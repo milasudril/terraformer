@@ -56,4 +56,100 @@ inline double length(Arc arc)
 	return arc.r * arc.theta;
 }
 
+template<class T>
+class Vector2d
+{
+public:
+	public:
+	explicit Vector2d(T x, T y): m_value{x, y}
+	{}
+
+	T x() const
+	{ return m_value[0]; }
+
+	T y() const
+	{ return m_value[1]; }
+
+	vec2_t<T> value() const
+	{
+		return m_value;
+	}
+
+	Vector2d& operator+=(Vector2d vec)
+	{
+		m_value += vec.value();
+		return *this;
+	}
+
+	Vector2d& operator-=(Vector2d vec)
+	{
+		m_value -= vec.value();
+		return *this;
+	}
+
+	Vector2d& operator*=(T c)
+	{
+		m_value *= c;
+		return *this;
+	}
+
+private:
+	vec2_t<T> m_value;
+};
+
+template<class T>
+T dot(Vector2d<T> a, Vector2d<T> b)
+{
+	auto temp = a.value() * b.value();
+	return temp[0] + temp[1];
+}
+
+template<class T>
+class Point2d
+{
+public:
+	explicit Point2d(T x, T y): m_value{x, y}
+	{}
+
+	T x() const
+	{ return m_value[0]; }
+
+	T y() const
+	{ return m_value[1]; }
+
+	vec2_t<T> value() const
+	{
+		return m_value;
+	}
+
+	Point2d& operator+=(Vector2d<T> vec)
+	{
+		m_value += vec.value();
+		return *this;
+	}
+
+	Point2d& operator-=(Vector2d<T> vec)
+	{
+		m_value -= vec.value();
+		return *this;
+	}
+
+private:
+	vec2_t<T> m_value;
+};
+
+template<class T>
+Vector2d<T> operator-(Point2d<T> a, Point2d<T> b)
+{
+	return Vector2d<T>{b.value() - a.value()};
+}
+
+template<class T>
+T distance_squared(Point2d<T> a, Point2d<T> b)
+{
+	auto diff = a - b;
+	return dot(diff, diff);
+}
+
+
 #endif
