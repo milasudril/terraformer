@@ -2,6 +2,7 @@
 #define TERRAFORMER_MATHUTILS_HPP
 
 #include <cmath>
+#include <vector>
 
 template<class T>
 using vec4_t [[gnu::vector_size(4*sizeof(T))]] = T;
@@ -164,9 +165,44 @@ Vector<T> operator-(Point<T> a, Point<T> b)
 template<class T>
 T distance_squared(Point<T> a, Point<T> b)
 {
-	auto diff = a - b;
-	return dot(diff, diff);
+	return length_squared(a - b);
 }
+
+template<class T>
+T distance(Point<T> a, Point<T> b)
+{
+	return length(a - b);
+}
+
+template<class T>
+struct LineSegment
+{
+	Point<T> a;
+	Point<T> b;
+};
+
+template<class T>
+T length(LineSegment<T> const& l)
+{
+	return distance(l.a, l.b);
+}
+
+template<class T, bool closed = false>
+class Polygon
+{
+public:
+	explicit Polygon(LineSegment<T> const& seg): m_points{seg}{}
+
+	Polygon& append(Point<T> p)
+	{
+		m_points.push_back(p);
+		return *this;
+	}
+
+
+private:
+	std::vector<Point<T>> m_points;
+};
 
 
 #endif
