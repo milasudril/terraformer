@@ -4,35 +4,50 @@
 #include <cmath>
 
 template<class T>
-using vec2_t [[gnu::vector_size(2*sizeof(T))]] = T;
+using vec4_t [[gnu::vector_size(4*sizeof(T))]] = T;
 
 template<class T, class U>
-vec2_t<T> vector_cast(vec2_t<U> v)
+vec4_t<T> vector_cast(vec4_t<U> v)
 {
-	return vec2_t<T>{static_cast<T>(v[0]), static_cast<T>(v[1])};
+	return vec4_t<T>{static_cast<T>(v[0]), static_cast<T>(v[1]), static_cast<T>(v[2]), static_cast<T>(v[3])};
 }
 
 template<class T>
-class Size2d
+constexpr T unity()
 {
-    public:
-        explicit Size2d(T width, T height):m_value{width, height}{}
+	return static_cast<T>(1);
+}
 
-        T width() const { return m_value[0]; }
+template<class T>
+constexpr T zero()
+{
+	return static_cast<T>(0);
+}
 
-        T height() const { return m_value[1]; }
+template<class T>
+class Size
+{
+public:
+	explicit Size(T width, T depth, T height = unity<T>()):m_value{width, depth, height, zero<T>()}{}
 
-        vec2_t<T> value() const
-        { return m_value; }
+	T width() const { return m_value[0]; }
 
-    private:
-    vec2_t<T> m_value;
+	T depth() const { return m_value[1]; }
+
+	T height() const { return m_value[2]; }
+
+
+	vec4_t<T> value() const
+	{ return m_value; }
+
+private:
+	vec4_t<T> m_value;
 };
 
 template<class T>
-T area(Size2d<T> s)
+T volume(Size<T> s)
 {
-    return s.width() * s.height();
+    return s.width() * s.depth() * s.height();
 }
 
 struct Arc
@@ -42,9 +57,9 @@ struct Arc
 };
 
 template<class T>
-Arc make_arc(Size2d<T> size)
+Arc make_arc(Size<T> size)
 {
-	auto const v = vec2_t<double>{1.0, 0.5} * vector_cast<double>(size.value());
+	auto const v = vec4_t<float>{1.0f, 0.5f, 0.0f, 0.0f} * vector_cast<float>(size.value());
 	auto const a = v[0];
 	auto const b = v[1];
 	auto const r = (b*b + a*a)/(2.0*b);
@@ -57,11 +72,11 @@ inline double length(Arc arc)
 }
 
 template<class T>
-class Vector2d
+class Vector
 {
 public:
 	public:
-	explicit Vector2d(T x, T y): m_value{x, y}
+	explicit Vector(T x, T y, T z = zero<T>()): m_value{x, y, z, zero<T>()}
 	{}
 
 	T x() const
@@ -70,45 +85,46 @@ public:
 	T y() const
 	{ return m_value[1]; }
 
-	vec2_t<T> value() const
-	{
-		return m_value;
-	}
+ 	T z() const
+	{ return m_value[2]; }
 
-	Vector2d& operator+=(Vector2d vec)
+	vec4_t<T> value() const
+	{ return m_value; }
+
+	Vector& operator+=(Vector vec)
 	{
 		m_value += vec.value();
 		return *this;
 	}
 
-	Vector2d& operator-=(Vector2d vec)
+	Vector& operator-=(Vector vec)
 	{
 		m_value -= vec.value();
 		return *this;
 	}
 
-	Vector2d& operator*=(T c)
+	Vector& operator*=(T c)
 	{
 		m_value *= c;
 		return *this;
 	}
 
 private:
-	vec2_t<T> m_value;
+	vec4_t<T> m_value;
 };
 
 template<class T>
-T dot(Vector2d<T> a, Vector2d<T> b)
+T dot(Vector<T> a, Vector<T> b)
 {
 	auto temp = a.value() * b.value();
-	return temp[0] + temp[1];
+	return temp[0] + temp[1] + temp[2];
 }
 
 template<class T>
-class Point2d
+class Point
 {
 public:
-	explicit Point2d(T x, T y): m_value{x, y}
+	explicit Point(T x, T y, T z = zero<T>()): m_value{x, y, z}
 	{}
 
 	T x() const
@@ -117,35 +133,36 @@ public:
 	T y() const
 	{ return m_value[1]; }
 
-	vec2_t<T> value() const
-	{
-		return m_value;
-	}
+	T z() const
+	{ return m_value[2]; }
 
-	Point2d& operator+=(Vector2d<T> vec)
+	vec4_t<T> value() const
+	{ return m_value; }
+
+	Point& operator+=(Vector<T> vec)
 	{
 		m_value += vec.value();
 		return *this;
 	}
 
-	Point2d& operator-=(Vector2d<T> vec)
+	Point& operator-=(Vector<T> vec)
 	{
 		m_value -= vec.value();
 		return *this;
 	}
 
 private:
-	vec2_t<T> m_value;
+	vec4_t<T> m_value;
 };
 
 template<class T>
-Vector2d<T> operator-(Point2d<T> a, Point2d<T> b)
+Vector<T> operator-(Point<T> a, Point<T> b)
 {
-	return Vector2d<T>{b.value() - a.value()};
+	return Vector<T>{b.value() - a.value()};
 }
 
 template<class T>
-T distance_squared(Point2d<T> a, Point2d<T> b)
+T distance_squared(Point<T> a, Point<T> b)
 {
 	auto diff = a - b;
 	return dot(diff, diff);
