@@ -4,8 +4,10 @@
 #include <cmath>
 #include <vector>
 #include <span>
+#include <type_traits>
 
 template<class T>
+requires std::is_arithmetic_v<T> && (!std::is_const_v<T>)
 using vec4_t [[gnu::vector_size(4*sizeof(T))]] = T;
 
 template<class T, class U>
