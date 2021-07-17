@@ -32,7 +32,7 @@ TESTCASE(AdjIntegrate)
 		return a - b;
 	}, static_cast<int>(0));
 
-	static_assert(std::is_same<decltype(res), decltype(vals)::value_type>::value);
+	static_assert(std::is_same_v<decltype(res), decltype(vals)::value_type>);
 	EXPECT_EQ(res, (1.0f - 2.0f) + (2.0f - 3.0f) + (3.0f - 4.0f));
 }
 

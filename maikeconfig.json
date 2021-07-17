@@ -46,17 +46,21 @@
             "cxx_test": {
                 "compiler": {
                     "config": {
-                        "actions": [
-                            "link",
-                            "run"
-                        ],
                         "cflags": [
                             "-g",
-                            "-Wall"
+                            "-Wall",
+                            "-Wextra",
+                            "-Werror",
+                            "-O3",
+                            "-ffast-math"
                         ],
                         "iquote": [
                             "."
-                        ]
+                        ],
+                        "std_revision":{
+							"min": "c++20"
+                        },
+                        "actions":["link", "run"]
                     },
                     "recipe": "cxx_compiler.py",
                     "use_get_tags": 0
