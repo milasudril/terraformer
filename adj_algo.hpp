@@ -34,14 +34,14 @@ namespace adj_algo_detail
 	{
 		using type = decltype(
 			std::declval<Func>()
-				(std::declval<IterValueType<Iter>::type>(), std::declval<IterValueType<Iter>::type>()));
+				(std::declval<typename IterValueType<Iter>::type>(), std::declval<typename IterValueType<Iter>::type>()));
 	};
 }
 
-template<class Iter, class Func, class T>
+template<class Iter, class Func>
 auto adj_integrate(Iter begin, Iter end, Func&& f, typename adj_algo_detail::ReturnType<Iter, Func>::type&& init = 0)
 {
-	adj_for_each(begin, end, [&init, func=std::forward<T>(f)](auto a, auto b) mutable {
+	adj_for_each(begin, end, [&init, func=std::forward<Func>(f)](auto a, auto b) mutable {
 		init += func(a, b);
 	});
 	return init;
