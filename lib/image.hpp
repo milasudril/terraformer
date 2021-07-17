@@ -83,4 +83,6 @@ inline auto area(BasicImage<PixelType> const& img)
 
 using Image = BasicImage<RgbaPixel>;
 
+using GrayscaleImage = BasicImage<float>;
+
 #endif
