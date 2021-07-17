@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_MATHUTILS_HPP
 #define TERRAFORMER_MATHUTILS_HPP
 
+#include "./adj_algo.hpp"
+
 #include <cmath>
 #include <vector>
 #include <span>
@@ -218,12 +220,12 @@ auto length(LineSegment<T> const& l)
 }
 
 template<class T>
-class Polygon
+class PolygonChain
 {
 public:
-	explicit Polygon(LineSegment<T> const& seg): m_points{seg}{}
+	explicit PolygonChain(LineSegment<T> const& seg): m_points{seg}{}
 
-	Polygon& append(Point<T> p)
+	PolygonChain& append(Point<T> p)
 	{
 		m_points.push_back(p);
 		return *this;
@@ -236,5 +238,13 @@ private:
 	std::vector<Point<T>> m_points;
 };
 
+template<class T>
+auto& length(PolygonChain<T> const& p)
+{
+	auto verts = p.vertices();
+	return adj_integrate(std::begin(verts), std::end(verts), [](auto a, auto b){
+		return distance(a, b);
+	});
+}
 
 #endif
