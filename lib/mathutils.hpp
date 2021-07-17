@@ -3,48 +3,13 @@
 
 #include "./adj_algo.hpp"
 #include "./vec_t.hpp"
+#include "./constants.hpp"
+#include "./extents.hpp"
 
 #include <cmath>
 #include <vector>
 #include <span>
 #include <type_traits>
-
-template<class T>
-constexpr T unity()
-{
-	return static_cast<T>(1);
-}
-
-template<class T>
-constexpr T zero()
-{
-	return static_cast<T>(0);
-}
-
-template<class T>
-class Size
-{
-public:
-	explicit Size(T width, T depth, T height = unity<T>()):m_value{width, depth, height, zero<T>()}{}
-
-	T width() const { return m_value[0]; }
-
-	T depth() const { return m_value[1]; }
-
-	T height() const { return m_value[2]; }
-
-	vec4_t<T> value() const
-	{ return m_value; }
-
-private:
-	vec4_t<T> m_value;
-};
-
-template<class T>
-T volume(Size<T> s)
-{
-    return s.width() * s.depth() * s.height();
-}
 
 struct Arc
 {

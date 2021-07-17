@@ -4,38 +4,6 @@
 
 #include "testfwk/testfwk.hpp"
 
-TESTCASE(Unity)
-{
-	constexpr auto val = unity<int>();
-	static_assert(std::is_same_v<decltype(val), int const>);
-	EXPECT_EQ(val, 1);
-}
-
-TESTCASE(Zero)
-{
-	constexpr auto val = zero<int>();
-	static_assert(std::is_same_v<decltype(val), int const>);
-	EXPECT_EQ(val, 0);
-}
-
-TESTCASE(SizeDefaultHeight)
-{
-	::Size box{2, 4};
-	EXPECT_EQ(box.width(), 2);
-	EXPECT_EQ(box.depth(), 4);
-	EXPECT_EQ(box.height(), 1);
-	EXPECT_EQ(volume(box), 8);
-}
-
-TESTCASE(Size)
-{
-	::Size box{2, 3, 4};
-	EXPECT_EQ(box.width(), 2);
-	EXPECT_EQ(box.depth(), 3);
-	EXPECT_EQ(box.height(), 4);
-	EXPECT_EQ(volume(box), 24);
-}
-
 TESTCASE(MakeArc)
 {
 	::Size box{3, 1};
