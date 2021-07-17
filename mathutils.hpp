@@ -177,7 +177,7 @@ T distance_squared(Point<T> a, Point<T> b)
 }
 
 template<class T>
-T distance(Point<T> a, Point<T> b)
+auto distance(Point<T> a, Point<T> b)
 {
 	return length(a - b);
 }
@@ -190,7 +190,7 @@ struct LineSegment
 };
 
 template<class T>
-T length(LineSegment<T> const& l)
+auto length(LineSegment<T> const& l)
 {
 	return distance(l.a, l.b);
 }
