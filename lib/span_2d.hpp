@@ -3,6 +3,8 @@
 
 #include "./extents.hpp"
 
+#include <cstdint>
+
 template<class T>
 class Span2d
 {
@@ -85,9 +87,9 @@ template<class T, class U, class Func>
 void transform(Span2d<T> in, Span2d<U> out, Func&& f)
 {
 	using IndexType = typename Span2d<T>::IndexType;
-	for(IndexType row = 0; row != span.height(); ++row)
+	for(IndexType row = 0; row != in.height(); ++row)
 	{
-		for(IndexType col = 0; col != span.width(); ++col)
+		for(IndexType col = 0; col != in.width(); ++col)
 		{
 			out(col, row) = f(col, row, in(col, row));
 		}
@@ -98,9 +100,9 @@ template<class T, class Func>
 void generate(Span2d<T> out, Func&& f)
 {
 	using IndexType = typename Span2d<T>::IndexType;
-	for(IndexType row = 0; row != span.height(); ++row)
+	for(IndexType row = 0; row != out.height(); ++row)
 	{
-		for(IndexType col = 0; col != span.width(); ++col)
+		for(IndexType col = 0; col != out.width(); ++col)
 		{
 			out(col, row) = f(col, row);
 		}
