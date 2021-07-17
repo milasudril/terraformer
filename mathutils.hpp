@@ -78,7 +78,6 @@ template<class T>
 class Vector
 {
 public:
-	public:
 	explicit Vector(T x, T y, T z = zero<T>()): m_value{x, y, z, zero<T>()}
 	{}
 
@@ -112,6 +111,8 @@ public:
 		return *this;
 	}
 
+	inline Vector& normalize() requires std::floating_point<T>;
+
 private:
 	vec4_t<T> m_value;
 };
@@ -127,6 +128,25 @@ template<class T>
 auto length(Vector<T> v)
 {
 	return std::sqrt(dot(v, v));
+}
+
+template<class T>
+Vector<T>& Vector<T>::normalize() requires std::floating_point<T>
+{
+	m_value /= length(*this);
+	return *this;
+}
+
+template<std::floating_point T>
+auto normalized(Vector<T> v)
+{
+	return v.normalize();
+}
+
+template<class T>
+auto normalized(Vector<T> v)
+{
+	return normalized(vector_cast<double>(v));
 }
 
 template<class T>
@@ -159,6 +179,8 @@ public:
 		m_value -= vec.value();
 		return *this;
 	}
+
+
 
 private:
 	vec4_t<T> m_value;
