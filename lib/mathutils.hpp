@@ -205,23 +205,10 @@ auto distance(Point<T> a, Point<T> b)
 }
 
 template<class T>
-struct LineSegment
-{
-	Point<T> a;
-	Point<T> b;
-};
-
-template<class T>
-auto length(LineSegment<T> const& l)
-{
-	return distance(l.a, l.b);
-}
-
-template<class T>
 class PolygonChain
 {
 public:
-	explicit PolygonChain(LineSegment<T> const& seg): m_points{seg}{}
+	explicit PolygonChain(Point<T> first, Point<T> second): m_points{first, second}{}
 
 	PolygonChain& append(Point<T> p)
 	{
@@ -229,8 +216,8 @@ public:
 		return *this;
 	}
 
-	std::span<Point<T>> vertices() const
-	{ return m_points; }
+	std::span<Point<T> const> vertices() const
+	{ return std::span<Point<T> const>{std::data(m_points), std::size(m_points)}; }
 
 private:
 	std::vector<Point<T>> m_points;

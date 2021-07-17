@@ -17,10 +17,16 @@ template<>
 struct HasVectorSize<vec4_t<int>>:std::true_type{};
 
 template<>
+struct HasVectorSize<vec4_t<unsigned int>>:std::true_type{};
+
+template<>
 struct HasVectorSize<vec4_t<double>>:std::true_type{};
 
 template<>
 struct HasVectorSize<vec4_t<long long>>:std::true_type{};
+
+template<>
+struct HasVectorSize<vec4_t<unsigned long long>>:std::true_type{};
 
 template<class T, class U>
 vec4_t<T> vector_cast(U v) requires HasVectorSize<U>::value

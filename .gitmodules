@@ -7,3 +7,6 @@
 [submodule "test_pattern"]
 	path = test_pattern
 	url = https://github.com/milasudril/test_pattern
+[submodule "pcg-cpp"]
+	path = pcg-cpp
+	url = https://github.com/imneme/pcg-cpp
