@@ -95,6 +95,9 @@ template<class T>
 class Vector
 {
 public:
+	explicit Vector(vec4_t<T> data):m_value{data}
+	{m_value[3] = zero<T>();}
+
 	explicit Vector(T x, T y, T z = zero<T>()): m_value{x, y, z, zero<T>()}
 	{}
 
@@ -135,6 +138,27 @@ private:
 };
 
 template<class T>
+Vector<T> operator*(T c, Vector<T> v)
+{
+	v*=c;
+	return v;
+}
+
+template<class T>
+Vector<T> operator+(Vector<T> a, Vector<T> b)
+{
+	a += b;
+	return a;
+}
+
+template<class T>
+Vector<T> operator-(Vector<T> a, Vector<T> b)
+{
+	a -= b;
+	return a;
+}
+
+template<class T>
 T dot(Vector<T> a, Vector<T> b)
 {
 	auto temp = a.value() * b.value();
@@ -142,9 +166,15 @@ T dot(Vector<T> a, Vector<T> b)
 }
 
 template<class T>
+auto length_squared(Vector<T> v)
+{
+	return dot(v, v);
+}
+
+template<class T>
 auto length(Vector<T> v)
 {
-	return std::sqrt(dot(v, v));
+	return std::sqrt(length_squared(v));
 }
 
 template<class T>
@@ -163,7 +193,7 @@ auto normalized(Vector<T> v)
 template<class T>
 auto normalized(Vector<T> v)
 {
-	return normalized(vector_cast<double>(v));
+	return normalized(Vector<double>{vector_cast<double>(v.value())});
 }
 
 template<class T>
@@ -196,8 +226,6 @@ public:
 		m_value -= vec.value();
 		return *this;
 	}
-
-
 
 private:
 	vec4_t<T> m_value;

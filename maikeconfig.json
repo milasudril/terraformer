@@ -28,7 +28,8 @@
                             "-Wextra",
                             "-Werror",
                             "-O3",
-                            "-ffast-math"
+                            "-ffast-math",
+                            "-mavx2"
                         ],
                         "iquote": [
                             "."
@@ -52,7 +53,8 @@
                             "-Wextra",
                             "-Werror",
                             "-O3",
-                            "-ffast-math"
+                            "-ffast-math",
+                            "-mavx2"
                         ],
                         "iquote": [
                             "."
