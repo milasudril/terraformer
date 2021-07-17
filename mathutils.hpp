@@ -234,7 +234,21 @@ private:
 template<class T>
 Vector<T> operator-(Point<T> a, Point<T> b)
 {
-	return Vector<T>{b.value() - a.value()};
+	return Vector<T>{a.value() - b.value()};
+}
+
+template<class T>
+Point<T> operator+(Point<T> a, Vector<T> b)
+{
+	a += b;
+	return a;
+}
+
+template<class T>
+Point<T> operator-(Point<T> a, Vector<T> b)
+{
+	a -= b;
+	return a;
 }
 
 template<class T>
