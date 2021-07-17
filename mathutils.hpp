@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <vector>
+#include <span>
 
 template<class T>
 using vec4_t [[gnu::vector_size(4*sizeof(T))]] = T;
@@ -187,7 +188,7 @@ T length(LineSegment<T> const& l)
 	return distance(l.a, l.b);
 }
 
-template<class T, bool closed = false>
+template<class T>
 class Polygon
 {
 public:
@@ -199,6 +200,8 @@ public:
 		return *this;
 	}
 
+	std::span<Point<T>> vertices() const
+	{ return m_points; }
 
 private:
 	std::vector<Point<T>> m_points;
