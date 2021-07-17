@@ -8,7 +8,7 @@
 #include <OpenEXR/ImfArray.h>
 #include <OpenEXR/ImfTestFile.h>
 
-PixelStore::Image PixelStore::load(Enum::Empty<Image>,
+Image load(Empty<Image>,
                                                            void* arg,
                                                            detail::InputFileFactory make_input_file)
 {
@@ -27,23 +27,23 @@ PixelStore::Image PixelStore::load(Enum::Empty<Image>,
 	fb.insert("R",
 	          Imf::Slice{Imf::FLOAT,
 	                     (char*)(ret.pixels().data()) + 0 * sizeof(float),
-	                     sizeof(Pixel),
-	                     sizeof(Pixel) * w});
+	                     sizeof(RgbaPixel),
+	                     sizeof(RgbaPixel) * w});
 	fb.insert("G",
 	          Imf::Slice{Imf::FLOAT,
 	                     (char*)(ret.pixels().data()) + 1 * sizeof(float),
-	                     sizeof(Pixel),
-	                     sizeof(Pixel) * w});
+	                     sizeof(RgbaPixel),
+	                     sizeof(RgbaPixel) * w});
 	fb.insert("B",
 	          Imf::Slice{Imf::FLOAT,
 	                     (char*)(ret.pixels().data()) + 2 * sizeof(float),
-	                     sizeof(Pixel),
-	                     sizeof(Pixel) * w});
+	                     sizeof(RgbaPixel),
+	                     sizeof(RgbaPixel) * w});
 	fb.insert("A",
 	          Imf::Slice{Imf::FLOAT,
 	                     (char*)(ret.pixels().data()) + 3 * sizeof(float),
-	                     sizeof(Pixel),
-	                     sizeof(Pixel) * w});
+	                     sizeof(RgbaPixel),
+	                     sizeof(RgbaPixel) * w});
 
 	src.setFrameBuffer(fb);
 	src.readPixels(box.min.y, box.max.y);
@@ -59,7 +59,7 @@ PixelStore::Image PixelStore::load(Enum::Empty<Image>,
 	return ret;
 }
 
-void PixelStore::store(Span2d<Pixel const> pixels,
+void store(Span2d<RgbaPixel const> pixels,
                                    void* arg,
                                    detail::OutputFileFactory make_output_file)
 {
@@ -73,30 +73,30 @@ void PixelStore::store(Span2d<Pixel const> pixels,
 	fb.insert("R",
 	          Imf::Slice{Imf::FLOAT,
 	                     (char*)(pixels.data()) + 0 * sizeof(float),
-	                     sizeof(Pixel),
-	                     sizeof(Pixel) * pixels.width()});
+	                     sizeof(RgbaPixel),
+	                     sizeof(RgbaPixel) * pixels.width()});
 	fb.insert("G",
 	          Imf::Slice{Imf::FLOAT,
 	                     (char*)(pixels.data()) + 1 * sizeof(float),
-	                     sizeof(Pixel),
-	                     sizeof(Pixel) * pixels.width()});
+	                     sizeof(RgbaPixel),
+	                     sizeof(RgbaPixel) * pixels.width()});
 	fb.insert("B",
 	          Imf::Slice{Imf::FLOAT,
 	                     (char*)(pixels.data()) + 2 * sizeof(float),
-	                     sizeof(Pixel),
-	                     sizeof(Pixel) * pixels.width()});
+	                     sizeof(RgbaPixel),
+	                     sizeof(RgbaPixel) * pixels.width()});
 	fb.insert("A",
 	          Imf::Slice{Imf::FLOAT,
 	                     (char*)(pixels.data()) + 3 * sizeof(float),
-	                     sizeof(Pixel),
-	                     sizeof(Pixel) * pixels.width()});
+	                     sizeof(RgbaPixel),
+	                     sizeof(RgbaPixel) * pixels.width()});
 
 	auto dest = make_output_file(arg, header);
 	dest.setFrameBuffer(fb);
 	dest.writePixels(pixels.height());
 }
 
-bool PixelStore::fileValid(Enum::Empty<Image>, char const* filename)
+bool fileValid(Empty<Image>, char const* filename)
 {
 	return Imf::isOpenExrFile(filename);
 }

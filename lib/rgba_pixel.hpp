@@ -1,7 +1,7 @@
 //@	{"targets":[{"name":"pixel.hpp", "type":"include"}]}
 
-#ifndef PIXELSTORE_PIXEL_HPP
-#define PIXELSTORE_PIXEL_HPP
+#ifndef TERRAFORMER_RGBAPIXEL_HPP
+#define TERRAFORMER_RGBAPIXEL_HPP
 
 #include "./vec_t.hpp"
 

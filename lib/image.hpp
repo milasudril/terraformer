@@ -1,7 +1,7 @@
 //@	{"targets":[{"name":"image.hpp", "type":"include"}]}
 
-#ifndef PIXELSTORE_IMAGE_HPP
-#define PIXELSTORE_IMAGE_HPP
+#ifndef TERRAFORMER_IMAGE_HPP
+#define TERRAFORMER_IMAGE_HPP
 
 #include "./rgba_pixel.hpp"
 
