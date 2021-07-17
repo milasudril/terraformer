@@ -2,6 +2,8 @@
 
 #include "./mathutils.hpp"
 
+#include <cassert>
+
 struct Foo
 {
 	int x;
@@ -11,7 +13,7 @@ struct Foo
 
 int main()
 {
-vec4_t<int> a{1, 2, 3, 4};
-vec4_t<int> b{4, 3, 2, 1};
-a += b;
+	Vector a{3, 4, 0};
+	static_assert(std::is_same_v<decltype(length(a)), double>);
+	assert(length(a) == 5);
 }

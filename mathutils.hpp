@@ -40,7 +40,6 @@ public:
 
 	T height() const { return m_value[2]; }
 
-
 	vec4_t<T> value() const
 	{ return m_value; }
 
@@ -122,6 +121,12 @@ T dot(Vector<T> a, Vector<T> b)
 {
 	auto temp = a.value() * b.value();
 	return temp[0] + temp[1] + temp[2];
+}
+
+template<class T>
+auto length(Vector<T> v)
+{
+	return std::sqrt(dot(v, v));
 }
 
 template<class T>
