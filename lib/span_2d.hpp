@@ -11,15 +11,15 @@ class Span2d
 public:
 	using IndexType = uint32_t;
 
-	constexpr explicit Span2d(): Span2d{nullptr, Extents{0, 0}} {}
+	constexpr explicit Span2d(): Span2d{0u, 0u, nullptr} {}
 
-	constexpr explicit Span2d(T* ptr, IndexType w, IndexType h): Span2d{ptr, Extents{w, h}} {}
+	constexpr explicit Span2d(IndexType w, IndexType h, T* ptr): m_size{w, h}, m_ptr{ptr} {}
 
 	template<class U>
 	constexpr explicit(!std::is_same_v<std::decay_t<U>, std::decay_t<T>>)
 		Span2d(Span2d<U> other)
-		: m_ptr{other.data()}
-		, m_size{other.size()}
+		: m_size{other.size()}
+		, m_ptr{other.data()}
 	{
 	}
 
@@ -37,7 +37,7 @@ public:
 
 	constexpr auto width() const { return m_size.width(); }
 
-	constexpr auto height() const { return m_size.height(); }
+	constexpr auto height() const { return m_size.depth(); }
 
 	constexpr T& operator()(IndexType x, IndexType y)
 	{
@@ -54,8 +54,8 @@ public:
 	constexpr auto extents() const { return m_size; }
 
 private:
-	T* m_ptr;
 	Extents<IndexType> m_size;
+	T* m_ptr;
 };
 
 template<class T>

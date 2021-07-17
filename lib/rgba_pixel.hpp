@@ -119,4 +119,20 @@ constexpr auto operator*(float c, RgbaPixel a)
 {
 	return a * c;
 }
+
+constexpr RgbaPixel black() { return RgbaPixel{0.0f, 0.0f, 0.0f}; }
+
+constexpr RgbaPixel red() { return RgbaPixel{1.0f, 0.0f, 0.0f}; }
+
+constexpr RgbaPixel green() { return RgbaPixel{0.0f, 1.0f, 0.0f}; }
+
+constexpr RgbaPixel blue() { return RgbaPixel{0.0f, 0.0f, 1.0f}; }
+
+constexpr RgbaPixel cyan() { return RgbaPixel{0.0f, 1.0f, 1.0f}; }
+
+constexpr RgbaPixel magenta() { return RgbaPixel{1.0f, 0.0f, 1.0f}; }
+
+constexpr RgbaPixel yellow() { return RgbaPixel{1.0f, 1.0f, 0.0f}; }
+
+constexpr RgbaPixel white() { return RgbaPixel{1.0f, 1.0f, 1.0f}; }
 #endif
