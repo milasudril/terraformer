@@ -45,3 +45,14 @@ TESTCASE(Size)
 	EXPECT_EQ(box.height(), 4);
 	EXPECT_EQ(volume(box), 24);
 }
+
+TESTCASE(MakeArc)
+{
+	::Size box{3, 1};
+	auto arc = make_arc(box);
+	EXPECT_EQ(arc.radius, 5);
+	::Vector arc_end{arc.radius*std::cos(arc.angle), arc.radius*std::sin(arc.angle)};
+	EXPECT_EQ(arc_end.x(), arc.radius - box.depth());
+	EXPECT_EQ(arc_end.y(), box.width());
+	EXPECT_EQ(length(arc), arc.radius*arc.angle);
+}

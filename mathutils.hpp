@@ -72,8 +72,8 @@ T volume(Size<T> s)
 
 struct Arc
 {
-	double r;
-	double theta;
+	double radius;
+	double angle;
 };
 
 template<class T>
@@ -88,7 +88,7 @@ Arc make_arc(Size<T> size)
 
 inline double length(Arc arc)
 {
-	return arc.r * arc.theta;
+	return arc.radius * arc.angle;
 }
 
 template<class T>
