@@ -8,15 +8,15 @@ template<class T>
 class Extents
 {
 public:
-	explicit Extents(T width, T depth, T height = unity<T>()):m_value{width, depth, height, zero<T>()}{}
+	constexpr explicit Extents(T width, T depth, T height = unity<T>()):m_value{width, depth, height, zero<T>()}{}
 
-	T width() const { return m_value[0]; }
+	constexpr T width() const { return m_value[0]; }
 
-	T depth() const { return m_value[1]; }
+	constexpr T depth() const { return m_value[1]; }
 
-	T height() const { return m_value[2]; }
+	constexpr T height() const { return m_value[2]; }
 
-	vec4_t<T> value() const
+	constexpr vec4_t<T> value() const
 	{ return m_value; }
 
 private:
@@ -24,7 +24,7 @@ private:
 };
 
 template<class T>
-T volume(Extents<T> s)
+constexpr T volume(Extents<T> s)
 {
     return s.width() * s.depth() * s.height();
 }
