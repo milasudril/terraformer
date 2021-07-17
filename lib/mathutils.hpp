@@ -13,17 +13,17 @@
 
 struct Arc
 {
-	double radius;
-	double angle;
+	float radius;
+	float angle;
 };
 
 template<class T>
-Arc make_arc(Size<T> size)
+Arc make_arc(Extents<T> size)
 {
 	auto const v = vector_cast<float>(size.value());
 	auto const a = v[0];
 	auto const b = v[1];
-	auto const r = (b*b + a*a)/(2.0*b);
+	auto const r = (b*b + a*a)/(2.0f*b);
 	return Arc{r, std::atan(a/(r - b))};
 }
 

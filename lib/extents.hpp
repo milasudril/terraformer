@@ -5,10 +5,10 @@
 #include "./constants.hpp"
 
 template<class T>
-class Size
+class Extents
 {
 public:
-	explicit Size(T width, T depth, T height = unity<T>()):m_value{width, depth, height, zero<T>()}{}
+	explicit Extents(T width, T depth, T height = unity<T>()):m_value{width, depth, height, zero<T>()}{}
 
 	T width() const { return m_value[0]; }
 
@@ -24,7 +24,7 @@ private:
 };
 
 template<class T>
-T volume(Size<T> s)
+T volume(Extents<T> s)
 {
     return s.width() * s.depth() * s.height();
 }

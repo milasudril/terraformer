@@ -6,7 +6,7 @@
 
 TESTCASE(MakeArc)
 {
-	::Size box{3, 1};
+	::Extents box{3, 1};
 	auto arc = make_arc(box);
 	EXPECT_EQ(arc.radius, 5);
 	::Vector arc_end{arc.radius*std::cos(arc.angle), arc.radius*std::sin(arc.angle)};
