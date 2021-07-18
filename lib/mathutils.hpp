@@ -137,11 +137,22 @@ auto normalized(Vector<T> v)
 	return normalized(Vector<double>{vector_cast<double>(v.value())});
 }
 
+template<class T, class U>
+auto vector_cast(Vector<U> v)
+{
+	return Vector<T>{vector_cast<T>(v.value())};
+}
+
 template<class T>
 class Point
 {
 public:
-	explicit Point(T x, T y, T z = zero<T>()): m_value{x, y, z}
+	explicit Point(vec4_t<T> v): m_value{v}
+	{
+		m_value[3] = unity<T>();
+	}
+
+	explicit Point(T x, T y, T z = zero<T>()): m_value{x, y, z, unity<T>()}
 	{}
 
 	T x() const
@@ -204,6 +215,12 @@ auto distance(Point<T> a, Point<T> b)
 	return length(a - b);
 }
 
+template<class T, class U>
+auto vector_cast(Point<U> v)
+{
+	return Point<T>{vector_cast<T>(v.value())};
+}
+
 template<class T>
 class PolygonChain
 {
@@ -230,6 +247,19 @@ auto& length(PolygonChain<T> const& p)
 	return adj_integrate(std::begin(verts), std::end(verts), [](auto a, auto b){
 		return distance(a, b);
 	});
+}
+
+template<class T>
+struct LineSegment
+{
+	Point<T> from;
+	Point<T> to;
+};
+
+template<class T>
+T xy(T val)
+{
+	return T{val.x(), val.y()};
 }
 
 #endif

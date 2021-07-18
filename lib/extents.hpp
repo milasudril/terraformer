@@ -29,4 +29,12 @@ constexpr T volume(Extents<T> s)
     return s.width() * s.depth() * s.height();
 }
 
+template<class T, class U>
+constexpr bool within(T val, Extents<U> ex)
+{
+	return val.x() >= zero<U>() && val.x() < ex.width()
+		&& val.y() >= zero<U>() && val.y() < ex.depth()
+		&& val.z() >= zero<U>() && val.z() < ex.height();
+}
+
 #endif
