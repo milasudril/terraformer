@@ -92,7 +92,7 @@ int main()
 
 	GrayscaleImage img{1024, 512};
 	RidgeGenerator make_ridge{rng, img.extents()};
-	for(int k = 0; k < 65536; ++k)
+	for(int k = 0; k < 1; ++k)
 	{
 		auto ridge = make_ridge();
 
