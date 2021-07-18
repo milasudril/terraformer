@@ -15,7 +15,7 @@ public:
 	explicit RidgeGenerator(pcg32& rng, Extents<Image::IndexType> extents):
 		m_rng{rng},
 		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()},
-		pos{0.0f, m_extents.depth(), 1.0f},
+		pos{0.0f, m_extents.depth(), 0.0f},
 		θ{0.0f}
 	{
 	}
@@ -24,18 +24,18 @@ public:
 	{
 		auto angle_dist = std::uniform_real_distribution{-0.4375f*std::numbers::pi_v<float>,
 			0.4375f*std::numbers::pi_v<float>};
-		auto z_dist = std::uniform_real_distribution{-0.5f, 0.5f};
+		auto z_dist = std::uniform_real_distribution{0.0f, 1.0f};
 
 		auto const pos_init = pos;
 		θ += angle_dist(m_rng.get()) - 0.5f*θ;
 		pos += Vector{16.0f*std::cos(θ), -16.0f*std::sin(θ), z_dist(m_rng.get())}
-			+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), 0.5f*(1.0f - pos.z())};
+				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), -7.0f*pos.z()/8.0f};
  		PolygonChain ret{pos_init, pos};
 		while(pos.x() < m_extents.width())
 		{
 			θ += angle_dist(m_rng.get()) - 0.5f*θ;
 			pos += Vector{16.0f*std::cos(θ), -16.0f*std::sin(θ), z_dist(m_rng.get())}
-				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), 0.5f*(1.0f - pos.z())};
+				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), -7.0f*pos.z()/8.0f};
 			ret.append(pos);
 		}
 		pos = Point{0.0f, pos.y(), pos.z()};
@@ -58,7 +58,7 @@ void draw(LineSegment<float> const& l, GrayscaleImage& img)
 	{
 		auto const t = static_cast<float>(k);
 		auto const pos = l.from + t*𝐭;
-		auto int_pos = vector_cast<uint32_t>(pos);
+		auto int_pos = vector_cast<uint32_t>(pos + Vector{0.5f, 0.5f, 0.5f});
 		if(within(xy(int_pos), img.extents()))
 		{ img(int_pos.x(), int_pos.y()) += pos.z(); }
 	}
