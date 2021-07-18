@@ -9,26 +9,42 @@
 #include <numbers>
 #include <random>
 
-PolygonChain<float> make_ridge(Extents<Image::IndexType> ex, pcg32& rng)
+class RidgeGenerator
 {
-	std::normal_distribution<float> n{0.5f*ex.depth(), 0.125f*ex.depth()};
-	auto const ex_new = Extents{static_cast<float>(ex.width()), n(rng)};
-	auto angle_dist = std::uniform_real_distribution{-0.5f*std::numbers::pi_v<float>, 0.5f*std::numbers::pi_v<float>};
-	auto dz_dist = std::uniform_real_distribution{0.0f, 1.0f};
-	Point const pos_init{0.0f, ex_new.depth(), 1.0f};
-	auto θ = 0.0f;
-	θ += angle_dist(rng);
-	auto pos = pos_init + 16.0f*Vector{std::cos(θ), -std::sin(θ), 0.0f};
-	PolygonChain ret{pos_init, pos};
-	while(pos.x() < ex_new.width())
+public:
+	explicit RidgeGenerator(pcg32& rng, Extents<Image::IndexType> extents):
+		m_rng{rng},
+		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()},
+		pos{0.0f, m_extents.depth(), 1.0f},
+		θ{0.0f},
+		dz{0.0f}
 	{
-		pos += 16.0f*Vector{std::cos(θ), -std::sin(θ), dz_dist(rng)};
-		θ += angle_dist(rng) - 0.5f*θ;
-		ret.append(pos);
 	}
 
-	return ret;
-}
+	PolygonChain<float> operator()()
+	{
+		auto angle_dist = std::uniform_real_distribution{-0.5f*std::numbers::pi_v<float>, 0.5f*std::numbers::pi_v<float>};
+		auto const pos_init = pos;
+		θ += angle_dist(m_rng.get()) - 0.5f*θ;
+		pos += 16.0f*Vector{std::cos(θ), -std::sin(θ), 0.0f} + Vector{0.0f, 0.125f*(m_extents.depth() - pos.y()), 0.0f};
+		θ += angle_dist(m_rng.get()) - 0.5f*θ;
+ 		PolygonChain ret{pos_init, pos};
+		while(pos.x() < m_extents.width())
+		{
+			pos += 16.0f*Vector{std::cos(θ), -std::sin(θ), 0.0f} + Vector{0.0f, 0.125f*(m_extents.depth() - pos.y()), 0.0f};
+			θ += angle_dist(m_rng.get()) - 0.5f*θ;
+			ret.append(pos);
+		}
+		return ret;
+	}
+
+private:
+	std::reference_wrapper<pcg32> m_rng;
+	Extents<float> m_extents;
+	Point<float> pos;
+	float θ;
+	float dz;
+};
 
 void draw(LineSegment<float> const& l, GrayscaleImage& img)
 {
@@ -72,16 +88,11 @@ int main()
 	pcg32 rng;
 
 	GrayscaleImage img{1024, 512};
-	for(int k = 0; k < 16; ++k)
+	RidgeGenerator make_ridge{rng, img.extents()};
+	for(int k = 0; k < 1; ++k)
 	{
-		auto ridge = make_ridge(img.extents(), rng);
+		auto ridge = make_ridge();
 		draw(ridge, img);
 	}
-	debug(img);
-
-//	std::ranges::for_each(ridge.vertices(), [&img](auto pos) {
-//		printf("%.8g %.8g\n", pos.x(), pos.y());
-//	});
-
 	debug(img);
 }
