@@ -74,6 +74,24 @@ void draw(PolygonChain<float> const& polychain, GrayscaleImage& img_out)
 	});
 }
 
+void set_horizontal_boundary(Span2d<float> dest, uint32_t y, float val)
+{
+	// Dirichlet
+	for(uint32_t x = 0u; x != dest.width(); ++x)
+	{
+		dest(x, y) = val;
+	}
+}
+
+void set_vertical_boundaries(Span2d<float> dest)
+{
+	//	Neumann
+	for(uint32_t y = 0u; y != dest.height(); ++y)
+	{
+		dest(0, y) = dest(1, y);
+		dest(dest.width() - 1, y) = dest(dest.width() - 2, y);
+	}
+}
 
 void diffuse(Span2d<float const> src, Span2d<float> dest)
 {
@@ -131,6 +149,9 @@ int main()
 		{
 			diffuse(in.get().pixels(), out.get().pixels());
 			draw(ridge, out.get());
+			set_horizontal_boundary(out.get().pixels(), 0, 0.25f);
+			set_horizontal_boundary(out.get().pixels(), img_a.height() - 1, 0);
+			set_vertical_boundaries(out.get());
 			std::swap(in, out);
 			if(l%128 == 0)
 			{
