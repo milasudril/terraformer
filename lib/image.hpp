@@ -24,6 +24,11 @@ public:
 
 	BasicImage(BasicImage const& src): BasicImage{src.pixels()} {}
 
+	explicit BasicImage(Span2d<PixelType const> src):BasicImage{src.width(), src.height()}
+	{
+		std::copy(std::begin(src), std::end(src), m_data.get());
+	}
+
 	BasicImage& operator=(BasicImage&&) = default;
 
 	BasicImage(BasicImage&&) = default;

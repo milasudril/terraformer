@@ -29,13 +29,13 @@ public:
 		auto const pos_init = pos;
 		θ += angle_dist(m_rng.get()) - 0.5f*θ;
 		pos += Vector{16.0f*std::cos(θ), -16.0f*std::sin(θ), z_dist(m_rng.get())}
-				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), -7.0f*pos.z()/8.0f};
+				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), -4.0f*pos.z()/8.0f};
  		PolygonChain ret{pos_init, pos};
 		while(pos.x() < m_extents.width())
 		{
 			θ += angle_dist(m_rng.get()) - 0.5f*θ;
 			pos += Vector{16.0f*std::cos(θ), -16.0f*std::sin(θ), z_dist(m_rng.get())}
-				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), -7.0f*pos.z()/8.0f};
+				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), -8.0f*pos.z()/16.0f};
 			ret.append(pos);
 		}
 		pos = Point{0.0f, pos.y(), pos.z()};
@@ -60,7 +60,9 @@ void draw(LineSegment<float> const& l, GrayscaleImage& img)
 		auto const pos = l.from + t*𝐭;
 		auto int_pos = vector_cast<uint32_t>(pos + Vector{0.5f, 0.5f, 0.5f});
 		if(within(xy(int_pos), img.extents()))
-		{ img(int_pos.x(), int_pos.y()) += pos.z(); }
+		{
+			img(int_pos.x(), int_pos.y()) = pos.z();
+		}
 	}
 }
 
@@ -70,6 +72,24 @@ void draw(PolygonChain<float> const& polychain, GrayscaleImage& img_out)
 	adj_for_each(std::begin(verts), std::end(verts), [&img = img_out](auto from, auto to){
 		draw(LineSegment{from, to}, img);
 	});
+}
+
+
+void diffuse(Span2d<float const> src, Span2d<float> dest)
+{
+	std::fill(std::begin(dest), std::end(dest), 0.0f);
+	for(uint32_t y = 1u; y != src.height() - 1; ++y)
+	{
+		for(uint32_t x = 1u; x != src.width() - 1; ++x)
+		{
+			auto const d_xx = src(x + 1, y) - 2.0f*src(x, y) + src(x - 1, y);
+			auto const d_yy = src(x, y + 1) - 2.0f*src(x, y) + src(x , y - 1);
+
+			auto const laplace = d_xx + d_yy;
+
+			dest(x, y) += src(x, y) + 0.125f*laplace;
+		}
+	}
 }
 
 void debug(GrayscaleImage const& img)
@@ -90,13 +110,34 @@ int main()
 {
 	pcg32 rng;
 
-	GrayscaleImage img{1024, 512};
-	RidgeGenerator make_ridge{rng, img.extents()};
+	GrayscaleImage img_a{1024, 512};
+	std::fill(std::begin(img_a.pixels()), std::end(img_a.pixels()), 0.0f);
+	auto img_b = img_a;
+	RidgeGenerator make_ridge{rng, img_a.extents()};
+	std::reference_wrapper in{img_a};
+	std::reference_wrapper out{img_b};
 	for(int k = 0; k < 1; ++k)
 	{
 		auto ridge = make_ridge();
-
-		draw(ridge, img);
+		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
+			auto const int_pos = vector_cast<uint32_t>(val + Vector{0.5f, 0.5f, 0.5f});
+			if(within(xy(int_pos), img.extents()))
+			{
+				val += Vector{0.0f, 0.0f, img(int_pos.x(), int_pos.y())};
+			}
+		});
+		draw(ridge, in.get());
+		for(int l = 0; l < 32768; ++l)
+		{
+			diffuse(in.get().pixels(), out.get().pixels());
+			draw(ridge, out.get());
+			std::swap(in, out);
+			if(l%128 == 0)
+			{
+				printf("%d applying diffusion\n", l);
+			}
+		}
+		printf("Next iter %d\n", k);
 	}
-	debug(img);
+	debug(in);
 }

@@ -236,6 +236,9 @@ public:
 	std::span<Point<T> const> vertices() const
 	{ return std::span<Point<T> const>{std::data(m_points), std::size(m_points)}; }
 
+	std::span<Point<T> > vertices()
+	{ return std::span<Point<T>>{std::data(m_points), std::size(m_points)}; }
+
 private:
 	std::vector<Point<T>> m_points;
 };

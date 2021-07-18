@@ -18,7 +18,7 @@ public:
 	template<class U>
 	constexpr explicit(!std::is_same_v<std::decay_t<U>, std::decay_t<T>>)
 		Span2d(Span2d<U> other)
-		: m_size{other.size()}
+		: m_size{other.extents()}
 		, m_ptr{other.data()}
 	{
 	}
