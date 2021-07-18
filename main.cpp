@@ -23,7 +23,8 @@ public:
 
 	PolygonChain<float> operator()()
 	{
-		auto angle_dist = std::uniform_real_distribution{-0.5f*std::numbers::pi_v<float>, 0.5f*std::numbers::pi_v<float>};
+		auto angle_dist = std::uniform_real_distribution{-0.4375f*std::numbers::pi_v<float>,
+			0.4375f*std::numbers::pi_v<float>};
 		auto const pos_init = pos;
 		θ += angle_dist(m_rng.get()) - 0.5f*θ;
 		pos += 16.0f*Vector{std::cos(θ), -std::sin(θ), 0.0f} + Vector{0.0f, 0.125f*(m_extents.depth() - pos.y()), 0.0f};
@@ -31,10 +32,11 @@ public:
  		PolygonChain ret{pos_init, pos};
 		while(pos.x() < m_extents.width())
 		{
-			pos += 16.0f*Vector{std::cos(θ), -std::sin(θ), 0.0f} + Vector{0.0f, 0.125f*(m_extents.depth() - pos.y()), 0.0f};
+			pos += 16.0f*Vector{std::cos(θ), -std::sin(θ), 0.0f} + Vector{0.0f, 0.0625f*(m_extents.depth() - pos.y()), 0.0f};
 			θ += angle_dist(m_rng.get()) - 0.5f*θ;
 			ret.append(pos);
 		}
+		pos = Point{0.0f, pos.y(), pos.z()};
 		return ret;
 	}
 
@@ -89,9 +91,10 @@ int main()
 
 	GrayscaleImage img{1024, 512};
 	RidgeGenerator make_ridge{rng, img.extents()};
-	for(int k = 0; k < 1; ++k)
+	for(int k = 0; k < 4; ++k)
 	{
 		auto ridge = make_ridge();
+
 		draw(ridge, img);
 	}
 	debug(img);
