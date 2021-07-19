@@ -18,11 +18,11 @@ public:
 	using DirDecayRate = TaggedType<float, ParamId::DirDecayRateId>;
 	using SegLength = TaggedType<float, ParamId::SegLengthId>;
 	using SegLengthDecayRate = TaggedType<float, ParamId::SegLengthDecayRateId>;
-	using LocationDecayRate = TaggedType<float, ParamId::LocationDecayRateId>;
+	using LocDecayRate = TaggedType<float, ParamId::LocationDecayRateId>;
 
 	explicit XYLocGenerator(pcg32& rng,
                             SegLength seg_length,
-                            LocationDecayRate loc_decay_rate,
+                            LocDecayRate loc_decay_rate,
                             DirDecayRate dir_decay_rate,
                             SegLengthDecayRate seg_length_decay_rate):
 		m_rng{rng},
@@ -43,9 +43,18 @@ public:
 
 		m_loc += m_seg_length*Vector{cos(m_dir), -sin(m_dir) - m_loc_decay_rate*m_loc.y()};
 		m_seg_length *= m_seg_length_decay_rate;
-		m_dir += angle_dist(m_rng.get()) - m_dir_decay_rate;
+		m_dir += angle_dist(m_rng.get()) - m_dir_decay_rate*m_dir;
 
 		return ret;
+	}
+
+	Point<float> location() const
+	{ return m_loc; }
+
+	XYLocGenerator& location(Point<float> loc)
+	{
+		m_loc = loc;
+		return *this;
 	}
 
 private:
@@ -54,7 +63,7 @@ private:
 	float m_dir;
 
 	float m_seg_length;
-	LocationDecayRate m_loc_decay_rate;
+	LocDecayRate m_loc_decay_rate;
 	DirDecayRate m_dir_decay_rate;
 	SegLengthDecayRate m_seg_length_decay_rate;
 };
@@ -63,40 +72,32 @@ class RidgeGenerator
 {
 public:
 	explicit RidgeGenerator(pcg32& rng, Extents<Image::IndexType> extents):
-		m_rng{rng},
-		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()},
-		pos{0.0f, m_extents.depth(), 0.0f},
-		θ{0.0f}
+		m_generator{rng,
+			XYLocGenerator::SegLength{16.0f},
+			XYLocGenerator::LocDecayRate{0.1f/16.0f},
+			XYLocGenerator::DirDecayRate{0.5f},
+			XYLocGenerator::SegLengthDecayRate{0.0f}},
+		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()}
 	{
 	}
 
 	PolygonChain<float> operator()()
 	{
-		auto angle_dist = std::uniform_real_distribution{-0.4375f*std::numbers::pi_v<float>,
-			0.4375f*std::numbers::pi_v<float>};
-		auto z_dist = std::uniform_real_distribution{0.0f, 1.0f};
-
-		auto const pos_init = pos;
-		θ += angle_dist(m_rng.get()) - 0.5f*θ;
-		pos += Vector{16.0f*std::cos(θ), -16.0f*std::sin(θ), z_dist(m_rng.get())}
-				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), -4.0f*pos.z()/8.0f};
- 		PolygonChain ret{pos_init, pos};
-		while(pos.x() < m_extents.width())
+		auto offset = Vector{0.0f, m_extents.depth(), 1.0f};
+ 		PolygonChain ret{m_generator() + offset, m_generator() + offset};
+		auto loc = m_generator() + offset;
+		while(loc.x() < m_extents.width())
 		{
-			θ += angle_dist(m_rng.get()) - 0.5f*θ;
-			pos += Vector{16.0f*std::cos(θ), -16.0f*std::sin(θ), z_dist(m_rng.get())}
-				+ Vector{0.0f, 0.1f*(m_extents.depth() - pos.y()), -8.0f*pos.z()/16.0f};
-			ret.append(pos);
+			ret.append(loc);
+			loc = m_generator() + offset;
 		}
-		pos = Point{0.0f, pos.y(), pos.z()};
+		ret.append(loc);
 		return ret;
 	}
 
 private:
-	std::reference_wrapper<pcg32> m_rng;
+	XYLocGenerator m_generator;
 	Extents<float> m_extents;
-	Point<float> pos;
-	float θ;
 };
 
 void draw(LineSegment<float> const& l, GrayscaleImage& img)
@@ -164,6 +165,7 @@ void debug(GrayscaleImage const& img)
 {
 	auto ptr = img.pixels().data();
 	auto v = *std::max_element(ptr, ptr + area(img));
+	printf("%.8g\n", v);
 	Image img_out{img.width(), img.height()};
 	transform(img.pixels(), img_out.pixels(), [v_max =v](auto, auto, auto v) {
 		v/=v_max;
@@ -184,7 +186,7 @@ int main()
 	RidgeGenerator make_ridge{rng, img_a.extents()};
 	std::reference_wrapper in{img_a};
 	std::reference_wrapper out{img_b};
-	for(int k = 0; k < 128; ++k)
+	for(int k = 0; k < 1; ++k)
 	{
 		auto ridge = make_ridge();
 		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
@@ -195,6 +197,7 @@ int main()
 			}
 		});
 		draw(ridge, in.get());
+#if 0
 		for(int l = 0; l < 512; ++l)
 		{
 			diffuse(in.get().pixels(), out.get().pixels());
@@ -208,6 +211,7 @@ int main()
 				printf("%d applying diffusion\n", l);
 			}
 		}
+#endif
 		printf("Next iter %d\n", k);
 	}
 	debug(in);
