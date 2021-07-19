@@ -3,11 +3,61 @@
 #include "lib/image.hpp"
 #include "lib/image_io.hpp"
 #include "lib/mathutils.hpp"
+#include "lib/tagged_type.hpp"
 
 #include <pcg_random.hpp>
 
 #include <numbers>
 #include <random>
+
+class XYLocGenerator
+{
+	enum class ParamId:int{DirDecayRateId, SegLengthId, SegLengthDecayRateId, LocationDecayRateId};
+
+public:
+	using DirDecayRate = TaggedType<float, ParamId::DirDecayRateId>;
+	using SegLength = TaggedType<float, ParamId::SegLengthId>;
+	using SegLengthDecayRate = TaggedType<float, ParamId::SegLengthDecayRateId>;
+	using LocationDecayRate = TaggedType<float, ParamId::LocationDecayRateId>;
+
+	explicit XYLocGenerator(pcg32& rng,
+                            SegLength seg_length,
+                            LocationDecayRate loc_decay_rate,
+                            DirDecayRate dir_decay_rate,
+                            SegLengthDecayRate seg_length_decay_rate):
+		m_rng{rng},
+		m_loc{0.0f, 0.0f},
+		m_dir{0.0f},
+		m_seg_length{seg_length},
+		m_loc_decay_rate{loc_decay_rate},
+		m_dir_decay_rate{dir_decay_rate},
+		m_seg_length_decay_rate{std::exp(-seg_length_decay_rate)}
+	{}
+
+	Point<float> operator()()
+	{
+		auto const ret = m_loc;
+
+		auto angle_dist = std::uniform_real_distribution{-0.4375f*std::numbers::pi_v<float>,
+			0.4375f*std::numbers::pi_v<float>};
+
+		m_loc += m_seg_length*Vector{cos(m_dir), -sin(m_dir) - m_loc_decay_rate*m_loc.y()};
+		m_seg_length *= m_seg_length_decay_rate;
+		m_dir += angle_dist(m_rng.get()) - m_dir_decay_rate;
+
+		return ret;
+	}
+
+private:
+	std::reference_wrapper<pcg32> m_rng;
+	Point<float> m_loc;
+	float m_dir;
+
+	float m_seg_length;
+	LocationDecayRate m_loc_decay_rate;
+	DirDecayRate m_dir_decay_rate;
+	SegLengthDecayRate m_seg_length_decay_rate;
+};
 
 class RidgeGenerator
 {
@@ -134,7 +184,7 @@ int main()
 	RidgeGenerator make_ridge{rng, img_a.extents()};
 	std::reference_wrapper in{img_a};
 	std::reference_wrapper out{img_b};
-	for(int k = 0; k < 1; ++k)
+	for(int k = 0; k < 128; ++k)
 	{
 		auto ridge = make_ridge();
 		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
@@ -145,11 +195,11 @@ int main()
 			}
 		});
 		draw(ridge, in.get());
-		for(int l = 0; l < 32768; ++l)
+		for(int l = 0; l < 512; ++l)
 		{
 			diffuse(in.get().pixels(), out.get().pixels());
 			draw(ridge, out.get());
-			set_horizontal_boundary(out.get().pixels(), 0, 0.25f);
+			set_horizontal_boundary(out.get().pixels(), 0, 1.0f);
 			set_horizontal_boundary(out.get().pixels(), img_a.height() - 1, 0);
 			set_vertical_boundaries(out.get());
 			std::swap(in, out);
