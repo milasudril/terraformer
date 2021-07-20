@@ -26,12 +26,10 @@ public:
 	using SegLengthDecayRate = TaggedType<float, ParamId::SegLengthDecayRateId>;
 	using LocDecayRate = TaggedType<float, ParamId::LocationDecayRateId>;
 
-	explicit XYLocGenerator(pcg32& rng,
-                            SegLength seg_length,
+	explicit XYLocGenerator(SegLength seg_length,
                             LocDecayRate loc_decay_rate,
                             DirDecayRate dir_decay_rate,
                             SegLengthDecayRate seg_length_decay_rate):
-		m_rng{rng},
 		m_loc{0.0f, 0.0f},
 		m_dir{0.0f},
 		m_seg_length{seg_length},
@@ -40,7 +38,7 @@ public:
 		m_seg_length_decay_rate{std::exp(-seg_length_decay_rate)}
 	{}
 
-	Point<float> operator()()
+	Point<float> operator()(pcg32& rng)
 	{
 		auto const ret = m_loc;
 
@@ -50,7 +48,7 @@ public:
 		m_loc += m_seg_length*Vector{cos(m_dir), -sin(m_dir)}
 			 + Vector{0.0f, -m_loc_decay_rate*m_loc.y()};
 		m_seg_length *= m_seg_length_decay_rate;
-		m_dir += angle_dist(m_rng.get()) - m_dir_decay_rate*m_dir;
+		m_dir += angle_dist(rng) - m_dir_decay_rate*m_dir;
 
 		return ret;
 	}
@@ -65,7 +63,6 @@ public:
 	}
 
 private:
-	std::reference_wrapper<pcg32> m_rng;
 	Point<float> m_loc;
 	float m_dir;
 
@@ -75,28 +72,33 @@ private:
 	SegLengthDecayRate m_seg_length_decay_rate;
 };
 
+class ElevationGenerator
+{
+public:
+private:
+};
+
 class RidgeGenerator
 {
 public:
-	explicit RidgeGenerator(pcg32& rng, Extents<Image::IndexType> extents):
-		m_generator{rng,
-			XYLocGenerator::SegLength{Level0SegLength},
-			XYLocGenerator::LocDecayRate{1.0f/16.0f},
-			XYLocGenerator::DirDecayRate{1.0f/2.0f},
+	explicit RidgeGenerator(Extents<Image::IndexType> extents):
+		m_generator{XYLocGenerator::SegLength{Level0SegLength},
+			XYLocGenerator::LocDecayRate{1.0f/2.0f},
+			XYLocGenerator::DirDecayRate{1.375f/2.0f},
 			XYLocGenerator::SegLengthDecayRate{0.0f}},
 		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()}
 	{
 	}
 
-	PolygonChain<float> operator()()
+	PolygonChain<float> operator()(pcg32& rng)
 	{
 		auto offset = Vector{0.0f, m_extents.depth(), 1.0f};
- 		PolygonChain ret{m_generator() + offset, m_generator() + offset};
-		auto loc = m_generator() + offset;
+ 		PolygonChain ret{m_generator(rng) + offset, m_generator(rng) + offset};
+		auto loc = m_generator(rng) + offset;
 		while(loc.x() < m_extents.width())
 		{
 			ret.append(loc);
-			loc = m_generator() + offset;
+			loc = m_generator(rng) + offset;
 		}
 		ret.append(loc);
 		return ret;
@@ -189,7 +191,7 @@ int main()
 	GrayscaleImage img_a{static_cast<uint32_t>(DomainWidth), static_cast<uint32_t>(DomainHeight)};
 	std::fill(std::begin(img_a.pixels()), std::end(img_a.pixels()), 0.0f);
 	auto img_b = img_a;
-	RidgeGenerator make_ridge{rng, img_a.extents()};
+	RidgeGenerator make_ridge{img_a.extents()};
 	std::reference_wrapper in{img_a};
 	std::reference_wrapper out{img_b};
 
@@ -199,7 +201,7 @@ int main()
 	for(int k = 0; k < 1; ++k)
 	{
 		puts("Tick");
-		auto ridge = make_ridge();
+		auto ridge = make_ridge(rng);
 		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
 			auto const int_pos = vector_cast<uint32_t>(val + Vector{0.5f, 0.5f, 0.5f});
 			if(within(xy(int_pos), img.extents()))
