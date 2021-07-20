@@ -5,6 +5,8 @@ template<class T, auto tag>
 class TaggedType
 {
 public:
+	constexpr explicit TaggedType(T const& value):m_value{value}{}
+
 	constexpr explicit TaggedType(T&& value):m_value{value}{}
 
 	constexpr operator T() const

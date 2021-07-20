@@ -10,6 +10,12 @@
 #include <numbers>
 #include <random>
 
+constexpr float Meter = 1.0f/16.0f;
+
+constexpr float DomainWidth  = 131072.0f*Meter;
+constexpr float DomainHeight = 65536.0f*Meter;
+constexpr float Level0SegLength = 2048.0f*Meter;
+
 class XYLocGenerator
 {
 	enum class ParamId:int{DirDecayRateId, SegLengthId, SegLengthDecayRateId, LocationDecayRateId};
@@ -41,7 +47,8 @@ public:
 		auto angle_dist = std::uniform_real_distribution{-0.4375f*std::numbers::pi_v<float>,
 			0.4375f*std::numbers::pi_v<float>};
 
-		m_loc += m_seg_length*Vector{cos(m_dir), -sin(m_dir) - m_loc_decay_rate*m_loc.y()};
+		m_loc += m_seg_length*Vector{cos(m_dir), -sin(m_dir)}
+			 + Vector{0.0f, -m_loc_decay_rate*m_loc.y()};
 		m_seg_length *= m_seg_length_decay_rate;
 		m_dir += angle_dist(m_rng.get()) - m_dir_decay_rate*m_dir;
 
@@ -73,9 +80,9 @@ class RidgeGenerator
 public:
 	explicit RidgeGenerator(pcg32& rng, Extents<Image::IndexType> extents):
 		m_generator{rng,
-			XYLocGenerator::SegLength{16.0f},
-			XYLocGenerator::LocDecayRate{0.1f/16.0f},
-			XYLocGenerator::DirDecayRate{0.5f},
+			XYLocGenerator::SegLength{Level0SegLength},
+			XYLocGenerator::LocDecayRate{1.0f/16.0f},
+			XYLocGenerator::DirDecayRate{1.0f/2.0f},
 			XYLocGenerator::SegLengthDecayRate{0.0f}},
 		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()}
 	{
@@ -165,7 +172,6 @@ void debug(GrayscaleImage const& img)
 {
 	auto ptr = img.pixels().data();
 	auto v = *std::max_element(ptr, ptr + area(img));
-	printf("%.8g\n", v);
 	Image img_out{img.width(), img.height()};
 	transform(img.pixels(), img_out.pixels(), [v_max =v](auto, auto, auto v) {
 		v/=v_max;
@@ -180,7 +186,7 @@ int main()
 {
 	pcg32 rng;
 
-	GrayscaleImage img_a{1024, 512};
+	GrayscaleImage img_a{static_cast<uint32_t>(DomainWidth), static_cast<uint32_t>(DomainHeight)};
 	std::fill(std::begin(img_a.pixels()), std::end(img_a.pixels()), 0.0f);
 	auto img_b = img_a;
 	RidgeGenerator make_ridge{rng, img_a.extents()};
@@ -188,6 +194,7 @@ int main()
 	std::reference_wrapper out{img_b};
 	for(int k = 0; k < 1; ++k)
 	{
+		puts("Tick");
 		auto ridge = make_ridge();
 		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
 			auto const int_pos = vector_cast<uint32_t>(val + Vector{0.5f, 0.5f, 0.5f});
@@ -197,6 +204,7 @@ int main()
 			}
 		});
 		draw(ridge, in.get());
+		puts("Tock");
 #if 0
 		for(int l = 0; l < 512; ++l)
 		{
