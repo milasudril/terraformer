@@ -192,6 +192,10 @@ int main()
 	RidgeGenerator make_ridge{rng, img_a.extents()};
 	std::reference_wrapper in{img_a};
 	std::reference_wrapper out{img_b};
+
+	draw(PolygonChain{Point{0.0f, DomainHeight/3.0f, 1.0f}, Point{DomainWidth, DomainHeight/3.0f, 1.0f}}, in.get());
+	draw(PolygonChain{Point{0.0f, 2.0f*DomainHeight/3.0f, 1.0f}, Point{DomainWidth, 2.0f*DomainHeight/3.0f, 1.0f}}, in.get());
+
 	for(int k = 0; k < 1; ++k)
 	{
 		puts("Tick");
