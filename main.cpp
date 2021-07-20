@@ -13,8 +13,8 @@
 constexpr float Meter = 1.0f/16.0f;
 
 constexpr float DomainWidth  = 131072.0f*Meter;
-constexpr float DomainHeight = 65536.0f*Meter;
-constexpr float Level0SegLength = 2048.0f*Meter;
+constexpr float DomainHeight = 6.0f*16384.0f*Meter;
+constexpr float Level0SegLength = 2048.0f*Meter;  // Approx. distance between Lhotse and Chomolungma
 
 class XYLocGenerator
 {
