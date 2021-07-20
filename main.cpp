@@ -78,9 +78,9 @@ class ElevationGenerator
 {
 	enum class ParamId:int{ElevDecayRateId};
 public:
-	using ElevDecayRate = TaggedType<float, ParamId::ElevDecayRateId>;
+	using DecayRate = TaggedType<float, ParamId::ElevDecayRateId>;
 
-	explicit ElevationGenerator(ElevDecayRate elev_decay_rate):
+	explicit ElevationGenerator(DecayRate elev_decay_rate):
 		m_z{0.0f},
 		m_elev_decay_rate{elev_decay_rate}
 	{}
@@ -95,7 +95,7 @@ public:
 
 private:
 	float m_z;
-	ElevDecayRate m_elev_decay_rate;
+	DecayRate m_elev_decay_rate;
 };
 
 class RidgeGenerator
@@ -106,6 +106,7 @@ public:
 			XYLocGenerator::LocDecayRate{1.0f/384.0f},
 			XYLocGenerator::DirDecayRate{1.0f/128.0f},
 			XYLocGenerator::SegLengthDecayRate{0.0f}},
+		m_z_gen{ElevationGenerator::DecayRate{1.0f/16.0f}},
 		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()}
 	{
 	}
@@ -113,12 +114,14 @@ public:
 	PolygonChain<float> operator()(RngType& rng)
 	{
 		auto offset = Vector{0.0f, m_extents.depth(), 1.0f};
- 		PolygonChain ret{m_xy_gen(rng) + offset, m_xy_gen(rng) + offset};
+		auto const Z = Vector{0.0f, 0.0f, 1.0f};
+
+ 		PolygonChain ret{m_xy_gen(rng) + m_z_gen(rng)*Z + offset, m_xy_gen(rng) + m_z_gen(rng)*Z + offset};
 		auto loc = m_xy_gen(rng) + offset;
 		while(loc.x() < m_extents.width())
 		{
 			ret.append(loc);
-			loc = m_xy_gen(rng) + offset;
+			loc = m_xy_gen(rng) + m_z_gen(rng)*Z + offset;
 		}
 		ret.append(loc);
 		return ret;
@@ -126,6 +129,7 @@ public:
 
 private:
 	XYLocGenerator m_xy_gen;
+	ElevationGenerator m_z_gen;
 	Extents<float> m_extents;
 };
 
