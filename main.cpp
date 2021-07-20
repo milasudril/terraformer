@@ -14,7 +14,9 @@ constexpr float Meter = 1.0f/16.0f;
 
 constexpr float DomainWidth  = 131072.0f*Meter;
 constexpr float DomainHeight = 6.0f*16384.0f*Meter;
-constexpr float Level0SegLength = 2048.0f*Meter;  // Approx. distance between Lhotse and Chomolungma
+constexpr float Level0SegLength = 16.0f*Meter;
+
+using RngType = pcg32;
 
 class XYLocGenerator
 {
@@ -38,12 +40,12 @@ public:
 		m_seg_length_decay_rate{std::exp(-seg_length_decay_rate)}
 	{}
 
-	Point<float> operator()(pcg32& rng)
+	Point<float> operator()(RngType& rng)
 	{
 		auto const ret = m_loc;
 
-		auto angle_dist = std::uniform_real_distribution{-0.4375f*std::numbers::pi_v<float>,
-			0.4375f*std::numbers::pi_v<float>};
+		auto const angle_range = 1.0f*std::numbers::pi_v<float>/12.0f;
+		auto angle_dist = std::uniform_real_distribution{-angle_range, angle_range};
 
 		m_loc += m_seg_length*Vector{cos(m_dir), -sin(m_dir)}
 			 + Vector{0.0f, -m_loc_decay_rate*m_loc.y()};
@@ -74,8 +76,26 @@ private:
 
 class ElevationGenerator
 {
+	enum class ParamId:int{ElevDecayRateId};
 public:
+	using ElevDecayRate = TaggedType<float, ParamId::ElevDecayRateId>;
+
+	explicit ElevationGenerator(ElevDecayRate elev_decay_rate):
+		m_z{0.0f},
+		m_elev_decay_rate{elev_decay_rate}
+	{}
+
+	float operator()(RngType& rng)
+	{
+		auto ret = m_z;
+		auto z_dist = std::uniform_real_distribution{0.0f, 1.0f};
+		m_z += z_dist(rng) - m_elev_decay_rate*m_z;
+		return ret;
+	}
+
 private:
+	float m_z;
+	ElevDecayRate m_elev_decay_rate;
 };
 
 class RidgeGenerator
@@ -83,14 +103,14 @@ class RidgeGenerator
 public:
 	explicit RidgeGenerator(Extents<Image::IndexType> extents):
 		m_generator{XYLocGenerator::SegLength{Level0SegLength},
-			XYLocGenerator::LocDecayRate{1.0f/2.0f},
-			XYLocGenerator::DirDecayRate{1.375f/2.0f},
+			XYLocGenerator::LocDecayRate{1.0f/384.0f},
+			XYLocGenerator::DirDecayRate{1.0f/128.0f},
 			XYLocGenerator::SegLengthDecayRate{0.0f}},
 		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()}
 	{
 	}
 
-	PolygonChain<float> operator()(pcg32& rng)
+	PolygonChain<float> operator()(RngType& rng)
 	{
 		auto offset = Vector{0.0f, m_extents.depth(), 1.0f};
  		PolygonChain ret{m_generator(rng) + offset, m_generator(rng) + offset};
@@ -186,7 +206,7 @@ void debug(GrayscaleImage const& img)
 
 int main()
 {
-	pcg32 rng;
+	RngType rng;
 
 	GrayscaleImage img_a{static_cast<uint32_t>(DomainWidth), static_cast<uint32_t>(DomainHeight)};
 	std::fill(std::begin(img_a.pixels()), std::end(img_a.pixels()), 0.0f);
@@ -200,8 +220,8 @@ int main()
 
 	for(int k = 0; k < 1; ++k)
 	{
-		puts("Tick");
 		auto ridge = make_ridge(rng);
+#if 0
 		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
 			auto const int_pos = vector_cast<uint32_t>(val + Vector{0.5f, 0.5f, 0.5f});
 			if(within(xy(int_pos), img.extents()))
@@ -209,8 +229,9 @@ int main()
 				val += Vector{0.0f, 0.0f, img(int_pos.x(), int_pos.y())};
 			}
 		});
+#endif
 		draw(ridge, in.get());
-		puts("Tock");
+//		puts("Tock");
 #if 0
 		for(int l = 0; l < 512; ++l)
 		{
