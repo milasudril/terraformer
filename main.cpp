@@ -102,7 +102,7 @@ class RidgeGenerator
 {
 public:
 	explicit RidgeGenerator(Extents<Image::IndexType> extents):
-		m_generator{XYLocGenerator::SegLength{Level0SegLength},
+		m_xy_gen{XYLocGenerator::SegLength{Level0SegLength},
 			XYLocGenerator::LocDecayRate{1.0f/384.0f},
 			XYLocGenerator::DirDecayRate{1.0f/128.0f},
 			XYLocGenerator::SegLengthDecayRate{0.0f}},
@@ -113,19 +113,19 @@ public:
 	PolygonChain<float> operator()(RngType& rng)
 	{
 		auto offset = Vector{0.0f, m_extents.depth(), 1.0f};
- 		PolygonChain ret{m_generator(rng) + offset, m_generator(rng) + offset};
-		auto loc = m_generator(rng) + offset;
+ 		PolygonChain ret{m_xy_gen(rng) + offset, m_xy_gen(rng) + offset};
+		auto loc = m_xy_gen(rng) + offset;
 		while(loc.x() < m_extents.width())
 		{
 			ret.append(loc);
-			loc = m_generator(rng) + offset;
+			loc = m_xy_gen(rng) + offset;
 		}
 		ret.append(loc);
 		return ret;
 	}
 
 private:
-	XYLocGenerator m_generator;
+	XYLocGenerator m_xy_gen;
 	Extents<float> m_extents;
 };
 
