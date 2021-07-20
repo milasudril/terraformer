@@ -10,7 +10,7 @@
 #include <numbers>
 #include <random>
 
-constexpr float Meter = 1.0f/16.0f;
+constexpr float Meter = 1.0f/128.0f;
 
 constexpr float DomainWidth  = 131072.0f*Meter;
 constexpr float DomainHeight = 6.0f*16384.0f*Meter;
@@ -44,7 +44,7 @@ public:
 	{
 		auto const ret = m_loc;
 
-		auto const angle_range = 1.0f*std::numbers::pi_v<float>/12.0f;
+		auto const angle_range = 1.0f*std::numbers::pi_v<float>/24.0f;
 		auto angle_dist = std::uniform_real_distribution{-angle_range, angle_range};
 
 		m_loc += m_seg_length*Vector{cos(m_dir), -sin(m_dir)}
@@ -81,14 +81,14 @@ public:
 	using DecayRate = TaggedType<float, ParamId::ElevDecayRateId>;
 
 	explicit ElevationGenerator(DecayRate elev_decay_rate):
-		m_z{0.0f},
+		m_z{1.0f},
 		m_elev_decay_rate{elev_decay_rate}
 	{}
 
 	float operator()(RngType& rng)
 	{
 		auto ret = m_z;
-		auto z_dist = std::uniform_real_distribution{0.0f, 1.0f};
+		auto z_dist = std::uniform_real_distribution{-1.0f, 1.0f};
 		m_z += z_dist(rng) - m_elev_decay_rate*m_z;
 		return ret;
 	}
@@ -104,9 +104,9 @@ public:
 	explicit RidgeGenerator(Extents<Image::IndexType> extents):
 		m_xy_gen{XYLocGenerator::SegLength{Level0SegLength},
 			XYLocGenerator::LocDecayRate{1.0f/384.0f},
-			XYLocGenerator::DirDecayRate{1.0f/128.0f},
+			XYLocGenerator::DirDecayRate{1.0f/192.0f},
 			XYLocGenerator::SegLengthDecayRate{0.0f}},
-		m_z_gen{ElevationGenerator::DecayRate{1.0f/16.0f}},
+		m_z_gen{ElevationGenerator::DecayRate{1.0f/64.0f}},
 		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()}
 	{
 	}
@@ -155,6 +155,17 @@ void draw(PolygonChain<float> const& polychain, GrayscaleImage& img_out)
 	auto verts = polychain.vertices();
 	adj_for_each(std::begin(verts), std::end(verts), [&img = img_out](auto from, auto to){
 		draw(LineSegment{from, to}, img);
+	});
+}
+
+void normalize_elevation(std::span<Point<float>> points)
+{
+	auto min_elevation = [](auto a, auto b){ return a.z() < b.z(); };
+	auto min = std::ranges::min_element(points, min_elevation)->z();
+	auto max = std::ranges::max_element(points, min_elevation)->z();
+	auto range = max - min;;
+	std::ranges::for_each(points, [min, range](auto& p){
+		p = Point{p.x(), p.y(), (p.z() - min)/range};
 	});
 }
 
@@ -219,12 +230,13 @@ int main()
 	std::reference_wrapper in{img_a};
 	std::reference_wrapper out{img_b};
 
-	draw(PolygonChain{Point{0.0f, DomainHeight/3.0f, 1.0f}, Point{DomainWidth, DomainHeight/3.0f, 1.0f}}, in.get());
-	draw(PolygonChain{Point{0.0f, 2.0f*DomainHeight/3.0f, 1.0f}, Point{DomainWidth, 2.0f*DomainHeight/3.0f, 1.0f}}, in.get());
+//	draw(PolygonChain{Point{0.0f, DomainHeight/3.0f, 1.0f}, Point{DomainWidth, DomainHeight/3.0f, 1.0f}}, in.get());
+//	draw(PolygonChain{Point{0.0f, 2.0f*DomainHeight/3.0f, 1.0f}, Point{DomainWidth, 2.0f*DomainHeight/3.0f, 1.0f}}, in.get());
 
 	for(int k = 0; k < 1; ++k)
 	{
 		auto ridge = make_ridge(rng);
+		normalize_elevation(ridge.vertices());
 #if 0
 		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
 			auto const int_pos = vector_cast<uint32_t>(val + Vector{0.5f, 0.5f, 0.5f});
