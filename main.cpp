@@ -10,11 +10,12 @@
 #include <numbers>
 #include <random>
 
-constexpr float Meter = 1.0f/128.0f;
+constexpr float MeterXY = 1.0f/128.0f;
+constexpr float MeterZ = 1.0f/4096.0f;
 
-constexpr float DomainWidth  = 131072.0f*Meter;
-constexpr float DomainHeight = 6.0f*16384.0f*Meter;
-constexpr float Level0SegLength = 16.0f*Meter;
+constexpr float DomainWidth  = 131072.0f*MeterXY;
+constexpr float DomainHeight = 6.0f*16384.0f*MeterXY;
+constexpr float Level0SegLength = 16.0f*MeterXY;
 
 using RngType = pcg32;
 
@@ -237,6 +238,9 @@ int main()
 	{
 		auto ridge = make_ridge(rng);
 		normalize_elevation(ridge.vertices());
+		std::ranges::for_each(ridge.vertices(), [](auto& val){
+			val += Vector{0.0f, 0.0f, 512.0f*MeterZ};
+		});
 #if 0
 		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
 			auto const int_pos = vector_cast<uint32_t>(val + Vector{0.5f, 0.5f, 0.5f});
@@ -246,14 +250,14 @@ int main()
 			}
 		});
 #endif
-		draw(ridge, in.get());
+//		draw(ridge, in.get());
 //		puts("Tock");
-#if 0
-		for(int l = 0; l < 512; ++l)
+#if 1
+		for(int l = 0; l < 32768; ++l)
 		{
 			diffuse(in.get().pixels(), out.get().pixels());
 			draw(ridge, out.get());
-			set_horizontal_boundary(out.get().pixels(), 0, 1.0f);
+			set_horizontal_boundary(out.get().pixels(), 0, 512.0f*MeterZ);
 			set_horizontal_boundary(out.get().pixels(), img_a.height() - 1, 0);
 			set_vertical_boundaries(out.get());
 			std::swap(in, out);
