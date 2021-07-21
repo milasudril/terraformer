@@ -11,163 +11,165 @@
 #include <span>
 #include <type_traits>
 
-struct Arc
-{
-	float radius;
-	float angle;
-};
-
-template<class T>
-Arc make_arc(Extents<T> size)
-{
-	auto const v = vector_cast<float>(size.value());
-	auto const a = v[0];
-	auto const b = v[1];
-	auto const r = (b*b + a*a)/(2.0f*b);
-	return Arc{r, std::atan(a/(r - b))};
-}
-
-inline double length(Arc arc)
-{
-	return arc.radius * arc.angle;
-}
 
 template<class T>
 class Vector
 {
 public:
-	explicit Vector(vec4_t<T> data):m_value{data}
+	constexpr explicit Vector(vec4_t<T> data):m_value{data}
 	{m_value[3] = zero<T>();}
 
-	explicit Vector(T x, T y, T z = zero<T>()): m_value{x, y, z, zero<T>()}
+	constexpr explicit Vector(T x, T y, T z = zero<T>()): m_value{x, y, z, zero<T>()}
 	{}
 
-	T x() const
+	constexpr T x() const
 	{ return m_value[0]; }
 
-	T y() const
+	constexpr T y() const
 	{ return m_value[1]; }
 
- 	T z() const
+ 	constexpr T z() const
 	{ return m_value[2]; }
 
-	vec4_t<T> value() const
+	constexpr vec4_t<T> value() const
 	{ return m_value; }
 
-	Vector& operator+=(Vector vec)
+	constexpr Vector& operator+=(Vector vec)
 	{
 		m_value += vec.value();
 		return *this;
 	}
 
-	Vector& operator-=(Vector vec)
+	constexpr Vector& operator-=(Vector vec)
 	{
 		m_value -= vec.value();
 		return *this;
 	}
 
-	Vector& operator*=(T c)
+	constexpr Vector& operator*=(T c)
 	{
 		m_value *= c;
 		return *this;
 	}
 
-	inline Vector& normalize() requires std::floating_point<T>;
+	constexpr inline Vector& normalize() requires std::floating_point<T>;
+
+	constexpr Vector& scale(Vector a)
+	{
+		m_value *= a.value();
+		return *this;
+	}
 
 private:
 	vec4_t<T> m_value;
 };
 
 template<class T>
-Vector<T> operator*(T c, Vector<T> v)
+constexpr Vector<T> operator*(T c, Vector<T> v)
 {
 	v*=c;
 	return v;
 }
 
 template<class T>
-Vector<T> operator+(Vector<T> a, Vector<T> b)
+constexpr Vector<T> scale(Vector<T> a, Vector<T> b)
+{
+	a.scale(b);
+	return a;
+}
+
+template<class T>
+constexpr Vector<T> operator+(Vector<T> a, Vector<T> b)
 {
 	a += b;
 	return a;
 }
 
 template<class T>
-Vector<T> operator-(Vector<T> a, Vector<T> b)
+constexpr Vector<T> operator-(Vector<T> a, Vector<T> b)
 {
 	a -= b;
 	return a;
 }
 
 template<class T>
-T dot(Vector<T> a, Vector<T> b)
+constexpr T dot(Vector<T> a, Vector<T> b)
 {
 	auto temp = a.value() * b.value();
 	return temp[0] + temp[1] + temp[2];
 }
 
 template<class T>
-auto length_squared(Vector<T> v)
+constexpr auto length_squared(Vector<T> v)
 {
 	return dot(v, v);
 }
 
 template<class T>
-auto length(Vector<T> v)
+constexpr auto length(Vector<T> v)
 {
 	return std::sqrt(length_squared(v));
 }
 
 template<class T>
-Vector<T>& Vector<T>::normalize() requires std::floating_point<T>
+constexpr Vector<T>& Vector<T>::normalize() requires std::floating_point<T>
 {
 	m_value /= length(*this);
 	return *this;
 }
 
 template<std::floating_point T>
-auto normalized(Vector<T> v)
+constexpr auto normalized(Vector<T> v)
 {
 	return v.normalize();
 }
 
 template<class T>
-auto normalized(Vector<T> v)
+constexpr auto normalized(Vector<T> v)
 {
 	return normalized(Vector<double>{vector_cast<double>(v.value())});
 }
 
 template<class T, class U>
-auto vector_cast(Vector<U> v)
+constexpr auto vector_cast(Vector<U> v)
 {
 	return Vector<T>{vector_cast<T>(v.value())};
 }
 
 template<class T>
+constexpr Vector<T> X{1, 0, 0};
+
+template<class T>
+constexpr Vector<T> Y{0, 1, 0};
+
+template<class T>
+constexpr Vector<T> Z{0, 0, 1};
+
+template<class T>
 class Point
 {
 public:
-	explicit Point(vec4_t<T> v): m_value{v}
+	constexpr explicit Point(vec4_t<T> v): m_value{v}
 	{
 		m_value[3] = unity<T>();
 	}
 
-	explicit Point(T x, T y, T z = zero<T>()): m_value{x, y, z, unity<T>()}
+	constexpr explicit Point(T x, T y, T z = zero<T>()): m_value{x, y, z, unity<T>()}
 	{}
 
-	T x() const
+	constexpr T x() const
 	{ return m_value[0]; }
 
-	T y() const
+	constexpr T y() const
 	{ return m_value[1]; }
 
-	T z() const
+	constexpr T z() const
 	{ return m_value[2]; }
 
-	vec4_t<T> value() const
+	constexpr vec4_t<T> value() const
 	{ return m_value; }
 
-	Point& operator+=(Vector<T> vec)
+	constexpr Point& operator+=(Vector<T> vec)
 	{
 		m_value += vec.value();
 		return *this;
@@ -184,39 +186,39 @@ private:
 };
 
 template<class T>
-Vector<T> operator-(Point<T> a, Point<T> b)
+constexpr Vector<T> operator-(Point<T> a, Point<T> b)
 {
 	return Vector<T>{a.value() - b.value()};
 }
 
 template<class T>
-Point<T> operator+(Point<T> a, Vector<T> b)
+constexpr Point<T> operator+(Point<T> a, Vector<T> b)
 {
 	a += b;
 	return a;
 }
 
 template<class T>
-Point<T> operator-(Point<T> a, Vector<T> b)
+constexpr Point<T> operator-(Point<T> a, Vector<T> b)
 {
 	a -= b;
 	return a;
 }
 
 template<class T>
-T distance_squared(Point<T> a, Point<T> b)
+constexpr T distance_squared(Point<T> a, Point<T> b)
 {
 	return length_squared(a - b);
 }
 
 template<class T>
-auto distance(Point<T> a, Point<T> b)
+constexpr auto distance(Point<T> a, Point<T> b)
 {
 	return length(a - b);
 }
 
 template<class T, class U>
-auto vector_cast(Point<U> v)
+constexpr auto vector_cast(Point<U> v)
 {
 	return Point<T>{vector_cast<T>(v.value())};
 }
@@ -244,6 +246,9 @@ private:
 };
 
 template<class T>
+constexpr Point<T> Origin{0.0f, 0.0f, 0.0f};
+
+template<class T>
 auto& length(PolygonChain<T> const& p)
 {
 	auto verts = p.vertices();
@@ -260,7 +265,7 @@ struct LineSegment
 };
 
 template<class T>
-T xy(T val)
+constexpr T xy(T val)
 {
 	return T{val.x(), val.y()};
 }

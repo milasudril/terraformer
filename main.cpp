@@ -243,26 +243,28 @@ int main()
 		auto ridge = make_ridge(rng);
 		normalize_elevation(ridge.vertices());
 		std::ranges::for_each(ridge.vertices(), [](auto& val){
-			val = Point{val.x(), val.y(), val.z()*3072.0f} + Vector{0.0f, 0.0f, 1024.0f};
+			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 3072.0f}) + 1024.0f*Z<float>;
 		});
 
 		auto upper = make_ridge(rng);
 		normalize_elevation(upper.vertices());
 		std::ranges::for_each(upper.vertices(), [](auto& val){
-			val = Point{val.x(), val.y(), val.z()*128.0f} + Vector{0.0f, -1.0f*DomainHeight/6.0f, 640.0f};
+			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 128.0f})
+				+ Vector{0.0f, -1.0f*DomainHeight/6.0f, 640.0f};
 		});
 
 		auto lower = make_ridge(rng);
 		normalize_elevation(lower.vertices());
 		std::ranges::for_each(lower.vertices(), [](auto& val){
-			val = Point{val.x(), val.y(), val.z()*64.0f} + Vector{0.0f, 1.0f*DomainHeight/6.0f, 320.0f};
+			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 64.0f})
+				+ Vector{0.0f, 1.0f*DomainHeight/6.0f, 320.0f};
 		});
 
 		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
 			auto const int_pos = vector_cast<uint32_t>(val + Vector{0.5f, 0.5f, 0.5f});
 			if(within(xy(int_pos), img.extents()))
 			{
-				val += Vector{0.0f, 0.0f, img(int_pos.x(), int_pos.y())};
+				val += img(int_pos.x(), int_pos.y())*Z<float>;
 			}
 		});
 #if 0

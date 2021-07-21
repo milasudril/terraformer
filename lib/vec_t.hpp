@@ -29,7 +29,7 @@ template<>
 struct HasVectorSize<vec4_t<unsigned long long>>:std::true_type{};
 
 template<class T, class U>
-vec4_t<T> vector_cast(U v) requires HasVectorSize<U>::value
+constexpr vec4_t<T> vector_cast(U v) requires HasVectorSize<U>::value
 {
 	return vec4_t<T>{static_cast<T>(v[0]), static_cast<T>(v[1]), static_cast<T>(v[2]), static_cast<T>(v[3])};
 }
