@@ -74,30 +74,6 @@ private:
 	SegLengthDecayRate m_seg_length_decay_rate;
 };
 
-class ElevationGenerator
-{
-	enum class ParamId:int{ElevDecayRateId};
-public:
-	using DecayRate = TaggedType<float, ParamId::ElevDecayRateId>;
-
-	explicit ElevationGenerator(DecayRate elev_decay_rate):
-		m_z{1.0f},
-		m_elev_decay_rate{elev_decay_rate}
-	{}
-
-	float operator()(RngType& rng)
-	{
-		auto ret = m_z;
-		auto z_dist = std::uniform_real_distribution{-1.0f, 1.0f};
-		m_z += z_dist(rng) - m_elev_decay_rate*m_z;
-		return ret;
-	}
-
-private:
-	float m_z;
-	DecayRate m_elev_decay_rate;
-};
-
 class RidgeGenerator
 {
 public:
@@ -106,7 +82,6 @@ public:
 			XYLocGenerator::LocDecayRate{1.0f/384.0f},
 			XYLocGenerator::DirDecayRate{1.0f/192.0f},
 			XYLocGenerator::SegLengthDecayRate{0.0f}},
-		m_z_gen{ElevationGenerator::DecayRate{1.0f/64.0f}},
 		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()}
 	{
 	}
@@ -118,14 +93,13 @@ public:
 			m_xy_gen.location(Point{0.0f, loc.y(), loc.z()});
 		}
 		auto offset = Vector{0.0f, m_extents.depth(), 1.0f};
-		auto const Z = Vector{0.0f, 0.0f, 1.0f};
 
- 		PolygonChain ret{m_xy_gen(rng) + m_z_gen(rng)*Z + offset, m_xy_gen(rng) + m_z_gen(rng)*Z + offset};
+ 		PolygonChain ret{m_xy_gen(rng) + offset, m_xy_gen(rng) + offset};
 		auto loc = m_xy_gen(rng) + offset;
 		while(loc.x() < m_extents.width())
 		{
 			ret.append(loc);
-			loc = m_xy_gen(rng) + m_z_gen(rng)*Z + offset;
+			loc = m_xy_gen(rng) + offset;
 		}
 		ret.append(loc);
 		return ret;
@@ -133,7 +107,6 @@ public:
 
 private:
 	XYLocGenerator m_xy_gen;
-	ElevationGenerator m_z_gen;
 	Extents<float> m_extents;
 };
 
@@ -241,20 +214,17 @@ int main()
 	{
 
 		auto ridge = make_ridge(rng);
-		normalize_elevation(ridge.vertices());
 		std::ranges::for_each(ridge.vertices(), [](auto& val){
 			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 3072.0f}) + 1024.0f*Z<float>;
 		});
 
 		auto upper = make_ridge(rng);
-		normalize_elevation(upper.vertices());
 		std::ranges::for_each(upper.vertices(), [](auto& val){
 			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 128.0f})
 				+ Vector{0.0f, -1.0f*DomainHeight/6.0f, 640.0f};
 		});
 
 		auto lower = make_ridge(rng);
-		normalize_elevation(lower.vertices());
 		std::ranges::for_each(lower.vertices(), [](auto& val){
 			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 64.0f})
 				+ Vector{0.0f, 1.0f*DomainHeight/6.0f, 320.0f};
