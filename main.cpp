@@ -10,10 +10,10 @@
 #include <numbers>
 #include <random>
 
-constexpr float MeterXY = 1.0f/128.0f;
+constexpr float MeterXY = 1.0f/64.0f;
 
-constexpr float DomainWidth  = 131072.0f*MeterXY;
-constexpr float DomainHeight = 6.0f*16384.0f*MeterXY;
+constexpr float DomainWidth  = 65535.0f*MeterXY;
+constexpr float DomainHeight = 49152.0f*MeterXY;
 constexpr float Level0SegLength = 16.0f*MeterXY;
 
 using RngType = pcg32;
@@ -182,7 +182,7 @@ void diffuse(Span2d<float const> src, Span2d<float> dest)
 	}
 }
 
-void debug(GrayscaleImage const& img)
+void debug(GrayscaleImage const& img, char const* name)
 {
 	auto ptr = img.pixels().data();
 	auto v = *std::max_element(ptr, ptr + area(img));
@@ -191,7 +191,7 @@ void debug(GrayscaleImage const& img)
 		v/=v_max;
 		return RgbaPixel{v, v, v, 1.0f};
 	});
-	store(img_out, "/dev/shm/slask.exr");
+	store(img_out, name);
 }
 
 template<class T>
@@ -239,58 +239,61 @@ GrayscaleImage generate_envelope(XYLocGenerator& get_location,
 		return ret;
 	});
 
-	return img_a;
+	std::reference_wrapper in{img_a};
+	std::reference_wrapper out{img_b};
+
+	for(size_t l = 0; l != (1 << 17); ++l)
+	{
+		diffuse(in.get().pixels(), out.get().pixels());
+		std::ranges::for_each(ridges, [&out = out.get()](auto const& ridge) {
+			draw(ridge, out);
+		});
+
+		set_horizontal_boundary(out.get().pixels(), 0, 512.0f);
+		set_horizontal_boundary(out.get().pixels(), img_a.height() - 1, 0);
+		set_vertical_boundaries(out.get());
+		std::swap(in, out);
+		if(l%128 == 0)
+		{
+			printf("%zu applying diffusion\n", l);
+		}
+	}
+
+	return in.get();
 }
 
 int main()
 {
 	RngType rng;
-
-	GrayscaleImage img_a{static_cast<uint32_t>(DomainWidth), static_cast<uint32_t>(DomainHeight)};
-	std::fill(std::begin(img_a.pixels()), std::end(img_a.pixels()), 0.0f);
-	auto img_b = img_a;
-	RidgeGenerator make_ridge{img_a.extents()};
-	std::reference_wrapper in{img_a};
-	std::reference_wrapper out{img_b};
-
-//	draw(PolygonChain{Point{0.0f, DomainHeight/3.0f, 1.0f}, Point{DomainWidth, DomainHeight/3.0f, 1.0f}}, in.get());
-//	draw(PolygonChain{Point{0.0f, 2.0f*DomainHeight/3.0f, 1.0f}, Point{DomainWidth, 2.0f*DomainHeight/3.0f, 1.0f}}, in.get());
-
-	// Generate envelope
+	XYLocGenerator loc_gen
 	{
+		XYLocGenerator::SegLength{Level0SegLength},
+		XYLocGenerator::LocDecayRate{1.0f/384.0f},
+		XYLocGenerator::DirDecayRate{1.0f/192.0f},
+		XYLocGenerator::SegLengthDecayRate{0.0f}
+	};
 
-		auto ridge = make_ridge(rng);
-		std::ranges::for_each(ridge.vertices(), [](auto& val){
-			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 3072.0f}) + 1024.0f*Z<float>;
-		});
-
-		auto upper = make_ridge(rng);
-		std::ranges::for_each(upper.vertices(), [](auto& val){
-			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 128.0f})
-				+ Vector{0.0f, -1.0f*DomainHeight/6.0f, 640.0f};
-		});
-
-		auto lower = make_ridge(rng);
-		std::ranges::for_each(lower.vertices(), [](auto& val){
-			val = Origin<float> + scale(val - Origin<float>, Vector{1.0f, 1.0f, 64.0f})
-				+ Vector{0.0f, 1.0f*DomainHeight/6.0f, 320.0f};
-		});
-
-		for(int l = 0; l < 65536; ++l)
+	{
+		std::array<BoundaryInfo<float>, 3> higher_env_params
 		{
-			diffuse(in.get().pixels(), out.get().pixels());
-			draw(ridge, out.get());
-			draw(upper, out.get());
-			draw(lower, out.get());
-			set_horizontal_boundary(out.get().pixels(), 0, 512.0f);
-			set_horizontal_boundary(out.get().pixels(), img_a.height() - 1, 0);
-			set_vertical_boundaries(out.get());
-			std::swap(in, out);
-			if(l%128 == 0)
-			{
-				printf("%d applying diffusion\n", l);
-			}
-		}
+			BoundaryInfo{Vector{1.0f, 1.0f, 1024.0f}, (DomainHeight/3.0f) * Y<float>},
+			BoundaryInfo{Vector{1.0f, 1.0f, 5120.0f}, (DomainHeight/2.0f) * Y<float>},
+			BoundaryInfo{Vector{1.0f, 1.0f, 512.0f},  (2.0f*DomainHeight/3.0f) * Y<float>}
+		};
+		auto higher_env = generate_envelope(loc_gen, rng, Extents{DomainWidth, DomainHeight}, higher_env_params);
+
+		debug(higher_env, "/dev/shm/slask_a.exr");
 	}
-	debug(in);
+
+	{
+		std::array<BoundaryInfo<float>, 3> lower_env_params
+			{
+				BoundaryInfo{Vector{1.0f, 1.0f, 768.0f}, (DomainHeight/3.0f) * Y<float>},
+				BoundaryInfo{Vector{1.0f, 1.0f, 1024.0f}, (DomainHeight/2.0f) * Y<float>},
+				BoundaryInfo{Vector{1.0f, 1.0f, 384.0f},  (2.0f*DomainHeight/3.0f) * Y<float>}
+			};
+		auto lower_env = generate_envelope(loc_gen, rng, Extents{DomainWidth, DomainHeight}, lower_env_params);
+		debug(lower_env, "/dev/shm/slask_b.exr");
+	}
+
 }
