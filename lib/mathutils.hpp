@@ -10,6 +10,7 @@
 #include <vector>
 #include <span>
 #include <type_traits>
+#include <algorithm>
 
 
 template<class T>
@@ -224,6 +225,9 @@ constexpr auto vector_cast(Point<U> v)
 }
 
 template<class T>
+constexpr Point<T> Origin{0.0f, 0.0f, 0.0f};
+
+template<class T>
 class PolygonChain
 {
 public:
@@ -246,7 +250,21 @@ private:
 };
 
 template<class T>
-constexpr Point<T> Origin{0.0f, 0.0f, 0.0f};
+void scale(PolygonChain<T>& p, Vector<T> factor, Point<T> origin = Origin<T>)
+{
+	std::ranges::for_each(p.vertices(), [factor, origin](auto& val) {
+		val = origin + scale(val - origin, factor);
+	});
+}
+
+
+template<class T>
+void translate(PolygonChain<T>& p, Vector<T> offset)
+{
+	std::ranges::for_each(p.vertices(), [offset](auto& val) {
+		val += offset;
+	});
+}
 
 template<class T>
 auto& length(PolygonChain<T> const& p)

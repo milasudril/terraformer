@@ -194,7 +194,53 @@ void debug(GrayscaleImage const& img)
 	store(img_out, "/dev/shm/slask.exr");
 }
 
+template<class T>
+struct BoundaryInfo
+{
+	Vector<T> scale;
+	Vector<T> offset;
+};
 
+PolygonChain<float> make_ridge(XYLocGenerator& get_location,
+							   RngType& rng,
+							   float length)
+{
+	{
+		auto const loc = get_location.location();
+		get_location.location(Point{0.0f, loc.y(), loc.z()});
+	}
+	constexpr auto offset = Z<float>;
+
+	PolygonChain ret{get_location(rng) + offset, get_location(rng) + offset};
+	auto loc = get_location(rng) + offset;
+	while(loc.x() < length)
+	{
+		ret.append(loc);
+		loc = get_location(rng) + offset;
+	}
+	ret.append(loc);
+	return ret;
+}
+
+GrayscaleImage generate_envelope(XYLocGenerator& get_location,
+							     RngType& rng,
+								 Extents<float> extents,
+								 std::span<BoundaryInfo<float> const> bi)
+{
+	GrayscaleImage img_a{static_cast<uint32_t>(extents.width()), static_cast<uint32_t>(extents.depth())};
+	auto img_b = img_a;
+	std::vector<PolygonChain<float>> ridges;
+	ridges.reserve(std::size(bi));
+	std::ranges::transform(bi, std::back_inserter(ridges),
+				   [&get_location, &rng, length=extents.width()](auto const& val) {
+		auto ret = make_ridge(get_location, rng, length);
+		scale(ret, val.scale);
+		translate(ret, val.offset);
+		return ret;
+	});
+
+	return img_a;
+}
 
 int main()
 {
@@ -210,7 +256,7 @@ int main()
 //	draw(PolygonChain{Point{0.0f, DomainHeight/3.0f, 1.0f}, Point{DomainWidth, DomainHeight/3.0f, 1.0f}}, in.get());
 //	draw(PolygonChain{Point{0.0f, 2.0f*DomainHeight/3.0f, 1.0f}, Point{DomainWidth, 2.0f*DomainHeight/3.0f, 1.0f}}, in.get());
 
-	for(int k = 0; k < 1; ++k)
+	// Generate envelope
 	{
 
 		auto ridge = make_ridge(rng);
@@ -230,19 +276,6 @@ int main()
 				+ Vector{0.0f, 1.0f*DomainHeight/6.0f, 320.0f};
 		});
 
-		std::ranges::for_each(ridge.vertices(), [&img = in.get()](auto& val){
-			auto const int_pos = vector_cast<uint32_t>(val + Vector{0.5f, 0.5f, 0.5f});
-			if(within(xy(int_pos), img.extents()))
-			{
-				val += img(int_pos.x(), int_pos.y())*Z<float>;
-			}
-		});
-#if 0
-		draw(ridge, in.get());
-		draw(upper, in.get());
-		draw(lower, in.get());
-//		puts("Tock");
-#else
 		for(int l = 0; l < 65536; ++l)
 		{
 			diffuse(in.get().pixels(), out.get().pixels());
@@ -258,8 +291,6 @@ int main()
 				printf("%d applying diffusion\n", l);
 			}
 		}
-#endif
-		printf("Next iter %d\n", k);
 	}
 	debug(in);
 }

@@ -30,7 +30,8 @@
                             "-O3",
                             "-ffast-math",
                             "-mavx2",
-                            "-Ipcg-cpp/include"
+                            "-Ipcg-cpp/include",
+                            "-fconcepts-diagnostics-depth=2"
                         ],
                         "iquote": [
                             "."
