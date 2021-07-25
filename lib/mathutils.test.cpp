@@ -97,3 +97,17 @@ TESTCASE(Point)
 	EXPECT_EQ(P4.y(), P1.y());
 	EXPECT_EQ(P4.z(), P1.z());
 }
+
+TESTCASE(PolygonChain)
+{
+	::PolygonChain polychain{::Point{1.0f, 2.0f, 3.0f}, ::Point{4.0f, 5.0f, 6.0f}};
+	translate(polychain, ::Vector{1.0f, 1.0f, 1.0f});
+
+	EXPECT_EQ(std::begin(polychain.vertices())->x(), 2.0f);
+	EXPECT_EQ(std::begin(polychain.vertices())->y(), 3.0f);
+	EXPECT_EQ(std::begin(polychain.vertices())->z(), 4.0f);
+
+	EXPECT_EQ((std::end(polychain.vertices()) - 1)->x(), 5.0f);
+	EXPECT_EQ((std::end(polychain.vertices()) - 1)->y(), 6.0f);
+	EXPECT_EQ((std::end(polychain.vertices()) - 1)->z(), 7.0f);
+}

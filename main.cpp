@@ -15,6 +15,7 @@ constexpr float MeterXY = 1.0f/64.0f;
 constexpr float DomainWidth  = 65535.0f*MeterXY;
 constexpr float DomainHeight = 49152.0f*MeterXY;
 constexpr float Level0SegLength = 16.0f*MeterXY;
+constexpr float Level0BranchDistance = 4096.0f*MeterXY/3.0f;
 
 using RngType = pcg32;
 
@@ -64,6 +65,12 @@ public:
 		return *this;
 	}
 
+	XYLocGenerator& direction(float val)
+	{
+		m_dir = val;
+		return *this;
+	}
+
 private:
 	Point<float> m_loc;
 	float m_dir;
@@ -72,42 +79,6 @@ private:
 	LocDecayRate m_loc_decay_rate;
 	DirDecayRate m_dir_decay_rate;
 	SegLengthDecayRate m_seg_length_decay_rate;
-};
-
-class RidgeGenerator
-{
-public:
-	explicit RidgeGenerator(Extents<Image::IndexType> extents):
-		m_xy_gen{XYLocGenerator::SegLength{Level0SegLength},
-			XYLocGenerator::LocDecayRate{1.0f/384.0f},
-			XYLocGenerator::DirDecayRate{1.0f/192.0f},
-			XYLocGenerator::SegLengthDecayRate{0.0f}},
-		m_extents{static_cast<float>(extents.width()), 0.5f*extents.depth()}
-	{
-	}
-
-	PolygonChain<float> operator()(RngType& rng)
-	{
-		{
-			auto const loc = m_xy_gen.location();
-			m_xy_gen.location(Point{0.0f, loc.y(), loc.z()});
-		}
-		auto offset = Vector{0.0f, m_extents.depth(), 1.0f};
-
- 		PolygonChain ret{m_xy_gen(rng) + offset, m_xy_gen(rng) + offset};
-		auto loc = m_xy_gen(rng) + offset;
-		while(loc.x() < m_extents.width())
-		{
-			ret.append(loc);
-			loc = m_xy_gen(rng) + offset;
-		}
-		ret.append(loc);
-		return ret;
-	}
-
-private:
-	XYLocGenerator m_xy_gen;
-	Extents<float> m_extents;
 };
 
 void draw(LineSegment<float> const& l, GrayscaleImage& img)
@@ -123,6 +94,22 @@ void draw(LineSegment<float> const& l, GrayscaleImage& img)
 		if(within(xy(int_pos), img.extents()))
 		{
 			img(int_pos.x(), int_pos.y()) = pos.z();
+		}
+	}
+}
+
+void fill(PolygonChain<float> const& polychain, GrayscaleImage& img)
+{
+	for(uint32_t y = 0; y != img.height(); ++y)
+	{
+		for(uint32_t x = 0; x != img.width(); ++x)
+		{
+			auto const loc = Point{static_cast<float>(x), static_cast<float>(y)};
+			auto const min = *std::ranges::min_element(polychain.vertices(), [loc](auto val_a, auto val_b) {
+				return distance_squared(loc, val_a) < distance_squared(loc, val_b);
+			});
+
+			img(x, y) = std::max(img(x,y), std::exp2(-distance(loc, min)/(2048.0f*MeterXY)));
 		}
 	}
 }
@@ -262,6 +249,43 @@ GrayscaleImage generate_envelope(XYLocGenerator& get_location,
 	return in.get();
 }
 
+std::vector<PolygonChain<float>> generate_extensions(PolygonChain<float> const& curve,
+	RngType& rng)
+{
+	std::vector<PolygonChain<float>> ret;
+	adj_for_each(std::begin(curve.vertices()), std::end(curve.vertices()), [l = 0.0f,
+		gamma = std::gamma_distribution{3.0f, Level0BranchDistance},
+		&rng,
+		branch_dist = 0.0f,
+		&ret](auto a, auto b) mutable {
+		l += distance(a, b);
+		if(l >= branch_dist)
+		{
+			branch_dist = gamma(rng);
+			XYLocGenerator get_location
+			{
+				XYLocGenerator::SegLength{Level0SegLength},
+				XYLocGenerator::LocDecayRate{1.0f/384.0f},
+				XYLocGenerator::DirDecayRate{1.0f/192.0f},
+				XYLocGenerator::SegLengthDecayRate{0.0f}
+			};
+			auto ridge = make_ridge(get_location, rng, 1.0f*l);
+			auto const O = *std::begin(ridge.vertices());
+			scale(ridge, Vector{0.5f, 0.5f, 0.0f}, O);
+			auto const t = normalized(b - a);
+			auto const n = Vector{t.y(), -t.x()};
+			auto const m = midpoint(a, b);
+			auto const dir = dot(n, b - m) < 0.0f ? 1.0f : -1.0f;
+			transform(ridge, dir*t, dir*n, Z<float>, O);
+			transform(ridge, -1.0f*Y<float>, 1.0f*X<float>, Z<float>, O);
+			translate(ridge, m - O);
+ 			ret.push_back(std::move(ridge));
+			l = 0.0f;
+		}
+	});
+	return ret;
+}
+
 int main()
 {
 	RngType rng;
@@ -272,7 +296,7 @@ int main()
 		XYLocGenerator::DirDecayRate{1.0f/192.0f},
 		XYLocGenerator::SegLengthDecayRate{0.0f}
 	};
-
+#if 0
 	{
 		std::array<BoundaryInfo<float>, 3> higher_env_params
 		{
@@ -294,6 +318,40 @@ int main()
 			};
 		auto lower_env = generate_envelope(loc_gen, rng, Extents{DomainWidth, DomainHeight}, lower_env_params);
 		debug(lower_env, "/dev/shm/slask_b.exr");
+	}
+#endif
+	{
+		auto img_a = GrayscaleImage{static_cast<uint32_t>(DomainWidth), static_cast<uint32_t>(DomainHeight)};
+
+
+		auto a = make_ridge(loc_gen, rng, DomainWidth);
+		translate(a, (DomainHeight/3.0f + DomainHeight/24.0f) * Y<float>);
+		auto ext_a = generate_extensions(a, rng);
+
+
+		auto b = make_ridge(loc_gen, rng, DomainWidth);
+		translate(b, (DomainHeight/3.0f + 7.0f*DomainHeight/24.0f) * Y<float>);
+		auto ext_b = generate_extensions(b, rng);
+
+
+		fill(a, img_a);
+		fill(b, img_a);
+		std::ranges::for_each(ext_a, [&img_a](auto const& val){fill(val, img_a);});
+		std::ranges::for_each(ext_b, [&img_a](auto const& val){fill(val, img_a);});
+
+
+#if 1
+
+#else
+		std::ranges::for_each(a.vertices(), [](auto loc) mutable{
+			printf("%.8g %.8g\n", loc.x(), loc.y());
+		});
+#endif
+#if 0
+
+		draw(a, img);
+#endif
+		debug(img_a, "/dev/shm/slask.exr");
 	}
 
 }

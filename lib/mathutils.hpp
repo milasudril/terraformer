@@ -138,6 +138,12 @@ constexpr auto vector_cast(Vector<U> v)
 }
 
 template<class T>
+constexpr Vector<T> transform(Vector<T> v, Vector<T> x_vec, Vector<T> y_vec, Vector<T> z_vec)
+{
+	return Vector<T>{dot(v, x_vec), dot(v, y_vec), dot(v, z_vec)};
+}
+
+template<class T>
 constexpr Vector<T> X{1, 0, 0};
 
 template<class T>
@@ -218,6 +224,12 @@ constexpr auto distance(Point<T> a, Point<T> b)
 	return length(a - b);
 }
 
+template<class T>
+constexpr auto midpoint(Point<T> a, Point<T> b)
+{
+	return Point<T>{0.5f*(a.value() + b.value())};
+}
+
 template<class T, class U>
 constexpr auto vector_cast(Point<U> v)
 {
@@ -254,6 +266,14 @@ void scale(PolygonChain<T>& p, Vector<T> factor, Point<T> origin = Origin<T>)
 {
 	std::ranges::for_each(p.vertices(), [factor, origin](auto& val) {
 		val = origin + scale(val - origin, factor);
+	});
+}
+
+template<class T>
+void transform(PolygonChain<T>& p, Vector<T> x_vec, Vector<T> y_vec, Vector<T> z_vec, Point<T> origin = Origin<T>)
+{
+	std::ranges::for_each(p.vertices(), [x_vec, y_vec, z_vec, origin](auto& val) {
+		val = origin + transform(val - origin, x_vec, y_vec, z_vec);
 	});
 }
 
