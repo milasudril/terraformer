@@ -98,14 +98,14 @@ void draw(LineSegment<float> const& l, GrayscaleImage& img)
 	}
 }
 
-void fill(PolygonChain<float> const& polychain, GrayscaleImage& img)
+void fill(std::span<Point<float> const> sources, GrayscaleImage& img)
 {
 	for(uint32_t y = 0; y != img.height(); ++y)
 	{
 		for(uint32_t x = 0; x != img.width(); ++x)
 		{
 			auto const loc = Point{static_cast<float>(x), static_cast<float>(y)};
-			auto const min = *std::ranges::min_element(polychain.vertices(), [loc](auto val_a, auto val_b) {
+			auto const min = *std::ranges::min_element(sources, [loc](auto val_a, auto val_b) {
 				return distance_squared(loc, val_a) < distance_squared(loc, val_b);
 			});
 
@@ -334,10 +334,10 @@ int main()
 		auto ext_b = generate_extensions(b, rng);
 
 
-		fill(a, img_a);
-		fill(b, img_a);
-		std::ranges::for_each(ext_a, [&img_a](auto const& val){fill(val, img_a);});
-		std::ranges::for_each(ext_b, [&img_a](auto const& val){fill(val, img_a);});
+		fill(a.vertices(), img_a);
+		fill(b.vertices(), img_a);
+		std::ranges::for_each(ext_a, [&img_a](auto const& val){fill(val.vertices(), img_a);});
+		std::ranges::for_each(ext_b, [&img_a](auto const& val){fill(val.vertices(), img_a);});
 
 
 #if 1
