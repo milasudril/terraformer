@@ -249,14 +249,19 @@ GrayscaleImage generate_envelope(XYLocGenerator& get_location,
 	return in.get();
 }
 
-std::vector<PolygonChain<float>> generate_extensions(PolygonChain<float> const& curve,
-	RngType& rng)
+std::vector<PolygonChain<float>> generate_extensions(PolygonChain<float> const& trunc,
+	RngType& rng,
+	float branch_distance = Level0BranchDistance,
+	size_t level = 0)
 {
 	std::vector<PolygonChain<float>> ret;
-	adj_for_each(std::begin(curve.vertices()), std::end(curve.vertices()), [l = 0.0f,
-		gamma = std::gamma_distribution{3.0f, Level0BranchDistance},
+
+	adj_for_each(std::begin(trunc.vertices()), std::end(trunc.vertices()), [
+		gamma = std::gamma_distribution{3.0f, branch_distance},
+		level,
 		&rng,
 		branch_dist = 0.0f,
+		l = 0.0f,
 		&ret](auto a, auto b) mutable {
 		l += distance(a, b);
 		if(l >= branch_dist)
@@ -279,10 +284,16 @@ std::vector<PolygonChain<float>> generate_extensions(PolygonChain<float> const& 
 			transform(ridge, dir*t, dir*n, Z<float>, O);
 			transform(ridge, -1.0f*Y<float>, 1.0f*X<float>, Z<float>, O);
 			translate(ridge, m - O);
+			if(level != 1)
+			{
+				auto tmp = generate_extensions(ridge, rng, 0.5f*gamma.beta(), level + 1);
+				std::ranges::move(tmp, std::back_inserter(ret));
+			}
  			ret.push_back(std::move(ridge));
 			l = 0.0f;
 		}
 	});
+
 	return ret;
 }
 
