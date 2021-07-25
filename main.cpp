@@ -109,7 +109,7 @@ void fill(std::span<Point<float> const> sources, GrayscaleImage& img)
 				return distance_squared(loc, val_a) < distance_squared(loc, val_b);
 			});
 
-			img(x, y) = std::max(img(x,y), std::exp2(-distance(loc, min)/(2048.0f*MeterXY)));
+			img(x, y) += std::exp2(-distance(loc, min)/(2048.0f*MeterXY));
 		}
 	}
 }
@@ -333,11 +333,18 @@ int main()
 		translate(b, (DomainHeight/3.0f + 7.0f*DomainHeight/24.0f) * Y<float>);
 		auto ext_b = generate_extensions(b, rng);
 
+		std::vector<Point<float>> ridges;
+		std::ranges::copy(a.vertices(), std::back_inserter(ridges));
+		std::ranges::copy(b.vertices(), std::back_inserter(ridges));
+		std::ranges::for_each(ext_a, [&ridges](auto const& val) {
+			std::ranges::copy(val.vertices(), std::back_inserter(ridges));
+		});
+		std::ranges::for_each(ext_b, [&ridges](auto const& val) {
+			std::ranges::copy(val.vertices(), std::back_inserter(ridges));
+		});
 
-		fill(a.vertices(), img_a);
-		fill(b.vertices(), img_a);
-		std::ranges::for_each(ext_a, [&img_a](auto const& val){fill(val.vertices(), img_a);});
-		std::ranges::for_each(ext_b, [&img_a](auto const& val){fill(val.vertices(), img_a);});
+		fill(ridges, img_a);
+
 
 
 #if 1
