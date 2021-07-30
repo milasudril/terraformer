@@ -69,6 +69,14 @@ int main()
 		glViewport(0, 0, w, h);
 	});
 
+	glfwSetCharCallback(window.get(), [](GLFWwindow*, unsigned int){
+		puts("Char callback");
+	});
+
+	glfwSetKeyCallback(window.get(), [](GLFWwindow*, int, int, int, int){
+		puts("Key callback");
+	});
+
 	while(!glfwWindowShouldClose(window.get()))
 	{
 		glfwPollEvents();
