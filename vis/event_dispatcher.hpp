@@ -8,7 +8,7 @@ public:
 
 	void update_canvas_size(int width, int height);
 	void update() const;
-	void send_typing_event(DeviceId device, Scancode scancode, ButtonState state, CharCodepoint mapped_codepoint);
+	void send_typing_event(Scancode scancode, ButtonState state, CharCodepoint mapped_codepoint);
 	void send_mouse_event(double x, double y, int button, ButtonState state);
 	void send_scroll_event(double dx, double dy);
 	void send_midi_event(DeviceId device, MidiEvent event);
@@ -22,7 +22,6 @@ public:
 
 private:
 	DisplayCallback m_disp_callback;
-	std::vector<std::reference_wrapper<Widget>> m_widgets;
 	std::map<DeviceId, std::vector<std::reference_wrapper<Widget>>> m_sensitive_widgets;
 };
 
