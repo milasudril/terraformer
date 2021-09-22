@@ -337,13 +337,18 @@ int main()
 
 		auto a = make_ridge(loc_gen, rng, DomainWidth);
 		translate(a, (DomainHeight/3.0f + DomainHeight/24.0f) * Y<float>);
+		fill(a.vertices(), img_a);
 		auto ext_a = generate_extensions(a, rng);
-
+		std::ranges::for_each(ext_a, [&img_a](auto const& item) {
+			fill(item.vertices(), img_a);
+		});
 
 		auto b = make_ridge(loc_gen, rng, DomainWidth);
 		translate(b, (DomainHeight/3.0f + 7.0f*DomainHeight/24.0f) * Y<float>);
 		auto ext_b = generate_extensions(b, rng);
 
+
+#if 0
 		std::vector<Point<float>> ridges;
 		std::ranges::copy(a.vertices(), std::back_inserter(ridges));
 		std::ranges::copy(b.vertices(), std::back_inserter(ridges));
@@ -356,7 +361,7 @@ int main()
 
 		fill(ridges, img_a);
 
-
+#endif
 
 #if 1
 
