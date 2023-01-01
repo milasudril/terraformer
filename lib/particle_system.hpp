@@ -54,6 +54,16 @@ namespace terraformer
 			return *this;
 		}
 
+		auto get_particle(size_t k) const
+		{
+			return particle{
+				.r = m_locations[k],
+				.v = m_velocities[k],
+				.integ_distance = m_integ_distances[k],
+				.integ_heading = m_integ_headings[k]
+			};
+		}
+
 
 
 		auto locations() const
