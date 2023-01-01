@@ -17,17 +17,18 @@ namespace terraformer
 		geosimd::turn_angle integ_heading;
 	};
 
-	template<class T>
-	concept particle_generator = requires(T x)
+	template<class T, class ... Args>
+	concept particle_generator = requires(T x, Args ... args)
 	{
-		{x(size_t{})} -> std::same_as<particle>;
+		{x(size_t{}, args...)} -> std::same_as<particle>;
 	};
 
 	class particle_system
 	{
 	public:
-		template<particle_generator Generator>
-		explicit particle_system(size_t size, Generator gen):m_size{size},
+		template<class Generator, class ... Args>
+		requires(particle_generator<Generator, Args ...>)
+		explicit particle_system(size_t size, Generator&& gen, Args&& ... args):m_size{size},
 			m_locations{std::make_unique_for_overwrite<location[]>(size)},
 			m_velocities{std::make_unique_for_overwrite<displacement[]>(size)},
 			m_integ_distances{std::make_unique_for_overwrite<float[]>(size)},
@@ -35,11 +36,9 @@ namespace terraformer
 		{
 			for(size_t k = 0; k != size; ++k)
 			{
-				assign(k, gen(k));
+				assign(k, gen(k, args...));
 			}
 		}
-
-
 
 		size_t size() const
 		{ return m_size; }
