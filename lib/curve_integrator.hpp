@@ -14,12 +14,10 @@ namespace terraformer
 		{x(std::span<particle_system>{})} -> std::same_as<displacement>;
 	};
 
-	enum class curve_integrator_status:int{keep_going, stop};
-
 	template<class T>
-	concept curve_integrator_stop_condition = requires(T x)
+	concept curve_integrator_stop_condition = requires(T x, particle_system const& p)
 	{
-		{x(particle_system{})} -> std::same_as<curve_integrator_status>;
+		{x(p)} -> std::same_as<bool>;
 	};
 
 	template<curve_velocity_model V>
@@ -42,14 +40,14 @@ namespace terraformer
 			auto curve_params,
 			auto v_ext_prev){
 			auto const v_ext = curve_params.velocity_model(old_states);
-			auto const state_prev = old_states.back();
+			auto const& state_prev = old_states.back();
 			auto const v_prev = state_prev.velocities(k);
 			auto const I = curve_params.inertia;
 
 			// This expression follows from using the trapetzoid rule, assuming v_ext is independent
 			// of the current system state.
 			auto const v_guess = ((2.0f*I - 1.0f)/(1.0f + 2.0f*I)) * v_prev
-				+ (v_ext + v_ext_prev)/(1.0f + 2.0f*I);
+				+ (v_ext + v_ext_prev[k])/(1.0f + 2.0f*I);
 			auto const c = curve_params.scaling_factor;
 			auto const r_prev = state_prev.locations(k);
 			auto const r_guess =  r_prev + c*(v_guess + v_prev)/2.0f;
@@ -61,14 +59,14 @@ namespace terraformer
 			v_ext_prev[k] = v_ext;
 
 			auto const point_count = std::size(old_states);
-			auto const idist_prev = state_prev.integ_distance(k);
-			auto const iheading_prev = state_prev.integ_heading(k);
+			auto const idist_prev = state_prev.integ_distances(k);
+			auto const iheading_prev = state_prev.integ_headings(k);
 
 			if(point_count < 2)
 			{
 				auto const integ_distance = idist_prev + norm(dr);
-				auto const integ_heading = state_prev.integ_heading(k)
-					+ angular_difference(dr, direction{geom_space::x{}});
+				auto const integ_heading = iheading_prev
+					+ angular_difference(direction{dr}, direction{geom_space::x{}});
 
 				return particle{
 					.r = r_guess,
@@ -104,13 +102,13 @@ namespace terraformer
 			auto const d = std::abs(inner_product(dir_corr, dr));
 
 			auto const r = r_prev + d*dir_corr;
-			auto const v = 2.0f*(v_guess - r_prev)/c  - v_prev;
+			auto const v = 2.0f*(r - r_prev)/c  - v_prev;
 			auto const integ_distance = idist_prev + d;
 			auto const integ_heading = iheading_prev + dtheta;
 
 			return particle{
 				.r = r,
-				.v = v_guess,
+				.v = v,
 				.integ_distance = integ_distance,
 				.integ_heading = integ_heading
 			};
@@ -120,7 +118,7 @@ namespace terraformer
 
 
 	template<curve_integrator_stop_condition S, curve_velocity_model V>
-	auto generate_curves(particle_system const& initial_state,
+	auto generate_curves(particle_system&& initial_state,
 		S const& stop_condition,
 		curve_parameters<V> const& curve_params)
 	{
@@ -132,8 +130,8 @@ namespace terraformer
 			v_ext[k] = curve_params.velocity_model(ret);
 		}
 
-		ret.push_back(initial_state);
-		while(curve_params.stop_condition(ret))
+		ret.push_back(std::move(initial_state));
+		while(!stop_condition(ret.back()))
 		{
 			ret.push_back(compute_next_state(initial_state, ret, curve_params, v_ext.get()));
 		}

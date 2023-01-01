@@ -32,7 +32,9 @@
                             "-Wall",
                             "-Wextra",
                             "-Werror",
-                            "-Wconversion"
+                            "-Wconversion",
+                            "-I.",
+                            "-fconcepts-diagnostics-depth=2"
                         ],
                         "iquote": [
                             "."
