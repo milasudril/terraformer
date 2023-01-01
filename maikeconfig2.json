@@ -9,35 +9,36 @@
             "app": {
                 "compiler": {
                     "config": {
-                        "cflags": [
-                            "-g"
-                        ]
                     },
                     "recipe": "cxx_linker.py",
                     "use_get_tags": 0
                 },
                 "config": {},
-                "loader": "app"
+                "loader": "maikerule"
+            },
+            "lib": {
+                "compiler": {
+                    "config": {},
+                    "recipe": "make_lib.py",
+                    "use_get_tags": 0
+                },
+                "config": {},
+                "loader": "lib"
             },
             "cxx": {
                 "compiler": {
                     "config": {
                         "cflags": [
-                            "-g",
                             "-Wall",
                             "-Wextra",
                             "-Werror",
-                            "-O3",
-                            "-ffast-math",
-                            "-mavx2",
-                            "-Ipcg-cpp/include",
-                            "-fconcepts-diagnostics-depth=2"
+                            "-Wconversion"
                         ],
                         "iquote": [
                             "."
                         ],
-                        "std_revision":{
-							"min": "c++20"
+                        "std_revision": {
+							"min":"c++20"
                         }
                     },
                     "recipe": "cxx_compiler.py",
@@ -49,23 +50,20 @@
             "cxx_test": {
                 "compiler": {
                     "config": {
+						"actions":["link", "run"],
                         "cflags": [
-                            "-g",
                             "-Wall",
                             "-Wextra",
+                            "-Wconversion",
                             "-Werror",
-                            "-O3",
-                            "-ffast-math",
-                            "-mavx2",
-                            "-Ipcg-cpp/include"
+                            "-fconcepts-diagnostics-depth=2"
                         ],
                         "iquote": [
                             "."
                         ],
-                        "std_revision":{
-							"min": "c++20"
-                        },
-                        "actions":["link", "run"]
+                        "std_revision": {
+							"min":"c++20"
+                        }
                     },
                     "recipe": "cxx_compiler.py",
                     "use_get_tags": 0
@@ -82,10 +80,10 @@
                 "config": {},
                 "loader": "extension"
             },
-            "identity": {
+            "generic_example": {
                 "compiler": {
                     "config": {},
-                    "recipe": "copy_file.py",
+                    "recipe": "",
                     "use_get_tags": 0
                 },
                 "config": {
@@ -93,43 +91,25 @@
                     "target_filename_ext": ""
                 },
                 "loader": "generic"
-            },
-            "lib": {
-                "compiler": {
-                    "config": {},
-                    "recipe": "make_lib.py",
-                    "use_get_tags": 0
-                },
-                "config": {},
-                "loader": "lib"
-            },
-            "sass2css": {
-                "compiler": {
-                    "config": {},
-                    "recipe": "sass2css.py",
-                    "use_get_tags": 0
-                },
-                "config": {
-                    "filename_ext_replacement_mode": "replace",
-                    "target_filename_ext": ".css"
-                },
-                "loader": "generic"
             }
         },
         "source_tree_loader": {
             "file_info_loaders": {
                 ".app.maikerule": "app",
+				".lib.maikerule": "lib",
                 ".cpp": "cxx",
                 ".hpp": "cxx",
-                ".lib.maikerule": "lib",
                 ".py": "extension",
-                ".sass": "sass2css",
                 ".test.cpp": "cxx_test"
             },
             "input_filter": [
                 "^\\.",
+                "^__"
+            ],
+            "fullpath_input_filter": [
+                "^\\.",
                 "^__",
-                "^pcg-cpp"
+                "pcg-cpp"
             ],
             "recursive": 1
         }
