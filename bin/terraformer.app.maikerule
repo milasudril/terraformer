@@ -1,0 +1,4 @@
+{
+	"target":{"name":"terraformer"}
+	,"dependencies":[{"ref":"./main.o", "rel":"implementation"}]
+}
