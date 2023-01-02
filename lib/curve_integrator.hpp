@@ -66,7 +66,7 @@ namespace terraformer
 			{
 				auto const integ_distance = idist_prev + norm(dr);
 				auto const integ_heading = iheading_prev
-					+ angular_difference(direction{dr}, direction{geom_space::x{}});
+					+ angular_difference(direction{dr}, direction{v_prev});
 
 				return particle{
 					.r = r_guess,
