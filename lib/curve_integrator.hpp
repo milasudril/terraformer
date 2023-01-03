@@ -28,6 +28,27 @@ namespace terraformer
 		float scaling_factor;
 	};
 
+	struct particle_state
+	{
+		location r;
+		displacement v;
+		displacement v_ext;
+	};
+
+	auto guess_next_state(particle_state const& state_prev,
+		displacement v_ext,
+		float inertia,
+		float scaling_factor)
+	{
+		// This expression follows from using the trapetzoid rule, assuming v_ext is independent
+		// of the current system state.
+		auto const v_guess = ((2.0f*inertia - 1.0f)/(1.0f + 2.0f*inertia)) * state_prev.v
+			+ (v_ext + state_prev.v_ext)/(1.0f + 2.0f*inertia);
+		auto const r_guess =  state_prev.r + scaling_factor*(v_guess + state_prev.v)/2.0f;
+
+		return particle_state{r_guess, v_guess, v_ext};
+	}
+
 	template<curve_velocity_model V>
 	auto compute_next_state(particle_system const& initial_state,
 		std::span<particle_system const> old_states,
@@ -38,25 +59,29 @@ namespace terraformer
 		particle_system ret{particle_count, [](size_t k,
 			auto old_states,
 			auto curve_params,
-			auto v_ext_prev){
-			auto const v_ext = curve_params.velocity_model(old_states);
+			displacement* v_ext_prev){
+			displacement const v_ext = curve_params.velocity_model(old_states);
+			auto const inertia = curve_params.inertia;
+			auto const scaling_factor = curve_params.scaling_factor;
+
 			auto const& state_prev = old_states.back();
-			auto const v_prev = state_prev.velocities(k);
-			auto const I = curve_params.inertia;
 
-			// This expression follows from using the trapetzoid rule, assuming v_ext is independent
-			// of the current system state.
-			auto const v_guess = ((2.0f*I - 1.0f)/(1.0f + 2.0f*I)) * v_prev
-				+ (v_ext + v_ext_prev[k])/(1.0f + 2.0f*I);
-			auto const c = curve_params.scaling_factor;
-			auto const r_prev = state_prev.locations(k);
-			auto const r_guess =  r_prev + c*(v_guess + v_prev)/2.0f;
+			particle_state const ps_in{
+				.r = state_prev.locations(k),
+				.v = state_prev.velocities(k),
+				.v_ext = v_ext_prev[k]
+			};
 
-			auto const dr = r_guess - r_prev;
+			auto const state_guess = guess_next_state(ps_in,
+				v_ext,
+				inertia,
+				scaling_factor);
+
+			displacement const dr = state_guess.r - ps_in.r;
 
 			// We will not use v_ext_prev when correcting for bad angles. Thus, it is ok
 			// to save the value already at this point
-			v_ext_prev[k] = v_ext;
+			v_ext_prev[k] = state_guess.v_ext;
 
 			auto const point_count = std::size(old_states);
 			auto const idist_prev = state_prev.integ_distances(k);
@@ -66,11 +91,11 @@ namespace terraformer
 			{
 				auto const integ_distance = idist_prev + norm(dr);
 				auto const integ_heading = iheading_prev
-					+ angular_difference(direction{dr}, direction{v_prev});
+					+ angular_difference(direction{dr}, direction{ps_in.v});
 
 				return particle{
-					.r = r_guess,
-					.v = v_guess,
+					.r = state_guess.r,
+					.v = state_guess.v,
 					.integ_distance = integ_distance,
 					.integ_heading = integ_heading
 				};
@@ -78,7 +103,7 @@ namespace terraformer
 
 			auto const r_prev_prev = old_states[point_count - 2].locations(k);
 
-			direction const dir_in{r_prev - r_prev_prev};
+			direction const dir_in{ps_in.r - r_prev_prev};
 
 			auto const dtheta_in = angular_difference(direction{dr}, dir_in);
 			geosimd::turn_angle const max_turn_angle{0x4000'0000};
@@ -101,8 +126,8 @@ namespace terraformer
 			// the normal velocity
 			auto const d = std::abs(inner_product(dir_corr, dr));
 
-			auto const r = r_prev + d*dir_corr;
-			auto const v = 2.0f*(r - r_prev)/c  - v_prev;
+			auto const r = ps_in.r + d*dir_corr;
+			auto const v = 2.0f*(r - ps_in.r)/scaling_factor  - ps_in.v;
 			auto const integ_distance = idist_prev + d;
 			auto const integ_heading = iheading_prev + dtheta;
 

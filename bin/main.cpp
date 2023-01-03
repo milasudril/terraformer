@@ -92,7 +92,7 @@ int main()
 	auto const state_history = generate_curves(std::move(ps),
 		[](particle_system const& current_state) -> bool {
 			auto const i_max = std::ranges::max_element(current_state.integ_distances());
-			return *i_max > 16.0f;
+			return *i_max > 1.0f;
 		}, params);
 
 
