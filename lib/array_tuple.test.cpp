@@ -14,7 +14,7 @@ namespace
 		terraformer::array_tuple<std::unique_ptr<int>, std::unique_ptr<double>>;
 
 	using array_tulpe_not_trivally_copyable =
-		terraformer::array_tuple<std::string, std::vector<int>>;
+		terraformer::array_tuple<std::string, std::vector<size_t>>;
 
 	using array_tuple_trivially_copyable = terraformer::array_tuple<int, double>;
 
@@ -27,12 +27,14 @@ namespace
 		return array_tuple_non_copyable::value_type{};
 	}
 
+	constexpr char const* strings[]={"Hello", "World", "Lol"};
+
 	template<>
-	auto generate<array_tulpe_not_trivally_copyable::value_type>(size_t)
+	auto generate<array_tulpe_not_trivally_copyable::value_type>(size_t k)
 	{
 		return array_tulpe_not_trivally_copyable::value_type{
-			"Hello, World",
-			std::vector{1, 2, 3}
+			strings[k%3],
+			std::vector{1*k, 2*k, 3*k}
 		};
 	}
 
