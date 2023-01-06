@@ -30,7 +30,10 @@ namespace
 	template<>
 	auto generate<array_tulpe_not_trivally_copyable::value_type>(size_t)
 	{
-		return array_tulpe_not_trivally_copyable::value_type{};
+		return array_tulpe_not_trivally_copyable::value_type{
+			"Hello, World",
+			std::vector{1, 2, 3}
+		};
 	}
 
 	template<>
