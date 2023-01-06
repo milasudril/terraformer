@@ -4,6 +4,8 @@
 #include <type_traits>
 #include <utility>
 
+#include <cstdio>
+
 namespace terraformer
 {
 	namespace tuple_detail
@@ -35,16 +37,16 @@ namespace terraformer
 			bool operator==(tuple const&) const = default;
 			bool operator!=(tuple const&) const = default;
 
-			constexpr decltype(auto) get() &
+			constexpr T& get() &
 			{ return m_value; }
 
-			constexpr decltype(auto) get() const&
+			constexpr T const& get() const&
 			{ return m_value; }
 
-			constexpr decltype(auto) get() &&
+			constexpr T&& get() &&
 			{ return std::move(m_value); }
 
-			constexpr decltype(auto) get() const&&
+			constexpr T const&& get() const&&
 			{ return std::move(m_value); }
 
 			T m_value;
@@ -84,31 +86,39 @@ namespace terraformer
 
 		template<std::size_t index>
 		constexpr decltype(auto) get() &
-		{
-			return static_cast<base_class_from_index<index>&>(*this).get();
-		}
+		{ return static_cast<base_class_from_index<index>&>(*this).get(); }
 
 		template<std::size_t index>
 		constexpr decltype(auto) get() const&
-		{
-			return static_cast<base_class_from_index<index> const&>(*this).get();
-		}
+		{ return static_cast<base_class_from_index<index> const&>(*this).get(); }
 
 		template<std::size_t index>
 		constexpr decltype(auto) get() &&
-		{
-			return static_cast<base_class_from_index<index>&&>(std::move(*this)).get();
-		}
+		{ return static_cast<base_class_from_index<index>&&>(*this).get(); }
 
 		template<std::size_t index>
 		constexpr decltype(auto) get() const&&
-		{
-			return static_cast<base_class_from_index<index> const&&>(std::move(*this)).get();
-		}
+		{ return static_cast<base_class_from_index<index> const&&>(std::move(*this)).get(); }
 	};
 
 	template<class ... Types>
 	tuple(Types...)->tuple<Types ...>;
+
+	template<std::size_t I, class ... Types>
+	decltype(auto) get(tuple<Types...>& t)
+	{ return t.template get<I>(); }
+
+	template<std::size_t I, class ... Types>
+	decltype(auto) get(tuple<Types...> const& t)
+	{ return t.template get<I>(); }
+
+	template<std::size_t I, class ... Types>
+	decltype(auto) get(tuple<Types...>&& t)
+	{ return std::move(t).template get<I>(); }
+
+	template<std::size_t I, class ... Types>
+	decltype(auto) get(tuple<Types...> const&& t)
+	{ return std::move(t).template get<I>();}
 }
 
 namespace std
