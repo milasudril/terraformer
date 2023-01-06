@@ -68,13 +68,13 @@ namespace terraformer
 		static_assert(std::is_same_v<int, element_t<1, double, int>>);
 	}
 
-	template<class First, class ... Types>
-	class tuple : private tuple_detail::tuple<0, First, Types...>
+	template<class ... Types>
+	class tuple : private tuple_detail::tuple<0, Types...>
 	{
-		using base = tuple_detail::tuple<0, First, Types...>;
+		using base = tuple_detail::tuple<0, Types...>;
 
 		template<std::size_t i>
-		using base_class_from_index = tuple_detail::tuple<i, tuple_detail::element_t<i, First, Types ...>>;
+		using base_class_from_index = tuple_detail::tuple<i, tuple_detail::element_t<i, Types ...>>;
 
 	public:
 		using base::base;
