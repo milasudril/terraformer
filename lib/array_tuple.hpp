@@ -1,8 +1,9 @@
 #ifndef TERRAFORMER_LIB_ARRAY_TUPLE_HPP
 #define TERRAFORMER_LIB_ARRAY_TUPLE_HPP
 
+#include "./tuple.hpp"
+
 #include <memory>
-#include <tuple>
 #include <algorithm>
 #include <span>
 #include <limits>
@@ -21,7 +22,7 @@ namespace terraformer
 		void assign(std::index_sequence<Is...>, TupleLHS& l, size_t index, TupleRHS&& r)
 		{
 			(...,(
-			std::get<Is>(l)[index] = std::forward<std::tuple_element_t<Is, TupleRHS>>(std::get<Is>(r))
+			get<Is>(l)[index] = std::forward<std::tuple_element_t<Is, TupleRHS>>(get<Is>(r))
 			));
 		}
 
@@ -29,7 +30,7 @@ namespace terraformer
 		void move_data(std::index_sequence<Is...>, TupleFrom&& from, TupleTo& to, size_t size)
 		{
 			(...,(
-			std::move(std::get<Is>(from).get(), std::get<Is>(from).get() + size, std::get<Is>(to).get())
+			std::move(get<Is>(from).get(), get<Is>(from).get() + size, get<Is>(to).get())
 			));
 		}
 
@@ -37,7 +38,7 @@ namespace terraformer
 		void copy_data(std::index_sequence<Is...>, TupleFrom const& from, TupleTo& to, size_t size)
 		{
 			(...,(
-			std::copy(std::get<Is>(from).get(), std::get<Is>(from).get() + size, std::get<Is>(to).get())
+			std::copy(get<Is>(from).get(), get<Is>(from).get() + size, get<Is>(to).get())
 			));
 		}
 
@@ -45,7 +46,7 @@ namespace terraformer
 		bool equal(std::index_sequence<Is...>, Tuple const& a, Tuple const& b, size_t size)
 		{
 			return (... &&
-			std::equal(std::get<Is>(a).get(), std::get<Is>(a).get() + size, std::get<Is>(b).get())
+			std::equal(get<Is>(a).get(), get<Is>(a).get() + size, get<Is>(b).get())
 			);
 		}
 	}
@@ -53,11 +54,11 @@ namespace terraformer
 	template<class ... Types>
 	class array_tuple
 	{
-		using storage_type = std::tuple<std::unique_ptr<Types[]>...>;
+		using storage_type = tuple<std::unique_ptr<Types[]>...>;
 	public:
 		using size_type = uint32_t;
-		using value_type = std::tuple<Types...>;
-		using cref_value_type = std::tuple<Types const&...>;
+		using value_type = tuple<Types...>;
+		using cref_value_type = tuple<Types const&...>;
 
 		class const_iterator
 		{
@@ -71,8 +72,8 @@ namespace terraformer
 
 			explicit const_iterator(size_t index, storage_type const& storage):
 				m_index{index},
-				m_base_pointers{std::apply([](auto const& ... item){
-					return std::tuple<Types const*...>{item.get()...};
+				m_base_pointers{terraformer::apply([](auto const& ... item){
+					return tuple<Types const*...>{item.get()...};
 				}, storage)}
 			{}
 
@@ -169,7 +170,7 @@ namespace terraformer
 
 		private:
 			size_t m_index;
-			std::tuple<Types const*...> m_base_pointers;
+			tuple<Types const*...> m_base_pointers;
 		};
 
 		array_tuple():m_size{0},m_capacity{0}{}
@@ -188,7 +189,7 @@ namespace terraformer
 		[[nodiscard]] array_tuple(array_tuple const& other):
 			m_size{other.size()},
 			m_capacity{other.capacity()},
-			m_storage{std::tuple{std::make_unique_for_overwrite<Types[]>(other.capacity())...}}
+			m_storage{tuple{std::make_unique_for_overwrite<Types[]>(other.capacity())...}}
 		{
 			copy_data(other.m_storage, m_storage, m_size);
 		}
@@ -230,7 +231,7 @@ namespace terraformer
 			{realloc();}
 
 			array_tuple_detail::assign(std::make_index_sequence<sizeof...(Types)>{},
-				m_storage, m_size, std::tuple{std::forward<Vals>(vals)...});
+				m_storage, m_size, tuple{std::forward<Vals>(vals)...});
 			++m_size;
 		}
 
@@ -288,11 +289,11 @@ namespace terraformer
 
 		template<size_t I>
 		[[nodiscard]] auto get()
-		{ return std::span{std::get<I>(m_storage).get(), m_size}; }
+		{ return std::span{get<I>(m_storage).get(), m_size}; }
 
 		template<size_t I>
 		[[nodiscard]] auto get() const
-		{ return std::span{std::as_const(std::get<I>(m_storage).get()), m_size}; }
+		{ return std::span{std::as_const(get<I>(m_storage).get()), m_size}; }
 
 
 
@@ -302,7 +303,7 @@ namespace terraformer
 		{
 			assert(index < m_size);
 			array_tuple_detail::assign(std::make_index_sequence<sizeof...(Types)>{},
-				m_storage, index, std::tuple{std::forward<Vals>(vals)...});
+				m_storage, index, tuple{std::forward<Vals>(vals)...});
 		}
 
 		template<class Tuple>
@@ -328,7 +329,7 @@ namespace terraformer
 
 		void realloc(size_type new_capacity)
 		{
-			auto new_storage = std::tuple{std::make_unique_for_overwrite<Types[]>(new_capacity)...};
+			auto new_storage = tuple{std::make_unique_for_overwrite<Types[]>(new_capacity)...};
 			if(m_size != 0)
 			{
 				array_tuple_detail::move_data(std::make_index_sequence<sizeof...(Types)>{},
