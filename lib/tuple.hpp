@@ -36,70 +36,124 @@ namespace terraformer
 			return next_after(val);
 		}
 
-		template<auto IndexType, class First, class ... Types>
-		class tuple:
-			private tuple<IndexType, First>,
-			private tuple<next_index(IndexType), Types...>
+		template<class T>
+		requires(std::is_integral_v<T>)
+		constexpr T previous_index(T val)
 		{
+			return val - 1;
+		}
+
+		template<class T>
+		requires(!std::is_integral_v<T>)
+		constexpr T previous_index(T val)
+		{
+			return next_before(val);
+		}
+
+		template<auto Index, class First, class ... Types>
+		class tuple:
+			public tuple<Index, First>,
+			public tuple<next_index(Index), Types...>
+		{
+			using b1 = tuple<Index, First>;
+			using b2 = tuple<next_index(Index), Types...>;
+
 		public:
+			template<class X, class ... Y>
+			requires(std::is_same_v<X, First>)
+			explicit tuple(X&& first, Y&&... other):
+				b1{std::forward<X>(first)},
+				b2{std::forward<Y>(other)...}
+			{}
+
 			bool operator==(tuple const&) const = default;
 			bool operator!=(tuple const&) const = default;
 		};
 
-		template<auto IndexType, class T>
-		class tuple<IndexType, T>
+		template<auto Index, class T>
+		class tuple<Index, T>
 		{
 		public:
 			bool operator==(tuple const&) const = default;
 			bool operator!=(tuple const&) const = default;
 
-			constexpr T& get() &
+			constexpr decltype(auto) get() &
 			{ return m_value; }
 
-			constexpr T const& get() const&
+			constexpr decltype(auto) get() const&
 			{ return m_value; }
-
-			constexpr T&& get() &&
+/*
+			constexpr decltype(auto) get() &&
 			{ return std::move(m_value); }
 
-			constexpr T const&& get() const&&
-			{ return std::move(m_value); }
+			constexpr decltype(auto) get() const&&
+			{ return std::move(m_value); }*/
 
-		private:
 			T m_value;
 		};
+
+		template<std::size_t Index, class First, class ... Args>
+		struct get_type_from_index
+		{
+			using type = typename get_type_from_index<previous_index(Index), Args...>::type;
+		};
+
+		template<class First, class ... Args>
+		struct get_type_from_index<first_index<std::size_t>(), First, Args ...>
+		{
+			using type = First;
+		};
+
+		template<std::size_t Index, class First, class ... Args>
+		using type = get_type_from_index<Index, First, Args ...>::type;
 	}
 
-	template<class IndexType, class First, class ... Types>
-	class tuple : private tuple_detail::tuple<tuple_detail::first_index<IndexType>(), First, Types...>
+	template<class Index, class First, class ... Types>
+	class tuple : private tuple_detail::tuple<tuple_detail::first_index<Index>(), First, Types...>
 	{
+		using base = tuple_detail::tuple<tuple_detail::first_index<Index>(), First, Types...>;
+
+		template<Index i>
+		using base_class_from_index = tuple_detail::tuple<i, tuple_detail::type<i, First, Types ...>>;
+
 	public:
+		using base::base;
+
 		bool operator==(tuple const&) const = default;
 		bool operator!=(tuple const&) const = default;
 
-		template<IndexType index>
+		template<Index index>
 		constexpr decltype(auto) get() &
 		{
-			return static_cast<tuple_detail::tuple<index, First, Types...>&>(*this).get();
+			return static_cast<base_class_from_index<index>&>(*this).get();
 		}
 
-		template<IndexType index>
+		template<Index index>
 		constexpr decltype(auto) get() const&
 		{
-			return static_cast<tuple_detail::tuple<index, First, Types...> const&>(*this).get();
+			return static_cast<base_class_from_index<index> const&>(*this).get();
 		}
 
-		template<IndexType index>
+		template<Index index>
 		constexpr decltype(auto) get() &&
 		{
-			return static_cast<tuple_detail::tuple<index, First, Types...>&&>(*this).get();
+			return static_cast<base_class_from_index<index>&&>(*this).get();
 		}
 
-		template<IndexType index>
+		template<Index index>
 		constexpr decltype(auto) get() const&&
 		{
-			return static_cast<tuple_detail::tuple<index, First, Types...> const&&>(*this).get();
+			return static_cast<base_class_from_index<index> const&&>(*this).get();
 		}
+	};
+}
+
+namespace std
+{
+	template<class Index, class First, class ... Types>
+	struct tuple_size<terraformer::tuple<Index, First, Types ...>>
+	{
+		static constexpr size_t value = 1 + sizeof...(Types);
 	};
 }
 
