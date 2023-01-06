@@ -8,55 +8,13 @@ namespace terraformer
 {
 	namespace tuple_detail
 	{
-		template<class T>
-		requires(std::is_integral_v<T>)
-		constexpr T first_index()
-		{
-			return T{0};
-		}
-
-		template<class T>
-		requires(!std::is_integral_v<T>)
-		constexpr T first_index()
-		{
-			return first(std::type_identity<T>{});
-		}
-
-		template<class T>
-		requires(std::is_integral_v<T>)
-		constexpr T next_index(T val)
-		{
-			return val + 1;
-		}
-
-		template<class T>
-		requires(!std::is_integral_v<T>)
-		constexpr T next_index(T val)
-		{
-			return next_after(val);
-		}
-
-		template<class T>
-		requires(std::is_integral_v<T>)
-		constexpr T previous_index(T val)
-		{
-			return val - 1;
-		}
-
-		template<class T>
-		requires(!std::is_integral_v<T>)
-		constexpr T previous_index(T val)
-		{
-			return next_before(val);
-		}
-
-		template<auto Index, class First, class ... Types>
+		template<std::size_t Index, class First, class ... Types>
 		class tuple:
 			public tuple<Index, First>,
-			public tuple<next_index(Index), Types...>
+			public tuple<Index + 1, Types...>
 		{
 			using b1 = tuple<Index, First>;
-			using b2 = tuple<next_index(Index), Types...>;
+			using b2 = tuple<Index + 1, Types...>;
 
 		public:
 			template<class X, class ... Y>
@@ -70,7 +28,7 @@ namespace terraformer
 			bool operator!=(tuple const&) const = default;
 		};
 
-		template<auto Index, class T>
+		template<std::size_t Index, class T>
 		class tuple<Index, T>
 		{
 		public:
@@ -82,39 +40,41 @@ namespace terraformer
 
 			constexpr decltype(auto) get() const&
 			{ return m_value; }
-/*
+
 			constexpr decltype(auto) get() &&
 			{ return std::move(m_value); }
 
 			constexpr decltype(auto) get() const&&
-			{ return std::move(m_value); }*/
+			{ return std::move(m_value); }
 
 			T m_value;
 		};
 
 		template<std::size_t Index, class First, class ... Args>
-		struct get_type_from_index
+		struct element
 		{
-			using type = typename get_type_from_index<previous_index(Index), Args...>::type;
+			using type = typename element<Index - 1, Args...>::type;
 		};
 
 		template<class First, class ... Args>
-		struct get_type_from_index<first_index<std::size_t>(), First, Args ...>
+		struct element<0, First, Args ...>
 		{
 			using type = First;
 		};
 
-		template<std::size_t Index, class First, class ... Args>
-		using type = get_type_from_index<Index, First, Args ...>::type;
+		template<std::size_t Index, class ... Args>
+		using element_t = element<Index, Args ...>::type;
+
+		static_assert(std::is_same_v<int, element_t<1, double, int>>);
 	}
 
-	template<class Index, class First, class ... Types>
-	class tuple : private tuple_detail::tuple<tuple_detail::first_index<Index>(), First, Types...>
+	template<class First, class ... Types>
+	class tuple : private tuple_detail::tuple<0, First, Types...>
 	{
-		using base = tuple_detail::tuple<tuple_detail::first_index<Index>(), First, Types...>;
+		using base = tuple_detail::tuple<0, First, Types...>;
 
-		template<Index i>
-		using base_class_from_index = tuple_detail::tuple<i, tuple_detail::type<i, First, Types ...>>;
+		template<std::size_t i>
+		using base_class_from_index = tuple_detail::tuple<i, tuple_detail::element_t<i, First, Types ...>>;
 
 	public:
 		using base::base;
@@ -122,38 +82,44 @@ namespace terraformer
 		bool operator==(tuple const&) const = default;
 		bool operator!=(tuple const&) const = default;
 
-		template<Index index>
+		template<std::size_t index>
 		constexpr decltype(auto) get() &
 		{
 			return static_cast<base_class_from_index<index>&>(*this).get();
 		}
 
-		template<Index index>
+		template<std::size_t index>
 		constexpr decltype(auto) get() const&
 		{
 			return static_cast<base_class_from_index<index> const&>(*this).get();
 		}
 
-		template<Index index>
+		template<std::size_t index>
 		constexpr decltype(auto) get() &&
 		{
-			return static_cast<base_class_from_index<index>&&>(*this).get();
+			return static_cast<base_class_from_index<index>&&>(std::move(*this)).get();
 		}
 
-		template<Index index>
+		template<std::size_t index>
 		constexpr decltype(auto) get() const&&
 		{
-			return static_cast<base_class_from_index<index> const&&>(*this).get();
+			return static_cast<base_class_from_index<index> const&&>(std::move(*this)).get();
 		}
 	};
 }
 
 namespace std
 {
-	template<class Index, class First, class ... Types>
-	struct tuple_size<terraformer::tuple<Index, First, Types ...>>
+	template<class ... Types>
+	struct tuple_size<terraformer::tuple<Types ...>>
 	{
-		static constexpr size_t value = 1 + sizeof...(Types);
+		static constexpr size_t value = sizeof...(Types);
+	};
+
+	template<std::size_t Index, class ... Types>
+	struct tuple_element<Index, terraformer::tuple<Types ...>>
+	{
+		using type = terraformer::tuple_detail::element_t<Index, Types...>;
 	};
 }
 
