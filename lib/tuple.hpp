@@ -106,6 +106,9 @@ namespace terraformer
 			return static_cast<base_class_from_index<index> const&&>(std::move(*this)).get();
 		}
 	};
+
+	template<class ... Types>
+	tuple(Types...)->tuple<Types ...>;
 }
 
 namespace std

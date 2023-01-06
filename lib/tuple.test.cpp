@@ -13,7 +13,7 @@ static_assert(std::equality_comparable<terraformer::tuple<int, double>>);
 
 TESTCASE(terraformer_tuple_get_values)
 {
-	terraformer::tuple<int, int, double> x{1, 2, 3.0};
+	terraformer::tuple x{1, 2, 3.0};
 
 	auto [v1, v2, v3] = x;
 	EXPECT_EQ(v1, 1);
