@@ -39,3 +39,15 @@ TESTCASE(terraformer_tuple_get_values)
 		EXPECT_EQ(reinterpret_cast<intptr_t>(get<1>(y).get()), reinterpret_cast<intptr_t>(v2.get()));
 	}
 }
+
+TESTCASE(terraformer_tuple_apply)
+{
+	terraformer::tuple x{1, 2, 3};
+
+	apply([x](auto ... item){
+		terraformer::tuple t{item...};
+		EXPECT_EQ(get<0>(x), get<0>(t));
+		EXPECT_EQ(get<1>(x), get<1>(t));
+		EXPECT_EQ(get<2>(x), get<2>(t));
+	}, x);
+}

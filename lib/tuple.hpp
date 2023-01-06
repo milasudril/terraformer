@@ -3,6 +3,8 @@
 
 #include <type_traits>
 #include <utility>
+#include <functional>
+#include <tuple>
 
 #include <cstdio>
 
@@ -20,7 +22,6 @@ namespace terraformer
 
 		public:
 			template<class X, class ... Y>
-			requires(std::is_same_v<X, First>)
 			explicit tuple(X&& first, Y&&... other):
 				b1{std::forward<X>(first)},
 				b2{std::forward<Y>(other)...}
@@ -37,16 +38,16 @@ namespace terraformer
 			bool operator==(tuple const&) const = default;
 			bool operator!=(tuple const&) const = default;
 
-			constexpr T& get() &
+			[[nodiscard]] constexpr T& get() &
 			{ return m_value; }
 
-			constexpr T const& get() const&
+			[[nodiscard]] constexpr T const& get() const&
 			{ return m_value; }
 
-			constexpr T&& get() &&
+			[[nodiscard]] constexpr T&& get() &&
 			{ return std::move(m_value); }
 
-			constexpr T const&& get() const&&
+			[[nodiscard]] constexpr T const&& get() const&&
 			{ return std::move(m_value); }
 
 			T m_value;
@@ -68,6 +69,12 @@ namespace terraformer
 		using element_t = element<Index, Args ...>::type;
 
 		static_assert(std::is_same_v<int, element_t<1, double, int>>);
+
+		template <class F, class Tuple, std::size_t... I>
+		constexpr decltype(auto) apply(F&& f, Tuple&& t, std::index_sequence<I...>)
+		{
+			return std::invoke(std::forward<F>(f), get<I>(std::forward<Tuple>(t))...);
+		}
 	}
 
 	template<class ... Types>
@@ -85,19 +92,19 @@ namespace terraformer
 		bool operator!=(tuple const&) const = default;
 
 		template<std::size_t index>
-		constexpr decltype(auto) get() &
+		[[nodiscard]] constexpr decltype(auto) get() &
 		{ return static_cast<base_class_from_index<index>&>(*this).get(); }
 
 		template<std::size_t index>
-		constexpr decltype(auto) get() const&
+		[[nodiscard]] constexpr decltype(auto) get() const&
 		{ return static_cast<base_class_from_index<index> const&>(*this).get(); }
 
 		template<std::size_t index>
-		constexpr decltype(auto) get() &&
+		[[nodiscard]] constexpr decltype(auto) get() &&
 		{ return static_cast<base_class_from_index<index>&&>(*this).get(); }
 
 		template<std::size_t index>
-		constexpr decltype(auto) get() const&&
+		[[nodiscard]] constexpr decltype(auto) get() const&&
 		{ return static_cast<base_class_from_index<index> const&&>(std::move(*this)).get(); }
 	};
 
@@ -105,20 +112,28 @@ namespace terraformer
 	tuple(Types...)->tuple<Types ...>;
 
 	template<std::size_t I, class ... Types>
-	decltype(auto) get(tuple<Types...>& t)
+	[[nodiscard]] decltype(auto) get(tuple<Types...>& t)
 	{ return t.template get<I>(); }
 
 	template<std::size_t I, class ... Types>
-	decltype(auto) get(tuple<Types...> const& t)
+	[[nodiscard]] decltype(auto) get(tuple<Types...> const& t)
 	{ return t.template get<I>(); }
 
 	template<std::size_t I, class ... Types>
-	decltype(auto) get(tuple<Types...>&& t)
+	[[nodiscard]]  decltype(auto) get(tuple<Types...>&& t)
 	{ return std::move(t).template get<I>(); }
 
 	template<std::size_t I, class ... Types>
-	decltype(auto) get(tuple<Types...> const&& t)
+	[[nodiscard]] decltype(auto) get(tuple<Types...> const&& t)
 	{ return std::move(t).template get<I>();}
+
+	template <class F, class Tuple>
+	constexpr decltype(auto) apply(F&& f, Tuple&& t)
+	{
+		return tuple_detail::apply(
+			std::forward<F>(f), std::forward<Tuple>(t),
+			std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>>>{});
+	}
 }
 
 namespace std
