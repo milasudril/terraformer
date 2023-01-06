@@ -52,9 +52,90 @@ namespace terraformer
 	template<class ... Types>
 	class array_tuple
 	{
+		using storage_type = std::tuple<std::unique_ptr<Types[]>...>;
 	public:
 		using size_type = uint32_t;
 		using value_type = std::tuple<Types...>;
+
+		class const_iterator
+		{
+		public:
+			explicit const_iterator(size_t index, storage_type const& storage):
+				m_index{index},
+				m_base_pointers{std::apply([](auto const& ... item){
+					return std::tuple{std::as_const(item.get())...};
+				}, storage)}
+			{}
+
+			const_iterator& operator++()
+			{
+				++m_index;
+				return *this;
+			}
+
+			const_iterator& operator++(int)
+			{
+				auto old = *this;
+				++(*this);
+				return old;
+			}
+
+			const_iterator& operator--()
+			{
+				--m_index;
+				return *this;
+			}
+
+			const_iterator& operator--(int)
+			{
+				auto old = *this;
+				--(*this);
+				return old;
+			}
+
+			const_iterator& operator+=(intptr_t n)
+			{
+				m_index += n;
+				return *this;
+			}
+
+			const_iterator& operator-=(intptr_t n)
+			{
+				m_index -= n;
+				return *this;
+			}
+
+			friend const_iterator operator+(const_iterator a, intptr_t n)
+			{ return a += n; }
+
+			friend const_iterator operator-(const_iterator a, intptr_t n)
+			{ return a -= n; }
+
+			friend intptr_t operator-(const_iterator const& a, const_iterator const& b)
+			{ return a.m_index - b.m_index; }
+
+			bool operator==(const_iterator const& other) const
+			{ return m_index == other.m_index; }
+
+			bool operator<(const_iterator const& other) const
+			{ return m_index < other.m_index; }
+
+			bool operator<=(const_iterator const& other) const
+			{ return m_index <= other.m_index; }
+
+			bool operator!=(const_iterator const& other) const
+			{ return m_index != other.m_index; }
+
+			bool operator>(const_iterator const& other) const
+			{ return m_index > other.m_index; }
+
+			bool operator>=(const_iterator const& other) const
+			{ return m_index >= other.m_index; }
+
+		private:
+			size_t m_index;
+			std::tuple<Types const*...> m_base_pointers;
+		};
 
 		array_tuple():m_size{0},m_capacity{0}{}
 
@@ -197,7 +278,7 @@ namespace terraformer
 
 		size_type m_size;
 		size_type m_capacity;
-		std::tuple<std::unique_ptr<Types[]>...> m_storage;
+		storage_type m_storage;
 	};
 }
 
