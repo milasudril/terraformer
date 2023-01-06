@@ -56,11 +56,15 @@ namespace terraformer
 	public:
 		using size_type = uint32_t;
 		using value_type = std::tuple<Types...>;
+		using cref_value_type = std::tuple<Types const&...>;
 
 		class const_iterator
 		{
 		public:
-			using value_type = array_tuple::value_type;
+			using value_type = std::conditional<
+				std::is_trivially_copyable_v<array_tuple::value_type>,
+				array_tuple::value_type,
+				array_tuple::cref_value_type>;
 
 			const_iterator() = default;
 
@@ -73,34 +77,16 @@ namespace terraformer
 
 			[[nodiscard]] value_type operator[](intptr_t n) const
 			{
-				if constexpr(std::is_trivially_copyable_v<value_type>)
-				{
-					return std::apply([offset = m_index + n](auto ... items){
-						return std::tuple<Types...>{*(items + offset)...};
-					}, m_base_pointers);
-				}
-				else
-				{
-					return std::apply([offset = m_index + n](auto ... items){
-						return std::tuple<Types const&...>{*(items + offset)...};
-					}, m_base_pointers);
-				}
+				return std::apply([offset = m_index + n](auto ... items){
+					return value_type{*(items + offset)...};
+				}, m_base_pointers);
 			}
 
 			[[nodiscard]] value_type operator*() const
 			{
-				if constexpr(std::is_trivially_copyable_v<value_type>)
-				{
-					return std::apply([offset = m_index](auto const& ... items){
-						return std::tuple<Types...>{*(items + offset)...};
-					}, m_base_pointers);
-				}
-				else
-				{
-					return std::apply([offset = m_index](auto const& ... items){
-						return std::tuple<Types const&...>{*(items + offset)...};
-					}, m_base_pointers);
-				}
+				return std::apply([offset = m_index](auto const& ... items){
+					return value_type{*(items + offset)...};
+				}, m_base_pointers);
 			}
 
 
@@ -271,21 +257,25 @@ namespace terraformer
 		const_iterator end() const
 		{ return const_iterator{m_size, m_storage}; }
 
+		template<class Dummy = void>
+		requires(std::is_trivially_copyable_v<value_type>)
 		[[nodiscard]] value_type operator[](size_type index) const
 		{
 			assert(index < m_size);
-			if constexpr(std::is_trivially_copyable_v<value_type>)
-			{
-				return std::apply([index](auto const& ... items){
-					return std::tuple<Types...>{items[index]...};
-				}, m_storage);
-			}
-			else
-			{
-				return std::apply([index](auto const& ... items){
-					return std::tuple<Types const&...>{items[index]...};
-				}, m_storage);
-			}
+			return std::apply([index](auto const& ... items){
+				return value_type{items[index]...};
+			}, m_storage);
+		}
+
+		template<class Dummy = void>
+		requires(!std::is_trivially_copyable_v<value_type>)
+		[[nodiscard]] cref_value_type operator[](size_type index) const
+		{
+			assert(index < m_size);
+
+			return std::apply([index](auto const& ... items){
+				return cref_value_type{items[index]...};
+			}, m_storage);
 		}
 
 

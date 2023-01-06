@@ -19,5 +19,6 @@ namespace
 
 static_assert(std::random_access_iterator<array_tuple_trivially_copyable::const_iterator>);
 
-//static_assert(std::random_access_iterator<array_tuple_non_copyable::const_iterator>);
-//static_assert(std::random_access_iterator<array_tulpe_not_trivally_copyable::const_iterator>);
+static_assert(std::random_access_iterator<array_tuple_non_copyable::const_iterator>);
+
+static_assert(std::random_access_iterator<array_tulpe_not_trivally_copyable::const_iterator>);
