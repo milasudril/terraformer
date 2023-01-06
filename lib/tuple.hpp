@@ -36,8 +36,6 @@ namespace terraformer
 		class tuple<Index, T>
 		{
 		public:
-		//	tuple() = default;
-
 			bool operator==(tuple const&) const = default;
 			bool operator!=(tuple const&) const = default;
 
@@ -77,6 +75,12 @@ namespace terraformer
 		constexpr decltype(auto) apply(F&& f, Tuple&& t, std::index_sequence<I...>)
 		{
 			return std::invoke(std::forward<F>(f), get<I>(std::forward<Tuple>(t))...);
+		}
+
+		template <size_t... Is, class TupleA, class TupleB>
+		bool equal(std::index_sequence<Is...>, TupleA const& a, TupleB const& b)
+		{
+			return (... && (get<Is>(a) == get<Is>(b)));
 		}
 	}
 
@@ -139,16 +143,30 @@ namespace terraformer
 	}
 
 	template<class ... Types>
-	auto to_string(tuple<Types...> const& x)
+	[[nodiscard]] bool operator==(tuple<Types const&...> const& a, tuple<Types...> const& b)
 	{
-		std::string ret;
-		return apply([&ret](auto const& ... args){
-			using std::to_string;
-			(ret.append(to_string(args)), ...);
-			ret.append(" ");
+		return tuple_detail::equal(std::make_index_sequence<sizeof...(Types)>{}, a, b);
+	}
 
-			return ret;
-		}, x);
+	template<class ... Types>
+	[[nodiscard]] bool operator==(tuple<Types...> const& a,
+		tuple<Types const&...> const& b)
+	{
+		return b == a;
+	}
+
+	template<class ... Types>
+	[[nodiscard]] bool operator!=(tuple<Types const&...> const& a,
+		tuple<Types...> const& b)
+	{
+		return !(a == b);
+	}
+
+	template<class ... Types>
+	[[nodiscard]] bool operator!=(tuple<Types...> const& a,
+		tuple<Types const&...> const& b)
+	{
+		return !(b == a);
 	}
 }
 

@@ -79,14 +79,14 @@ namespace terraformer
 
 			[[nodiscard]] value_type operator[](intptr_t n) const
 			{
-				return apply([offset = m_index + n](auto ... items){
+				return terraformer::apply([offset = m_index + n](auto ... items){
 					return value_type{*(items + offset)...};
 				}, m_base_pointers);
 			}
 
 			[[nodiscard]] value_type operator*() const
 			{
-				return apply([offset = m_index](auto const& ... items){
+				return terraformer::apply([offset = m_index](auto const& ... items){
 					return value_type{*(items + offset)...};
 				}, m_base_pointers);
 			}
@@ -315,8 +315,6 @@ namespace terraformer
 				m_storage, index, std::forward<Tuple>(t));
 		}
 
-
-
 	private:
 		void realloc()
 		{
@@ -343,14 +341,6 @@ namespace terraformer
 		size_type m_capacity;
 		storage_type m_storage;
 	};
-
-	// FIXME: this is a catch all template
-	template<class ArrayTupleIterator>
-	auto to_string(ArrayTupleIterator const& x)
-	{
-		using std::to_string;
-		return to_string(x.current_offset());
-	}
 }
 
 #endif
