@@ -5,8 +5,7 @@
 #include <utility>
 #include <functional>
 #include <tuple>
-
-#include <cstdio>
+#include <string>
 
 namespace terraformer
 {
@@ -131,12 +130,25 @@ namespace terraformer
 	[[nodiscard]] decltype(auto) get(tuple<Types...> const&& t)
 	{ return std::move(t).template get<I>();}
 
-	template <class F, class Tuple>
+	template<class F, class Tuple>
 	constexpr decltype(auto) apply(F&& f, Tuple&& t)
 	{
 		return tuple_detail::apply(
 			std::forward<F>(f), std::forward<Tuple>(t),
 			std::make_index_sequence<std::tuple_size_v<std::remove_reference_t<Tuple>>>{});
+	}
+
+	template<class ... Types>
+	auto to_string(tuple<Types...> const& x)
+	{
+		std::string ret;
+		return apply([&ret](auto const& ... args){
+			using std::to_string;
+			(ret.append(to_string(args)), ...);
+			ret.append(" ");
+
+			return ret;
+		}, x);
 	}
 }
 

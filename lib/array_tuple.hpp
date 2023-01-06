@@ -63,7 +63,7 @@ namespace terraformer
 		class const_iterator
 		{
 		public:
-			using value_type = std::conditional<
+			using value_type = std::conditional_t<
 				std::is_trivially_copyable_v<array_tuple::value_type>,
 				array_tuple::value_type,
 				array_tuple::cref_value_type>;
@@ -79,14 +79,14 @@ namespace terraformer
 
 			[[nodiscard]] value_type operator[](intptr_t n) const
 			{
-				return std::apply([offset = m_index + n](auto ... items){
+				return apply([offset = m_index + n](auto ... items){
 					return value_type{*(items + offset)...};
 				}, m_base_pointers);
 			}
 
 			[[nodiscard]] value_type operator*() const
 			{
-				return std::apply([offset = m_index](auto const& ... items){
+				return apply([offset = m_index](auto const& ... items){
 					return value_type{*(items + offset)...};
 				}, m_base_pointers);
 			}
@@ -269,7 +269,7 @@ namespace terraformer
 		[[nodiscard]] value_type operator[](size_type index) const
 		{
 			assert(index < m_size);
-			return std::apply([index](auto const& ... items){
+			return apply([index](auto const& ... items){
 				return value_type{items[index]...};
 			}, m_storage);
 		}
@@ -280,7 +280,7 @@ namespace terraformer
 		{
 			assert(index < m_size);
 
-			return std::apply([index](auto const& ... items){
+			return apply([index](auto const& ... items){
 				return cref_value_type{items[index]...};
 			}, m_storage);
 		}
@@ -344,6 +344,7 @@ namespace terraformer
 		storage_type m_storage;
 	};
 
+	// FIXME: this is a catch all template
 	template<class ArrayTupleIterator>
 	auto to_string(ArrayTupleIterator const& x)
 	{

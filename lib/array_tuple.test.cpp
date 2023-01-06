@@ -88,7 +88,7 @@ namespace
 		auto i = std::begin(a);
 		for(size_t k = 0; k != 9; ++k)
 		{
-		//	EXPECT_EQ(*i, generate<typename T::value_type>(k));
+			EXPECT_EQ(*i, generate<typename T::value_type>(k));
 			++i;
 		}
 		EXPECT_EQ(i, std::end(a));
