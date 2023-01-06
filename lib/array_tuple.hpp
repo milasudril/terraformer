@@ -206,7 +206,7 @@ namespace terraformer
 		{
 			m_size = std::exchange(other.m_size, 0);
 			m_capacity = std::exchange(other.m_capacity, 0);
-			m_storage = std::exchange(other.m_storage, nullptr);
+			m_storage = std::exchange(other.m_storage, storage_type{});
 			return *this;
 		}
 

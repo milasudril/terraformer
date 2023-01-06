@@ -122,6 +122,44 @@ namespace
 	}
 
 	template<class T>
+	void test_move_assign()
+	{
+		T a;
+		for(size_t k = 0; k != 9; ++k)
+		{ a.push_back(generate<typename T::value_type>(k)); }
+
+		EXPECT_EQ(std::size(a), 9);
+		EXPECT_EQ(std::end(a) - std::begin(a), 9);
+		EXPECT_EQ(a.capacity(), 16);
+
+		auto b = std::move(a);
+		EXPECT_EQ(std::size(b), 9);
+		EXPECT_EQ(std::end(b) - std::begin(b), 9);
+		EXPECT_EQ(b.capacity(), 16);
+
+		EXPECT_EQ(a.capacity(), 0);
+		EXPECT_EQ(std::size(a), 0);
+		EXPECT_EQ(std::end(a) - std::begin(a), 0);
+
+		a = std::move(b);
+		EXPECT_EQ(std::size(a), 9);
+		EXPECT_EQ(std::end(a) - std::begin(a), 9);
+		EXPECT_EQ(a.capacity(), 16);
+
+		EXPECT_EQ(b.capacity(), 0);
+		EXPECT_EQ(std::size(b), 0);
+		EXPECT_EQ(std::end(b) - std::begin(b), 0);
+
+		auto i = std::begin(a);
+		for(size_t k = 0; k != 9; ++k)
+		{
+			EXPECT_EQ(*i, generate<typename T::value_type>(k));
+			++i;
+		}
+		EXPECT_EQ(i, std::end(a));
+	}
+
+	template<class T>
 	void test_copy_construct()
 	{
 		T a;
@@ -133,6 +171,24 @@ namespace
 		EXPECT_EQ(a.capacity(), 16);
 
 		auto b = a;
+		EXPECT_EQ(a, b);
+	}
+
+	template<class T>
+	void test_copy_assign()
+	{
+		T a;
+		for(size_t k = 0; k != 9; ++k)
+		{ a.push_back(generate<typename T::value_type>(k)); }
+
+		EXPECT_EQ(std::size(a), 9);
+		EXPECT_EQ(std::end(a) - std::begin(a), 9);
+		EXPECT_EQ(a.capacity(), 16);
+
+		auto b = a;
+		EXPECT_EQ(a, b);
+
+		a = b;
 		EXPECT_EQ(a, b);
 	}
 }
@@ -158,8 +214,22 @@ TESTCASE(array_tuple_move_construct)
 	test_move_construct<array_tuple_trivially_copyable>();
 }
 
+TESTCASE(array_tuple_move_assign)
+{
+	test_move_assign<array_tuple_non_copyable>();
+	test_move_assign<array_tulpe_not_trivally_copyable>();
+	test_move_assign<array_tuple_trivially_copyable>();
+}
+
 TESTCASE(array_tuple_copy_construct)
 {
 	test_copy_construct<array_tulpe_not_trivally_copyable>();
 	test_copy_construct<array_tuple_trivially_copyable>();
+}
+
+
+TESTCASE(array_tuple_copy_assign)
+{
+	test_copy_assign<array_tulpe_not_trivally_copyable>();
+	test_copy_assign<array_tuple_trivially_copyable>();
 }
