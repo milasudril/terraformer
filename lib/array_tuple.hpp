@@ -191,7 +191,10 @@ namespace terraformer
 			m_capacity{other.capacity()},
 			m_storage{tuple{std::make_unique_for_overwrite<Types[]>(other.capacity())...}}
 		{
-			copy_data(other.m_storage, m_storage, m_size);
+			array_tuple_detail::copy_data(std::make_index_sequence<sizeof...(Types)>{},
+				other.m_storage,
+				m_storage,
+				m_size);
 		}
 
 		void reserve(size_type n)
@@ -217,7 +220,10 @@ namespace terraformer
 		[[nodiscard]] bool operator==(array_tuple const& other) const
 		{
 			return m_size == other.size() &&
-				array_tuple_detail::equal(m_storage, other.m_storage, m_size);
+			array_tuple_detail::equal(std::make_index_sequence<sizeof...(Types)>{},
+				other.m_storage,
+				m_storage,
+				m_size);
 		}
 
 		[[nodiscard]] bool operator!=(array_tuple const& other) const
