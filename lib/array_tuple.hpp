@@ -8,6 +8,7 @@
 #include <limits>
 #include <concepts>
 #include <cassert>
+#include <string>
 
 namespace terraformer
 {
@@ -24,16 +25,16 @@ namespace terraformer
 			));
 		}
 
-		template <size_t... Is, class Tuple>
-		void move_data(std::index_sequence<Is...>, Tuple&& from, Tuple& to, size_t size)
+		template <size_t... Is, class TupleFrom, class TupleTo>
+		void move_data(std::index_sequence<Is...>, TupleFrom&& from, TupleTo& to, size_t size)
 		{
 			(...,(
 			std::move(std::get<Is>(from).get(), std::get<Is>(from).get() + size, std::get<Is>(to).get())
 			));
 		}
 
-		template <size_t... Is, class Tuple>
-		void copy_data(std::index_sequence<Is...>, Tuple&& from, Tuple& to, size_t size)
+		template <size_t... Is, class TupleFrom, class TupleTo>
+		void copy_data(std::index_sequence<Is...>, TupleFrom const& from, TupleTo& to, size_t size)
 		{
 			(...,(
 			std::copy(std::get<Is>(from).get(), std::get<Is>(from).get() + size, std::get<Is>(to).get())
@@ -71,7 +72,7 @@ namespace terraformer
 			explicit const_iterator(size_t index, storage_type const& storage):
 				m_index{index},
 				m_base_pointers{std::apply([](auto const& ... item){
-					return std::tuple{std::as_const(item.get())...};
+					return std::tuple<Types const*...>{item.get()...};
 				}, storage)}
 			{}
 
@@ -87,6 +88,11 @@ namespace terraformer
 				return std::apply([offset = m_index](auto const& ... items){
 					return value_type{*(items + offset)...};
 				}, m_base_pointers);
+			}
+
+			auto current_offset() const
+			{
+				return m_index;
 			}
 
 
@@ -317,14 +323,17 @@ namespace terraformer
 			if(new_capacity > static_cast<size_t>(std::numeric_limits<size_type>::max()))
 			{ throw std::runtime_error{"Data storage out of space"}; }
 
-			realloc(new_capacity);
+			realloc(static_cast<size_type>(new_capacity));
 		}
 
 		void realloc(size_type new_capacity)
 		{
-			auto const new_storage = std::tuple{std::make_unique_for_overwrite<Types[]>(new_capacity)...};
+			auto new_storage = std::tuple{std::make_unique_for_overwrite<Types[]>(new_capacity)...};
 			if(m_size != 0)
-			{ array_tuple_detail::move_data(m_storage, new_storage, m_size); }
+			{
+				array_tuple_detail::move_data(std::make_index_sequence<sizeof...(Types)>{},
+					std::move(m_storage), new_storage, m_size);
+			}
 			m_capacity = static_cast<size_type>(new_capacity);
 			m_storage = std::move(new_storage);
 		}
@@ -333,6 +342,13 @@ namespace terraformer
 		size_type m_capacity;
 		storage_type m_storage;
 	};
+
+	template<class ArrayTupleIterator>
+	auto to_string(ArrayTupleIterator const& x)
+	{
+		using std::to_string;
+		return to_string(x.current_offset());
+	}
 }
 
 #endif
