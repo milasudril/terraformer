@@ -60,6 +60,10 @@ namespace terraformer
 		class const_iterator
 		{
 		public:
+			using value_type = array_tuple::value_type;
+
+			const_iterator() = default;
+
 			explicit const_iterator(size_t index, storage_type const& storage):
 				m_index{index},
 				m_base_pointers{std::apply([](auto const& ... item){
@@ -67,28 +71,28 @@ namespace terraformer
 				}, storage)}
 			{}
 
-			[[nodiscard]] auto operator[](intptr_t n) const
+			[[nodiscard]] value_type operator[](intptr_t n) const
 			{
 				if constexpr(std::is_trivially_copyable_v<value_type>)
 				{
-					return std::apply([offset = m_index + n](auto const& ... items){
-						return std::tuple{*(items + offset)...};
+					return std::apply([offset = m_index + n](auto ... items){
+						return std::tuple<Types...>{*(items + offset)...};
 					}, m_base_pointers);
 				}
 				else
 				{
-					return std::apply([offset = m_index + n](auto const& ... items){
+					return std::apply([offset = m_index + n](auto ... items){
 						return std::tuple<Types const&...>{*(items + offset)...};
 					}, m_base_pointers);
 				}
 			}
 
-			[[nodiscard]] auto operator*() const
+			[[nodiscard]] value_type operator*() const
 			{
 				if constexpr(std::is_trivially_copyable_v<value_type>)
 				{
 					return std::apply([offset = m_index](auto const& ... items){
-						return std::tuple{*(items + offset)...};
+						return std::tuple<Types...>{*(items + offset)...};
 					}, m_base_pointers);
 				}
 				else
@@ -107,7 +111,7 @@ namespace terraformer
 				return *this;
 			}
 
-			const_iterator& operator++(int)
+			const_iterator operator++(int)
 			{
 				auto old = *this;
 				++m_index;
@@ -120,7 +124,7 @@ namespace terraformer
 				return *this;
 			}
 
-			const_iterator& operator--(int)
+			const_iterator operator--(int)
 			{
 				auto old = *this;
 				--m_index;
@@ -140,6 +144,9 @@ namespace terraformer
 			}
 
 			[[nodiscard]] friend const_iterator operator+(const_iterator a, intptr_t n)
+			{ return a += n; }
+
+			[[nodiscard]] friend const_iterator operator+(intptr_t n, const_iterator a)
 			{ return a += n; }
 
 			[[nodiscard]] friend const_iterator operator-(const_iterator a, intptr_t n)
@@ -190,7 +197,6 @@ namespace terraformer
 			m_size{other.size()},
 			m_capacity{other.capacity()},
 			m_storage{std::tuple{std::make_unique_for_overwrite<Types[]>(other.capacity())...}}
-
 		{
 			copy_data(other.m_storage, m_storage, m_size);
 		}
@@ -265,13 +271,13 @@ namespace terraformer
 		const_iterator end() const
 		{ return const_iterator{m_size, m_storage}; }
 
-		[[nodiscard]] auto operator[](size_type index) const
+		[[nodiscard]] value_type operator[](size_type index) const
 		{
 			assert(index < m_size);
 			if constexpr(std::is_trivially_copyable_v<value_type>)
 			{
 				return std::apply([index](auto const& ... items){
-					return std::tuple{items[index]...};
+					return std::tuple<Types...>{items[index]...};
 				}, m_storage);
 			}
 			else
