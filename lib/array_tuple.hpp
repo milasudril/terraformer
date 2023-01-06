@@ -67,6 +67,40 @@ namespace terraformer
 				}, storage)}
 			{}
 
+			[[nodiscard]] auto operator[](intptr_t n) const
+			{
+				if constexpr(std::is_trivially_copyable_v<value_type>)
+				{
+					return std::apply([offset = m_index + n](auto const& ... items){
+						return std::tuple{*(items + offset)...};
+					}, m_base_pointers);
+				}
+				else
+				{
+					return std::apply([offset = m_index + n](auto const& ... items){
+						return std::tuple<Types const&...>{*(items + offset)...};
+					}, m_base_pointers);
+				}
+			}
+
+			[[nodiscard]] auto operator*() const
+			{
+				if constexpr(std::is_trivially_copyable_v<value_type>)
+				{
+					return std::apply([offset = m_index](auto const& ... items){
+						return std::tuple{*(items + offset)...};
+					}, m_base_pointers);
+				}
+				else
+				{
+					return std::apply([offset = m_index](auto const& ... items){
+						return std::tuple<Types const&...>{*(items + offset)...};
+					}, m_base_pointers);
+				}
+			}
+
+
+
 			const_iterator& operator++()
 			{
 				++m_index;
@@ -76,7 +110,7 @@ namespace terraformer
 			const_iterator& operator++(int)
 			{
 				auto old = *this;
-				++(*this);
+				++m_index;
 				return old;
 			}
 
@@ -89,7 +123,7 @@ namespace terraformer
 			const_iterator& operator--(int)
 			{
 				auto old = *this;
-				--(*this);
+				--m_index;
 				return old;
 			}
 
@@ -105,28 +139,30 @@ namespace terraformer
 				return *this;
 			}
 
-			friend const_iterator operator+(const_iterator a, intptr_t n)
+			[[nodiscard]] friend const_iterator operator+(const_iterator a, intptr_t n)
 			{ return a += n; }
 
-			friend const_iterator operator-(const_iterator a, intptr_t n)
+			[[nodiscard]] friend const_iterator operator-(const_iterator a, intptr_t n)
 			{ return a -= n; }
 
-			friend intptr_t operator-(const_iterator const& a, const_iterator const& b)
+			[[nodiscard]] friend intptr_t operator-(const_iterator const& a, const_iterator const& b)
 			{ return a.m_index - b.m_index; }
 
-			bool operator==(const_iterator const& other) const
+
+
+			[[nodiscard]] bool operator==(const_iterator const& other) const
 			{ return m_index == other.m_index; }
 
-			bool operator<(const_iterator const& other) const
+			[[nodiscard]] bool operator<(const_iterator const& other) const
 			{ return m_index < other.m_index; }
 
-			bool operator<=(const_iterator const& other) const
+			[[nodiscard]] bool operator<=(const_iterator const& other) const
 			{ return m_index <= other.m_index; }
 
-			bool operator!=(const_iterator const& other) const
+			[[nodiscard]] bool operator!=(const_iterator const& other) const
 			{ return m_index != other.m_index; }
 
-			bool operator>(const_iterator const& other) const
+			[[nodiscard]] bool operator>(const_iterator const& other) const
 			{ return m_index > other.m_index; }
 
 			bool operator>=(const_iterator const& other) const
@@ -221,6 +257,33 @@ namespace terraformer
 		[[nodiscard]] size_type capacity() const
 		{ return m_capacity; }
 
+
+
+		const_iterator begin() const
+		{ return const_iterator{0, m_storage}; }
+
+		const_iterator end() const
+		{ return const_iterator{m_size, m_storage}; }
+
+		[[nodiscard]] auto operator[](size_type index) const
+		{
+			assert(index < m_size);
+			if constexpr(std::is_trivially_copyable_v<value_type>)
+			{
+				return std::apply([index](auto const& ... items){
+					return std::tuple{items[index]...};
+				}, m_storage);
+			}
+			else
+			{
+				return std::apply([index](auto const& ... items){
+					return std::tuple<Types const&...>{items[index]...};
+				}, m_storage);
+			}
+		}
+
+
+
 		template<size_t I>
 		[[nodiscard]] auto get()
 		{ return std::span{std::get<I>(m_storage).get(), m_size}; }
@@ -229,15 +292,7 @@ namespace terraformer
 		[[nodiscard]] auto get() const
 		{ return std::span{std::as_const(std::get<I>(m_storage).get()), m_size}; }
 
-		template<class Dummy>
-		requires(std::is_trivially_copyable_v<value_type>)
-		[[nodiscard]] auto operator[](size_type index) const
-		{
-			assert(index < m_size);
-			return std::apply([index](auto const& ... items){
-				return std::tuple{items[index]...};
-			}, m_storage);
-		}
+
 
 		template<class ... Vals>
 		requires(array_tuple_detail::same_as_unqual<Types, Vals> && ...)
@@ -256,6 +311,8 @@ namespace terraformer
 			array_tuple_detail::assign(std::make_index_sequence<sizeof...(Types)>{},
 				m_storage, index, std::forward<Tuple>(t));
 		}
+
+
 
 	private:
 		void realloc()
