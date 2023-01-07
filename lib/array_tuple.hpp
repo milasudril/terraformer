@@ -2,6 +2,7 @@
 #define TERRAFORMER_LIB_ARRAY_TUPLE_HPP
 
 #include "./tuple.hpp"
+#include "./utils.hpp"
 
 #include <memory>
 #include <algorithm>
@@ -178,8 +179,8 @@ namespace terraformer
 		~array_tuple() = default;
 
 		[[nodiscard]] array_tuple(array_tuple&& other) noexcept:
-			m_size{other.size()},
-			m_capacity{other.capacity()},
+			m_size{other.m_size},
+			m_capacity{other.m_capacity},
 			m_storage{std::move(other.m_storage)}
 		{
 			other.m_size = 0;
@@ -187,9 +188,9 @@ namespace terraformer
 		}
 
 		[[nodiscard]] array_tuple(array_tuple const& other):
-			m_size{other.size()},
-			m_capacity{other.capacity()},
-			m_storage{tuple{std::make_unique_for_overwrite<Types[]>(other.capacity())...}}
+			m_size{other.m_size},
+			m_capacity{other.m_capacity},
+			m_storage{tuple{std::make_unique_for_overwrite<Types[]>(other.m_capacity)...}}
 		{
 			array_tuple_detail::copy_data(std::make_index_sequence<sizeof...(Types)>{},
 				other.m_storage,
@@ -219,7 +220,7 @@ namespace terraformer
 
 		[[nodiscard]] bool operator==(array_tuple const& other) const
 		{
-			return m_size == other.size() &&
+			return m_size == other.m_size &&
 			array_tuple_detail::equal(std::make_index_sequence<sizeof...(Types)>{},
 				other.m_storage,
 				m_storage,
@@ -275,7 +276,7 @@ namespace terraformer
 		[[nodiscard]] value_type operator[](size_type index) const
 		{
 			assert(index < m_size);
-			return apply([index](auto const& ... items){
+			return terraformer::apply([index](auto const& ... items){
 				return value_type{items[index]...};
 			}, m_storage);
 		}
@@ -285,8 +286,7 @@ namespace terraformer
 		[[nodiscard]] cref_value_type operator[](size_type index) const
 		{
 			assert(index < m_size);
-
-			return apply([index](auto const& ... items){
+			return terraformer::apply([index](auto const& ... items){
 				return cref_value_type{items[index]...};
 			}, m_storage);
 		}
@@ -295,11 +295,13 @@ namespace terraformer
 
 		template<size_t I>
 		[[nodiscard]] auto get()
-		{ return std::span{get<I>(m_storage).get(), m_size}; }
+		{ return std::span{terraformer::get<I>(m_storage).get(), m_size}; }
 
 		template<size_t I>
 		[[nodiscard]] auto get() const
-		{ return std::span{std::as_const(get<I>(m_storage).get()), m_size}; }
+		{
+			return std::span{as_ptr_to_const(terraformer::get<I>(m_storage).get()), m_size};
+		}
 
 
 
@@ -347,6 +349,14 @@ namespace terraformer
 		size_type m_capacity;
 		storage_type m_storage;
 	};
+
+	template<std::size_t I, class ... Types>
+	[[nodiscard]] decltype(auto) get(array_tuple<Types...>& t)
+	{ return t.template get<I>(); }
+
+	template<std::size_t I, class ... Types>
+	[[nodiscard]] decltype(auto) get(array_tuple<Types...> const& t)
+	{ return t.template get<I>(); }
 }
 
 #endif
