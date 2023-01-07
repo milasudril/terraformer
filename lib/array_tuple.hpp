@@ -230,18 +230,6 @@ namespace terraformer
 		[[nodiscard]] bool operator!=(array_tuple const& other) const
 		{ return !(*this == other); }
 
-		template<class ... Vals>
-		requires(array_tuple_detail::same_as_unqual<Types, Vals> && ...)
-		void push_back(Vals&&... vals)
-		{
-			if(m_size == m_capacity) [[unlikely]]
-			{realloc();}
-
-			array_tuple_detail::assign(std::make_index_sequence<sizeof...(Types)>{},
-				m_storage, m_size, tuple{std::forward<Vals>(vals)...});
-			++m_size;
-		}
-
 		template<class Tuple>
 		requires(array_tuple_detail::same_as_unqual<Tuple, value_type>)
 		void push_back(Tuple&& t)
@@ -304,15 +292,6 @@ namespace terraformer
 		}
 
 
-
-		template<class ... Vals>
-		requires(array_tuple_detail::same_as_unqual<Types, Vals> && ...)
-		void assign(size_type index, Vals&&... vals)
-		{
-			assert(index < m_size);
-			array_tuple_detail::assign(std::make_index_sequence<sizeof...(Types)>{},
-				m_storage, index, tuple{std::forward<Vals>(vals)...});
-		}
 
 		template<class Tuple>
 		requires(array_tuple_detail::same_as_unqual<Tuple, value_type>)
