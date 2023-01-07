@@ -6,24 +6,71 @@
 
 TESTCASE(terraformer_damped_motion_integrator_step_response_at_min_inertia)
 {
-	constexpr terraformer::displacement v{1.0f, 0.0f, 0.0f};
-	terraformer::particle_state state{};
-	terraformer::damped_motion_integrator integrator{v,
-		terraformer::damped_motion_integrator::params{
-			.inertia = terraformer::damped_motion_integrator::min_inertia(),
-			.curve_scaling_factor = 1.0f
-		}
-	};
+	{
+		constexpr terraformer::displacement v{1.0f, 0.0f, 0.0f};
 
-	state = integrator(state, v);
-	EXPECT_EQ(state.v, v);
-	EXPECT_EQ(state.r, (terraformer::location{0.5f, 0.0f, 0.0f}));
-	state = integrator(state, v);
-	EXPECT_EQ(state.v, v);
-	EXPECT_EQ(state.r, (terraformer::location{1.5f, 0.0f, 0.0f}));
-	state = integrator(state, v);
-	EXPECT_EQ(state.v, v);
-	EXPECT_EQ(state.r, (terraformer::location{2.5f, 0.0f, 0.0f}));
+		terraformer::particle_state state{};
+		terraformer::damped_motion_integrator integrator{v,
+			terraformer::damped_motion_integrator::params{
+				.inertia = terraformer::damped_motion_integrator::min_inertia(),
+				.curve_scaling_factor = 1.0f
+			}
+		};
+
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{0.5f, 0.0f, 0.0f}));
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{1.5f, 0.0f, 0.0f}));
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{2.5f, 0.0f, 0.0f}));
+	}
+
+	{
+		constexpr terraformer::displacement v{1.0f, 0.0f, 0.0f};
+
+		terraformer::particle_state state{};
+		terraformer::damped_motion_integrator integrator{v,
+			terraformer::damped_motion_integrator::params{
+				.inertia = terraformer::damped_motion_integrator::min_inertia(),
+				.curve_scaling_factor = 3.0f
+			}
+		};
+
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{1.5f, 0.0f, 0.0f}));
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{4.5f, 0.0f, 0.0f}));
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{7.5f, 0.0f, 0.0f}));
+	}
+
+	{
+		constexpr terraformer::displacement v{3.0f, 0.0f, 0.0f};
+
+		terraformer::particle_state state{};
+		terraformer::damped_motion_integrator integrator{v,
+			terraformer::damped_motion_integrator::params{
+				.inertia = terraformer::damped_motion_integrator::min_inertia(),
+				.curve_scaling_factor = 1.0f
+			}
+		};
+
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{1.5f, 0.0f, 0.0f}));
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{4.5f, 0.0f, 0.0f}));
+		state = integrator(state, v);
+		EXPECT_EQ(state.v, v);
+		EXPECT_EQ(state.r, (terraformer::location{7.5f, 0.0f, 0.0f}));
+	}
 }
 
 TESTCASE(terraformer_damped_motion_integrator_step_response_inertia_1dot5)
