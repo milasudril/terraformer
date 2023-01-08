@@ -11,7 +11,7 @@ namespace terraformer
 	using displacement = geom_space::displacement;
 	using direction = geom_space::direction;
 
-	inline constexpr auto origin = geosimd::origin<geom_space>();
+	inline constexpr auto origin = geosimd::origin<geosimd::euclidian_space<float, 3>>();
 };
 
 #endif
