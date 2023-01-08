@@ -19,7 +19,7 @@ TESTCASE(terraformer_noisy_drift_expected_norm)
 		terraformer::noisy_drift generator{
 			Rng{seed},
 			terraformer::noisy_drift<Rng>::params{
-				.drift = terraformer::direction{terraformer::geom_space::x{}},
+				.drift = geosimd::rotation_angle{geosimd::turns{static_cast<double>(k)/4.0}},
 				.noise_amount = static_cast<float>(k)/4.0f
 			}
 		};

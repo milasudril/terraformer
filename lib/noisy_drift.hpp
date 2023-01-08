@@ -9,7 +9,7 @@ namespace terraformer
 {
 	struct noisy_drift_params
 	{
-		direction drift;
+		geosimd::rotation_angle drift;
 		float noise_amount;
 	};
 
@@ -19,7 +19,7 @@ namespace terraformer
 	public:
 		using params = noisy_drift_params;
 
-		constexpr explicit noisy_drift(Rng rng, params const& model_params):
+		constexpr explicit noisy_drift(Rng rng, params model_params):
 			m_rng{rng},
 			m_model_params{model_params}
 		{ }
@@ -32,8 +32,8 @@ namespace terraformer
 				displacement const v{U(m_rng), U(m_rng), 0.0f};
 				if(auto const norm_random_sq = norm_squared(v); norm_random_sq < 1.0f) [[likely]]
 				{
-					auto const theta_drift = angular_difference(m_model_params.drift,
-						direction{geom_space::x{}});
+					auto const theta_drift = m_model_params.drift
+						- geosimd::rotation_angle{geosimd::turns{0.0}};
 					auto const theta_random = angular_difference(direction{v}, direction{geom_space::x{}});
 					auto const norm_random = std::sqrt(norm_random_sq);
 					auto const r = (1.0f - m_model_params.noise_amount)
@@ -43,15 +43,6 @@ namespace terraformer
 					auto const cs = cossin(theta);
 
 					return r*displacement{cs.cos, cs.sin, 0.0f};
-
-
-#if 0
-					auto const norm_random = 1.5f*std::sqrt(norm_random_sq);
-
-
-					return (1.0f - m_model_params.noise_amount)*m_model_params.drift
-						+ 1.5f*m_model_params.noise_amount*v;
-#endif
 				}
 			}
 		}
