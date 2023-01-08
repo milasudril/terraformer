@@ -38,8 +38,7 @@ namespace terraformer
 					auto const norm_random = std::sqrt(norm_random_sq);
 					auto const r = (1.0f - m_model_params.noise_amount)
 						+ 1.5f*norm_random*m_model_params.noise_amount;
-					auto const theta = (1.0f - m_model_params.noise_amount)*theta_drift
-						+ m_model_params.noise_amount*theta_random;
+					auto const theta = theta_drift + m_model_params.noise_amount*theta_random;
 					auto const cs = cossin(theta);
 
 					return r*displacement{cs.cos, cs.sin, 0.0f};
