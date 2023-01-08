@@ -86,7 +86,7 @@ TESTCASE(terraformer_repulsion_loc_points_loc_west_of_sn_line_segment)
 	}
 }
 
-TESTCASE(terraformer_repulsion_loc_points_loc_inside_closed_curve)
+TESTCASE(terraformer_repulsion_loc_points_loc_inside_closed_curve_centered_at_loc)
 {
 	std::array<terraformer::location, 97> segs;
 	for(size_t k = 0; k != std::size(segs); ++k)
@@ -99,6 +99,27 @@ TESTCASE(terraformer_repulsion_loc_points_loc_inside_closed_curve)
 			+ r*terraformer::displacement{cs_theta.cos, cs_theta.sin, 0.0f};
 	}
 
-	auto const x = terraformer::repulsion_between(terraformer::origin, segs);
-	EXPECT_LT(norm(x), 1.0f/1048576.0f);
+	{
+		auto const x = terraformer::repulsion_between(terraformer::origin, segs);
+		EXPECT_LT(norm(x), 1.0f/1048576.0f);
+	}
+}
+
+TESTCASE(terraformer_repulsion_2d_loc_points_loc_inside_circle)
+{
+	std::array<terraformer::location, 97> segs;
+	for(size_t k = 0; k != std::size(segs); ++k)
+	{
+		geosimd::turn_angle theta{geosimd::turns{static_cast<double>(k)/(std::size(segs) - 1)}};
+		auto const cs_theta = cossin(theta);
+		auto const r = 2.0f;
+		segs[k] = terraformer::origin
+			+ r*terraformer::displacement{cs_theta.cos, cs_theta.sin, 0.0f};
+	}
+
+	{
+		auto const x = terraformer::repulsion_2d_between(terraformer::origin
+			+ terraformer::displacement{1.0f, 0.0f, 0.0f}, segs);
+		EXPECT_LT(norm(x), 1.0f/1048576.0f);
+	}
 }
