@@ -13,16 +13,17 @@ namespace
 
 TESTCASE(terraformer_noisy_drift_expected_norm)
 {
+	auto const seed = static_cast<unsigned __int128>(time(0));
+	Rng rng{seed};
+
 	for(size_t k = 0; k != 5; ++k)
 	{
 		for(size_t l = 0; l != 5; ++l)
 		{
 			geosimd::rotation_angle const expected_theta{geosimd::turns{static_cast<double>(k)/4.0}};
 
-			auto const seed = static_cast<unsigned __int128>(time(0));
 			terraformer::noisy_drift generator{
-				Rng{seed},
-				terraformer::noisy_drift<Rng>::params{
+				terraformer::noisy_drift::params{
 					.drift = expected_theta,
 					.noise_amount = static_cast<float>(l)/4.0f
 				}
@@ -36,7 +37,7 @@ TESTCASE(terraformer_noisy_drift_expected_norm)
 			size_t N = 16*65536;
 			for(size_t m = 0; m != N; ++m)
 			{
-				auto const v = generator();
+				auto const v = generator(rng);
 				r += norm(v);
 				theta += angular_difference(terraformer::direction{v}, expected_dir);
 			}
