@@ -30,10 +30,28 @@ namespace terraformer
 			while(true)
 			{
 				displacement const v{U(m_rng), U(m_rng), 0.0f};
-				if(norm_squared(v) < 1.0f)
+				if(auto const norm_random_sq = norm_squared(v); norm_random_sq < 1.0f) [[likely]]
 				{
+					auto const theta_drift = angular_difference(m_model_params.drift,
+						direction{geom_space::x{}});
+					auto const theta_random = angular_difference(direction{v}, direction{geom_space::x{}});
+					auto const norm_random = std::sqrt(norm_random_sq);
+					auto const r = (1.0f - m_model_params.noise_amount)
+						+ 1.5f*norm_random*m_model_params.noise_amount;
+					auto const theta = (1.0f - m_model_params.noise_amount)*theta_drift
+						+ m_model_params.noise_amount*theta_random;
+					auto const cs = cossin(theta);
+
+					return r*displacement{cs.cos, cs.sin, 0.0f};
+
+
+#if 0
+					auto const norm_random = 1.5f*std::sqrt(norm_random_sq);
+
+
 					return (1.0f - m_model_params.noise_amount)*m_model_params.drift
-						+ m_model_params.noise_amount*v;
+						+ 1.5f*m_model_params.noise_amount*v;
+#endif
 				}
 			}
 		}
