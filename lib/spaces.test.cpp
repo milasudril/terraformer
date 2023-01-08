@@ -1,4 +1,4 @@
-//@	{"target":{"name":"spaces.test.cpp"}}
+//@	{"target":{"name":"spaces.test"}}
 
 #include "./spaces.hpp"
 

@@ -25,8 +25,7 @@ namespace terraformer
 		static constexpr auto min_inertia()
 		{ return 0.5f; }
 
-		constexpr explicit damped_motion_integrator(displacement initial_input,
-			params model_params):
+		constexpr explicit damped_motion_integrator(displacement initial_input, params model_params):
 			m_input_prev{initial_input},
 			m_params{model_params}
 		{

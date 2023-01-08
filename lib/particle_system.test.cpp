@@ -1,4 +1,4 @@
-//@	{"target":{"name":"particle_system.test.cpp"}}
+//@	{"target":{"name":"particle_system.test"}}
 
 #include "./particle_system.hpp"
 
