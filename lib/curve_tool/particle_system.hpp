@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_LIB_PARTICLE_SYSTEM_HPP
 #define TERRAFORMER_LIB_PARTICLE_SYSTEM_HPP
 
-#include "./spaces.hpp"
+#include "lib/common/spaces.hpp"
 
 #include <span>
 #include <memory>

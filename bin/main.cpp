@@ -1,6 +1,6 @@
 //@	{"target":{"name":"main.o"}}
 
-#include "lib/curve_integrator.hpp"
+#include "lib/curve_tool/curve_integrator.hpp"
 
 #include <random>
 #include <pcg-cpp/include/pcg_random.hpp>

@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_LIB_NOISY_DRIFT_HPP
 #define TERRAFORMER_LIB_NOISY_DRIFT_HPP
 
-#include "./spaces.hpp"
+#include "lib/common/spaces.hpp"
 
 #include <random>
 
