@@ -42,9 +42,6 @@ namespace terraformer
 		});
 	}
 
-	bool file_valid(image_io_detail::empty<image>, char const* filename);
-
-
 	void store(span_2d<rgba_pixel const> pixels,
 		void* arg, image_io_detail::output_file_factory make_output_file);
 

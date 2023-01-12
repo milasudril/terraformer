@@ -9,7 +9,6 @@
 #include <OpenEXR/ImfOutputFile.h>
 #include <OpenEXR/ImfChannelList.h>
 #include <OpenEXR/ImfArray.h>
-#include <OpenEXR/ImfTestFile.h>
 #include <OpenEXR/ImfHeader.h>
 #include <OpenEXR/ImfFrameBuffer.h>
 
@@ -100,9 +99,4 @@ void terraformer::store(span_2d<rgba_pixel const> pixels,
 	auto dest = make_output_file(arg, header);
 	dest.setFrameBuffer(fb);
 	dest.writePixels(pixels.height());
-}
-
-bool terraformer::file_valid(image_io_detail::empty<image>, char const* filename)
-{
-	return Imf::isOpenExrFile(filename);
 }
