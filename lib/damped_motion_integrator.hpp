@@ -1,18 +1,12 @@
 #ifndef TERRAFORMER_LIB_DAMPED_MOTION_INTEGRATOR_HPP
 #define TERRAFORMER_LIB_DAMPED_MOTION_INTEGRATOR_HPP
 
-#include "./spaces.hpp"
+#include "./particle_state.hpp"
 
 #include <stdexcept>
 
 namespace terraformer
 {
-	struct particle_state
-	{
-		displacement v;
-		location r;
-	};
-
 	class damped_motion_integrator
 	{
 	public:
