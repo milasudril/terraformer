@@ -68,6 +68,26 @@ namespace terraformer
 	{
 		store(img.pixels(), std::forward<FileWriter>(writer));
 	}
+
+	grayscale_image load(image_io_detail::empty<grayscale_image>,
+		void* arg,
+		image_io_detail::input_file_factory make_input_file);
+
+	inline grayscale_image load(image_io_detail::empty<grayscale_image>, char const* filename)
+	{
+		return load(image_io_detail::empty<grayscale_image>{}, const_cast<char*>(filename), [](void* filename) {
+			return Imf::InputFile{static_cast<char const*>(filename)};
+		});
+	}
+
+	template<class FileReader>
+	grayscale_image load(image_io_detail::empty<grayscale_image>, FileReader&& reader)
+	{
+		ilm_input_adapter input{std::forward<FileReader>(reader)};
+		return load(image_io_detail::empty<grayscale_image>{}, &input, [](void* input) {
+			return Imf::InputFile{*static_cast<ilm_input_adapter<FileReader>*>(input)};
+		});
+	}
 }
 
 #endif

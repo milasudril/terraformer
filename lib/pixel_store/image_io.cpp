@@ -12,6 +12,43 @@
 #include <OpenEXR/ImfHeader.h>
 #include <OpenEXR/ImfFrameBuffer.h>
 
+namespace
+{
+	constexpr unsigned int red_bit = 0x1;
+	constexpr unsigned int green_bit = 0x2;
+	constexpr unsigned int blue_bit = 0x4;
+	constexpr auto rgb_mask = red_bit | green_bit | blue_bit;
+	constexpr unsigned int alpha_bit = 0x8;
+	constexpr auto rgba_mask = rgb_mask | alpha_bit;
+	constexpr unsigned int luminance_bit = 0x10;
+	constexpr unsigned int unsupported_bit = 0x8000'0000;
+
+	constexpr unsigned int channel_name_to_channel_bit(std::string_view name)
+	{
+		if(name == "R") { return red_bit; }
+
+		if(name == "G") { return green_bit; }
+
+		if(name == "B") { return blue_bit; }
+
+		if(name == "A") { return alpha_bit; }
+
+		if(name == "Y") { return luminance_bit; }
+
+		return unsupported_bit;
+	}
+
+	unsigned int get_channel_mask(Imf::ChannelList const& channels)
+	{
+		unsigned int ret = 0;
+		for(auto i = std::begin(channels); i != std::end(channels); ++i)
+		{
+			ret |= channel_name_to_channel_bit(i.name());
+		}
+		return ret;
+	}
+}
+
 terraformer::image terraformer::load(
 	image_io_detail::empty<image>,
 	void* arg,
@@ -25,7 +62,11 @@ terraformer::image terraformer::load(
 	auto h = box.max.y - box.min.y + 1;
 
 	if(w > 65535 || h > 65535)
-	{ throw std::runtime_error{std::string{"This image is too large."}}; }
+	{ throw std::runtime_error{"Tried to load a too large image"}; }
+
+	auto const channel_mask = get_channel_mask(src.header().channels());
+	if((channel_mask & (~rgba_mask)) || !(channel_mask&rgb_mask))
+	{ throw std::runtime_error{"Unsupported pixel format"}; }
 
 	image ret{static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
 	Imf::FrameBuffer fb;
@@ -53,7 +94,7 @@ terraformer::image terraformer::load(
 	src.setFrameBuffer(fb);
 	src.readPixels(box.min.y, box.max.y);
 
-	if(!src.header().channels().findChannel("A"))
+	if(!(channel_mask&alpha_bit))
 	{
 		std::ranges::transform(ret.pixels(), std::begin(ret.pixels()), [](auto val) {
 			val.alpha(1.0f);
@@ -99,4 +140,36 @@ void terraformer::store(span_2d<rgba_pixel const> pixels,
 	auto dest = make_output_file(arg, header);
 	dest.setFrameBuffer(fb);
 	dest.writePixels(pixels.height());
+}
+
+terraformer::grayscale_image terraformer::load(image_io_detail::empty<grayscale_image>,
+	void* arg,
+	image_io_detail::input_file_factory make_input_file)
+{
+	auto src = make_input_file(arg);
+
+	auto box = src.header().dataWindow();
+
+	auto w = box.max.x - box.min.x + 1;
+	auto h = box.max.y - box.min.y + 1;
+
+	if(w > 65535 || h > 65535)
+	{ throw std::runtime_error{std::string{"This image is too large."}}; }
+
+	auto const channel_mask = get_channel_mask(src.header().channels());
+	if(channel_mask != luminance_bit)
+	{ throw std::runtime_error{"Unsupported pixel format"}; }
+
+	grayscale_image ret{static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
+	Imf::FrameBuffer fb;
+	fb.insert("Y",
+		Imf::Slice{Imf::FLOAT,
+			(char*)(ret.pixels().data()) + 0 * sizeof(float),
+			sizeof(float),
+			sizeof(float) * w});
+
+	src.setFrameBuffer(fb);
+	src.readPixels(box.min.y, box.max.y);
+
+	return ret;
 }
