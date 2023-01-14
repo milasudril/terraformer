@@ -4,6 +4,7 @@
 //@	}
 
 #include "./image_io.hpp"
+#include "./channel_mask.hpp"
 
 #include <OpenEXR/ImfInputFile.h>
 #include <OpenEXR/ImfOutputFile.h>
@@ -14,36 +15,12 @@
 
 namespace
 {
-	constexpr unsigned int red_bit = 0x1;
-	constexpr unsigned int green_bit = 0x2;
-	constexpr unsigned int blue_bit = 0x4;
-	constexpr auto rgb_mask = red_bit | green_bit | blue_bit;
-	constexpr unsigned int alpha_bit = 0x8;
-	constexpr auto rgba_mask = rgb_mask | alpha_bit;
-	constexpr unsigned int luminance_bit = 0x10;
-	constexpr unsigned int unsupported_bit = 0x8000'0000;
-
-	constexpr unsigned int channel_name_to_channel_bit(std::string_view name)
+	terraformer::channel_mask get_channel_mask(Imf::ChannelList const& channels)
 	{
-		if(name == "R") { return red_bit; }
-
-		if(name == "G") { return green_bit; }
-
-		if(name == "B") { return blue_bit; }
-
-		if(name == "A") { return alpha_bit; }
-
-		if(name == "Y") { return luminance_bit; }
-
-		return unsupported_bit;
-	}
-
-	unsigned int get_channel_mask(Imf::ChannelList const& channels)
-	{
-		unsigned int ret = 0;
+		terraformer::channel_mask ret;
 		for(auto i = std::begin(channels); i != std::end(channels); ++i)
 		{
-			ret |= channel_name_to_channel_bit(i.name());
+			ret.set(i.name());
 		}
 		return ret;
 	}
@@ -65,7 +42,7 @@ terraformer::image terraformer::load(
 	{ throw std::runtime_error{"Tried to load a too large image"}; }
 
 	auto const channel_mask = get_channel_mask(src.header().channels());
-	if((channel_mask & (~rgba_mask)) || !(channel_mask&rgb_mask))
+	if(!represents_color_image(channel_mask))
 	{ throw std::runtime_error{"Unsupported pixel format"}; }
 
 	image ret{static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
@@ -94,7 +71,7 @@ terraformer::image terraformer::load(
 	src.setFrameBuffer(fb);
 	src.readPixels(box.min.y, box.max.y);
 
-	if(!(channel_mask&alpha_bit))
+	if(!channel_mask.has_alpha())
 	{
 		std::ranges::transform(ret.pixels(), std::begin(ret.pixels()), [](auto val) {
 			val.alpha(1.0f);
@@ -157,7 +134,7 @@ terraformer::grayscale_image terraformer::load(image_io_detail::empty<grayscale_
 	{ throw std::runtime_error{std::string{"This image is too large."}}; }
 
 	auto const channel_mask = get_channel_mask(src.header().channels());
-	if(channel_mask != luminance_bit)
+	if(represents_grayscale_image(channel_mask))
 	{ throw std::runtime_error{"Unsupported pixel format"}; }
 
 	grayscale_image ret{static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
