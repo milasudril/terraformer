@@ -16,14 +16,12 @@ namespace terraformer
 {
 	namespace array_tuple_detail
 	{
-		template<class T, class U>
-		concept same_as_unqual = std::same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
-
 		template <size_t... Is, class TupleLHS, class TupleRHS>
 		void assign(std::index_sequence<Is...>, TupleLHS& l, size_t index, TupleRHS&& r)
 		{
+			using tuple_rhs = std::remove_cvref_t<TupleRHS>;
 			(...,(
-			get<Is>(l)[index] = std::forward<std::tuple_element_t<Is, TupleRHS>>(get<Is>(r))
+			get<Is>(l)[index] = std::forward<std::tuple_element_t<Is, tuple_rhs>>(get<Is>(r))
 			));
 		}
 
@@ -231,7 +229,7 @@ namespace terraformer
 		{ return !(*this == other); }
 
 		template<class Tuple>
-		requires(array_tuple_detail::same_as_unqual<Tuple, value_type>)
+		requires(same_as_unqual<Tuple, value_type>)
 		void push_back(Tuple&& t)
 		{
 			if(m_size == m_capacity) [[unlikely]]
@@ -294,7 +292,7 @@ namespace terraformer
 
 
 		template<class Tuple>
-		requires(array_tuple_detail::same_as_unqual<Tuple, value_type>)
+		requires(same_as_unqual<Tuple, value_type>)
 		void assign(size_type index, Tuple&& t)
 		{
 			assert(index < m_size);
