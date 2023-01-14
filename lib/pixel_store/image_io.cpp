@@ -43,7 +43,7 @@ terraformer::image terraformer::load(
 
 	auto const channel_mask = get_channel_mask(src.header().channels());
 	if(!represents_color_image(channel_mask))
-	{ throw std::runtime_error{"Unsupported pixel format"}; }
+	{ throw std::runtime_error{"Expected a color image"}; }
 
 	image ret{static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
 	Imf::FrameBuffer fb;
@@ -84,7 +84,7 @@ terraformer::image terraformer::load(
 
 void terraformer::store(span_2d<rgba_pixel const> pixels,
 	void* arg,
-    image_io_detail::output_file_factory make_output_file)
+	image_io_detail::output_file_factory make_output_file)
 {
 	Imf::Header header{static_cast<int>(pixels.width()), static_cast<int>(pixels.height())};
 	header.channels().insert("R", Imf::Channel{Imf::FLOAT});
@@ -131,11 +131,11 @@ terraformer::grayscale_image terraformer::load(image_io_detail::empty<grayscale_
 	auto h = box.max.y - box.min.y + 1;
 
 	if(w > 65535 || h > 65535)
-	{ throw std::runtime_error{std::string{"This image is too large."}}; }
+	{ throw std::runtime_error{std::string{"Tried to load a too large image"}}; }
 
 	auto const channel_mask = get_channel_mask(src.header().channels());
-	if(represents_grayscale_image(channel_mask))
-	{ throw std::runtime_error{"Unsupported pixel format"}; }
+	if(!represents_grayscale_image(channel_mask))
+	{ throw std::runtime_error{"Expected a grayscale image"}; }
 
 	grayscale_image ret{static_cast<uint32_t>(w), static_cast<uint32_t>(h)};
 	Imf::FrameBuffer fb;
@@ -149,4 +149,23 @@ terraformer::grayscale_image terraformer::load(image_io_detail::empty<grayscale_
 	src.readPixels(box.min.y, box.max.y);
 
 	return ret;
+}
+
+void terraformer::store(span_2d<float const> pixels,
+	void* arg,
+	image_io_detail::output_file_factory make_output_file)
+{
+	Imf::Header header{static_cast<int>(pixels.width()), static_cast<int>(pixels.height())};
+	header.channels().insert("Y", Imf::Channel{Imf::FLOAT});
+
+	Imf::FrameBuffer fb;
+	fb.insert("Y",
+		Imf::Slice{Imf::FLOAT,
+		(char*)(pixels.data()) + 0 * sizeof(float),
+		sizeof(float),
+		sizeof(float) * pixels.width()});
+
+	auto dest = make_output_file(arg, header);
+	dest.setFrameBuffer(fb);
+	dest.writePixels(pixels.height());
 }

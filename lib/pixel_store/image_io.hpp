@@ -69,6 +69,8 @@ namespace terraformer
 		store(img.pixels(), std::forward<FileWriter>(writer));
 	}
 
+
+
 	grayscale_image load(image_io_detail::empty<grayscale_image>,
 		void* arg,
 		image_io_detail::input_file_factory make_input_file);
@@ -87,6 +89,33 @@ namespace terraformer
 		return load(image_io_detail::empty<grayscale_image>{}, &input, [](void* input) {
 			return Imf::InputFile{*static_cast<ilm_input_adapter<FileReader>*>(input)};
 		});
+	}
+
+	void store(span_2d<float const> pixels,
+		void* arg, image_io_detail::output_file_factory make_output_file);
+
+	inline void store(span_2d<float const> pixels, char const* filename)
+	{
+		store(pixels, const_cast<char*>(filename), [](void* filename, Imf::Header const& header) {
+			return Imf::OutputFile{static_cast<char const*>(filename), header};
+		});
+	}
+
+	inline void store(grayscale_image const& img, char const* filename) { store(img.pixels(), filename); }
+
+	template<class FileWriter>
+	void store(span_2d<float const> pixels, FileWriter&& writer)
+	{
+		ilm_output_adapter output{std::forward<FileWriter>(writer)};
+		store(pixels, &output, [](void* output, Imf::Header const& header) {
+			return Imf::OutputFile{*static_cast<ilm_output_adapter<FileWriter>*>(output), header};
+		});
+	}
+
+	template<class FileWriter>
+	void store(grayscale_image const& img, FileWriter&& writer)
+	{
+		store(img.pixels(), std::forward<FileWriter>(writer));
 	}
 }
 

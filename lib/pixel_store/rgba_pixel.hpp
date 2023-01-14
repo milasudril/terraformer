@@ -100,6 +100,10 @@ namespace terraformer
 			return *this;
 		}
 
+		constexpr bool operator==(rgba_pixel const&) const = default;
+
+		constexpr bool operator!=(rgba_pixel const&) const = default;
+
 	private:
 		StorageType m_value;
 	};
@@ -119,6 +123,8 @@ namespace terraformer
 		return a * c;
 	}
 
+	class 𝟛d_mesh;
+
 	constexpr rgba_pixel black() { return rgba_pixel{0.0f, 0.0f, 0.0f}; }
 
 	constexpr rgba_pixel red() { return rgba_pixel{1.0f, 0.0f, 0.0f}; }
@@ -134,5 +140,8 @@ namespace terraformer
 	constexpr rgba_pixel yellow() { return rgba_pixel{1.0f, 1.0f, 0.0f}; }
 
 	constexpr rgba_pixel white() { return rgba_pixel{1.0f, 1.0f, 1.0f}; }
+
+	inline auto to_string(rgba_pixel const& x)
+	{ return to_string(x.value()); }
 }
 #endif
