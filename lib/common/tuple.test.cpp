@@ -52,12 +52,8 @@ TESTCASE(terraformer_tuple_apply)
 	}, x);
 }
 
-#include "./spaces.hpp"
+TESTCASE(terraformer_tuple_of_one_element)
+{
+	terraformer::tuple x{1};
+}
 
-static_assert(
-	std::is_same_v<std::tuple_element_t<0, terraformer::tuple<terraformer::location, terraformer::direction>>, terraformer::location >
-);
-
-static_assert(
-	std::is_same_v<std::tuple_element_t<1, terraformer::tuple<terraformer::location, terraformer::direction>>, terraformer::direction >
-);

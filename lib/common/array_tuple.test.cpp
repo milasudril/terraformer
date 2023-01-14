@@ -31,7 +31,7 @@ namespace
 	auto generate<array_tulpe_not_trivally_copyable::value_type>(size_t k)
 	{
 		return array_tulpe_not_trivally_copyable::value_type{
-			strings[k%3],
+			std::string{strings[k%3]},
 			std::vector{1*k, 2*k, 3*k}
 		};
 	}

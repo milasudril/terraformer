@@ -72,7 +72,7 @@ namespace terraformer
 			explicit const_iterator(size_t index, storage_type const& storage):
 				m_index{index},
 				m_base_pointers{terraformer::apply([](auto const& ... item){
-					return tuple<Types const*...>{item.get()...};
+					return tuple{as_ptr_to_const(item.get())...};
 				}, storage)}
 			{}
 
