@@ -1,5 +1,5 @@
 //@	{
-//@	"targets":[{"name":"image_io.o", "type":"object", "pkgconfig_libs":["OpenEXR"]}],
+//@	"target":{"name":"image_io.o", "type":"object", "pkgconfig_libs":["OpenEXR"]},
 //@	"dependencies":[{"ref":"OpenEXR", "origin":"pkg-config"}]
 //@	}
 

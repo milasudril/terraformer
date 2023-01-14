@@ -16,7 +16,7 @@ namespace terraformer
 
 		constexpr channel_mask& set(std::string_view name)
 		{
-			m_value |= name;
+			m_value |= channel_name_to_channel_bit(name);
 			return *this;
 		}
 
@@ -52,14 +52,14 @@ namespace terraformer
 
 		constexpr channel_mask& set_rgb()
 		{
-			m_value |= mask_rgb;
-			return *tshi;
+			m_value |= rgb_mask;
+			return *this;
 		}
 
 		constexpr channel_mask& set_rgba()
 		{
-			m_value |= mask_rgba;
-			return *tshi;
+			m_value |= rgb_mask;
+			return *this;
 		}
 
 		constexpr channel_mask& clear(std::string_view name)
@@ -100,14 +100,14 @@ namespace terraformer
 
 		constexpr channel_mask& clear_rgb()
 		{
-			m_value &= ~mask_rgb;
-			return *tshi;
+			m_value &= ~rgb_mask;
+			return *this;
 		}
 
 		constexpr channel_mask& clear_rgba()
 		{
-			m_value &= ~mask_rgba;
-			return *tshi;
+			m_value &= ~rgba_mask;
+			return *this;
 		}
 
 		[[nodiscard]] constexpr bool has(std::string_view name)
@@ -129,28 +129,28 @@ namespace terraformer
 		{ return m_value & luminance_bit; }
 
 		[[nodiscard]] constexpr bool has_rgb() const
-		{ return m_value & mask_rgb; }
+		{ return (m_value & rgb_mask) == rgb_mask; }
 
 		[[nodiscard]] constexpr bool has_rgba() const
-		{ return m_value & mask_rgba; }
+		{ return (m_value & rgba_mask) == rgba_mask; }
 
 		[[nodiscard]] constexpr bool has_unsupported_channel() const
-		{ return m_value & has_unsupported_channel; }
+		{ return m_value & unsupported_bit; }
 
-		[[nodiscard]] constexpr bool operator==(channel_mask const&) = default;
+		[[nodiscard]] constexpr bool operator==(channel_mask const&) const = default;
 
-		[[nodiscard]] constexpr bool operator!=(channel_mask const&) = default;
+		[[nodiscard]] constexpr bool operator!=(channel_mask const&) const = default;
 
 	private:
-		constexpr unsigned int red_bit = 0x1;
-		constexpr unsigned int green_bit = 0x2;
-		constexpr unsigned int blue_bit = 0x4;
-		constexpr unsigned int alpha_bit = 0x8;
-		constexpr unsigned int luminance_bit = 0x10;
-		constexpr unsigned int unsupported_bit = 0x8000'0000;
+		static constexpr unsigned int red_bit = 0x1;
+		static constexpr unsigned int green_bit = 0x2;
+		static constexpr unsigned int blue_bit = 0x4;
+		static constexpr unsigned int alpha_bit = 0x8;
+		static constexpr unsigned int luminance_bit = 0x10;
+		static constexpr unsigned int unsupported_bit = 0x8000'0000;
 
-		constexpr auto rgb_mask = red_bit | green_bit | blue_bit;
-		constexpr auto rgba_mask = rgb_mask | alpha_bit;
+		static constexpr auto rgb_mask = red_bit | green_bit | blue_bit;
+		static constexpr auto rgba_mask = rgb_mask | alpha_bit;
 
 		[[nodiscard]] static constexpr unsigned int channel_name_to_channel_bit(std::string_view name)
 		{
