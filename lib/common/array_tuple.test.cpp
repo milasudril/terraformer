@@ -25,13 +25,18 @@ namespace
 		return array_tuple_non_copyable::value_type{};
 	}
 
-	constexpr char const* strings[]={"Hello", "World", "Lol"};
+	constexpr char const* strings[]={
+		"Hello",
+		"World",
+		"Lol",
+		"This string should definitely exceed SBO capacity"
+	};
 
 	template<>
 	auto generate<array_tulpe_not_trivally_copyable::value_type>(size_t k)
 	{
 		return array_tulpe_not_trivally_copyable::value_type{
-			std::string{strings[k%3]},
+			std::string{strings[k%4]},
 			std::vector{1*k, 2*k, 3*k}
 		};
 	}

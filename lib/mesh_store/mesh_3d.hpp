@@ -13,7 +13,7 @@ namespace terraformer
 		uint32_t v3;
 	};
 
-	using vertex = tuple<location, displacement>;
+	using vertex = tuple<location, direction>;
 
 	class mesh_3d
 	{
@@ -34,7 +34,7 @@ namespace terraformer
 		{ return m_vertex_data.get<1>(); }
 
 	private:
-		array_tuple<location, displacement> m_vertex_data;
+		array_tuple<location, direction> m_vertex_data;
 		array_tuple<face> m_faces;
 	};
 }

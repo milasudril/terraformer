@@ -17,7 +17,7 @@ namespace terraformer
 	namespace array_tuple_detail
 	{
 		template <size_t... Is, class TupleLHS, class TupleRHS>
-		void assign(std::index_sequence<Is...>, TupleLHS& l, size_t index, TupleRHS&& r)
+		void assign(std::index_sequence<Is...>, TupleLHS const& l, size_t index, TupleRHS&& r)
 		{
 			using tuple_rhs = std::remove_cvref_t<TupleRHS>;
 			(...,(
@@ -25,19 +25,37 @@ namespace terraformer
 			));
 		}
 
-		template <size_t... Is, class TupleFrom, class TupleTo>
-		void move_data(std::index_sequence<Is...>, TupleFrom&& from, TupleTo& to, size_t size)
+		template <size_t... Is, class TupleLHS, class TupleRHS>
+		void construct_at(std::index_sequence<Is...>, TupleLHS const& l, size_t index, TupleRHS&& r)
+		{
+			using tuple_rhs = std::remove_cvref_t<TupleRHS>;
+			(...,(
+				std::construct_at(get<Is>(l) + index,
+					std::forward<std::tuple_element_t<Is, tuple_rhs>>(get<Is>(r)))
+			));
+		}
+
+		template <size_t... Is, class Tuple>
+		void destroy(std::index_sequence<Is...>, Tuple const& from, size_t size)
 		{
 			(...,(
-			std::move(get<Is>(from).get(), get<Is>(from).get() + size, get<Is>(to).get())
+			std::destroy(get<Is>(from), get<Is>(from) + size)
 			));
 		}
 
 		template <size_t... Is, class TupleFrom, class TupleTo>
-		void copy_data(std::index_sequence<Is...>, TupleFrom const& from, TupleTo& to, size_t size)
+		void uninitialized_move(std::index_sequence<Is...>, TupleFrom const& from, TupleTo const& to, size_t size)
 		{
 			(...,(
-			std::copy(get<Is>(from).get(), get<Is>(from).get() + size, get<Is>(to).get())
+			std::uninitialized_move(get<Is>(from), get<Is>(from) + size, get<Is>(to))
+			));
+		}
+
+		template <size_t... Is, class TupleFrom, class TupleTo>
+		void uninitialized_copy(std::index_sequence<Is...>, TupleFrom const& from, TupleTo const& to, size_t size)
+		{
+			(...,(
+			std::uninitialized_copy(get<Is>(from), get<Is>(from) + size, get<Is>(to))
 			));
 		}
 
@@ -45,15 +63,46 @@ namespace terraformer
 		bool equal(std::index_sequence<Is...>, Tuple const& a, Tuple const& b, size_t size)
 		{
 			return (... &&
-			std::equal(get<Is>(a).get(), get<Is>(a).get() + size, get<Is>(b).get())
+			std::equal(get<Is>(a), get<Is>(a) + size, get<Is>(b))
 			);
+		}
+
+		template<class T>
+		class ptr_to_buffer_holder
+		{
+		public:
+			using type = T;
+
+			explicit ptr_to_buffer_holder(void* ptr):m_ptr{ptr}{}
+
+			auto get() const
+			{ return m_ptr; }
+
+		private:
+			void* m_ptr;
+		};
+
+		static_assert(sizeof(ptr_to_buffer_holder<int>) == sizeof(void*));
+
+		template<class ... Types>
+		using temp_storage = tuple<ptr_to_buffer_holder<Types>...>;
+
+		template<class ... Types>
+		auto make_temp_storage(uint32_t elem_count)
+		{
+			return temp_storage
+			{
+				// Do not care about the possibility of nullptr for now. Let it crash if
+				// a pointer is nullptr
+				ptr_to_buffer_holder<Types>{malloc(static_cast<size_t>(elem_count)*sizeof(Types))}...
+			};
 		}
 	}
 
 	template<class ... Types>
 	class array_tuple
 	{
-		using storage_type = tuple<std::unique_ptr<Types[]>...>;
+		using storage_type = tuple<Types*...>;
 	public:
 		using size_type = uint32_t;
 		using value_type = tuple<Types...>;
@@ -72,7 +121,7 @@ namespace terraformer
 			explicit const_iterator(size_t index, storage_type const& storage):
 				m_index{index},
 				m_base_pointers{terraformer::apply([](auto const& ... item){
-					return tuple{as_ptr_to_const(item.get())...};
+					return tuple{as_ptr_to_const(item)...};
 				}, storage)}
 			{}
 
@@ -172,25 +221,28 @@ namespace terraformer
 			tuple<Types const*...> m_base_pointers;
 		};
 
-		array_tuple():m_size{0},m_capacity{0}{}
+		array_tuple():m_size{0},m_capacity{0},m_storage{}
+		{}
 
-		~array_tuple() = default;
+		~array_tuple()
+		{ free(); }
 
 		[[nodiscard]] array_tuple(array_tuple&& other) noexcept:
 			m_size{other.m_size},
 			m_capacity{other.m_capacity},
-			m_storage{std::move(other.m_storage)}
+			m_storage{other.m_storage}
 		{
 			other.m_size = 0;
 			other.m_capacity = 0;
+			other.m_storage = storage_type{};
 		}
 
 		[[nodiscard]] array_tuple(array_tuple const& other):
 			m_size{other.m_size},
 			m_capacity{other.m_capacity},
-			m_storage{tuple{std::make_unique_for_overwrite<Types[]>(other.m_capacity)...}}
+			m_storage{create_storage(other.m_capacity)}
 		{
-			array_tuple_detail::copy_data(std::make_index_sequence<sizeof...(Types)>{},
+			array_tuple_detail::uninitialized_copy(std::make_index_sequence<sizeof...(Types)>{},
 				other.m_storage,
 				m_storage,
 				m_size);
@@ -203,6 +255,7 @@ namespace terraformer
 
 		array_tuple& operator=(array_tuple&& other) noexcept
 		{
+			free();
 			m_size = std::exchange(other.m_size, 0);
 			m_capacity = std::exchange(other.m_capacity, 0);
 			m_storage = std::exchange(other.m_storage, storage_type{});
@@ -235,7 +288,7 @@ namespace terraformer
 			if(m_size == m_capacity) [[unlikely]]
 			{realloc();}
 
-			array_tuple_detail::assign(std::make_index_sequence<sizeof...(Types)>{},
+			array_tuple_detail::construct_at(std::make_index_sequence<sizeof...(Types)>{},
 				m_storage, m_size, std::forward<Tuple>(t));
 			++m_size;
 		}
@@ -281,12 +334,12 @@ namespace terraformer
 
 		template<size_t I>
 		[[nodiscard]] auto get()
-		{ return std::span{terraformer::get<I>(m_storage).get(), m_size}; }
+		{ return std::span{terraformer::get<I>(m_storage), m_size}; }
 
 		template<size_t I>
 		[[nodiscard]] auto get() const
 		{
-			return std::span{as_ptr_to_const(terraformer::get<I>(m_storage).get()), m_size};
+			return std::span{as_ptr_to_const(terraformer::get<I>(m_storage)), m_size};
 		}
 
 
@@ -310,16 +363,40 @@ namespace terraformer
 			realloc(static_cast<size_type>(new_capacity));
 		}
 
+		static auto create_storage(size_type capacity)
+		{
+			auto new_buffer = array_tuple_detail::make_temp_storage<Types...>(capacity);
+			auto new_storage = terraformer::apply([](auto ... item){
+				return tuple{reinterpret_cast<std::decay_t<decltype(item)>::type*>(item.get())...};
+			}, new_buffer);
+			return new_storage;
+		}
+
 		void realloc(size_type new_capacity)
 		{
-			auto new_storage = tuple{std::make_unique_for_overwrite<Types[]>(new_capacity)...};
+			auto new_storage = create_storage(new_capacity);
+
 			if(m_size != 0)
 			{
-				array_tuple_detail::move_data(std::make_index_sequence<sizeof...(Types)>{},
-					std::move(m_storage), new_storage, m_size);
+				array_tuple_detail::uninitialized_move(std::make_index_sequence<sizeof...(Types)>{},
+					m_storage, new_storage, m_size);
 			}
 			m_capacity = static_cast<size_type>(new_capacity);
-			m_storage = std::move(new_storage);
+			terraformer::apply([](auto... item){
+				(..., ::free(item));
+			}, m_storage);
+			m_storage = new_storage;
+		}
+
+		void free()
+		{
+			array_tuple_detail::destroy(std::make_index_sequence<sizeof...(Types)>{},
+				m_storage,
+				m_size);
+
+			terraformer::apply([](auto... item){
+				(..., ::free(item));
+			}, m_storage);
 		}
 
 		size_type m_size;
