@@ -33,6 +33,9 @@ namespace terraformer
 		auto normals() const
 		{ return m_vertex_data.get<1>(); }
 
+		bool operator==(mesh_3d const&) const = default;
+		bool operator!=(mesh_3d const&) const = default;
+
 	private:
 		array_tuple<location, direction> m_vertex_data;
 		array_tuple<face> m_faces;
