@@ -58,60 +58,14 @@ namespace terraformer
 
 		constexpr channel_mask& set_rgba()
 		{
-			m_value |= rgb_mask;
-			return *this;
-		}
-
-		constexpr channel_mask& clear(std::string_view name)
-		{
-			m_value &= ~channel_name_to_channel_bit(name);
-			return *this;
-		}
-
-		constexpr channel_mask& clear_red()
-		{
-			m_value &= ~red_bit;
-			return *this;
-		}
-
-		constexpr channel_mask& clear_green()
-		{
-			m_value &= ~green_bit;
-			return *this;
-		}
-
-		constexpr channel_mask& clear_blue()
-		{
-			m_value &= ~blue_bit;
-			return *this;
-		}
-
-		constexpr channel_mask& clear_alpha()
-		{
-			m_value &= ~alpha_bit;
-			return *this;
-		}
-
-		constexpr channel_mask& clear_luminance()
-		{
-			m_value &= ~luminance_bit;
-			return *this;
-		}
-
-		constexpr channel_mask& clear_rgb()
-		{
-			m_value &= ~rgb_mask;
-			return *this;
-		}
-
-		constexpr channel_mask& clear_rgba()
-		{
-			m_value &= ~rgba_mask;
+			m_value |= rgba_mask;
 			return *this;
 		}
 
 		[[nodiscard]] constexpr bool has(std::string_view name)
-		{ return m_value & channel_name_to_channel_bit(name); }
+		{
+			return m_value & (channel_name_to_channel_bit(name) & ~unsupported_bit);
+		}
 
 		[[nodiscard]] constexpr bool has_red() const
 		{ return m_value & red_bit; }
