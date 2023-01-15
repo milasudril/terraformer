@@ -13,6 +13,8 @@ namespace terraformer
 	public:
 		using IndexType = uint32_t;
 
+		using mapped_type = T;
+
 		constexpr explicit span_2d(): span_2d{0u, 0u, nullptr} {}
 
 		constexpr explicit span_2d(IndexType w, IndexType h, T* ptr):

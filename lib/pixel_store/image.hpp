@@ -5,10 +5,9 @@
 
 #include "./rgba_pixel.hpp"
 
-#include "./span_2d.hpp"
+#include "lib/common/span_2d.hpp"
 
 #include <algorithm>
-#include <span>
 #include <memory>
 
 namespace terraformer
@@ -17,6 +16,8 @@ namespace terraformer
 	class basic_image
 	{
 	public:
+		using mapped_type = PixelType;
+
 		using IndexType = typename span_2d<PixelType>::IndexType;
 
 		explicit basic_image(IndexType width, IndexType height):

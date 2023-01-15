@@ -19,11 +19,8 @@ namespace terraformer
 	template<class MapType, class MappedType>
 	concept map_2d = requires(MapType f, uint32_t x, uint32_t y)
 	{
-		typename MapType::mapped_type;
-		{f(x, y)} -> std::same_as<MappedType>;
-	} && std::is_same_v<MappedType, typename MapType::mapped_type>;
-
-	static_assert(!map_2d<int, int>);
+		{f(x, y)} -> std::convertible_to<MappedType>;
+	};
 }
 
 #endif
