@@ -30,7 +30,7 @@ namespace
 }
 
 
-void terraformer::store(mesh_3d const& mesh, FILE* file, char const* object_name)
+void terraformer::store(mesh const& mesh, FILE* file, char const* object_name)
 {
 	if(object_name != nullptr)
 	{

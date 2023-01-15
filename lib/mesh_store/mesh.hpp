@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_MESH_3D_HPP
-#define TERRAFORMER_MESH_3D_HPP
+#ifndef TERRAFORMER_MESH_HPP
+#define TERRAFORMER_MESH_HPP
 
 #include "lib/common/array_tuple.hpp"
 #include "lib/common/spaces.hpp"
@@ -15,7 +15,7 @@ namespace terraformer
 
 	using vertex = tuple<location, direction>;
 
-	class mesh_3d
+	class mesh
 	{
 	public:
 		void push_back(vertex v)
@@ -33,8 +33,8 @@ namespace terraformer
 		auto normals() const
 		{ return m_vertex_data.get<1>(); }
 
-		bool operator==(mesh_3d const&) const = default;
-		bool operator!=(mesh_3d const&) const = default;
+		bool operator==(mesh const&) const = default;
+		bool operator!=(mesh const&) const = default;
 
 	private:
 		array_tuple<location, direction> m_vertex_data;

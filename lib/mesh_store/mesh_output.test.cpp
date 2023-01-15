@@ -6,7 +6,7 @@
 
 TESTCASE(terraformer_mesh_store_store_mesh)
 {
-	terraformer::mesh_3d mesh;
+	terraformer::mesh mesh;
 	constexpr auto num_verts = 4;
 
 	std::array<terraformer::location, num_verts> locs

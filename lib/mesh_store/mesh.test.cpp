@@ -1,15 +1,15 @@
-//@	{"target":{"name":"mesh_3d.test"}}
+//@	{"target":{"name":"mesh.test"}}
 
-#include "./mesh_3d.hpp"
+#include "./mesh.hpp"
 
 #include "testfwk/testfwk.hpp"
 
 static_assert(std::is_same_v<std::tuple_element_t<0, terraformer::vertex>, terraformer::location>);
 static_assert(std::is_same_v<std::tuple_element_t<1, terraformer::vertex>, terraformer::direction>);
 
-TESTCASE(terraformer_mesh_3d_push_back)
+TESTCASE(terraformer_mesh_push_back)
 {
-	terraformer::mesh_3d mesh;
+	terraformer::mesh mesh;
 	mesh.push_back(terraformer::vertex{
 		terraformer::location{1.0f, 2.0f, 3.0f},
 		terraformer::direction{terraformer::geom_space::x{}}
