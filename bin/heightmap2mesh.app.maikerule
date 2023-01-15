@@ -1,0 +1,4 @@
+{
+	"target":{"name":"heightmap2mesh"}
+	,"dependencies":[{"ref":"./heightmap2mesh.o", "rel":"implementation"}]
+}
