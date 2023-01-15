@@ -1,0 +1,4 @@
+{
+	"target":{"name":"curve_gen"}
+	,"dependencies":[{"ref":"./curve_gen.o", "rel":"implementation"}]
+}

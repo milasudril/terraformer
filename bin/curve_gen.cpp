@@ -1,4 +1,4 @@
-//@	{"target":{"name":"main.o"}}
+//@	{"target":{"name":"curve_gen.o"}}
 
 #include "lib/curve_tool/curve_integrator.hpp"
 
