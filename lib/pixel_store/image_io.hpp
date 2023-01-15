@@ -22,6 +22,8 @@ namespace terraformer
 		using input_file_factory  = Imf::InputFile (*)(void*);
 	}
 
+	// FIXME: This file needs FileReader and FileWriter concepts
+
 	image load(image_io_detail::empty<image>,
 		void* arg,
 		image_io_detail::input_file_factory make_input_file);
@@ -34,6 +36,7 @@ namespace terraformer
 	}
 
 	template<class FileReader>
+	requires(!std::is_same_v<std::decay_t<FileReader>, char*>)
 	image load(image_io_detail::empty<image>, FileReader&& reader)
 	{
 		ilm_input_adapter input{std::forward<FileReader>(reader)};
@@ -55,6 +58,7 @@ namespace terraformer
 	inline void store(image const& img, char const* filename) { store(img.pixels(), filename); }
 
 	template<class FileWriter>
+	requires(!std::is_same_v<std::decay_t<FileWriter>, char*>)
 	void store(span_2d<rgba_pixel const> pixels, FileWriter&& writer)
 	{
 		ilm_output_adapter output{std::forward<FileWriter>(writer)};
@@ -64,6 +68,7 @@ namespace terraformer
 	}
 
 	template<class FileWriter>
+	requires(!std::is_same_v<std::decay_t<FileWriter>, char*>)
 	void store(image const& img, FileWriter&& writer)
 	{
 		store(img.pixels(), std::forward<FileWriter>(writer));
@@ -83,6 +88,7 @@ namespace terraformer
 	}
 
 	template<class FileReader>
+	requires(!std::is_same_v<std::decay_t<FileReader>, char*>)
 	grayscale_image load(image_io_detail::empty<grayscale_image>, FileReader&& reader)
 	{
 		ilm_input_adapter input{std::forward<FileReader>(reader)};
