@@ -13,14 +13,13 @@ namespace terraformer
 		struct params
 		{
 			geosimd::turn_angle max_turn_angle;
-			float scaling_factor;
 		};
 
 		struct state
 		{
-			struct particle_state p_state;
+			location r;
 			direction dir;
-			geosimd::turn_angle integrated_heading;
+			geosimd::turn_angle integrated_heading_change;
 		};
 
 		constexpr explicit turn_angle_limiter(state const& initial_state, params model_params):
@@ -28,11 +27,11 @@ namespace terraformer
 			m_model_params{model_params}
 		{ }
 
-		particle_state operator()(particle_state const& new_state)
+		location operator()(location loc_in)
 		{
 			auto const state_in = m_state_prev;
 
-			auto const dr = new_state.r - state_in.p_state.r;
+			auto const dr = loc_in - state_in.r;
 			auto const dir = direction{dr};
 			auto const dir_prev = state_in.dir;
 			auto const dtheta_in = angular_difference(dir, dir_prev);
@@ -43,7 +42,7 @@ namespace terraformer
 			// This prevents the curve from turning backwards. This is a sufficient condition to
 			// prevent self-intersections
 			geosimd::turn_angle const max_heading{0x4000'0000};
-			auto const iheading_prev = state_in.integrated_heading;
+			auto const iheading_prev = state_in.integrated_heading_change;
 			if(dtheta + iheading_prev > max_heading)
 			{ dtheta = max_heading - iheading_prev; }
 			else
@@ -58,18 +57,15 @@ namespace terraformer
 			// the normal velocity
 			auto const d = std::abs(inner_product(dir_corr, dr));
 
-			auto const r = state_in.p_state.r + d*dir_corr;
-			// Remember to update the velocity to match the new location
-			auto const v = 2.0f*(r - state_in.p_state.r)/m_model_params.scaling_factor
-				- state_in.p_state.v;
+			auto const r = state_in.r + d*dir_corr;
 
 			m_state_prev = state{
-				.p_state = new_state,
+				.r = loc_in,
 				.dir = dir,
-				.integrated_heading = iheading_prev + dtheta
+				.integrated_heading_change = iheading_prev + dtheta
 			};
 
-			return particle_state{v, r};
+			return r;
 		}
 
 	private:
