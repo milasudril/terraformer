@@ -46,7 +46,7 @@ namespace terraformer
 			if(dtheta + iheading_prev > max_heading)
 			{ dtheta = max_heading - iheading_prev; }
 			else
-			if(dtheta - iheading_prev < -max_heading)
+			if(dtheta + iheading_prev < -max_heading)
 			{ dtheta = -max_heading - iheading_prev; }
 
 			auto const theta_ref = angular_difference(dir_prev, direction{geom_space::x{}});
