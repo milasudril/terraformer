@@ -38,11 +38,11 @@ namespace terraformer
 			auto const max_turn_angle = m_model_params.max_turn_angle;
 
 			auto dtheta = clamp(dtheta_in, -max_turn_angle, max_turn_angle);
+			auto const iheading_prev = state_in.integrated_heading_change;
 
 			// This prevents the curve from turning backwards. This is a sufficient condition to
 			// prevent self-intersections
 			geosimd::turn_angle const max_heading{0x4000'0000};
-			auto const iheading_prev = state_in.integrated_heading_change;
 			if(dtheta + iheading_prev > max_heading)
 			{ dtheta = max_heading - iheading_prev; }
 			else
@@ -60,13 +60,16 @@ namespace terraformer
 			auto const r = state_in.r + d*dir_corr;
 
 			m_state_prev = state{
-				.r = loc_in,
+				.r = r,
 				.dir = dir,
 				.integrated_heading_change = iheading_prev + dtheta
 			};
 
 			return r;
 		}
+
+		auto integrated_heading_change() const
+		{ return m_state_prev.integrated_heading_change; }
 
 	private:
 		state m_state_prev;
