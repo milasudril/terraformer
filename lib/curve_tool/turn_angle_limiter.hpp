@@ -57,15 +57,15 @@ namespace terraformer
 			// the normal velocity
 			auto const d = std::abs(inner_product(dir_corr, dr));
 
-			auto const r = state_in.r + d*dir_corr;
+			auto const r_corr = state_in.r + d*dir_corr;
 
 			m_state_prev = state{
-				.r = r,
-				.dir = dir,
+				.r = r_corr,
+				.dir = dir_corr,
 				.integrated_heading_change = iheading_prev + dtheta
 			};
 
-			return r;
+			return r_corr;
 		}
 
 		auto integrated_heading_change() const
