@@ -168,3 +168,36 @@ TESTCASE(terraformer_draw_curve_thickness_5)
 		}
 	}
 }
+
+TESTCASE(terraformer_draw_curve_thickness_4_at_corner)
+{
+	terraformer::grayscale_image img{8, 8};
+
+	terraformer::location loc{1.0f, 1.0f, 1.0f};
+
+	draw(loc, img.pixels(), [](float x, float y, float z){
+		return x*x + y*y <= 1.0f? z : 0.0f;
+	}, [](auto){ return 4.0f; });
+
+	for(uint32_t k = 0; k != img.height(); ++k)
+	{
+		for(uint32_t l = 0; l != img.width(); ++l)
+		{
+			if(k <= 1)
+			{
+				if(l <=2 || l == 7)
+				{ EXPECT_EQ(img(l, k), 1.0f); }
+				else
+				{ EXPECT_EQ(img(l, k), 0.0f); }
+			}
+			else
+			if(k == 2 || k == 7)
+			{
+				if(l <= 1)
+				{ EXPECT_EQ(img(l, k), 1.0f); }
+				else
+				{ EXPECT_EQ(img(l, k), 0.0f); }
+			}
+		}
+	}
+}

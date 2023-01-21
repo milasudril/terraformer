@@ -31,10 +31,10 @@ namespace terraformer
 		auto const z = loc[2];
 
 		auto const thickness = 0.5f*mod(loc);
-		auto const k_min = static_cast<int32_t>(y - thickness + 0.5f);
-		auto const k_max = static_cast<int32_t>(y + thickness + 0.5f);
-		auto const l_min = static_cast<int32_t>(x - thickness + 0.5f);
-		auto const l_max = static_cast<int32_t>(x + thickness + 0.5f);
+		auto const k_min = static_cast<uint32_t>(y - thickness + 0.5f + static_cast<float>(h));
+		auto const k_max = static_cast<uint32_t>(y + thickness + 0.5f + static_cast<float>(h));
+		auto const l_min = static_cast<uint32_t>(x - thickness + 0.5f + static_cast<float>(w));
+		auto const l_max = static_cast<uint32_t>(x + thickness + 0.5f + static_cast<float>(w));
 
 		for(auto k = k_min; k != k_max; ++k)
 		{
@@ -48,8 +48,7 @@ namespace terraformer
 						+ 2.0f*(static_cast<float>(k - k_min) + 0.5f)
 						/static_cast<float>(k_max - k_min);
 
-				target_surface(static_cast<uint32_t>(l + w)%w,
-					static_cast<uint32_t>(k + h)%h) = brush(xi, eta, z);
+				target_surface(l%w, k%h) = brush(xi, eta, z);
 			}
 		}
 	}
