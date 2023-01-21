@@ -208,7 +208,7 @@ TESTCASE(terraformer_draw_curve_dx_largest_greater_than_zero)
 
 	std::array<terraformer::location, 2> loc{
 		terraformer::location{1.0f, 1.0f, 1.0f},
-		terraformer::location{6.0f, 4.0f, 1.0f}};
+		terraformer::location{7.0f, 4.0f, 1.0f}};
 
 	draw(loc, img.pixels(), [](float x, float y, float z){
 		return x*x + y*y <= 1.0f? z : 0.0f;
@@ -229,7 +229,7 @@ TESTCASE(terraformer_draw_curve_dx_largest_less_than_zero)
 	terraformer::grayscale_image img{8, 8};
 
 	std::array<terraformer::location, 2> loc{
-		terraformer::location{6.0f, 1.0f, 1.0f},
+		terraformer::location{7.0f, 1.0f, 1.0f},
 		terraformer::location{1.0f, 4.0f, 1.0f}};
 
 	draw(loc, img.pixels(), [](float x, float y, float z){
@@ -252,7 +252,7 @@ TESTCASE(terraformer_draw_curve_dy_largest_greater_than_zero)
 
 	std::array<terraformer::location, 2> loc{
 		terraformer::location{1.0f, 1.0f, 1.0f},
-		terraformer::location{4.0f, 6.0f, 1.0f}};
+		terraformer::location{4.0f, 7.0f, 1.0f}};
 
 	draw(loc, img.pixels(), [](float x, float y, float z){
 		return x*x + y*y <= 1.0f? z : 0.0f;
@@ -273,7 +273,7 @@ TESTCASE(terraformer_draw_curve_dy_largest_less_than_zero)
 	terraformer::grayscale_image img{8, 8};
 
 	std::array<terraformer::location, 2> loc{
-		terraformer::location{1.0f, 6.0f, 1.0f},
+		terraformer::location{1.0f, 7.0f, 1.0f},
 		terraformer::location{4.0f, 1.0f, 1.0f}};
 
 	draw(loc, img.pixels(), [](float x, float y, float z){
