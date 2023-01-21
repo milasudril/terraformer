@@ -169,7 +169,7 @@ TESTCASE(terraformer_draw_curve_thickness_5)
 	}
 }
 
-TESTCASE(terraformer_draw_curve_thickness_4_at_corner)
+TESTCASE(terraformer_draw_point_thickness_4_at_corner)
 {
 	terraformer::grayscale_image img{8, 8};
 
@@ -199,5 +199,93 @@ TESTCASE(terraformer_draw_curve_thickness_4_at_corner)
 				{ EXPECT_EQ(img(l, k), 0.0f); }
 			}
 		}
+	}
+}
+
+TESTCASE(terraformer_draw_curve_dx_largest_greater_than_zero)
+{
+	terraformer::grayscale_image img{8, 8};
+
+	std::array<terraformer::location, 2> loc{
+		terraformer::location{1.0f, 1.0f, 1.0f},
+		terraformer::location{6.0f, 4.0f, 1.0f}};
+
+	draw(loc, img.pixels(), [](float x, float y, float z){
+		return x*x + y*y <= 1.0f? z : 0.0f;
+	}, [](auto){ return 1.0f; }, terraformer::line_draw_tag{});
+
+	for(uint32_t k = 0; k != img.height(); ++k)
+	{
+		for(uint32_t l = 0; l != img.width(); ++l)
+		{
+			printf("%.8g ",img(l, k));
+		}
+		putchar('\n');
+	}
+}
+
+TESTCASE(terraformer_draw_curve_dx_largest_less_than_zero)
+{
+	terraformer::grayscale_image img{8, 8};
+
+	std::array<terraformer::location, 2> loc{
+		terraformer::location{6.0f, 1.0f, 1.0f},
+		terraformer::location{1.0f, 4.0f, 1.0f}};
+
+	draw(loc, img.pixels(), [](float x, float y, float z){
+		return x*x + y*y <= 1.0f? z : 0.0f;
+	}, [](auto){ return 1.0f; }, terraformer::line_draw_tag{});
+
+	for(uint32_t k = 0; k != img.height(); ++k)
+	{
+		for(uint32_t l = 0; l != img.width(); ++l)
+		{
+			printf("%.8g ",img(l, k));
+		}
+		putchar('\n');
+	}
+}
+
+TESTCASE(terraformer_draw_curve_dy_largest_greater_than_zero)
+{
+	terraformer::grayscale_image img{8, 8};
+
+	std::array<terraformer::location, 2> loc{
+		terraformer::location{1.0f, 1.0f, 1.0f},
+		terraformer::location{4.0f, 6.0f, 1.0f}};
+
+	draw(loc, img.pixels(), [](float x, float y, float z){
+		return x*x + y*y <= 1.0f? z : 0.0f;
+	}, [](auto){ return 1.0f; }, terraformer::line_draw_tag{});
+
+	for(uint32_t k = 0; k != img.height(); ++k)
+	{
+		for(uint32_t l = 0; l != img.width(); ++l)
+		{
+			printf("%.8g ",img(l, k));
+		}
+		putchar('\n');
+	}
+}
+
+TESTCASE(terraformer_draw_curve_dy_largest_less_than_zero)
+{
+	terraformer::grayscale_image img{8, 8};
+
+	std::array<terraformer::location, 2> loc{
+		terraformer::location{1.0f, 6.0f, 1.0f},
+		terraformer::location{4.0f, 1.0f, 1.0f}};
+
+	draw(loc, img.pixels(), [](float x, float y, float z){
+		return x*x + y*y <= 1.0f? z : 0.0f;
+	}, [](auto){ return 1.0f; }, terraformer::line_draw_tag{});
+
+	for(uint32_t k = 0; k != img.height(); ++k)
+	{
+		for(uint32_t l = 0; l != img.width(); ++l)
+		{
+			printf("%.8g ",img(l, k));
+		}
+		putchar('\n');
 	}
 }

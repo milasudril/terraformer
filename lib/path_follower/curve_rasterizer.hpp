@@ -4,7 +4,7 @@
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
 
-#include <cstdio>
+#include <geosimd/line.hpp>
 
 namespace terraformer
 {
@@ -53,15 +53,63 @@ namespace terraformer
 		}
 	}
 
+
 	template<class PixelType, brush<PixelType> BrushType, brush_size_modulator ModulatorType>
-	void draw(std::span<location const> curve,
+	void draw(geosimd::line_segment<geom_space> seg,
 		span_2d<PixelType> target_surface,
 		BrushType&& brush,
 		ModulatorType&& mod)
 	{
-		for(auto loc : curve)
+		auto dr = seg.p2 - seg.p1;
+		if(std::abs(dr[0]) > std::abs(dr[1]))
 		{
-			draw(loc, target_surface, brush, mod);
+			auto const a = dr[1]/dr[0];
+			auto const dx = dr[0] >= 0.0f ? 1 : -1;
+			for(auto l = static_cast<int32_t>(seg.p1[0]);
+				l != static_cast<int32_t>(seg.p2[0]) + dx;
+				l += dx)
+			{
+				auto const x = static_cast<float>(l);
+				auto const y = a*static_cast<float>(l - static_cast<int32_t>(seg.p1[0]))
+					+ seg.p1[1];
+				draw(location{x, y, 1.0f}, target_surface, brush, mod);
+			}
+
+		}
+		else
+		{
+			auto const a = dr[0]/dr[1];
+			auto const dy = dr[1] >= 0.0f ? 1 : -1;
+			for(auto k = static_cast<int32_t>(seg.p1[1]);
+				k != static_cast<int32_t>(seg.p2[1]) + dy;
+				k += dy)
+			{
+				auto const y = static_cast<float>(k);
+				auto const x = a*static_cast<float>(k - static_cast<int32_t>(seg.p1[1]))
+					+ seg.p1[0];
+				draw(location{x, y, 1.0f}, target_surface, brush, mod);
+			}
+		}
+	}
+
+	struct line_draw_tag{};
+
+	template<class PixelType, brush<PixelType> BrushType, brush_size_modulator ModulatorType>
+	void draw(std::span<location const> curve,
+		span_2d<PixelType> target_surface,
+		BrushType&& brush,
+		ModulatorType&& mod,
+		line_draw_tag)
+	{
+		if(std::size(curve) == 0)
+		{ return; }
+
+		auto prev = curve[0];
+		for(size_t k = 1; k!=std::size(curve); ++k)
+		{
+			auto const current = curve[k];
+			draw(geosimd::line_segment{.p1 = prev, .p2 = current}, target_surface, brush, mod);
+			prev = current;
 		}
 	}
 

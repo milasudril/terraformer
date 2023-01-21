@@ -5,7 +5,7 @@
 
 namespace terraformer
 {
-	struct geom_space : geosimd::euclidian_space<float, 3>{};
+	using geom_space = geosimd::euclidian_space<float, 3>;
 
 	using location = geom_space::location;
 	using displacement = geom_space::displacement;
