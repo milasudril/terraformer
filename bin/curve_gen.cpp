@@ -65,8 +65,16 @@ int main()
 	terraformer::grayscale_image img{1024, 1024};
 	draw(curve,
 		 img.pixels(),
-		 [](auto x, auto y, auto...){return x*x + y*y <= 1.0f? 1.0f : 0.0f;},
-		 [](auto ...){return 1.0f;},
+		 [](auto x, auto y, auto...){
+			 return x*x + y*y <= 1.0f? std::optional{1.0f} : std::optional<float>{};
+		},
+		 [l = 0.0f, loc_prev = curve.front()](terraformer::location r) mutable {
+			auto const m = midpoint(r, loc_prev);
+			auto ret_dist = l + distance(loc_prev, m);
+			l += distance(loc_prev, r);
+			loc_prev = r;
+			return 8.0f*std::exp2(-ret_dist/1024.0f);
+		},
 		 terraformer::line_draw_tag{});
 	store(img, "test.exr");
 }

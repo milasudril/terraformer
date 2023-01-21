@@ -6,12 +6,14 @@
 
 #include <geosimd/line.hpp>
 
+#include <optional>
+
 namespace terraformer
 {
 	template<class T, class PixelType>
 	concept brush = requires(T f, PixelType z, float xi, float eta, float zeta)
 	{
-		{f(xi, eta, zeta)} -> std::same_as<PixelType>;
+		{f(xi, eta, zeta)} -> std::same_as<std::optional<PixelType>>;
 	};
 
 	template<class T>
@@ -48,7 +50,8 @@ namespace terraformer
 						+ 2.0f*(static_cast<float>(k - k_min) + 0.5f)
 						/static_cast<float>(k_max - k_min);
 
-				target_surface(l%w, k%h) = brush(xi, eta, z);
+				if(auto val = brush(xi, eta, z); val.has_value())
+				{ target_surface(l%w, k%h) = *val; }
 			}
 		}
 	}
