@@ -3,6 +3,9 @@
 #include "lib/curve_tool/damped_motion_integrator.hpp"
 #include "lib/curve_tool/noisy_drift.hpp"
 #include "lib/curve_tool/turn_angle_limiter.hpp"
+#include "lib/pixel_store/image.hpp"
+#include "lib/path_follower/curve_rasterizer.hpp"
+#include "lib/pixel_store/image_io.hpp"
 
 #include <random>
 #include <pcg-cpp/include/pcg_random.hpp>
@@ -59,7 +62,11 @@ int main()
 		curve.push_back(r_corrected);
 	}
 
-	std::ranges::for_each(curve, [](auto const item) {
-		printf("%.8e %.8e\n", item[0], item[1]);
-	});
+	terraformer::grayscale_image img{1024, 1024};
+	draw(curve,
+		 img.pixels(),
+		 [](auto x, auto y, auto...){return x*x + y*y <= 1.0f? 1.0f : 0.0f;},
+		 [](auto ...){return 1.0f;},
+		 terraformer::line_draw_tag{});
+	store(img, "test.exr");
 }
