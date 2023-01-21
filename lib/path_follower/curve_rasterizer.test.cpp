@@ -20,9 +20,9 @@ TESTCASE(terraformer_draw_curve_thickness_1)
 		for(uint32_t l = 0; l != img.width(); ++l)
 		{
 			if(k == 3 && l == 4)
-			{ EXPECT_EQ(img(l, k), 1.0f); }
+			{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 			else
-			{ EXPECT_EQ(img(l, k), 0.0f); }
+			{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 		}
 	}
 }
@@ -42,9 +42,9 @@ TESTCASE(terraformer_draw_curve_thickness_2)
 		for(uint32_t l = 0; l != img.width(); ++l)
 		{
 			if((k >= 2 && k <= 3) && (l >= 3 && l <= 4))
-			{ EXPECT_EQ(img(l, k), 1.0f); }
+			{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 			else
-			{ EXPECT_EQ(img(l, k), 0.0f); }
+			{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 		}
 	}
 }
@@ -66,9 +66,9 @@ TESTCASE(terraformer_draw_curve_thickness_2_at_half_pixel)
 		for(uint32_t l = 0; l != img.width(); ++l)
 		{
 			if((k >= 3 && k <= 4) && (l >= 4 && l <= 5))
-			{ EXPECT_EQ(img(l, k), 1.0f); }
+			{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 			else
-			{ EXPECT_EQ(img(l, k), 0.0f); }
+			{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 		}
 	}
 }
@@ -88,9 +88,9 @@ TESTCASE(terraformer_draw_curve_thickness_3)
 		for(uint32_t l = 0; l != img.width(); ++l)
 		{
 			if((k >= 2 && k <= 4) && (l >= 3 && l <= 5))
-			{ EXPECT_EQ(img(l, k), 1.0f); }
+			{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 			else
-			{ EXPECT_EQ(img(l, k), 0.0f); }
+			{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 		}
 	}
 }
@@ -112,21 +112,21 @@ TESTCASE(terraformer_draw_curve_thickness_4)
 			if(k == 1 || k == 4)
 			{
 				if(l >= 3 && l <= 4)
-				{ EXPECT_EQ(img(l, k), 1.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 				else
-				{ EXPECT_EQ(img(l, k), 0.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 			}
 			else
 			if(k >= 2 && k <= 3)
 			{
 				if(l >= 2 && l <= 5)
-				{ EXPECT_EQ(img(l, k), 1.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 				else
-				{ EXPECT_EQ(img(l, k), 0.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 			}
 			else
 			{
-				EXPECT_EQ(img(l, k), 0.0f);
+				EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f);
 			}
 		}
 	}
@@ -149,21 +149,21 @@ TESTCASE(terraformer_draw_curve_thickness_5)
 			if(k == 1 || k == 5)
 			{
 				if(l >= 3 && l <= 5)
-				{ EXPECT_EQ(img(l, k), 1.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 				else
-				{ EXPECT_EQ(img(l, k), 0.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 			}
 			else
 			if(k >= 2 && k <= 4)
 			{
 				if(l >= 2 && l <= 6)
-				{ EXPECT_EQ(img(l, k), 1.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 				else
-				{ EXPECT_EQ(img(l, k), 0.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 			}
 			else
 			{
-				EXPECT_EQ(img(l, k), 0.0f);
+				EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f);
 			}
 		}
 	}
@@ -186,17 +186,17 @@ TESTCASE(terraformer_draw_point_thickness_4_at_corner)
 			if(k <= 1)
 			{
 				if(l <=2 || l == 7)
-				{ EXPECT_EQ(img(l, k), 1.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 				else
-				{ EXPECT_EQ(img(l, k), 0.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 			}
 			else
 			if(k == 2 || k == 7)
 			{
 				if(l <= 1)
-				{ EXPECT_EQ(img(l, k), 1.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 1.0f); }
 				else
-				{ EXPECT_EQ(img(l, k), 0.0f); }
+				{ EXPECT_EQ(img(l, img.height() - 1 - k), 0.0f); }
 			}
 		}
 	}
@@ -218,7 +218,7 @@ TESTCASE(terraformer_draw_curve_dx_largest_greater_than_zero)
 	{
 		for(uint32_t l = 0; l != img.width(); ++l)
 		{
-			printf("%.8g ",img(l, k));
+			printf("%.8g ",img(l, img.height() - 1 - k));
 		}
 		putchar('\n');
 	}
@@ -240,7 +240,7 @@ TESTCASE(terraformer_draw_curve_dx_largest_less_than_zero)
 	{
 		for(uint32_t l = 0; l != img.width(); ++l)
 		{
-			printf("%.8g ",img(l, k));
+			printf("%.8g ",img(l, img.height() - 1 - k));
 		}
 		putchar('\n');
 	}
@@ -262,7 +262,7 @@ TESTCASE(terraformer_draw_curve_dy_largest_greater_than_zero)
 	{
 		for(uint32_t l = 0; l != img.width(); ++l)
 		{
-			printf("%.8g ",img(l, k));
+			printf("%.8g ",img(l, img.height() - 1 - k));
 		}
 		putchar('\n');
 	}
@@ -284,7 +284,7 @@ TESTCASE(terraformer_draw_curve_dy_largest_less_than_zero)
 	{
 		for(uint32_t l = 0; l != img.width(); ++l)
 		{
-			printf("%.8g ",img(l, k));
+			printf("%.8g ",img(l, img.height() - 1 - k));
 		}
 		putchar('\n');
 	}

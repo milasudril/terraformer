@@ -51,7 +51,7 @@ namespace terraformer
 						/static_cast<float>(k_max - k_min);
 
 				if(auto val = brush(xi, eta, z); val.has_value())
-				{ target_surface(l%w, k%h) = *val; }
+				{ target_surface(l%w, (h - 1) - k%h ) = *val; }
 			}
 		}
 	}
