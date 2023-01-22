@@ -37,6 +37,7 @@ namespace terraformer
 		diffusion_source_function<ConcentrationVector> Src>
 	struct diffusion_params
 	{
+		float dt;
 		DiffCoeff D;
 		BoundaryFunc boundary;
 		SourceFunc source;
@@ -74,8 +75,8 @@ namespace terraformer
 				}
 
 				auto const bv = params.boundary(x, y);
-				output_buffer(x, y) = bv.value*bv.weight
-					+ (1.0f - bv.weight)*(input_buffer(x, y) + td*(0.25f*params.D*laplace + src(x, y)));
+				auto const diff_step = input_buffer(x, y) + params.dt*(0.25f*params.D*laplace + src(x, y));
+				output_buffer(x, y) = bv.value*bv.weight + (1.0f - bv.weight)*diff_step;
 			}
 		}
 	}
