@@ -1,7 +1,7 @@
 //@	{"target":{"name":"heightmap2mesh.o"}}
 
 #include "lib/pixel_store/image_io.hpp"
-#include "lib/functions/heightmap_to_mesh.hpp"
+#include "lib/filters/heightmap_to_mesh.hpp"
 #include "lib/mesh_store/mesh_output.hpp"
 
 int main(int argc, char** argv)

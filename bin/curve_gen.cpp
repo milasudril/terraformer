@@ -4,7 +4,7 @@
 #include "lib/curve_tool/noisy_drift.hpp"
 #include "lib/curve_tool/turn_angle_limiter.hpp"
 #include "lib/pixel_store/image.hpp"
-#include "lib/path_follower/curve_rasterizer.hpp"
+#include "lib/filters/curve_rasterizer.hpp"
 #include "lib/pixel_store/image_io.hpp"
 
 #include <random>
