@@ -27,7 +27,7 @@ namespace terraformer
 		constexpr explicit(!std::is_same_v<std::decay_t<U>, std::decay_t<T>>)
 			span_2d(span_2d<U> other)
 			: m_width{other.width()}
-			, m_width{other.height()}
+			, m_height{other.height()}
 			, m_ptr{other.data()}
 		{
 		}

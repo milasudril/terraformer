@@ -3,6 +3,7 @@
 
 #include <type_traits>
 #include <concepts>
+#include <cassert>
 
 namespace terraformer
 {
@@ -31,31 +32,32 @@ namespace terraformer
 		{val*c} -> std::same_as<ConcentrationVector>;
 	};
 
-	template<class ConcentrationVector,
-		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
-		dirichlet_boundary_function<ConcentrationVector> BoundaryFunuc,
-		diffusion_source_function<ConcentrationVector> Src>
+	inline constexpr std::array<std::array<float, 3>, 3> laplace_kernel{
+		std::array<float, 3>{0.0f,  1.0f,  0.0f},
+		std::array<float, 3>{1.0f, -4.0f,  1.0f},
+		std::array<float, 3>{0.0f,  1.0f,  0.0f},
+	};
+
+	template<class DiffCoeff, class Boundary, class Src>
 	struct diffusion_params
 	{
-		float dt;
+		float dt;  // Must be smaller than 4/(2*D)
 		DiffCoeff D;
-		BoundaryFunc boundary;
-		SourceFunc source;
+		Boundary boundary;
+		Src source;
 	};
 
-	inline constexpr std::array<std::array<float, 3>, 3> laplace_kernel{
-		std::array<float>{0.0f,  1.0f,  0.0f},
-		std::array<float>{1.0f, -2.0f,  1.0f},
-		std::array<float>{0.0f,  1.0f,  0.0f},
-	};
-
-	template<class ConcentrationVector, class DiffCoeff, class BoundaryFunc, class SourceFunc>
+	template<class ConcentrationVector,
+		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
+		dirichlet_boundary_function<ConcentrationVector> Boundary,
+		diffusion_source_function<ConcentrationVector> Src>
 	void run_diffusion_step(span_2d<ConcentrationVector> output_buffer,
 		span_2d<ConcentrationVector const> input_buffer,
-		diffusion_params<ConcentrationVector, DiffCoeff, BoundaryFunc, SourceFunc> const& params)
+		diffusion_params<DiffCoeff, Boundary, Src> const& params)
 	{
 		assert(output_buffer.width() == input_buffer.width());
 		assert(output_buffer.height() == input_buffer.height());
+		assert(output_buffer.data() != input_buffer.data());
 
 		auto const h = output_buffer.height();
 		auto const w = output_buffer.width();
@@ -64,19 +66,20 @@ namespace terraformer
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
-				PixleType laplace{};
+				ConcentrationVector laplace{};
 				for(uint32_t eta = 0; eta != 3; ++eta)
 				{
 					for(uint32_t xi = 0; xi != 3; ++xi)
 					{
+						static_assert(std::is_same_v<decltype(x - 1), uint32_t>);
 						laplace += laplace_kernel[eta][xi]
 							*input_buffer((x - 1 + xi + w)%w, (y - 1 + eta + h)%h);
 					}
 				}
 
 				auto const bv = params.boundary(x, y);
-				auto const diff_step = input_buffer(x, y) + params.dt*(0.25f*params.D*laplace + src(x, y));
-				output_buffer(x, y) = bv.value*bv.weight + (1.0f - bv.weight)*diff_step;
+				auto const ds = input_buffer(x, y) + params.dt*(0.25f*params.D*laplace + params.source(x, y));
+				output_buffer(x, y) = bv.value*bv.weight + (1.0f - bv.weight)*ds;
 			}
 		}
 	}
