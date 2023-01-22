@@ -11,7 +11,7 @@
 namespace terraformer
 {
 	template<class T, class PixelType>
-	concept brush = requires(T f, PixelType z, float xi, float eta, float zeta)
+	concept pixel_replacing_brush = requires(T f, PixelType z, float xi, float eta, float zeta)
 	{
 		{f(xi, eta, zeta)} -> std::same_as<std::optional<PixelType>>;
 	};
@@ -22,8 +22,8 @@ namespace terraformer
 		{f(loc)} -> std::same_as<float>;
 	};
 
-	template<class PixelType, brush<PixelType> BrushType, brush_size_modulator ModulatorType>
-	void draw(location loc, span_2d<PixelType> target_surface, BrushType&& brush, ModulatorType&& mod)
+	template<class PixelType, pixel_replacing_brush<PixelType> Brush, brush_size_modulator Modulator>
+	void draw(location loc, span_2d<PixelType> target_surface, Brush&& brush, Modulator&& mod)
 	{
 		auto const h = target_surface.width();
 		auto const w = target_surface.height();
@@ -57,16 +57,17 @@ namespace terraformer
 	}
 
 
-	template<class PixelType, brush<PixelType> BrushType, brush_size_modulator ModulatorType>
+	template<class PixelType, class BrushType, brush_size_modulator Modulator>
 	void draw(geosimd::line_segment<geom_space> seg,
 		span_2d<PixelType> target_surface,
 		BrushType&& brush,
-		ModulatorType&& mod)
+		Modulator&& mod)
 	{
 		auto dr = seg.p2 - seg.p1;
 		if(std::abs(dr[0]) > std::abs(dr[1]))
 		{
 			auto const a = dr[1]/dr[0];
+			auto const b = dr[2]/dr[0];
 			auto const dx = dr[0] >= 0.0f ? 1 : -1;
 			for(auto l = static_cast<int32_t>(seg.p1[0]);
 				l != static_cast<int32_t>(seg.p2[0]) + dx;
@@ -75,13 +76,15 @@ namespace terraformer
 				auto const x = static_cast<float>(l);
 				auto const y = a*static_cast<float>(l - static_cast<int32_t>(seg.p1[0]))
 					+ seg.p1[1];
-				draw(location{x, y, 1.0f}, target_surface, brush, mod);
+				auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
+				draw(location{x, y, z}, target_surface, brush, mod);
 			}
 
 		}
 		else
 		{
 			auto const a = dr[0]/dr[1];
+			auto const b = dr[2]/dr[1];
 			auto const dy = dr[1] >= 0.0f ? 1 : -1;
 			for(auto k = static_cast<int32_t>(seg.p1[1]);
 				k != static_cast<int32_t>(seg.p2[1]) + dy;
@@ -90,18 +93,19 @@ namespace terraformer
 				auto const y = static_cast<float>(k);
 				auto const x = a*static_cast<float>(k - static_cast<int32_t>(seg.p1[1]))
 					+ seg.p1[0];
-				draw(location{x, y, 1.0f}, target_surface, brush, mod);
+				auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
+				draw(location{x, y, z}, target_surface, brush, mod);
 			}
 		}
 	}
 
 	struct line_draw_tag{};
 
-	template<class PixelType, brush<PixelType> BrushType, brush_size_modulator ModulatorType>
+	template<class PixelType, class BrushType, brush_size_modulator Modulator>
 	void draw(std::span<location const> curve,
 		span_2d<PixelType> target_surface,
 		BrushType&& brush,
-		ModulatorType&& mod,
+		Modulator&& mod,
 		line_draw_tag)
 	{
 		if(std::size(curve) == 0)
