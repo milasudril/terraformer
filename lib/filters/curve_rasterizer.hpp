@@ -22,8 +22,30 @@ namespace terraformer
 		{f(loc)} -> std::same_as<float>;
 	};
 
-	template<class PixelType, pixel_replacing_brush<PixelType> Brush, brush_size_modulator Modulator>
-	void draw(location loc, span_2d<PixelType> target_surface, Brush&& brush, Modulator&& mod)
+	template<class PixelType>
+	struct default_pixel_replacing_brush
+	{
+		auto operator()(float x, float y, float z) const
+		{
+			return x*x + y*y <= 1.0f ? std::optional{z} : std::optional<float>{};
+		}
+	};
+
+	struct default_brush_size_modulator
+	{
+		auto operator()(auto...) const
+		{
+			return 1.0f;
+		}
+	};
+
+	template<class PixelType,
+		pixel_replacing_brush<PixelType> Brush = default_pixel_replacing_brush<PixelType>,
+		brush_size_modulator Modulator = default_brush_size_modulator>
+	void draw(location loc,
+		span_2d<PixelType> target_surface,
+		Brush&& brush = Brush{},
+		Modulator&& mod = Modulator{})
 	{
 		auto const h = target_surface.width();
 		auto const w = target_surface.height();
@@ -57,11 +79,13 @@ namespace terraformer
 	}
 
 
-	template<class PixelType, class BrushType, brush_size_modulator Modulator>
+	template<class PixelType,
+		class BrushType = default_pixel_replacing_brush<PixelType>,
+		class BrushSizeModulator = default_brush_size_modulator>
 	void draw(geosimd::line_segment<geom_space> seg,
 		span_2d<PixelType> target_surface,
-		BrushType&& brush,
-		Modulator&& mod)
+		BrushType&& brush = BrushType{},
+		BrushSizeModulator&& mod = BrushSizeModulator{})
 	{
 		auto dr = seg.p2 - seg.p1;
 		if(std::abs(dr[0]) > std::abs(dr[1]))
@@ -99,14 +123,13 @@ namespace terraformer
 		}
 	}
 
-	struct line_draw_tag{};
-
-	template<class PixelType, class BrushType, brush_size_modulator Modulator>
-	void draw(std::span<location const> curve,
+	template<class PixelType,
+		class BrushType = default_pixel_replacing_brush<PixelType>,
+		class BrushSizeModulator = default_brush_size_modulator>
+	void draw_as_line_segments(std::span<location const> curve,
 		span_2d<PixelType> target_surface,
-		BrushType&& brush,
-		Modulator&& mod,
-		line_draw_tag)
+		BrushType&& brush = BrushType{},
+		BrushSizeModulator&& mod = BrushSizeModulator{})
 	{
 		if(std::size(curve) == 0)
 		{ return; }
@@ -117,6 +140,20 @@ namespace terraformer
 			auto const current = curve[k];
 			draw(geosimd::line_segment{.p1 = prev, .p2 = current}, target_surface, brush, mod);
 			prev = current;
+		}
+	}
+
+	template<class PixelType,
+		class BrushType = default_pixel_replacing_brush<PixelType>,
+		class BrushSizeModulator = default_brush_size_modulator>
+	void draw_as_dots(std::span<location const> curve,
+		span_2d<PixelType> target_surface,
+		BrushType&& brush = BrushType{},
+		BrushSizeModulator&& mod = BrushSizeModulator{})
+	{
+		for(auto point: curve)
+		{
+			draw(point, target_surface, brush, mod);
 		}
 	}
 

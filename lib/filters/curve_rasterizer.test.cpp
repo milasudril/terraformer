@@ -210,9 +210,9 @@ TESTCASE(terraformer_draw_curve_dx_largest_greater_than_zero)
 		terraformer::location{1.0f, 1.0f, 1.0f},
 		terraformer::location{7.0f, 4.0f, 4.0f}};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
+	draw_as_line_segments(loc, img.pixels(), [](float x, float y, float z){
 		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; }, terraformer::line_draw_tag{});
+	}, [](auto){ return 1.0f; });
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -232,9 +232,9 @@ TESTCASE(terraformer_draw_curve_dx_largest_less_than_zero)
 		terraformer::location{7.0f, 1.0f, 1.0f},
 		terraformer::location{1.0f, 4.0f, -2.0f}};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
+	draw_as_line_segments(loc, img.pixels(), [](float x, float y, float z){
 		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; }, terraformer::line_draw_tag{});
+	}, [](auto){ return 1.0f; });
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -254,9 +254,9 @@ TESTCASE(terraformer_draw_curve_dy_largest_greater_than_zero)
 		terraformer::location{1.0f, 1.0f, 1.0f},
 		terraformer::location{4.0f, 7.0f, -2.0f}};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
+	draw_as_line_segments(loc, img.pixels(), [](float x, float y, float z){
 		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; }, terraformer::line_draw_tag{});
+	}, [](auto){ return 1.0f; });
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -276,9 +276,9 @@ TESTCASE(terraformer_draw_curve_dy_largest_less_than_zero)
 		terraformer::location{1.0f, 7.0f, 1.0f},
 		terraformer::location{4.0f, 1.0f, 4.0f}};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
+	draw_as_line_segments(loc, img.pixels(), [](float x, float y, float z){
 		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; }, terraformer::line_draw_tag{});
+	}, [](auto){ return 1.0f; });
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{

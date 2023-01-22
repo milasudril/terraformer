@@ -59,22 +59,10 @@ int main()
 		ps.v = v_corr;
 		ps.r = r_corrected;
 
-		curve.push_back(r_corrected);
+		curve.push_back(r_corrected + terraformer::displacement{0.0f, 0.0f, 1.0f});
 	}
 
 	terraformer::grayscale_image img{1024, 1024};
-	draw(curve,
-		 img.pixels(),
-		 [](auto x, auto y, auto...){
-			 return x*x + y*y <= 1.0f? std::optional{1.0f} : std::optional<float>{};
-		},
-		 [l = 0.0f, loc_prev = curve.front()](terraformer::location r) mutable {
-			auto const m = midpoint(r, loc_prev);
-			auto ret_dist = l + distance(loc_prev, m);
-			l += distance(loc_prev, r);
-			loc_prev = r;
-			return 8.0f*std::exp2(-ret_dist/1024.0f);
-		},
-		 terraformer::line_draw_tag{});
+	draw_as_line_segments(curve, img.pixels());
 	store(img, "test.exr");
 }
