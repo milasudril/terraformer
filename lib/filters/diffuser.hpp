@@ -51,7 +51,7 @@ namespace terraformer
 		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
 		dirichlet_boundary_function<ConcentrationVector> Boundary,
 		diffusion_source_function<ConcentrationVector> Src>
-	void run_diffusion_step(span_2d<ConcentrationVector> output_buffer,
+	auto run_diffusion_step(span_2d<ConcentrationVector> output_buffer,
 		span_2d<ConcentrationVector const> input_buffer,
 		diffusion_params<DiffCoeff, Boundary, Src> const& params)
 	{
@@ -61,6 +61,11 @@ namespace terraformer
 
 		auto const h = output_buffer.height();
 		auto const w = output_buffer.width();
+
+		using std::abs;
+		using abs_value = decltype(abs(std::declval<ConcentrationVector>()));
+
+		abs_value ret{};
 
 		for(uint32_t y = 0; y != h; ++y)
 		{
@@ -78,10 +83,17 @@ namespace terraformer
 				}
 
 				auto const bv = params.boundary(x, y);
-				auto const ds = input_buffer(x, y) + params.dt*(0.25f*params.D*laplace + params.source(x, y));
-				output_buffer(x, y) = bv.value*bv.weight + (1.0f - bv.weight)*ds;
+				auto const old_val = input_buffer(x, y);
+				auto const ds = old_val + params.dt*(0.25f*params.D*laplace + params.source(x, y));
+				auto const new_val = bv.value*bv.weight + (1.0f - bv.weight)*ds;
+				output_buffer(x, y) = new_val;
+
+				using std::max;
+				ret = max(ret, abs(new_val - old_val));
 			}
 		}
+
+		return ret;
 	}
 }
 

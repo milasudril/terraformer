@@ -94,17 +94,15 @@ int main()
 	auto input_buffer = img_a.pixels();
 	auto output_buffer = img_b.pixels();
 
-	for(size_t k = 0; k != 4*65536; ++k)
+	while(true)
 	{
-		run_diffusion_step(output_buffer,
+		auto const delta = run_diffusion_step(output_buffer,
 			terraformer::span_2d<float const>{input_buffer},
 			diff_params);
 		std::swap(input_buffer, output_buffer);
-		if(k % 4096 == 0)
-		{
-			fprintf(stderr, "*");
-			fflush(stderr);
-		}
+
+		if(delta < 1.0f/16384.0f)
+		{ break; }
 	}
 	store(input_buffer, "test.exr");
 }
