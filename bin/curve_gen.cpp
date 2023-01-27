@@ -17,6 +17,7 @@ int main()
 {
 	uint32_t const domain_size = 1024;
 	auto const curve_scaling_factor = 6.0f;
+
 	terraformer::location const r_0{0.0f, 2.0f*static_cast<float>(domain_size)/3.0f, 0.0f};
 
 	terraformer::noisy_drift drift{terraformer::noisy_drift::params{
@@ -64,15 +65,15 @@ int main()
 		curve.push_back(r_corrected + terraformer::displacement{0.0f, 0.0f, 1.0f});
 	}
 
-	terraformer::grayscale_image img_a{domain_size, domain_size};
-	draw_as_line_segments(curve, img_a.pixels());
+	terraformer::grayscale_image boundary_values{domain_size, domain_size};
+	draw_as_line_segments(curve, boundary_values.pixels());
+	store(boundary_values, "boundary.exr");
 
-	terraformer::grayscale_image img_b{domain_size, domain_size};
 
 	terraformer::diffusion_params const diff_params{
 		.dt = 1.0f,
 		.D = 1.0f,
-		.boundary = [values = img_a](uint32_t x, uint32_t y) {
+		.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
 			if(y == 0)
 			{
 				return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.382f};
@@ -91,6 +92,23 @@ int main()
 		.source =  [](uint32_t, uint32_t){ return 0.0f; }
 	};
 
+
+	terraformer::grayscale_image img_a{domain_size, domain_size};
+	for(uint32_t y = 0; y != domain_size; ++y)
+	{
+		for(uint32_t x = 0; x != domain_size; ++x)
+		{
+			auto const y_val = static_cast<float>(y);
+			auto const ridge_line = static_cast<float>(domain_size) - r_0[1];
+			auto const t = y_val/ridge_line;
+			auto const val = std::min(std::lerp(0.382f, 1.0f, t),
+				std::lerp(1.0f, 0.618f*0.382f, (y_val - ridge_line)/static_cast<float>(domain_size - ridge_line)));
+
+			img_a(x, y) = val;
+		}
+	}
+
+	terraformer::grayscale_image img_b{domain_size, domain_size};
 	auto input_buffer = img_a.pixels();
 	auto output_buffer = img_b.pixels();
 
@@ -101,7 +119,7 @@ int main()
 			diff_params);
 		std::swap(input_buffer, output_buffer);
 
-		if(delta < 1.0f/16384.0f)
+		if(delta < 1.0e-6f)
 		{ break; }
 	}
 	store(input_buffer, "test.exr");
