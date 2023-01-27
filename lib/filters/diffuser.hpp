@@ -47,13 +47,20 @@ namespace terraformer
 		Src source;
 	};
 
+	struct scanline_range
+	{
+		uint32_t begin;
+		uint32_t end;
+	};
+
 	template<class ConcentrationVector,
 		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
 		dirichlet_boundary_function<ConcentrationVector> Boundary,
 		diffusion_source_function<ConcentrationVector> Src>
 	auto run_diffusion_step(span_2d<ConcentrationVector> output_buffer,
 		span_2d<ConcentrationVector const> input_buffer,
-		diffusion_params<DiffCoeff, Boundary, Src> const& params)
+		diffusion_params<DiffCoeff, Boundary, Src> const& params,
+		scanline_range range)
 	{
 		assert(output_buffer.width() == input_buffer.width());
 		assert(output_buffer.height() == input_buffer.height());
@@ -67,7 +74,7 @@ namespace terraformer
 
 		abs_value ret{};
 
-		for(uint32_t y = 0; y != h; ++y)
+		for(uint32_t y = range.begin; y != range.end; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
@@ -93,6 +100,20 @@ namespace terraformer
 		}
 
 		return ret;
+	}
+
+	template<class ConcentrationVector,
+		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
+		dirichlet_boundary_function<ConcentrationVector> Boundary,
+		diffusion_source_function<ConcentrationVector> Src>
+	auto run_diffusion_step(span_2d<ConcentrationVector> output_buffer,
+		span_2d<ConcentrationVector const> input_buffer,
+		diffusion_params<DiffCoeff, Boundary, Src> const& params)
+	{
+		return run_diffusion_step(output_buffer, input_buffer, params, scanline_range{
+			.begin = 0,
+			.end = output_buffer.height()
+		});
 	}
 }
 
