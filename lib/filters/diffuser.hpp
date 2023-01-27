@@ -1,6 +1,9 @@
 #ifndef TERRAFORMER_FILTERS_DIFFUSER_HPP
 #define TERRAFORMER_FILTERS_DIFFUSER_HPP
 
+#include "lib/common/signaling_counter.hpp"
+#include "lib/common/notifying_task.hpp"
+
 #include <type_traits>
 #include <concepts>
 #include <cassert>
@@ -114,6 +117,47 @@ namespace terraformer
 			.begin = 0,
 			.end = output_buffer.height()
 		});
+	}
+
+	template<class ConcentrationVector,
+		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
+		dirichlet_boundary_function<ConcentrationVector> Boundary,
+		diffusion_source_function<ConcentrationVector> Src,
+		class worker_pool>
+	auto run_diffusion_step(span_2d<ConcentrationVector> output_buffer,
+		span_2d<ConcentrationVector const> input_buffer,
+		diffusion_params<DiffCoeff, Boundary, Src> const& params, worker_pool& pool)
+	{
+		auto const n_workers = std::size(pool);
+		signaling_counter counter{n_workers};
+		auto const domain_height = output_buffer.height();
+		auto const batch_size = 1 + (domain_height - 1)/static_cast<uint32_t>(n_workers);
+
+		using geosimd::norm;
+		using abs_value = decltype(norm(std::declval<ConcentrationVector>()));
+
+		auto retvals = std::make_unique_for_overwrite<abs_value[]>(n_workers);
+
+		for(size_t k = 0; k != n_workers; ++k)
+		{
+			scanline_range const range{
+				.begin = static_cast<uint32_t>(k*batch_size),
+				.end = std::min(domain_height, (k + 1)*batch_size)
+			};
+
+			pool.schedule(notifying_task{
+				std::ref(counter),
+				[retval = &retvals[k]]<class ... T>(auto&& ... args){
+					*retval = run_diffusion_step(std::forward<T>(args)...);
+				},
+				output_buffer,
+				input_buffer,
+				params,
+				range
+			});
+		}
+
+		return *std::max_element(retvals.get(), retvals.get() + n_workers);
 	}
 }
 
