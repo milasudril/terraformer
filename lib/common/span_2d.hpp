@@ -2,6 +2,7 @@
 #define TERRAFORMER_LIB_SPAN2D_HPP
 
 #include "./utils.hpp"
+#include "./spaces.hpp"
 
 #include <cstdint>
 #include <type_traits>
@@ -97,7 +98,7 @@ namespace terraformer
 	}
 
 	template<class T>
-	T interp(span_2d<T const> img, float x, float y)
+	auto interp(span_2d<T const> img, float x, float y)
 	{
 		auto const w = img.width();
 		auto const h = img.height();
@@ -121,6 +122,39 @@ namespace terraformer
 		auto const z_x0 = (1.0f - static_cast<float>(xi)) * z_00 + static_cast<float>(xi) * z_10;
 		auto const z_x1 = (1.0f - static_cast<float>(xi)) * z_01 + static_cast<float>(xi) * z_11;
 		return (1.0f - eta)*z_x0 + eta*z_x1;
+	}
+
+	inline auto grad(span_2d<float const> img, float x, float y)
+	{
+		auto const x0 = x - 1.0f;
+		auto const x1 = x + 1.0f;
+		auto const y0 = y - 1.0f;
+		auto const y1 = y + 1.0f;
+
+		auto const z_x1_y = interp(img, x1, y);
+		auto const z_x0_y = interp(img, x0, y);
+		auto const z_x_y1 = interp(img, x, y1);
+		auto const z_x_y0 = interp(img, x, y0);
+
+		return 0.5f*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
+	}
+
+	inline auto grad(span_2d<float const> img, uint32_t x, uint32_t y)
+	{
+		auto const w = img.width();
+		auto const h = img.height();
+
+		auto const x0 = (x + w - 1)%w;
+		auto const x1 = (x + w + 1)%w;
+		auto const y0 = (y + h - 1)%h;
+		auto const y1 = (y + h + 1)%h;
+
+		auto const z_x1_y = img(x1, y);
+		auto const z_x0_y = img(x0, y);
+		auto const z_x_y1 = img(x, y1);
+		auto const z_x_y0 = img(x, y0);
+
+		return 0.5f*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}
 }
 
