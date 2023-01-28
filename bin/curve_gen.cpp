@@ -71,7 +71,6 @@ int main()
 
 
 	terraformer::diffusion_params const diff_params{
-		.dt = 1.0f,
 		.D = 1.0f,
 		.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
 			if(y == 0)

@@ -44,8 +44,7 @@ namespace terraformer
 	template<class DiffCoeff, class Boundary, class Src>
 	struct diffusion_params
 	{
-		float dt;  // Must be smaller than 4/(2*D)
-		DiffCoeff D;
+		DiffCoeff D;  // Must be smaller than one
 		Boundary boundary;
 		Src source;
 	};
@@ -94,7 +93,7 @@ namespace terraformer
 
 				auto const bv = params.boundary(x, y);
 				auto const old_val = input_buffer(x, y);
-				auto const ds = old_val + params.dt*(0.25f*params.D*laplace + params.source(x, y));
+				auto const ds = old_val + (0.25f*params.D*laplace + params.source(x, y));
 				auto const new_val = bv.value*bv.weight + (1.0f - bv.weight)*ds;
 				output_buffer(x, y) = new_val;
 
