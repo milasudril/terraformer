@@ -2,8 +2,9 @@
 #define TERRAFORMER_LIB_UTILS_HPP
 
 #include <type_traits>
-#include <cstdint>
+#include <cmath>
 #include <concepts>
+#include <cstdint>
 
 namespace terraformer
 {
@@ -21,6 +22,12 @@ namespace terraformer
 	{
 		{f(x, y)} -> std::convertible_to<MappedType>;
 	};
+
+	constexpr auto mod(float x, float denom)
+	{
+		auto ret = std::fmod(x, denom);
+		return ret < 0.0f ? std::max(0.0f, ret + denom) : ret;
+	}
 }
 
 #endif
