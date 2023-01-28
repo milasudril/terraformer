@@ -30,7 +30,8 @@ namespace terraformer
 	};
 
 	template<class T, class ConcentrationVector>
-	concept diffusion_coeff_vector = requires(T val, ConcentrationVector c)
+	concept diffusion_coeff_vector = std::is_same_v<float, T> &&
+	requires (T val, ConcentrationVector c)
 	{
 		{val*c} -> std::same_as<ConcentrationVector>;
 	};
@@ -71,10 +72,7 @@ namespace terraformer
 		auto const h = output_buffer.height();
 		auto const w = output_buffer.width();
 
-		using geosimd::norm;
-		using abs_value = decltype(norm(std::declval<ConcentrationVector>()));
-
-		abs_value ret{};
+		float max_delta{};
 
 		for(uint32_t y = range.begin; y != range.end; ++y)
 		{
@@ -97,11 +95,12 @@ namespace terraformer
 				auto const new_val = bv.value*bv.weight + (1.0f - bv.weight)*ds;
 				output_buffer(x, y) = new_val;
 
-				ret = std::max(ret, norm(new_val - old_val));
+				using geosimd::norm;
+				max_delta = std::max(max_delta, norm(new_val - old_val));
 			}
 		}
 
-		return ret;
+		return max_delta;
 	}
 
 	template<class ConcentrationVector,
@@ -132,10 +131,7 @@ namespace terraformer
 		auto const domain_height = output_buffer.height();
 		auto const batch_size = 1 + (domain_height - 1)/static_cast<uint32_t>(n_workers);
 
-		using geosimd::norm;
-		using abs_value = decltype(norm(std::declval<ConcentrationVector>()));
-
-		auto retvals = std::make_unique_for_overwrite<abs_value[]>(n_workers);
+		auto retvals = std::make_unique_for_overwrite<float[]>(n_workers);
 
 		for(size_t k = 0; k != n_workers; ++k)
 		{
