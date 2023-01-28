@@ -1,0 +1,4 @@
+{
+	"target":{"name":"make_heightmap"}
+	,"dependencies":[{"ref":"./make_heightmap.o", "rel":"implementation"}]
+}

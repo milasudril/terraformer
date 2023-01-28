@@ -1,4 +1,4 @@
-//@	{"target":{"name":"curve_gen.o"}}
+//@	{"target":{"name":"make_heightmap.o"}}
 
 #include "lib/curve_tool/damped_motion_integrator.hpp"
 #include "lib/curve_tool/noisy_drift.hpp"
@@ -52,6 +52,7 @@ int main()
 	};
 
 	curve.push_back(ps.r);
+//	auto z_prev = 0.0f;
 	while(ps.r[0] < static_cast<float>(domain_size))
 	{
 		auto const v = drift(rng);
@@ -63,13 +64,22 @@ int main()
 		ps.v = v_corr;
 		ps.r = r_corrected;
 
-		curve.push_back(r_corrected + terraformer::displacement{0.0f, 0.0f, 1.0f});
+//		std::uniform_real_distribution U{-1.0f, 1.0f};
+//		auto const rng_val = U(rng)/2.0f;
+//		auto const z = std::lerp(z_prev, rng_val, 1.0f/64.0f);
+
+		auto const z = 16.0f*std::abs((ps.r - r_0)[1])/static_cast<float>(domain_size);
+
+		curve.push_back(r_corrected + terraformer::displacement{0.0f, 0.0f, 1.0f + 0.125f*z*z});
+//		z_prev = z;
 	}
 
 	terraformer::grayscale_image boundary_values{domain_size, domain_size};
-	draw_as_line_segments(curve, boundary_values.pixels());
+	draw_as_line_segments(curve, boundary_values.pixels(), terraformer::default_pixel_replacing_brush<float>{},
+		[](auto...){return 1.0f;});
 	store(boundary_values, "boundary.exr");
 
+#if 1
 	terraformer::grayscale_image img_a{domain_size, domain_size};
 	for(uint32_t y = 0; y != domain_size; ++y)
 	{
@@ -109,31 +119,22 @@ int main()
 		}
 	);
 
+	size_t k = 0;
 	while(true)
 	{
 		auto const delta = diffuser();
 
 		if(delta < 1.0e-6f)
 		{ break; }
+
+		if(k % 1024 == 0)
+		{
+			printf("\r%.8e", delta);
+			fflush(stdout);
+		}
+		++k;
 	}
 
 	store(diffuser.get_buffer(), "test.exr");
-
-#if 0
-	terraformer::grayscale_image img_b{domain_size, domain_size};
-	auto input_buffer = img_a.pixels();
-	auto output_buffer = img_b.pixels();
-
-	while(true)
-	{
-		auto const delta = run_diffusion_step(output_buffer,
-			terraformer::span_2d<float const>{input_buffer},
-			diff_params);
-		std::swap(input_buffer, output_buffer);
-
-		if(delta < 1.0e-6f)
-		{ break; }
-	}
-	store(input_buffer, "test.exr");
 #endif
 }
