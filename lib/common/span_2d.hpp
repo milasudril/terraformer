@@ -58,6 +58,12 @@ namespace terraformer
 		T* m_ptr;
 	};
 
+	struct pixel_coordinates
+	{
+		uint32_t x;
+		uint32_t y;
+	};
+
 	template<class T, class Func>
 	void for_each(span_2d<T> span, Func&& f)
 	{
@@ -109,7 +115,7 @@ namespace terraformer
 		auto const x_0 = static_cast<uint32_t>(x);
 		auto const y_0 = static_cast<uint32_t>(y);
 		auto const x_1 = (x_0 + 1) % w;
-		auto const y_1 = (y_0 + 1) % h;;
+		auto const y_1 = (y_0 + 1) % h;
 
 		auto const z_00 = img(x_0, y_0);
 		auto const z_01 = img(x_0, y_1);
