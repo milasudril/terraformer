@@ -3,6 +3,7 @@
 
 #include "lib/common/signaling_counter.hpp"
 #include "lib/common/notifying_task.hpp"
+#include "lib/pixel_store/image.hpp"
 
 #include <type_traits>
 #include <concepts>
@@ -117,42 +118,146 @@ namespace terraformer
 		});
 	}
 
-	template<class ConcentrationVector,
+	template<class ConcentrationVector, class DiffCoeff, class Boundary, class Src>
+	using diffusion_step = void (*)(float&,
+		span_2d<ConcentrationVector>,
+		span_2d<ConcentrationVector const>,
+		diffusion_params<DiffCoeff, Boundary, Src> const&,
+		scanline_range);
+
+	template<class ConcentrationVector, class DiffCoeff, class Boundary, class Src>
+	using diffusion_step_execution = notifying_task<
+		std::reference_wrapper<signaling_counter>,
+		diffusion_step<ConcentrationVector, DiffCoeff, Boundary, Src>,
+		std::reference_wrapper<float>,
+		span_2d<ConcentrationVector>,
+		span_2d<ConcentrationVector const>,
+		std::reference_wrapper<diffusion_params<DiffCoeff, Boundary, Src> const>,
+		scanline_range
+		>;
+
+	template<class DiffusionStepExecutor, class ConcentrationVector, class DiffCoeff, class Boundary, class Src>
+	concept diffusion_step_executor = requires(DiffusionStepExecutor e,
+		diffusion_step_execution<ConcentrationVector, DiffCoeff, Boundary, Src> task)
+	{
+		{e.run(std::move(task))} -> std::same_as<void>;
+	};
+
+	template<template<class> class DiffusionStepExecutor,
+		class ConcentrationVector,
 		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
 		dirichlet_boundary_function<ConcentrationVector> Boundary,
-		diffusion_source_function<ConcentrationVector> Src,
-		class worker_pool>
-	auto run_diffusion_step(span_2d<ConcentrationVector> output_buffer,
-		span_2d<ConcentrationVector const> input_buffer,
-		diffusion_params<DiffCoeff, Boundary, Src> const& params, worker_pool& pool)
+		diffusion_source_function<ConcentrationVector> Src>
+	requires (diffusion_step_executor<
+		DiffusionStepExecutor<
+			diffusion_step_execution<
+				ConcentrationVector,
+				DiffCoeff,
+				Boundary,
+				Src>
+			>,
+		   ConcentrationVector,
+		   DiffCoeff,
+		   Boundary,
+		   Src
+		>)
+	class diffusion_solver
 	{
-		auto const n_workers = std::size(pool);
-		signaling_counter counter{n_workers};
-		auto const domain_height = output_buffer.height();
-		auto const batch_size = 1 + (domain_height - 1)/static_cast<uint32_t>(n_workers);
+	public:
+		explicit diffusion_solver(uint32_t num_workers,
+			span_2d<ConcentrationVector const> initial_state,
+			diffusion_params<DiffCoeff, Boundary, Src>&& params):
+			m_executor{num_workers},
+			m_buffer_a{initial_state},
+			m_buffer_b{initial_state.width(), initial_state.height()},
+			m_input_buffer{m_buffer_a.pixels()},
+			m_output_buffer{m_buffer_b.pixels()},
+			m_params{std::move(params)}
+		{}
 
-		auto retvals = std::make_unique_for_overwrite<float[]>(n_workers);
-
-		for(size_t k = 0; k != n_workers; ++k)
+		decltype(auto) take_result()
 		{
-			scanline_range const range{
-				.begin = static_cast<uint32_t>(k*batch_size),
-				.end = std::min(domain_height, (k + 1)*batch_size)
-			};
-
-			pool.schedule(notifying_task{
-				std::ref(counter),
-				[retval = &retvals[k]]<class ... T>(auto&& ... args){
-					*retval = run_diffusion_step(std::forward<T>(args)...);
-				},
-				output_buffer,
-				input_buffer,
-				params,
-				range
-			});
+			if(m_buffer_a.data() == m_input_buffer.data())
+			{ return std::move(m_buffer_a); }
+			else
+			{ return std::move(m_buffer_b); }
 		}
 
-		return *std::max_element(retvals.get(), retvals.get() + n_workers);
+		auto operator()()
+		{
+			auto const n_workers = std::size(m_executor);
+			auto retvals = std::make_unique_for_overwrite<float[]>(n_workers);
+
+			auto const domain_height = m_output_buffer.height();
+			auto const batch_size = 1 + (domain_height - 1)/static_cast<uint32_t>(n_workers);
+			signaling_counter counter{n_workers};
+			for(size_t k = 0; k != n_workers; ++k)
+			{
+				m_executor.run(notifying_task{
+					std::ref(counter),
+					+[](float& max_delta,
+						span_2d<ConcentrationVector> output_buffer,
+						span_2d<ConcentrationVector const> input_buffer,
+						diffusion_params<DiffCoeff, Boundary, Src> const& params,
+						scanline_range range)
+					{
+						max_delta = run_diffusion_step(output_buffer, input_buffer, params, range);
+					},
+					std::ref(retvals[k]),
+					m_output_buffer,
+					get_buffer(),
+					std::cref(m_params),
+					scanline_range{
+						.begin = static_cast<uint32_t>(k*batch_size),
+						.end = std::min(domain_height, static_cast<uint32_t>((k + 1)*batch_size))
+					}
+				});
+			}
+			counter.wait();
+
+			std::swap(m_input_buffer, m_output_buffer);
+			return *std::max_element(retvals.get(), retvals.get() + n_workers);
+		}
+
+		auto get_buffer() const
+		{ return span_2d<ConcentrationVector const>{m_input_buffer}; }
+
+
+	private:
+		DiffusionStepExecutor<diffusion_step_execution<ConcentrationVector, DiffCoeff, Boundary, Src>> m_executor;
+		basic_image<ConcentrationVector> m_buffer_a;
+		basic_image<ConcentrationVector> m_buffer_b;
+
+		span_2d<ConcentrationVector> m_input_buffer;
+		span_2d<ConcentrationVector> m_output_buffer;
+		diffusion_params<DiffCoeff, Boundary, Src> m_params;
+	};
+
+
+	template<template<class> class DiffusionStepExecutor,
+		class ConcentrationVector,
+		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
+		dirichlet_boundary_function<ConcentrationVector> Boundary,
+		diffusion_source_function<ConcentrationVector> Src>
+	requires (diffusion_step_executor<
+		DiffusionStepExecutor<
+			diffusion_step_execution<
+				ConcentrationVector,
+				DiffCoeff,
+				Boundary,
+				Src>
+			>,
+		   ConcentrationVector,
+		   DiffCoeff,
+		   Boundary,
+		   Src
+		>)
+	auto make_diffusion_solver(uint32_t num_workers,
+		span_2d<ConcentrationVector const> initial_state,
+		diffusion_params<DiffCoeff, Boundary, Src>&& params)
+	{
+		return diffusion_solver<DiffusionStepExecutor, ConcentrationVector, DiffCoeff, Boundary, Src>
+			{num_workers, initial_state, std::move(params)};
 	}
 }
 

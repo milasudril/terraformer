@@ -21,7 +21,7 @@ namespace terraformer
 
 		size_t size() const { return std::size(m_workers); }
 
-		void schedule(Task&& task)
+		void run(Task&& task)
 		{
 			m_tasks.push(std::move(task));
 			std::lock_guard lock{m_mutex};
@@ -57,7 +57,7 @@ namespace terraformer
 				{
 					std::unique_lock lock{m_mutex};
 					m_cv.wait(lock, [this, &t](){
-						t = m_tasks.try_pop();
+						t = std::move(m_tasks.try_pop());
 						return t.has_value() || m_should_stop;
 					});
 					should_stop = m_should_stop;

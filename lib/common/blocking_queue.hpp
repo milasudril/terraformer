@@ -18,13 +18,13 @@ namespace terraformer
 
 		std::optional<T> try_pop()
 		{
-			std::lock_guard lock1{m_mutex};
+			std::lock_guard lock{m_mutex};
 			if(m_queue.empty())
 			{ return std::nullopt; }
 
-			auto ret = m_queue.front();
+			auto ret = std::move(m_queue.front());
 			m_queue.pop();
-			return std::move(ret);
+			return ret;
 		}
 
 	private:
