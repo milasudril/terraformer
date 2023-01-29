@@ -8,6 +8,7 @@
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/filters/diffuser.hpp"
 #include "lib/common/thread_pool.hpp"
+#include "lib/filters/coordinate_sampler.hpp"
 
 #include <random>
 #include <pcg-cpp/include/pcg_random.hpp>
@@ -52,7 +53,6 @@ int main()
 	};
 
 	curve.push_back(ps.r);
-//	auto z_prev = 0.0f;
 	while(ps.r[0] < static_cast<float>(domain_size))
 	{
 		auto const v = drift(rng);
@@ -64,14 +64,9 @@ int main()
 		ps.v = v_corr;
 		ps.r = r_corrected;
 
-//		std::uniform_real_distribution U{-1.0f, 1.0f};
-//		auto const rng_val = U(rng)/2.0f;
-//		auto const z = std::lerp(z_prev, rng_val, 1.0f/64.0f);
-
 		auto const z = 16.0f*std::abs((ps.r - r_0)[1])/static_cast<float>(domain_size);
 
 		curve.push_back(r_corrected + terraformer::displacement{0.0f, 0.0f, 1.0f + 0.125f*z*z});
-//		z_prev = z;
 	}
 
 	terraformer::grayscale_image boundary_values{domain_size, domain_size};
@@ -79,7 +74,6 @@ int main()
 		[](auto...){return 1.0f;});
 	store(boundary_values, "boundary.exr");
 
-#if 1
 	terraformer::grayscale_image img_a{domain_size, domain_size};
 	for(uint32_t y = 0; y != domain_size; ++y)
 	{
@@ -129,12 +123,26 @@ int main()
 
 		if(k % 1024 == 0)
 		{
-			printf("\r%.8e", delta);
-			fflush(stdout);
+			fprintf(stderr, "\r%.8e", delta);
+			fflush(stderr);
 		}
 		++k;
 	}
 
 	store(diffuser.get_buffer(), "test.exr");
-#endif
+
+	auto river_start_points = terraformer::sample(domain_size,
+		domain_size,
+		[&rng, heightmap = diffuser.get_buffer()](uint32_t x, uint32_t y){
+			std::uniform_real_distribution U{0.0f, 1.0f};
+			// TODO: normalize to max value in heightmap
+			auto const val = 0.75f*heightmap(x, y);
+
+			// TODO: These numbers constants should be parameters
+			return 768.0f*U(rng) < (val >= 0.75f);
+		});
+
+	std::ranges::for_each(river_start_points, [](auto const item) {
+		printf("%u %u\n", item.x, item.y);
+	});
 }

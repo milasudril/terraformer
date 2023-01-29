@@ -11,7 +11,7 @@ namespace terraformer
 		{pred(x, y)} -> std::same_as<bool>;
 	};
 
-	template<by_value_selection_predicate Pred>
+	template<pixel_selection_predicate Pred>
 	auto sample(uint32_t width, uint32_t height, Pred&& pred)
 	{
 		std::vector<pixel_coordinates> ret;
@@ -19,7 +19,7 @@ namespace terraformer
 		{
 			for(uint32_t x = 0; x != width; ++x)
 			{
-				if(pred(values(x, y)))
+				if(pred(x, y))
 				{ ret.push_back(pixel_coordinates{x, y}); }
 			}
 		}
