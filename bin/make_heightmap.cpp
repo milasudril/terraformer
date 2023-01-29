@@ -72,12 +72,14 @@ int main()
 	}
 
 	// Generate initial heightmap
+
 	terraformer::grayscale_image boundary_values{domain_size, domain_size};
 	draw_as_line_segments(curve, boundary_values.pixels(), terraformer::default_pixel_replacing_brush<float>{},
 		[](auto...){return 1.0f;});
 	store(boundary_values, "boundary.exr");
 
-	terraformer::grayscale_image img_a{domain_size, domain_size};
+	terraformer::double_buffer<terraformer::grayscale_image> buffers{domain_size, domain_size};
+
 	for(uint32_t y = 0; y != domain_size; ++y)
 	{
 		for(uint32_t x = 0; x != domain_size; ++x)
@@ -88,12 +90,13 @@ int main()
 			auto const val = std::min(std::lerp(0.382f, 1.0f, t),
 				std::lerp(1.0f, 0.618f*0.382f, (y_val - ridge_line)/static_cast<float>(domain_size - ridge_line)));
 
-			img_a(x, y) = val;
+			buffers.back()(x, y) = val;
 		}
 	}
+	buffers.swap();
 
 	auto diffuser = make_diffusion_solver<terraformer::thread_pool>(16,
-		std::as_const(img_a).pixels(),
+		buffers,
 		terraformer::diffusion_params{
 			.D = 1.0f,
 			.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
@@ -132,10 +135,9 @@ int main()
 		++k;
 	}
 
-	store(diffuser.get_buffer(), "test.exr");
+	store(buffers.front(), "test.exr");
 
-	auto const heightmap = diffuser.get_buffer();
-	auto const backbuffer = diffuser.get_back_buffer();
+	auto const heightmap = buffers.front().pixels();
 
 	// Collect river start points
 	auto const river_start_points = terraformer::sample(domain_size,
@@ -149,7 +151,7 @@ int main()
 			return 768.0f*U(rng) < (val >= 0.75f);
 		});
 
-	std::ranges::for_each(river_start_points, [heightmap, backbuffer](auto const item) {
+	std::ranges::for_each(river_start_points, [heightmap](auto const item) {
 		auto path = trace_gradient(heightmap, item);
 		printf("Created path of size %u\n", std::size(path));
 

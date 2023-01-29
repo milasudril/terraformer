@@ -4,6 +4,7 @@
 #include "lib/common/signaling_counter.hpp"
 #include "lib/common/notifying_task.hpp"
 #include "lib/pixel_store/image.hpp"
+#include "lib/common/double_buffer.hpp"
 
 #include <type_traits>
 #include <concepts>
@@ -164,31 +165,22 @@ namespace terraformer
 	class diffusion_solver
 	{
 	public:
+		using buffer_type = basic_image<ConcentrationVector>;
+
 		explicit diffusion_solver(uint32_t num_workers,
-			span_2d<ConcentrationVector const> initial_state,
+			double_buffer<buffer_type>& buffers,
 			diffusion_params<DiffCoeff, Boundary, Src>&& params):
 			m_executor{num_workers},
-			m_buffer_a{initial_state},
-			m_buffer_b{initial_state.width(), initial_state.height()},
-			m_input_buffer{m_buffer_a.pixels()},
-			m_output_buffer{m_buffer_b.pixels()},
+			m_buffers{buffers},
 			m_params{std::move(params)}
 		{}
-
-		decltype(auto) take_result()
-		{
-			if(m_buffer_a.data() == m_input_buffer.data())
-			{ return std::move(m_buffer_a); }
-			else
-			{ return std::move(m_buffer_b); }
-		}
 
 		auto operator()()
 		{
 			auto const n_workers = std::size(m_executor);
 			auto retvals = std::make_unique_for_overwrite<float[]>(n_workers);
 
-			auto const domain_height = m_output_buffer.height();
+			auto const domain_height = m_buffers.get().back().height();
 			auto const batch_size = 1 + (domain_height - 1)/static_cast<uint32_t>(n_workers);
 			signaling_counter counter{n_workers};
 			for(size_t k = 0; k != n_workers; ++k)
@@ -204,8 +196,8 @@ namespace terraformer
 						max_delta = run_diffusion_step(output_buffer, input_buffer, params, range);
 					},
 					std::ref(retvals[k]),
-					m_output_buffer,
-					std::as_const(*this).get_buffer(),
+					m_buffers.get().back().pixels(),
+					m_buffers.get().front().pixels(),
 					std::cref(m_params),
 					scanline_range{
 						.begin = static_cast<uint32_t>(k*batch_size),
@@ -214,28 +206,13 @@ namespace terraformer
 				});
 			}
 			counter.wait();
-
-			std::swap(m_input_buffer, m_output_buffer);
+			m_buffers.get().swap();
 			return *std::max_element(retvals.get(), retvals.get() + n_workers);
 		}
 
-		auto get_buffer() const
-		{ return span_2d<ConcentrationVector const>{m_input_buffer}; }
-
-		auto get_buffer()
-		{ return m_input_buffer; }
-
-		auto get_back_buffer() const
-		{ return m_output_buffer; }
-
-
 	private:
 		DiffusionStepExecutor<diffusion_step_execution<ConcentrationVector, DiffCoeff, Boundary, Src>> m_executor;
-		basic_image<ConcentrationVector> m_buffer_a;
-		basic_image<ConcentrationVector> m_buffer_b;
-
-		span_2d<ConcentrationVector> m_input_buffer;
-		span_2d<ConcentrationVector> m_output_buffer;
+		std::reference_wrapper<double_buffer<buffer_type>> m_buffers;
 		diffusion_params<DiffCoeff, Boundary, Src> m_params;
 	};
 
@@ -259,11 +236,11 @@ namespace terraformer
 		   Src
 		>)
 	auto make_diffusion_solver(uint32_t num_workers,
-		span_2d<ConcentrationVector const> initial_state,
+		double_buffer<basic_image<ConcentrationVector>>& buffers,
 		diffusion_params<DiffCoeff, Boundary, Src>&& params)
 	{
 		return diffusion_solver<DiffusionStepExecutor, ConcentrationVector, DiffCoeff, Boundary, Src>
-			{num_workers, initial_state, std::move(params)};
+			{num_workers, buffers, std::move(params)};
 	}
 }
 
