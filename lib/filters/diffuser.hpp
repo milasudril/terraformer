@@ -205,7 +205,7 @@ namespace terraformer
 					},
 					std::ref(retvals[k]),
 					m_output_buffer,
-					get_buffer(),
+					std::as_const(*this).get_buffer(),
 					std::cref(m_params),
 					scanline_range{
 						.begin = static_cast<uint32_t>(k*batch_size),
@@ -221,6 +221,12 @@ namespace terraformer
 
 		auto get_buffer() const
 		{ return span_2d<ConcentrationVector const>{m_input_buffer}; }
+
+		auto get_buffer()
+		{ return m_input_buffer; }
+
+		auto get_back_buffer() const
+		{ return m_output_buffer; }
 
 
 	private:

@@ -58,6 +58,13 @@ namespace terraformer
 		T* m_ptr;
 	};
 
+	template<class T>
+	bool inside(span_2d<T const> span, float x, float y)
+	{
+		return (x >= 0.0f && x < static_cast<float>(span.width()))
+			&& (y >= 0.0f && y < static_cast<float>(span.height()));
+	}
+
 	struct pixel_coordinates
 	{
 		uint32_t x;
@@ -104,10 +111,10 @@ namespace terraformer
 	}
 
 	template<class T>
-	auto interp(span_2d<T const> img, float x, float y)
+	auto interp(span_2d<T const> span, float x, float y)
 	{
-		auto const w = img.width();
-		auto const h = img.height();
+		auto const w = span.width();
+		auto const h = span.height();
 
 		x = mod(x, static_cast<float>(w));
 		y = mod(y, static_cast<float>(h));
@@ -117,10 +124,10 @@ namespace terraformer
 		auto const x_1 = (x_0 + 1) % w;
 		auto const y_1 = (y_0 + 1) % h;
 
-		auto const z_00 = img(x_0, y_0);
-		auto const z_01 = img(x_0, y_1);
-		auto const z_10 = img(x_1, y_0);
-		auto const z_11 = img(x_1, y_1);
+		auto const z_00 = span(x_0, y_0);
+		auto const z_01 = span(x_0, y_1);
+		auto const z_10 = span(x_1, y_0);
+		auto const z_11 = span(x_1, y_1);
 
 		auto const xi = x - static_cast<float>(x_0);
 		auto const eta = y  - static_cast<float>(y_0);
@@ -130,35 +137,35 @@ namespace terraformer
 		return (1.0f - eta)*z_x0 + eta*z_x1;
 	}
 
-	inline auto grad(span_2d<float const> img, float x, float y)
+	inline auto grad(span_2d<float const> span, float x, float y)
 	{
 		auto const x0 = x - 1.0f;
 		auto const x1 = x + 1.0f;
 		auto const y0 = y - 1.0f;
 		auto const y1 = y + 1.0f;
 
-		auto const z_x1_y = interp(img, x1, y);
-		auto const z_x0_y = interp(img, x0, y);
-		auto const z_x_y1 = interp(img, x, y1);
-		auto const z_x_y0 = interp(img, x, y0);
+		auto const z_x1_y = interp(span, x1, y);
+		auto const z_x0_y = interp(span, x0, y);
+		auto const z_x_y1 = interp(span, x, y1);
+		auto const z_x_y0 = interp(span, x, y0);
 
 		return 0.5f*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}
 
-	inline auto grad(span_2d<float const> img, uint32_t x, uint32_t y)
+	inline auto grad(span_2d<float const> span, uint32_t x, uint32_t y)
 	{
-		auto const w = img.width();
-		auto const h = img.height();
+		auto const w = span.width();
+		auto const h = span.height();
 
 		auto const x0 = (x + w - 1)%w;
 		auto const x1 = (x + w + 1)%w;
 		auto const y0 = (y + h - 1)%h;
 		auto const y1 = (y + h + 1)%h;
 
-		auto const z_x1_y = img(x1, y);
-		auto const z_x0_y = img(x0, y);
-		auto const z_x_y1 = img(x, y1);
-		auto const z_x_y0 = img(x, y0);
+		auto const z_x1_y = span(x1, y);
+		auto const z_x0_y = span(x0, y);
+		auto const z_x_y1 = span(x, y1);
+		auto const z_x_y0 = span(x, y0);
 
 		return 0.5f*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}

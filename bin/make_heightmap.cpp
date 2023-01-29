@@ -9,6 +9,7 @@
 #include "lib/filters/diffuser.hpp"
 #include "lib/common/thread_pool.hpp"
 #include "lib/filters/coordinate_sampler.hpp"
+#include "lib/filters/gradient_tracer.hpp"
 
 #include <random>
 #include <pcg-cpp/include/pcg_random.hpp>
@@ -133,10 +134,13 @@ int main()
 
 	store(diffuser.get_buffer(), "test.exr");
 
+	auto const heightmap = diffuser.get_buffer();
+	auto const backbuffer = diffuser.get_back_buffer();
+
 	// Collect river start points
 	auto const river_start_points = terraformer::sample(domain_size,
 		domain_size,
-		[&rng, heightmap = diffuser.get_buffer()](uint32_t x, uint32_t y){
+		[&rng, heightmap](uint32_t x, uint32_t y){
 			std::uniform_real_distribution U{0.0f, 1.0f};
 			// TODO: normalize to max value in heightmap
 			auto const val = 0.75f*heightmap(x, y);
@@ -145,8 +149,10 @@ int main()
 			return 768.0f*U(rng) < (val >= 0.75f);
 		});
 
-	std::ranges::for_each(river_start_points, [](auto const item) {
-		printf("%u %u\n", item.x, item.y);
+	std::ranges::for_each(river_start_points, [heightmap, backbuffer](auto const item) {
+		auto path = trace_gradient(heightmap, item);
+		printf("Created path of size %u\n", std::size(path));
+
 	});
 
 }
