@@ -20,6 +20,7 @@ int main()
 	uint32_t const domain_size = 1024;
 	auto const curve_scaling_factor = 6.0f;
 
+	// Generate ridge line
 	terraformer::location const r_0{0.0f, 2.0f*static_cast<float>(domain_size)/3.0f, 0.0f};
 
 	terraformer::noisy_drift drift{terraformer::noisy_drift::params{
@@ -69,6 +70,7 @@ int main()
 		curve.push_back(r_corrected + terraformer::displacement{0.0f, 0.0f, 1.0f + 0.125f*z*z});
 	}
 
+	// Generate initial heightmap
 	terraformer::grayscale_image boundary_values{domain_size, domain_size};
 	draw_as_line_segments(curve, boundary_values.pixels(), terraformer::default_pixel_replacing_brush<float>{},
 		[](auto...){return 1.0f;});
@@ -131,7 +133,8 @@ int main()
 
 	store(diffuser.get_buffer(), "test.exr");
 
-	auto river_start_points = terraformer::sample(domain_size,
+	// Collect river start points
+	auto const river_start_points = terraformer::sample(domain_size,
 		domain_size,
 		[&rng, heightmap = diffuser.get_buffer()](uint32_t x, uint32_t y){
 			std::uniform_real_distribution U{0.0f, 1.0f};
@@ -145,4 +148,5 @@ int main()
 	std::ranges::for_each(river_start_points, [](auto const item) {
 		printf("%u %u\n", item.x, item.y);
 	});
+
 }
