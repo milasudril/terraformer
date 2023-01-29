@@ -242,6 +242,41 @@ namespace terraformer
 		return diffusion_solver<DiffusionStepExecutor, ConcentrationVector, DiffCoeff, Boundary, Src>
 			{num_workers, buffers, std::move(params)};
 	}
+
+
+	template<template<class> class DiffusionStepExecutor,
+		class ConcentrationVector,
+		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
+		dirichlet_boundary_function<ConcentrationVector> Boundary,
+		diffusion_source_function<ConcentrationVector> Src>
+	requires (diffusion_step_executor<
+		DiffusionStepExecutor<
+			diffusion_step_execution<
+				ConcentrationVector,
+				DiffCoeff,
+				Boundary,
+				Src>
+			>,
+		   ConcentrationVector,
+		   DiffCoeff,
+		   Boundary,
+		   Src
+		>)
+	auto solve_laplace(uint32_t num_workers,
+		double_buffer<basic_image<ConcentrationVector>>& buffers,
+		diffusion_params<DiffCoeff, Boundary, Src>&& params,
+		float tolerance)
+	{
+		auto diffuser = make_diffusion_solver<DiffusionStepExecutor>(
+			num_workers, buffers, std::move(params));
+		while(true)
+		{
+			auto const delta = diffuser();
+
+			if(delta < tolerance)
+			{ return delta; }
+		}
+	}
 }
 
 #endif

@@ -95,9 +95,7 @@ int main()
 	}
 	buffers.swap();
 
-	auto diffuser = make_diffusion_solver<terraformer::thread_pool>(16,
-		buffers,
-		terraformer::diffusion_params{
+	solve_laplace<terraformer::thread_pool>(16, buffers, terraformer::diffusion_params{
 			.D = 1.0f,
 			.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
 				if(y == 0)
@@ -116,24 +114,7 @@ int main()
 					terraformer::dirichlet_boundary_pixel{0.0f, 0.0f};
 			},
 			.source =  [](uint32_t, uint32_t){ return 0.0f; }
-		}
-	);
-
-	size_t k = 0;
-	while(true)
-	{
-		auto const delta = diffuser();
-
-		if(delta < 1.0e-6f)
-		{ break; }
-
-		if(k % 1024 == 0)
-		{
-			fprintf(stderr, "\r%.8e", delta);
-			fflush(stderr);
-		}
-		++k;
-	}
+		}, 1.0e-6f);
 
 	store(buffers.front(), "test.exr");
 
