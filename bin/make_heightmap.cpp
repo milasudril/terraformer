@@ -99,14 +99,10 @@ int main()
 			.D = 1.0f,
 			.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
 				if(y == 0)
-				{
-					return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.382f};
-				}
+				{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.382f}; }
 
 				if(y == values.height() - 1)
-				{
-					return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.618f*0.382f};
-				}
+				{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.618f*0.382f};}
 
 				auto const val = values(x, y);
 				return val >= 0.5f ?
@@ -135,7 +131,5 @@ int main()
 	std::ranges::for_each(river_start_points, [heightmap](auto const item) {
 		auto path = trace_gradient(heightmap, item);
 		printf("Created path of size %u\n", std::size(path));
-
 	});
-
 }
