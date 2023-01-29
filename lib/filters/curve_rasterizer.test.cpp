@@ -11,9 +11,8 @@ TESTCASE(terraformer_draw_curve_thickness_1)
 
 	terraformer::location loc{4.0f, 3.0f, 1.0f};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; });
+	draw(img.pixels(), loc[0], loc[1], loc[2], 1.0f, [](float x, float y){
+		return x*x + y*y <= 1.0f? 1.0f : 0.0f;});
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -33,9 +32,8 @@ TESTCASE(terraformer_draw_curve_thickness_2)
 
 	terraformer::location loc{4.0f, 3.0f, 1.0f};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 2.0f; });
+	draw(img.pixels(), loc[0], loc[1], loc[2], 2.0f, [](float x, float y){
+		return x*x + y*y <= 1.0f? 1.0f : 0.0f;});
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -57,9 +55,8 @@ TESTCASE(terraformer_draw_curve_thickness_2_at_half_pixel)
 
 	loc += terraformer::displacement{0.5f, 0.5f, 0.0f};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 2.0f; });
+	draw(img.pixels(), loc[0], loc[1], loc[2], 2.0f, [](float x, float y){
+		return x*x + y*y <= 1.0f? 1.0f : 0.0f;});
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -79,9 +76,8 @@ TESTCASE(terraformer_draw_curve_thickness_3)
 
 	terraformer::location loc{4.0f, 3.0f, 1.0f};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 3.0f; });
+	draw(img.pixels(), loc[0], loc[1], loc[2], 3.0f, [](float x, float y){
+		return x*x + y*y <= 1.0f? 1.0f : 0.0f;});
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -101,9 +97,8 @@ TESTCASE(terraformer_draw_curve_thickness_4)
 
 	terraformer::location loc{4.0f, 3.0f, 1.0f};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 4.0f; });
+	draw(img.pixels(), loc[0], loc[1], loc[2], 4.0f, [](float x, float y){
+		return x*x + y*y <= 1.0f? 1.0f : 0.0f;});
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -138,9 +133,8 @@ TESTCASE(terraformer_draw_curve_thickness_5)
 
 	terraformer::location loc{4.0f, 3.0f, 1.0f};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 5.0f; });
+	draw(img.pixels(), loc[0], loc[1], loc[2], 5.0f, [](float x, float y){
+		return x*x + y*y <= 1.0f? 1.0f : 0.0f;});
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -175,9 +169,8 @@ TESTCASE(terraformer_draw_point_thickness_4_at_corner)
 
 	terraformer::location loc{1.0f, 1.0f, 1.0f};
 
-	draw(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 4.0f; });
+	draw(img.pixels(), loc[0], loc[1], loc[2], 4.0f, [](float x, float y){
+		return x*x + y*y <= 1.0f? 1.0f : 0.0f;});
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -210,9 +203,7 @@ TESTCASE(terraformer_draw_curve_dx_largest_greater_than_zero)
 		terraformer::location{1.0f, 1.0f, 1.0f},
 		terraformer::location{7.0f, 4.0f, 4.0f}};
 
-	draw_as_line_segments(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; });
+	draw_as_line_segments(img.pixels(), loc, 1.0f);
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -232,9 +223,7 @@ TESTCASE(terraformer_draw_curve_dx_largest_less_than_zero)
 		terraformer::location{7.0f, 1.0f, 1.0f},
 		terraformer::location{1.0f, 4.0f, -2.0f}};
 
-	draw_as_line_segments(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; });
+	draw_as_line_segments(img.pixels(), loc, 1.0f);
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -254,9 +243,7 @@ TESTCASE(terraformer_draw_curve_dy_largest_greater_than_zero)
 		terraformer::location{1.0f, 1.0f, 1.0f},
 		terraformer::location{4.0f, 7.0f, -2.0f}};
 
-	draw_as_line_segments(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; });
+	draw_as_line_segments(img.pixels(), loc, 1.0f);
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{
@@ -276,9 +263,7 @@ TESTCASE(terraformer_draw_curve_dy_largest_less_than_zero)
 		terraformer::location{1.0f, 7.0f, 1.0f},
 		terraformer::location{4.0f, 1.0f, 4.0f}};
 
-	draw_as_line_segments(loc, img.pixels(), [](float x, float y, float z){
-		return x*x + y*y <= 1.0f? std::optional{z} : std::optional<float>{};
-	}, [](auto){ return 1.0f; });
+	draw_as_line_segments(img.pixels(), loc, 1.0f);
 
 	for(uint32_t k = 0; k != img.height(); ++k)
 	{

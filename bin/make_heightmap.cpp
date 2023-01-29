@@ -74,8 +74,7 @@ int main()
 	// Generate initial heightmap
 
 	terraformer::grayscale_image boundary_values{domain_size, domain_size};
-	draw_as_line_segments(curve, boundary_values.pixels(), terraformer::default_pixel_replacing_brush<float>{},
-		[](auto...){return 1.0f;});
+	draw_as_line_segments(boundary_values.pixels(), curve, 1.0f);
 	store(boundary_values, "boundary.exr");
 
 	terraformer::double_buffer<terraformer::grayscale_image> buffers{domain_size, domain_size};

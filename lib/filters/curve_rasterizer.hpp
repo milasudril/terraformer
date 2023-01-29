@@ -10,51 +10,44 @@
 
 namespace terraformer
 {
-	template<class T, class PixelType>
-	concept pixel_replacing_brush = requires(T f, PixelType z, float xi, float eta, float zeta)
+	template<class T>
+	concept brush_size_modulator = requires(T f, float x, float y)
 	{
-		{f(xi, eta, zeta)} -> std::same_as<std::optional<PixelType>>;
+		{f(x, y)} -> std::same_as<float>;
 	};
 
 	template<class T>
-	concept brush_size_modulator = requires(T f, location loc)
+	concept brush = requires(T f, float xi, float eta)
 	{
-		{f(loc)} -> std::same_as<float>;
+		{f(xi, eta)} -> std::same_as<float>;
 	};
 
-	template<class PixelType>
-	struct default_pixel_replacing_brush
+	struct default_brush
 	{
-		auto operator()(float x, float y, float z) const
-		{
-			return x*x + y*y <= 1.0f ? std::optional{z} : std::optional<float>{};
-		}
+		constexpr auto operator()(float x, float y) const
+		{ return x*x + y*y <= 1.0f ? 1.0f : 0.0f; }
 	};
 
 	struct default_brush_size_modulator
 	{
-		auto operator()(auto...) const
+		constexpr auto operator()(float, float) const
 		{
 			return 1.0f;
 		}
 	};
 
-	template<class PixelType,
-		pixel_replacing_brush<PixelType> Brush = default_pixel_replacing_brush<PixelType>,
-		brush_size_modulator Modulator = default_brush_size_modulator>
-	void draw(location loc,
-		span_2d<PixelType> target_surface,
-		Brush&& brush = Brush{},
-		Modulator&& mod = Modulator{})
+	template<class PixelType, brush Brush = default_brush>
+	void draw(span_2d<PixelType> target_surface,
+		float x,
+		float y,
+		PixelType value,
+		float d,
+		Brush&& brush = Brush{})
 	{
 		auto const h = target_surface.width();
 		auto const w = target_surface.height();
 
-		auto const x = loc[0];
-		auto const y = loc[1];
-		auto const z = loc[2];
-
-		auto const thickness = 0.5f*mod(loc);
+		auto const thickness = 0.5f*d;
 		auto const k_min = static_cast<uint32_t>(y - thickness + 0.5f + static_cast<float>(h));
 		auto const k_max = static_cast<uint32_t>(y + thickness + 0.5f + static_cast<float>(h));
 		auto const l_min = static_cast<uint32_t>(x - thickness + 0.5f + static_cast<float>(w));
@@ -72,20 +65,21 @@ namespace terraformer
 						+ 2.0f*(static_cast<float>(k - k_min) + 0.5f)
 						/static_cast<float>(k_max - k_min);
 
-				if(auto val = brush(xi, eta, z); val.has_value())
-				{ target_surface(l%w, (h - 1) - k%h ) = *val; }
+				auto const strength = brush(xi, eta);
+				auto const src_val = target_surface(l%w, (h - 1) - k%h);
+				target_surface(l%w, (h - 1) - k%h ) = strength*value + (1.0f - strength)*src_val;
 			}
 		}
 	}
 
-
 	template<class PixelType,
-		class BrushType = default_pixel_replacing_brush<PixelType>,
-		class BrushSizeModulator = default_brush_size_modulator>
-	void draw(geosimd::line_segment<geom_space> seg,
-		span_2d<PixelType> target_surface,
-		BrushType&& brush = BrushType{},
-		BrushSizeModulator&& mod = BrushSizeModulator{})
+		brush_size_modulator BrushSizeModulator = default_brush_size_modulator,
+		brush Brush = default_brush>
+	void draw(span_2d<PixelType> target_surface,
+		geosimd::line_segment<geom_space> seg,
+		PixelType value,
+		BrushSizeModulator&& mod = BrushSizeModulator{},
+		Brush&& brush = Brush{})
 	{
 		auto dr = seg.p2 - seg.p1;
 		if(std::abs(dr[0]) > std::abs(dr[1]))
@@ -101,9 +95,9 @@ namespace terraformer
 				auto const y = a*static_cast<float>(l - static_cast<int32_t>(seg.p1[0]))
 					+ seg.p1[1];
 				auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
-				draw(location{x, y, z}, target_surface, brush, mod);
+				auto const d = mod(x, y);
+				draw(target_surface, x, y, z*value, d, brush);
 			}
-
 		}
 		else
 		{
@@ -118,18 +112,20 @@ namespace terraformer
 				auto const x = a*static_cast<float>(k - static_cast<int32_t>(seg.p1[1]))
 					+ seg.p1[0];
 				auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
-				draw(location{x, y, z}, target_surface, brush, mod);
+				auto const d = mod(x, y);
+				draw(target_surface, x, y, z*value, d, brush);
 			}
 		}
 	}
 
 	template<class PixelType,
-		class BrushType = default_pixel_replacing_brush<PixelType>,
-		class BrushSizeModulator = default_brush_size_modulator>
-	void draw_as_line_segments(std::span<location const> curve,
-		span_2d<PixelType> target_surface,
-		BrushType&& brush = BrushType{},
-		BrushSizeModulator&& mod = BrushSizeModulator{})
+		brush_size_modulator BrushSizeModulator = default_brush_size_modulator,
+		brush Brush = default_brush>
+	void draw_as_line_segments(span_2d<PixelType> target_surface,
+		std::span<location const> curve,
+		PixelType value,
+		BrushSizeModulator&& mod = BrushSizeModulator{},
+		Brush&& brush = Brush{})
 	{
 		if(std::size(curve) == 0)
 		{ return; }
@@ -138,22 +134,23 @@ namespace terraformer
 		for(size_t k = 1; k!=std::size(curve); ++k)
 		{
 			auto const current = curve[k];
-			draw(geosimd::line_segment{.p1 = prev, .p2 = current}, target_surface, brush, mod);
+			draw(target_surface, geosimd::line_segment{.p1 = prev, .p2 = current}, value, mod, brush);
 			prev = current;
 		}
 	}
 
 	template<class PixelType,
-		class BrushType = default_pixel_replacing_brush<PixelType>,
-		class BrushSizeModulator = default_brush_size_modulator>
-	void draw_as_dots(std::span<location const> curve,
-		span_2d<PixelType> target_surface,
-		BrushType&& brush = BrushType{},
-		BrushSizeModulator&& mod = BrushSizeModulator{})
+		brush_size_modulator BrushSizeModulator = default_brush_size_modulator,
+		brush Brush = default_brush>
+	void draw_as_dots(span_2d<PixelType> target_surface,
+		std::span<location const> curve,
+		PixelType value,
+		BrushSizeModulator&& mod = BrushSizeModulator{},
+		Brush&& brush = Brush{})
 	{
 		for(auto point: curve)
 		{
-			draw(point, target_surface, brush, mod);
+			draw(target_surface, point, value, mod, brush);
 		}
 	}
 
