@@ -48,26 +48,22 @@ namespace terraformer
 		auto const w = target_surface.height();
 
 		auto const thickness = 0.5f*d;
-		auto const k_min = static_cast<uint32_t>(y - thickness + 0.5f + static_cast<float>(h));
-		auto const k_max = static_cast<uint32_t>(y + thickness + 0.5f + static_cast<float>(h));
-		auto const l_min = static_cast<uint32_t>(x - thickness + 0.5f + static_cast<float>(w));
-		auto const l_max = static_cast<uint32_t>(x + thickness + 0.5f + static_cast<float>(w));
+		auto const brush_size = static_cast<uint32_t>(d);
+		auto const k_min = static_cast<uint32_t>(y - thickness + 0.5f);
+//		auto const k_max = static_cast<uint32_t>(y + thickness + 0.5f + static_cast<float>(h));
+		auto const l_min = static_cast<uint32_t>(x - thickness + 0.5f);
+//		auto const l_max = static_cast<uint32_t>(x + thickness + 0.5f + static_cast<float>(w));
 
-		for(auto k = k_min; k != k_max; ++k)
+		for(auto k = 0u; k != brush_size; ++k)
 		{
-			for(auto l = l_min; l != l_max; ++l)
+			for(auto l = 0u; l != brush_size; ++l)
 			{
-				auto const xi = -1.0f
-					+ 2.0f*(static_cast<float>(l - l_min) + 0.5f)
-						/static_cast<float>(l_max - l_min);
-
-				auto const eta =  - 1.0f
-						+ 2.0f*(static_cast<float>(k - k_min) + 0.5f)
-						/static_cast<float>(k_max - k_min);
+				auto const xi = std::lerp(-1.0f, 1.0f, (static_cast<float>(l) + 0.5f)/d);
+				auto const eta = std::lerp(-1.0f, 1.0f, (static_cast<float>(k) + 0.5f)/d);
 
 				auto const strength = brush(xi, eta);
-				auto const src_val = target_surface(l%w, (h - 1) - k%h);
-				target_surface(l%w, (h - 1) - k%h ) = strength*value + (1.0f - strength)*src_val;
+				auto const src_val = target_surface((l + l_min + w)%w, (h - 1) - (k + k_min + h)%h);
+				target_surface((l + l_min + w)%w, (h - 1) - (k + k_min + h)%h ) = strength*value + (1.0f - strength)*src_val;
 			}
 		}
 	}

@@ -167,7 +167,7 @@ TESTCASE(terraformer_draw_point_thickness_4_at_corner)
 {
 	terraformer::grayscale_image img{8, 8};
 
-	terraformer::location loc{1.0f, 1.0f, 1.0f};
+	terraformer::location loc{0.0f, 0.0f, 1.0f};
 
 	draw(img.pixels(), loc[0], loc[1], loc[2], 4.0f, [](float x, float y){
 		return x*x + y*y <= 1.0f? 1.0f : 0.0f;});
