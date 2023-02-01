@@ -50,9 +50,7 @@ namespace terraformer
 		auto const thickness = 0.5f*d;
 		auto const brush_size = static_cast<uint32_t>(d);
 		auto const k_min = static_cast<uint32_t>(y - thickness + 0.5f);
-//		auto const k_max = static_cast<uint32_t>(y + thickness + 0.5f + static_cast<float>(h));
 		auto const l_min = static_cast<uint32_t>(x - thickness + 0.5f);
-//		auto const l_max = static_cast<uint32_t>(x + thickness + 0.5f + static_cast<float>(w));
 
 		for(auto k = 0u; k != brush_size; ++k)
 		{
