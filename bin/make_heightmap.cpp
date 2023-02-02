@@ -7,7 +7,7 @@
 #include "lib/filters/curve_rasterizer.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/filters/diffuser.hpp"
-#include "lib/common/thread_pool.hpp"
+#include "lib/execution/thread_pool.hpp"
 #include "lib/filters/coordinate_sampler.hpp"
 #include "lib/filters/gradient_tracer.hpp"
 

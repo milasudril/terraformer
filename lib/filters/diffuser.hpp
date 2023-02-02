@@ -1,8 +1,8 @@
 #ifndef TERRAFORMER_FILTERS_DIFFUSER_HPP
 #define TERRAFORMER_FILTERS_DIFFUSER_HPP
 
-#include "lib/common/signaling_counter.hpp"
-#include "lib/common/notifying_task.hpp"
+#include "lib/execution/signaling_counter.hpp"
+#include "lib/execution/notifying_task.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/double_buffer.hpp"
 
