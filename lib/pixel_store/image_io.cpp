@@ -27,7 +27,7 @@ namespace
 }
 
 terraformer::image terraformer::load(
-	image_io_detail::empty<image>,
+	empty<image>,
 	void* arg,
 	image_io_detail::input_file_factory make_input_file)
 {
@@ -119,7 +119,7 @@ void terraformer::store(span_2d<rgba_pixel const> pixels,
 	dest.writePixels(pixels.height());
 }
 
-terraformer::grayscale_image terraformer::load(image_io_detail::empty<grayscale_image>,
+terraformer::grayscale_image terraformer::load(empty<grayscale_image>,
 	void* arg,
 	image_io_detail::input_file_factory make_input_file)
 {

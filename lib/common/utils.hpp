@@ -28,6 +28,9 @@ namespace terraformer
 		auto ret = std::fmod(x, denom);
 		return ret < 0.0f ? std::max(0.0f, ret + denom) : ret;
 	}
+
+	template<class T>
+	using empty = std::type_identity<T>;
 }
 
 #endif

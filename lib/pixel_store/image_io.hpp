@@ -16,31 +16,29 @@ namespace terraformer
 
 	namespace image_io_detail
 	{
-		template<class T>
-		using empty = std::type_identity<T>;
 		using output_file_factory = Imf::OutputFile (*)(void*, Imf::Header const&);
 		using input_file_factory  = Imf::InputFile (*)(void*);
 	}
 
 	// FIXME: This file needs FileReader and FileWriter concepts
 
-	image load(image_io_detail::empty<image>,
+	image load(empty<image>,
 		void* arg,
 		image_io_detail::input_file_factory make_input_file);
 
-	inline image load(image_io_detail::empty<image>, char const* filename)
+	inline image load(empty<image>, char const* filename)
 	{
-		return load(image_io_detail::empty<image>{}, const_cast<char*>(filename), [](void* filename) {
+		return load(empty<image>{}, const_cast<char*>(filename), [](void* filename) {
 			return Imf::InputFile{static_cast<char const*>(filename)};
 		});
 	}
 
 	template<class FileReader>
 	requires(!std::is_same_v<std::decay_t<FileReader>, char*>)
-	image load(image_io_detail::empty<image>, FileReader&& reader)
+	image load(empty<image>, FileReader&& reader)
 	{
 		ilm_input_adapter input{std::forward<FileReader>(reader)};
-		return load(image_io_detail::empty<image>{}, &input, [](void* input) {
+		return load(empty<image>{}, &input, [](void* input) {
 			return Imf::InputFile{*static_cast<ilm_input_adapter<FileReader>*>(input)};
 		});
 	}
@@ -76,23 +74,23 @@ namespace terraformer
 
 
 
-	grayscale_image load(image_io_detail::empty<grayscale_image>,
+	grayscale_image load(empty<grayscale_image>,
 		void* arg,
 		image_io_detail::input_file_factory make_input_file);
 
-	inline grayscale_image load(image_io_detail::empty<grayscale_image>, char const* filename)
+	inline grayscale_image load(empty<grayscale_image>, char const* filename)
 	{
-		return load(image_io_detail::empty<grayscale_image>{}, const_cast<char*>(filename), [](void* filename) {
+		return load(empty<grayscale_image>{}, const_cast<char*>(filename), [](void* filename) {
 			return Imf::InputFile{static_cast<char const*>(filename)};
 		});
 	}
 
 	template<class FileReader>
 	requires(!std::is_same_v<std::decay_t<FileReader>, char*>)
-	grayscale_image load(image_io_detail::empty<grayscale_image>, FileReader&& reader)
+	grayscale_image load(empty<grayscale_image>, FileReader&& reader)
 	{
 		ilm_input_adapter input{std::forward<FileReader>(reader)};
-		return load(image_io_detail::empty<grayscale_image>{}, &input, [](void* input) {
+		return load(empty<grayscale_image>{}, &input, [](void* input) {
 			return Imf::InputFile{*static_cast<ilm_input_adapter<FileReader>*>(input)};
 		});
 	}
