@@ -11,18 +11,24 @@
 namespace terraformer
 {
 	template<class T>
-	concept brush_size_modulator = requires(T f, float x, float y)
-	{
-		{f(x, y)} -> std::same_as<float>;
-	};
-
-	template<class T>
 	concept brush = requires(T f, float xi, float eta)
 	{
 		{f(xi, eta)} -> std::same_as<float>;
 	};
 
-	struct default_brush
+	template<class T>
+	concept brush_size_modulator = requires(T f, float x, float y)
+	{
+		{f(x, y)} -> std::same_as<float>;
+	};
+
+	template<class T, class PixelType>
+	concept blend_function = requires(T f, PixelType old_val, PixelType new_val, float brush_strength)
+	{
+		{f(old_val, new_val, brush_strength)} -> std::same_as<PixelType>;
+	};
+
+	struct solid_circle
 	{
 		constexpr auto operator()(float x, float y) const
 		{ return x*x + y*y <= 1.0f ? 1.0f : 0.0f; }
@@ -36,7 +42,29 @@ namespace terraformer
 		}
 	};
 
-	template<class PixelType, brush Brush = default_brush>
+	template<class PixelType>
+	struct lerp
+	{
+		constexpr auto operator()(PixelType old_val, PixelType new_val, float brush_strength) const
+		{
+			return brush_strength*new_val + (1.0f - brush_strength)*old_val;
+		}
+	};
+
+	template<class PixelType,
+		brush Brush = solid_circle,
+		blend_function<PixelType> BlendFunction = lerp<PixelType>>
+	struct paint_params
+	{
+		float x_0;
+		float y_0;
+		PixelType value;
+		float brush_diameter;
+		Brush brush;
+		BlendFunction blend_function;
+	};
+
+	template<class PixelType, brush Brush = solid_circle>
 	void draw(span_2d<PixelType> target_surface,
 		float x,
 		float y,
@@ -68,7 +96,7 @@ namespace terraformer
 
 	template<class PixelType,
 		brush_size_modulator BrushSizeModulator = default_brush_size_modulator,
-		brush Brush = default_brush>
+		brush Brush = solid_circle>
 	void draw(span_2d<PixelType> target_surface,
 		geosimd::line_segment<geom_space> seg,
 		PixelType value,
@@ -114,7 +142,7 @@ namespace terraformer
 
 	template<class PixelType,
 		brush_size_modulator BrushSizeModulator = default_brush_size_modulator,
-		brush Brush = default_brush>
+		brush Brush = solid_circle>
 	void draw_as_line_segments(span_2d<PixelType> target_surface,
 		std::span<location const> curve,
 		PixelType value,
@@ -135,7 +163,7 @@ namespace terraformer
 
 	template<class PixelType,
 		brush_size_modulator BrushSizeModulator = default_brush_size_modulator,
-		brush Brush = default_brush>
+		brush Brush = solid_circle>
 	void draw_as_dots(span_2d<PixelType> target_surface,
 		std::span<location const> curve,
 		PixelType value,
