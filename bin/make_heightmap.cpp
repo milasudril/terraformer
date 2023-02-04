@@ -18,8 +18,8 @@ using random_generator = pcg_engines::oneseq_dxsm_128_64;
 
 int main()
 {
-	uint32_t const domain_size = 1024;
-	auto const curve_scaling_factor = 6.0f;
+	uint32_t const domain_size = 256;
+	auto const curve_scaling_factor = 1.5f;
 
 	// Generate ridge line
 	terraformer::location const r_0{0.0f, 2.0f*static_cast<float>(domain_size)/3.0f, 0.0f};

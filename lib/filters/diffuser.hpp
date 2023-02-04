@@ -216,6 +216,33 @@ namespace terraformer
 		Src source;
 	};
 
+	template<class DiffusionStepExecutorFactory,
+		class ConcentrationVector,
+		dirichlet_boundary_function<ConcentrationVector> Boundary,
+		diffusion_source_function<ConcentrationVector> Source>
+	auto solve_bvp(double_buffer<basic_image<ConcentrationVector>>& buffers,
+		poisson_solver_params<DiffusionStepExecutorFactory, Boundary, Source>&& params)
+	{
+		diffusion_solver diffuser{std::forward<DiffusionStepExecutorFactory>(params.step_executor_factory),
+			buffers,
+			diffusion_params{
+				.D = 1.0f,
+				.boundary = std::forward<Boundary>(params.boundary),
+				.source = std::forward<Source>(params.source)
+			}
+		};
+
+		auto const tolerance = params.tolerance;
+
+		while(true)
+		{
+			auto const delta = diffuser();
+
+			if(delta < tolerance)
+			{ return delta; }
+		}
+	}
+
 	template<class DiffusionStepExecutorFactory, class Boundary>
 	struct laplace_solver_params
 	{
@@ -230,24 +257,12 @@ namespace terraformer
 	auto solve_bvp(double_buffer<basic_image<ConcentrationVector>>& buffers,
 		laplace_solver_params<DiffusionStepExecutorFactory, Boundary>&& params)
 	{
-		diffusion_solver diffuser{std::forward<DiffusionStepExecutorFactory>(params.step_executor_factory),
-			buffers,
-			diffusion_params{
-				.D = 1.0f,
-				.boundary = std::forward<Boundary>(params.boundary),
-				.source = [](auto...){ return 0.0f; }
-			}
-		};
-
-		auto const tolerance = params.tolerance;
-
-		while(true)
-		{
-			auto const delta = diffuser();
-
-			if(delta < tolerance)
-			{ return delta; }
-		}
+		return solve_bvp(buffers, poisson_solver_params{
+			.tolerance = params.tolerance,
+			.step_executor_factory = std::forward<DiffusionStepExecutorFactory>(params.step_executor_factory),
+			.boundary = std::forward<Boundary>(params.boundary),
+			.source = [](auto&&...){return 0.0f;}
+		});
 	}
 }
 
