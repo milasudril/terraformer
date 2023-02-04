@@ -94,7 +94,7 @@ int main()
 	}
 	buffers.swap();
 
-	solve_laplace<terraformer::thread_pool>(16, buffers, terraformer::diffusion_params{
+	solve_laplace(terraformer::thread_pool_factory{16}, buffers, terraformer::diffusion_params{
 			.D = 1.0f,
 			.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
 				if(y == 0)

@@ -144,33 +144,24 @@ namespace terraformer
 		{e.run(std::move(task))} -> std::same_as<void>;
 	};
 
-	template<template<class> class DiffusionStepExecutor,
+	template<class DiffusionStepExecutorFactory,
 		class ConcentrationVector,
 		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
 		dirichlet_boundary_function<ConcentrationVector> Boundary,
 		diffusion_source_function<ConcentrationVector> Src>
-	requires (diffusion_step_executor<
-		DiffusionStepExecutor<
-			diffusion_step_execution<
-				ConcentrationVector,
-				DiffCoeff,
-				Boundary,
-				Src>
-			>,
-		   ConcentrationVector,
-		   DiffCoeff,
-		   Boundary,
-		   Src
-		>)
 	class diffusion_solver
 	{
 	public:
 		using buffer_type = basic_image<ConcentrationVector>;
+		using step_exec_type = diffusion_step_execution<ConcentrationVector, DiffCoeff, Boundary, Src>;
+		using executor_type = decltype(std::declval<DiffusionStepExecutorFactory>()(
+			empty<step_exec_type>{}
+		));
 
-		explicit diffusion_solver(uint32_t num_workers,
+		explicit diffusion_solver(DiffusionStepExecutorFactory&& exec_step_factory,
 			double_buffer<buffer_type>& buffers,
 			diffusion_params<DiffCoeff, Boundary, Src>&& params):
-			m_executor{num_workers},
+			m_executor{exec_step_factory(empty<step_exec_type>{})},
 			m_buffers{buffers},
 			m_params{std::move(params)}
 		{}
@@ -211,64 +202,26 @@ namespace terraformer
 		}
 
 	private:
-		DiffusionStepExecutor<diffusion_step_execution<ConcentrationVector, DiffCoeff, Boundary, Src>> m_executor;
+		executor_type m_executor;
 		std::reference_wrapper<double_buffer<buffer_type>> m_buffers;
 		diffusion_params<DiffCoeff, Boundary, Src> m_params;
 	};
 
 
-	template<template<class> class DiffusionStepExecutor,
+	template<class DiffusionStepExecutorFactory,
 		class ConcentrationVector,
 		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
 		dirichlet_boundary_function<ConcentrationVector> Boundary,
 		diffusion_source_function<ConcentrationVector> Src>
-	requires (diffusion_step_executor<
-		DiffusionStepExecutor<
-			diffusion_step_execution<
-				ConcentrationVector,
-				DiffCoeff,
-				Boundary,
-				Src>
-			>,
-		   ConcentrationVector,
-		   DiffCoeff,
-		   Boundary,
-		   Src
-		>)
-	auto make_diffusion_solver(uint32_t num_workers,
-		double_buffer<basic_image<ConcentrationVector>>& buffers,
-		diffusion_params<DiffCoeff, Boundary, Src>&& params)
-	{
-		return diffusion_solver<DiffusionStepExecutor, ConcentrationVector, DiffCoeff, Boundary, Src>
-			{num_workers, buffers, std::move(params)};
-	}
-
-
-	template<template<class> class DiffusionStepExecutor,
-		class ConcentrationVector,
-		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
-		dirichlet_boundary_function<ConcentrationVector> Boundary,
-		diffusion_source_function<ConcentrationVector> Src>
-	requires (diffusion_step_executor<
-		DiffusionStepExecutor<
-			diffusion_step_execution<
-				ConcentrationVector,
-				DiffCoeff,
-				Boundary,
-				Src>
-			>,
-		   ConcentrationVector,
-		   DiffCoeff,
-		   Boundary,
-		   Src
-		>)
-	auto solve_laplace(uint32_t num_workers,
+	auto solve_laplace(DiffusionStepExecutorFactory&& step_exec_factory,
 		double_buffer<basic_image<ConcentrationVector>>& buffers,
 		diffusion_params<DiffCoeff, Boundary, Src>&& params,
 		float tolerance)
 	{
-		auto diffuser = make_diffusion_solver<DiffusionStepExecutor>(
-			num_workers, buffers, std::move(params));
+		diffusion_solver diffuser{std::forward<DiffusionStepExecutorFactory>(step_exec_factory),
+			buffers,
+			std::forward<diffusion_params<DiffCoeff, Boundary, Src>>(params)};
+
 		while(true)
 		{
 			auto const delta = diffuser();

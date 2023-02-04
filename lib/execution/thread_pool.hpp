@@ -74,5 +74,16 @@ namespace terraformer
 		std::condition_variable m_cv;
 		std::vector<std::thread> m_workers;
 	};
+
+	struct thread_pool_factory
+	{
+		size_t num_workers;
+
+		template<class Task>
+		auto operator()(empty<Task>)
+		{
+			return thread_pool<Task>{num_workers};
+		}
+	};
 }
 #endif
