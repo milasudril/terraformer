@@ -207,20 +207,39 @@ namespace terraformer
 		diffusion_params<DiffCoeff, Boundary, Src> m_params;
 	};
 
+	template<class DiffusionStepExecutorFactory, class Boundary, class Src>
+	struct poisson_solver_params
+	{
+		float tolerance;
+		DiffusionStepExecutorFactory step_executor_factory;
+		Boundary boundary;
+		Src source;
+	};
+
+	template<class DiffusionStepExecutorFactory, class Boundary>
+	struct laplace_solver_params
+	{
+		float tolerance;
+		DiffusionStepExecutorFactory step_executor_factory;
+		Boundary boundary;
+	};
 
 	template<class DiffusionStepExecutorFactory,
 		class ConcentrationVector,
-		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
-		dirichlet_boundary_function<ConcentrationVector> Boundary,
-		diffusion_source_function<ConcentrationVector> Src>
-	auto solve_laplace(DiffusionStepExecutorFactory&& step_exec_factory,
-		double_buffer<basic_image<ConcentrationVector>>& buffers,
-		diffusion_params<DiffCoeff, Boundary, Src>&& params,
-		float tolerance)
+		dirichlet_boundary_function<ConcentrationVector> Boundary>
+	auto solve_bvp(double_buffer<basic_image<ConcentrationVector>>& buffers,
+		laplace_solver_params<DiffusionStepExecutorFactory, Boundary>&& params)
 	{
-		diffusion_solver diffuser{std::forward<DiffusionStepExecutorFactory>(step_exec_factory),
+		diffusion_solver diffuser{std::forward<DiffusionStepExecutorFactory>(params.step_executor_factory),
 			buffers,
-			std::forward<diffusion_params<DiffCoeff, Boundary, Src>>(params)};
+			diffusion_params{
+				.D = 1.0f,
+				.boundary = std::forward<Boundary>(params.boundary),
+				.source = [](auto...){ return 0.0f; }
+			}
+		};
+
+		auto const tolerance = params.tolerance;
 
 		while(true)
 		{

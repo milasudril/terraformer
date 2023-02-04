@@ -94,22 +94,22 @@ int main()
 	}
 	buffers.swap();
 
-	solve_laplace(terraformer::thread_pool_factory{16}, buffers, terraformer::diffusion_params{
-			.D = 1.0f,
-			.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
-				if(y == 0)
-				{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.382f}; }
+	solve_bvp(buffers, terraformer::laplace_solver_params{
+		.tolerance = 1.0e-6f,
+		.step_executor_factory = terraformer::thread_pool_factory{16},
+		.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
+			if(y == 0)
+			{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.382f}; }
 
-				if(y == values.height() - 1)
-				{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.618f*0.382f};}
+			if(y == values.height() - 1)
+			{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.618f*0.382f};}
 
-				auto const val = values(x, y);
-				return val >= 0.5f ?
-					terraformer::dirichlet_boundary_pixel{1.0f, val}:
-					terraformer::dirichlet_boundary_pixel{0.0f, 0.0f};
-			},
-			.source =  [](uint32_t, uint32_t){ return 0.0f; }
-		}, 1.0e-6f);
+			auto const val = values(x, y);
+			return val >= 0.5f ?
+				terraformer::dirichlet_boundary_pixel{1.0f, val}:
+				terraformer::dirichlet_boundary_pixel{0.0f, 0.0f};
+		},
+	});
 
 	store(buffers.front(), "test.exr");
 
