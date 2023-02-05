@@ -78,25 +78,19 @@ int main()
 	store(boundary_values, "boundary.exr");
 
 	terraformer::double_buffer<terraformer::grayscale_image> buffers{domain_size, domain_size};
+	generate(buffers.back().pixels(), [r_0](uint32_t, uint32_t y) {
+		auto const y_val = static_cast<float>(y);
+		auto const ridge_line = static_cast<float>(domain_size) - r_0[1];
+		auto const t = y_val/ridge_line;
+		return std::min(std::lerp(0.382f, 1.0f, t),
+			std::lerp(1.0f, 0.618f*0.382f, (y_val - ridge_line)/static_cast<float>(domain_size - ridge_line)));
+	});
 
-	for(uint32_t y = 0; y != domain_size; ++y)
-	{
-		for(uint32_t x = 0; x != domain_size; ++x)
-		{
-			auto const y_val = static_cast<float>(y);
-			auto const ridge_line = static_cast<float>(domain_size) - r_0[1];
-			auto const t = y_val/ridge_line;
-			auto const val = std::min(std::lerp(0.382f, 1.0f, t),
-				std::lerp(1.0f, 0.618f*0.382f, (y_val - ridge_line)/static_cast<float>(domain_size - ridge_line)));
-
-			buffers.back()(x, y) = val;
-		}
-	}
 	buffers.swap();
 
 	solve_bvp(buffers, terraformer::laplace_solver_params{
 		.tolerance = 1.0e-6f,
-		.step_executor_factory = terraformer::thread_pool_factory{16},
+		.step_executor_factory = terraformer::thread_pool_factory{2},
 		.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
 			if(y == 0)
 			{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.382f}; }
