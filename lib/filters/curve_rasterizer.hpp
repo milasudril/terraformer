@@ -16,12 +16,6 @@ namespace terraformer
 		{f(xi, eta)} -> std::same_as<float>;
 	};
 
-	template<class T>
-	concept brush_size_modulator = requires(T f, float x, float y)
-	{
-		{f(x, y)} -> std::same_as<float>;
-	};
-
 	template<class T, class PixelType>
 	concept blend_function = requires(T f, PixelType old_val, PixelType new_val, float brush_strength)
 	{
@@ -32,14 +26,6 @@ namespace terraformer
 	{
 		constexpr auto operator()(float x, float y) const
 		{ return x*x + y*y <= 1.0f ? 1.0f : 0.0f; }
-	};
-
-	struct default_brush_size_modulator
-	{
-		constexpr auto operator()(float, float) const
-		{
-			return 1.0f;
-		}
 	};
 
 	template<class PixelType>
@@ -95,8 +81,34 @@ namespace terraformer
 		}
 	}
 
+	template<class T>
+	concept brush_size_modulator = requires(T f, float x, float y)
+	{
+		{f(x, y)} -> std::same_as<float>;
+	};
+
+	struct constant_brush_size
+	{
+		constexpr auto operator()(float, float) const
+		{ return value; }
+
+		float value{1.0f};
+	};
+
 	template<class PixelType,
-		brush_size_modulator BrushSizeModulator = default_brush_size_modulator,
+		brush Brush = solid_circle,
+		brush_size_modulator BrushSizeModulator = constant_brush_size,
+		blend_function<PixelType> BlendFunction = lerp<PixelType>>
+	struct line_draw_params
+	{
+		PixelType value;
+		Brush brush{};
+		BlendFunction blend_function{};
+		BrushSizeModulator bsm{};
+	};
+
+	template<class PixelType,
+		brush_size_modulator BrushSizeModulator = constant_brush_size,
 		brush Brush = solid_circle>
 	void draw(span_2d<PixelType> target_surface,
 		geosimd::line_segment<geom_space> seg,
@@ -154,7 +166,7 @@ namespace terraformer
 	}
 
 	template<class PixelType,
-		brush_size_modulator BrushSizeModulator = default_brush_size_modulator,
+		brush_size_modulator BrushSizeModulator = constant_brush_size,
 		brush Brush = solid_circle>
 	void draw_as_line_segments(span_2d<PixelType> target_surface,
 		std::span<location const> curve,
