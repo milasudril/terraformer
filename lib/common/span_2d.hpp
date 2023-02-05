@@ -84,17 +84,33 @@ namespace terraformer
 		}
 	}
 
-	template<class T, class U, class Func>
-	void transform(span_2d<T> in, span_2d<U> out, Func&& f)
+	template<class In, class Out, class Func>
+	void transform(span_2d<In const> in, span_2d<Out> out, Func&& f)
 	{
-		using IndexType = typename span_2d<T>::IndexType;
-		for(IndexType row = 0; row != in.height(); ++row)
+		using IndexType = typename span_2d<Out>::IndexType;
+
+		for(IndexType row = 0; row != out.height(); ++row)
 		{
-			for(IndexType col = 0; col != in.width(); ++col)
+			for(IndexType col = 0; col != out.width(); ++col)
 			{
-				out(col, row) = f(col, row, in(col, row));
+				out(col, row) = f(in(col, row));
 			}
 		}
+	}
+
+	template<class In1, class In2, class Out, class Func>
+	void transform(span_2d<In1 const> in_1, span_2d<In2 const> in_2, span_2d<Out> out, Func&& f)
+	{
+		using IndexType = typename span_2d<Out>::IndexType;
+
+		for(IndexType row = 0; row != out.height(); ++row)
+		{
+			for(IndexType col = 0; col != out.width(); ++col)
+			{
+ 				out(col, row) = f(in_1(col, row), in_2(col, row));
+			}
+		}
+
 	}
 
 	template<class T, class Func>
