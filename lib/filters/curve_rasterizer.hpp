@@ -99,22 +99,21 @@ namespace terraformer
 		brush Brush = solid_circle,
 		brush_size_modulator BrushSizeModulator = constant_brush_size,
 		blend_function<PixelType> BlendFunction = lerp<PixelType>>
-	struct line_draw_params
+	struct line_segment_draw_params
 	{
 		PixelType value;
 		Brush brush{};
 		BlendFunction blend_function{};
-		BrushSizeModulator bsm{};
+		BrushSizeModulator brush_diameter{};
 	};
 
 	template<class PixelType,
+		brush Brush,
 		brush_size_modulator BrushSizeModulator = constant_brush_size,
-		brush Brush = solid_circle>
+		blend_function<PixelType> BlendFunction = lerp<PixelType>>
 	void draw(span_2d<PixelType> target_surface,
 		geosimd::line_segment<geom_space> seg,
-		PixelType value,
-		BrushSizeModulator&& mod = BrushSizeModulator{},
-		Brush&& brush = Brush{})
+		line_segment_draw_params<PixelType, Brush, BrushSizeModulator, BlendFunction> const& params)
 	{
 		auto dr = seg.p2 - seg.p1;
 		if(std::abs(dr[0]) > std::abs(dr[1]))
@@ -130,13 +129,13 @@ namespace terraformer
 				auto const y = a*static_cast<float>(l - static_cast<int32_t>(seg.p1[0]))
 					+ seg.p1[1];
 				auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
-				auto const d = mod(x, y);
 				paint(target_surface, paint_params{
 					.x = x,
 		  			.y = y,
-		  			.value = z*value,
-		  			.brush_diameter = d,
-					.brush = brush
+		  			.value = z*params.value,
+		  			.brush_diameter = params.brush_diameter(x, y),
+					.brush = params.brush,
+					.blend_function = params.blend_function
 				});
 			}
 		}
@@ -153,26 +152,25 @@ namespace terraformer
 				auto const x = a*static_cast<float>(k - static_cast<int32_t>(seg.p1[1]))
 					+ seg.p1[0];
 				auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
-				auto const d = mod(x, y);
 				paint(target_surface, paint_params{
 					.x = x,
 		  			.y = y,
-		  			.value = z*value,
-		  			.brush_diameter = d,
-					.brush = brush,
+		  			.value = z*params.value,
+		  			.brush_diameter = params.brush_diameter(x, y),
+					.brush = params.brush,
+					.blend_function =params.blend_function
 				});
 			}
 		}
 	}
 
 	template<class PixelType,
-		brush_size_modulator BrushSizeModulator = constant_brush_size,
-		brush Brush = solid_circle>
-	void draw_as_line_segments(span_2d<PixelType> target_surface,
+		brush Brush,
+		brush_size_modulator BrushSizeModulator,
+		blend_function<PixelType> BlendFunction>
+	void draw(span_2d<PixelType> target_surface,
 		std::span<location const> curve,
-		PixelType value,
-		BrushSizeModulator&& mod = BrushSizeModulator{},
-		Brush&& brush = Brush{})
+		line_segment_draw_params<PixelType, Brush, BrushSizeModulator, BlendFunction> const& params)
 	{
 		if(std::size(curve) == 0)
 		{ return; }
@@ -181,7 +179,7 @@ namespace terraformer
 		for(size_t k = 1; k!=std::size(curve); ++k)
 		{
 			auto const current = curve[k];
-			draw(target_surface, geosimd::line_segment{.p1 = prev, .p2 = current}, value, mod, brush);
+			draw(target_surface, geosimd::line_segment{.p1 = prev, .p2 = current}, params);
 			prev = current;
 		}
 	}
