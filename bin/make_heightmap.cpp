@@ -18,11 +18,11 @@ using random_generator = pcg_engines::oneseq_dxsm_128_64;
 
 int main()
 {
-	uint32_t const domain_size = 256;
-	auto const curve_scaling_factor = 1.5f;
+	uint32_t const domain_size = 1024;
+	auto const curve_scaling_factor = 6.0f;
 
 	// Generate ridge line
-	terraformer::location const r_0{0.0f, 2.0f*static_cast<float>(domain_size)/3.0f, 0.0f};
+	terraformer::location const r_0{0.0f, 1.0f*static_cast<float>(domain_size)/3.0f, 0.0f};
 
 	terraformer::noisy_drift drift{terraformer::noisy_drift::params{
 		.drift = geosimd::rotation_angle{0x0},
@@ -80,7 +80,7 @@ int main()
 	terraformer::double_buffer<terraformer::grayscale_image> buffers{domain_size, domain_size};
 	generate(buffers.back().pixels(), [r_0](uint32_t, uint32_t y) {
 		auto const y_val = static_cast<float>(y);
-		auto const ridge_line = static_cast<float>(domain_size) - r_0[1];
+		auto const ridge_line = r_0[1];
 		auto const t = y_val/ridge_line;
 		return std::min(std::lerp(0.382f, 1.0f, t),
 			std::lerp(1.0f, 0.618f*0.382f, (y_val - ridge_line)/static_cast<float>(domain_size - ridge_line)));
@@ -90,7 +90,7 @@ int main()
 
 	solve_bvp(buffers, terraformer::laplace_solver_params{
 		.tolerance = 1.0e-6f,
-		.step_executor_factory = terraformer::thread_pool_factory{2},
+		.step_executor_factory = terraformer::thread_pool_factory{16},
 		.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
 			if(y == 0)
 			{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.382f}; }
@@ -105,12 +105,11 @@ int main()
 		},
 	});
 
-	store(buffers.front(), "test.exr");
+	store(buffers.front(), "test1.exr");
 
 	auto const heightmap = buffers.front().pixels();
-
 	// Collect river start points
-	auto const river_start_points = terraformer::sample(domain_size,
+	auto river_start_points = terraformer::sample(domain_size,
 		domain_size,
 		[&rng, heightmap](uint32_t x, uint32_t y){
 			std::uniform_real_distribution U{0.0f, 1.0f};
@@ -121,8 +120,27 @@ int main()
 			return 768.0f*U(rng) < (val >= 0.75f);
 		});
 
-	std::ranges::for_each(river_start_points, [heightmap](auto const item) {
-		auto path = trace_gradient(heightmap, item);
-		printf("Created path of size %u\n", std::size(path));
+	std::ranges::shuffle(river_start_points, rng);
+
+	terraformer::grayscale_image river_mask{domain_size, domain_size};
+	std::ranges::for_each(river_start_points,
+		[river_mask = river_mask.pixels(), heightmap](auto const item) {
+		auto const path = trace_gradient(heightmap, item);
+		draw(river_mask, get<0>(path), terraformer::line_segment_draw_params{
+			.value = 1.0f/32.0f,
+			.brush = [](float x, float y) {
+				auto const d = x*x + y*y;
+				return d<=1.0f ? 1.0f - std::sqrt(d): 0.0f;
+			},
+			.blend_function = [](float in, float value, float strength){
+				return std::max(in, value*strength);
+			},
+			.brush_diameter = [](float, float){ return 16.0f;}
+		});
 	});
+	transform(heightmap, std::as_const(river_mask).pixels(), buffers.back().pixels(), [](float a, float b) {
+		return a - b;
+	});
+	buffers.swap();
+	store(buffers.front(), "test2.exr");
 }

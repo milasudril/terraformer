@@ -73,9 +73,9 @@ namespace terraformer
 				auto const eta = std::lerp(-1.0f, 1.0f, (static_cast<float>(k) + 0.5f)/d);
 
 				auto const strength = params.brush(xi, eta);
-				auto const src_val = target_surface((l + l_min + w)%w, (h - 1) - (k + k_min + h)%h);
+				auto const src_val = target_surface((l + l_min + w)%w, (k + k_min + h)%h);
 				static_assert(std::is_same_v<decltype(l + l_min), uint32_t>);
-				target_surface((l + l_min + w)%w, (h - 1) - (k + k_min + h)%h ) =
+				target_surface((l + l_min + w)%w, (k + k_min + h)%h ) =
 					params.blend_function(src_val, value, strength);
 			}
 		}
