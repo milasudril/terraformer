@@ -60,7 +60,8 @@ namespace terraformer
 		dimensions physical_dimensions;
 		uint32_t pixel_count;
 		ridge_params starting_ridge;
-		geosimd::rotation_angle expected_wind_direction;
+		noisy_drift::params wind_direction;
+		float max_percipitation_rate;
 		geosimd::rotation_angle center_latitude;
 	};
 }
