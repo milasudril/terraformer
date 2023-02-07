@@ -27,9 +27,9 @@ namespace terraformer
 
 	struct boundary_height_modulation
 	{
-		float amplitude;
+		float base_amplitude;
 		float phase;
-		float frequency;
+		float base_frequency;
 	};
 
 	struct ridge_curve_params
