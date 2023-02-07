@@ -16,6 +16,55 @@
 
 using random_generator = pcg_engines::oneseq_dxsm_128_64;
 
+namespace terraformer
+{
+	struct dimensions
+	{
+		float width;
+		float height;
+		float thickness;
+	};
+
+	struct boundary_height_modulation
+	{
+		float amplitude;
+		float phase;
+		float frequency;
+	};
+
+	struct ridge_curve_params
+	{
+		float start_location;
+		float noise_amount;
+		geosimd::turn_angle max_turn_angle;
+		float inertia;
+		float curve_scaling_factor;
+		boundary_height_modulation height_modulation;
+	};
+
+	struct domain_boundary_conditions
+	{
+		float low_level;
+		float high_level;
+	};
+
+	struct ridge_params
+	{
+		ridge_curve_params curve;
+		domain_boundary_conditions boundary;
+	};
+
+	struct sim_params
+	{
+		__int128_t seed;
+		dimensions physical_dimensions;
+		uint32_t pixel_count;
+		ridge_params starting_ridge;
+		geosimd::rotation_angle expected_wind_direction;
+		geosimd::rotation_angle center_latitude;
+	};
+}
+
 int main()
 {
 	uint32_t const domain_size = 1024;
