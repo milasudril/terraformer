@@ -125,7 +125,7 @@ int main()
 	terraformer::grayscale_image river_mask{domain_size, domain_size};
 	std::ranges::for_each(river_start_points,
 		[river_mask = river_mask.pixels(), heightmap](auto const item) {
-		auto const path = trace_gradient(heightmap, item);
+		auto const path = trace_gradient_periodic_xy(heightmap, item);
 		draw(river_mask, get<0>(path), terraformer::line_segment_draw_params{
 			.value = 1.0f/32.0f,
 			.brush = [](float x, float y) {
