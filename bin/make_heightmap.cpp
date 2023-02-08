@@ -61,7 +61,9 @@ namespace terraformer
 		uint32_t pixel_count;
 		ridge_params starting_ridge;
 		noisy_drift::params wind_direction;
-		float max_percipitation_rate;
+		float max_precipitation_rate;
+
+		geosimd::turn_angle north_offset;
 		geosimd::rotation_angle center_latitude;
 	};
 }
