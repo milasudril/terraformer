@@ -1,8 +1,7 @@
 //@	{"target":{"name":"make_heightmap.o"}}
 
-#include "lib/curve_tool/damped_motion_integrator.hpp"
-#include "lib/curve_tool/noisy_drift.hpp"
-#include "lib/curve_tool/turn_angle_limiter.hpp"
+#include "lib/curve_tool/ridge_curve.hpp"
+
 #include "lib/pixel_store/image.hpp"
 #include "lib/filters/curve_rasterizer.hpp"
 #include "lib/pixel_store/image_io.hpp"
@@ -25,13 +24,7 @@ namespace terraformer
 		float thickness;
 	};
 
-	struct boundary_height_modulation
-	{
-		float base_amplitude;
-		float phase;
-		float base_frequency;
-	};
-
+/*
 	struct ridge_curve_params
 	{
 		float start_location;
@@ -41,6 +34,7 @@ namespace terraformer
 		float curve_scaling_factor;
 		boundary_height_modulation height_modulation;
 	};
+*/
 
 	struct domain_boundary_conditions
 	{
@@ -50,7 +44,7 @@ namespace terraformer
 
 	struct ridge_params
 	{
-		ridge_curve_params curve;
+//		ridge_curve_params curve;
 		domain_boundary_conditions boundary;
 	};
 
