@@ -4,6 +4,7 @@
 #include <numbers>
 #include <random>
 #include <cmath>
+#include <array>
 
 namespace terraformer
 {
@@ -12,7 +13,6 @@ namespace terraformer
 	public:
 		struct params
 		{
-			float x_offset;
 			float wavelength;
 			float per_wave_component_scaling_factor;
 			float exponent_noise_amount;
@@ -21,12 +21,12 @@ namespace terraformer
 		};
 
 		template<class Rng>
-		explicit fractal_wave(Rng&& rng, params const& params):
+		explicit fractal_wave(Rng&& rng, float x_offset, params const& params):
 			m_wavelength{params.wavelength},
+			m_offset{x_offset},
 			m_amplitude{0.0f}
 		{
 			std::uniform_real_distribution U{-0.5f, 0.5f};
-			m_offset = params.x_offset;
 			for(size_t k = 0; k != std::size(m_component_params); ++k)
 			{
 				m_component_params[k] = per_wave_component_params{
@@ -63,6 +63,7 @@ namespace terraformer
 	private:
 		float m_wavelength;
 		float m_offset;
+
 		struct per_wave_component_params
 		{
 			float scale;
