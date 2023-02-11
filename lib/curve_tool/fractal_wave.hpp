@@ -13,9 +13,9 @@ namespace terraformer
 		struct params
 		{
 			float wavelength;
-			float per_component_scaling_factor;
+			float per_wave_component_scaling_factor;
 			float exponent_noise_amount;
-			float per_component_phase_shift;
+			float per_wave_component_phase_shift;
 			float phase_shift_noise_amount;
 		};
 
@@ -28,10 +28,10 @@ namespace terraformer
 			m_offset = U(rng);
 			for(size_t k = 0; k != std::size(m_component_params); ++k)
 			{
-				m_component_params[k] = per_component_params{
-					.scale = std::pow(params.per_component_scaling_factor, static_cast<float>(k)
+				m_component_params[k] = per_wave_component_params{
+					.scale = std::pow(params.per_wave_component_scaling_factor, static_cast<float>(k)
 						+ params.exponent_noise_amount*U(rng)),
-					.phase_shift = static_cast<float>(k)*(params.per_component_phase_shift
+					.phase_shift = static_cast<float>(k)*(params.per_wave_component_phase_shift
 						+ params.phase_shift_noise_amount*U(rng))
 				};
 			}
@@ -62,13 +62,13 @@ namespace terraformer
 	private:
 		float m_wavelength;
 		float m_offset;
-		struct per_component_params
+		struct per_wave_component_params
 		{
 			float scale;
 			float phase_shift;
 		};
 
-		std::array<per_component_params, 16> m_component_params;
+		std::array<per_wave_component_params, 16> m_component_params;
 		float m_amplitude;
 	};
 }
