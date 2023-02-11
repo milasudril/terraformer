@@ -5,6 +5,7 @@
 #include "./turn_angle_limiter.hpp"
 #include "./damped_motion_integrator.hpp"
 #include "./particle_state.hpp"
+#include "./fractal_wave.hpp"
 
 namespace terraformer
 {
