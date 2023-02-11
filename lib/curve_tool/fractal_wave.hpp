@@ -12,6 +12,7 @@ namespace terraformer
 	public:
 		struct params
 		{
+			float x_offset;
 			float wavelength;
 			float per_wave_component_scaling_factor;
 			float exponent_noise_amount;
@@ -25,7 +26,7 @@ namespace terraformer
 			m_amplitude{0.0f}
 		{
 			std::uniform_real_distribution U{-0.5f, 0.5f};
-			m_offset = U(rng);
+			m_offset = params.x_offset;
 			for(size_t k = 0; k != std::size(m_component_params); ++k)
 			{
 				m_component_params[k] = per_wave_component_params{
