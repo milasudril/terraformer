@@ -39,14 +39,14 @@ namespace terraformer
 		}
 
 		auto const Ay = params.wave_amplitude/wave.amplitude();
-		auto const Az = params.height_modulation/(wave.amplitude()* wave.amplitude());
+		auto const Az = params.height_modulation/(wave.amplitude() * wave.amplitude());
 
 		std::vector<location> ret;
 		for(size_t k = 0; k != std::size(curve); ++k)
 		{
 			auto const vec_val = curve[k].get();
 			ret.push_back(params.start_location
-				+ displacement{vec_val*geosimd::vec_t{1.0f, Ay, Az, 1.0f}});
+				+ displacement{vec_val*geosimd::vec_t{1.0f, Ay, Az*vec_val[2], 1.0f}});
 		}
 		return ret;
 	}

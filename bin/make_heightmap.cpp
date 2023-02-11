@@ -27,18 +27,6 @@ namespace terraformer
 		float thickness;
 	};
 
-/*
-	struct ridge_curve_params
-	{
-		float start_location;
-		float noise_amount;
-		geosimd::turn_angle max_turn_angle;
-		float inertia;
-		float curve_scaling_factor;
-		boundary_height_modulation height_modulation;
-	};
-*/
-
 	struct domain_boundary_conditions
 	{
 		float low_level;
@@ -68,57 +56,25 @@ namespace terraformer
 int main()
 {
 	uint32_t const domain_size = 1024;
-	auto const curve_scaling_factor = 6.0f;
 
-	// Generate ridge line
-	terraformer::location const r_0{0.0f, 1.0f*static_cast<float>(domain_size)/3.0f, 0.0f};
-
-	terraformer::noisy_drift drift{terraformer::noisy_drift::params{
-		.drift = geosimd::rotation_angle{0x0},
-		.noise_amount = 0.875f
-	}};
-	terraformer::turn_angle_limiter limiter{
-		terraformer::turn_angle_limiter::state{
-			.r = r_0,
-			.dir = terraformer::direction{terraformer::geom_space::x{}},
-			.integrated_heading_change = geosimd::turn_angle{0x0}
-		},
-		terraformer::turn_angle_limiter::params{
-			.max_turn_angle = geosimd::turn_angle{0x1000'0000}
-		}
-	};
-	terraformer::damped_motion_integrator integrator{
-		terraformer::displacement{1.0f, 0.0f, 0.0f},
-		terraformer::damped_motion_integrator::params{
-			.inertia = 2.0f,
-			.curve_scaling_factor = curve_scaling_factor
-		}
-	};
+	terraformer::location const r_0{0.0f, 1.0f*static_cast<float>(domain_size)/3.0f, 1.0f};
 
 	random_generator rng;
 
-	std::vector<terraformer::location> curve;
-	terraformer::particle_state ps{
-		.v = terraformer::displacement{0.0f, 0.0f, 0.0f},
-		.r = r_0
-	};
+	auto const curve = generate(rng, terraformer::main_ridge_params{
+		.start_location = r_0,
+		.distance_to_endpoint = static_cast<float>(domain_size),
+		.wave_params = terraformer::fractal_wave::params{
+			.wavelength = 512.0f,
+			.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
+			.exponent_noise_amount = std::numbers::phi_v<float>/64.0f,
+			.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
+			.phase_shift_noise_amount = 1.0f/12.0f
+		},
+		.wave_amplitude = 4096.0f*1024.0f/49152.0f,
+		.height_modulation = 1024.0f/6144.0f
+	});
 
-	curve.push_back(ps.r);
-	while(ps.r[0] < static_cast<float>(domain_size))
-	{
-		auto const v = drift(rng);
-		auto const ps_new = integrator(ps, v);
-		auto const r_corrected = limiter(ps_new.r);
-
-		auto const v_corr = 2.0f*(r_corrected - ps.r)/curve_scaling_factor - ps.v;
-
-		ps.v = v_corr;
-		ps.r = r_corrected;
-
-		auto const z = 16.0f*std::abs((ps.r - r_0)[1])/static_cast<float>(domain_size);
-
-		curve.push_back(r_corrected + terraformer::displacement{0.0f, 0.0f, 1.0f + 0.125f*z*z});
-	}
 
 	// Generate initial heightmap
 
@@ -136,6 +92,7 @@ int main()
 	});
 
 	buffers.swap();
+	store(buffers.front(), "initial_state.exr");
 
 	solve_bvp(buffers, terraformer::laplace_solver_params{
 		.tolerance = 1.0e-6f,
@@ -154,7 +111,7 @@ int main()
 		},
 	});
 
-	store(buffers.front(), "test1.exr");
+	store(buffers.front(), "after_laplace.exr");
 
 	auto const heightmap = buffers.front().pixels();
 	// Collect river start points
@@ -191,5 +148,5 @@ int main()
 		return a - b;
 	});
 	buffers.swap();
-	store(buffers.front(), "test2.exr");
+	store(buffers.front(), "eroded.exr");
 }
