@@ -33,23 +33,25 @@ namespace terraformer
 		float high_level;
 	};
 
-	struct ridge_params
+	struct massif_outline_description
 	{
-//		ridge_curve_params curve;
 		domain_boundary_conditions boundary;
+		main_ridge_params main_ridge;
 	};
 
-	struct sim_params
+	struct landscape_description
 	{
-		__int128_t seed;
 		dimensions physical_dimensions;
 		uint32_t pixel_count;
-		ridge_params starting_ridge;
+		massif_outline_description initial_heightmap_description;
+
+#if 0
 		noisy_drift::params wind_direction;
 		float max_precipitation_rate;
 
 		geosimd::turn_angle north_offset;
 		geosimd::rotation_angle center_latitude;
+#endif
 	};
 }
 
