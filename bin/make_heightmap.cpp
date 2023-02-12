@@ -60,6 +60,19 @@ namespace terraformer
 	};
 }
 
+std::pair<uint32_t, uint32_t> pixel_dimensions(float width, float height, uint32_t pixel_count)
+{
+	auto const w = static_cast<double>(width);
+	auto const h = static_cast<double>(height);
+	auto const d = static_cast<double>(pixel_count);
+	auto const r = w/h;
+
+	return std::pair{
+		static_cast<uint32_t>(d*std::sqrt(r) + 0.5),
+		static_cast<uint32_t>(d/std::sqrt(r) + 0.5)
+	};
+}
+
 int main()
 {
 	terraformer::landscape_descriptor const params{
@@ -92,8 +105,16 @@ int main()
 
 	auto const pixel_size = static_cast<float>(std::sqrt(domain_area(params.physical_dimensions))
 		/static_cast<double>(params.pixel_count));
+	auto const canvas_size = pixel_dimensions(
+		params.physical_dimensions.width,
+		params.physical_dimensions.height,
+		params.pixel_count
+	);
+
 	fprintf(stderr, "pixel_size: %.8g\n", pixel_size);
-	(void)pixel_size;
+	fprintf(stderr, "width: %u\n", canvas_size.first);
+	fprintf(stderr, "height: %u\n", canvas_size.second);
+
 
 	uint32_t const domain_size = 1024;
 	terraformer::location const r_0{0.0f, 1.0f*static_cast<float>(domain_size)/3.0f, 1.0f};
