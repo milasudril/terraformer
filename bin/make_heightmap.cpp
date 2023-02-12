@@ -57,24 +57,25 @@ namespace terraformer
 		});
 
 		generate(buffers.back().pixels(), [
-				r_0 = heightmap_params.main_ridge.start_location,
+				y_0 = heightmap_params.main_ridge.start_location[1]/pixel_size,
+				z_0 = heightmap_params.main_ridge.start_location[2],
 				h = static_cast<float>(h),
 				boundary = heightmap_params.boundary
 			](uint32_t, uint32_t y) {
-
 			auto const y_val = static_cast<float>(y);
-			auto const ridge_line = r_0[1];
-			auto const t = y_val/ridge_line;
-			return std::min(std::lerp(boundary.back_level, r_0[2], t),
-				std::lerp(r_0[2],
-					boundary.front_level,
-					(y_val - ridge_line)/static_cast<float>(h - ridge_line))
-			);
+
+			auto const t1 = y_val/y_0;
+			auto const t2 = (y_val - y_0)/(h - y_0);
+
+			auto const z1 = std::lerp(boundary.back_level, z_0, t1);
+			auto const z2 = std::lerp(z_0, boundary.front_level, t2);
+
+			return t1 < 1.0f ? z1 : z2;
 		});
 		buffers.swap();
 
 		solve_bvp(buffers, terraformer::laplace_solver_params{
-			.tolerance = 1.0e-5f * heightmap_params.main_ridge.start_location[2],
+			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
 			.step_executor_factory = terraformer::thread_pool_factory{16},
 			.boundary = [
 				values = main_ridge,
@@ -182,9 +183,10 @@ int main()
 
 	random_generator rng;
 	make_initial_heightmap(buffers, rng, pixel_size, params.initial_heightmap);
-
 	store(buffers.front(), "after_laplace.exr");
+
 #if 0
+	store(buffers.front(), "after_laplace.exr");
 	auto const heightmap = buffers.front().pixels();
 	// Collect river start points
 	auto river_start_points = terraformer::sample(canvas_size.first,
@@ -201,12 +203,12 @@ int main()
 	std::ranges::shuffle(river_start_points, rng);
 #endif
 
+
 	terraformer::grayscale_image lit_surface{canvas_size.first, canvas_size.second};
 	raycast(lit_surface.pixels(),
 		buffers.front(),
 		terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}});
 	store(lit_surface, "lit_surface.exr");
-
 
 #if 0
 	std::ranges::for_each(river_start_points,
