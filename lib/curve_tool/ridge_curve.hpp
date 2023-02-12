@@ -51,7 +51,8 @@ namespace terraformer
 		{
 			auto const vec_val = curve[k].get();
 			ret.push_back(params.start_location
-				+ displacement{vec_val*geosimd::vec_t{1.0f, Ay, Az*vec_val[2], 1.0f}});
+				+ displacement{vec_val*geosimd::vec_t{1.0f, Ay, Az*vec_val[2], 1.0f}}
+				+ displacement{0.0f, 0.0f, -0.5f*params.height_modulation});
 		}
 		return ret;
 	}
