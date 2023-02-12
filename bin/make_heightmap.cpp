@@ -67,7 +67,7 @@ int main()
 		.wave_params = terraformer::fractal_wave::params{
 			.wavelength = 512.0f,
 			.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
-			.exponent_noise_amount = std::numbers::phi_v<float>/64.0f,
+			.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
 			.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
 			.phase_shift_noise_amount = 1.0f/12.0f
 		},
