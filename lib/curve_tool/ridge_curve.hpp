@@ -17,7 +17,7 @@ namespace terraformer
 	};
 
 	template<class Rng>
-	std::vector<location> generate(Rng&& rng, main_ridge_params const& params)
+	std::vector<location> generate(Rng&& rng, float dx, main_ridge_params const& params)
 	{
 		auto const n_points = static_cast<size_t>(params.distance_to_endpoint);
 		std::uniform_real_distribution U{-0.5f, 0.5f};
@@ -37,7 +37,7 @@ namespace terraformer
 		std::vector<displacement> curve;
 		for(size_t k = 0; k != n_points; ++k)
 		{
-			auto const x = static_cast<float>(k);
+			auto const x = static_cast<float>(k)*dx;
 			auto const y = wave_xy(x);
 			auto const z = wave_xz(x);
 			curve.push_back(displacement{x, y, z});

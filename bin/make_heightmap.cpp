@@ -27,23 +27,28 @@ namespace terraformer
 		float thickness;
 	};
 
+	constexpr auto domain_area(dimensions const& dim)
+	{
+		return static_cast<double>(dim.width)*static_cast<double>(dim.height);
+	}
+
 	struct domain_boundary_conditions
 	{
 		float low_level;
 		float high_level;
 	};
 
-	struct massif_outline_description
+	struct massif_outline_descriptor
 	{
 		domain_boundary_conditions boundary;
 		main_ridge_params main_ridge;
 	};
 
-	struct landscape_description
+	struct landscape_descriptor
 	{
 		dimensions physical_dimensions;
 		uint32_t pixel_count;
-		massif_outline_description initial_heightmap_description;
+		massif_outline_descriptor initial_heightmap;
 
 #if 0
 		noisy_drift::params wind_direction;
@@ -57,13 +62,45 @@ namespace terraformer
 
 int main()
 {
-	uint32_t const domain_size = 1024;
+	terraformer::landscape_descriptor const params{
+		.physical_dimensions{
+			.width = 49152.0f,
+			.height = 49152.0f,
+			.thickness = 6144.0f,
+		},
+		.pixel_count = 1024,
+		.initial_heightmap{
+			.boundary{
+				.low_level = 512.0f,
+				.high_level = 2048.0f
+			},
+			.main_ridge{
+				.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
+				.distance_to_endpoint = 49152.0f,
+				.wave_params{
+					.wavelength = 24576.0f,
+					.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
+					.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
+					.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
+					.phase_shift_noise_amount = 1.0f/12.0f
+				},
+				.wave_amplitude = 4096.0f,
+				.height_modulation = 1024.0f
+			}
+		}
+	};
 
+	auto const pixel_size = static_cast<float>(std::sqrt(domain_area(params.physical_dimensions))
+		/static_cast<double>(params.pixel_count));
+	fprintf(stderr, "pixel_size: %.8g\n", pixel_size);
+	(void)pixel_size;
+
+	uint32_t const domain_size = 1024;
 	terraformer::location const r_0{0.0f, 1.0f*static_cast<float>(domain_size)/3.0f, 1.0f};
 
 	random_generator rng;
 
-	auto const curve = generate(rng, terraformer::main_ridge_params{
+	auto const curve = generate(rng, 1.0f, terraformer::main_ridge_params{
 		.start_location = r_0,
 		.distance_to_endpoint = static_cast<float>(domain_size),
 		.wave_params = terraformer::fractal_wave::params{
