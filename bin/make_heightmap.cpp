@@ -116,14 +116,13 @@ int main()
 	fprintf(stderr, "height: %u\n", canvas_size.second);
 
 
-	uint32_t const domain_size = 1024;
-	terraformer::location const r_0{0.0f, 1.0f*static_cast<float>(domain_size)/3.0f, 1.0f};
+	terraformer::location const r_0{0.0f, 1.0f*static_cast<float>(canvas_size.second)/3.0f, 1.0f};
 
 	random_generator rng;
 
 	auto const curve = generate(rng, 1.0f, terraformer::main_ridge_params{
 		.start_location = r_0,
-		.distance_to_endpoint = static_cast<float>(domain_size),
+		.distance_to_endpoint = static_cast<float>(canvas_size.first),
 		.wave_params = terraformer::fractal_wave::params{
 			.wavelength = 512.0f,
 			.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
@@ -138,17 +137,17 @@ int main()
 
 	// Generate initial heightmap
 
-	terraformer::grayscale_image boundary_values{domain_size, domain_size};
+	terraformer::grayscale_image boundary_values{canvas_size.first, canvas_size.second};
 	draw(boundary_values.pixels(), curve, terraformer::line_segment_draw_params{.value = 1.0f});
 	store(boundary_values, "boundary.exr");
 
-	terraformer::double_buffer<terraformer::grayscale_image> buffers{domain_size, domain_size};
-	generate(buffers.back().pixels(), [r_0](uint32_t, uint32_t y) {
+	terraformer::double_buffer<terraformer::grayscale_image> buffers{canvas_size.first, canvas_size.second};
+	generate(buffers.back().pixels(), [r_0, h = static_cast<float>(canvas_size.second)](uint32_t, uint32_t y) {
 		auto const y_val = static_cast<float>(y);
 		auto const ridge_line = r_0[1];
 		auto const t = y_val/ridge_line;
 		return std::min(std::lerp(0.382f, 1.0f, t),
-			std::lerp(1.0f, 0.618f*0.382f, (y_val - ridge_line)/static_cast<float>(domain_size - ridge_line)));
+			std::lerp(1.0f, 0.618f*0.382f, (y_val - ridge_line)/static_cast<float>(h - ridge_line)));
 	});
 
 	buffers.swap();
@@ -175,8 +174,8 @@ int main()
 
 	auto const heightmap = buffers.front().pixels();
 	// Collect river start points
-	auto river_start_points = terraformer::sample(domain_size,
-		domain_size,
+	auto river_start_points = terraformer::sample(canvas_size.first,
+		canvas_size.second,
 		[&rng, heightmap](uint32_t x, uint32_t y){
 			std::uniform_real_distribution U{0.0f, 1.0f};
 			// TODO: normalize to max value in heightmap
@@ -188,7 +187,7 @@ int main()
 
 	std::ranges::shuffle(river_start_points, rng);
 
-	terraformer::grayscale_image river_mask{domain_size, domain_size};
+	terraformer::grayscale_image river_mask{canvas_size.first, canvas_size.second};
 	std::ranges::for_each(river_start_points,
 		[river_mask = river_mask.pixels(), heightmap](auto const item) {
 		auto const path = trace_gradient_periodic_xy(heightmap, item);
