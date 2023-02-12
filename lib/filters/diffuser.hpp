@@ -234,12 +234,20 @@ namespace terraformer
 
 		auto const tolerance = params.tolerance;
 
+		size_t k = 0;
 		while(true)
 		{
 			auto const delta = diffuser();
 
 			if(delta < tolerance)
 			{ return delta; }
+
+			if(k % 1024 == 0)
+			{
+				fprintf(stderr, "\r%.8g    ", delta);
+			}
+
+			++k;
 		}
 	}
 

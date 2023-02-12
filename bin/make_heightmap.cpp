@@ -24,7 +24,6 @@ namespace terraformer
 	{
 		float width;
 		float height;
-		float thickness;
 	};
 
 	constexpr auto domain_area(dimensions const& dim)
@@ -34,8 +33,8 @@ namespace terraformer
 
 	struct domain_boundary_conditions
 	{
-		float low_level;
-		float high_level;
+		float front_level;
+		float back_level;
 	};
 
 	struct massif_outline_descriptor
@@ -78,17 +77,16 @@ int main()
 	terraformer::landscape_descriptor const params{
 		.physical_dimensions{
 			.width = 49152.0f,
-			.height = 49152.0f,
-			.thickness = 6144.0f,
+			.height = 49152.0f
 		},
 		.pixel_count = 1024,
 		.initial_heightmap{
 			.boundary{
-				.low_level = 512.0f,
-				.high_level = 2048.0f
+				.front_level = 512.0f,
+				.back_level = 2048.0f
 			},
 			.main_ridge{
-				.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
+				.start_location = terraformer::location{0.0f, 16384.0f, 6144.0f},
 				.distance_to_endpoint = 49152.0f,
 				.wave_params{
 					.wavelength = 24576.0f,
@@ -120,48 +118,58 @@ int main()
 
 	random_generator rng;
 
-	auto const curve = generate(rng, 1.0f, terraformer::main_ridge_params{
-		.start_location = r_0,
-		.distance_to_endpoint = static_cast<float>(canvas_size.first),
-		.wave_params = terraformer::fractal_wave::params{
-			.wavelength = 512.0f,
-			.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
-			.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
-			.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
-			.phase_shift_noise_amount = 1.0f/12.0f
-		},
-		.wave_amplitude = 4096.0f*1024.0f/49152.0f,
-		.height_modulation = 1024.0f/6144.0f
-	});
-
+	auto const curve = generate(rng, pixel_size, params.initial_heightmap.main_ridge);
 
 	// Generate initial heightmap
 
-	terraformer::grayscale_image boundary_values{canvas_size.first, canvas_size.second};
-	draw(boundary_values.pixels(), curve, terraformer::line_segment_draw_params{.value = 1.0f});
-	store(boundary_values, "boundary.exr");
+	terraformer::grayscale_image main_ridge{canvas_size.first, canvas_size.second};
+	draw(main_ridge.pixels(), curve, terraformer::line_segment_draw_params{
+		.value = 1.0f,
+		.scale = pixel_size
+	});
+	store(main_ridge, "boundary.exr");
 
 	terraformer::double_buffer<terraformer::grayscale_image> buffers{canvas_size.first, canvas_size.second};
-	generate(buffers.back().pixels(), [r_0, h = static_cast<float>(canvas_size.second)](uint32_t, uint32_t y) {
+	generate(buffers.back().pixels(), [
+			r_0 = params.initial_heightmap.main_ridge.start_location,
+			h = static_cast<float>(canvas_size.second),
+			boundary = params.initial_heightmap.boundary
+		](uint32_t, uint32_t y) {
+
 		auto const y_val = static_cast<float>(y);
 		auto const ridge_line = r_0[1];
 		auto const t = y_val/ridge_line;
-		return std::min(std::lerp(0.382f, 1.0f, t),
-			std::lerp(1.0f, 0.618f*0.382f, (y_val - ridge_line)/static_cast<float>(h - ridge_line)));
+		return std::min(std::lerp(boundary.back_level, r_0[2], t),
+			std::lerp(r_0[2],
+				boundary.front_level,
+				(y_val - ridge_line)/static_cast<float>(h - ridge_line))
+		);
 	});
-
 	buffers.swap();
 	store(buffers.front(), "initial_state.exr");
 
 	solve_bvp(buffers, terraformer::laplace_solver_params{
-		.tolerance = 1.0e-6f,
+		.tolerance = 1.0e-6f * params.initial_heightmap.main_ridge.start_location[2],
 		.step_executor_factory = terraformer::thread_pool_factory{16},
-		.boundary = [values = boundary_values](uint32_t x, uint32_t y) {
+		.boundary = [
+			values = main_ridge,
+			front_back = params.initial_heightmap.boundary
+		](uint32_t x, uint32_t y) {
 			if(y == 0)
-			{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.382f}; }
+			{
+				return terraformer::dirichlet_boundary_pixel{
+					.weight=1.0f,
+					.value=front_back.back_level
+				};
+			}
 
 			if(y == values.height() - 1)
-			{ return terraformer::dirichlet_boundary_pixel{.weight=1.0f, .value=0.618f*0.382f};}
+			{
+				return terraformer::dirichlet_boundary_pixel{
+					.weight=1.0f,
+					.value=front_back.front_level
+				};
+			}
 
 			auto const val = values(x, y);
 			return val >= 0.5f ?
@@ -169,8 +177,8 @@ int main()
 				terraformer::dirichlet_boundary_pixel{0.0f, 0.0f};
 		},
 	});
-
 	store(buffers.front(), "after_laplace.exr");
+
 
 	auto const heightmap = buffers.front().pixels();
 	// Collect river start points
@@ -179,9 +187,9 @@ int main()
 		[&rng, heightmap](uint32_t x, uint32_t y){
 			std::uniform_real_distribution U{0.0f, 1.0f};
 			// TODO: normalize to max value in heightmap
-			auto const val = 0.75f*heightmap(x, y);
+			auto const val = 0.75f*heightmap(x, y)/6144.0f;
 
-			// TODO: These numbers constants should be parameters
+			// TODO: These constants should be parameters
 			return 768.0f*U(rng) < (val >= 0.75f);
 		});
 

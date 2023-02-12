@@ -105,6 +105,7 @@ namespace terraformer
 		Brush brush{};
 		BlendFunction blend_function{};
 		BrushSizeModulator brush_diameter{};
+		float scale = 1.0f;
 	};
 
 	template<class PixelType,
@@ -130,8 +131,8 @@ namespace terraformer
 					+ seg.p1[1];
 				auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
 				paint(target_surface, paint_params{
-					.x = x,
-		  			.y = y,
+					.x = x/params.scale,
+		  			.y = y/params.scale,
 		  			.value = z*params.value,
 		  			.brush_diameter = params.brush_diameter(x, y),
 					.brush = params.brush,
@@ -153,8 +154,8 @@ namespace terraformer
 					+ seg.p1[0];
 				auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
 				paint(target_surface, paint_params{
-					.x = x,
-		  			.y = y,
+					.x = x/params.scale,
+		  			.y = y/params.scale,
 		  			.value = z*params.value,
 		  			.brush_diameter = params.brush_diameter(x, y),
 					.brush = params.brush,

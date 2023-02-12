@@ -19,7 +19,7 @@ namespace terraformer
 	template<class Rng>
 	std::vector<location> generate(Rng&& rng, float dx, main_ridge_params const& params)
 	{
-		auto const n_points = static_cast<size_t>(params.distance_to_endpoint);
+		auto const n_points = static_cast<size_t>(params.distance_to_endpoint/dx);
 		std::uniform_real_distribution U{-0.5f, 0.5f};
 		auto const x_offset = U(rng);
 		fractal_wave wave_xy{
