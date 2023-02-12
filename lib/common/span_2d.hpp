@@ -185,6 +185,12 @@ namespace terraformer
 
 		return 0.5f*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}
+
+	inline auto normal(span_2d<float const> span, uint32_t x, uint32_t y)
+	{
+		auto const g = grad(span, x, y);
+		return direction{displacement{-g[0], -g[1], 1.0f}};
+	}
 }
 
 #endif

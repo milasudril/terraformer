@@ -8,6 +8,7 @@
 #include "lib/execution/thread_pool.hpp"
 #include "lib/filters/coordinate_sampler.hpp"
 #include "lib/filters/gradient_tracer.hpp"
+#include "lib/filters/raycaster.hpp"
 
 #include <random>
 #include <pcg-cpp/include/pcg_random.hpp>
@@ -73,7 +74,7 @@ namespace terraformer
 		buffers.swap();
 
 		solve_bvp(buffers, terraformer::laplace_solver_params{
-			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
+			.tolerance = 1.0e-5f * heightmap_params.main_ridge.start_location[2],
 			.step_executor_factory = terraformer::thread_pool_factory{16},
 			.boundary = [
 				values = main_ridge,
@@ -183,7 +184,7 @@ int main()
 	make_initial_heightmap(buffers, rng, pixel_size, params.initial_heightmap);
 
 	store(buffers.front(), "after_laplace.exr");
-
+#if 0
 	auto const heightmap = buffers.front().pixels();
 	// Collect river start points
 	auto river_start_points = terraformer::sample(canvas_size.first,
@@ -198,8 +199,16 @@ int main()
 		});
 
 	std::ranges::shuffle(river_start_points, rng);
+#endif
 
-	terraformer::grayscale_image river_mask{canvas_size.first, canvas_size.second};
+	terraformer::grayscale_image lit_surface{canvas_size.first, canvas_size.second};
+	raycast(lit_surface.pixels(),
+		buffers.front(),
+		terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}});
+	store(lit_surface, "lit_surface.exr");
+
+
+#if 0
 	std::ranges::for_each(river_start_points,
 		[river_mask = river_mask.pixels(), heightmap](auto const item) {
 		auto const path = trace_gradient_periodic_xy(heightmap, item);
@@ -220,4 +229,5 @@ int main()
 	});
 	buffers.swap();
 	store(buffers.front(), "eroded.exr");
+#endif
 }
