@@ -39,6 +39,70 @@ namespace terraformer
 		main_ridge_params main_ridge;
 	};
 
+	template<class Rng>
+	void make_initial_heightmap(double_buffer<terraformer::grayscale_image>& buffers,
+		Rng&& rng,
+		float pixel_size,
+		massif_outline_descriptor const& heightmap_params)
+	{
+		auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
+		auto const w = buffers.front().width();
+		auto const h = buffers.front().height();
+
+		terraformer::grayscale_image main_ridge{w, h};
+		draw(main_ridge.pixels(), curve, terraformer::line_segment_draw_params{
+			.value = 1.0f,
+			.scale = pixel_size
+		});
+
+		generate(buffers.back().pixels(), [
+				r_0 = heightmap_params.main_ridge.start_location,
+				h = static_cast<float>(h),
+				boundary = heightmap_params.boundary
+			](uint32_t, uint32_t y) {
+
+			auto const y_val = static_cast<float>(y);
+			auto const ridge_line = r_0[1];
+			auto const t = y_val/ridge_line;
+			return std::min(std::lerp(boundary.back_level, r_0[2], t),
+				std::lerp(r_0[2],
+					boundary.front_level,
+					(y_val - ridge_line)/static_cast<float>(h - ridge_line))
+			);
+		});
+		buffers.swap();
+
+		solve_bvp(buffers, terraformer::laplace_solver_params{
+			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
+			.step_executor_factory = terraformer::thread_pool_factory{16},
+			.boundary = [
+				values = main_ridge,
+				front_back = heightmap_params.boundary
+			](uint32_t x, uint32_t y) {
+				if(y == 0)
+				{
+					return terraformer::dirichlet_boundary_pixel{
+						.weight=1.0f,
+						.value=front_back.back_level
+					};
+				}
+
+				if(y == values.height() - 1)
+				{
+					return terraformer::dirichlet_boundary_pixel{
+						.weight=1.0f,
+						.value=front_back.front_level
+					};
+				}
+
+				auto const val = values(x, y);
+				return val >= 0.5f ?
+					terraformer::dirichlet_boundary_pixel{1.0f, val}:
+					terraformer::dirichlet_boundary_pixel{0.0f, 0.0f};
+			},
+		});
+	}
+
 	struct landscape_descriptor
 	{
 		dimensions physical_dimensions;
@@ -116,65 +180,7 @@ int main()
 	};
 
 	random_generator rng;
-	[](terraformer::double_buffer<terraformer::grayscale_image>& buffers, auto&& rng, float pixel_size,
-	   terraformer::massif_outline_descriptor const& heightmap_params){
-		auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
-		auto const w = buffers.front().width();
-		auto const h = buffers.front().height();
-
-		terraformer::grayscale_image main_ridge{w, h};
-		draw(main_ridge.pixels(), curve, terraformer::line_segment_draw_params{
-			.value = 1.0f,
-			.scale = pixel_size
-		});
-
-		generate(buffers.back().pixels(), [
-				r_0 = heightmap_params.main_ridge.start_location,
-				h = static_cast<float>(h),
-				boundary = heightmap_params.boundary
-			](uint32_t, uint32_t y) {
-
-			auto const y_val = static_cast<float>(y);
-			auto const ridge_line = r_0[1];
-			auto const t = y_val/ridge_line;
-			return std::min(std::lerp(boundary.back_level, r_0[2], t),
-				std::lerp(r_0[2],
-					boundary.front_level,
-					(y_val - ridge_line)/static_cast<float>(h - ridge_line))
-			);
-		});
-		buffers.swap();
-
-		solve_bvp(buffers, terraformer::laplace_solver_params{
-			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
-			.step_executor_factory = terraformer::thread_pool_factory{16},
-			.boundary = [
-				values = main_ridge,
-				front_back = heightmap_params.boundary
-			](uint32_t x, uint32_t y) {
-				if(y == 0)
-				{
-					return terraformer::dirichlet_boundary_pixel{
-						.weight=1.0f,
-						.value=front_back.back_level
-					};
-				}
-
-				if(y == values.height() - 1)
-				{
-					return terraformer::dirichlet_boundary_pixel{
-						.weight=1.0f,
-						.value=front_back.front_level
-					};
-				}
-
-				auto const val = values(x, y);
-				return val >= 0.5f ?
-					terraformer::dirichlet_boundary_pixel{1.0f, val}:
-					terraformer::dirichlet_boundary_pixel{0.0f, 0.0f};
-			},
-		});
-	}(buffers, rng, pixel_size, params.initial_heightmap);
+	make_initial_heightmap(buffers, rng, pixel_size, params.initial_heightmap);
 
 	store(buffers.front(), "after_laplace.exr");
 
