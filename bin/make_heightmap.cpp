@@ -109,69 +109,74 @@ int main()
 	fprintf(stderr, "width: %u\n", canvas_size.first);
 	fprintf(stderr, "height: %u\n", canvas_size.second);
 
+
+	terraformer::double_buffer<terraformer::grayscale_image> buffers{
+		canvas_size.first,
+		canvas_size.second
+	};
+
 	random_generator rng;
+	[](terraformer::double_buffer<terraformer::grayscale_image>& buffers, auto&& rng, float pixel_size,
+	   terraformer::massif_outline_descriptor const& heightmap_params){
+		auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
+		auto const w = buffers.front().width();
+		auto const h = buffers.front().height();
 
-	auto const curve = generate(rng, pixel_size, params.initial_heightmap.main_ridge);
+		terraformer::grayscale_image main_ridge{w, h};
+		draw(main_ridge.pixels(), curve, terraformer::line_segment_draw_params{
+			.value = 1.0f,
+			.scale = pixel_size
+		});
 
-	// Generate initial heightmap
+		generate(buffers.back().pixels(), [
+				r_0 = heightmap_params.main_ridge.start_location,
+				h = static_cast<float>(h),
+				boundary = heightmap_params.boundary
+			](uint32_t, uint32_t y) {
 
-	terraformer::grayscale_image main_ridge{canvas_size.first, canvas_size.second};
-	draw(main_ridge.pixels(), curve, terraformer::line_segment_draw_params{
-		.value = 1.0f,
-		.scale = pixel_size
-	});
-	store(main_ridge, "boundary.exr");
+			auto const y_val = static_cast<float>(y);
+			auto const ridge_line = r_0[1];
+			auto const t = y_val/ridge_line;
+			return std::min(std::lerp(boundary.back_level, r_0[2], t),
+				std::lerp(r_0[2],
+					boundary.front_level,
+					(y_val - ridge_line)/static_cast<float>(h - ridge_line))
+			);
+		});
+		buffers.swap();
 
-	terraformer::double_buffer<terraformer::grayscale_image> buffers{canvas_size.first, canvas_size.second};
-	generate(buffers.back().pixels(), [
-			r_0 = params.initial_heightmap.main_ridge.start_location,
-			h = static_cast<float>(canvas_size.second),
-			boundary = params.initial_heightmap.boundary
-		](uint32_t, uint32_t y) {
+		solve_bvp(buffers, terraformer::laplace_solver_params{
+			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
+			.step_executor_factory = terraformer::thread_pool_factory{16},
+			.boundary = [
+				values = main_ridge,
+				front_back = heightmap_params.boundary
+			](uint32_t x, uint32_t y) {
+				if(y == 0)
+				{
+					return terraformer::dirichlet_boundary_pixel{
+						.weight=1.0f,
+						.value=front_back.back_level
+					};
+				}
 
-		auto const y_val = static_cast<float>(y);
-		auto const ridge_line = r_0[1];
-		auto const t = y_val/ridge_line;
-		return std::min(std::lerp(boundary.back_level, r_0[2], t),
-			std::lerp(r_0[2],
-				boundary.front_level,
-				(y_val - ridge_line)/static_cast<float>(h - ridge_line))
-		);
-	});
-	buffers.swap();
-	store(buffers.front(), "initial_state.exr");
+				if(y == values.height() - 1)
+				{
+					return terraformer::dirichlet_boundary_pixel{
+						.weight=1.0f,
+						.value=front_back.front_level
+					};
+				}
 
-	solve_bvp(buffers, terraformer::laplace_solver_params{
-		.tolerance = 1.0e-6f * params.initial_heightmap.main_ridge.start_location[2],
-		.step_executor_factory = terraformer::thread_pool_factory{16},
-		.boundary = [
-			values = main_ridge,
-			front_back = params.initial_heightmap.boundary
-		](uint32_t x, uint32_t y) {
-			if(y == 0)
-			{
-				return terraformer::dirichlet_boundary_pixel{
-					.weight=1.0f,
-					.value=front_back.back_level
-				};
-			}
+				auto const val = values(x, y);
+				return val >= 0.5f ?
+					terraformer::dirichlet_boundary_pixel{1.0f, val}:
+					terraformer::dirichlet_boundary_pixel{0.0f, 0.0f};
+			},
+		});
+	}(buffers, rng, pixel_size, params.initial_heightmap);
 
-			if(y == values.height() - 1)
-			{
-				return terraformer::dirichlet_boundary_pixel{
-					.weight=1.0f,
-					.value=front_back.front_level
-				};
-			}
-
-			auto const val = values(x, y);
-			return val >= 0.5f ?
-				terraformer::dirichlet_boundary_pixel{1.0f, val}:
-				terraformer::dirichlet_boundary_pixel{0.0f, 0.0f};
-		},
-	});
 	store(buffers.front(), "after_laplace.exr");
-
 
 	auto const heightmap = buffers.front().pixels();
 	// Collect river start points
