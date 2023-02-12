@@ -113,9 +113,6 @@ int main()
 	fprintf(stderr, "width: %u\n", canvas_size.first);
 	fprintf(stderr, "height: %u\n", canvas_size.second);
 
-
-	terraformer::location const r_0{0.0f, 1.0f*static_cast<float>(canvas_size.second)/3.0f, 1.0f};
-
 	random_generator rng;
 
 	auto const curve = generate(rng, pixel_size, params.initial_heightmap.main_ridge);
