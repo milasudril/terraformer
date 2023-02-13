@@ -205,9 +205,12 @@ int main()
 
 
 	terraformer::grayscale_image lit_surface{canvas_size.first, canvas_size.second};
-	raycast(lit_surface.pixels(),
-		buffers.front(),
-		terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}});
+	generate(lit_surface.pixels(), [heightmap = buffers.front()](uint32_t x, uint32_t y){
+		return raycast(heightmap,
+			terraformer::pixel_coordinates{x, y},
+			heightmap(x, y),
+			geosimd::rotation_angle{0x0}).has_value() ? 0.0f : 1.0f;
+	});
 	store(lit_surface, "lit_surface.exr");
 
 #if 0
