@@ -158,11 +158,11 @@ int main()
 		},
 		.initial_heightmap{
 			.boundary{
-				.front_level = 512.0f,
-				.back_level = 2048.0f
+				.front_level = 1024.0f,
+				.back_level = 3072.0f
 			},
 			.main_ridge{
-				.start_location = terraformer::location{0.0f, 16384.0f, 6144.0f},
+				.start_location = terraformer::location{0.0f, 16384.0f, 8192.0f},
 				.distance_to_endpoint = 49152.0f,
 				.wave_params{
 					.wavelength = 24576.0f,
