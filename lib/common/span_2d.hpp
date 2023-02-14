@@ -7,9 +7,23 @@
 #include <cstdint>
 #include <type_traits>
 #include <cstddef>
+#include <cmath>
 
 namespace terraformer
 {
+	struct span_2d_extents
+	{
+		uint32_t width;
+		uint32_t height;
+	};
+
+	inline auto diagonal(span_2d_extents extents)
+	{
+		auto const w = static_cast<double>(extents.width);
+		auto const h = static_cast<double>(extents.height);
+		return std::sqrt(w*w + h*h);
+	}
+
 	template<class T>
 	class span_2d
 	{

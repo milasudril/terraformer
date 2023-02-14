@@ -11,14 +11,17 @@ namespace terraformer
 	inline std::optional<pixel_coordinates> raycast(span_2d<float const> heighmap,
 		pixel_coordinates loc,
 		float src_altitude,
-		geosimd::rotation_angle src_dir)
+		direction src_dir,
+		size_t max_iterations)
 	{
 		auto const x_0 = static_cast<int32_t>(loc.x);
 		auto const y_0 = static_cast<int32_t>(loc.y);
-		location r{static_cast<float>(x_0), static_cast<float>(y_0), src_altitude};
-		direction const dr{cossin(src_dir), geosimd::dimension_tag<2>{}};
+		location const r_0{static_cast<float>(x_0), static_cast<float>(y_0), src_altitude};
 
-		while(inside(heighmap, r[0], r[1]))
+		size_t k = 0;
+		auto r = r_0;
+
+		while(k != max_iterations && inside(heighmap, r[0], r[1]))
 		{
 			if(r[2] < interp(heighmap, r[0], r[1]))
 			{
@@ -27,8 +30,11 @@ namespace terraformer
 					static_cast<uint32_t>(r[1] + 0.5f)
 				};
 			}
-			r += 1.0f*dr;
+
+			++k;
+			r = r_0 + static_cast<float>(k)*src_dir;
 		}
+
 		return std::nullopt;
 	}
 }

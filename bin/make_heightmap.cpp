@@ -119,20 +119,21 @@ namespace terraformer
 		geosimd::rotation_angle center_latitude;
 #endif
 	};
+
+	inline auto pixel_dimensions(float width, float height, uint32_t pixel_count)
+	{
+		auto const w = static_cast<double>(width);
+		auto const h = static_cast<double>(height);
+		auto const d = static_cast<double>(pixel_count);
+		auto const r = w/h;
+
+		return span_2d_extents{
+			static_cast<uint32_t>(d*std::sqrt(r) + 0.5),
+			static_cast<uint32_t>(d/std::sqrt(r) + 0.5)
+		};
+	}
 }
 
-std::pair<uint32_t, uint32_t> pixel_dimensions(float width, float height, uint32_t pixel_count)
-{
-	auto const w = static_cast<double>(width);
-	auto const h = static_cast<double>(height);
-	auto const d = static_cast<double>(pixel_count);
-	auto const r = w/h;
-
-	return std::pair{
-		static_cast<uint32_t>(d*std::sqrt(r) + 0.5),
-		static_cast<uint32_t>(d/std::sqrt(r) + 0.5)
-	};
-}
 
 int main()
 {
@@ -165,25 +166,38 @@ int main()
 
 	auto const pixel_size = static_cast<float>(std::sqrt(domain_area(params.physical_dimensions))
 		/static_cast<double>(params.pixel_count));
-	auto const canvas_size = pixel_dimensions(
+	auto const canvas_size = terraformer::pixel_dimensions(
 		params.physical_dimensions.width,
 		params.physical_dimensions.height,
 		params.pixel_count
 	);
 
 	fprintf(stderr, "pixel_size: %.8g\n", pixel_size);
-	fprintf(stderr, "width: %u\n", canvas_size.first);
-	fprintf(stderr, "height: %u\n", canvas_size.second);
+	fprintf(stderr, "width: %u\n", canvas_size.width);
+	fprintf(stderr, "height: %u\n", canvas_size.height);
 
 
 	terraformer::double_buffer<terraformer::grayscale_image> buffers{
-		canvas_size.first,
-		canvas_size.second
+		canvas_size.width,
+		canvas_size.height
 	};
 
 	random_generator rng;
 	make_initial_heightmap(buffers, rng, pixel_size, params.initial_heightmap);
 	store(buffers.front(), "after_laplace.exr");
+
+	terraformer::grayscale_image lit_surface{canvas_size.width, canvas_size.height};
+	generate(lit_surface.pixels(), [heightmap = buffers.front(),
+		src_dir = terraformer::direction{cossin(geosimd::rotation_angle{0x8000'0000}), geosimd::dimension_tag<2>{}},
+		d = static_cast<size_t>(diagonal(canvas_size) + 0.5)
+	](uint32_t x, uint32_t y){
+		return raycast(heightmap,
+			terraformer::pixel_coordinates{x, y},
+			heightmap(x, y),
+			src_dir,
+			d).has_value() ? 0.0f : 1.0f;
+	});
+	store(lit_surface, "lit_surface.exr");
 
 #if 0
 	store(buffers.front(), "after_laplace.exr");
@@ -204,14 +218,6 @@ int main()
 #endif
 
 
-	terraformer::grayscale_image lit_surface{canvas_size.first, canvas_size.second};
-	generate(lit_surface.pixels(), [heightmap = buffers.front()](uint32_t x, uint32_t y){
-		return raycast(heightmap,
-			terraformer::pixel_coordinates{x, y},
-			heightmap(x, y),
-			geosimd::rotation_angle{0x0}).has_value() ? 0.0f : 1.0f;
-	});
-	store(lit_surface, "lit_surface.exr");
 
 #if 0
 	std::ranges::for_each(river_start_points,
