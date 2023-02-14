@@ -105,10 +105,34 @@ namespace terraformer
 		});
 	}
 
-	struct landscape_descriptor
+	struct domain_size_descriptor
 	{
 		dimensions physical_dimensions;
 		uint32_t pixel_count;
+	};
+
+	inline auto get_canvas_size(domain_size_descriptor const& domain_size)
+	{
+		auto const w = static_cast<double>(domain_size.physical_dimensions.width);
+		auto const h = static_cast<double>(domain_size.physical_dimensions.height);
+		auto const d = static_cast<double>(domain_size.pixel_count);
+		auto const r = w/h;
+
+		return span_2d_extents{
+			static_cast<uint32_t>(d*std::sqrt(r) + 0.5),
+			static_cast<uint32_t>(d/std::sqrt(r) + 0.5)
+		};
+	}
+
+	inline auto get_pixel_size(domain_size_descriptor const& domain_size)
+	{
+		return static_cast<float>(std::sqrt(domain_area(domain_size.physical_dimensions))
+			/static_cast<double>(domain_size.pixel_count));
+	}
+
+	struct landscape_descriptor
+	{
+		domain_size_descriptor domain_size;
 		massif_outline_descriptor initial_heightmap;
 
 #if 0
@@ -119,30 +143,19 @@ namespace terraformer
 		geosimd::rotation_angle center_latitude;
 #endif
 	};
-
-	inline auto pixel_dimensions(float width, float height, uint32_t pixel_count)
-	{
-		auto const w = static_cast<double>(width);
-		auto const h = static_cast<double>(height);
-		auto const d = static_cast<double>(pixel_count);
-		auto const r = w/h;
-
-		return span_2d_extents{
-			static_cast<uint32_t>(d*std::sqrt(r) + 0.5),
-			static_cast<uint32_t>(d/std::sqrt(r) + 0.5)
-		};
-	}
 }
 
 
 int main()
 {
 	terraformer::landscape_descriptor const params{
-		.physical_dimensions{
-			.width = 49152.0f,
-			.height = 49152.0f
+		.domain_size{
+			.physical_dimensions{
+				.width = 49152.0f,
+				.height = 49152.0f
+			},
+			.pixel_count = 1024
 		},
-		.pixel_count = 1024,
 		.initial_heightmap{
 			.boundary{
 				.front_level = 512.0f,
@@ -164,13 +177,8 @@ int main()
 		}
 	};
 
-	auto const pixel_size = static_cast<float>(std::sqrt(domain_area(params.physical_dimensions))
-		/static_cast<double>(params.pixel_count));
-	auto const canvas_size = terraformer::pixel_dimensions(
-		params.physical_dimensions.width,
-		params.physical_dimensions.height,
-		params.pixel_count
-	);
+	auto const pixel_size = get_pixel_size(params.domain_size);
+	auto const canvas_size = get_canvas_size(params.domain_size);
 
 	fprintf(stderr, "pixel_size: %.8g\n", pixel_size);
 	fprintf(stderr, "width: %u\n", canvas_size.width);
@@ -188,7 +196,7 @@ int main()
 
 	terraformer::grayscale_image lit_surface{canvas_size.width, canvas_size.height};
 	generate(lit_surface.pixels(), [heightmap = buffers.front(),
-		src_dir = terraformer::direction{cossin(geosimd::rotation_angle{0x8000'0000}), geosimd::dimension_tag<2>{}},
+		src_dir = terraformer::direction{cossin(geosimd::rotation_angle{0x0000'0000}), geosimd::dimension_tag<2>{}},
 		d = static_cast<size_t>(diagonal(canvas_size) + 0.5)
 	](uint32_t x, uint32_t y){
 		return raycast(heightmap,
