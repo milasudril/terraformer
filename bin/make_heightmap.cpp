@@ -1,6 +1,7 @@
 //@	{"target":{"name":"make_heightmap.o"}}
 
 #include "lib/curve_tool/ridge_curve.hpp"
+#include "lib/curve_tool/noisy_drift.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/filters/curve_rasterizer.hpp"
 #include "lib/pixel_store/image_io.hpp"
@@ -130,16 +131,38 @@ namespace terraformer
 			/static_cast<double>(domain_size.pixel_count));
 	}
 
+	inline constexpr auto north = geosimd::rotation_angle{0xc000'0000};
+	inline constexpr auto north_east = geosimd::rotation_angle{0xe000'0000};
+	inline constexpr auto east = geosimd::rotation_angle{0x0};
+	inline constexpr auto south_east = geosimd::rotation_angle{0x2000'0000};
+	inline constexpr auto south = geosimd::rotation_angle{0x4000'0000};
+	inline constexpr auto south_west = geosimd::rotation_angle{0x6000'0000};
+	inline constexpr auto west = geosimd::rotation_angle{0x8000'0000};
+	inline constexpr auto north_west = geosimd::rotation_angle{0xa000'0000};
+
+	struct wind_direction_descriptor
+	{
+		geosimd::rotation_angle expected_value;
+		float std_dev;
+	};
+
+	struct weather_data_descriptor
+	{
+		wind_direction_descriptor wind_direction;
+	};
+
 	struct landscape_descriptor
 	{
 		domain_size_descriptor domain_size;
 		massif_outline_descriptor initial_heightmap;
+		geosimd::turn_angle north_offset;
+		weather_data_descriptor weather_data;
+
 
 #if 0
 		noisy_drift::params wind_direction;
 		float max_precipitation_rate;
 
-		geosimd::turn_angle north_offset;
 		geosimd::rotation_angle center_latitude;
 #endif
 	};
@@ -174,6 +197,13 @@ int main()
 				.wave_amplitude = 4096.0f,
 				.height_modulation = 1024.0f
 			}
+		},
+		.north_offset = geosimd::turn_angle{0x0},
+		.weather_data{
+			.wind_direction{
+				.expected_value = terraformer::south_west,
+				.std_dev = 1.0f/24.0f
+			}
 		}
 	};
 
@@ -195,16 +225,27 @@ int main()
 	store(buffers.front(), "after_laplace.exr");
 
 	terraformer::grayscale_image lit_surface{canvas_size.width, canvas_size.height};
+	printf("Generating precipitation data\n");
 	generate(lit_surface.pixels(), [heightmap = buffers.front(),
-		src_dir = terraformer::direction{cossin(geosimd::rotation_angle{0x0000'0000}), geosimd::dimension_tag<2>{}},
+		&rng,
+		wind_dir_distrib = std::normal_distribution{0.0f, params.weather_data.wind_direction.std_dev},
+		wind_direction = params.weather_data.wind_direction.expected_value,
 		d = static_cast<size_t>(diagonal(canvas_size) + 0.5)
-	](uint32_t x, uint32_t y){
-		return raycast(heightmap,
+	](uint32_t x, uint32_t y) mutable {
+		auto const src_dir = terraformer::direction{cossin(
+			wind_direction + geosimd::turn_angle{geosimd::turns{wind_dir_distrib(rng)}}
+		), geosimd::dimension_tag<2>{}};
+
+		auto const cloud_base = 3072.0f;
+		return raycast(
+			heightmap,
 			terraformer::pixel_coordinates{x, y},
-			heightmap(x, y),
+			std::max(heightmap(x, y), cloud_base),
 			src_dir,
-			d).has_value() ? 0.0f : 1.0f;
+			d
+		).has_value() ? 0.0f : 1.0f;
 	});
+	printf("Saving result\n");
 	store(lit_surface, "lit_surface.exr");
 
 #if 0
