@@ -160,11 +160,11 @@ int main()
 	{
 		auto const t0 = std::chrono::steady_clock::now();
 		printf("Generating precipitation data... ");
-		generate(lit_surface.pixels(), [heightmap = buffers.front(),
+		generate(lit_surface.pixels(), [heightmap = buffers.front().pixels(),
 			&rng,
 			wind_dir_distrib = std::normal_distribution{0.0f, params.weather_data.wind_direction.std_dev},
 			wind_direction = params.weather_data.wind_direction.expected_value,
-			d = static_cast<size_t>(diagonal(canvas_size) + 0.5)
+			hm_conv_hull = std::as_const(hm_conv_hull).pixels()
 		](uint32_t x, uint32_t y) mutable {
 			auto const src_dir = terraformer::direction{cossin(
 				wind_direction + geosimd::turn_angle{geosimd::turns{wind_dir_distrib(rng)}}
@@ -176,8 +176,12 @@ int main()
 				terraformer::pixel_coordinates{x, y},
 				std::max(heightmap(x, y), cloud_base),
 				src_dir,
-				d
-			).has_value() ? 0.0f : 1.0f;
+				[hm_conv_hull](size_t, terraformer::location loc){
+					if(!inside(hm_conv_hull, loc[0], loc[1]))
+					{ return true; }
+
+					return interp(hm_conv_hull, loc[0], loc[1]) < loc[2];
+				}).has_value() ? 0.0f : 1.0f;
 		});
 		printf("%.8g s\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
 	}

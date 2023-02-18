@@ -8,11 +8,18 @@
 
 namespace terraformer
 {
+	template<class Func>
+	concept raycast_stop_predicate = requires(Func f, size_t k, location loc)
+	{
+		{f(k, loc)} -> std::same_as<bool>;
+	};
+
+	template<raycast_stop_predicate StopPredicate>
 	inline std::optional<pixel_coordinates> raycast(span_2d<float const> heighmap,
 		pixel_coordinates loc,
 		float src_altitude,
 		direction src_dir,
-		size_t max_iterations)
+		StopPredicate&& pred)
 	{
 		auto const x_0 = static_cast<int32_t>(loc.x);
 		auto const y_0 = static_cast<int32_t>(loc.y);
@@ -21,7 +28,7 @@ namespace terraformer
 		size_t k = 0;
 		auto r = r_0;
 
-		while(k != max_iterations && inside(heighmap, r[0], r[1]))
+		while(!pred(k, r))
 		{
 			if(r[2] < interp(heighmap, r[0], r[1]))
 			{
