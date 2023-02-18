@@ -8,6 +8,7 @@
 #include "lib/filters/convhull.hpp"
 
 #include <random>
+#include <chrono>
 #include <pcg-cpp/include/pcg_random.hpp>
 
 using random_generator = pcg_engines::oneseq_dxsm_128_64;
@@ -141,36 +142,45 @@ int main()
 
 	random_generator rng;
 	make_heightmap(buffers, rng, pixel_size, params.initial_heightmap);
+	putchar('\n');
 	store(buffers.front(), "after_laplace.exr");
 
-	printf("\nGenerating convex hull\n");
 	auto hm_conv_hull = buffers.front();
-	convhull(hm_conv_hull.pixels());
+
+	{
+		auto const t0 = std::chrono::steady_clock::now();
+		printf("Generating convex hull... ");
+		convhull(hm_conv_hull.pixels());
+		printf("%.8g s\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
+	}
 	store(hm_conv_hull, "hm_conv_hull.exr");
-	printf("...\n");
 
 
 	terraformer::grayscale_image lit_surface{canvas_size.width, canvas_size.height};
-	printf("Generating precipitation data\n");
-	generate(lit_surface.pixels(), [heightmap = buffers.front(),
-		&rng,
-		wind_dir_distrib = std::normal_distribution{0.0f, params.weather_data.wind_direction.std_dev},
-		wind_direction = params.weather_data.wind_direction.expected_value,
-		d = static_cast<size_t>(diagonal(canvas_size) + 0.5)
-	](uint32_t x, uint32_t y) mutable {
-		auto const src_dir = terraformer::direction{cossin(
-			wind_direction + geosimd::turn_angle{geosimd::turns{wind_dir_distrib(rng)}}
-		), geosimd::dimension_tag<2>{}};
+	{
+		auto const t0 = std::chrono::steady_clock::now();
+		printf("Generating precipitation data... ");
+		generate(lit_surface.pixels(), [heightmap = buffers.front(),
+			&rng,
+			wind_dir_distrib = std::normal_distribution{0.0f, params.weather_data.wind_direction.std_dev},
+			wind_direction = params.weather_data.wind_direction.expected_value,
+			d = static_cast<size_t>(diagonal(canvas_size) + 0.5)
+		](uint32_t x, uint32_t y) mutable {
+			auto const src_dir = terraformer::direction{cossin(
+				wind_direction + geosimd::turn_angle{geosimd::turns{wind_dir_distrib(rng)}}
+			), geosimd::dimension_tag<2>{}};
 
-		auto const cloud_base = 3072.0f;
-		return raycast(
-			heightmap,
-			terraformer::pixel_coordinates{x, y},
-			std::max(heightmap(x, y), cloud_base),
-			src_dir,
-			d
-		).has_value() ? 0.0f : 1.0f;
-	});
+			auto const cloud_base = 3072.0f;
+			return raycast(
+				heightmap,
+				terraformer::pixel_coordinates{x, y},
+				std::max(heightmap(x, y), cloud_base),
+				src_dir,
+				d
+			).has_value() ? 0.0f : 1.0f;
+		});
+		printf("%.8g s\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
+	}
 	printf("Saving result\n");
 	store(lit_surface, "lit_surface.exr");
 #if 0
