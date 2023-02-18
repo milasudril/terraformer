@@ -54,6 +54,7 @@
                     "config": {
 						"actions":["link", "run"],
                         "cflags": [
+                            "-I.",
                             "-Wall",
                             "-Wextra",
                             "-Wconversion",
