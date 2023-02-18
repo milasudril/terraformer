@@ -5,6 +5,7 @@
 #include "lib/filters/coordinate_sampler.hpp"
 #include "lib/filters/gradient_tracer.hpp"
 #include "lib/filters/raycaster.hpp"
+#include "lib/filters/convhull.hpp"
 
 #include <random>
 #include <pcg-cpp/include/pcg_random.hpp>
@@ -142,6 +143,13 @@ int main()
 	make_heightmap(buffers, rng, pixel_size, params.initial_heightmap);
 	store(buffers.front(), "after_laplace.exr");
 
+	printf("\nGenerating convex hull\n");
+	auto hm_conv_hull = buffers.front();
+	convhull(hm_conv_hull.pixels());
+	store(hm_conv_hull, "hm_conv_hull.exr");
+	printf("...\n");
+
+
 	terraformer::grayscale_image lit_surface{canvas_size.width, canvas_size.height};
 	printf("Generating precipitation data\n");
 	generate(lit_surface.pixels(), [heightmap = buffers.front(),
@@ -165,8 +173,8 @@ int main()
 	});
 	printf("Saving result\n");
 	store(lit_surface, "lit_surface.exr");
-
 #if 0
+
 	store(buffers.front(), "after_laplace.exr");
 	auto const heightmap = buffers.front().pixels();
 	// Collect river start points

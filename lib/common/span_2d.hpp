@@ -66,6 +66,9 @@ namespace terraformer
 			return *(ptr + y * width() + x);
 		}
 
+		constexpr auto row(IndexType y) const
+		{ return std::span{m_ptr + y*width(), width()}; }
+
 	private:
 		IndexType m_width;
 		IndexType m_height;
