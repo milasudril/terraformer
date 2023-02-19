@@ -30,6 +30,7 @@
                     "config": {
                         "cflags": [
                             "-Wall",
+                            "-mavx2",
                             "-Wextra",
                             "-Werror",
                             "-Wconversion",
@@ -55,6 +56,7 @@
 						"actions":["link", "run"],
                         "cflags": [
                             "-I.",
+                            "-mavx2",
                             "-Wall",
                             "-Wextra",
                             "-Wconversion",

@@ -12,6 +12,14 @@ namespace terraformer
 	using direction = geom_space::direction;
 
 	inline constexpr auto origin = geosimd::origin<geosimd::euclidian_space<float, 3>>();
+
+
+	using hires_geom_space = geosimd::euclidian_space<double, 3>;
+	using hires_location = hires_geom_space::location;
+	using hires_displacement = hires_geom_space::displacement;
+	using hires_direction = hires_geom_space::direction;
+
+	inline constexpr auto hires_origin = geosimd::origin<geosimd::euclidian_space<double, 3>>();
 };
 
 #endif
