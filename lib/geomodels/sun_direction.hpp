@@ -19,7 +19,6 @@ namespace terraformer
 		auto const z = colatcs.cos();
 
 		auto const r = hires_displacement{x, y, z}.apply(planet_rotation);
-	//	printf("r = %s\n", to_string(r).c_str());
 		auto const loc_observer = planet_location + r;
 		hires_displacement const sun_dir_xyz{hires_origin - loc_observer};
 
@@ -52,7 +51,6 @@ namespace terraformer
 		return hires_direction{
 			hires_displacement{
 				m*inverted(planet_rotation).get()*sun_dir_xyz.get().get()
-
 			}
 		};
 	}
