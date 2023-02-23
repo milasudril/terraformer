@@ -6,32 +6,50 @@
 
 namespace terraformer
 {
-	inline auto orbital_sun_direction(hires_location earth_loc,
-		hires_displacement view_offset,
-		hires_location sun_loc = hires_origin)
+	inline auto local_sun_direction(hires_location planet_location,
+		geosimd::rotation<hires_geom_space> const& planet_rotation,
+		geosimd::rotation_angle longitude,
+		geosimd::rotation_angle colatitude)
 	{
-		return hires_direction{sun_loc - (earth_loc + view_offset)};
-	}
+		auto const longcs = cossin<double>(longitude);
+		auto const colatcs = cossin<double>(colatitude);
 
-	inline auto local_sun_direction(hires_location earth_loc,
-		hires_displacement view_offset,
-		hires_location sun_loc = hires_origin)
-	{
-		auto const dir_orbit = sun_loc - (earth_loc + view_offset);
+		auto const x = longcs.cos() * colatcs.sin();
+		auto const y = longcs.sin() * colatcs.sin();
+		auto const z = colatcs.cos();
 
-		hires_direction const n{view_offset};
-		hires_direction const te{hires_displacement{-view_offset[1], view_offset[0], 0.0}};
-		auto const ts = cross(te, n);
+		auto const r = hires_displacement{x, y, z}.apply(planet_rotation);
+		auto const loc_observer = planet_location + r;
+		hires_displacement const sun_dir_xyz{hires_origin - loc_observer};
+
+		hires_displacement const dx{
+			-longcs.sin(),
+			colatcs.cos()*longcs.cos(),
+			colatcs.sin()*longcs.cos()
+		};
+
+		hires_displacement const dy{
+			longcs.cos(),
+			colatcs.cos()*longcs.sin(),
+			colatcs.sin()*longcs.sin()
+		};
+
+		hires_displacement const dz{
+			0.0,
+			-colatcs.sin(),
+			colatcs.cos()
+		};
 
 		geosimd::mat_4x4 const m{
 			std::array<geosimd::vec_t<double, 4>, 4>{
-				te.get().get(), ts.get().get(), n.get().get(), geosimd::vec_t{0.0, 0.0, 0.0, 1.0}
-			}
-		};
+				dx.get(),
+				dy.get(),
+				dz.get(),
+				geosimd::vec_t{0.0, 0.0, 0.0, 1.0}
+		}};
 
-		return hires_direction{hires_displacement{transposed(m)*dir_orbit.get().get()}};
+		return hires_direction{hires_displacement{m*sun_dir_xyz.get().get()}};
 	}
-
 }
 
 #endif
