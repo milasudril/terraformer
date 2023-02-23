@@ -12,25 +12,69 @@ TESTCASE(terraformer_geomodels_local_sun_direction)
 		geosimd::rotation_angle longitude,
 		geosimd::rotation_angle colatitude*/
 
-	terraformer::hires_location const planet_loc{-1024.0*1024.0, 0.0, 0.0};
-	geosimd::rotation<terraformer::hires_geom_space> const rot{geosimd::rotation_angle{0x0}, geosimd::dimension_tag<2>{}};
+	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
+	{
+		geosimd::rotation<terraformer::hires_geom_space> const rot_a{
+			geosimd::rotation_angle{0x0},
+			geosimd::dimension_tag<2>{}
+		};
+		auto const local_dir_a = terraformer::local_sun_direction(planet_loc,
+			rot_a,
+			geosimd::rotation_angle{0x0000'0000},
+			geosimd::rotation_angle{0x2000'0000}
+		);
 
-	printf("A\n");
+		EXPECT_EQ(static_cast<float>(local_dir_a[0]), 0.0f);
+		EXPECT_EQ(static_cast<float>(local_dir_a[1]), 1.0f/std::sqrt(2.0f));
+		EXPECT_EQ(static_cast<float>(local_dir_a[2]), 1.0f/std::sqrt(2.0f));
+	}
 
-	auto const local_dir_a = terraformer::local_sun_direction(planet_loc,
-		rot,
-		geosimd::rotation_angle{0x0000'0000},
-		geosimd::rotation_angle{0x2000'0000}
-	);
-	printf("%.8g %.8g %.8g\n", local_dir_a[0], local_dir_a[1], local_dir_a[2]);
-#if 0
-	printf("B\n");
-	auto const local_dir_b = terraformer::local_sun_direction(earth_loc, view_offset_b);
-	printf("%.8g %.8g %.8g\n", local_dir_b[0], local_dir_b[1], local_dir_b[2]);
+	{
+		geosimd::rotation<terraformer::hires_geom_space> const rot_a{
+			geosimd::rotation_angle{0x4000'0000},
+			geosimd::dimension_tag<2>{}
+		};
+		auto const local_dir_a = terraformer::local_sun_direction(planet_loc,
+			rot_a,
+			geosimd::rotation_angle{0x0000'0000},
+			geosimd::rotation_angle{0x2000'0000}
+		);
 
-	printf("C\n");
-	auto const local_dir_c = terraformer::local_sun_direction(earth_loc, view_offset_c);
-	printf("%.8g %.8g %.8g\n", local_dir_c[0], local_dir_c[1], local_dir_c[2]);
-#endif
+		EXPECT_EQ(static_cast<float>(local_dir_a[0]), -1.0f);
+		EXPECT_EQ(static_cast<float>(local_dir_a[1]), 0.0f);
+		EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
+	}
+
+	{
+		geosimd::rotation<terraformer::hires_geom_space> const rot_a{
+			geosimd::rotation_angle{0xc000'0000},
+			geosimd::dimension_tag<2>{}
+		};
+		auto const local_dir_a = terraformer::local_sun_direction(planet_loc,
+			rot_a,
+			geosimd::rotation_angle{0x0000'0000},
+			geosimd::rotation_angle{0x2000'0000}
+		);
+
+		EXPECT_EQ(static_cast<float>(local_dir_a[0]), 1.0f);
+		EXPECT_EQ(static_cast<float>(local_dir_a[1]), 0.0f);
+		EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
+	}
+
+	{
+		geosimd::rotation<terraformer::hires_geom_space> const rot_a{
+			geosimd::rotation_angle{0x8000'0000},
+			geosimd::dimension_tag<2>{}
+		};
+		auto const local_dir_a = terraformer::local_sun_direction(planet_loc,
+			rot_a,
+			geosimd::rotation_angle{0x0000'0000},
+			geosimd::rotation_angle{0x2000'0000}
+		);
+
+		EXPECT_EQ(static_cast<float>(local_dir_a[0]), 0.0f);
+		EXPECT_EQ(static_cast<float>(local_dir_a[1]), -1.0f/std::sqrt(2.0f));
+		EXPECT_EQ(static_cast<float>(local_dir_a[2]), -1.0f/std::sqrt(2.0f));
+	}
 }
