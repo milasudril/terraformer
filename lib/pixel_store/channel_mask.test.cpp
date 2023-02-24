@@ -442,166 +442,166 @@ TESTCASE(terraformer_channel_mask_build)
 	EXPECT_EQ(represents_color_image(mask), false);
 }
 
-TESTCASE(channel_mask_color_image_000)
+TESTCASE(terraformer_channel_mask_color_image_000)
 {
 	terraformer::channel_mask mask;
 	EXPECT_EQ(represents_color_image(mask), false);
 }
 
-TESTCASE(channel_mask_color_image_001)
+TESTCASE(terraformer_channel_mask_color_image_001)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance();
 	EXPECT_EQ(represents_color_image(mask), false);
 }
 
-TESTCASE(channel_mask_color_image_with_010)
+TESTCASE(terraformer_channel_mask_color_image_with_010)
 {
 	terraformer::channel_mask mask;
 	mask.set("Junk");
 	EXPECT_EQ(represents_color_image(mask), false);
 }
 
-TESTCASE(channel_mask_color_image_with_011)
+TESTCASE(terraformer_channel_mask_color_image_with_011)
 {
 	terraformer::channel_mask mask;
 	mask.set("Junk").set_luminance();
 	EXPECT_EQ(represents_color_image(mask), false);
 }
 
-TESTCASE(channel_mask_color_image_100)
+TESTCASE(terraformer_channel_mask_color_image_100)
 {
 	terraformer::channel_mask mask;
 	mask.set_rgb();
 	EXPECT_EQ(represents_color_image(mask), true);
 }
 
-TESTCASE(channel_mask_color_image_101)
+TESTCASE(terraformer_channel_mask_color_image_101)
 {
 	terraformer::channel_mask mask;
 	mask.set_rgb().set_luminance();
 	EXPECT_EQ(represents_color_image(mask), false);
 }
 
-TESTCASE(channel_mask_color_image_with_110)
+TESTCASE(terraformer_channel_mask_color_image_with_110)
 {
 	terraformer::channel_mask mask;
 	mask.set_rgb().set("Junk");
 	EXPECT_EQ(represents_color_image(mask), false);
 }
 
-TESTCASE(channel_mask_color_image_with_111)
+TESTCASE(terraformer_channel_mask_color_image_with_111)
 {
 	terraformer::channel_mask mask;
 	mask.set_rgb().set("Junk").set_luminance();
 	EXPECT_EQ(represents_color_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_0000)
+TESTCASE(terraformer_channel_mask_grayscale_image_0000)
 {
 	terraformer::channel_mask mask;
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_0001)
+TESTCASE(terraformer_channel_mask_grayscale_image_0001)
 {
 	terraformer::channel_mask mask;
 	mask.set_alpha();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_0010)
+TESTCASE(terraformer_channel_mask_grayscale_image_0010)
 {
 	terraformer::channel_mask mask;
 	mask.set_rgb();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_0011)
+TESTCASE(terraformer_channel_mask_grayscale_image_0011)
 {
 	terraformer::channel_mask mask;
 	mask.set_rgb().set_alpha();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_0100)
+TESTCASE(terraformer_channel_mask_grayscale_image_0100)
 {
 	terraformer::channel_mask mask;
 	mask.set("Junk");
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_0101)
+TESTCASE(terraformer_channel_mask_grayscale_image_0101)
 {
 	terraformer::channel_mask mask;
 	mask.set("Junk").set_alpha();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_0110)
+TESTCASE(terraformer_channel_mask_grayscale_image_0110)
 {
 	terraformer::channel_mask mask;
 	mask.set("Junk").set_rgb();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_0111)
+TESTCASE(terraformer_channel_mask_grayscale_image_0111)
 {
 	terraformer::channel_mask mask;
 	mask.set("Junk").set_rgb().set_alpha();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_1000)
+TESTCASE(terraformer_channel_mask_grayscale_image_1000)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance();
 	EXPECT_EQ(represents_grayscale_image(mask), true);
 }
 
-TESTCASE(channel_mask_grayscale_image_1001)
+TESTCASE(terraformer_channel_mask_grayscale_image_1001)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance().set_alpha();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_1010)
+TESTCASE(terraformer_channel_mask_grayscale_image_1010)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance().set_rgb();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_1011)
+TESTCASE(terraformer_channel_mask_grayscale_image_1011)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance().set_rgb().set_alpha();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_1100)
+TESTCASE(terraformer_channel_mask_grayscale_image_1100)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance().set("Junk");
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_1101)
+TESTCASE(terraformer_channel_mask_grayscale_image_1101)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance().set("Junk").set_alpha();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_1110)
+TESTCASE(terraformer_channel_mask_grayscale_image_1110)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance().set("Junk").set_rgb();
 	EXPECT_EQ(represents_grayscale_image(mask), false);
 }
 
-TESTCASE(channel_mask_grayscale_image_1111)
+TESTCASE(terraformer_channel_mask_grayscale_image_1111)
 {
 	terraformer::channel_mask mask;
 	mask.set_luminance().set("Junk").set_rgb().set_alpha();

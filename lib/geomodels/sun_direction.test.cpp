@@ -4,7 +4,7 @@
 
 #include "testfwk/testfwk.hpp"
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E0_00UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N45E0_00UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -23,7 +23,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E0_00UTC)
 	EXPECT_EQ(static_cast<float>(local_dir_a[2]), -1.0f/std::sqrt(2.0f));
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E0_06UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N45E0_06UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -42,7 +42,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E0_06UTC)
 	EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E0_12UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N45E0_12UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -61,7 +61,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E0_12UTC)
 	EXPECT_EQ(static_cast<float>(local_dir_a[2]), 1.0f/std::sqrt(2.0f));
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E0_18UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N45E0_18UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -80,7 +80,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E0_18UTC)
 	EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E90_00UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N45E90_00UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -99,7 +99,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E90_00UTC)
 	EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E90_06UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N45E90_06UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -118,7 +118,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E90_06UTC)
 	EXPECT_EQ(static_cast<float>(local_dir_a[2]), 1.0f/std::sqrt(2.0f));
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E90_12UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N45E90_12UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -137,7 +137,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E90_12UTC)
 	EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E90_18UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N45E90_18UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -156,7 +156,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N45E90_18UTC)
 	EXPECT_EQ(static_cast<float>(local_dir_a[2]), -1.0f/std::sqrt(2.0f));
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E0_00UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_S45E0_00UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -175,7 +175,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E0_00UTC)
 	EXPECT_EQ(static_cast<float>(local_dir_a[2]), -1.0f/std::sqrt(2.0f));
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E0_06UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_S45E0_06UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -194,7 +194,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E0_06UTC)
 	EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E0_12UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_S45E0_12UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -213,7 +213,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E0_12UTC)
 	EXPECT_EQ(static_cast<float>(local_dir_a[2]), 1.0f/std::sqrt(2.0f));
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E0_18UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_S45E0_18UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -232,7 +232,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E0_18UTC)
 	EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E90_00UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_S45E90_00UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -251,7 +251,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E90_00UTC)
 	EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E90_06UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_S45E90_06UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -270,7 +270,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E90_06UTC)
 	EXPECT_EQ(static_cast<float>(local_dir_a[2]), 1.0f/std::sqrt(2.0f));
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E90_12UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_S45E90_12UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -289,7 +289,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E90_12UTC)
 	EXPECT_LT(std::abs(static_cast<float>(local_dir_a[2])), 1.0e-7f);
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E90_18UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_S45E90_18UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
@@ -308,7 +308,7 @@ TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_S45E90_18UTC)
 	EXPECT_EQ(static_cast<float>(local_dir_a[2]), -1.0f/std::sqrt(2.0f));
 }
 
-TESTCASE(terraformer_geomodels_local_sun_direction_no_tilt_N90_00UTC)
+TESTCASE(terraformer_geomodels_local_sun_direction_T00_N90_00UTC)
 {
 	terraformer::hires_location const planet_loc{-1024.0*1024.0*1024.0, 0.0, 0.0};
 
