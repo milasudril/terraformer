@@ -94,9 +94,9 @@ TESTCASE(terraformer_repulsion_loc_points_loc_inside_closed_curve_centered_at_lo
 		geosimd::turn_angle theta{geosimd::turns{static_cast<double>(k)/(std::size(segs) - 1)}};
 		auto const cs_3theta = cossin(3*theta);
 		auto const cs_theta = cossin(theta);
-		auto const r = 2.0f + cs_3theta.sin;
+		auto const r = 2.0f + cs_3theta.sin();
 		segs[k] = terraformer::origin
-			+ r*terraformer::displacement{cs_theta.cos, cs_theta.sin, 0.0f};
+			+ r*terraformer::displacement{cs_theta.cos(), cs_theta.sin(), 0.0f};
 	}
 
 	{
@@ -114,7 +114,7 @@ TESTCASE(terraformer_repulsion_2d_loc_points_loc_inside_circle)
 		auto const cs_theta = cossin(theta);
 		auto const r = 2.0f;
 		segs[k] = terraformer::origin
-			+ r*terraformer::displacement{cs_theta.cos, cs_theta.sin, 0.0f};
+			+ r*terraformer::displacement{cs_theta.cos(), cs_theta.sin(), 0.0f};
 	}
 
 	{

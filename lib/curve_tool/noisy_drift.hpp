@@ -38,7 +38,7 @@ namespace terraformer
 					auto const theta = theta_drift + m_model_params.noise_amount*theta_random;
 					auto const cs = cossin(theta);
 
-					return r*displacement{cs.cos, cs.sin, 0.0f};
+					return r*displacement{cs.cos(), cs.sin(), 0.0f};
 				}
 			}
 		}

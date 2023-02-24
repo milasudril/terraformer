@@ -30,7 +30,7 @@ TESTCASE(terraformer_noisy_drift_expected_norm)
 			};
 
 			auto cs = cossin(expected_theta);
-			terraformer::direction const expected_dir{terraformer::displacement{cs.cos, cs.sin, 0.0f}};
+			terraformer::direction const expected_dir{terraformer::displacement{cs.cos(), cs.sin(), 0.0f}};
 
 			auto r = 0.0;
 			auto theta = geosimd::turn_angle{0};
