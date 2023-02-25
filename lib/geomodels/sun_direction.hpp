@@ -8,12 +8,6 @@
 
 namespace terraformer
 {
-	struct longcolat
-	{
-		geosimd::rotation_angle longitude;
-		geosimd::rotation_angle colatitude;
-	};
-
 	inline auto to_world_location(pixel_coordinates loc, span_2d_extents domain_size, double pixel_size)
 	{
 		hires_displacement const r{static_cast<double>(loc.x), static_cast<double>(loc.y), 0.0};
@@ -25,6 +19,17 @@ namespace terraformer
 
 		return hires_origin + pixel_size*(r - 0.5*size_vec + hires_displacement{0.5, 0.5, 0.0});
 	}
+
+	inline auto to_colatitude(geosimd::turn_angle latitude)
+	{
+		return geosimd::rotation_angle{0x4000'0000} - latitude;
+	}
+
+	struct longcolat
+	{
+		geosimd::rotation_angle longitude;
+		geosimd::rotation_angle colatitude;
+	};
 
 	inline auto to_longcolat(hires_location loc,
 		double pixel_size,
