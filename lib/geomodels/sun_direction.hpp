@@ -6,6 +6,32 @@
 
 namespace terraformer
 {
+	inline auto planet_location(geosimd::turn_angle year, double distance_to_sun)
+	{
+		auto const cs = cossin<double>(year);
+		return hires_origin + distance_to_sun*hires_direction{cs, geosimd::dimension_tag<2>{}};
+	}
+
+	inline auto planet_rotation(geosimd::turn_angle spin_angle, geosimd::turn_angle tilt_angle)
+	{
+		geosimd::rotation<hires_geom_space> ret{};
+		ret.push(tilt_angle, geosimd::dimension_tag<1>{})
+			.push(spin_angle, geosimd::dimension_tag<2>{});
+		return ret;
+	}
+
+	template<class T>
+	concept planetary_tilt_modulation = requires(T x, geosimd::turn_angle t)
+	{
+		{x(t)} -> std::same_as<geosimd::rotation_angle>;
+	};
+
+	template<planetary_tilt_modulation TiltModulation>
+	inline auto planet_rotation(geosimd::turn_angle year, double spin_freq, TiltModulation&& tilt_mod)
+	{
+		return planet_rotation(spin_freq*year, std::forward<TiltModulation>(tilt_mod)(year));
+	}
+
 	inline auto local_sun_direction(hires_location planet_location,
 		geosimd::rotation<hires_geom_space> const& planet_rotation,
 		geosimd::rotation_angle longitude,
