@@ -8,12 +8,6 @@
 
 namespace terraformer
 {
-	struct world_dimensions
-	{
-		float width;
-		float height;
-	};
-
 	struct longcolat
 	{
 		geosimd::rotation_angle longitude;
@@ -21,27 +15,21 @@ namespace terraformer
 	};
 
 	inline auto to_longcolat(pixel_coordinates loc,
-		span_2d_extents pixel_extents,
-		world_dimensions dim,
+		double pixel_size,
 		double planet_radius,
-		geosimd::rotation_angle center_colat)
+		geosimd::rotation_angle top_colat)
 	{
-		auto const h = static_cast<double>(dim.height);
-		geosimd::turn_angle const dtheta{geosimd::rad{h/planet_radius}};
-		auto const top_colat = center_colat - 0.5*dtheta;
-		auto const colatitude = top_colat
-			+ dtheta*(static_cast<double>(loc.y) + 0.5)/static_cast<double>(pixel_extents.height);
-
-		auto const w = static_cast<double>(dim.width);
-		geosimd::turn_angle const dphi{geosimd::rad{w/(planet_radius*sin(colatitude))}};
-		auto const left_long = -0.5*dphi;
-		auto const longitude = geosimd::rotation_angle{0x0}
-			+ left_long
-			+ dphi*(static_cast<double>(loc.x) + 0.5)/static_cast<double>(pixel_extents.width);
+		auto const theta = top_colat
+			+ geosimd::turn_angle{
+				geosimd::rad{(static_cast<double>(loc.y) + 0.5)*pixel_size/planet_radius}
+			};
+		geosimd::rotation_angle const phi{
+			geosimd::rad{(static_cast<double>(loc.x) + 0.5)*pixel_size/(planet_radius*sin(theta))}
+		};
 
 		return longcolat{
-			.longitude = longitude,
-			.colatitude = colatitude
+			.longitude = phi,
+			.colatitude = theta
 		};
 	}
 
