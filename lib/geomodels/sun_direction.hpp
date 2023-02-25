@@ -2,10 +2,50 @@
 #define TERRAFORMER_GEOMODELS_SUNDIRECTION_HPP
 
 #include "lib/common/spaces.hpp"
+#include "lib/common/span_2d.hpp"
+
 #include <geosimd/mat_4x4.hpp>
 
 namespace terraformer
 {
+	struct world_dimensions
+	{
+		float width;
+		float height;
+	};
+
+	struct longcolat
+	{
+		geosimd::rotation_angle longitude;
+		geosimd::rotation_angle colatitude;
+	};
+
+	inline auto to_longcolat(pixel_coordinates loc,
+		span_2d_extents pixel_extents,
+		world_dimensions dim,
+		double planet_radius,
+		geosimd::rotation_angle center_colat)
+	{
+		auto const h = static_cast<double>(dim.height);
+		geosimd::turn_angle const dtheta{geosimd::rad{h/planet_radius}};
+		auto const top_colat = center_colat - 0.5*dtheta;
+		auto const colatitude = top_colat
+			+ dtheta*(static_cast<double>(loc.y) + 0.5)/static_cast<double>(pixel_extents.height);
+
+		auto const w = static_cast<double>(dim.width);
+		geosimd::turn_angle const dphi{geosimd::rad{w/(planet_radius*sin(colatitude))}};
+		auto const left_long = -0.5*dphi;
+		auto const longitude = geosimd::rotation_angle{0x0}
+			+ left_long
+			+ dphi*(static_cast<double>(loc.x) + 0.5)/static_cast<double>(pixel_extents.width);
+
+		return longcolat{
+			.longitude = longitude,
+			.colatitude = colatitude
+		};
+	}
+
+#if 0
 	inline auto planet_location(geosimd::turn_angle year, double distance_to_sun)
 	{
 		auto const cs = cossin<double>(year);
@@ -31,6 +71,7 @@ namespace terraformer
 	{
 		return planet_rotation(spin_freq*year, std::forward<TiltModulation>(tilt_mod)(year));
 	}
+#endif
 
 	inline auto local_sun_direction(hires_location planet_location,
 		geosimd::rotation<hires_geom_space> const& planet_rotation,
