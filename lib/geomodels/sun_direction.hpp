@@ -14,6 +14,18 @@ namespace terraformer
 		geosimd::rotation_angle colatitude;
 	};
 
+	inline auto to_world_location(pixel_coordinates loc, span_2d_extents domain_size, double pixel_size)
+	{
+		hires_displacement const r{static_cast<double>(loc.x), static_cast<double>(loc.y), 0.0};
+		hires_displacement const size_vec{
+			static_cast<double>(domain_size.width),
+			static_cast<double>(domain_size.height),
+			0.0
+		};
+
+		return hires_origin + pixel_size*(r - 0.5*size_vec + hires_displacement{0.5, 0.5, 0.0});
+	}
+
 	inline auto to_longcolat(hires_location loc,
 		double pixel_size,
 		double planet_radius,
