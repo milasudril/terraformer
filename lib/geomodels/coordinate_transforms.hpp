@@ -35,13 +35,8 @@ namespace terraformer
 		double planet_radius,
 		geosimd::rotation_angle colat_offset)
 	{
-		auto const theta = colat_offset
-			+ geosimd::turn_angle{
-				geosimd::rad{loc[1]/planet_radius}
-			};
-		geosimd::rotation_angle const phi{
-			geosimd::rad{loc[0]/(planet_radius*sin(theta))}
-		};
+		auto const theta = colat_offset + geosimd::turn_angle{geosimd::rad{loc[1]/planet_radius}};
+		geosimd::rotation_angle const phi{geosimd::rad{loc[0]/(planet_radius*sin(theta))}};
 
 		return longcolat{
 			.longitude = phi,
@@ -49,11 +44,68 @@ namespace terraformer
 		};
 	}
 
-
-	#if 0
-	inline auto planet_location(geosimd::turn_angle year, double distance_to_sun)
+	class year
 	{
-		auto const cs = cossin<double>(year);
+	public:
+		constexpr explicit year(double value):m_value{value}
+		{}
+
+		constexpr double value() const { return m_value; }
+
+		constexpr year& operator*=(double factor)
+		{
+			m_value *= factor;
+			return *this;
+		}
+
+		constexpr year& operator/=(double factor)
+		{
+			m_value /= factor;
+			return *this;
+		}
+
+		constexpr year& operator+=(year other)
+		{
+			m_value += other.value();
+			return *this;
+		}
+
+		constexpr year& operator-=(year other)
+		{
+			m_value += other.value();
+			return *this;
+		}
+
+		constexpr auto operator<=>(year const&) const = default;
+
+	private:
+		double m_value;
+	};
+
+
+	inline constexpr year operator*(double factor, year a)
+	{
+		return a*=factor;
+	}
+
+	inline constexpr year operator/(year a, double factor)
+	{
+		return a/factor;
+	}
+
+	inline constexpr year operator+(year a, year b)
+	{
+		return a+=b;
+	}
+
+	inline constexpr year operator-(year a, year b)
+	{
+		return a-=b;
+	}
+
+	inline auto planet_location(year t, double distance_to_sun)
+	{
+		auto const cs = cossin<double>(geosimd::turn_angle{geosimd::turns{t.value()}});
 		return hires_origin + distance_to_sun*hires_direction{cs, geosimd::dimension_tag<2>{}};
 	}
 
@@ -76,7 +128,6 @@ namespace terraformer
 	{
 		return planet_rotation(spin_freq*year, std::forward<TiltModulation>(tilt_mod)(year));
 	}
-#endif
 }
 
 #endif
