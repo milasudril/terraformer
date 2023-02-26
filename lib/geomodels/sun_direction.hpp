@@ -2,6 +2,7 @@
 #define TERRAFORMER_GEOMODELS_SUNDIRECTION_HPP
 
 #include "lib/common/spaces.hpp"
+#include "lib/common/span_2d.hpp"
 
 #include <geosimd/mat_4x4.hpp>
 

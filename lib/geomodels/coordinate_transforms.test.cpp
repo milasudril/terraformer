@@ -189,3 +189,14 @@ TESTCASE(terraformer_planet_location)
 	EXPECT_EQ(loc_d2[0], 0.0);
 	EXPECT_EQ(loc_d2[1], -2.0);
 }
+
+TESTCASE(terraformer_planet_rotation)
+{
+	auto const rot = terraformer::planet_rotation(geosimd::turn_angle{0x1000'0000},
+		geosimd::turn_angle{0x2000'0000});
+
+	auto const v = terraformer::hires_displacement{1.0, 0.0, 0.0}.apply(rot);
+	EXPECT_LT(std::abs(v[0] - 0.65328148f), 1e-7);
+	EXPECT_LT(std::abs(v[1] - 0.38268343f), 1e-7);
+	EXPECT_LT(std::abs(v[2] + 0.65328148f), 1e-7);
+}
