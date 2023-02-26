@@ -158,3 +158,34 @@ TESTCASE(terraformer_to_longcolat_ne_equator_other_radius)
 	EXPECT_EQ(res.longitude.get(), geosimd::rotation_angle{0x7B3'132A}.get());
 	EXPECT_EQ(res.colatitude.get(), geosimd::rotation_angle{0x3AE8'33E5}.get());
 }
+
+TESTCASE(terraformer_planet_location)
+{
+	auto const loc_a1 = planet_location(terraformer::year{0.0}, 1.0);
+	auto const loc_b1 = planet_location(terraformer::year{0.25}, 1.0);
+	auto const loc_c1 = planet_location(terraformer::year{0.5}, 1.0);
+	auto const loc_d1 = planet_location(terraformer::year{0.75}, 1.0);
+
+	EXPECT_EQ(loc_a1[0], 1.0);
+	EXPECT_EQ(loc_a1[1], 0.0);
+	EXPECT_EQ(loc_b1[0], 0.0);
+	EXPECT_EQ(loc_b1[1], 1.0);
+	EXPECT_EQ(loc_c1[0], -1.0);
+	EXPECT_EQ(loc_c1[1], 0.0);
+	EXPECT_EQ(loc_d1[0], 0.0);
+	EXPECT_EQ(loc_d1[1], -1.0);
+
+	auto const loc_a2 = planet_location(terraformer::year{0.0}, 2.0);
+	auto const loc_b2 = planet_location(terraformer::year{0.25}, 2.0);
+	auto const loc_c2 = planet_location(terraformer::year{0.5}, 2.0);
+	auto const loc_d2 = planet_location(terraformer::year{0.75}, 2.0);
+
+	EXPECT_EQ(loc_a2[0], 2.0);
+	EXPECT_EQ(loc_a2[1], 0.0);
+	EXPECT_EQ(loc_b2[0], 0.0);
+	EXPECT_EQ(loc_b2[1], 2.0);
+	EXPECT_EQ(loc_c2[0], -2.0);
+	EXPECT_EQ(loc_c2[1], 0.0);
+	EXPECT_EQ(loc_d2[0], 0.0);
+	EXPECT_EQ(loc_d2[1], -2.0);
+}
