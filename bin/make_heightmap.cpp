@@ -118,6 +118,24 @@ int main()
 				.height_modulation = 1024.0f
 			}
 		},
+#if 0
+		.planet{
+			.distance_to_sun = 1.4812e11,
+			.radius = 6371000,
+			.spin_frequency = 366.2563986330786,
+			.tilt{
+				.mean{geosimd::rotation_angle{geosimd::turns{0.06472222222222222}}},
+				.amplitude{geosimd::turn_angle{geoosimd::turns{0.003333333333333331}}},
+				.motion_params{
+					.wavelength = 41000.0f,
+					.per_wave_component_scaling_factor = 1.01f,
+					.exponent_noise_amount = 1.01f/16.0f,
+					.per_wave_component_phase_shift = 0.0f,
+					.phase_shift_noise_amount = 1.0f/12.0f
+				}
+			}
+		},
+#endif
 		.north_offset = geosimd::turn_angle{0x0},
 		.weather_data{
 			.wind_direction{
