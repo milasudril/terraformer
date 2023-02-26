@@ -118,15 +118,16 @@ namespace terraformer
 	}
 
 	template<class T>
-	concept planetary_tilt_modulation = requires(T x, geosimd::turn_angle t)
+	concept planetary_tilt_modulation = requires(T x, year t)
 	{
 		{x(t)} -> std::same_as<geosimd::rotation_angle>;
 	};
 
 	template<planetary_tilt_modulation TiltModulation>
-	inline auto planet_rotation(geosimd::turn_angle year, double spin_freq, TiltModulation&& tilt_mod)
+	inline auto planet_rotation(year t, double spin_freq, TiltModulation&& tilt_mod)
 	{
-		return planet_rotation(spin_freq*year, std::forward<TiltModulation>(tilt_mod)(year));
+		geosimd::turn_angle const spin_angle{geosimd::turns{spin_freq*t.value()}};
+		return planet_rotation(spin_angle, std::forward<TiltModulation>(tilt_mod)(t));
 	}
 }
 
