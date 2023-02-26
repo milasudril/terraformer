@@ -63,7 +63,7 @@ namespace terraformer
 	template<class T>
 	concept planetary_tilt_modulation = requires(T x, year t)
 	{
-		{x(t)} -> std::same_as<geosimd::rotation_angle>;
+		{x(t)} -> std::same_as<geosimd::turn_angle>;
 	};
 
 	template<planetary_tilt_modulation TiltModulation>
