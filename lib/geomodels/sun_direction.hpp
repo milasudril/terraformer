@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_GEOMODELS_SUNDIRECTION_HPP
 #define TERRAFORMER_GEOMODELS_SUNDIRECTION_HPP
 
+#include "./coordinate_transforms.hpp"
+
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
 
@@ -55,6 +57,13 @@ namespace terraformer
 				m*inverted(planet_rotation).get()*sun_dir_xyz.get().get()
 			}
 		};
+	}
+
+	inline auto local_sun_direction(hires_location planet_location,
+		geosimd::rotation<hires_geom_space> const& planet_rotation,
+		longcolat loc)
+	{
+		return local_sun_direction(planet_location, planet_rotation, loc.longitude, loc.colatitude);
 	}
 }
 
