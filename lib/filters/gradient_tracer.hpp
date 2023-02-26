@@ -21,7 +21,7 @@ namespace terraformer
 
 		while(true)
 		{
-			auto const g = grad(pixels, loc[0], loc[1]);
+			auto const g = grad(pixels, loc[0], loc[1], 1.0f);
 			auto const grad_size = norm(g);
 			if(grad_size < 1.0f/(1024.0f*1024.0f))
 			{ return ret; }
@@ -57,7 +57,7 @@ namespace terraformer
 
 		while(true)
 		{
-			auto const g = grad(pixels, loc[0], loc[1]);
+			auto const g = grad(pixels, loc[0], loc[1], 1.0f);
 			auto const grad_size = norm(g);
 			if(grad_size < 1.0f/(1024.0f*1024.0f))
 			{ return ret; }

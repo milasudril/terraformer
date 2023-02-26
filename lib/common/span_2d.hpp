@@ -170,7 +170,7 @@ namespace terraformer
 		return (1.0f - eta)*z_x0 + eta*z_x1;
 	}
 
-	inline auto grad(span_2d<float const> span, float x, float y)
+	inline auto grad(span_2d<float const> span, float x, float y, float scale)
 	{
 		auto const x0 = x - 1.0f;
 		auto const x1 = x + 1.0f;
@@ -182,10 +182,10 @@ namespace terraformer
 		auto const z_x_y1 = interp(span, x, y1);
 		auto const z_x_y0 = interp(span, x, y0);
 
-		return 0.5f*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
+		return 0.5f*scale*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}
 
-	inline auto grad(span_2d<float const> span, uint32_t x, uint32_t y)
+	inline auto grad(span_2d<float const> span, uint32_t x, uint32_t y, float scale)
 	{
 		auto const w = span.width();
 		auto const h = span.height();
@@ -200,12 +200,12 @@ namespace terraformer
 		auto const z_x_y1 = span(x, y1);
 		auto const z_x_y0 = span(x, y0);
 
-		return 0.5f*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
+		return 0.5f*scale*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}
 
-	inline auto normal(span_2d<float const> span, uint32_t x, uint32_t y)
+	inline auto normal(span_2d<float const> span, uint32_t x, uint32_t y, float scale)
 	{
-		auto const g = grad(span, x, y);
+		auto const g = grad(span, x, y, scale);
 		return direction{displacement{-g[0], -g[1], 1.0f}};
 	}
 }
