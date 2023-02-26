@@ -128,8 +128,8 @@ int main()
 				.amplitude{geosimd::turn_angle{geoosimd::turns{0.003333333333333331}}},
 				.motion_params{
 					.wavelength = 41000.0f,
-					.per_wave_component_scaling_factor = 1.01f,
-					.exponent_noise_amount = 1.01f/16.0f,
+					.per_wave_component_scaling_factor = 1.0f + 1.0f/128.0f,
+					.exponent_noise_amount = 1.0f/(128.0f*16.0f),
 					.per_wave_component_phase_shift = 0.0f,
 					.phase_shift_noise_amount = 1.0f/12.0f
 				}
