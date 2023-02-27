@@ -111,18 +111,15 @@ TESTCASE(terraformer_to_colatitude)
 TESTCASE(terraformer_to_longcolat_origin_equator)
 {
 	auto const res = terraformer::to_longcolat(terraformer::hires_origin,
-		2.0,
 		terraformer::to_colatitude(geosimd::turn_angle{0x0}));
 
 	EXPECT_EQ(res.longitude.get(), geosimd::rotation_angle{0x0}.get());
 	EXPECT_EQ(res.colatitude.get(), geosimd::rotation_angle{0x4000'0000}.get());
 }
 
-
 TESTCASE(terraformer_to_longcolat_origin_45N)
 {
 	auto const res = terraformer::to_longcolat(terraformer::hires_origin,
-		2.0,
 		terraformer::to_colatitude(geosimd::turn_angle{0x2000'0000}));
 
 	EXPECT_EQ(res.longitude.get(), geosimd::rotation_angle{0x0}.get());
@@ -131,8 +128,7 @@ TESTCASE(terraformer_to_longcolat_origin_45N)
 
 TESTCASE(terraformer_to_longcolat_nw_equator)
 {
-	auto const res = terraformer::to_longcolat(terraformer::hires_location{-1.5, -1.0, 0.0},
-		4.0,
+	auto const res = terraformer::to_longcolat(terraformer::hires_location{-1.5/4.0, -1.0/4.0, 0.0},
 		terraformer::to_colatitude(geosimd::turn_angle{0x0}));
 
 	EXPECT_EQ(res.longitude.get(), geosimd::rotation_angle{0xF03B'1C6C}.get());
@@ -141,22 +137,11 @@ TESTCASE(terraformer_to_longcolat_nw_equator)
 
 TESTCASE(terraformer_to_longcolat_w_equator)
 {
-	auto const res = terraformer::to_longcolat(terraformer::hires_location{-1.5, 0.0, 0.0},
-		4.0,
+	auto const res = terraformer::to_longcolat(terraformer::hires_location{-1.5/4.0, 0.0, 0.0},
 		terraformer::to_colatitude(geosimd::turn_angle{0x0}));
 
 	EXPECT_EQ(res.longitude.get(), geosimd::rotation_angle{0xF0B8'9BAE}.get());
 	EXPECT_EQ(res.colatitude.get(), geosimd::rotation_angle{0x4000'0000}.get());
-}
-
-TESTCASE(terraformer_to_longcolat_ne_equator_other_radius)
-{
-	auto const res = terraformer::to_longcolat(terraformer::hires_location{1.5, -1.0, 0.0},
-		8.0,
-		terraformer::to_colatitude(geosimd::turn_angle{0x0}));
-
-	EXPECT_EQ(res.longitude.get(), geosimd::rotation_angle{0x7B3'132A}.get());
-	EXPECT_EQ(res.colatitude.get(), geosimd::rotation_angle{0x3AE8'33E5}.get());
 }
 
 TESTCASE(terraformer_planet_location)

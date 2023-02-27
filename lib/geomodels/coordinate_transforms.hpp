@@ -34,11 +34,10 @@ namespace terraformer
 	};
 
 	inline auto to_longcolat(hires_location loc,
-		double planet_radius,
 		geosimd::rotation_angle colat_offset)
 	{
-		auto const theta = colat_offset + geosimd::turn_angle{geosimd::rad{loc[1]/planet_radius}};
-		geosimd::rotation_angle const phi{geosimd::rad{loc[0]/(planet_radius*sin(theta))}};
+		auto const theta = colat_offset + geosimd::turn_angle{geosimd::rad{loc[1]}};
+		geosimd::rotation_angle const phi{geosimd::rad{loc[0]/sin(theta)}};
 
 		return longcolat{
 			.longitude = phi,
