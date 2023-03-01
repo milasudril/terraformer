@@ -1,0 +1,10 @@
+{
+    "Mercury":{"distance_to_sun":0.3871,"mass":0.054, "period_of_revolution":87.65},
+    "Venus":{   "distance_to_sun":0.7233,"mass":0.815, "period_of_revolution":224.7},
+    "Earth":{   "distance_to_sun":1.0,"mass":1.0, "period_of_revolution":365.26},
+    "Mars":{    "distance_to_sun":1.5237,"mass":0.107, "period_of_revolution":687.0},
+    "Jupiter":{ "distance_to_sun":5.2028,"mass":317.9, "period_of_revolution":4332.925},
+    "Saturn":{  "distance_to_sun":9.540,"mass":95.15, "period_of_revolution":10759.5345},
+    "Uranus":{  "distance_to_sun":19.22,"mass":14.58, "period_of_revolution":30685.74825},
+    "Neptune":{ "distance_to_sun":30.07,"mass":17.22, "period_of_revolution":60189.5475}
+}
