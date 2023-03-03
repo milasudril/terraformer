@@ -71,11 +71,16 @@ namespace terraformer
 		wind_direction_descriptor wind_direction;
 	};
 
+	struct domain_descriptor
+	{
+		domain_size_descriptor size;
+		geosimd::turn_angle orientation;
+	};
+
 	struct landscape_descriptor
 	{
-		domain_size_descriptor domain_size;
+		domain_descriptor domain;
 		steady_plate_collision_zone_descriptor initial_heightmap;
-		geosimd::turn_angle north_offset;
 		weather_data_descriptor weather_data;
 
 
@@ -92,12 +97,15 @@ namespace terraformer
 int main()
 {
 	terraformer::landscape_descriptor const params{
-		.domain_size{
-			.physical_dimensions{
-				.width = 49152.0f,
-				.height = 49152.0f
+		.domain{
+			.size{
+				.physical_dimensions{
+					.width = 49152.0f,
+					.height = 49152.0f
+				},
+				.pixel_count = 1024
 			},
-			.pixel_count = 1024
+			.orientation = geosimd::turn_angle{0x0}
 		},
 		.initial_heightmap{
 			.boundary{
@@ -136,7 +144,6 @@ int main()
 			}
 		},
 #endif
-		.north_offset = geosimd::turn_angle{0x0},
 		.weather_data{
 			.wind_direction{
 				.expected_value = terraformer::south_west,
@@ -145,8 +152,8 @@ int main()
 		}
 	};
 
-	auto const pixel_size = get_pixel_size(params.domain_size);
-	auto const canvas_size = get_canvas_size(params.domain_size);
+	auto const pixel_size = get_pixel_size(params.domain.size);
+	auto const canvas_size = get_canvas_size(params.domain.size);
 
 	fprintf(stderr, "pixel_size: %.8g\n", pixel_size);
 	fprintf(stderr, "width: %u\n", canvas_size.width);
