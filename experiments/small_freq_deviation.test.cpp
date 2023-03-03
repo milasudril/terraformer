@@ -1,25 +1,22 @@
-#include "../lib/curve_tool/fractal_wave.hpp"
+#include "../lib/curve_tool/wave_sum.hpp"
 
 #include <pretty/plot.hpp>
-#include <random>
 #include <ranges>
-
-using random_generator = std::mt19937;
 
 struct location
 {
-	float x;
-	float y;
+	double x;
+	double y;
 };
 
 template<size_t k>
-float get(location);
+auto get(location);
 
 template<>
-float get<0>(location loc){ return loc.x; }
+auto get<0>(location loc){ return loc.x; }
 
 template<>
-float get<1>(location loc){ return loc.y; }
+auto get<1>(location loc){ return loc.y; }
 
 template<>
 struct std::tuple_size<location>
@@ -29,29 +26,26 @@ struct std::tuple_size<location>
 
 int main()
 {
-	terraformer::fractal_wave::params const wave_params{
-		.wavelength = 16.0f,
-		.per_wave_component_scaling_factor = 1.0f + 1.0f/128.0f,
-		.exponent_noise_amount = 1.0f/(128.0f*16.0f),
-		.per_wave_component_phase_shift = 0.0f,
-		.phase_shift_noise_amount = 1.0f/12.0f
+	terraformer::wave_sum<double>::params const wave_params{
+		.amplitude = 50000.0,
+		.base_frequency = 1.0/41000.0,
+		.frequency_ratio = std::sqrt(2)/std::sqrt(3),
+		.phase_difference = 0.0,
+		.mix = 0.25
 	};
 
-	random_generator rng;
-	terraformer::fractal_wave wave{rng, 0.0f, wave_params};
+	terraformer::wave_sum<double> wave{wave_params};
 
-	std::array<location, 128> vals;
+	pretty::print(1.0/(wave_params.base_frequency*wave_params.frequency_ratio));
+
+	std::array<location, 2048> vals;
+	auto const dt = 1e6/static_cast<double>(std::size(vals));
 	for(size_t k = 0; k != std::size(vals); ++k)
 	{
-		vals[k] = location{static_cast<float>(k), wave(static_cast<float>(k))};
-	}
-
-	for(size_t k = 0; k != std::size(vals);++k)
-	{
-		vals[k].y *= 16.0f/wave.amplitude();
+		auto const t = dt*static_cast<double>(k);
+		vals[k] = location{t, wave(t)};
 	}
 
 	std::array<std::span<location const>, 1> vals_to_plot{vals};
 	pretty::plot(vals_to_plot);
-
 }
