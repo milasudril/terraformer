@@ -7,17 +7,20 @@
 namespace terraformer
 {
 	template<std::floating_point Precision>
+	struct wave_sum_params
+	{
+		Precision amplitude;
+		Precision base_frequency;
+		Precision frequency_ratio;
+		Precision phase_difference;
+		Precision mix;
+	};
+
+	template<std::floating_point Precision>
 	class wave_sum
 	{
 	public:
-		struct params
-		{
-			Precision amplitude;
-			Precision base_frequency;
-			Precision frequency_ratio;
-			Precision phase_difference;
-			Precision mix;
-		};
+		using params = wave_sum_params<Precision>;
 
 		explicit wave_sum(params const& params): m_params{params}
 		{
