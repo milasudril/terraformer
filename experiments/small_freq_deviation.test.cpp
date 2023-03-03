@@ -26,15 +26,14 @@ struct std::tuple_size<location>
 
 int main()
 {
-	terraformer::wave_sum<double>::params const wave_params{
-		.amplitude = 50000.0,
+	terraformer::wave_sum_params const wave_params{
 		.base_frequency = 1.0/41000.0,
 		.frequency_ratio = std::sqrt(2)/std::sqrt(3),
 		.phase_difference = 0.0,
 		.mix = 0.25
 	};
 
-	terraformer::wave_sum<double> wave{wave_params};
+	terraformer::wave_sum const wave{wave_params};
 
 	pretty::print(1.0/(wave_params.base_frequency*wave_params.frequency_ratio));
 
@@ -43,7 +42,7 @@ int main()
 	for(size_t k = 0; k != std::size(vals); ++k)
 	{
 		auto const t = dt*static_cast<double>(k);
-		vals[k] = location{t, wave(t)};
+		vals[k] = location{t, 50000.0*wave(t)};
 	}
 
 	std::array<std::span<location const>, 1> vals_to_plot{vals};
