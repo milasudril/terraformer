@@ -6,6 +6,7 @@
 #include "lib/filters/gradient_tracer.hpp"
 #include "lib/filters/raycaster.hpp"
 #include "lib/filters/convhull.hpp"
+#include "lib/curve_tool/wave_sum.hpp"
 
 #include <random>
 #include <chrono>
@@ -77,10 +78,26 @@ namespace terraformer
 		geosimd::turn_angle orientation;
 	};
 
+	struct planet_tilt_params
+	{
+		geosimd::rotation_angle mean;
+		geosimd::turn_angle amplitude;
+		wave_sum<double>::params motion_params;
+	};
+
+	struct planet_descriptor
+	{
+		double distance_to_sun;
+		double radius;
+		double spin_frequency;
+		planet_tilt_params tilt;
+	};
+
 	struct landscape_descriptor
 	{
 		domain_descriptor domain;
 		steady_plate_collision_zone_descriptor initial_heightmap;
+		planet_descriptor planetary_data;
 		weather_data_descriptor weather_data;
 
 
@@ -126,14 +143,13 @@ int main()
 				.height_modulation = 1024.0f
 			}
 		},
-#if 0
-		.planet{
+		.planetary_data{
 			.distance_to_sun = 1.4812e11,
-			.radius = 6371000,
+			.radius = 6371000.0,
 			.spin_frequency = 366.2563986330786,
 			.tilt{
 				.mean{geosimd::rotation_angle{geosimd::turns{0.06472222222222222}}},
-				.amplitude{geosimd::turn_angle{geoosimd::turns{0.003333333333333331}}},
+				.amplitude{geosimd::turn_angle{geosimd::turns{0.003333333333333331}}},
 				.motion_params{
 					.base_frequency = 1.0/41000.0,
 					.frequency_ratio = std::sqrt(2)/std::sqrt(3),
@@ -142,7 +158,6 @@ int main()
 				}
 			}
 		},
-#endif
 		.weather_data{
 			.wind_direction{
 				.expected_value = terraformer::south_west,
