@@ -1,6 +1,7 @@
 //@	{"target":{"name":"make_heightmap.o"}}
 
 #include "lib/geomodels/steady_plate_collision_zone.hpp"
+#include "lib/geomodels/sun_direction.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/filters/coordinate_sampler.hpp"
 #include "lib/filters/gradient_tracer.hpp"
@@ -179,6 +180,47 @@ int main()
 		canvas_size.height
 	};
 
+	generate(buffers.back().pixels(), [
+		input = buffers.front().pixels(),
+		planetary_data = params.planetary_data,
+		pixel_size
+	](uint32_t x, uint32_t y)
+	{
+		auto const n = normal(input, x, y, 1.0f/pixel_size);
+		auto const planet_loc = planet_location(
+			terraformer::year{0.0},
+			planetary_data.distance_to_sun/planetary_data.radius
+		);
+		auto const maploc = to_map_location(
+			terraformer::pixel_coordinates{x, y},
+			input.extents(),
+			pixel_size/planetary_data.radius
+		);
+		auto const planet_rot = terraformer::planet_rotation(
+			geosimd::turn_angle{0x6000'0000},
+			geosimd::turn_angle{0x0});
+
+		geosimd::rotation<terraformer::hires_geom_space>{};
+		auto const sun_dir = terraformer::local_sun_direction(
+			planet_loc,
+			planet_rot,
+			terraformer::to_longcolat(maploc, geosimd::rotation_angle{0x2000'0000})
+		);
+
+		return std::max(
+			inner_product(
+				n,
+				terraformer::displacement{
+					static_cast<float>(sun_dir[0]),
+					static_cast<float>(sun_dir[1]),
+					static_cast<float>(sun_dir[2])}
+				),
+			0.0f);
+	});
+	buffers.swap();
+	store(buffers.front(), "test.exr");
+
+#if 0
 	random_generator rng;
 	make_heightmap(buffers, rng, pixel_size, params.initial_heightmap);
 	putchar('\n');
@@ -268,5 +310,6 @@ int main()
 	});
 	buffers.swap();
 	store(buffers.front(), "eroded.exr");
+#endif
 #endif
 }

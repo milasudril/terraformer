@@ -60,6 +60,8 @@ namespace terraformer
 
 		constexpr auto height() const { return m_height; }
 
+		constexpr auto extents() const { return span_2d_extents{m_width, m_height}; }
+
 		constexpr T& operator()(IndexType x, IndexType y) const
 		{
 			auto ptr = begin();
