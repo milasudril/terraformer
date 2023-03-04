@@ -1,7 +1,7 @@
 //@	{"target":{"name":"make_heightmap.o"}}
 
 #include "lib/geomodels/steady_plate_collision_zone.hpp"
-#include "lib/geomodels/sun_direction.hpp"
+#include "lib/geomodels/generate_lightmap.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/filters/coordinate_sampler.hpp"
 #include "lib/filters/gradient_tracer.hpp"
@@ -77,21 +77,7 @@ namespace terraformer
 	{
 		domain_size_descriptor size;
 		geosimd::turn_angle orientation;
-	};
-
-	struct planet_tilt_params
-	{
-		geosimd::rotation_angle mean;
-		geosimd::turn_angle amplitude;
-		wave_sum<double>::params motion_params;
-	};
-
-	struct planet_descriptor
-	{
-		double distance_to_sun;
-		double radius;
-		double spin_frequency;
-		planet_tilt_params tilt;
+		geosimd::rotation_angle center_latitude;
 	};
 
 	struct landscape_descriptor
@@ -123,7 +109,8 @@ int main()
 				},
 				.pixel_count = 1024
 			},
-			.orientation = geosimd::turn_angle{0x0}
+			.orientation = geosimd::turn_angle{0x0},
+			.center_latitude = geosimd::rotation_angle{0x1000'0000}
 		},
 		.initial_heightmap{
 			.boundary{
@@ -149,7 +136,7 @@ int main()
 			.radius = 6371000.0,
 			.spin_frequency = 366.2563986330786,
 			.tilt{
-				.mean{geosimd::rotation_angle{geosimd::turns{0.06472222222222222}}},
+				.mean{geosimd::turn_angle{geosimd::turns{0.06472222222222222}}},
 				.amplitude{geosimd::turn_angle{geosimd::turns{0.003333333333333331}}},
 				.motion_params{
 					.base_frequency = 1.0/41000.0,
@@ -180,52 +167,26 @@ int main()
 		canvas_size.height
 	};
 
-	generate(buffers.back().pixels(), [
-		input = buffers.front().pixels(),
-		planetary_data = params.planetary_data,
-		pixel_size
-	](uint32_t x, uint32_t y)
-	{
-		auto const n = normal(input, x, y, 1.0f/pixel_size);
-		auto const planet_loc = planet_location(
-			terraformer::year{0.0},
-			planetary_data.distance_to_sun/planetary_data.radius
-		);
-		auto const maploc = to_map_location(
-			terraformer::pixel_coordinates{x, y},
-			input.extents(),
-			pixel_size/planetary_data.radius
-		);
-		auto const planet_rot = terraformer::planet_rotation(
-			geosimd::turn_angle{0x6000'0000},
-			geosimd::turn_angle{0x0});
 
-		geosimd::rotation<terraformer::hires_geom_space>{};
-		auto const sun_dir = terraformer::local_sun_direction(
-			planet_loc,
-			planet_rot,
-			terraformer::to_longcolat(maploc, geosimd::rotation_angle{0x2000'0000})
-		);
-
-		return std::max(
-			inner_product(
-				n,
-				terraformer::displacement{
-					static_cast<float>(sun_dir[0]),
-					static_cast<float>(sun_dir[1]),
-					static_cast<float>(sun_dir[2])}
-				),
-			0.0f);
-	});
-	buffers.swap();
-	store(buffers.front(), "test.exr");
-
-#if 0
 	random_generator rng;
 	make_heightmap(buffers, rng, pixel_size, params.initial_heightmap);
 	putchar('\n');
 	store(buffers.front(), "after_laplace.exr");
 
+	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
+
+	generate_lightmap(
+		lightmap.pixels(),
+		buffers.front(),
+		terraformer::year{0.5} - to_years(0.25, params.planetary_data),
+		params.planetary_data,
+		pixel_size,
+		params.domain.center_latitude
+	);
+
+	store(lightmap, "lightmap.exr");
+
+#if 0
 	auto hm_conv_hull = buffers.front();
 
 	{
