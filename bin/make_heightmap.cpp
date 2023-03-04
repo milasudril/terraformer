@@ -110,7 +110,7 @@ int main()
 				.pixel_count = 1024
 			},
 			.orientation = geosimd::turn_angle{0x0},
-			.center_latitude = geosimd::rotation_angle{0x1000'0000}
+			.center_latitude = geosimd::rotation_angle{0x2000'0000}
 		},
 		.initial_heightmap{
 			.boundary{
@@ -175,16 +175,27 @@ int main()
 
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
 
-	generate_lightmap(
-		lightmap.pixels(),
-		buffers.front(),
-		terraformer::year{0.5} - to_years(0.25, params.planetary_data),
-		params.planetary_data,
-		pixel_size,
-		params.domain.center_latitude
-	);
+	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
+	size_t k = 0;
+	while(static_cast<double>(k)*dt <= 1.0)
+	{
+		generate_lightmap(
+			lightmap.pixels(),
+			buffers.front(),
+			terraformer::year{static_cast<double>(k)*dt},
+			params.planetary_data,
+			pixel_size,
+			params.domain.center_latitude
+		);
 
-	store(lightmap, "lightmap.exr");
+		std::array<char, 32> buffer{};
+		sprintf(buffer.data(), "__dump/lightmap_%04zu.exr", k);
+		store(lightmap, std::as_const(buffer).data());
+		printf("%zu                \r", k);
+		fflush(stdout);
+		++k;
+	}
+	putchar('\n');
 
 #if 0
 	auto hm_conv_hull = buffers.front();
