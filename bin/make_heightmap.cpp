@@ -135,11 +135,10 @@ int main()
 				.mean{geosimd::rotation_angle{geosimd::turns{0.06472222222222222}}},
 				.amplitude{geosimd::turn_angle{geoosimd::turns{0.003333333333333331}}},
 				.motion_params{
-					.wavelength = 41000.0f,
-					.per_wave_component_scaling_factor = 1.0f + 1.0f/128.0f,
-					.exponent_noise_amount = 1.0f/(128.0f*16.0f),
-					.per_wave_component_phase_shift = 0.0f,
-					.phase_shift_noise_amount = 1.0f/12.0f
+					.base_frequency = 1.0/41000.0,
+					.frequency_ratio = std::sqrt(2)/std::sqrt(3),
+					.phase_difference = 0.0,
+					.mix = 0.25
 				}
 			}
 		},

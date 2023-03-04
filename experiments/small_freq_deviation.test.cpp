@@ -29,7 +29,7 @@ int main()
 	terraformer::wave_sum_params const wave_params{
 		.base_frequency = 1.0/41000.0,
 		.frequency_ratio = std::sqrt(2)/std::sqrt(3),
-		.phase_difference = 0.0,
+		.phase_difference = 0.25,
 		.mix = 0.25
 	};
 
