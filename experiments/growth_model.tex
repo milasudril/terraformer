@@ -1,0 +1,83 @@
+\documentclass[a4paper, 12pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+
+\title{A growth model}
+\author{Torbjörn Rathsman}
+
+\begin{document}
+\maketitle
+\section{Quantities}
+\subsection{State variables}
+\begin{tabular}{ll}
+  $g_b$ & Biomass growth rate \\
+ $d_b$ & Biomass death rate \\
+ $c_{rb}$ & Resource consumption rate \\
+ $e_r$ & Resource evaporation rate \\
+ $s_r$ & Resource spawn rate \\
+\end{tabular}
+\subsection{Model parameters}
+\begin{tabular}{ll}
+  $g_b$ & Biomass growth rate \\
+ $d_b$ & Biomass death rate \\
+ $c_{rb}$ & Resource consumption rate \\
+ $e_r$ & Resource evaporation rate \\
+ $s_r$ & Resource spawn rate \\
+\end{tabular}
+
+\section{Model}
+\begin{equation}
+M=
+\left\{
+ \begin{aligned}
+  \dot{b} &= g_b rb - d_b b =  b g_b\left(r - \frac{d_b}{g_b}\right) = b g_b\left(r - r_c\right) \\
+  \dot{r} &= -c_{rb} r b - e_r r + r_g = -rc_{rb}\left(b + \frac{e_r}{c_{rb}}\right) +s_r = -rc_{rb}\left(b + b_0\right) +s_r
+ \end{aligned}
+ \right.
+\end{equation}
+
+\section{Fixed points}
+\paragraph{If $b = 0$ (Uninteresting)}
+\[
+ 0 = -b_0c_{rb}r + s_r \Leftrightarrow r = \frac{s_r}{b_0 c_{rb}}
+\]
+
+\paragraph{If $r = r_c$}
+\[
+ 0 = -r_c c_{rb}\left(b + b_0\right) + s_r \Leftrightarrow b + b_0 = \frac{s_r}{r_c c_{rb}} \Leftrightarrow b =
+ \frac{s_r}{r_c c_{rb}} - b_0 =  \frac{s_r - r_c c_{rb}b_0}{r_c c_{rb}}
+\]
+
+\section{Stability}
+\begin{equation}
+J(M) =
+ \begin{bmatrix}
+ g_b\left(r - r_c\right) & bg_b\\
+ -rc_{rb} & -c_{rb}\left(b + b_0\right)
+ \end{bmatrix}
+\end{equation}
+
+\[
+\begin{aligned}
+0 &= \left(g_b\left(r - r_c\right) - \lambda\right)\left(-c_{rb}\left(b + b_0\right) - \lambda\right) +bg_b r c_{rb} =_{\left\{r = r_c\right\}}\\
+  &= \lambda\left(c_{rb}\left(b + b_0\right) + \lambda\right) +bg_b r c_{rb} = \lambda^2 + \lambda c_{rb}\left(b + b_0\right) + bg_b r_c c_{rb} =_{\left\{b + b_0 = \frac{s_r}{r_c c_{rb}}\right\}}\\
+  &= \lambda^2 + \lambda \frac{s_r}{r_c} + bg_b r c_{rb} \Leftrightarrow \\
+\lambda^2 + \lambda \frac{s_r}{r_c} &= -bg_b r_c c_{rb} \\
+&\Leftrightarrow \left(\lambda + \frac{s_r}{2r_c}\right)^2 - \frac{s_r^2}{4r_c^2} = -bg_b r_c c_{rb}\\
+&\Leftrightarrow \left(\lambda + \frac{s_r}{2r_c}\right)^2  = \frac{s_r^2}{4r_c^2} -bg_b r_c c_{rb}\\
+&\Leftrightarrow_{\left\{b = \frac{s_r - r_c c_{rb}b_0}{r_c c_{rb}}\right\}} \left(\lambda + \frac{s_r}{2r_c}\right)^2  = \frac{s_r^2}{4r_c^2} -\frac{s_r - r_c c_{rb}b_0}{r_c c_{rb}}g_b r_c c_{rb} = \frac{s_r^2}{4r_c^2} -\left(s_r - r_c c_{rb}b_0\right)g_b \\
+\end{aligned}
+\]
+\[
+\begin{aligned}
+ \lambda_1 &= -\frac{s_r}{2r_c}-\sqrt{\frac{s_r^2}{4r_c^2} - \left(s_r - r_c c_{rb}b_0\right)g_b} \\
+ \lambda_2 &= -\frac{s_r}{2r_c}+\sqrt{\frac{s_r^2}{4r_c^2} - \left(s_r - r_c c_{rb}b_0\right)g_b} \\
+\end{aligned}
+\]
+
+With sufficiently large $g_b$, this is a stable spiral.
+
+
+\end{document}
