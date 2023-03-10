@@ -29,11 +29,13 @@
                 "compiler": {
                     "config": {
                         "cflags": [
+                            "-DGEOSIMD_MAX_BUILTIN_VECTOR_BYTE_SIZE=32",
                             "-Wall",
-                            "-mavx2",
+                            "-march=native",
                             "-Wextra",
                             "-Werror",
                             "-Wconversion",
+                            "-Wno-psabi",
                             "-I.",
                             "-fconcepts-diagnostics-depth=2"
                         ],
@@ -55,11 +57,13 @@
                     "config": {
 						"actions":["link", "run"],
                         "cflags": [
+                            "-DGEOSIMD_MAX_BUILTIN_VECTOR_BYTE_SIZE=32",
                             "-I.",
-                            "-mavx2",
+                            "-march=native",
                             "-Wall",
                             "-Wextra",
                             "-Wconversion",
+                            "-Wno-psabi",
                             "-Werror",
                             "-fconcepts-diagnostics-depth=2"
                         ],
