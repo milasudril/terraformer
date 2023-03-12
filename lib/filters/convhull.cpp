@@ -2,6 +2,8 @@
 
 #include "./convhull.hpp"
 
+#include "lib/curve_tool/polynomial.hpp"
+
 namespace
 {
 	struct loc_2d
@@ -19,6 +21,52 @@ namespace
 
 		return dy_2/dx_2 > dy_1/dx_1;
 	}
+
+
+void convhull(std::span<loc_2d const> values, std::vector<loc_2d>& buffer)
+{
+	auto const max = std::ranges::max_element(values, [](auto const a, auto const b){
+		return a.y < b.y;
+	});
+
+	auto const left = values.front();
+	auto const right = values.back();
+	auto const split_at = max;
+
+	buffer.push_back(*max);
+	auto i = std::begin(values);
+	{
+		auto const size_part = split_at - std::begin(values);
+		std::vector<loc_2d> part{};
+		part.reserve(size_part);
+		auto const dydx = (max->y - left.y)/(max->x - left.x);
+		terraformer::polynomial const p{left.y, dydx};
+		while(i != max)
+		{
+			if(i->y > p(i->x))
+			{ part.push_back(*i); }
+
+			++i;
+		}
+		convhull(part, buffer);
+	}
+
+	{
+		auto const size_part = std::end(values) - split_at;
+		std::vector<loc_2d> part{};
+		part.reserve(size_part);
+		auto const dydx = (right.y - max->y)/(right.x - max->x);
+		terraformer::polynomial const p{max->y, dydx};
+		while(i != std::end(values))
+		{
+			if(i->y > p(i->x))
+			{ part.push_back(*i); }
+
+			++i;
+		}
+		convhull(part, buffer);
+	}
+}
 }
 
 void terraformer::convhull(std::span<float> values)
@@ -57,6 +105,8 @@ void terraformer::convhull(std::span<float> values)
 		loc_prev = loc_current;
 	}
 }
+
+
 
 void terraformer::convhull_per_scanline(span_2d<float> buffer)
 {

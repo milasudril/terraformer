@@ -16,6 +16,8 @@ namespace terraformer
 
 	void convhull_per_column(span_2d<float> buffer);
 
+	std::vector<float> convhull2(std::span<float const> values);
+
 	inline void convhull(span_2d<float> buffer)
 	{
 		convhull_per_scanline(buffer);
