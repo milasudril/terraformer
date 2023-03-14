@@ -45,7 +45,7 @@ void convhull(std::span<loc_2d const> values, std::vector<loc_2d>& buffer)
 	auto const split_at = max;
 
 	buffer.push_back(*max);
-	auto i = std::begin(values);
+	auto i = std::begin(values) + 1;
 	{
 		auto const size_part = split_at - std::begin(values);
 		std::vector<loc_2d> part{};
@@ -63,12 +63,13 @@ void convhull(std::span<loc_2d const> values, std::vector<loc_2d>& buffer)
 	}
 
 	{
-		auto const size_part = std::end(values) - split_at;
+		++i;
+		auto const size_part = std::end(values) - (split_at + 1);
 		std::vector<loc_2d> part{};
 		part.reserve(size_part);
 		auto const dydx = (right.y - max->y)/(right.x - max->x);
 		terraformer::polynomial const p{max->y, dydx};
-		while(i != std::end(values))
+		while(i != std::end(values) - 1)
 		{
 			if(i->y > p(i->x))
 			{ part.push_back(*i); }
