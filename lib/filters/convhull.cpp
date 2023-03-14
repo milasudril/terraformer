@@ -25,60 +25,93 @@ namespace
 	}
 
 
-void convhull(std::span<loc_2d const> values, std::vector<loc_2d>& buffer)
-{
-	if(std::size(values) <= 2)
+	void convhull(std::span<loc_2d const> values, std::vector<loc_2d>& buffer)
 	{
-		for(size_t k = 0; k != std::size(values); ++k)
+		if(std::size(values) <= 2)
 		{
-			buffer.push_back(values[k]);
+			for(size_t k = 0; k != std::size(values); ++k)
+			{
+				buffer.push_back(values[k]);
+			}
+			return;
 		}
-		return;
-	}
 
-	auto const max = std::ranges::max_element(values, [](auto const a, auto const b){
-		return a.y < b.y;
-	});
+		auto const max = std::ranges::max_element(values, [](auto const a, auto const b){
+			return a.y < b.y;
+		});
 
-	auto const left = values.front();
-	auto const right = values.back();
-	auto const split_at = max;
+		auto const left = values.front();
+		auto const right = values.back();
+		auto const split_at = max;
 
-	buffer.push_back(*max);
-	auto i = std::begin(values) + 1;
-	{
-		auto const size_part = split_at - std::begin(values);
-		std::vector<loc_2d> part{};
-		part.reserve(size_part);
-		auto const dydx = (max->y - left.y)/(max->x - left.x);
-		terraformer::polynomial const p{left.y, dydx};
-		while(i != max)
+		buffer.push_back(*max);
+		auto i = std::begin(values) + 1;
 		{
-			if(i->y > p(i->x))
-			{ part.push_back(*i); }
+			auto const size_part = split_at - std::begin(values);
+			std::vector<loc_2d> part{};
+			part.reserve(size_part);
+			auto const dydx = (max->y - left.y)/(max->x - left.x);
+			terraformer::polynomial const p{left.y, dydx};
+			while(i != max)
+			{
+				if(i->y > p(i->x))
+				{ part.push_back(*i); }
 
+				++i;
+			}
+			convhull(part, buffer);
+		}
+
+		{
 			++i;
-		}
-		convhull(part, buffer);
-	}
+			auto const size_part = std::end(values) - (split_at + 1);
+			std::vector<loc_2d> part{};
+			part.reserve(size_part);
+			auto const dydx = (right.y - max->y)/(right.x - max->x);
+			terraformer::polynomial const p{max->y, dydx};
+			while(i != std::end(values) - 1)
+			{
+				if(i->y > p(i->x))
+				{ part.push_back(*i); }
 
-	{
-		++i;
-		auto const size_part = std::end(values) - (split_at + 1);
-		std::vector<loc_2d> part{};
-		part.reserve(size_part);
-		auto const dydx = (right.y - max->y)/(right.x - max->x);
-		terraformer::polynomial const p{max->y, dydx};
-		while(i != std::end(values) - 1)
-		{
-			if(i->y > p(i->x))
-			{ part.push_back(*i); }
-
-			++i;
+				++i;
+			}
+			convhull(part, buffer);
 		}
-		convhull(part, buffer);
 	}
 }
+
+std::vector<float> terraformer::convhull(std::span<float const> values)
+{
+	std::vector<loc_2d> temp;
+	temp.reserve(std::size(values));
+	for(size_t k = 0; k != std::size(values); ++k)
+	{
+		auto const x = static_cast<float>(k);
+		temp.push_back(loc_2d{x, values[k]});
+	}
+
+	std::vector<loc_2d> output;
+	convhull(temp, output);
+	std::ranges::sort(output, [](auto const a, auto const b){
+		return a.x < b.x;
+	});
+
+	std::vector<float> ret;
+	ret.reserve(std::size(values));
+	for(size_t k = 1; k != std::size(output); ++k)
+	{
+		auto const dx = output[k].x - output[k - 1].x;
+		auto const dy = output[k].y - output[k - 1].y;
+
+		polynomial const p{output[k - 1].x, dy/dx};
+		for(size_t l = 0; l != static_cast<size_t>(dx); ++l)
+		{
+			auto const x = static_cast<float>(l);
+			ret.push_back(p(x));
+		}
+	}
+	return ret;
 }
 
 void terraformer::convhull(std::span<float> values)
