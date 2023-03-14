@@ -4,6 +4,8 @@
 
 #include "lib/curve_tool/polynomial.hpp"
 
+#include <algorithm>
+
 namespace
 {
 	struct loc_2d
@@ -25,6 +27,15 @@ namespace
 
 void convhull(std::span<loc_2d const> values, std::vector<loc_2d>& buffer)
 {
+	if(std::size(values) <= 2)
+	{
+		for(size_t k = 0; k != std::size(values); ++k)
+		{
+			buffer.push_back(values[k]);
+		}
+		return;
+	}
+
 	auto const max = std::ranges::max_element(values, [](auto const a, auto const b){
 		return a.y < b.y;
 	});

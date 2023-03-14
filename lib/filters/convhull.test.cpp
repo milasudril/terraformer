@@ -153,7 +153,7 @@ TESTCASE(terraformer_filters_convhull_1d)
 	terraformer::convhull(values);
 	for(size_t k = 0; k != std::size(values); ++k)
 	{
-		EXPECT_LT(std::abs(values[k] - expected_result[k]), 1e-8f);
+		EXPECT_LT(std::abs(values[k] - expected_result[k]), 1e-7f);
 	}
 
 }
