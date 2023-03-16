@@ -36,9 +36,11 @@ namespace
 			return;
 		}
 
-		auto const max = std::ranges::max_element(values, [](auto const a, auto const b){
-			return a.y < b.y;
-		});
+		auto const max = std::max_element(std::begin(values) + 1,
+			std::end(values) - 1,
+			[](auto const a, auto const b){
+				return a.y < b.y;
+			});
 
 		auto const left = values.front();
 		auto const right = values.back();
@@ -47,7 +49,7 @@ namespace
 		buffer.push_back(*max);
 		auto i = std::begin(values) + 1;
 		{
-			auto const size_part = split_at - std::begin(values);
+			auto const size_part = split_at - (std::begin(values) + 1);
 			std::vector<loc_2d> part{};
 			part.reserve(size_part);
 			auto const dydx = (max->y - left.y)/(max->x - left.x);
@@ -64,24 +66,25 @@ namespace
 
 		{
 			++i;
-			auto const size_part = std::end(values) - (split_at + 1);
+			auto const size_part = std::end(values) - (split_at + 2);
 			std::vector<loc_2d> part{};
 			part.reserve(size_part);
 			auto const dydx = (right.y - max->y)/(right.x - max->x);
 			terraformer::polynomial const p{max->y, dydx};
 			while(i != std::end(values) - 1)
 			{
-				if(i->y > p(i->x))
+				if(i->y > p(i->x - max->x))
 				{ part.push_back(*i); }
 
 				++i;
 			}
+
 			convhull(part, buffer);
 		}
 	}
 }
 
-std::vector<float> terraformer::convhull(std::span<float const> values)
+std::vector<float> terraformer::convhull2(std::span<float const> values)
 {
 	std::vector<loc_2d> temp;
 	temp.reserve(std::size(values));
@@ -91,11 +94,19 @@ std::vector<float> terraformer::convhull(std::span<float const> values)
 		temp.push_back(loc_2d{x, values[k]});
 	}
 
-	std::vector<loc_2d> output;
+	std::vector<loc_2d> output{temp.front(), temp.back()};
 	convhull(temp, output);
 	std::ranges::sort(output, [](auto const a, auto const b){
 		return a.x < b.x;
 	});
+
+#if 0
+	for(size_t k = 0; k != std::size(output);++k)
+	{
+		printf("%.8g %.8g\n", output[k].x, output[k].y);
+	}
+	printf("==============\n");
+#endif
 
 	std::vector<float> ret;
 	ret.reserve(std::size(values));
@@ -104,13 +115,18 @@ std::vector<float> terraformer::convhull(std::span<float const> values)
 		auto const dx = output[k].x - output[k - 1].x;
 		auto const dy = output[k].y - output[k - 1].y;
 
-		polynomial const p{output[k - 1].x, dy/dx};
+		polynomial const p{output[k - 1].y, dy/dx};
+	//	printf("dy/dx = %.8g\n", dy/dx);
 		for(size_t l = 0; l != static_cast<size_t>(dx); ++l)
 		{
 			auto const x = static_cast<float>(l);
+		//	printf("%.8g %.8g\n", x, p(x));
 			ret.push_back(p(x));
 		}
+	//	printf("-----------------\n");
 	}
+	ret.push_back(output.back().y);
+//	printf("==============\n");
 	return ret;
 }
 
