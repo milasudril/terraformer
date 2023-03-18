@@ -4,14 +4,11 @@
 #include "lib/common/array_tuple.hpp"
 #include "lib/common/spaces.hpp"
 
+#include <geosimd/triangle.hpp>
+
 namespace terraformer
 {
-	struct face
-	{
-		uint32_t v1;
-		uint32_t v2;
-		uint32_t v3;
-	};
+	using face = geosimd::indirect_triangle<uint32_t>;
 
 	using vertex = tuple<location, direction>;
 
