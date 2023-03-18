@@ -44,7 +44,7 @@ TESTCASE(terraformer_mesh_store_store_mesh)
 
 	for(size_t k = 0; k != num_faces; ++k)
 	{
-		mesh.insert(faces[k]);
+		mesh.push_back(faces[k]);
 	}
 
 	auto id_string = std::string{MAIKE_BUILDINFO_TARGETDIR "/"};
