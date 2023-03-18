@@ -37,6 +37,24 @@ namespace terraformer
 
 		auto const vertex_count() const { return std::size(m_vertex_data); }
 
+		std::array<face, 3> subdivide(face const& f, vertex new_vert)
+		{
+			auto const vert_index = vertex_count();
+			push_back(new_vert);
+			std::array<face, 3> ret{
+				face{f.v1, f.v2, vert_index},
+				face{f.v2, f.v3, vert_index},
+				face{f.v3, f.v1, vert_index},
+			};
+
+			for(size_t k = 0; k != std::size(ret); ++k)
+			{ m_faces.insert(ret[k]); }
+
+			m_faces.erase(f);
+
+			return ret;
+		}
+
 	private:
 		array_tuple<location, direction> m_vertex_data;
 		struct face_compare
