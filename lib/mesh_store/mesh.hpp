@@ -5,6 +5,8 @@
 #include "lib/common/spaces.hpp"
 
 #include <geosimd/triangle.hpp>
+#include <set>
+#include <bit>
 
 namespace terraformer
 {
@@ -18,11 +20,11 @@ namespace terraformer
 		void push_back(vertex v)
 		{ m_vertex_data.push_back(v); }
 
-		void push_back(face const& f)
-		{ m_faces.push_back(tuple{f}); }
+		void insert(face const& f)
+		{ m_faces.insert(f); }
 
 		auto faces() const
-		{ return m_faces.get<0>(); }
+		{ return m_faces; }
 
 		auto locations() const
 		{ return m_vertex_data.get<0>(); }
@@ -33,9 +35,19 @@ namespace terraformer
 		bool operator==(mesh const&) const = default;
 		bool operator!=(mesh const&) const = default;
 
+		auto const vertex_count() const { return std::size(m_vertex_data); }
+
 	private:
 		array_tuple<location, direction> m_vertex_data;
-		array_tuple<face> m_faces;
+		struct face_compare
+		{
+			bool operator()(face const& a, face const& b) const
+			{
+				return std::bit_cast<std::array<uint32_t, 3>>(a)
+					< std::bit_cast<std::array<uint32_t, 3>>(b);
+			}
+		};
+		std::set<face, face_compare> m_faces;
 	};
 }
 

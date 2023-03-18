@@ -67,8 +67,8 @@ terraformer::mesh terraformer::create(std::type_identity<mesh>, heightmap<Map> c
 				y_prev*w + x_prev
 			};
 
-			ret.push_back(f1);
-			ret.push_back(f2);
+			ret.insert(f1);
+			ret.insert(f2);
 
 			x_prev = x;
 		}

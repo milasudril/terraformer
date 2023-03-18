@@ -23,16 +23,16 @@ TESTCASE(terraformer_mesh_push_back)
 		terraformer::direction{terraformer::geom_space::z{}}
 	});
 
-	mesh.push_back(terraformer::face{0, 1, 2});
+	mesh.insert(terraformer::face{0, 1, 2});
 
 	EXPECT_EQ(std::size(mesh.faces()), 1);
 	EXPECT_EQ(std::size(mesh.locations()), 3);
 	EXPECT_EQ(std::size(mesh.normals()), 3);
 
 	auto const faces = mesh.faces();
-	EXPECT_EQ(faces[0].v1, 0);
-	EXPECT_EQ(faces[0].v2, 1);
-	EXPECT_EQ(faces[0].v3, 2);
+	EXPECT_EQ(faces.begin()->v1, 0);
+	EXPECT_EQ(faces.begin()->v2, 1);
+	EXPECT_EQ(faces.begin()->v3, 2);
 
 	auto const locations = mesh.locations();
 	EXPECT_EQ(locations[0], (terraformer::location{1.0f, 2.0f, 3.0f}));
