@@ -3,6 +3,8 @@
 #include "./convhull.hpp"
 
 #include "lib/curve_tool/polynomial.hpp"
+#include "lib/common/span_2d.hpp"
+#include "lib/mesh_store/mesh.hpp"
 
 #include <algorithm>
 
@@ -80,6 +82,47 @@ namespace
 			}
 
 			convhull(part, buffer);
+		}
+	}
+
+	void convhull(terraformer::span_2d<float const> image,
+		terraformer::mesh& mesh_to_build,
+		terraformer::face const& initial_face,
+		terraformer::location split_at)
+	{
+		using namespace terraformer;
+
+		auto by_z = [](location a, location b){
+			return a[2] < b[2];
+		};
+
+		auto const res_face = resolve(initial_face, mesh_to_build.locations());
+
+		auto const is_triangle_vertex = [res_face](location loc){
+			return std::ranges::any_of(res_face.points(), [loc](location val) {
+				return loc == val;
+			});
+		};
+
+		auto const new_triangles = mesh_to_build.subdivide(initial_face,
+			tuple{split_at, direction{normal(res_face)}});
+
+		auto const append_if_above = [is_triangle_vertex](location loc,
+			span_2d<float const> image,
+			std::vector<location>& new_locations) {
+			if(is_triangle_vertex(loc)
+				&& image(static_cast<uint32_t>(loc[0]), static_cast<uint32_t>(loc[1])) > loc[2])
+			{ new_locations.push_back(loc); }
+		};
+
+		for(size_t k = 0; k != std::size(new_triangles); ++k)
+		{
+			std::vector<location> new_locations;
+			auto const t = resolve(new_triangles[k], mesh_to_build.locations());
+			project_from_above(t, append_if_above, image, new_locations);
+
+			auto const max = std::ranges::max_element(new_locations, by_z);
+			convhull(image, mesh_to_build, new_triangles[k], *max);
 		}
 	}
 }
