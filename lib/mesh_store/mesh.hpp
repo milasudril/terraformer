@@ -37,7 +37,7 @@ namespace terraformer
 
 		auto const vertex_count() const { return std::size(m_vertex_data); }
 
-		std::array<face, 3> subdivide(face const& f, vertex new_vert)
+		std::array<face, 3> subdivide(face const& f, location new_loc)
 		{
 			auto const i = m_faces.find(f);
 			if(i == std::end(m_faces))
@@ -50,7 +50,7 @@ namespace terraformer
 				face{f.v3, f.v1, vert_index},
 			};
 
-			push_back(new_vert);
+			push_back(tuple{new_loc, direction{normal(resolve(f, locations()))}});
 			for(size_t k = 0; k != std::size(ret); ++k)
 			{ m_faces.insert(ret[k]); }
 
