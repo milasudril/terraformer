@@ -206,18 +206,12 @@ terraformer::basic_image<float> terraformer::convhull2(span_2d<float const> inpu
 	visit(input, visited, mesh_to_build, f1);
 	visit(input, visited, mesh_to_build, f2);
 
-/*
+	project_from_above(mesh_to_build, [pixels = ret.pixels()](location loc){
+		auto const x = static_cast<uint32_t>(loc[0]);
+		auto const y = static_cast<uint32_t>(loc[1]);
+		pixels(x, y) = loc[2];
+	});
 
-	{
-		std::vector<location> new_locations;
-		auto const t = resolve(new_triangles[k], mesh_to_build.locations());
-		project_from_above(t, append_new_loc_if_above, image, visited, new_locations);
-
-		auto const max = std::ranges::max_element(new_locations, by_z);
-		convhull(image, visited, mesh_to_build, new_triangles[k], *max);
-	}
-
-*/
 	return ret;
 }
 

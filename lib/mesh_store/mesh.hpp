@@ -71,6 +71,15 @@ namespace terraformer
 		};
 		std::set<face, face_compare> m_faces;
 	};
+
+	template<class Func, class ... FuncParams>
+	void project_from_above(mesh const& mesh, Func&& f, FuncParams&& ... params)
+	{
+		for(auto& face : mesh.faces())
+		{
+			project_from_above(resolve(face, mesh.locations()), f, params ...);
+		}
+	}
 }
 
 #endif
