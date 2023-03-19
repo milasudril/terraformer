@@ -88,6 +88,9 @@ namespace terraformer
 	{
 		uint32_t x;
 		uint32_t y;
+
+		bool operator==(pixel_coordinates const&) const = default;
+		bool operator!=(pixel_coordinates const&) const = default;
 	};
 
 	template<class T, class Func>

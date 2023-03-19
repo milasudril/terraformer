@@ -107,7 +107,7 @@ int main()
 					.width = 49152.0f,
 					.height = 49152.0f
 				},
-				.pixel_count = 1024
+				.pixel_count = 64
 			},
 			.orientation = geosimd::turn_angle{0x0},
 			.center_latitude = geosimd::rotation_angle{0x2000'0000}
@@ -173,6 +173,10 @@ int main()
 	putchar('\n');
 	store(buffers.front(), "after_laplace.exr");
 
+	auto const convhull = convhull2(buffers.front().pixels());
+	store(convhull, "convhull.exr");
+
+#if 0
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
 
 	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
@@ -197,7 +201,6 @@ int main()
 	}
 	putchar('\n');
 
-#if 0
 	auto hm_conv_hull = buffers.front();
 
 	{

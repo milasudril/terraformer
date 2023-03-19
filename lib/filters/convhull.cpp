@@ -5,6 +5,7 @@
 #include "lib/curve_tool/polynomial.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/mesh_store/mesh.hpp"
+#include "lib/mesh_store/mesh_output.hpp"
 #include "lib/pixel_store/image.hpp"
 
 #include <algorithm>
@@ -94,16 +95,16 @@ namespace
 
 	void append_new_loc_if_above(terraformer::location loc,
 		terraformer::span_2d<float const> image,
-		terraformer::span_2d<bool> visited,
+		terraformer::span_2d<bool const> visited,
 		std::vector<terraformer::location>& new_locations)
 	{
 		auto const loc_x = static_cast<uint32_t>(loc[0]);
 		auto const loc_y = static_cast<uint32_t>(loc[1]);
+		auto const loc_z = image(loc_x, loc_y);
 
-		if(!visited(loc_x, loc_y) && image(loc_x, loc_y) > loc[2])
+		if(!visited(loc_x, loc_y) && loc_z > loc[2])
 		{
-			visited(loc_x, loc_y) = true;
-			new_locations.push_back(loc);
+			new_locations.push_back(terraformer::location{loc[0], loc[1], loc_z});
 		}
 	}
 
@@ -118,9 +119,22 @@ namespace
 
 		std::vector<terraformer::location> new_locations;
 		auto const t = resolve(initial_face, mesh_to_build.locations());
+		for(auto const p : t.points())
+		{
+			auto const x = static_cast<uint32_t>(p[0]);
+			auto const y = static_cast<uint32_t>(p[1]);
+			visited(x, y) = true;
+		}
+
 		project_from_above(t, append_new_loc_if_above, image, visited, new_locations);
+		if(std::size(new_locations) == 0)
+		{
+			printf("No hit\n");
+			return;
+		}
 
 		auto const max = std::ranges::max_element(new_locations, by_z);
+		printf("size: %zu,  max: %s\n", std::size(new_locations), to_string(*max).c_str());
 		convhull(image, visited, mesh_to_build, initial_face, *max);
 	}
 
@@ -132,7 +146,7 @@ namespace
 	{
 		auto const new_triangles = mesh_to_build.subdivide(initial_face, split_at);
 		for(size_t k = 0; k != std::size(new_triangles); ++k)
-		{ visit(image, visited, mesh_to_build, initial_face); }
+		{ visit(image, visited, mesh_to_build, new_triangles[k]); }
 	}
 }
 
@@ -199,12 +213,14 @@ terraformer::basic_image<float> terraformer::convhull2(span_2d<float const> inpu
 	mesh_to_build.push_back(tuple{location{0.0f, y_maxf, input(0u, y_max)}, n});
 
 	face const f1{0u, 1u, 2u};
-	face const f2{2u, 3u, 1u};
+//	face const f2{2u, 3u, 1u};
 	mesh_to_build.insert(f1);
-	mesh_to_build.insert(f2);
+//	mesh_to_build.insert(f2);
 
 	visit(input, visited, mesh_to_build, f1);
-	visit(input, visited, mesh_to_build, f2);
+//	visit(input, visited, mesh_to_build, f2);
+
+	store(mesh_to_build, "test.obj");
 
 	project_from_above(mesh_to_build, [pixels = ret.pixels()](location loc){
 		auto const x = static_cast<uint32_t>(loc[0]);
