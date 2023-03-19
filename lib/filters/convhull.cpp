@@ -5,6 +5,7 @@
 #include "lib/curve_tool/polynomial.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/mesh_store/mesh.hpp"
+#include "lib/pixel_store/image.hpp"
 
 #include <algorithm>
 
@@ -89,39 +90,49 @@ namespace
 		terraformer::span_2d<bool> visited,
 		terraformer::mesh& mesh_to_build,
 		terraformer::face const& initial_face,
-		terraformer::location split_at)
-	{
-		using namespace terraformer;
+		terraformer::location split_at);
 
-		auto by_z = [](location a, location b){
+	void append_new_loc_if_above(terraformer::location loc,
+		terraformer::span_2d<float const> image,
+		terraformer::span_2d<bool> visited,
+		std::vector<terraformer::location>& new_locations)
+	{
+		auto const loc_x = static_cast<uint32_t>(loc[0]);
+		auto const loc_y = static_cast<uint32_t>(loc[1]);
+
+		if(!visited(loc_x, loc_y) && image(loc_x, loc_y) > loc[2])
+		{
+			visited(loc_x, loc_y) = true;
+			new_locations.push_back(loc);
+		}
+	}
+
+	void visit(terraformer::span_2d<float const> image,
+		terraformer::span_2d<bool> visited,
+		terraformer::mesh& mesh_to_build,
+		terraformer::face const& initial_face)
+	{
+		auto by_z = [](terraformer::location a, terraformer::location b){
 			return a[2] < b[2];
 		};
 
+		std::vector<terraformer::location> new_locations;
+		auto const t = resolve(initial_face, mesh_to_build.locations());
+		project_from_above(t, append_new_loc_if_above, image, visited, new_locations);
+
+		auto const max = std::ranges::max_element(new_locations, by_z);
+		convhull(image, visited, mesh_to_build, initial_face, *max);
+	}
+
+	void convhull(terraformer::span_2d<float const> image,
+		terraformer::span_2d<bool> visited,
+		terraformer::mesh& mesh_to_build,
+		terraformer::face const& initial_face,
+		terraformer::location split_at)
+	{
 		auto const new_triangles = mesh_to_build.subdivide(initial_face, split_at);
-
-		auto const append_new_loc_if_above = [](location loc,
-			span_2d<float const> image,
-			span_2d<bool> visited,
-			std::vector<location>& new_locations) {
-			auto const loc_x = static_cast<uint32_t>(loc[0]);
-			auto const loc_y = static_cast<uint32_t>(loc[1]);
-
-			if(!visited(loc_x, loc_y) && image(loc_x, loc_y) > loc[2])
-			{
-				visited(loc_x, loc_y) = true;
-				new_locations.push_back(loc);
-			}
-		};
-
 		for(size_t k = 0; k != std::size(new_triangles); ++k)
-		{
-			std::vector<location> new_locations;
-			auto const t = resolve(new_triangles[k], mesh_to_build.locations());
-			project_from_above(t, append_new_loc_if_above, image, visited, new_locations);
-
-			auto const max = std::ranges::max_element(new_locations, by_z);
-			convhull(image, visited, mesh_to_build, new_triangles[k], *max);
-		}
+		{ visit(image, visited, mesh_to_build, initial_face); }
 	}
 }
 
@@ -168,6 +179,45 @@ std::vector<float> terraformer::convhull2(std::span<float const> values)
 	}
 	ret.push_back(output.back().y);
 //	printf("==============\n");
+	return ret;
+}
+
+terraformer::basic_image<float> terraformer::convhull2(span_2d<float const> input)
+{
+	basic_image<float> ret{input.width(), input.height()};
+	basic_image<bool> visited{input.width(), input.height()};
+	terraformer::mesh mesh_to_build;
+	auto const x_max = input.width() - 1;
+	auto const y_max = input.height() - 1;
+	auto const x_maxf = static_cast<float>(input.width() - 1);
+	auto const y_maxf = static_cast<float>(input.height() - 1);
+	direction const n{displacement{0.0f, 0.0f, 1.0f}};
+
+	mesh_to_build.push_back(tuple{location{0.0f, 0.0f, input(0u, 0u)}, n});
+	mesh_to_build.push_back(tuple{location{x_maxf, 0.0f, input(x_max, 0u)}, n});
+	mesh_to_build.push_back(tuple{location{x_maxf, y_maxf, input(x_max, y_max)}, n});
+	mesh_to_build.push_back(tuple{location{0.0f, y_maxf, input(0u, y_max)}, n});
+
+	face const f1{0u, 1u, 2u};
+	face const f2{2u, 3u, 1u};
+	mesh_to_build.insert(f1);
+	mesh_to_build.insert(f2);
+
+	visit(input, visited, mesh_to_build, f1);
+	visit(input, visited, mesh_to_build, f2);
+
+/*
+
+	{
+		std::vector<location> new_locations;
+		auto const t = resolve(new_triangles[k], mesh_to_build.locations());
+		project_from_above(t, append_new_loc_if_above, image, visited, new_locations);
+
+		auto const max = std::ranges::max_element(new_locations, by_z);
+		convhull(image, visited, mesh_to_build, new_triangles[k], *max);
+	}
+
+*/
 	return ret;
 }
 
