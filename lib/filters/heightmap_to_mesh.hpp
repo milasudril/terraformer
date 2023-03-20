@@ -43,7 +43,7 @@ terraformer::mesh terraformer::create(std::type_identity<mesh>, heightmap<Map> c
 
 			auto const dfx = 0.5f*s_z*(pixels((x + 1 + w)%w, y) - pixels((x - 1 + w)%w, y))/s_x;
 			auto const dfy = 0.5f*s_z*(pixels(x, (y + 1 + h)%h) - pixels(x, (y - 1 + h)%h))/s_y;
-			displacement const normal{-dfx, -dfy, 1.0f};
+			displacement const normal{-dfx, dfy, 1.0f};
 
 			ret.push_back(vertex{location{x_loc, y_loc, z_loc}, direction{normal}});
 		}

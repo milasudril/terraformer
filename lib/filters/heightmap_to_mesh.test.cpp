@@ -55,6 +55,11 @@ TESTCASE(terraformer_create_mesh_from_heightmap)
 	{
 		EXPECT_EQ(locs[k][0], x_expected[k]);
 		EXPECT_EQ(locs[k][1], y_expected[k]);
+		if(locs[k][0] != 1.5f && locs[k][0] != -1.5f && locs[k][1] != -1.0f && locs[k][1] != 1.0f)
+		{
+			EXPECT_LT(mesh.normals()[k][0], 0.0f);
+			EXPECT_LT(mesh.normals()[k][1], 0.0f);
+		}
 		EXPECT_GT(mesh.normals()[k][2], 0.0f);
 	}
 
