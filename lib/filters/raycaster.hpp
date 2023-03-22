@@ -28,7 +28,7 @@ namespace terraformer
 		size_t k = 0;
 		auto r = r_0;
 
-		while(!pred(k, r))
+		while(pred(k, r))
 		{
 			if(r[2] < interp(heighmap, r[0], r[1]))
 			{

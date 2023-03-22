@@ -107,10 +107,10 @@ int main()
 					.width = 49152.0f,
 					.height = 49152.0f
 				},
-				.pixel_count = 1024
+				.pixel_count = 64
 			},
 			.center_latitude = geosimd::rotation_angle{0x2000'0000},
-			.orientation = geosimd::rotation_angle{0x0}
+			.orientation = geosimd::rotation_angle{0x0000'0000}
 		},
 		.initial_heightmap{
 			.boundary{
@@ -179,7 +179,7 @@ int main()
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
 
 	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
-	size_t k = 0;
+	size_t k = 0.0;
 	while(static_cast<double>(k)*dt <= 1.0)
 	{
 		generate_lightmap(
@@ -193,7 +193,7 @@ int main()
 		);
 
 		std::array<char, 32> buffer{};
-		sprintf(buffer.data(), "__dump/lightmap_%04zu.exr", k);
+		sprintf(buffer.data(), "__dump/lightmap_0_%04zu.exr", k);
 		store(lightmap, std::as_const(buffer).data());
 		printf("%zu                \r", k);
 		fflush(stdout);

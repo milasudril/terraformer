@@ -74,18 +74,20 @@ namespace terraformer
 			if(sun_dir[2] <= 0.0)
 			{ return 0.0f; }
 
+			auto const d = terraformer::direction(sun_dir_float).apply(dom_rot);
+
 			auto const raycast_result = raycast(
 				heightmap,
 				terraformer::pixel_coordinates{x, y},
 				heightmap(x, y),
-				terraformer::direction(sun_dir_float).apply(dom_rot),
+				d,
 				[heightmap](auto, auto loc){ return inside(heightmap, loc[0], loc[1]);}
 			);
 
 			if(raycast_result.has_value())
 			{ return 0.0f; }
 
-			return std::max(inner_product(n, sun_dir_float), 0.0f);
+			return std::max(inner_product(n, d), 0.0f);
 		});
 	}
 }
