@@ -33,7 +33,9 @@ namespace terraformer
 		year t,
 		planet_descriptor const& planetary_data,
 		float pixel_size,
-		geosimd::rotation_angle center_latitude)
+		geosimd::rotation_angle center_latitude,
+		geosimd::rotation_angle domain_orientation
+	)
 	{
 		generate(output, [
 			heightmap,
@@ -46,7 +48,8 @@ namespace terraformer
 				}),
 			planet_radius = planetary_data.radius,
 			pixel_size,
-			center_latitude
+			center_latitude,
+			dom_rot = geosimd::rotation<geom_space>{domain_orientation, geosimd::dimension_tag<2>{}}
 		]
 		(uint32_t x, uint32_t y){
 			auto const n = normal(heightmap, x, y, 1.0f/pixel_size);
@@ -75,7 +78,7 @@ namespace terraformer
 				heightmap,
 				terraformer::pixel_coordinates{x, y},
 				heightmap(x, y),
-				terraformer::direction(sun_dir_float),
+				terraformer::direction(sun_dir_float).apply(dom_rot),
 				[heightmap](auto, auto loc){ return inside(heightmap, loc[0], loc[1]);}
 			);
 

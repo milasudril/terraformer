@@ -76,8 +76,8 @@ namespace terraformer
 	struct domain_descriptor
 	{
 		domain_size_descriptor size;
-		geosimd::turn_angle orientation;
 		geosimd::rotation_angle center_latitude;
+		geosimd::rotation_angle orientation;
 	};
 
 	struct landscape_descriptor
@@ -107,10 +107,10 @@ int main()
 					.width = 49152.0f,
 					.height = 49152.0f
 				},
-				.pixel_count = 64
+				.pixel_count = 1024
 			},
-			.orientation = geosimd::turn_angle{0x0},
-			.center_latitude = geosimd::rotation_angle{0x2000'0000}
+			.center_latitude = geosimd::rotation_angle{0x2000'0000},
+			.orientation = geosimd::rotation_angle{0x0}
 		},
 		.initial_heightmap{
 			.boundary{
@@ -173,10 +173,9 @@ int main()
 	putchar('\n');
 	store(buffers.front(), "after_laplace.exr");
 
-	auto const convhull = convhull2(buffers.front().pixels());
-	store(convhull, "convhull.exr");
+//	auto const convhull = convhull2(buffers.front().pixels());
+//	store(convhull, "convhull.exr");
 
-#if 0
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
 
 	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
@@ -189,7 +188,8 @@ int main()
 			terraformer::year{static_cast<double>(k)*dt},
 			params.planetary_data,
 			pixel_size,
-			params.domain.center_latitude
+			params.domain.center_latitude,
+			params.domain.orientation
 		);
 
 		std::array<char, 32> buffer{};
@@ -201,6 +201,7 @@ int main()
 	}
 	putchar('\n');
 
+#if 0
 	auto hm_conv_hull = buffers.front();
 
 	{
@@ -243,7 +244,6 @@ int main()
 	}
 	printf("Saving result\n");
 	store(lit_surface, "lit_surface.exr");
-#if 0
 
 	store(buffers.front(), "after_laplace.exr");
 	auto const heightmap = buffers.front().pixels();
@@ -285,6 +285,5 @@ int main()
 	});
 	buffers.swap();
 	store(buffers.front(), "eroded.exr");
-#endif
 #endif
 }
