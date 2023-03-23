@@ -21,7 +21,7 @@ namespace
 	}
 }
 
-void terraformer::convhull(std::span<float> values)
+std::vector<float> terraformer::convhull(std::span<float const> values)
 {
 	std::vector<loc_2d> buffer;
 	for(size_t k = 0; k != std::size(values); ++k)
@@ -52,31 +52,37 @@ void terraformer::convhull(std::span<float> values)
 		for(size_t l = 0; l != static_cast<size_t>(dx); ++l)
 		{
 			auto const y = loc_prev.y + static_cast<float>(l)*slope;
-			values[static_cast<size_t>(loc_prev.x) + l] = y;
+			ret[static_cast<size_t>(loc_prev.x) + l] = y;
 		}
 		loc_prev = loc_current;
 	}
+	ret.back() = values.back();
+	return ret;
 }
 
-void terraformer::convhull_per_scanline(span_2d<float> buffer)
+terraformer::basic_image<float> terraformer::convhull_per_scanline(span_2d<float const> buffer)
 {
+	basic_image<float> ret{buffer.width(), buffer.height()};
 	for(uint32_t k = 0; k != buffer.height(); ++k)
 	{
-		convhull(buffer.row(k));
+		ret.pixels().update_row(k, convhull(buffer.row(k)));
 	}
+	return ret;
 }
 
-void terraformer::convhull_per_column(span_2d<float> buffer)
+terraformer::basic_image<float> terraformer::convhull_per_column(span_2d<float const> buffer)
 {
+	basic_image<float> ret{buffer.width(), buffer.height()};
 	std::vector<float> colbuff(buffer.height());
 	for(uint32_t x = 0; x != buffer.width(); ++x)
 	{
 		for(uint32_t y = 0; y != buffer.height(); ++y)
 		{ colbuff[y] = buffer(x, y); }
 
-		convhull(colbuff);
+		auto temp = convhull(colbuff);
 
 		for(uint32_t y = 0; y!= buffer.height(); ++y)
-		{ buffer(x, y) = std::max(buffer(x, y), colbuff[y]); }
+		{ ret(x, y) = temp[y]; }
 	}
+	return ret;
 }

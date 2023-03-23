@@ -71,6 +71,12 @@ namespace terraformer
 		constexpr auto row(IndexType y) const
 		{ return std::span{m_ptr + y*width(), width()}; }
 
+		constexpr auto update_row(IndexType y, std::span<T const> src)
+		{
+			std::copy(std::begin(src), std::end(src), m_ptr + y*width());
+			return *this;
+		}
+
 	private:
 		IndexType m_width;
 		IndexType m_height;

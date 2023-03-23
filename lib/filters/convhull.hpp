@@ -4,23 +4,18 @@
 #define TERRAFORMER_FILTERS_CONVHULL_HPP
 
 #include "lib/common/span_2d.hpp"
+#include "lib/pixel_store/image.hpp"
 
 #include <span>
 #include <vector>
 
 namespace terraformer
 {
-	void convhull(std::span<float> values);
+	[[nodiscard]] std::vector<float> convhull(std::span<float const> values);
 
-	void convhull_per_scanline(span_2d<float> buffer);
+	[[nodiscard]] basic_image<float> convhull_per_scanline(span_2d<float const> buffer);
 
-	void convhull_per_column(span_2d<float> buffer);
-
-	inline void convhull(span_2d<float> buffer)
-	{
-		convhull_per_scanline(buffer);
-		convhull_per_column(buffer);
-	}
+	[[nodiscard]] basic_image<float> convhull_per_column(span_2d<float const> buffer);
 }
 
 #endif
