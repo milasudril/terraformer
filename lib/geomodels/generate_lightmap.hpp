@@ -76,18 +76,23 @@ namespace terraformer
 
 			auto const d = terraformer::direction(sun_dir_float).apply(dom_rot);
 
+			auto const n_proj = inner_product(n, d);
+
+			if(n_proj <= 0.0f)
+			{ return 0.0f; }
+
 			auto const raycast_result = raycast(
 				heightmap,
 				terraformer::pixel_coordinates{x, y},
 				heightmap(x, y),
 				d,
-				[heightmap](auto, auto loc){ return inside(heightmap, loc[0], loc[1]);}
+				[heightmap](auto, auto loc){ return loc[2] <= 8192.0f && inside(heightmap, loc[0], loc[1]);}
 			);
 
 			if(raycast_result.has_value())
 			{ return 0.0f; }
 
-			return std::max(inner_product(n, d), 0.0f);
+			return n_proj;
 		});
 	}
 }

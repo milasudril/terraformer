@@ -107,7 +107,7 @@ int main()
 					.width = 49152.0f,
 					.height = 49152.0f
 				},
-				.pixel_count = 64
+				.pixel_count = 256
 			},
 			.center_latitude = geosimd::rotation_angle{0x2000'0000},
 			.orientation = geosimd::rotation_angle{0x0000'0000}
@@ -193,7 +193,7 @@ int main()
 		);
 
 		std::array<char, 32> buffer{};
-		sprintf(buffer.data(), "__dump/lightmap_0_%04zu.exr", k);
+		sprintf(buffer.data(), "__dump/lightmap_%04zu.exr", k);
 		store(lightmap, std::as_const(buffer).data());
 		printf("%zu                \r", k);
 		fflush(stdout);
