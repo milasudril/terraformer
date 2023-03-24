@@ -138,7 +138,6 @@ namespace terraformer
  				out(col, row) = f(in_1(col, row), in_2(col, row));
 			}
 		}
-
 	}
 
 	template<class T, class Func>

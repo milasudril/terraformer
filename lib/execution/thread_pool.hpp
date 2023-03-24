@@ -80,10 +80,41 @@ namespace terraformer
 		size_t num_workers;
 
 		template<class Task>
-		auto operator()(empty<Task>)
+		auto operator()(empty<Task>) const
 		{
 			return thread_pool<Task>{num_workers};
 		}
 	};
+
+	template<class Task>
+	class single_thread_pool_manager
+	{
+	public:
+		using task_type = Task;
+
+		explicit single_thread_pool_manager(size_t num_workers):m_thread_pool{num_workers}{}
+
+		auto& operator()(empty<Task>)
+		{
+			return m_thread_pool;
+		}
+
+	private:
+		thread_pool<Task> m_thread_pool;
+	};
+
+	template<class ThreadPoolFactory>
+	class thread_pool_factory_adaptor:private ThreadPoolFactory
+	{
+	public:
+		using ThreadPoolFactory::ThreadPoolFactory;
+
+		template<class Task>
+		decltype(auto) operator()(empty<Task>)
+		{ return ThreadPoolFactory::operator()(empty<typename ThreadPoolFactory::task_type>{}); }
+	};
+
+	using default_thread_pool =
+		thread_pool_factory_adaptor<single_thread_pool_manager<std::function<void()>>>;
 }
 #endif

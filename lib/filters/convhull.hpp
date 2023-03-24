@@ -13,9 +13,9 @@ namespace terraformer
 {
 	[[nodiscard]] std::vector<float> convhull(std::span<float const> values);
 
-	[[nodiscard]] basic_image<float> convhull_per_scanline(span_2d<float const> buffer);
+	[[nodiscard]] basic_image<float> convhull_per_row(span_2d<float const> buffer);
 
-	[[nodiscard]] basic_image<float> convhull_per_column(span_2d<float const> buffer);
+	[[nodiscard]] basic_image<float> convhull_per_col(span_2d<float const> buffer);
 }
 
 #endif

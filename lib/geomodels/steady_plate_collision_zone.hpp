@@ -22,9 +22,10 @@ namespace terraformer
 		main_ridge_params main_ridge;
 	};
 
-	template<class Rng>
+	template<class Rng, class DiffusionStepExecutorFactory>
 	void make_heightmap(double_buffer<terraformer::grayscale_image>& buffers,
 		Rng&& rng,
+		DiffusionStepExecutorFactory&& exec_factory,
 		float pixel_size,
 		steady_plate_collision_zone_descriptor const& heightmap_params)
 	{
@@ -58,7 +59,7 @@ namespace terraformer
 
 		solve_bvp(buffers, terraformer::laplace_solver_params{
 			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
-			.step_executor_factory = terraformer::thread_pool_factory{16},
+			.step_executor_factory = std::forward<DiffusionStepExecutorFactory>(exec_factory),
 			.boundary = [
 				values = main_ridge,
 				front_back = heightmap_params.boundary

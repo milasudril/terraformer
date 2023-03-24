@@ -60,7 +60,7 @@ std::vector<float> terraformer::convhull(std::span<float const> values)
 	return ret;
 }
 
-terraformer::basic_image<float> terraformer::convhull_per_scanline(span_2d<float const> buffer)
+terraformer::basic_image<float> terraformer::convhull_per_row(span_2d<float const> buffer)
 {
 	basic_image<float> ret{buffer.width(), buffer.height()};
 	for(uint32_t k = 0; k != buffer.height(); ++k)
@@ -70,7 +70,7 @@ terraformer::basic_image<float> terraformer::convhull_per_scanline(span_2d<float
 	return ret;
 }
 
-terraformer::basic_image<float> terraformer::convhull_per_column(span_2d<float const> buffer)
+terraformer::basic_image<float> terraformer::convhull_per_col(span_2d<float const> buffer)
 {
 	basic_image<float> ret{buffer.width(), buffer.height()};
 	std::vector<float> colbuff(buffer.height());
