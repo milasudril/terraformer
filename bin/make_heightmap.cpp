@@ -191,10 +191,10 @@ int main()
 	getchar();
 
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
-#if 0
+#if 1
 	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
-	size_t k = 0;
-	while(static_cast<double>(k)*dt <= 1.0)
+	size_t k = 24;
+//	while(static_cast<double>(k)*dt <= 1.0)
 	{
 		generate_lightmap(
 			lightmap.pixels(),

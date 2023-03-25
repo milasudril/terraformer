@@ -52,12 +52,6 @@ namespace terraformer
 		Src source;
 	};
 
-	struct scanline_range
-	{
-		uint32_t begin;
-		uint32_t end;
-	};
-
 	template<class ConcentrationVector,
 		diffusion_coeff_vector<ConcentrationVector> DiffCoeff,
 		dirichlet_boundary_function<ConcentrationVector> Boundary,

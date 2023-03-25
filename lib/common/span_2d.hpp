@@ -99,6 +99,12 @@ namespace terraformer
 		bool operator!=(pixel_coordinates const&) const = default;
 	};
 
+	struct scanline_range
+	{
+		uint32_t begin;
+		uint32_t end;
+	};
+
 	template<class T, class Func>
 	void for_each(span_2d<T> span, Func&& f)
 	{
