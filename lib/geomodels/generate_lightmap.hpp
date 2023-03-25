@@ -37,6 +37,27 @@ namespace terraformer
 		geosimd::rotation<geom_space> domain_rot;
 	};
 
+	inline lightmap_params make_lightmap_params(year t,
+		planet_descriptor const& planetary_data,
+		float pixel_size,
+		geosimd::rotation_angle center_latitude,
+		geosimd::rotation_angle domain_orientation)
+	{
+		return lightmap_params{
+			.planet_loc = planet_location(t, planetary_data.distance_to_sun),
+			.planet_rot = planet_rotation(t,
+				planetary_data.spin_frequency,
+				[&tilt = planetary_data.tilt](year t)
+				{
+					return tilt.mean + tilt.amplitude*wave_sum{tilt.motion_params}(t.value());
+				}),
+			.planet_radius = planetary_data.radius,
+			.pixel_size = pixel_size,
+			.center_latitude = center_latitude,
+			.domain_rot = geosimd::rotation<geom_space>{domain_orientation, geosimd::dimension_tag<2>{}}
+		};
+	}
+
 	inline float intensity(span_2d<float const> heightmap,
 					pixel_coordinates loc,
 					lightmap_params const& params)
@@ -99,27 +120,6 @@ namespace terraformer
 		}
 	}
 
-	lightmap_params make_lightmap_params(year t,
-		planet_descriptor const& planetary_data,
-		float pixel_size,
-		geosimd::rotation_angle center_latitude,
-		geosimd::rotation_angle domain_orientation)
-	{
-		return lightmap_params{
-			.planet_loc = planet_location(t, planetary_data.distance_to_sun),
-			.planet_rot = planet_rotation(t,
-				planetary_data.spin_frequency,
-				[&tilt = planetary_data.tilt](year t)
-				{
-					return tilt.mean + tilt.amplitude*wave_sum{tilt.motion_params}(t.value());
-				}),
-			.planet_radius = planetary_data.radius,
-			.pixel_size = pixel_size,
-			.center_latitude = center_latitude,
-			.domain_rot = geosimd::rotation<geom_space>{domain_orientation, geosimd::dimension_tag<2>{}}
-		};
-	}
-
 	inline void generate_lightmap(
 		span_2d<float> output,
 		span_2d<float const> heightmap,
@@ -134,6 +134,68 @@ namespace terraformer
 			make_lightmap_params(t, planetary_data, pixel_size, center_latitude, domain_orientation),
 			scanline_range{0, heightmap.height()});
 	}
+
+	using lightmap_generation_pass = notifying_task<
+		std::reference_wrapper<signaling_counter>,
+		void (*)(span_2d<float>, span_2d<float const>, lightmap_params const&, scanline_range),
+		span_2d<float>,
+		span_2d<float const>,
+		std::reference_wrapper<lightmap_params const> const,
+		scanline_range>;
+
+	template<class ExecutorFactory>
+	class lightmap_generator
+	{
+	public:
+		using step_exec_type = lightmap_generation_pass;
+		using executor_type = decltype(std::declval<ExecutorFactory>()(empty<step_exec_type>{}));
+
+		explicit lightmap_generator(ExecutorFactory&& exec_factory,
+			span_2d<float> output_buffer,
+			span_2d<float const> input_buffer,
+			lightmap_params const& params):
+			m_executor{exec_factory(empty<step_exec_type>{})},
+			m_output_buffer{output_buffer},
+			m_input_buffer{input_buffer},
+			m_params{params}
+		{}
+
+		auto operator()()
+		{
+			auto const n_workers = std::size(m_executor);
+
+			auto const domain_height = m_output_buffer.height();
+			auto const batch_size = 1 + (domain_height - 1)/static_cast<uint32_t>(n_workers);
+			signaling_counter counter{n_workers};
+			for(size_t k = 0; k != n_workers; ++k)
+			{
+				m_executor.run(notifying_task{
+					std::ref(counter),
+					+[](span_2d<float> output_buffer,
+						span_2d<float const> heightmap,
+						lightmap_params const& params,
+						scanline_range range)
+					{
+						return generate_lightmap(output_buffer, heightmap, params, range);
+					},
+					m_output_buffer,
+					m_input_buffer,
+					std::cref(m_params),
+					scanline_range{
+						.begin = static_cast<uint32_t>(k*batch_size),
+						.end = std::min(domain_height, static_cast<uint32_t>((k + 1)*batch_size))
+					}
+				});
+			}
+			counter.wait();
+		}
+
+	private:
+		executor_type m_executor;
+		span_2d<float> m_output_buffer;
+		span_2d<float const> m_input_buffer;
+		lightmap_params m_params;
+	};
 }
 
 #endif

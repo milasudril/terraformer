@@ -188,27 +188,30 @@ int main()
 	store(bounding_volume, "bounding_volume.exr");
 	store(buffers.front(), "after_laplace.exr");
 
-	getchar();
 
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
 #if 1
 	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
-	size_t k = 24;
-//	while(static_cast<double>(k)*dt <= 1.0)
+	size_t k = 0;
+	while(static_cast<double>(k)*dt <= 1.0)
 	{
-		generate_lightmap(
-			lightmap.pixels(),
+		terraformer::lightmap_generator gen{
+			std::ref(threads),
+			buffers.back(),
 			buffers.front(),
-			terraformer::year{static_cast<double>(k)*dt},
-			params.planetary_data,
-			pixel_size,
-			params.domain.center_latitude,
-			params.domain.orientation
-		);
+			make_lightmap_params(
+				terraformer::year{static_cast<double>(k)*dt},
+				params.planetary_data,
+				pixel_size,
+				params.domain.center_latitude,
+				params.domain.orientation)
+		};
+
+		gen();
 
 		std::array<char, 32> buffer{};
 		sprintf(buffer.data(), "__dump/lightmap_%04zu.exr", k);
-		store(lightmap, std::as_const(buffer).data());
+		store(buffers.back(), std::as_const(buffer).data());
 		printf("%zu                \r", k);
 		fflush(stdout);
 		++k;
