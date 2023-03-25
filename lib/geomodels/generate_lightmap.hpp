@@ -75,14 +75,16 @@ namespace terraformer
 			to_longcolat(maploc, params.center_latitude)
 		);
 
+		// NOTE: It is assumed that domain is only rotated around z axis. Thus, it is ok to discard
+		//       the current fragment if sun is below horizon before applying domain rotation.
+		if(sun_dir[2] <= 0.0)
+		{ return 0.0f; }
+
 		terraformer::displacement const sun_dir_float{
 			static_cast<float>(sun_dir[0]),
 			static_cast<float>(sun_dir[1]),
 			static_cast<float>(sun_dir[2])
 		};
-
-		if(sun_dir[2] <= 0.0)
-		{ return 0.0f; }
 
 		auto const d = terraformer::direction(sun_dir_float).apply(params.domain_rot);
 
@@ -96,6 +98,7 @@ namespace terraformer
 			loc,
 			heightmap(loc.x, loc.y),
 			d,
+			params.pixel_size,
 			// TODO: Use a proper upper limit instead of hardcoding 8192.0f
 			[heightmap](auto, auto loc){ return loc[2] <= 8192.0f && inside(heightmap, loc[0], loc[1]);}
 		);

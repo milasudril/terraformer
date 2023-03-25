@@ -19,6 +19,7 @@ namespace terraformer
 		pixel_coordinates loc,
 		float src_altitude,
 		direction src_dir,
+		float scale,
 		StopPredicate&& pred)
 	{
 		auto const x_0 = static_cast<int32_t>(loc.x);
@@ -27,10 +28,12 @@ namespace terraformer
 
 		size_t k = 0;
 		auto r = r_0;
+		displacement const v{src_dir[0], src_dir[1], scale*src_dir[2]};
 
 		while(pred(k, r))
 		{
-			if(r[2] < interp(heighmap, r[0], r[1]))
+			auto const z_ref = interp(heighmap, r[0], r[1]);
+			if(k != 0 && r[2] < z_ref)
 			{
 				return pixel_coordinates{
 					static_cast<uint32_t>(r[0] + 0.5f),
@@ -39,7 +42,7 @@ namespace terraformer
 			}
 
 			++k;
-			r = r_0 + static_cast<float>(k)*src_dir;
+			r = r_0 + static_cast<float>(k)*v;
 		}
 
 		return std::nullopt;
