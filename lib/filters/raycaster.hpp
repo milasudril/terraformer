@@ -32,7 +32,7 @@ namespace terraformer
 
 		while(pred(k, r))
 		{
-			auto const z_ref = interp(heighmap, r[0], r[1]);
+			auto const z_ref = interp(heighmap, r[0], r[1], clamp_at_boundary{});
 			if(k != 0 && r[2] < z_ref)
 			{
 				return pixel_coordinates{

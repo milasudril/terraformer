@@ -28,6 +28,6 @@ TESTCASE(terraformer_mod)
 	for(size_t k = 0; k != 65; ++k)
     {
 		auto const x = 0.25f*(static_cast<float>(k) - 32);
-		EXPECT_EQ(terraformer::mod(x, 4), vals[k%16]);
+		EXPECT_EQ(terraformer::mod(x, 4.0f), vals[k%16]);
     }
 }

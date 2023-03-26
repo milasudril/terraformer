@@ -29,6 +29,11 @@ namespace terraformer
 		return ret < 0.0f ? std::max(0.0f, ret + denom) : ret;
 	}
 
+	constexpr auto mod(int32_t x, int32_t denom)
+	{
+		return ((x % denom) + denom) % denom;
+	}
+
 	template<class T>
 	using empty = std::type_identity<T>;
 }

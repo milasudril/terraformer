@@ -107,7 +107,7 @@ int main()
 					.width = 49152.0f,
 					.height = 49152.0f
 				},
-				.pixel_count = 512
+				.pixel_count = 1024
 			},
 			.center_latitude = geosimd::rotation_angle{0x2000'0000},
 			.orientation = geosimd::rotation_angle{0x0000'0000}
@@ -168,7 +168,6 @@ int main()
 	};
 
 	random_generator rng;
-	{
 	terraformer::default_thread_pool threads{16};
 
 	make_heightmap(buffers, rng, std::ref(threads), pixel_size, params.initial_heightmap);
@@ -188,14 +187,12 @@ int main()
 	}
 	store(bounding_volume, "bounding_volume.exr");
 	store(buffers.front(), "after_laplace.exr");
-	}
 
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
-#if 1
+
 	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
-	size_t k = 24;
-	terraformer::default_thread_pool threads{1};
-//	while(static_cast<double>(k)*dt <= 1.0)
+	size_t k = 0;
+	while(static_cast<double>(k)*dt <= 1.0)
 	{
 		terraformer::lightmap_generator gen{
 			std::ref(threads),
@@ -219,7 +216,7 @@ int main()
 		++k;
 	}
 	putchar('\n');
-#endif
+
 #if 0
 	auto hm_conv_hull = buffers.front();
 

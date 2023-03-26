@@ -161,10 +161,12 @@ namespace terraformer
 
 	template<class T>
 	concept boundary_sampling_policy
-		= requires(T const& policy, float fx, uint32_t ix, uint32_t max_size)
+		= requires(T const& policy, float fx, int32_t ix, uint32_t ux, uint32_t max_size)
 	{
 		{policy(fx, max_size)} -> std::same_as<uint32_t>;
 		{policy(ix, max_size)} -> std::same_as<uint32_t>;
+		{policy(ux, max_size)} -> std::same_as<uint32_t>;
+
 	};
 
 	struct wrap_around_at_boundary
@@ -172,6 +174,11 @@ namespace terraformer
 		auto operator()(float x, uint32_t max) const
 		{
 			return static_cast<uint32_t>(mod(x, static_cast<float>(max)));
+		}
+
+		auto operator()(int32_t x, uint32_t max) const
+		{
+			return static_cast<uint32_t>(mod(x, static_cast<int32_t>(max)));
 		}
 
 		auto operator()(uint32_t x, uint32_t max) const
@@ -182,12 +189,17 @@ namespace terraformer
 
 	struct clamp_at_boundary
 	{
-		auto operator()(float x, uint32_t max) const
+		uint32_t operator()(float x, uint32_t max) const
 		{
-			return static_cast<uint32_t>(std::clamp(x, 0.0f, static_cast<float>(max  - 1)));
+			return static_cast<uint32_t>(std::clamp(x, 0.0f, static_cast<float>(max - 1)));
 		}
 
-		auto operator()(uint32_t x, uint32_t max) const
+		uint32_t operator()(int32_t x, uint32_t max) const
+		{
+			return static_cast<uint32_t>(std::clamp(x, 0, static_cast<int32_t>(max) - 1));
+		}
+
+		uint32_t operator()(uint32_t x, uint32_t max) const
 		{
 			return std::clamp(x, 0u, max - 1);
 		}
@@ -239,10 +251,10 @@ namespace terraformer
 		auto const w = span.width();
 		auto const h = span.height();
 
-		auto const x0 = bsp(x + w - 1, w);
-		auto const x1 = bsp(x + w + 1, w);
-		auto const y0 = bsp(y + h - 1, h);
-		auto const y1 = bsp(y + h + 1, h);
+		auto const x0 = bsp(static_cast<int32_t>(x) - 1, w);
+		auto const x1 = bsp(static_cast<int32_t>(x) + 1, w);
+		auto const y0 = bsp(static_cast<int32_t>(y) - 1, h);
+		auto const y1 = bsp(static_cast<int32_t>(y) + 1, h);
 
 		auto const z_x1_y = span(x1, y);
 		auto const z_x0_y = span(x0, y);

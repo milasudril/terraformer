@@ -62,7 +62,7 @@ namespace terraformer
 					pixel_coordinates loc,
 					lightmap_params const& params)
 	{
-		auto const n = normal(heightmap, loc.x, loc.y, 1.0f/params.pixel_size);
+		auto const n = normal(heightmap, loc.x, loc.y, 1.0f/params.pixel_size, clamp_at_boundary{});
 		auto const maploc = to_map_location(
 			loc,
 			heightmap.extents(),
