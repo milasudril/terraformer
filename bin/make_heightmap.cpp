@@ -195,7 +195,7 @@ int main()
 		gen();
 
 		std::array<char, 32> buffer{};
-		sprintf(buffer.data(), "__dump/lightmap_%04zu.exr", k);
+		sprintf(buffer.data(), "__dump/lightmap_%05zu.exr", k);
 		store(buffers.back(), std::as_const(buffer).data());
 		printf("%zu                \r", k);
 		fflush(stdout);
