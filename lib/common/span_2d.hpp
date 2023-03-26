@@ -160,18 +160,36 @@ namespace terraformer
 	}
 
 	template<class T>
-	auto interp(span_2d<T const> span, float x, float y)
+	concept boundary_sampling_policy
+		= requires(T const& policy, float fx, uint32_t ix, uint32_t max_size)
+	{
+		{policy(fx, max_size)} -> std::same_as<uint32_t>;
+		{policy(ix, max_size)} -> std::same_as<uint32_t>;
+	};
+
+	struct wrap_around_at_boundary
+	{
+		auto operator()(float x, uint32_t max) const
+		{
+			return static_cast<uint32_t>(mod(x, static_cast<float>(max)));
+		}
+
+		auto operator()(uint32_t x, uint32_t max) const
+		{
+			return x % max;
+		}
+	};
+
+	template<class T, boundary_sampling_policy U>
+	auto interp(span_2d<T const> span, float x, float y, U bsp = wrap_around_at_boundary{})
 	{
 		auto const w = span.width();
 		auto const h = span.height();
 
-		x = mod(x, static_cast<float>(w));
-		y = mod(y, static_cast<float>(h));
-
-		auto const x_0 = static_cast<uint32_t>(x);
-		auto const y_0 = static_cast<uint32_t>(y);
-		auto const x_1 = (x_0 + 1) % w;
-		auto const y_1 = (y_0 + 1) % h;
+		auto const x_0 = bsp(x);
+		auto const y_0 = bsp(y);
+		auto const x_1 = bsp(x_0 + 1, w);
+		auto const y_1 = bsp(y_0 + 1, h);
 
 		auto const z_00 = span(x_0, y_0);
 		auto const z_01 = span(x_0, y_1);
@@ -186,7 +204,8 @@ namespace terraformer
 		return (1.0f - eta)*z_x0 + eta*z_x1;
 	}
 
-	inline auto grad(span_2d<float const> span, float x, float y, float scale)
+	template<class T>
+	inline auto grad(span_2d<T const> span, float x, float y, float scale)
 	{
 		auto const x0 = x - 1.0f;
 		auto const x1 = x + 1.0f;
@@ -201,7 +220,8 @@ namespace terraformer
 		return 0.5f*scale*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}
 
-	inline auto grad(span_2d<float const> span, uint32_t x, uint32_t y, float scale)
+	template<class T>
+	inline auto grad(span_2d<T const> span, uint32_t x, uint32_t y, float scale)
 	{
 		auto const w = span.width();
 		auto const h = span.height();
