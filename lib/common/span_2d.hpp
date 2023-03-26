@@ -64,17 +64,7 @@ namespace terraformer
 
 		constexpr T& operator()(IndexType x, IndexType y) const
 		{
-			auto ptr = begin();
-			return *(ptr + y * width() + x);
-		}
-
-		constexpr auto row(IndexType y) const
-		{ return std::span{m_ptr + y*width(), width()}; }
-
-		constexpr auto update_row(IndexType y, std::span<T const> src)
-		{
-			std::copy(std::begin(src), std::end(src), m_ptr + y*width());
-			return *this;
+			return *(m_ptr + y * width() + x);
 		}
 
 	private:

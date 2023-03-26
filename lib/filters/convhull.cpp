@@ -59,30 +59,3 @@ std::vector<float> terraformer::convhull(std::span<float const> values)
 	ret.back() = values.back();
 	return ret;
 }
-
-terraformer::basic_image<float> terraformer::convhull_per_row(span_2d<float const> buffer)
-{
-	basic_image<float> ret{buffer.width(), buffer.height()};
-	for(uint32_t k = 0; k != buffer.height(); ++k)
-	{
-		ret.pixels().update_row(k, convhull(buffer.row(k)));
-	}
-	return ret;
-}
-
-terraformer::basic_image<float> terraformer::convhull_per_col(span_2d<float const> buffer)
-{
-	basic_image<float> ret{buffer.width(), buffer.height()};
-	std::vector<float> colbuff(buffer.height());
-	for(uint32_t x = 0; x != buffer.width(); ++x)
-	{
-		for(uint32_t y = 0; y != buffer.height(); ++y)
-		{ colbuff[y] = buffer(x, y); }
-
-		auto temp = convhull(colbuff);
-
-		for(uint32_t y = 0; y!= buffer.height(); ++y)
-		{ ret(x, y) = temp[y]; }
-	}
-	return ret;
-}

@@ -172,20 +172,6 @@ int main()
 
 	make_heightmap(buffers, rng, std::ref(threads), pixel_size, params.initial_heightmap);
 	putchar('\n');
-	terraformer::grayscale_image bounding_volume{canvas_size.width, canvas_size.height};
-	{
-		auto const a = convhull_per_row(buffers.front());
-		auto const b = convhull_per_col(a);
-
-		transform(a.pixels(),
-			b.pixels(),
-			bounding_volume.pixels(),
-			[](float a, float b){return std::max(a, b);});
-
-		bounding_volume = convhull_per_row(bounding_volume);
-		bounding_volume = convhull_per_col(bounding_volume);
-	}
-	store(bounding_volume, "bounding_volume.exr");
 	store(buffers.front(), "after_laplace.exr");
 
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
