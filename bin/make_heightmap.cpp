@@ -68,9 +68,30 @@ namespace terraformer
 		float std_dev;
 	};
 
+	struct cloud_base_level_descriptor
+	{
+		float expected_value;
+		float std_dev;
+	};
+
+	struct cloud_radius_descriptor
+	{
+		float expected_value;
+		float std_dev;
+	};
+
+	struct cloud_layer_descriptor
+	{
+		cloud_base_level_descriptor base_level;
+		cloud_radius_descriptor radius;
+		float expected_thickness;
+	};
+
 	struct weather_data_descriptor
 	{
 		wind_direction_descriptor wind_direction;
+		cloud_layer_descriptor cloud_layer;
+		float expected_percipitation_rate;
 	};
 
 	struct domain_descriptor
@@ -86,14 +107,8 @@ namespace terraformer
 		steady_plate_collision_zone_descriptor initial_heightmap;
 		planet_descriptor planetary_data;
 		weather_data_descriptor weather_data;
-
-
-#if 0
-		noisy_drift::params wind_direction;
-		float max_precipitation_rate;
-
-		geosimd::rotation_angle center_latitude;
-#endif
+		geosimd::rotation_angle ocean_direction;
+		float wind_errosion_strength;
 	};
 }
 
@@ -150,8 +165,24 @@ int main()
 			.wind_direction{
 				.expected_value = terraformer::south_west,
 				.std_dev = 1.0f/24.0f
-			}
-		}
+			},
+			.cloud_layer{
+				.base_level{
+					.expected_value = 4096.0f,
+					.std_dev = 1024.0f,
+				},
+				// TODO: It would be good compute radius from thickness given some volume
+				// TODO: These should have seasonal variation
+				.radius{
+					.expected_value = 8192.0f,
+					.std_dev = 4096.0f
+				},
+				.expected_thickness = 2048.0f
+			},
+			.expected_percipitation_rate = 2.4f  // TODO: This should have seasonal variation
+		},
+		.ocean_direction = terraformer::south,
+		.wind_errosion_strength = 1/65536.0f
 	};
 
 	auto const pixel_size = get_pixel_size(params.domain.size);
