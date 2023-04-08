@@ -12,6 +12,8 @@
 namespace terraformer
 {
 	[[nodiscard]] std::vector<float> convhull(std::span<float const> values);
+
+	[[nodiscard]] basic_image<float> convhull(span_2d<float const> values);
 }
 
 #endif

@@ -288,6 +288,11 @@ namespace terraformer
 	{
 		return location{static_cast<float>(x), static_cast<float>(y), span(x, y)};
 	}
+
+	inline auto to_location(span_2d<float const> span, pixel_coordinates loc)
+	{
+		return to_location(span, loc.x, loc.y);
+	}
 }
 
 #endif

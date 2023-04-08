@@ -59,3 +59,21 @@ std::vector<float> terraformer::convhull(std::span<float const> values)
 	ret.back() = values.back();
 	return ret;
 }
+
+terraformer::basic_image<float> terraformer::convhull(span_2d<float const> values)
+{
+	auto const w = values.width();
+	auto const h = values.height();
+
+	std::vector<location> points_out;
+	points_out.reserve(w*h);
+	points_out.push_back(to_location(values, 0, 0));
+	points_out.push_back(to_location(values, w - 1, 0));
+	points_out.push_back(to_location(values, w - 1, h - 1));
+	points_out.push_back(to_location(values, 0, h - 1));
+
+	auto const loc_max = max_element(values);
+	points_out.push_back(to_location(values, loc_max));
+
+	return basic_image<float>{w, h};
+}
