@@ -2,6 +2,8 @@
 
 #include "./convhull.hpp"
 
+#include <random>
+
 namespace
 {
 	struct loc_2d
@@ -74,6 +76,15 @@ terraformer::basic_image<float> terraformer::convhull(span_2d<float const> value
 
 	auto const loc_max = max_element(values);
 	points_out.push_back(to_location(values, loc_max));
+
+	auto remaining_points = to_location_array(values, [w, h, loc_max](uint32_t x, uint32_t y, auto){
+		return !( (x == 0 && y == 0)
+			|| (x == w - 1 && y == 0)
+			|| (x == w - 1 && y == h - 1)
+			|| (x == 0 && y == h - 1)
+			|| (x == loc_max.x && y == loc_max.y ) );
+	});
+	std::shuffle(std::begin(remaining_points), std::end(remaining_points), std::minstd_rand{});
 
 	return basic_image<float>{w, h};
 }
