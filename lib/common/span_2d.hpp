@@ -4,6 +4,7 @@
 #include "./utils.hpp"
 #include "./spaces.hpp"
 
+#include <functional>
 #include <cstdint>
 #include <type_traits>
 #include <cstddef>
@@ -106,6 +107,28 @@ namespace terraformer
 				f(col, row, span(col, row));
 			}
 		}
+	}
+
+	template<class T, class Cmp = std::less<T>>
+	pixel_coordinates max_element(span_2d<T> span, Cmp&& cmp = std::less<T>{})
+	{
+		using IndexType = typename span_2d<T>::IndexType;
+		pixel_coordinates ret{static_cast<IndexType>(0), static_cast<IndexType>(0)};
+		auto max = span(ret.x, ret.y);
+		for(IndexType row = 0; row != span.height(); ++row)
+		{
+			for(IndexType col = 0; col != span.width(); ++col)
+			{
+				auto const val = span(col, row);
+				if(cmp(max, val))
+				{
+					max = val;
+					ret = pixel_coordinates{col, row};
+				}
+			}
+		}
+
+		return ret;
 	}
 
 	template<class In, class Out, class Func>
@@ -259,6 +282,11 @@ namespace terraformer
 	{
 		auto const g = grad(span, x, y, scale, bsp);
 		return direction{displacement{-g[0], -g[1], 1.0f}};
+	}
+
+	inline auto to_location(span_2d<float const> span, uint32_t x, uint32_t y)
+	{
+		return location{static_cast<float>(x), static_cast<float>(y), span(x, y)};
 	}
 }
 
