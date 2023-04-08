@@ -219,7 +219,7 @@ namespace terraformer
 	};
 
 	template<class T, boundary_sampling_policy U = wrap_around_at_boundary>
-	auto interp(span_2d<T const> span, float x, float y, U bsp = wrap_around_at_boundary{})
+	auto interp(span_2d<T const> span, float x, float y, U&& bsp = wrap_around_at_boundary{})
 	{
 		auto const w = span.width();
 		auto const h = span.height();
@@ -259,7 +259,7 @@ namespace terraformer
 	}
 
 	template<class T, boundary_sampling_policy U = wrap_around_at_boundary>
-	inline auto grad(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U bsp = wrap_around_at_boundary{})
+	inline auto grad(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U&& bsp = wrap_around_at_boundary{})
 	{
 		auto const w = span.width();
 		auto const h = span.height();
@@ -278,7 +278,7 @@ namespace terraformer
 	}
 
 	template<class T, boundary_sampling_policy U = wrap_around_at_boundary>
-	inline auto normal(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U bsp = wrap_around_at_boundary{})
+	inline auto normal(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U&& bsp = wrap_around_at_boundary{})
 	{
 		auto const g = grad(span, x, y, scale, bsp);
 		return direction{displacement{-g[0], -g[1], 1.0f}};
@@ -292,6 +292,26 @@ namespace terraformer
 	inline auto to_location(span_2d<float const> span, pixel_coordinates loc)
 	{
 		return to_location(span, loc.x, loc.y);
+	}
+
+	struct always_true
+	{
+		template<class ... T>
+		constexpr bool operator()(T&&...) const { return true; }
+	};
+
+	template<class Filter = always_true>
+	inline auto to_location_array(span_2d<float const> span, Filter&& filter = always_true{})
+	{
+		std::vector<location> ret;
+		ret.reserve(span.width() * span.height());
+
+		for_each(span, [f = std::forward<Filter>(filter), &ret](uint32_t x, uint32_t y, float val) {
+			if(f(x, y, val))
+			{ ret.push_back(location{static_cast<float>(x), static_cast<float>(y), val}); }
+		});
+
+		return ret;
 	}
 }
 
