@@ -1,7 +1,9 @@
 //@	{"target":{"name":"convhull.o"}}
 
 #include "./convhull.hpp"
+#include "convhull/src/builder.hpp"
 
+#include <geosimd/triangle.hpp>
 #include <random>
 
 namespace
@@ -62,29 +64,31 @@ std::vector<float> terraformer::convhull(std::span<float const> values)
 	return ret;
 }
 
+
 terraformer::basic_image<float> terraformer::convhull(span_2d<float const> values)
 {
 	auto const w = values.width();
 	auto const h = values.height();
 
-	std::vector<location> points_out;
-	points_out.reserve(w*h);
-	points_out.push_back(to_location(values, 0, 0));
-	points_out.push_back(to_location(values, w - 1, 0));
-	points_out.push_back(to_location(values, w - 1, h - 1));
-	points_out.push_back(to_location(values, 0, h - 1));
+	auto points = to_location_array(values);
+	std::shuffle(std::begin(points), std::end(points), std::minstd_rand{});
 
-	auto const loc_max = max_element(values);
-	points_out.push_back(to_location(values, loc_max));
+	convhull::builder convhull_builder{points};
+	basic_image<float> ret{w, h};
 
-	auto remaining_points = to_location_array(values, [w, h, loc_max](uint32_t x, uint32_t y, auto){
-		return !( (x == 0 && y == 0)
-			|| (x == w - 1 && y == 0)
-			|| (x == w - 1 && y == h - 1)
-			|| (x == 0 && y == h - 1)
-			|| (x == loc_max.x && y == loc_max.y ) );
-	});
-	std::shuffle(std::begin(remaining_points), std::end(remaining_points), std::minstd_rand{});
+	for(auto& f : convhull_builder.faces())
+	{
+		geosimd::indirect_triangle const t{f.vertices[0], f.vertices[1], f.vertices[2]};
+		auto const t_resolved = geosimd::resolve(t, points, [](auto points, auto index){
+			return points[index.value()];
+		});
 
-	return basic_image<float>{w, h};
+		project_from_above(t_resolved, [](location loc, auto pixels){
+			auto const x = static_cast<uint32_t>(loc[0]);
+			auto const y = static_cast<uint32_t>(loc[1]);
+			pixels(x, y) = std::max(pixels(x, y), loc[2]);
+		}, ret.pixels());
+	}
+
+	return ret;
 }

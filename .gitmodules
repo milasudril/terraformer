@@ -10,3 +10,6 @@
 [submodule "pcg-cpp"]
 	path = pcg-cpp
 	url = https://github.com/imneme/pcg-cpp
+[submodule "convhull"]
+	path = convhull
+	url = https://github.com/milasudril/Convexhull-3D-Implementation-of-incremental-convexhull-algorithm
