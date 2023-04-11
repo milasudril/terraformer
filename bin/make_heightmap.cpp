@@ -205,6 +205,12 @@ int main()
 	putchar('\n');
 	store(buffers.front(), "after_laplace.exr");
 
+	auto const upper_limit = convhull(buffers.front());
+	store(upper_limit, "convhull.exr");
+
+
+#if 0
+
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
 
 	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
@@ -233,6 +239,7 @@ int main()
 		++k;
 	}
 	putchar('\n');
+#endif
 
 #if 0
 	auto hm_conv_hull = buffers.front();

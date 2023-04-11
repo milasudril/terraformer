@@ -300,15 +300,15 @@ namespace terraformer
 		constexpr bool operator()(T&&...) const { return true; }
 	};
 
-	template<class Filter = always_true>
+	template<class PointType, class Filter = always_true>
 	inline auto to_location_array(span_2d<float const> span, Filter&& filter = always_true{})
 	{
-		std::vector<location> ret;
+		std::vector<PointType> ret;
 		ret.reserve(span.width() * span.height());
 
 		for_each(span, [f = std::forward<Filter>(filter), &ret](uint32_t x, uint32_t y, float val) {
 			if(f(x, y, val))
-			{ ret.push_back(location{static_cast<float>(x), static_cast<float>(y), val}); }
+			{ ret.push_back(PointType{static_cast<float>(x), static_cast<float>(y), val}); }
 		});
 
 		return ret;

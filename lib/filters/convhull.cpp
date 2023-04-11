@@ -1,7 +1,19 @@
-//@	{"target":{"name":"convhull.o"}}
+//@	{
+//@	"target":{
+//@		"name":"convhull.o",
+//@		"dependencies":[
+//@			{"ref":"CGAL", "origin":"system"},
+//@			{"ref":"gmp", "origin":"pkg-config"}
+//@		]}
+//@	}
 
 #include "./convhull.hpp"
-#include "convhull/src/builder.hpp"
+
+#include <CGAL/Exact_predicates_inexact_constructions_kernel.h>
+#include <CGAL/Polyhedron_3.h>
+#include <CGAL/Surface_mesh.h>
+#include <CGAL/convex_hull_3.h>
+#include <CGAL/Polygon_mesh_processing/triangulate_faces.h>
 
 #include <geosimd/triangle.hpp>
 #include <random>
@@ -64,26 +76,53 @@ std::vector<float> terraformer::convhull(std::span<float const> values)
 	return ret;
 }
 
+namespace
+{
+	using cgal_kernel = CGAL::Exact_predicates_inexact_constructions_kernel;
+	using cgal_polyhedron = CGAL::Polyhedron_3<cgal_kernel>;
+	using cgal_point = cgal_kernel::Point_3;
+	using cgal_mesh = CGAL::Surface_mesh<cgal_point>;
+}
 
 terraformer::basic_image<float> terraformer::convhull(span_2d<float const> values)
 {
 	auto const w = values.width();
 	auto const h = values.height();
 
-	auto points = to_location_array(values);
-	std::shuffle(std::begin(points), std::end(points), std::minstd_rand{});
-
-	convhull::builder convhull_builder{points};
-	basic_image<float> ret{w, h};
-
-	for(auto& f : convhull_builder.faces())
+	cgal_mesh convhull;
 	{
-		geosimd::indirect_triangle const t{f.vertices[0], f.vertices[1], f.vertices[2]};
-		auto const t_resolved = geosimd::resolve(t, points, [](auto points, auto index){
-			return points[index.value()];
-		});
+		auto const points = to_location_array<cgal_point>(values);
+		CGAL::convex_hull_3(std::begin(points), std::end(points), convhull);
+		CGAL::Polygon_mesh_processing::triangulate_faces(convhull);
+	}
 
-		project_from_above(t_resolved, [](location loc, auto pixels){
+	std::vector<location> vertices;
+	std::ranges::transform(convhull.vertices(), std::back_inserter(vertices), [&convhull](auto vi){
+		auto const p = convhull.point(vi);
+		return location{static_cast<float>(p.x()), static_cast<float>(p.y()), static_cast<float>(p.z())};
+	});
+
+	std::vector<geosimd::indirect_triangle<uint32_t>> faces;
+	std::ranges::transform(convhull.faces(), std::back_inserter(faces), [&convhull](auto fi){
+		auto hf = convhull.halfedge(fi);
+		std::array<uint32_t, 3> verts{};
+		size_t k = 0;
+		for(auto edge_index : halfedges_around_face(hf, convhull))
+		{
+			assert(k != 3);
+			verts[k] = target(edge_index, convhull);
+			++k;
+		}
+
+		return geosimd::indirect_triangle<uint32_t>{verts[0], verts[1], verts[2]};
+
+	});
+
+	basic_image<float> ret{w, h};
+	for(auto const& face : faces)
+	{	auto const T = geosimd::resolve(face, vertices);
+
+		project_from_above(T, [](location loc, auto pixels){
 			auto const x = static_cast<uint32_t>(loc[0]);
 			auto const y = static_cast<uint32_t>(loc[1]);
 			pixels(x, y) = std::max(pixels(x, y), loc[2]);
