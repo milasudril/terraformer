@@ -59,6 +59,7 @@ namespace terraformer
 	}
 
 	inline float intensity(span_2d<float const> heightmap,
+					span_2d<float const> upper_boundary,
 					pixel_coordinates loc,
 					lightmap_params const& params)
 	{
@@ -99,8 +100,15 @@ namespace terraformer
 			heightmap(loc.x, loc.y),
 			d,
 			params.pixel_size,
-			// TODO: Use a proper upper limit instead of hardcoding 8192.0f
-			[heightmap](auto, auto loc){ return loc[2] <= 8192.0f && inside(heightmap, loc[0], loc[1]);}
+			[heightmap, upper_boundary](auto, auto loc){
+				if(!inside(heightmap, loc[0], loc[1]))
+				{ return raycast_pred_result::stop; }
+
+				if(loc[2] > interp(upper_boundary, loc[0], loc[1], clamp_at_boundary{}))
+				{ return raycast_pred_result::stop; }
+
+				return raycast_pred_result::keep_going;
+			}
 		);
 
 		if(raycast_result.has_value())
@@ -111,6 +119,7 @@ namespace terraformer
 
 	inline void generate_lightmap(span_2d<float> output_buffer,
 		span_2d<float const> heightmap,
+		span_2d<float const> upper_boundary,
 		lightmap_params const& params,
 		scanline_range range)
 	{
@@ -118,7 +127,7 @@ namespace terraformer
 		{
 			for(uint32_t l = 0; l != heightmap.width(); ++l)
 			{
-				output_buffer(l, k) = intensity(heightmap, pixel_coordinates{.x = l, .y = k}, params);
+				output_buffer(l, k) = intensity(heightmap, upper_boundary, pixel_coordinates{.x = l, .y = k}, params);
 			}
 		}
 	}
@@ -126,6 +135,7 @@ namespace terraformer
 	inline void generate_lightmap(
 		span_2d<float> output,
 		span_2d<float const> heightmap,
+		span_2d<float const> upper_boundary,
 		year t,
 		planet_descriptor const& planetary_data,
 		float pixel_size,
@@ -134,14 +144,16 @@ namespace terraformer
 	{
 		generate_lightmap(output,
 			heightmap,
+			upper_boundary,
 			make_lightmap_params(t, planetary_data, pixel_size, center_latitude, domain_orientation),
 			scanline_range{0, heightmap.height()});
 	}
 
 	using lightmap_generation_pass = notifying_task<
 		std::reference_wrapper<signaling_counter>,
-		void (*)(span_2d<float>, span_2d<float const>, lightmap_params const&, scanline_range),
+		void (*)(span_2d<float>, span_2d<float const>, span_2d<float const>, lightmap_params const&, scanline_range),
 		span_2d<float>,
+		span_2d<float const>,
 		span_2d<float const>,
 		std::reference_wrapper<lightmap_params const> const,
 		scanline_range>;
@@ -156,10 +168,12 @@ namespace terraformer
 		explicit lightmap_generator(ExecutorFactory&& exec_factory,
 			span_2d<float> output_buffer,
 			span_2d<float const> input_buffer,
+			span_2d<float const> upper_boundary,
 			lightmap_params const& params):
 			m_executor{exec_factory(empty<step_exec_type>{})},
 			m_output_buffer{output_buffer},
 			m_input_buffer{input_buffer},
+			m_upper_boundary{upper_boundary},
 			m_params{params}
 		{}
 
@@ -176,13 +190,15 @@ namespace terraformer
 					std::ref(counter),
 					+[](span_2d<float> output_buffer,
 						span_2d<float const> heightmap,
+						span_2d<float const> upper_boundary,
 						lightmap_params const& params,
 						scanline_range range)
 					{
-						return generate_lightmap(output_buffer, heightmap, params, range);
+						return generate_lightmap(output_buffer, heightmap, upper_boundary, params, range);
 					},
 					m_output_buffer,
 					m_input_buffer,
+					m_upper_boundary,
 					std::cref(m_params),
 					scanline_range{
 						.begin = static_cast<uint32_t>(k*batch_size),
@@ -197,6 +213,7 @@ namespace terraformer
 		executor_type m_executor;
 		span_2d<float> m_output_buffer;
 		span_2d<float const> m_input_buffer;
+		span_2d<float const> m_upper_boundary;
 		lightmap_params m_params;
 	};
 }

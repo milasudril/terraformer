@@ -112,6 +112,7 @@ namespace terraformer
 	};
 }
 
+void use(terraformer::span_2d<float const>);
 
 int main()
 {
@@ -208,9 +209,6 @@ int main()
 	auto const upper_limit = convhull(buffers.front());
 	store(upper_limit, "convhull.exr");
 
-
-#if 0
-
 	terraformer::grayscale_image lightmap{canvas_size.width, canvas_size.height};
 
 	auto const dt = 1.0/(48.0*params.planetary_data.spin_frequency);
@@ -221,6 +219,7 @@ int main()
 			std::ref(threads),
 			buffers.back(),
 			buffers.front(),
+			upper_limit,
 			make_lightmap_params(
 				terraformer::year{static_cast<double>(k)*dt},
 				params.planetary_data,
@@ -230,16 +229,20 @@ int main()
 		};
 
 		gen();
-
+		use(buffers.back());
+/*
 		std::array<char, 32> buffer{};
-		sprintf(buffer.data(), "__dump/lightmap_%04zu.exr", k);
+		sprintf(buffer.data(), "__dump/lightmap_%05zu.exr", k);
 		store(buffers.back(), std::as_const(buffer).data());
-		printf("%zu                \r", k);
-		fflush(stdout);
+*/
+		if(k % 16 == 0)
+		{
+			printf("%zu                \r", k);
+			fflush(stdout);
+		}
 		++k;
 	}
 	putchar('\n');
-#endif
 
 #if 0
 	auto hm_conv_hull = buffers.front();

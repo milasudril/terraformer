@@ -26,6 +26,8 @@ namespace
 	}
 }
 
+void use(terraformer::span_2d<float const>){}
+
 terraformer::image terraformer::load(
 	empty<image>,
 	void* arg,

@@ -8,10 +8,12 @@
 
 namespace terraformer
 {
+	enum class raycast_pred_result{stop, keep_going};
+
 	template<class Func>
 	concept raycast_stop_predicate = requires(Func f, size_t k, location loc)
 	{
-		{f(k, loc)} -> std::same_as<bool>;
+		{f(k, loc)} -> std::same_as<raycast_pred_result>;
 	};
 
 	template<raycast_stop_predicate StopPredicate>
@@ -30,7 +32,7 @@ namespace terraformer
 		auto r = r_0;
 		displacement const v{src_dir[0], src_dir[1], scale*src_dir[2]};
 
-		while(pred(k, r))
+		while(pred(k, r) == raycast_pred_result::keep_going)
 		{
 			auto const z_ref = interp(heighmap, r[0], r[1], clamp_at_boundary{});
 			if(k != 0 && r[2] < z_ref)
