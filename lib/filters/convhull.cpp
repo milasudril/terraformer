@@ -120,12 +120,21 @@ terraformer::basic_image<float> terraformer::convhull(span_2d<float const> value
 
 	basic_image<float> ret{w, h};
 	for(auto const& face : faces)
-	{	auto const T = geosimd::resolve(face, vertices);
+	{
+		auto const T = geosimd::resolve(face, vertices);
 
-		project_from_above(T, [](location loc, auto pixels){
-			auto const x = static_cast<uint32_t>(loc[0]);
-			auto const y = static_cast<uint32_t>(loc[1]);
-			pixels(x, y) = std::max(pixels(x, y), loc[2]);
+		decltype(T) scaled_triangle{
+			location{0.0f, 0.0f, 0.0f} + 2.0f*(T.p1 - location{0.0f, 0.0f, 0.0f}),
+			location{0.0f, 0.0f, 0.0f} + 2.0f*(T.p2 - location{0.0f, 0.0f, 0.0f}),
+			location{0.0f, 0.0f, 0.0f} + 2.0f*(T.p3 - location{0.0f, 0.0f, 0.0f}),
+		};
+
+		project_from_above(scaled_triangle, [](location loc, auto pixels){
+			auto const v = location{0.5f, 0.5f, 0.0f} + 0.5f*(loc - location{0.0f, 0.0f, 0.0f});
+			auto const x = std::min(static_cast<uint32_t>(v[0]), pixels.width() - 1);
+			auto const y = std::min(static_cast<uint32_t>(v[1]), pixels.height() - 1);
+			assert(loc[2] > 0.0f);
+			pixels(x, y) = std::max(pixels(x, y), v[2]);
 		}, ret.pixels());
 	}
 
