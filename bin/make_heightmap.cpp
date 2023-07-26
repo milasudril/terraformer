@@ -7,7 +7,9 @@
 #include "lib/filters/gradient_tracer.hpp"
 #include "lib/filters/raycaster.hpp"
 #include "lib/filters/convhull.hpp"
+#include "lib/filters/fill_from_points.hpp"
 #include "lib/curve_tool/wave_sum.hpp"
+
 
 #include <random>
 #include <chrono>
