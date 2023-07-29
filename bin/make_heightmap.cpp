@@ -208,6 +208,7 @@ int main()
 	putchar('\n');
 	store(buffers.front(), "after_laplace.exr");
 
+#if 0
 	auto const upper_limit = convhull(buffers.front());
 	store(upper_limit, "convhull.exr");
 
@@ -246,7 +247,6 @@ int main()
 	}
 	putchar('\n');
 
-#if 0
 	auto hm_conv_hull = buffers.front();
 
 	{

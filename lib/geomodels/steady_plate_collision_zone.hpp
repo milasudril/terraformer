@@ -6,7 +6,11 @@
 #include "lib/common/double_buffer.hpp"
 #include "lib/filters/curve_rasterizer.hpp"
 #include "lib/filters/diffuser.hpp"
+#include "lib/filters/fill_from_points.hpp"
 #include "lib/execution/thread_pool.hpp"
+
+#include "lib/pixel_store/image_io.hpp"
+
 
 namespace terraformer
 {
@@ -34,6 +38,76 @@ namespace terraformer
 		auto const h = buffers.front().height();
 
 		terraformer::grayscale_image main_ridge{w, h};
+		fill_from_points(main_ridge.pixels(), curve, [
+				pixel_size,
+				w = static_cast<float>(w)*pixel_size,
+				h = static_cast<float>(h)*pixel_size,
+				&boundary = heightmap_params.boundary
+		](auto pixel_point, auto points){
+			auto const r0 = location{0.0f, 0.0f, 0.0f} + (pixel_point - location{0.0f, 0.0f, 0.0f})*pixel_size;
+			auto i = std::ranges::min_element(points, [r0](auto const a, auto const b) {
+				auto const a_horz = a - displacement{0.0f, 0.0f, a[2]};
+				auto const b_horz = b - displacement{0.0f, 0.0f, b[2]};
+				return norm(r0 - a_horz) < norm(r0 - b_horz);
+			});
+			auto const O = *i;
+			auto const P = r0 + displacement{0.0f, 0.0f, O[2]};
+			return [w, h, & boundary](auto const ray) {
+				std::array const segs{
+					geosimd::line_segment{location{w, 0.0f, 0.0f}, location{w, h, 0.0f}},
+					geosimd::line_segment{location{w, h, 0.0f}, location{0.0f, h, 0.0f}},
+					geosimd::line_segment{location{0.0f, 0.0f, 0.0f}, location{0.0, h, 0.0f}},
+					geosimd::line_segment{location{0.0f, 0.0f, 0.0f}, location{w, 0.0f, 0.0f}}
+				};
+
+				constexpr std::array map_point{
+					+[](location O, float xi, geosimd::line_parameter<float> eta, const domain_boundary_conditions& b){
+						auto const z_0 = b.back_level;
+						auto const z_1 = b.front_level;
+						auto const z_e = (z_1 - z_0)*eta.get()*eta.get()*(3.0f - 2.0f*eta.get()) + z_0;
+						auto const z_r = O[2];
+						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
+					},
+					+[](location O, float xi, geosimd::line_parameter<float>, const domain_boundary_conditions& b){
+						auto const z_r = O[2];
+						auto const z_e = b.front_level;
+						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
+					},
+					+[](location O, float xi, geosimd::line_parameter<float> eta, const domain_boundary_conditions& b){
+						auto const z_0 = b.back_level;
+						auto const z_1 = b.front_level;
+						auto const z_e = (z_1 - z_0)*eta.get()*eta.get()*(3.0f - 2.0f*eta.get()) + z_0;
+						auto const z_r = O[2];
+						return z_e + (1.0f - xi)*(z_r - z_e);
+					},
+					+[](location O, float xi, geosimd::line_parameter<float>, const domain_boundary_conditions& b){
+						auto const z_r = O[2];
+						auto const z_e = b.back_level;
+						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
+					}
+				};
+
+				for(size_t k = 0; k != std::size(segs); ++k)
+				{
+					auto const intersect = intersect_2d(extension(ray), extension(segs[k]));
+					if(!intersect.has_value())
+					{ continue; }
+
+					if( intersect->a.get() > 0.0f
+						&& intersect->b.get() >=0.0f
+						&& intersect->b.get() <= 1.0f)
+					{
+						auto const t_ray = 1.0f;
+						auto const O = ray.origin;
+						auto const xi = t_ray / intersect->a.get();
+						return map_point[k](O, xi, intersect->b, boundary);
+					}
+				}
+				return 0.0f;
+			}(geosimd::ray{O, P});
+		});
+		store(main_ridge.pixels(), "test.exr");
+
 		draw(main_ridge.pixels(), curve, terraformer::line_segment_draw_params{
 			.value = 1.0f,
 			.scale = pixel_size
@@ -58,7 +132,7 @@ namespace terraformer
 		buffers.swap();
 
 		solve_bvp(buffers, terraformer::laplace_solver_params{
-			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
+			.tolerance = 1.0e-3f * heightmap_params.main_ridge.start_location[2],
 			.step_executor_factory = std::forward<DiffusionStepExecutorFactory>(exec_factory),
 			.boundary = [
 				values = main_ridge,
@@ -67,8 +141,8 @@ namespace terraformer
 				if(y == 0)
 				{
 					return terraformer::dirichlet_boundary_pixel{
-						.weight=1.0f,
-						.value=front_back.back_level
+						.weight = 1.0f,
+						.value = front_back.back_level
 					};
 				}
 
@@ -79,6 +153,20 @@ namespace terraformer
 						.value=front_back.front_level
 					};
 				}
+#if 0
+				if(x == 0 || x == values.width())
+				{
+					auto const z_0 = front_back.back_level;
+					auto const z_1 = front_back.front_level;
+					auto const xi = static_cast<float>(y)/static_cast<float>(values.height());
+					auto const z =  (z_1 - z_0)*xi*xi*(3.0f - 2.0f*xi) + z_0;
+
+					return terraformer::dirichlet_boundary_pixel{
+						.weight = 1.0f,
+						.value = z
+					};
+				}
+#endif
 
 				auto const val = values(x, y);
 				return val >= 0.5f ?
