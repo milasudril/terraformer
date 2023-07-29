@@ -54,56 +54,32 @@ namespace terraformer
 			auto const P = r0 + displacement{0.0f, 0.0f, O[2]};
 			return [w, h, & boundary](auto const ray) {
 				std::array const segs{
-					geosimd::line_segment{location{w, 0.0f, 0.0f}, location{w, h, 0.0f}},
-					geosimd::line_segment{location{w, h, 0.0f}, location{0.0f, h, 0.0f}},
-					geosimd::line_segment{location{0.0f, 0.0f, 0.0f}, location{0.0, h, 0.0f}},
-					geosimd::line_segment{location{0.0f, 0.0f, 0.0f}, location{w, 0.0f, 0.0f}}
+					geosimd::line_segment{location{0.0f, 0.0f, 0.0f}, location{w, 0.0f, 0.0f}},
+					geosimd::line_segment{location{w, h, 0.0f}, location{0.0f, h, 0.0f}}
 				};
 
 				constexpr std::array map_point{
-					+[](location O, float xi, geosimd::line_parameter<float> eta, const domain_boundary_conditions& b){
-						auto const z_0 = b.back_level;
-						auto const z_1 = b.front_level;
-						auto const z_e = (z_1 - z_0)*eta.get()*eta.get()*(3.0f - 2.0f*eta.get()) + z_0;
-						auto const z_r = O[2];
-						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
-					},
-					+[](location O, float xi, geosimd::line_parameter<float>, const domain_boundary_conditions& b){
-						auto const z_r = O[2];
-						auto const z_e = b.front_level;
-						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
-					},
-					+[](location O, float xi, geosimd::line_parameter<float> eta, const domain_boundary_conditions& b){
-						auto const z_0 = b.back_level;
-						auto const z_1 = b.front_level;
-						auto const z_e = (z_1 - z_0)*eta.get()*eta.get()*(3.0f - 2.0f*eta.get()) + z_0;
-						auto const z_r = O[2];
-						return z_e + (1.0f - xi)*(z_r - z_e);
-					},
-					+[](location O, float xi, geosimd::line_parameter<float>, const domain_boundary_conditions& b){
+					+[](location O, float xi, const domain_boundary_conditions& b){
 						auto const z_r = O[2];
 						auto const z_e = b.back_level;
+						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
+					},
+					+[](location O, float xi, const domain_boundary_conditions& b){
+						auto const z_r = O[2];
+						auto const z_e = b.front_level;
 						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
 					}
 				};
 
-				for(size_t k = 0; k != std::size(segs); ++k)
-				{
-					auto const intersect = intersect_2d(extension(ray), extension(segs[k]));
-					if(!intersect.has_value())
-					{ continue; }
+				auto const k = (ray.target - ray.origin)[1] > 0.0f ? 1 : 0;
+				auto const intersect = intersect_2d(extension(ray), extension(segs[k]));
+				if(!intersect.has_value())
+				{ return 0.0f; }
 
-					if( intersect->a.get() > 0.0f
-						&& intersect->b.get() >=0.0f
-						&& intersect->b.get() <= 1.0f)
-					{
-						auto const t_ray = 1.0f;
-						auto const O = ray.origin;
-						auto const xi = t_ray / intersect->a.get();
-						return map_point[k](O, xi, intersect->b, boundary);
-					}
-				}
-				return 0.0f;
+				auto const t_ray = 1.0f;
+				auto const O = ray.origin;
+				auto const xi = t_ray / intersect->a.get();
+				return map_point[k](O, xi, boundary);
 			}(geosimd::ray{O, P});
 		});
 		store(main_ridge.pixels(), "test.exr");
