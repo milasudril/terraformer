@@ -53,34 +53,17 @@ namespace terraformer
 			auto const O = *i;
 			auto const P = r0 + displacement{0.0f, 0.0f, O[2]};
 			return [w, h, & boundary](auto const ray) {
-				std::array const segs{
-					geosimd::line_segment{location{0.0f, 0.0f, 0.0f}, location{w, 0.0f, 0.0f}},
-					geosimd::line_segment{location{w, h, 0.0f}, location{0.0f, h, 0.0f}}
-				};
-
-				constexpr std::array map_point{
-					+[](location O, float xi, const domain_boundary_conditions& b){
-						auto const z_r = O[2];
-						auto const z_e = b.back_level;
-						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
-					},
-					+[](location O, float xi, const domain_boundary_conditions& b){
-						auto const z_r = O[2];
-						auto const z_e = b.front_level;
-						return z_e + (1.0f - xi)*(1.0f - xi)*(z_r - z_e);
-					}
-				};
-
-				auto const k = (ray.target - ray.origin)[1] > 0.0f ? 1 : 0;
-				auto const intersect = intersect_2d(extension(ray), extension(segs[k]));
-				if(!intersect.has_value())
-				{ return 0.0f; }
-
-				auto const t_ray = 1.0f;
-				auto const O = ray.origin;
-				auto const xi = t_ray / intersect->a.get();
-				return map_point[k](O, xi, boundary);
-			}(geosimd::ray{O, P});
+				auto const r = ray.target - ray.origin;
+				auto const d_top = norm(r);
+				auto const d_boundary = r[1] < 0.0f ? ray.target[1] : h - ray.target[1];
+				auto const d_top_boundary = r[1] < 0.0f ? 16384.0f : h - 16384.0f;
+				auto const z_boundary = r[1] < 0.0f ?  boundary.back_level : boundary.front_level;
+				constexpr auto slope_factor = 2.0f;
+				auto const xi = std::clamp(1.0f - d_top/(slope_factor*4096.0f), 0.0f, 1.0f);
+				auto const eta = d_boundary/d_top_boundary;
+				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
+				return z_valley + (ray.origin[2] - z_valley)*xi*xi;
+ 			}(geosimd::ray{O, P});
 		});
 		store(main_ridge.pixels(), "test.exr");
 
