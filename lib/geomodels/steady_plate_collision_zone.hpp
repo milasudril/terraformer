@@ -53,11 +53,8 @@ namespace terraformer
 				auto mean_distance_to_ridge = 0.0f;
 				for(size_t k = 0; k != std::size(curve); ++k)
 				{
-					auto const ridge_point = curve[k];
-					auto const d_ridge_boundary = side < 0.0f?
-						 ridge_point[1]
-						:pixel_size*static_cast<float>(h) - ridge_point[1];
-					mean_distance_to_ridge += d_ridge_boundary;
+					auto const ridge_point = curve[k] - displacement{0.0f, 0.0f, curve[k][2]};
+					mean_distance_to_ridge += distance(ridge_point, current_loc);
 				}
 				mean_distance_to_ridge /= static_cast<float>(std::size(curve));
 				auto const z_boundary = side < 0.0f?
@@ -66,7 +63,7 @@ namespace terraformer
 				auto const distance_to_boundary = side < 0.0f?
 					current_loc[1]:
 					pixel_size*static_cast<float>(h) - current_loc[1];
-				auto const eta = distance_to_boundary/mean_distance_to_ridge;
+				auto const eta = distance_to_boundary/(distance_to_boundary + mean_distance_to_ridge);
 				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
 
 //				max_val = std::max(z_mountain, max_val);
