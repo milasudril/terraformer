@@ -136,7 +136,7 @@ int main()
 				.back_level = 3072.0f
 			},
 			.main_ridge{
-				.start_location = terraformer::location{0.0f, 16384.0f, 8192.0f},
+				.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
 				.distance_to_endpoint = 49152.0f,
 				.wave_params{
 					.wavelength = 24576.0f,
@@ -202,11 +202,11 @@ int main()
 	};
 
 	random_generator rng;
-	terraformer::default_thread_pool threads{16};
+//	terraformer::default_thread_pool threads{16};
 
-	make_heightmap(buffers, rng, std::ref(threads), pixel_size, params.initial_heightmap);
+	make_heightmap_2(buffers, rng, pixel_size, params.initial_heightmap);
 	putchar('\n');
-	store(buffers.front(), "after_laplace.exr");
+	store(buffers.front(), "init_state.exr");
 
 #if 0
 	auto const upper_limit = convhull(buffers.front());

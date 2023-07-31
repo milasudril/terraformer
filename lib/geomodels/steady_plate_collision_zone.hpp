@@ -26,6 +26,65 @@ namespace terraformer
 		main_ridge_params main_ridge;
 	};
 
+	template<class Rng>
+	void make_heightmap_2(double_buffer<terraformer::grayscale_image>& buffers,
+		Rng&& rng,
+		float pixel_size,
+		steady_plate_collision_zone_descriptor const& heightmap_params)
+	{
+		auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
+		auto& current_buffer = buffers.back();
+		auto const w = current_buffer.width();
+		auto const h = current_buffer.height();
+//		float max_val = 0.0f;
+		for(uint32_t y = 0; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				assert(std::size(curve) == w);
+				location const current_loc{
+					pixel_size*static_cast<float>(x),
+					pixel_size*static_cast<float>(y),
+					0.0f
+				};
+
+				// NOTE: This works because curve is a function of x
+				auto const side = current_loc[1] < curve[x][1]? -1.0f : 1.0f;
+				auto mean_distance_to_ridge = 0.0f;
+				for(size_t k = 0; k != std::size(curve); ++k)
+				{
+					auto const ridge_point = curve[k];
+					auto const d_ridge_boundary = side < 0.0f?
+						 ridge_point[1]
+						:pixel_size*static_cast<float>(h) - ridge_point[1];
+					mean_distance_to_ridge += d_ridge_boundary;
+				}
+				mean_distance_to_ridge /= static_cast<float>(std::size(curve));
+				auto const z_boundary = side < 0.0f?
+					heightmap_params.boundary.back_level:
+					heightmap_params.boundary.front_level;
+				auto const distance_to_boundary = side < 0.0f?
+					current_loc[1]:
+					pixel_size*static_cast<float>(h) - current_loc[1];
+				auto const eta = distance_to_boundary/mean_distance_to_ridge;
+				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
+
+//				max_val = std::max(z_mountain, max_val);
+				current_buffer(x, y) = z_valley;
+			}
+
+		}
+#if 0
+		for(uint32_t y = 0; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{ current_buffer(x, y) = current_buffer(x, y)*3072.0f/max_val; }
+		}
+		printf("%.8g\n", max_val);
+#endif
+		buffers.swap();
+	}
+
 	template<class Rng, class DiffusionStepExecutorFactory>
 	void make_heightmap(double_buffer<terraformer::grayscale_image>& buffers,
 		Rng&& rng,
@@ -56,7 +115,7 @@ namespace terraformer
 				auto const r = ray.target - ray.origin;
 				auto const d_top = norm(r);
 				auto const d_boundary = r[1] < 0.0f ? ray.target[1] : h - ray.target[1];
-				auto const d_top_boundary = r[1] < 0.0f ? 16384.0f : h - 16384.0f;
+				auto const d_top_boundary = r[1] < 0.0f ? 16384.0f : h - 16384.0f;  // TODO: Test closest orthogonal point instead of average
 				auto const z_boundary = r[1] < 0.0f ?  boundary.back_level : boundary.front_level;
 				constexpr auto slope_factor = 2.0f;
 				auto const xi = std::clamp(1.0f - d_top/(slope_factor*4096.0f), 0.0f, 1.0f);
@@ -90,6 +149,8 @@ namespace terraformer
 		});
 		buffers.swap();
 
+		// TODO: Apply laplace only in proximity of the ridge. Would like to set curve elevation to
+		//       a value relative to base level, rather than sea level.
 		solve_bvp(buffers, terraformer::laplace_solver_params{
 			.tolerance = 1.0e-3f * heightmap_params.main_ridge.start_location[2],
 			.step_executor_factory = std::forward<DiffusionStepExecutorFactory>(exec_factory),
