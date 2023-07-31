@@ -50,20 +50,21 @@ namespace terraformer
 
 				// NOTE: This works because curve is a function of x
 				auto const side = current_loc[1] < curve[x][1]? -1.0f : 1.0f;
-				auto mean_distance_to_ridge = 0.0f;
-				for(size_t k = 0; k != std::size(curve); ++k)
+				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b)
 				{
-					auto const ridge_point = curve[k] - displacement{0.0f, 0.0f, curve[k][2]};
-					mean_distance_to_ridge += distance(ridge_point, current_loc);
-				}
-				mean_distance_to_ridge /= static_cast<float>(std::size(curve));
+					auto const loc_a = a - displacement{0.0f, 0.0f, a[2]};
+					auto const loc_b = b - displacement{0.0f, 0.0f, b[2]};
+					return distance(current_loc, loc_a) < distance(current_loc, loc_b);
+				});
+				auto const ridge_point = *i - displacement{0.0f, 0.0f, (*i)[2]};
+				auto const distance_to_ridge = distance(current_loc, ridge_point);
 				auto const z_boundary = side < 0.0f?
 					heightmap_params.boundary.back_level:
 					heightmap_params.boundary.front_level;
 				auto const distance_to_boundary = side < 0.0f?
 					current_loc[1]:
 					pixel_size*static_cast<float>(h) - current_loc[1];
-				auto const eta = distance_to_boundary/(distance_to_boundary + mean_distance_to_ridge);
+				auto const eta = distance_to_boundary/(distance_to_boundary + distance_to_ridge);
 				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
 
 //				max_val = std::max(z_mountain, max_val);
