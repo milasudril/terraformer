@@ -36,7 +36,7 @@ namespace terraformer
 		auto& current_buffer = buffers.back();
 		auto const w = current_buffer.width();
 		auto const h = current_buffer.height();
-//		float max_val = 0.0f;
+
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
@@ -50,8 +50,8 @@ namespace terraformer
 
 				// NOTE: This works because curve is a function of x
 				auto const side = current_loc[1] < curve[x][1]? -1.0f : 1.0f;
-				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b)
-				{
+
+				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b) {
 					auto const loc_a = a - displacement{0.0f, 0.0f, a[2]};
 					auto const loc_b = b - displacement{0.0f, 0.0f, b[2]};
 					return distance(current_loc, loc_a) < distance(current_loc, loc_b);
@@ -67,19 +67,10 @@ namespace terraformer
 				auto const eta = distance_to_boundary/(distance_to_boundary + distance_to_ridge);
 				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
 
-//				max_val = std::max(z_mountain, max_val);
 				current_buffer(x, y) = z_valley;
 			}
 
 		}
-#if 0
-		for(uint32_t y = 0; y != h; ++y)
-		{
-			for(uint32_t x = 0; x != w; ++x)
-			{ current_buffer(x, y) = current_buffer(x, y)*3072.0f/max_val; }
-		}
-		printf("%.8g\n", max_val);
-#endif
 		buffers.swap();
 	}
 

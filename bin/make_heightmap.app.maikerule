@@ -1,4 +1,4 @@
 {
-	"target":{"name":"make_heightmap"}
-	,"dependencies":[{"ref":"./make_heightmap.o", "rel":"implementation"}]
+	"target":{"name":"generate_bumps"}
+	,"dependencies":[{"ref":"./generate_bumps.o", "rel":"implementation"}]
 }
