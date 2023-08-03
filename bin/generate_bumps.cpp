@@ -17,7 +17,7 @@ struct fractal_wave_params
 {
 	float wavelength;
 	float scaling_factor;
-	float exponent_noise;
+	float scaling_noise;
 	float phase_shift;
 	float phase_shift_noise;
 };
@@ -39,7 +39,7 @@ int main()
 	{
 		.wavelength = 1024.0f,
 		.scaling_factor = std::numbers::phi_v<float>,
-		.exponent_noise = std::numbers::phi_v<float>/16.0f,
+		.scaling_noise = std::numbers::phi_v<float>/16.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
 		.phase_shift_noise = 1.0f
 	};
@@ -48,7 +48,7 @@ int main()
 	{
 		.wavelength = 1024.0f,
 		.scaling_factor = std::numbers::phi_v<float>,
-		.exponent_noise = std::numbers::phi_v<float>/16.0f,
+		.scaling_noise = std::numbers::phi_v<float>/16.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
 		.phase_shift_noise = 1.0f
 	};
@@ -60,6 +60,8 @@ int main()
 		0.0f
 	};
 	auto const rho2 = rho.get()*rho.get();
+	auto scaling_noise_x = std::uniform_real_distribution{-params_x.scaling_noise, params_x.scaling_noise};
+	auto scaling_noise_y = std::uniform_real_distribution{-params_y.scaling_noise, params_y.scaling_noise};
 	for(size_t k = 0; k != std::size(wave_components); ++k)
 	{
 		for(size_t l = 0; l != std::size(wave_components[k]); ++l)
@@ -70,7 +72,8 @@ int main()
 				static_cast<float>(k),
 				0.0f
 			} + terraformer::displacement{0.5f, 0.5f, 0.0f};
-			auto const r2 = r.get()*r.get();
+			auto const noisy_r = r + terraformer::displacement{scaling_noise_x(rng), scaling_noise_y(rng), 0.0f};
+			auto const r2 = noisy_r.get()*noisy_r.get();
 			auto const k_hat = terraformer::direction{r};
 			auto const scaling_factor = std::exp2(-std::sqrt(inner_product(r2, rho2)));
 
