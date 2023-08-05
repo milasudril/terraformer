@@ -11,7 +11,7 @@
 namespace terraformer
 {
 	inline auto local_sun_direction(hires_location planet_location,
-		geosimd::rotation<hires_geom_space> const& planet_rotation,
+		hires_rotation const& planet_rotation,
 		geosimd::rotation_angle longitude,
 		geosimd::rotation_angle colatitude)
 	{
@@ -60,7 +60,7 @@ namespace terraformer
 	}
 
 	inline auto local_sun_direction(hires_location planet_location,
-		geosimd::rotation<hires_geom_space> const& planet_rotation,
+		hires_rotation const& planet_rotation,
 		longcolat loc)
 	{
 		return local_sun_direction(planet_location, planet_rotation, loc.longitude, loc.colatitude);

@@ -30,11 +30,11 @@ namespace terraformer
 	struct lightmap_params
 	{
 		hires_location planet_loc;
-		geosimd::rotation<hires_geom_space> planet_rot;
+		hires_rotation planet_rot;
 		double planet_radius;
 		float pixel_size;
 		geosimd::rotation_angle center_latitude;
-		geosimd::rotation<geom_space> domain_rot;
+		rotation domain_rot;
 	};
 
 	inline lightmap_params make_lightmap_params(year t,
@@ -54,7 +54,7 @@ namespace terraformer
 			.planet_radius = planetary_data.radius,
 			.pixel_size = pixel_size,
 			.center_latitude = center_latitude,
-			.domain_rot = geosimd::rotation<geom_space>{domain_orientation, geosimd::dimension_tag<2>{}}
+			.domain_rot = rotation{domain_orientation, geosimd::dimension_tag<2>{}}
 		};
 	}
 

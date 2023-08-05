@@ -53,7 +53,7 @@ namespace terraformer
 
 	inline auto planet_rotation(geosimd::turn_angle spin_angle, geosimd::turn_angle tilt_angle)
 	{
-		geosimd::rotation<hires_geom_space> ret{};
+		hires_rotation ret{};
 		ret.push(tilt_angle, geosimd::dimension_tag<1>{})
 			.push(spin_angle, geosimd::dimension_tag<2>{});
 		return ret;
