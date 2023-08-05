@@ -82,7 +82,8 @@ int main()
 				0.0f
 			} + displacement{0.5f, 0.5f, 0.0f};
 			auto const k_hat = direction{r};
-			auto const scaling_factor = std::exp2(-norm((r + displacement{sn_x(rng), sn_y(rng), 0.0f}).apply(decay_rates)));
+			auto const scaling_factor = std::exp2(-norm(displacement{r}.apply(decay_rates)
+				+ displacement{sn_x(rng), sn_y(rng), 0.0f}));
 			wave_components[k][l] = wave_component{
 				.amplitude = scaling_factor,
 				.phase = pi*norm(displacement{r}.apply(phase_shift) + displacement{psn_x(rng), psn_y(rng), 0.0f}),
