@@ -55,7 +55,7 @@ int main()
 		.phase_shift_noise = 1.0f/6.0f
 	};
 
-	std::array<std::array<wave_component, 16>, 32> wave_components{};
+	std::array<wave_component, 16*32> wave_components{};
 	scaling const decay_rates{
 		std::log2(params_x.scaling_factor),
 		std::log2(params_y.scaling_factor),
@@ -72,27 +72,30 @@ int main()
 	std::uniform_real_distribution psn_y{-params_y.phase_shift_noise, params_y.phase_shift_noise};
 	scaling const lambda{params_x.wavelength, params_y.wavelength, 1.0f};
 	static constexpr auto pi = std::numbers::pi_v<float>;
-	for(size_t k = 0; k != std::size(wave_components); ++k)
+	size_t index = 0;
+	for(size_t k = 0; k != 16; ++k)
 	{
-		for(size_t l = 0; l != std::size(wave_components[k]); ++l)
+		for(size_t l = 0; l != 32; ++l)
 		{
 			auto const r = displacement{
-				static_cast<float>(l) - 0.5f*static_cast<float>(std::size(wave_components[k])),
+				static_cast<float>(l) - 0.5f*32.0f,
 				static_cast<float>(k),
 				0.0f
 			} + displacement{0.5f, 0.5f, 0.0f};
 			auto const k_hat = direction{r};
 			auto const scaling_factor = std::exp2(-norm(displacement{r}.apply(decay_rates)
 				+ displacement{sn_x(rng), sn_y(rng), 0.0f}));
-			wave_components[k][l] = wave_component{
+			wave_components[index] = wave_component{
 				.amplitude = scaling_factor,
 				.phase = pi*norm(displacement{r}.apply(phase_shift) + displacement{psn_x(rng), psn_y(rng), 0.0f}),
 				.wave_vector = (2.0f*pi*k_hat/scaling_factor).apply(inverted(lambda))
 			};
+			++index;
 		}
 	}
-
-
+	std::ranges::sort(wave_components, [](auto const& a, auto const& b) {
+		return a.amplitude < b.amplitude;
+	});
 
 	for(uint32_t y = 0; y != output.height(); ++y)
 	{
@@ -105,13 +108,10 @@ int main()
 
 			for(size_t k = 0; k != std::size(wave_components); ++k)
 			{
-				for(size_t l = 0; l != std::size(wave_components[k]); ++l)
-				{
-					auto const A = wave_components[k][l].amplitude;
-					auto const phase = wave_components[k][l].phase;
-					auto const wave_vector = wave_components[k][l].wave_vector;
+					auto const A = wave_components[k].amplitude;
+					auto const phase = wave_components[k].phase;
+					auto const wave_vector = wave_components[k].wave_vector;
 					sum += A*std::cos(inner_product(v, wave_vector) + phase);
-				}
 			}
 			output(x, y) = sum;
 		}
