@@ -13,6 +13,7 @@ namespace terraformer
 	using displacement = geom_space::displacement;
 	using direction = geom_space::direction;
 	using rotation = geosimd::rotation<geom_space>;
+	using scaling = geosimd::scaling<geom_space>;
 	inline constexpr auto origin = geosimd::origin<geosimd::euclidian_space<float, 3>>();
 
 	using hires_geom_space = geosimd::euclidian_space<double, 3>;
