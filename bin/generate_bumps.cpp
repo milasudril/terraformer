@@ -54,12 +54,11 @@ int main()
 	};
 
 	std::array<std::array<wave_component, 16>, 32> wave_components{};
-	terraformer::displacement const rho{
+	terraformer::scaling const decay_rates{
 		std::log2(params_x.scaling_factor),
 		std::log2(params_y.scaling_factor),
 		0.0f
 	};
-	auto const rho2 = rho.get()*rho.get();
 	auto scaling_noise_x = std::uniform_real_distribution{-params_x.scaling_noise, params_x.scaling_noise};
 	auto scaling_noise_y = std::uniform_real_distribution{-params_y.scaling_noise, params_y.scaling_noise};
 	terraformer::scaling const lambda{params_x.wavelength, params_y.wavelength, 1.0f};
@@ -73,10 +72,12 @@ int main()
 				static_cast<float>(k),
 				0.0f
 			} + terraformer::displacement{0.5f, 0.5f, 0.0f};
-			auto const noisy_r = r + terraformer::displacement{scaling_noise_x(rng), scaling_noise_y(rng), 0.0f};
-			auto const r2 = noisy_r.get()*noisy_r.get();
 			auto const k_hat = terraformer::direction{r};
-			auto const scaling_factor = std::exp2(-std::sqrt(inner_product(r2, rho2)));
+			auto const scaling_factor =
+				std::exp2(-norm(
+					(r + terraformer::displacement{scaling_noise_x(rng), scaling_noise_y(rng), 0.0f})
+					.apply(decay_rates))
+				);
 
 			wave_components[k][l] = wave_component{
 				.amplitude = scaling_factor,
