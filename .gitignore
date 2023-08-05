@@ -1,2 +1,5 @@
 __targets*
 private
+*.blend
+*.exr
+*.obj
