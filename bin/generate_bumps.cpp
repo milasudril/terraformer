@@ -38,7 +38,7 @@ int main()
 
 	fractal_wave_params const params_x
 	{
-		.wavelength = 512.0f,
+		.wavelength = 8192.0f/48.0f,
 		.scaling_factor = std::numbers::phi_v<float>,
 		.scaling_noise = 0.0,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
@@ -47,7 +47,7 @@ int main()
 
 	fractal_wave_params const params_y
 	{
-		.wavelength = 256.0f,
+		.wavelength = 5120.0f/48.0f,
 		.scaling_factor = std::numbers::phi_v<float>,
 		.scaling_noise = 0.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
@@ -140,5 +140,17 @@ int main()
 		}
 	}
 
-	store(output, "bumps.exr");
+	basic_image<float> output_1{1024, 1024};
+	for(uint32_t y = 0; y != output.height(); ++y)
+	{
+		for(uint32_t x = 0; x != output.width(); ++x)
+		{
+			auto const h = static_cast<float>(output.height());
+			auto const eta = 1.0f - 2.0f*std::abs(0.5f - static_cast<float>(y)/h);
+			output_1(x, y) = (2048.0f + 3072.0f*eta*eta)*(1.0f + 1024*output(x, y)/5120.0f);
+		}
+	}
+
+
+	store(output_1, "bumps.exr");
 }
