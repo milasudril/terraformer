@@ -34,24 +34,22 @@ int main()
 {
 	using namespace terraformer;
 
-
-	auto const heigest_elevation = 128.0f;
 	fractal_wave_params const params_x
 	{
-		.wavelength = 16.0f,
+		.wavelength = 512.0f,
 		.scaling_factor = std::numbers::phi_v<float>,
-		.scaling_noise = 0.0f*std::numbers::phi_v<float>/8.0f,
+		.scaling_noise = 0.0,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
-		.phase_shift_noise = 1.0f/12.0f
+		.phase_shift_noise = 0.0f
 	};
 
 	fractal_wave_params const params_y
 	{
-		.wavelength = 16.0f,
-		.scaling_factor = 1.0f + std::numbers::phi_v<float>,
-		.scaling_noise = 0.0f*std::numbers::phi_v<float>/16.0f,
+		.wavelength = 128.0f,
+		.scaling_factor = std::numbers::phi_v<float>,
+		.scaling_noise = 0.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
-		.phase_shift_noise = 1.0f/6.0f
+		.phase_shift_noise = 0.0f
 	};
 
 	std::array<wave_component, 17*33> wave_components{};
@@ -132,7 +130,7 @@ int main()
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			for(uint32_t x = 0; x != output.width(); ++x)
-			{ output(x, y) *= heigest_elevation/amplitude; }
+			{ output(x, y) /= amplitude; }
 		}
 	}
 
