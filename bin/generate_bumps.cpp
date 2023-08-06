@@ -3,6 +3,7 @@
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/curve_tool/ridge_curve.hpp"
 
 #include <random>
 #include <chrono>
@@ -29,16 +30,29 @@ struct wave_component
 	terraformer::displacement wave_vector;
 };
 
+struct domain_boundary_conditions
+{
+	float front_level;
+	float back_level;
+};
+
+struct steady_plate_collision_zone_descriptor
+{
+	domain_boundary_conditions boundary;
+	terraformer::main_ridge_params main_ridge;
+};
+
 
 int main()
 {
 	using namespace terraformer;
 
 	auto xy_mix = 0.25f;
+	static constexpr auto pixel_size = 48.0f;
 
 	fractal_wave_params const params_x
 	{
-		.wavelength = 8192.0f/48.0f,
+		.wavelength = 8192.0f/pixel_size,
 		.scaling_factor = std::numbers::phi_v<float>,
 		.scaling_noise = 0.0,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
@@ -47,16 +61,36 @@ int main()
 
 	fractal_wave_params const params_y
 	{
-		.wavelength = 5120.0f/48.0f,
+		.wavelength = 5120.0f/pixel_size,
 		.scaling_factor = std::numbers::phi_v<float>,
 		.scaling_noise = 0.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
 		.phase_shift_noise = 0.0f
 	};
 
+	steady_plate_collision_zone_descriptor const heightmap_params{
+		.boundary{
+			.front_level = 1024.0f,
+			.back_level = 3072.0f
+		},
+		.main_ridge{
+			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
+			.distance_to_endpoint = 49152.0f,
+			.wave_params{
+				.wavelength = 24576.0f,
+				.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
+				.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
+				.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
+				.phase_shift_noise_amount = 1.0f/12.0f
+			},
+			.wave_amplitude = 4096.0f,
+			.height_modulation = 1024.0f
+		}
+	};
+
+	random_generator rng;
 	std::array<wave_component, 17*33> wave_components{};
 	{
-		random_generator rng;
 		scaling const decay_rates{
 			std::log2(params_x.scaling_factor),
 			std::log2(params_y.scaling_factor),
@@ -141,13 +175,41 @@ int main()
 	}
 
 	basic_image<float> output_1{1024, 1024};
-	for(uint32_t y = 0; y != output.height(); ++y)
 	{
-		for(uint32_t x = 0; x != output.width(); ++x)
+		auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
+		auto const h = output_1.height();
+
+		for(uint32_t y = 0; y != output.height(); ++y)
 		{
-			auto const h = static_cast<float>(output.height());
-			auto const eta = 1.0f - 2.0f*std::abs(0.5f - static_cast<float>(y)/h);
-			output_1(x, y) = (2048.0f + 3072.0f*eta*eta)*(1.0f + 1024*output(x, y)/5120.0f);
+			for(uint32_t x = 0; x != output.width(); ++x)
+			{
+				location const current_loc{
+					pixel_size*static_cast<float>(x),
+					pixel_size*static_cast<float>(y),
+					0.0f
+				};
+
+				// NOTE: This works because curve is a function of x
+				auto const side = current_loc[1] < curve[x][1]? -1.0f : 1.0f;
+
+				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b) {
+					auto const loc_a = a - displacement{0.0f, 0.0f, a[2]};
+					auto const loc_b = b - displacement{0.0f, 0.0f, b[2]};
+					return distance(current_loc, loc_a) < distance(current_loc, loc_b);
+				});
+				auto const ridge_point = *i - displacement{0.0f, 0.0f, (*i)[2]};
+				auto const distance_to_ridge = distance(current_loc, ridge_point);
+				auto const z_boundary = side < 0.0f?
+					heightmap_params.boundary.back_level:
+					heightmap_params.boundary.front_level;
+				auto const distance_to_boundary = side < 0.0f?
+					current_loc[1]:
+					pixel_size*static_cast<float>(h) - current_loc[1];
+				auto const eta = distance_to_boundary/(distance_to_boundary + distance_to_ridge);
+				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
+
+				output_1(x, y) = z_valley*(1.0f + 1024*output(x, y)/5120.0f);
+			}
 		}
 	}
 
