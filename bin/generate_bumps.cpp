@@ -34,6 +34,8 @@ int main()
 {
 	using namespace terraformer;
 
+	auto xy_mix = 0.25f;
+
 	fractal_wave_params const params_x
 	{
 		.wavelength = 512.0f,
@@ -45,7 +47,7 @@ int main()
 
 	fractal_wave_params const params_y
 	{
-		.wavelength = 128.0f,
+		.wavelength = 256.0f,
 		.scaling_factor = std::numbers::phi_v<float>,
 		.scaling_noise = 0.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
@@ -72,6 +74,7 @@ int main()
 		auto const lambda = scaling{params_x.wavelength, params_y.wavelength, 1.0f}*
 			scaling{params_x.scaling_factor, params_y.scaling_factor, 1.0f};
 		auto const lambda_min = std::min(lambda[0], lambda[1]);
+		displacement const A{1.0f - xy_mix, xy_mix, 1.0f};
 		static constexpr auto pi = std::numbers::pi_v<float>;
 		size_t index = 0;
 		for(size_t k = 0; k != 17; ++k)
@@ -85,10 +88,13 @@ int main()
 				};
 				auto const is_dc = (k == 0 && l == 16);
 				auto const k_hat = direction{is_dc? displacement{1.0f, 0.0f, 0.0f} : r};
+				auto const k_hat1 = is_dc? displacement{1.0f, 0.0f, 0.0f} : r/(std::abs(r[0]) + std::abs(r[1]));
 				auto const scaling_factor = std::exp2(-norm(displacement{r}.apply(decay_rates)
 					+ displacement{sn_x(rng), sn_y(rng), 0.0f}));
 				wave_components[index] = wave_component{
-					.amplitude = is_dc? 0.0f : (scaling_factor*lambda_min < 2.0f ? 0.0f : scaling_factor),
+					.amplitude = is_dc?
+						0.0f : (scaling_factor*lambda_min < 2.0f ?
+							0.0f :  std::abs(inner_product(k_hat1, A))*scaling_factor),
 					.phase = pi*norm(displacement{r}.apply(phase_shift) + displacement{psn_x(rng), psn_y(rng), 0.0f}),
 					.wave_vector = (2.0f*pi*k_hat/scaling_factor).apply(inverted(lambda))
 				};
