@@ -97,7 +97,7 @@ int main()
 	};
 
 	fractal_wave::params const y_shift_params{
-		.wavelength = 8192.0f,
+		.wavelength = 24576.0f,
 		.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
 		.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
 		.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
@@ -171,7 +171,7 @@ int main()
 				location const current_loc{xf, yf, 0.0f};
 
 				auto sum = 0.0f;
-				auto const v = current_loc - location{512.0f*x_shift(yf), 512.0f*y_shift(xf), 0.0f};
+				auto const v = current_loc - location{256.0f*x_shift(yf), 128.0f*y_shift(xf), 0.0f};
 
 				for(size_t k = 0; k != std::size(wave_components); ++k)
 				{
