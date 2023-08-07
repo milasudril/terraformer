@@ -142,6 +142,7 @@ int main()
 
 	basic_image<float> output{1024, 1024};
 	auto amplitude = 0.0f;
+	auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
 
 	{
 		for(uint32_t y = 0; y != output.height(); ++y)
@@ -150,15 +151,22 @@ int main()
 			{
 				auto const xf = static_cast<float>(x);
 				auto const yf = static_cast<float>(y);
-				displacement const v{xf, yf, 0.0f};
+				location const current_loc{xf, yf, 0.0f};
+				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b) {
+					auto const loc_a = a - displacement{0.0f, 0.0f, a[2]};
+					auto const loc_b = b - displacement{0.0f, 0.0f, b[2]};
+					return distance(current_loc, loc_a) < distance(current_loc, loc_b);
+				});
+
 				auto sum = 0.0f;
+				auto const v = current_loc - location{(*i)[0], (*i)[1], 0.0f};
 
 				for(size_t k = 0; k != std::size(wave_components); ++k)
 				{
-						auto const A = wave_components[k].amplitude;
-						auto const phase = wave_components[k].phase;
-						auto const wave_vector = wave_components[k].wave_vector;
-						sum += A*std::cos(inner_product(v, wave_vector) + phase);
+					auto const A = wave_components[k].amplitude;
+					auto const phase = wave_components[k].phase;
+					auto const wave_vector = wave_components[k].wave_vector;
+					sum += A*std::cos(inner_product(v, wave_vector) + phase);
 				}
 				amplitude = std::max(std::abs(sum), amplitude);
 				output(x, y) = sum;
@@ -176,7 +184,6 @@ int main()
 
 	basic_image<float> output_1{1024, 1024};
 	{
-		auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
 		auto const h = output_1.height();
 
 		for(uint32_t y = 0; y != output.height(); ++y)
