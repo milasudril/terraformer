@@ -88,6 +88,14 @@ int main()
 		}
 	};
 
+	fractal_wave::params const horz_shift_params{
+		.wavelength = 8192.0f,
+		.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
+		.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
+		.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
+		.phase_shift_noise_amount = 1.0f/12.0f
+	};
+
 	random_generator rng;
 	std::array<wave_component, 17*33> wave_components{};
 	{
@@ -142,7 +150,8 @@ int main()
 
 	basic_image<float> output{1024, 1024};
 	auto amplitude = 0.0f;
-	auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
+	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
+	terraformer::fractal_wave horz_shift{rng, 0.0f, horz_shift_params};
 	auto const phi_0 = 0.5f*std::numbers::pi_v<float>;
 	{
 		for(uint32_t y = 0; y != output.height(); ++y)
@@ -152,12 +161,12 @@ int main()
 				auto const xf = static_cast<float>(x);
 				auto const yf = static_cast<float>(y);
 				location const current_loc{xf, yf, 0.0f};
-				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b) {
+				auto const i = std::ranges::min_element(main_ridge, [current_loc](auto a, auto b) {
 					return distance(current_loc, a) < distance(current_loc, b);
 				});
 
 				auto sum = 0.0f;
-				auto const v = current_loc - (*i);
+				auto const v = current_loc - (*i) + 512.0f*displacement{horz_shift(yf*pixel_size), 0.0f, 0.0f}/pixel_size;
 
 				for(size_t k = 0; k != std::size(wave_components); ++k)
 				{
@@ -194,10 +203,10 @@ int main()
 					0.0f
 				};
 
-				// NOTE: This works because curve is a function of x
-				auto const side = current_loc[1] < curve[x][1]? -1.0f : 1.0f;
+				// NOTE: This works because main_ridge is a function of x
+				auto const side = current_loc[1] < main_ridge[x][1]? -1.0f : 1.0f;
 
-				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b) {
+				auto const i = std::ranges::min_element(main_ridge, [current_loc](auto a, auto b) {
 					return distance(current_loc, a) < distance(current_loc, b);
 				});
 				auto const ridge_point = *i;
