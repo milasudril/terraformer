@@ -88,7 +88,15 @@ int main()
 		}
 	};
 
-	fractal_wave::params const horz_shift_params{
+	fractal_wave::params const x_shift_params{
+		.wavelength = 8192.0f,
+		.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
+		.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
+		.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
+		.phase_shift_noise_amount = 1.0f/12.0f
+	};
+
+	fractal_wave::params const y_shift_params{
 		.wavelength = 8192.0f,
 		.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
 		.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
@@ -150,7 +158,8 @@ int main()
 
 	basic_image<float> output{1024, 1024};
 	auto amplitude = 0.0f;
-	terraformer::fractal_wave horz_shift{rng, 0.0f, horz_shift_params};
+	terraformer::fractal_wave x_shift{rng, 0.0f, x_shift_params};
+	terraformer::fractal_wave y_shift{rng, 0.0f, y_shift_params};
 	auto const phi_0 = 0.5f*std::numbers::pi_v<float>;
 	{
 		for(uint32_t y = 0; y != output.height(); ++y)
@@ -162,7 +171,7 @@ int main()
 				location const current_loc{xf, yf, 0.0f};
 
 				auto sum = 0.0f;
-				auto const v = current_loc - location{512.0f*horz_shift(yf), 0.0f, 0.0f};
+				auto const v = current_loc - location{512.0f*x_shift(yf), 512.0f*y_shift(xf), 0.0f};
 
 				for(size_t k = 0; k != std::size(wave_components); ++k)
 				{
