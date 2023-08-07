@@ -143,7 +143,7 @@ int main()
 	basic_image<float> output{1024, 1024};
 	auto amplitude = 0.0f;
 	auto const curve = generate(rng, pixel_size, heightmap_params.main_ridge);
-
+	auto const phi_0 = 0.5f*std::numbers::pi_v<float>;
 	{
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
@@ -166,7 +166,7 @@ int main()
 					auto const A = wave_components[k].amplitude;
 					auto const phase = wave_components[k].phase;
 					auto const wave_vector = wave_components[k].wave_vector;
-					sum += A*std::cos(inner_product(v, wave_vector) + phase);
+					sum += A*std::cos(inner_product(v, wave_vector) + phase + phi_0);
 				}
 				amplitude = std::max(std::abs(sum), amplitude);
 				output(x, y) = sum;
