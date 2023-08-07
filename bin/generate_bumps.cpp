@@ -150,7 +150,6 @@ int main()
 
 	basic_image<float> output{1024, 1024};
 	auto amplitude = 0.0f;
-	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
 	terraformer::fractal_wave horz_shift{rng, 0.0f, horz_shift_params};
 	auto const phi_0 = 0.5f*std::numbers::pi_v<float>;
 	{
@@ -161,12 +160,9 @@ int main()
 				auto const xf = pixel_size*static_cast<float>(x);
 				auto const yf = pixel_size*static_cast<float>(y);
 				location const current_loc{xf, yf, 0.0f};
-				auto const i = std::ranges::min_element(main_ridge, [current_loc](auto a, auto b) {
-					return distance(current_loc, a) < distance(current_loc, b);
-				});
 
 				auto sum = 0.0f;
-				auto const v = current_loc - (*i) + 512.0f*displacement{horz_shift(yf), 0.0f, 0.0f};
+				auto const v = current_loc - location{512.0f*horz_shift(yf), 0.0f, 0.0f};
 
 				for(size_t k = 0; k != std::size(wave_components); ++k)
 				{
@@ -189,6 +185,7 @@ int main()
 		}
 	}
 
+	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
 	basic_image<float> output_1{1024, 1024};
 	{
 		auto const h = output_1.height();
