@@ -52,7 +52,7 @@ int main()
 
 	fractal_wave_params const params_x
 	{
-		.wavelength = 8192.0f/pixel_size,
+		.wavelength = 8192.0f,
 		.scaling_factor = std::numbers::phi_v<float>,
 		.scaling_noise = std::numbers::phi_v<float>/8.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
@@ -61,7 +61,7 @@ int main()
 
 	fractal_wave_params const params_y
 	{
-		.wavelength = 5120.0f/pixel_size,
+		.wavelength = 5120.0f,
 		.scaling_factor = std::numbers::phi_v<float>,
 		.scaling_noise = std::numbers::phi_v<float>/2.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
@@ -158,15 +158,15 @@ int main()
 		{
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
-				auto const xf = static_cast<float>(x);
-				auto const yf = static_cast<float>(y);
+				auto const xf = pixel_size*static_cast<float>(x);
+				auto const yf = pixel_size*static_cast<float>(y);
 				location const current_loc{xf, yf, 0.0f};
 				auto const i = std::ranges::min_element(main_ridge, [current_loc](auto a, auto b) {
 					return distance(current_loc, a) < distance(current_loc, b);
 				});
 
 				auto sum = 0.0f;
-				auto const v = current_loc - (*i) + 512.0f*displacement{horz_shift(yf*pixel_size), 0.0f, 0.0f}/pixel_size;
+				auto const v = current_loc - (*i) + 512.0f*displacement{horz_shift(yf), 0.0f, 0.0f};
 
 				for(size_t k = 0; k != std::size(wave_components); ++k)
 				{
