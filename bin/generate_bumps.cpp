@@ -54,18 +54,18 @@ int main()
 	{
 		.wavelength = 8192.0f/pixel_size,
 		.scaling_factor = std::numbers::phi_v<float>,
-		.scaling_noise = 0.0,
+		.scaling_noise = std::numbers::phi_v<float>/8.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
-		.phase_shift_noise = 0.0f
+		.phase_shift_noise = 1.0f/12.0f
 	};
 
 	fractal_wave_params const params_y
 	{
 		.wavelength = 5120.0f/pixel_size,
 		.scaling_factor = std::numbers::phi_v<float>,
-		.scaling_noise = 0.0f,
+		.scaling_noise = std::numbers::phi_v<float>/2.0f,
 		.phase_shift = 2.0f - std::numbers::phi_v<float>,
-		.phase_shift_noise = 0.0f
+		.phase_shift_noise = 1.0f/24.0f
 	};
 
 	steady_plate_collision_zone_descriptor const heightmap_params{
