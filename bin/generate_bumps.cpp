@@ -74,7 +74,7 @@ int main()
 			.back_level = 3072.0f
 		},
 		.main_ridge{
-			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
+			.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
 			.distance_to_endpoint = 49152.0f,
 			.wave_params{
 				.wavelength = 24576.0f,
@@ -84,7 +84,7 @@ int main()
 				.phase_shift_noise_amount = 1.0f/12.0f
 			},
 			.wave_amplitude = 4096.0f,
-			.height_modulation = 1024.0f
+			.height_modulation = 0.0f
 		}
 	};
 
@@ -153,13 +153,11 @@ int main()
 				auto const yf = static_cast<float>(y);
 				location const current_loc{xf, yf, 0.0f};
 				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b) {
-					auto const loc_a = a - displacement{0.0f, 0.0f, a[2]};
-					auto const loc_b = b - displacement{0.0f, 0.0f, b[2]};
-					return distance(current_loc, loc_a) < distance(current_loc, loc_b);
+					return distance(current_loc, a) < distance(current_loc, b);
 				});
 
 				auto sum = 0.0f;
-				auto const v = current_loc - location{(*i)[0], (*i)[1], 0.0f};
+				auto const v = current_loc - (*i);
 
 				for(size_t k = 0; k != std::size(wave_components); ++k)
 				{
@@ -200,11 +198,9 @@ int main()
 				auto const side = current_loc[1] < curve[x][1]? -1.0f : 1.0f;
 
 				auto const i = std::ranges::min_element(curve, [current_loc](auto a, auto b) {
-					auto const loc_a = a - displacement{0.0f, 0.0f, a[2]};
-					auto const loc_b = b - displacement{0.0f, 0.0f, b[2]};
-					return distance(current_loc, loc_a) < distance(current_loc, loc_b);
+					return distance(current_loc, a) < distance(current_loc, b);
 				});
-				auto const ridge_point = *i - displacement{0.0f, 0.0f, (*i)[2]};
+				auto const ridge_point = *i;
 				auto const distance_to_ridge = distance(current_loc, ridge_point);
 				auto const z_boundary = side < 0.0f?
 					heightmap_params.boundary.back_level:
@@ -219,7 +215,6 @@ int main()
 			}
 		}
 	}
-
 
 	store(output_1, "bumps.exr");
 }
