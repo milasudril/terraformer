@@ -2,7 +2,7 @@ import OpenImageIO as oiio
 import matplotlib.pyplot
 import numpy
 
-inp = oiio.ImageInput.open('test.exr')
+inp = oiio.ImageInput.open('bumps.exr')
 if inp:
 	spec = inp.spec()
 	xres = spec.width
