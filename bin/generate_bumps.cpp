@@ -70,9 +70,9 @@ int main()
 	};
 
 	fractal_wave::params const ridge_wave_params{
-		.wavelength = 8192.0f,
+		.wavelength = 5120.0f,
 		.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
-		.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
+		.exponent_noise_amount = std::numbers::phi_v<float>/8.0f,
 		.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
 		.phase_shift_noise_amount = 1.0f/12.0f
 	};
@@ -80,7 +80,8 @@ int main()
 	random_generator rng;
 
 	basic_image<float> output{1024, 1024};
-	auto amplitude = 0.0f;
+	auto max_val = -16384.0f;
+	auto min_val = 16384.0f;
 	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
 	terraformer::fractal_wave ridege_wave{rng, 0.0f, ridge_wave_params};
 
@@ -103,7 +104,8 @@ int main()
 					convsum += ridege_wave(d);
 				}
 
-				amplitude = std::max(std::abs(convsum), amplitude);
+				min_val = std::min(convsum, min_val);
+				max_val = std::max(convsum, max_val);
 				output(x, y) = convsum;
 			}
 		}
@@ -114,7 +116,10 @@ int main()
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			for(uint32_t x = 0; x != output.width(); ++x)
-			{ output(x, y) /= amplitude; }
+			{
+				auto const val = output(x, y);
+				output(x, y) = (val - min_val)/(max_val - min_val);
+			}
 		}
 	}
 
@@ -140,17 +145,20 @@ int main()
 					return distance(current_loc, a) < distance(current_loc, b);
 				});
 				auto const ridge_point = *i;
+
 				auto const distance_to_ridge = distance(current_loc, ridge_point);
 				auto const z_boundary = side < 0.0f?
-					heightmap_params.boundary.back_level:
+				heightmap_params.boundary.back_level:
 					heightmap_params.boundary.front_level;
-				auto const distance_to_boundary = side < 0.0f?
+					auto const distance_to_boundary = side < 0.0f?
 					current_loc[1]:
-					pixel_size*static_cast<float>(h) - current_loc[1];
+				pixel_size*static_cast<float>(h) - current_loc[1];
 				auto const eta = distance_to_boundary/(distance_to_boundary + distance_to_ridge);
 				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
 
-				output_1(x, y) = z_valley*(1.0f + 1024*output(x, y)/5120.0f);
+				auto const wave_val = output(x, y);
+				auto const val = wave_val != 1.0f ? 1.0f - (1.0f - wave_val)/std::sqrt(1.0f - wave_val) : 1.0f;
+				output_1(x, y) = z_valley*(1.0f + 1024.0f*2.0f*(val - 0.5f)/5120.0f);
 			}
 		}
 	}
