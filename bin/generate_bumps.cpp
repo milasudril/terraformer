@@ -23,6 +23,14 @@ struct fractal_wave_params
 	float phase_shift_noise;
 };
 
+struct corner_elevations
+{
+	float sw;
+	float se;
+	float nw;
+	float ne;
+};
+
 struct wave_component
 {
 	float amplitude;
@@ -38,7 +46,7 @@ struct domain_boundary_conditions
 
 struct steady_plate_collision_zone_descriptor
 {
-	domain_boundary_conditions boundary;
+	struct corner_elevations corner_elevations;
 	terraformer::main_ridge_params main_ridge;
 };
 
@@ -49,10 +57,14 @@ int main()
 
 	static constexpr auto pixel_size = 48.0f;
 
+
+
 	steady_plate_collision_zone_descriptor const heightmap_params{
-		.boundary{
-			.front_level = 1024.0f,
-			.back_level = 3072.0f
+		.corner_elevations{
+			.sw = 512.0f,
+			.se = 1536.0f,
+			.nw = 3584.0f,
+			.ne = 2560.0f,
 		},
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
@@ -126,7 +138,8 @@ int main()
 	basic_image<float> output_1{1024, 1024};
 	{
 		puts("Mixing");
-		auto const h = output_1.height();
+		auto const w = static_cast<float>(output_1.width());
+		auto const h = static_cast<float>(output_1.height());
 
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
@@ -147,12 +160,13 @@ int main()
 				auto const ridge_point = *i;
 
 				auto const distance_to_ridge = distance(current_loc, ridge_point);
+				auto const xi = static_cast<float>(x)/(w - 1.0f);
 				auto const z_boundary = side < 0.0f?
-				heightmap_params.boundary.back_level:
-					heightmap_params.boundary.front_level;
-					auto const distance_to_boundary = side < 0.0f?
+					std::lerp(heightmap_params.corner_elevations.nw, heightmap_params.corner_elevations.ne, xi):
+					std::lerp(heightmap_params.corner_elevations.sw, heightmap_params.corner_elevations.se, xi);
+				auto const distance_to_boundary = side < 0.0f?
 					current_loc[1]:
-				pixel_size*static_cast<float>(h) - current_loc[1];
+					pixel_size*h - current_loc[1];
 				auto const eta = distance_to_boundary/(distance_to_boundary + distance_to_ridge);
 				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
 
