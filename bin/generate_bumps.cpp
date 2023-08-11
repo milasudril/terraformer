@@ -13,12 +13,17 @@
 
 using random_generator = pcg_engines::oneseq_dxsm_128_64;
 
-struct corner_elevations
+struct corner
 {
-	float sw;
-	float se;
-	float nw;
-	float ne;
+	float elevation;
+};
+
+struct corners
+{
+	corner sw;
+	corner se;
+	corner nw;
+	corner ne;
 };
 
 struct wave_component
@@ -36,7 +41,7 @@ struct domain_boundary_conditions
 
 struct steady_plate_collision_zone_descriptor
 {
-	struct corner_elevations corner_elevations;
+	struct corners corners;
 	terraformer::main_ridge_params main_ridge;
 };
 
@@ -47,14 +52,12 @@ int main()
 
 	static constexpr auto pixel_size = 48.0f;
 
-
-
 	steady_plate_collision_zone_descriptor const heightmap_params{
-		.corner_elevations{
-			.sw = 512.0f,
-			.se = 1536.0f,
-			.nw = 3584.0f,
-			.ne = 2560.0f,
+		.corners{
+			.sw = corner{512.0f},
+			.se = corner{1536.0f},
+			.nw = corner{3584.0f},
+			.ne = corner{2560.0f},
 		},
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
@@ -152,8 +155,8 @@ int main()
 				auto const distance_to_ridge = distance(current_loc, ridge_point);
 				auto const xi = static_cast<float>(x)/(w - 1.0f);
 				auto const z_boundary = side < 0.0f?
-					std::lerp(heightmap_params.corner_elevations.nw, heightmap_params.corner_elevations.ne, xi):
-					std::lerp(heightmap_params.corner_elevations.sw, heightmap_params.corner_elevations.se, xi);
+					std::lerp(heightmap_params.corners.nw.elevation, heightmap_params.corners.ne.elevation, xi):
+					std::lerp(heightmap_params.corners.sw.elevation, heightmap_params.corners.se.elevation, xi);
 				auto const distance_to_boundary = side < 0.0f?
 					current_loc[1]:
 					pixel_size*h - current_loc[1];
