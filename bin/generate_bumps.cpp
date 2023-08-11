@@ -13,16 +13,6 @@
 
 using random_generator = pcg_engines::oneseq_dxsm_128_64;
 
-
-struct fractal_wave_params
-{
-	float wavelength;
-	float scaling_factor;
-	float scaling_noise;
-	float phase_shift;
-	float phase_shift_noise;
-};
-
 struct corner_elevations
 {
 	float sw;
