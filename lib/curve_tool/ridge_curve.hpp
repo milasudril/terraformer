@@ -21,16 +21,14 @@ namespace terraformer
 	{
 		auto const n_points = static_cast<size_t>(params.distance_to_endpoint/dx);
 		std::uniform_real_distribution U{-0.5f, 0.5f};
-		auto const x_offset = U(rng);
+		auto const x_offset = U(rng)*params.wave_params.wavelength.initial_value;
 		fractal_wave wave_xy{
 			rng,
-			x_offset,
 			params.wave_params
 		};
 
 		fractal_wave wave_xz{
 			rng,
-			x_offset,
 			params.wave_params
 		};
 
@@ -38,8 +36,8 @@ namespace terraformer
 		for(size_t k = 0; k != n_points; ++k)
 		{
 			auto const x = static_cast<float>(k)*dx;
-			auto const y = wave_xy(x);
-			auto const z = wave_xz(x);
+			auto const y = wave_xy(x + x_offset);
+			auto const z = wave_xz(x + x_offset);
 			curve.push_back(displacement{x, y, z});
 		}
 

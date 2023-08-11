@@ -56,18 +56,28 @@ int main()
 		.corners{
 			.sw = corner{512.0f},
 			.se = corner{1536.0f},
-			.nw = corner{3584.0f},
-			.ne = corner{2560.0f},
+			.nw = corner{2560.0f},
+			.ne = corner{3584.0f},
 		},
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
 			.distance_to_endpoint = 49152.0f,
 			.wave_params{
-				.wavelength = 24576.0f,
-				.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
-				.exponent_noise_amount = std::numbers::phi_v<float>/16.0f,
-				.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
-				.phase_shift_noise_amount = 1.0f/12.0f
+				.amplitude{
+					.initial_value = 1.0f,
+					.scaling_factor = std::numbers::phi_v<float>,
+					.scaling_noise = std::numbers::phi_v<float>/16.0f
+				},
+				.wavelength{
+					.initial_value = 24576.0f,
+					.scaling_factor = std::numbers::phi_v<float>,
+					.scaling_noise = std::numbers::phi_v<float>/16.0f
+				},
+				.phase{
+					.initial_value = 0.0f,
+					.offset = 2.0f - std::numbers::phi_v<float>,
+					.offset_noise = 1.0f/12.0f
+				}
 			},
 			.wave_amplitude = 4096.0f,
 			.height_modulation = 0.0f
@@ -75,11 +85,21 @@ int main()
 	};
 
 	fractal_wave::params const ridge_wave_params{
-		.wavelength = 5120.0f,
-		.per_wave_component_scaling_factor = std::numbers::phi_v<float>,
-		.exponent_noise_amount = std::numbers::phi_v<float>/8.0f,
-		.per_wave_component_phase_shift = 2.0f - std::numbers::phi_v<float>,
-		.phase_shift_noise_amount = 1.0f/12.0f
+		.amplitude{
+			.initial_value = 1.0f,
+			.scaling_factor = std::numbers::phi_v<float>,
+			.scaling_noise = std::numbers::phi_v<float>/8.0f
+		},
+		.wavelength{
+			.initial_value = 5120.0f,
+			.scaling_factor = std::numbers::phi_v<float>,
+			.scaling_noise = std::numbers::phi_v<float>/8.0f
+		},
+		.phase{
+			.initial_value = 0.0f,
+			.offset = 2.0f - std::numbers::phi_v<float>,
+			.offset_noise = 1.0f/12.0f
+		}
 	};
 
 	random_generator rng;
@@ -88,7 +108,7 @@ int main()
 	auto max_val = -16384.0f;
 	auto min_val = 16384.0f;
 	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
-	terraformer::fractal_wave ridege_wave{rng, 0.0f, ridge_wave_params};
+	terraformer::fractal_wave ridege_wave{rng, ridge_wave_params};
 
 	{
 		puts("Generating wave");

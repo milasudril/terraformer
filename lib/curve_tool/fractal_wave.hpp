@@ -8,32 +8,61 @@
 
 namespace terraformer
 {
+	struct exponential_progression
+	{
+		float initial_value;
+		float scaling_factor;
+		float scaling_noise;
+	};
+
+	template<class Rng>
+	inline float get_value(exponential_progression const& val, size_t k, Rng&& rng)
+	{
+		std::uniform_real_distribution U{-0.5f, 0.5f};
+		return val.initial_value*std::pow(val.scaling_factor, -(static_cast<float>(k) + val.scaling_noise*U(rng)));
+	}
+
+	struct linear_progression
+	{
+		float initial_value;
+		float offset;
+		float offset_noise;
+	};
+
+	template<class Rng>
+	inline float get_value(linear_progression const& val, size_t k, Rng&& rng)
+	{
+		std::uniform_real_distribution U{-0.5f, 0.5f};
+		return val.initial_value - (static_cast<float>(k)*val.offset + val.offset_noise*U(rng));
+	}
+
+	struct wave_params
+	{
+		float amplitude;
+		float wavelength;
+		float phase;
+	};
+
 	class fractal_wave
 	{
 	public:
 		struct params
 		{
-			float wavelength;
-			float per_wave_component_scaling_factor;
-			float exponent_noise_amount;
-			float per_wave_component_phase_shift;
-			float phase_shift_noise_amount;
+			exponential_progression amplitude;
+			exponential_progression wavelength;
+			linear_progression phase;
 		};
 
 		template<class Rng>
-		explicit fractal_wave(Rng&& rng, float x_offset, params const& params):
-			m_wavelength{params.wavelength},
-			m_offset{x_offset},
-			m_amplitude{0.0f}
+		explicit fractal_wave(Rng&& rng, params const& params):m_amplitude{0.0f}
 		{
 			std::uniform_real_distribution U{-0.5f, 0.5f};
 			for(size_t k = 0; k != std::size(m_component_params); ++k)
 			{
-				m_component_params[k] = per_wave_component_params{
-					.scale = std::pow(params.per_wave_component_scaling_factor, static_cast<float>(k)
-						+ params.exponent_noise_amount*U(rng)),
-					.phase_shift = static_cast<float>(k)*(params.per_wave_component_phase_shift
-						+ params.phase_shift_noise_amount*U(rng))
+				m_component_params[k] = wave_params{
+					.amplitude = get_value(params.amplitude, k, rng),
+					.wavelength = get_value(params.wavelength, k, rng),
+					.phase = get_value(params.phase, k, rng)
 				};
 			}
 		}
@@ -41,14 +70,14 @@ namespace terraformer
 		auto operator()(float x)
 		{
 			auto sum = 0.0f;
-			auto const twopi = 2.0f*std::numbers::pi_v<float>;
-			auto const xi = x/m_wavelength;
-			auto const offset = m_offset;
+			auto constexpr twopi = 2.0f*std::numbers::pi_v<float>;
 			for(size_t k = std::size(m_component_params); k != 0; --k)
 			{
-				auto const scale = m_component_params[k - 1].scale;
-				auto const phase_shift = m_component_params[k - 1].phase_shift;
-				sum += std::sin(twopi*(scale*(xi - offset) - phase_shift))/scale;
+				auto const amplitude = m_component_params[k - 1].amplitude;
+				auto const wavelength = m_component_params[k - 1].wavelength;
+				auto const phase = m_component_params[k - 1].phase;
+
+				sum += amplitude*std::sin(twopi*(x/wavelength - phase));
 			}
 
 			m_amplitude = std::max(std::abs(sum), m_amplitude);
@@ -56,21 +85,10 @@ namespace terraformer
 		}
 
 		float amplitude() const
-		{
-			return m_amplitude;
-		}
+		{ return m_amplitude; }
 
 	private:
-		float m_wavelength;
-		float m_offset;
-
-		struct per_wave_component_params
-		{
-			float scale;
-			float phase_shift;
-		};
-
-		std::array<per_wave_component_params, 16> m_component_params;
+		std::array<wave_params, 16> m_component_params;
 		float m_amplitude;
 	};
 }
