@@ -26,25 +26,11 @@ struct corners
 	corner ne;
 };
 
-struct wave_component
-{
-	float amplitude;
-	float phase;
-	terraformer::displacement wave_vector;
-};
-
-struct domain_boundary_conditions
-{
-	float front_level;
-	float back_level;
-};
-
 struct steady_plate_collision_zone_descriptor
 {
 	struct corners corners;
 	terraformer::main_ridge_params main_ridge;
 };
-
 
 int main()
 {
