@@ -10,7 +10,6 @@ namespace terraformer
 {
 	struct exponential_progression
 	{
-		float initial_value;
 		float scaling_factor;
 		float scaling_noise;
 	};
@@ -19,12 +18,11 @@ namespace terraformer
 	inline float get_value(exponential_progression const& val, size_t k, Rng&& rng)
 	{
 		std::uniform_real_distribution U{-0.5f, 0.5f};
-		return val.initial_value*std::pow(val.scaling_factor, -(static_cast<float>(k) + val.scaling_noise*U(rng)));
+		return std::pow(val.scaling_factor, -(static_cast<float>(k) + val.scaling_noise*U(rng)));
 	}
 
 	struct linear_progression
 	{
-		float initial_value;
 		float offset;
 		float offset_noise;
 	};
@@ -33,7 +31,7 @@ namespace terraformer
 	inline float get_value(linear_progression const& val, size_t k, Rng&& rng)
 	{
 		std::uniform_real_distribution U{-0.5f, 0.5f};
-		return val.initial_value - (static_cast<float>(k)*val.offset + val.offset_noise*U(rng));
+		return -(static_cast<float>(k)*val.offset + val.offset_noise*U(rng));
 	}
 
 	struct wave_params
@@ -54,7 +52,7 @@ namespace terraformer
 		};
 
 		template<class Rng>
-		explicit fractal_wave(Rng&& rng, params const& params):m_amplitude{0.0f}
+		explicit fractal_wave(Rng&& rng, params const& params)
 		{
 			std::uniform_real_distribution U{-0.5f, 0.5f};
 			for(size_t k = 0; k != std::size(m_component_params); ++k)
@@ -67,7 +65,7 @@ namespace terraformer
 			}
 		}
 
-		auto operator()(float x)
+		auto operator()(float x) const
 		{
 			auto sum = 0.0f;
 			auto constexpr twopi = 2.0f*std::numbers::pi_v<float>;
@@ -79,17 +77,11 @@ namespace terraformer
 
 				sum += amplitude*std::sin(twopi*(x/wavelength - phase));
 			}
-
-			m_amplitude = std::max(std::abs(sum), m_amplitude);
 			return sum;
 		}
 
-		float amplitude() const
-		{ return m_amplitude; }
-
 	private:
 		std::array<wave_params, 16> m_component_params;
-		float m_amplitude;
 	};
 }
 

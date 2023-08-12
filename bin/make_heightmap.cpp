@@ -138,25 +138,27 @@ int main()
 			.main_ridge{
 				.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
 				.distance_to_endpoint = 49152.0f,
-				.wave_params{
-					.amplitude{
-						.initial_value = 1.0f,
-						.scaling_factor = std::numbers::phi_v<float>,
-						.scaling_noise = std::numbers::phi_v<float>/16.0f
+				.ridge_line{
+					.shape{
+						.amplitude{
+							.scaling_factor = std::numbers::phi_v<float>,
+							.scaling_noise = std::numbers::phi_v<float>/16.0f
+						},
+						.wavelength{
+							.scaling_factor = std::numbers::phi_v<float>,
+							.scaling_noise = std::numbers::phi_v<float>/16.0f
+						},
+						.phase{
+							.offset = 2.0f - std::numbers::phi_v<float>,
+							.offset_noise = 1.0f/12.0f
+						}
 					},
-					.wavelength{
-						.initial_value = 24576.0f,
-						.scaling_factor = std::numbers::phi_v<float>,
-						.scaling_noise = std::numbers::phi_v<float>/16.0f
-					},
-					.phase{
-						.initial_value = 0.0f,
-						.offset = 2.0f - std::numbers::phi_v<float>,
-						.offset_noise = 1.0f/12.0f
+					.wave_properties{
+						.amplitude = 4096.0f,
+						.wavelength = 24576.0f,
+						.phase = 0.0f
 					}
-				},
-				.wave_amplitude = 4096.0f,
-				.height_modulation = 1024.0f
+				}
 			}
 		},
 		.planetary_data{

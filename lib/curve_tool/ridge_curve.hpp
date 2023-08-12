@@ -7,13 +7,17 @@
 
 namespace terraformer
 {
+	struct ridge_line_params
+	{
+		fractal_wave::params shape;
+		wave_params wave_properties;
+	};
+
 	struct main_ridge_params
 	{
 		location start_location;
 		float distance_to_endpoint;
-		fractal_wave::params wave_params;
-		float wave_amplitude;
-		float height_modulation;
+		ridge_line_params ridge_line;
 	};
 
 	template<class Rng>
@@ -21,37 +25,30 @@ namespace terraformer
 	{
 		auto const n_points = static_cast<size_t>(params.distance_to_endpoint/dx);
 		std::uniform_real_distribution U{-0.5f, 0.5f};
-		auto const x_offset = U(rng)*params.wave_params.wavelength.initial_value;
+
+		auto const wavelength = params.ridge_line.wave_properties.wavelength;
+		auto const phase = U(rng) + params.ridge_line.wave_properties.phase;
+
 		fractal_wave wave_xy{
 			rng,
-			params.wave_params
-		};
-
-		fractal_wave wave_xz{
-			rng,
-			params.wave_params
+			params.ridge_line.shape
 		};
 
 		std::vector<displacement> curve;
+		float wave_amplitude = 0.0f;
 		for(size_t k = 0; k != n_points; ++k)
 		{
 			auto const x = static_cast<float>(k)*dx;
-			auto const y = wave_xy(x + x_offset);
-			auto const z = wave_xz(x + x_offset);
-			curve.push_back(displacement{x, y, z});
+			auto const y = wave_xy(x/wavelength + phase);
+			curve.push_back(displacement{x, y, 0.0f});
+			wave_amplitude = std::max(std::abs(wave_amplitude), y);
 		}
 
-		auto const Ay = params.wave_amplitude/wave_xy.amplitude();
-		auto const Az = params.height_modulation/(wave_xz.amplitude() * wave_xz.amplitude());
+		scaling const scaling{1.0f, params.ridge_line.wave_properties.amplitude/wave_amplitude, 1.0f};
 
 		std::vector<location> ret;
 		for(size_t k = 0; k != std::size(curve); ++k)
-		{
-			auto const vec_val = curve[k].get();
-			ret.push_back(params.start_location
-				+ displacement{vec_val*geosimd::vec_t{1.0f, Ay, Az*vec_val[2], 1.0f}}
-				+ displacement{0.0f, 0.0f, -0.5f*params.height_modulation});
-		}
+		{ ret.push_back(params.start_location + curve[k].apply(scaling)); }
 		return ret;
 	}
 }

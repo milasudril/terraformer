@@ -62,45 +62,45 @@ int main()
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
 			.distance_to_endpoint = 49152.0f,
-			.wave_params{
-				.amplitude{
-					.initial_value = 1.0f,
-					.scaling_factor = std::numbers::phi_v<float>,
-					.scaling_noise = std::numbers::phi_v<float>/16.0f
+			.ridge_line{
+				.shape{
+					.amplitude{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/16.0f
+					},
+					.wavelength{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/16.0f
+					},
+					.phase{
+						.offset = 2.0f - std::numbers::phi_v<float>,
+						.offset_noise = 1.0f/12.0f
+					}
 				},
-				.wavelength{
-					.initial_value = 24576.0f,
-					.scaling_factor = std::numbers::phi_v<float>,
-					.scaling_noise = std::numbers::phi_v<float>/16.0f
-				},
-				.phase{
-					.initial_value = 0.0f,
-					.offset = 2.0f - std::numbers::phi_v<float>,
-					.offset_noise = 1.0f/12.0f
+				.wave_properties{
+					.amplitude = 4096.0f,
+					.wavelength = 24576.0f,
+					.phase = 0.0f
 				}
-			},
-			.wave_amplitude = 4096.0f,
-			.height_modulation = 0.0f
+			}
 		}
 	};
 
 	fractal_wave::params const ridge_wave_params{
 		.amplitude{
-			.initial_value = 1.0f,
 			.scaling_factor = std::numbers::phi_v<float>,
 			.scaling_noise = std::numbers::phi_v<float>/8.0f
 		},
 		.wavelength{
-			.initial_value = 5120.0f,
 			.scaling_factor = std::numbers::phi_v<float>,
 			.scaling_noise = std::numbers::phi_v<float>/8.0f
 		},
 		.phase{
-			.initial_value = 0.0f,
 			.offset = 2.0f - std::numbers::phi_v<float>,
 			.offset_noise = 1.0f/12.0f
 		}
 	};
+	auto const bump_wavelength = 5120.0f;
 
 	random_generator rng;
 
@@ -108,10 +108,10 @@ int main()
 	auto max_val = -16384.0f;
 	auto min_val = 16384.0f;
 	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
-	terraformer::fractal_wave ridege_wave{rng, ridge_wave_params};
 
 	{
 		puts("Generating wave");
+		terraformer::fractal_wave ridege_wave{rng, ridge_wave_params};
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			printf("%u   \r",y);
@@ -126,9 +126,8 @@ int main()
 				for(size_t k = 0; k != std::size(main_ridge); ++k)
 				{
 					auto const d = distance(current_loc, main_ridge[k]);
-					convsum += ridege_wave(d);
+					convsum += ridege_wave(d/bump_wavelength);
 				}
-
 				min_val = std::min(convsum, min_val);
 				max_val = std::max(convsum, max_val);
 				output(x, y) = convsum;
@@ -137,6 +136,8 @@ int main()
 	}
 
 	{
+		assert(std::abs(max_val) > 0.0f);
+		assert(min_val < max_val);
 		puts("Normalizing");
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
