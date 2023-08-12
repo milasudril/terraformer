@@ -140,7 +140,7 @@ int main()
 			for(uint32_t x = 0; x != bump_field.width(); ++x)
 			{
 				auto const gen_val = bump_field(x, y);
-				auto const val_normalized = (gen_val - min_val)/(gen_val - min_val);
+				auto const val_normalized = (gen_val - min_val)/(max_val - min_val);
 				auto const val = val_normalized != 1.0f?
 					1.0f - (1.0f - val_normalized)/std::sqrt(1.0f - val_normalized) :
 					1.0f;
