@@ -22,6 +22,12 @@ namespace terraformer
 		{f(old_val, new_val, brush_strength)} -> std::same_as<PixelType>;
 	};
 
+	template<class T, class PixelType>
+	concept draw_intensity_modulator = requires(T f, float curve_level, PixelType value)
+	{
+		{f(curve_level, value)} -> std::same_as<PixelType>;
+	};
+
 	struct solid_circle
 	{
 		constexpr auto operator()(float x, float y) const
@@ -32,9 +38,14 @@ namespace terraformer
 	struct lerp
 	{
 		constexpr auto operator()(PixelType old_val, PixelType new_val, float brush_strength) const
-		{
-			return brush_strength*new_val + (1.0f - brush_strength)*old_val;
-		}
+		{ return brush_strength*new_val + (1.0f - brush_strength)*old_val; }
+	};
+
+	template<class PixelType>
+	struct multiply
+	{
+		constexpr auto operator()(float curve_level, PixelType val) const
+		{ return curve_level*val; }
 	};
 
 	template<class PixelType,
@@ -96,25 +107,32 @@ namespace terraformer
 	};
 
 	template<class PixelType,
+		blend_function<PixelType> BlendFunction = lerp<PixelType>,
+		draw_intensity_modulator<PixelType> IntensityModulator = multiply<PixelType>,
 		brush Brush = solid_circle,
-		brush_size_modulator BrushSizeModulator = constant_brush_size,
-		blend_function<PixelType> BlendFunction = lerp<PixelType>>
+		brush_size_modulator BrushSizeModulator = constant_brush_size>
 	struct line_segment_draw_params
 	{
 		PixelType value;
-		Brush brush{};
 		BlendFunction blend_function{};
-		BrushSizeModulator brush_diameter{};
+		IntensityModulator intensity_modulator{};
 		float scale = 1.0f;
+		Brush brush{};
+		BrushSizeModulator brush_diameter{};
 	};
 
+	template<class ... Args>
+	inline auto make_line_segment_draw_params(Args&& ... args)
+	{ return line_segment_draw_params<Args...>(std::forward<Args>(args)...); }
+
 	template<class PixelType,
+		blend_function<PixelType> BlendFunction = lerp<PixelType>,
+		draw_intensity_modulator<PixelType> IntensityModulator = multiply<PixelType>,
 		brush Brush,
-		brush_size_modulator BrushSizeModulator = constant_brush_size,
-		blend_function<PixelType> BlendFunction = lerp<PixelType>>
+		brush_size_modulator BrushSizeModulator = constant_brush_size>
 	void draw(span_2d<PixelType> target_surface,
 		geosimd::line_segment<geom_space> seg,
-		line_segment_draw_params<PixelType, Brush, BrushSizeModulator, BlendFunction> const& params)
+		line_segment_draw_params<PixelType, BlendFunction, IntensityModulator, Brush, BrushSizeModulator> const& params)
 	{
 		auto dr = seg.p2 - seg.p1;
 		if(std::abs(dr[0]) > std::abs(dr[1]))
@@ -132,9 +150,9 @@ namespace terraformer
 				auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
 				paint(target_surface, paint_params{
 					.x = x/params.scale,
-		  			.y = y/params.scale,
-		  			.value = z*params.value,
-		  			.brush_diameter = params.brush_diameter(x, y),
+		  		.y = y/params.scale,
+		  		.value = params.intensity_modulator(z, params.value),
+		  		.brush_diameter = params.brush_diameter(x, y),
 					.brush = params.brush,
 					.blend_function = params.blend_function
 				});
@@ -156,7 +174,7 @@ namespace terraformer
 				paint(target_surface, paint_params{
 					.x = x/params.scale,
 		  			.y = y/params.scale,
-		  			.value = z*params.value,
+		  			.value = params.intensity_modulator(z, params.value),
 		  			.brush_diameter = params.brush_diameter(x, y),
 					.brush = params.brush,
 					.blend_function =params.blend_function
@@ -166,12 +184,13 @@ namespace terraformer
 	}
 
 	template<class PixelType,
+		blend_function<PixelType> BlendFunction,
+		draw_intensity_modulator<PixelType> IntensityModulator,
 		brush Brush,
-		brush_size_modulator BrushSizeModulator,
-		blend_function<PixelType> BlendFunction>
+		brush_size_modulator BrushSizeModulator>
 	void draw(span_2d<PixelType> target_surface,
 		std::span<location const> curve,
-		line_segment_draw_params<PixelType, Brush, BrushSizeModulator, BlendFunction> const& params)
+		line_segment_draw_params<PixelType, BlendFunction, IntensityModulator, Brush, BrushSizeModulator> const& params)
 	{
 		if(std::size(curve) == 0)
 		{ return; }

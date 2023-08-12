@@ -4,6 +4,8 @@
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/curve_tool/ridge_curve.hpp"
+#include "lib/filters/diffuser.hpp"
+#include "lib/filters/curve_rasterizer.hpp"
 
 #include <random>
 #include <chrono>
@@ -76,7 +78,7 @@ int main()
 					.phase = 0.0f
 				}
 			},
-			.base_elevation = 5120.0f
+			.base_elevation = 5120.0f,
 		},
 		.bump_field{
 			.shape{
@@ -105,11 +107,11 @@ int main()
 	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
 
 	basic_image<float> bump_field{1024, 1024};
-	auto max_val = -16384.0f;
-	auto min_val = 16384.0f;
 
 	{
 		puts("Generating bumps");
+		auto max_val = -16384.0f;
+		auto min_val = 16384.0f;
 		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.shape};
 		for(uint32_t y = 0; y != bump_field.height(); ++y)
 		{
@@ -148,6 +150,50 @@ int main()
 			}
 		}
 		store(bump_field, "bumps.exr");
+	}
+
+ 	basic_image<float> uplift_zone{1024, 1024};
+	{
+		puts("Generating uplift zone");
+		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{1024, 1024};
+		draw(uplift_zone_boundary.pixels(), main_ridge, line_segment_draw_params{
+			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 3072.0f},
+			.blend_function = [](auto, auto new_val, auto){
+				return new_val;
+			},
+			.intensity_modulator = [](float, auto brush_value) {
+			// FIXME: brush_value.value *= curve_intensity;
+				return brush_value;
+			},
+			.scale = pixel_size
+		});
+
+		for(uint32_t y = 0; y != uplift_zone.height(); ++y)
+		{
+			for(uint32_t x = 0; x != uplift_zone.width(); ++x)
+			{
+				location const current_loc{
+					pixel_size*static_cast<float>(x),
+					pixel_size*static_cast<float>(y),
+					0.0f
+				};
+
+				auto const i = std::ranges::min_element(main_ridge, [current_loc](auto a, auto b) {
+					return distance(current_loc, a) < distance(current_loc, b);
+				});
+
+				if(distance(*i, current_loc) > 8192.0f)
+				{ uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f}; }
+			}
+		}
+
+		for(uint32_t y = 0; y != uplift_zone.height(); ++y)
+		{
+			for(uint32_t x = 0; x != uplift_zone.width(); ++x)
+			{ uplift_zone(x, y) = uplift_zone_boundary(x, y).weight; }
+		}
+
+		store(uplift_zone, "uplift_zone.exr");
 	}
 
 	basic_image<float> base_elevation{1024, 1024};
@@ -200,7 +246,8 @@ int main()
 			{
 				auto const z_valley = base_elevation(x, y);
 				auto const z_hills = bump_field(x, y);
-				output(x, y) = z_valley*(1.0f + z_hills/heightmap_params.main_ridge.base_elevation);
+				auto const z_uplift = 0.0f; // FIXME: uplift_zone(x, y);
+				output(x, y) = z_valley*(1.0f + z_hills/heightmap_params.main_ridge.base_elevation) + z_uplift;
 			}
 		}
 		store(output, "output.exr");
