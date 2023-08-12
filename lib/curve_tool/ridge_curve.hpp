@@ -18,6 +18,7 @@ namespace terraformer
 		location start_location;
 		float distance_to_endpoint;
 		ridge_line_params ridge_line;
+		float base_elevation;
 	};
 
 	template<class Rng>

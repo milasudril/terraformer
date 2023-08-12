@@ -158,7 +158,8 @@ int main()
 						.wavelength = 24576.0f,
 						.phase = 0.0f
 					}
-				}
+				},
+				.base_elevation = 0.0f
 			}
 		},
 		.planetary_data{

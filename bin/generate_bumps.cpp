@@ -30,6 +30,7 @@ struct bump_field
 {
 	terraformer::fractal_wave::params wave_params;
 	float wavelength;
+	float amplitude;
 };
 
 struct steady_plate_collision_zone_descriptor
@@ -75,7 +76,8 @@ int main()
 					.wavelength = 24576.0f,
 					.phase = 0.0f
 				}
-			}
+			},
+			.base_elevation = 5120.0f
 		},
 		.bump_field{
 			.wave_params{
@@ -92,7 +94,8 @@ int main()
 					.offset_noise = 1.0f/12.0f
 				}
 			},
-			.wavelength = 5120.0f
+			.wavelength = 5120.0f,
+			.amplitude = 1024.0f
 		}
 	};
 
@@ -104,7 +107,7 @@ int main()
 	auto min_val = 16384.0f;
 
 	{
-		puts("Generating wave");
+		puts("Generating bumps");
 		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.wave_params};
 		for(uint32_t y = 0; y != bump_field.height(); ++y)
 		{
@@ -136,17 +139,18 @@ int main()
 				bump_field(x, y) = (val - min_val)/(max_val - min_val);
 			}
 		}
+		store(bump_field, "bumps.exr");
 	}
 
-	basic_image<float> output{1024, 1024};
+	basic_image<float> base_elevation{1024, 1024};
 	{
-		puts("Adding base slope");
-		auto const w = static_cast<float>(output.width());
-		auto const h = static_cast<float>(output.height());
+		puts("Generating base elevation");
+		auto const w = static_cast<float>(base_elevation.width());
+		auto const h = static_cast<float>(base_elevation.height());
 
-		for(uint32_t y = 0; y != output.height(); ++y)
+		for(uint32_t y = 0; y != base_elevation.height(); ++y)
 		{
-			for(uint32_t x = 0; x != output.width(); ++x)
+			for(uint32_t x = 0; x != base_elevation.width(); ++x)
 			{
 				location const current_loc{
 					pixel_size*static_cast<float>(x),
@@ -171,14 +175,27 @@ int main()
 					current_loc[1]:
 					pixel_size*h - current_loc[1];
 				auto const eta = distance_to_boundary/(distance_to_boundary + distance_to_ridge);
-				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
-
-				auto const wave_val = bump_field(x, y);
-				auto const val = wave_val != 1.0f ? 1.0f - (1.0f - wave_val)/std::sqrt(1.0f - wave_val) : 1.0f;
-				output(x, y) = z_valley*(1.0f + 1024.0f*2.0f*(val - 0.5f)/5120.0f);
+				auto const z_valley = z_boundary + eta*eta*(heightmap_params.main_ridge.base_elevation - z_boundary);
+				base_elevation(x, y) = z_valley;
 			}
 		}
+		store(base_elevation, "base_elevation.exr");
 	}
 
-	store(output, "bumps.exr");
+	basic_image<float> output{1024, 1024};
+	{
+		puts("Mixing bumps with base elevation");
+
+		for(uint32_t y = 0; y != output.height(); ++y)
+		{
+			for(uint32_t x = 0; x != output.width(); ++x)
+			{
+				auto const z_valley = base_elevation(x, y);
+				auto const wave_val = bump_field(x, y);
+				auto const val = wave_val != 1.0f ? 1.0f - (1.0f - wave_val)/std::sqrt(1.0f - wave_val) : 1.0f;
+				output(x, y) = z_valley*(1.0f + heightmap_params.bump_field.amplitude*2.0f*(val - 0.5f)/heightmap_params.main_ridge.base_elevation);
+			}
+		}
+		store(output, "output.exr");
+	}
 }
