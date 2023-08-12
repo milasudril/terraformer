@@ -109,7 +109,7 @@ int main()
 		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.wave_params};
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
-			printf("%u   \r",y);
+			printf(" %3x\r",static_cast<int>(256*static_cast<float>(y)/static_cast<float>(output.height())));
 			fflush(stdout);
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
@@ -128,12 +128,7 @@ int main()
 				output(x, y) = convsum;
 			}
 		}
-	}
 
-	{
-		assert(std::abs(max_val) > 0.0f);
-		assert(min_val < max_val);
-		puts("Normalizing");
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			for(uint32_t x = 0; x != output.width(); ++x)
@@ -144,11 +139,10 @@ int main()
 		}
 	}
 
-	basic_image<float> output_1{1024, 1024};
 	{
-		puts("Mixing");
-		auto const w = static_cast<float>(output_1.width());
-		auto const h = static_cast<float>(output_1.height());
+		puts("Adding base slope");
+		auto const w = static_cast<float>(output.width());
+		auto const h = static_cast<float>(output.height());
 
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
@@ -181,10 +175,10 @@ int main()
 
 				auto const wave_val = output(x, y);
 				auto const val = wave_val != 1.0f ? 1.0f - (1.0f - wave_val)/std::sqrt(1.0f - wave_val) : 1.0f;
-				output_1(x, y) = z_valley*(1.0f + 1024.0f*2.0f*(val - 0.5f)/5120.0f);
+				output(x, y) = z_valley*(1.0f + 1024.0f*2.0f*(val - 0.5f)/5120.0f);
 			}
 		}
 	}
 
-	store(output_1, "bumps.exr");
+	store(output, "bumps.exr");
 }
