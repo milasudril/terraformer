@@ -135,8 +135,12 @@ int main()
 		{
 			for(uint32_t x = 0; x != bump_field.width(); ++x)
 			{
-				auto const val = bump_field(x, y);
-				bump_field(x, y) = (val - min_val)/(max_val - min_val);
+				auto const gen_val = bump_field(x, y);
+				auto const val_normalized = (gen_val - min_val)/(gen_val - min_val);
+				auto const val = val_normalized != 1.0f?
+					1.0f - (1.0f - val_normalized)/std::sqrt(1.0f - val_normalized) :
+					1.0f;
+				bump_field(x, y) = heightmap_params.bump_field.amplitude*2.0f*(val - 0.5f);
 			}
 		}
 		store(bump_field, "bumps.exr");
@@ -191,9 +195,8 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-				auto const wave_val = bump_field(x, y);
-				auto const val = wave_val != 1.0f ? 1.0f - (1.0f - wave_val)/std::sqrt(1.0f - wave_val) : 1.0f;
-				output(x, y) = z_valley*(1.0f + heightmap_params.bump_field.amplitude*2.0f*(val - 0.5f)/heightmap_params.main_ridge.base_elevation);
+				auto const z_hills = bump_field(x, y);
+				output(x, y) = z_valley*(1.0f + z_hills/heightmap_params.main_ridge.base_elevation);
 			}
 		}
 		store(output, "output.exr");
