@@ -96,22 +96,21 @@ int main()
 		}
 	};
 
-
 	random_generator rng;
+	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
 
-	basic_image<float> output{1024, 1024};
+	basic_image<float> bump_field{1024, 1024};
 	auto max_val = -16384.0f;
 	auto min_val = 16384.0f;
-	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
 
 	{
 		puts("Generating wave");
 		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.wave_params};
-		for(uint32_t y = 0; y != output.height(); ++y)
+		for(uint32_t y = 0; y != bump_field.height(); ++y)
 		{
-			printf(" %3x\r",static_cast<int>(256*static_cast<float>(y)/static_cast<float>(output.height())));
+			printf(" %3x\r",static_cast<int>(256*static_cast<float>(y)/static_cast<float>(bump_field.height())));
 			fflush(stdout);
-			for(uint32_t x = 0; x != output.width(); ++x)
+			for(uint32_t x = 0; x != bump_field.width(); ++x)
 			{
 				auto const xf = pixel_size*static_cast<float>(x);
 				auto const yf = pixel_size*static_cast<float>(y);
@@ -125,20 +124,21 @@ int main()
 				}
 				min_val = std::min(convsum, min_val);
 				max_val = std::max(convsum, max_val);
-				output(x, y) = convsum;
+				bump_field(x, y) = convsum;
 			}
 		}
 
-		for(uint32_t y = 0; y != output.height(); ++y)
+		for(uint32_t y = 0; y != bump_field.height(); ++y)
 		{
-			for(uint32_t x = 0; x != output.width(); ++x)
+			for(uint32_t x = 0; x != bump_field.width(); ++x)
 			{
-				auto const val = output(x, y);
-				output(x, y) = (val - min_val)/(max_val - min_val);
+				auto const val = bump_field(x, y);
+				bump_field(x, y) = (val - min_val)/(max_val - min_val);
 			}
 		}
 	}
 
+	basic_image<float> output{1024, 1024};
 	{
 		puts("Adding base slope");
 		auto const w = static_cast<float>(output.width());
@@ -173,7 +173,7 @@ int main()
 				auto const eta = distance_to_boundary/(distance_to_boundary + distance_to_ridge);
 				auto const z_valley = z_boundary + eta*eta*(5120.0f - z_boundary);
 
-				auto const wave_val = output(x, y);
+				auto const wave_val = bump_field(x, y);
 				auto const val = wave_val != 1.0f ? 1.0f - (1.0f - wave_val)/std::sqrt(1.0f - wave_val) : 1.0f;
 				output(x, y) = z_valley*(1.0f + 1024.0f*2.0f*(val - 0.5f)/5120.0f);
 			}
