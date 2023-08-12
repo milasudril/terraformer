@@ -28,9 +28,8 @@ struct corners
 
 struct bump_field
 {
-	terraformer::fractal_wave::params wave_params;
-	float wavelength;
-	float amplitude;
+	terraformer::fractal_wave::params shape;
+	terraformer::wave_params wave_properties;
 };
 
 struct steady_plate_collision_zone_descriptor
@@ -80,7 +79,7 @@ int main()
 			.base_elevation = 5120.0f
 		},
 		.bump_field{
-			.wave_params{
+			.shape{
 				.amplitude{
 					.scaling_factor = std::numbers::phi_v<float>,
 					.scaling_noise = std::numbers::phi_v<float>/8.0f
@@ -94,8 +93,11 @@ int main()
 					.offset_noise = 1.0f/12.0f
 				}
 			},
-			.wavelength = 5120.0f,
-			.amplitude = 1024.0f
+			.wave_properties{
+				.amplitude = 1024.0f,
+				.wavelength = 5120.0f,
+				.phase = 0.0f
+			}
 		}
 	};
 
@@ -108,7 +110,7 @@ int main()
 
 	{
 		puts("Generating bumps");
-		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.wave_params};
+		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.shape};
 		for(uint32_t y = 0; y != bump_field.height(); ++y)
 		{
 			printf(" %3x\r",static_cast<int>(256*static_cast<float>(y)/static_cast<float>(bump_field.height())));
@@ -123,7 +125,9 @@ int main()
 				for(size_t k = 0; k != std::size(main_ridge); ++k)
 				{
 					auto const d = distance(current_loc, main_ridge[k]);
-					convsum += ridege_wave(d/heightmap_params.bump_field.wavelength);
+					convsum += ridege_wave(d/heightmap_params.bump_field.wave_properties.wavelength
+						+ heightmap_params.bump_field.wave_properties.phase
+					);
 				}
 				min_val = std::min(convsum, min_val);
 				max_val = std::max(convsum, max_val);
@@ -140,7 +144,7 @@ int main()
 				auto const val = val_normalized != 1.0f?
 					1.0f - (1.0f - val_normalized)/std::sqrt(1.0f - val_normalized) :
 					1.0f;
-				bump_field(x, y) = heightmap_params.bump_field.amplitude*2.0f*(val - 0.5f);
+				bump_field(x, y) = heightmap_params.bump_field.wave_properties.amplitude*2.0f*(val - 0.5f);
 			}
 		}
 		store(bump_field, "bumps.exr");
