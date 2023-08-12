@@ -26,10 +26,17 @@ struct corners
 	corner ne;
 };
 
+struct bump_field
+{
+	terraformer::fractal_wave::params wave_params;
+	float wavelength;
+};
+
 struct steady_plate_collision_zone_descriptor
 {
 	struct corners corners;
 	terraformer::main_ridge_params main_ridge;
+	struct bump_field bump_field;
 };
 
 int main()
@@ -69,24 +76,26 @@ int main()
 					.phase = 0.0f
 				}
 			}
+		},
+		.bump_field{
+			.wave_params{
+				.amplitude{
+					.scaling_factor = std::numbers::phi_v<float>,
+					.scaling_noise = std::numbers::phi_v<float>/8.0f
+				},
+				.wavelength{
+					.scaling_factor = std::numbers::phi_v<float>,
+					.scaling_noise = std::numbers::phi_v<float>/8.0f
+				},
+				.phase{
+					.offset = 2.0f - std::numbers::phi_v<float>,
+					.offset_noise = 1.0f/12.0f
+				}
+			},
+			.wavelength = 5120.0f
 		}
 	};
 
-	fractal_wave::params const ridge_wave_params{
-		.amplitude{
-			.scaling_factor = std::numbers::phi_v<float>,
-			.scaling_noise = std::numbers::phi_v<float>/8.0f
-		},
-		.wavelength{
-			.scaling_factor = std::numbers::phi_v<float>,
-			.scaling_noise = std::numbers::phi_v<float>/8.0f
-		},
-		.phase{
-			.offset = 2.0f - std::numbers::phi_v<float>,
-			.offset_noise = 1.0f/12.0f
-		}
-	};
-	auto const bump_wavelength = 5120.0f;
 
 	random_generator rng;
 
@@ -97,7 +106,7 @@ int main()
 
 	{
 		puts("Generating wave");
-		terraformer::fractal_wave ridege_wave{rng, ridge_wave_params};
+		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.wave_params};
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			printf("%u   \r",y);
@@ -112,7 +121,7 @@ int main()
 				for(size_t k = 0; k != std::size(main_ridge); ++k)
 				{
 					auto const d = distance(current_loc, main_ridge[k]);
-					convsum += ridege_wave(d/bump_wavelength);
+					convsum += ridege_wave(d/heightmap_params.bump_field.wavelength);
 				}
 				min_val = std::min(convsum, min_val);
 				max_val = std::max(convsum, max_val);
