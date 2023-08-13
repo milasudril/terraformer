@@ -88,6 +88,12 @@ namespace terraformer
 		std::array<wave_params, 16> m_component_params;
 	};
 
+	struct fractal_wave_params
+	{
+		fractal_wave::params shape;
+		wave_params wave_properties;
+	};
+
 	std::vector<location> generate(fractal_wave const& wave,
 		wave_params const& wave_params,
 		uniform_polyline_params const& line_params);

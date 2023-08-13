@@ -7,17 +7,11 @@
 
 namespace terraformer
 {
-	struct ridge_line_params
-	{
-		fractal_wave::params shape;
-		wave_params wave_properties;
-	};
-
 	struct main_ridge_params
 	{
 		location start_location;
 		float distance_to_endpoint;
-		ridge_line_params ridge_line;
+		fractal_wave_params ridge_line;
 		float base_elevation;
 	};
 
