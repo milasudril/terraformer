@@ -39,10 +39,16 @@ struct main_ridge_params
 	terraformer::fractal_wave_params ridge_curve_xz;
 };
 
+struct uplift_zone
+{
+	float radius;
+};
+
 struct steady_plate_collision_zone_descriptor
 {
 	struct corners corners;
 	main_ridge_params main_ridge;
+	struct uplift_zone uplift_zone;
 	terraformer::fractal_wave_params bump_field;
 };
 
@@ -58,8 +64,8 @@ int main()
 		.corners{
 			.sw = corner{512.0f},
 			.se = corner{1536.0f},
-			.nw = corner{2560.0f},
-			.ne = corner{3584.0f},
+			.nw = corner{3584.0f},
+			.ne = corner{4068.0f},
 		},
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
@@ -108,6 +114,9 @@ int main()
 				}
 			}
 		},
+		.uplift_zone{
+			.radius = 12384.0f
+		},
 		.bump_field{
 			.shape{
 				.amplitude{
@@ -124,8 +133,8 @@ int main()
 				}
 			},
 			.wave_properties{
-				.amplitude = 3072.0f,
-				.wavelength = 8192.0f + 3072.0f,
+				.amplitude = 2048.0f,
+				.wavelength = 8192.0f,
 				.phase = 0.0f
 			}
 		}
@@ -220,7 +229,7 @@ int main()
 					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
 				});
 
-				if(distance_xy(*i, current_loc) > 8192.0f)
+				if(distance_xy(*i, current_loc) > heightmap_params.uplift_zone.radius)
 				{ uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f}; }
 			}
 		}
