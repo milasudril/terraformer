@@ -28,17 +28,11 @@ struct corners
 	corner ne;
 };
 
-struct bump_field
-{
-	terraformer::fractal_wave::params shape;
-	terraformer::wave_params wave_properties;
-};
-
 struct steady_plate_collision_zone_descriptor
 {
 	struct corners corners;
 	terraformer::main_ridge_params main_ridge;
-	struct bump_field bump_field;
+	terraformer::fractal_wave_params bump_field;
 };
 
 int main()
