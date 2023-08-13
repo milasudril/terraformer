@@ -97,6 +97,14 @@ namespace terraformer
 	std::vector<location> generate(fractal_wave const& wave,
 		wave_params const& wave_params,
 		uniform_polyline_params const& line_params);
+
+	template<class Rng, class ... Params>
+	auto generate(Rng&& rng, fractal_wave_params const& wave_params, Params&&... params)
+	{
+		return generate(fractal_wave{rng, wave_params.shape},
+			wave_params.wave_properties,
+			std::forward<Params>(params)...);
+	}
 }
 
 #endif

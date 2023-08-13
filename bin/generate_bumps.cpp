@@ -3,9 +3,9 @@
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/common/spaces.hpp"
-#include "lib/curve_tool/ridge_curve.hpp"
 #include "lib/filters/diffuser.hpp"
 #include "lib/filters/curve_rasterizer.hpp"
+#include "lib/curve_tool/fractal_wave.hpp"
 
 #include <random>
 #include <chrono>
@@ -28,10 +28,19 @@ struct corners
 	corner ne;
 };
 
+struct main_ridge_params
+{
+	terraformer::location start_location;
+	float distance_to_endpoint;
+	terraformer::fractal_wave_params ridge_curve_xy;
+	float base_elevation;
+	terraformer::fractal_wave_params ridge_curve_xz;
+};
+
 struct steady_plate_collision_zone_descriptor
 {
 	struct corners corners;
-	terraformer::main_ridge_params main_ridge;
+	main_ridge_params main_ridge;
 	terraformer::fractal_wave_params bump_field;
 };
 
@@ -40,6 +49,8 @@ int main()
 	using namespace terraformer;
 
 	static constexpr auto pixel_size = 48.0f;
+	static constexpr auto domain_width = 1024;
+	static constexpr auto domain_height = 1024;
 
 	steady_plate_collision_zone_descriptor const heightmap_params{
 		.corners{
@@ -51,7 +62,7 @@ int main()
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
 			.distance_to_endpoint = 49152.0f,
-			.ridge_line{
+			.ridge_curve_xy{
 				.shape{
 					.amplitude{
 						.scaling_factor = std::numbers::phi_v<float>,
@@ -73,6 +84,27 @@ int main()
 				}
 			},
 			.base_elevation = 5120.0f,
+			.ridge_curve_xz{
+				.shape{
+					.amplitude{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/16.0f
+					},
+					.wavelength{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/16.0f
+					},
+					.phase{
+						.offset = 2.0f - std::numbers::phi_v<float>,
+						.offset_noise = 1.0f/12.0f
+					}
+				},
+				.wave_properties{
+					.amplitude = 512.0f,
+					.wavelength = 8192.0f,
+					.phase = 0.0f
+				}
+			}
 		},
 		.bump_field{
 			.shape{
@@ -98,9 +130,16 @@ int main()
 	};
 
 	random_generator rng;
-	auto const main_ridge = generate(rng, pixel_size, heightmap_params.main_ridge);
+	auto const ridge_curve_xy = generate(rng,
+		heightmap_params.main_ridge.ridge_curve_xy,
+		uniform_polyline_params{
+			.start_location = heightmap_params.main_ridge.start_location,
+			.point_count = domain_width,
+			.dx = pixel_size
+		}
+	);
 
-	basic_image<float> bump_field{1024, 1024};
+	basic_image<float> bump_field{domain_width, domain_height};
 
 	{
 		puts("Generating bumps");
@@ -118,9 +157,9 @@ int main()
 				location const current_loc{xf, yf, 0.0f};
 
 				auto convsum = 0.0f;
-				for(size_t k = 0; k != std::size(main_ridge); ++k)
+				for(size_t k = 0; k != std::size(ridge_curve_xy); ++k)
 				{
-					auto const d = distance(current_loc, main_ridge[k]);
+					auto const d = distance(current_loc, ridge_curve_xy[k]);
 					convsum += ridege_wave(d/heightmap_params.bump_field.wave_properties.wavelength
 						+ heightmap_params.bump_field.wave_properties.phase
 					);
@@ -146,11 +185,11 @@ int main()
 		store(bump_field, "bumps.exr");
 	}
 
- 	basic_image<float> uplift_zone{1024, 1024};
+ 	basic_image<float> uplift_zone{domain_width, domain_height};
 	{
 		puts("Generating uplift zone");
-		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{1024, 1024};
-		draw(uplift_zone_boundary.pixels(), main_ridge, line_segment_draw_params{
+		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
+		draw(uplift_zone_boundary.pixels(), ridge_curve_xy, line_segment_draw_params{
 			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 3072.0f},
 			.blend_function = [](auto, auto new_val, auto){
 				return new_val;
@@ -172,7 +211,7 @@ int main()
 					0.0f
 				};
 
-				auto const i = std::ranges::min_element(main_ridge, [current_loc](auto a, auto b) {
+				auto const i = std::ranges::min_element(ridge_curve_xy, [current_loc](auto a, auto b) {
 					return distance(current_loc, a) < distance(current_loc, b);
 				});
 
@@ -190,7 +229,7 @@ int main()
 		store(uplift_zone, "uplift_zone.exr");
 	}
 
-	basic_image<float> base_elevation{1024, 1024};
+	basic_image<float> base_elevation{domain_width, domain_height};
 	{
 		puts("Generating base elevation");
 		auto const w = static_cast<float>(base_elevation.width());
@@ -207,9 +246,9 @@ int main()
 				};
 
 				// NOTE: This works because main_ridge is a function of x
-				auto const side = current_loc[1] < main_ridge[x][1]? -1.0f : 1.0f;
+				auto const side = current_loc[1] < ridge_curve_xy[x][1]? -1.0f : 1.0f;
 
-				auto const i = std::ranges::min_element(main_ridge, [current_loc](auto a, auto b) {
+				auto const i = std::ranges::min_element(ridge_curve_xy, [current_loc](auto a, auto b) {
 					return distance(current_loc, a) < distance(current_loc, b);
 				});
 				auto const ridge_point = *i;
@@ -230,7 +269,7 @@ int main()
 		store(base_elevation, "base_elevation.exr");
 	}
 
-	basic_image<float> output{1024, 1024};
+	basic_image<float> output{domain_width, domain_height};
 	{
 		puts("Mixing bumps with base elevation");
 
