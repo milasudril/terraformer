@@ -32,9 +32,8 @@ struct main_ridge_params
 {
 	terraformer::location start_location;
 	float distance_xy_to_endpoint;
-	terraformer::fractal_wave_params ridge_curve_xy;
 	float base_elevation;
-	float ridge_elevation;
+	terraformer::fractal_wave_params ridge_curve_xy;
 	terraformer::fractal_wave_params ridge_curve_xz;
 };
 
@@ -61,8 +60,9 @@ int main()
 			.ne = corner{3584.0f},
 		},
 		.main_ridge{
-			.start_location = terraformer::location{0.0f, 16384.0f, 0.0f},
+			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
 			.distance_xy_to_endpoint = 49152.0f,
+			.base_elevation = 5120.0f,
 			.ridge_curve_xy{
 				.shape{
 					.amplitude{
@@ -84,8 +84,6 @@ int main()
 					.phase = 0.0f
 				}
 			},
-			.base_elevation = 5120.0f,
-			.ridge_elevation = 8192.0f,
 			.ridge_curve_xz{
 				.shape{
 					.amplitude{
@@ -133,15 +131,15 @@ int main()
 
 	random_generator rng;
 
-	uniform_polyline_params const ridge_curve_xy_polyline{
-		.start_location = heightmap_params.main_ridge.start_location,
-		.point_count = domain_width,
-		.dx = pixel_size
-	};
+
 	auto const ridge_curve_xy = generate(rng,
 		heightmap_params.main_ridge.ridge_curve_xy,
-		ridge_curve_xy_polyline,
-		rotation{}
+		heightmap_params.main_ridge.ridge_curve_xz,
+		uniform_polyline_params{
+			.start_location = heightmap_params.main_ridge.start_location,
+			.point_count = domain_width,
+			.dx = pixel_size
+		}
 	);
 
 	basic_image<float> bump_field{domain_width, domain_height};
@@ -194,12 +192,12 @@ int main()
 		puts("Generating uplift zone");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
 		draw(uplift_zone_boundary.pixels(), ridge_curve_xy, line_segment_draw_params{
-			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 3072.0f},
+			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f},
 			.blend_function = [](auto, auto new_val, auto){
 				return new_val;
 			},
-			.intensity_modulator = [](float, auto brush_value) {
-			// FIXME: brush_value.value *= curve_intensity;
+			.intensity_modulator = [](float curve_intensity, auto brush_value) {
+				brush_value.value *= curve_intensity;
 				return brush_value;
 			},
 			.scale = pixel_size
@@ -227,7 +225,7 @@ int main()
 		for(uint32_t y = 0; y != uplift_zone.height(); ++y)
 		{
 			for(uint32_t x = 0; x != uplift_zone.width(); ++x)
-			{ uplift_zone(x, y) = uplift_zone_boundary(x, y).weight; }
+			{ uplift_zone(x, y) = uplift_zone_boundary(x, y).value; }
 		}
 
 		store(uplift_zone, "uplift_zone.exr");
@@ -283,7 +281,7 @@ int main()
 			{
 				auto const z_valley = base_elevation(x, y);
 				auto const z_hills = bump_field(x, y);
-				auto const z_uplift = 0.0f; // FIXME: uplift_zone(x, y);
+				auto const z_uplift = 0.0f; // TODO: uplift_zone(x, y);
 				output(x, y) = z_valley*(1.0f + z_hills/heightmap_params.main_ridge.base_elevation) + z_uplift;
 			}
 		}
