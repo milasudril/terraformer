@@ -6,6 +6,8 @@
 #include "lib/filters/diffuser.hpp"
 #include "lib/filters/curve_rasterizer.hpp"
 #include "lib/curve_tool/fractal_wave.hpp"
+#include "lib/execution/thread_pool.hpp"
+#include "lib/filters/diffuser.hpp"
 
 #include <random>
 #include <chrono>
@@ -49,8 +51,8 @@ int main()
 	using namespace terraformer;
 
 	static constexpr auto pixel_size = 48.0f;
-	static constexpr auto domain_width = 1024;
-	static constexpr auto domain_height = 1024;
+	static constexpr uint32_t domain_width = 1024;
+	static constexpr uint32_t domain_height = 1024;
 
 	steady_plate_collision_zone_descriptor const heightmap_params{
 		.corners{
@@ -130,7 +132,7 @@ int main()
 	};
 
 	random_generator rng;
-
+	default_thread_pool threads{16};
 
 	auto const ridge_curve_xy = generate(rng,
 		heightmap_params.main_ridge.ridge_curve_xy,
@@ -187,9 +189,11 @@ int main()
 		store(bump_field, "bumps.exr");
 	}
 
- 	basic_image<float> uplift_zone{domain_width, domain_height};
+	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
+
 	{
 		puts("Generating uplift zone");
+		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
 		draw(uplift_zone_boundary.pixels(), ridge_curve_xy, line_segment_draw_params{
 			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f},
@@ -202,10 +206,9 @@ int main()
 			},
 			.scale = pixel_size
 		});
-
-		for(uint32_t y = 0; y != uplift_zone.height(); ++y)
+		for(uint32_t y = 0; y != uplift_zone_boundary.height(); ++y)
 		{
-			for(uint32_t x = 0; x != uplift_zone.width(); ++x)
+			for(uint32_t x = 0; x != uplift_zone_boundary.width(); ++x)
 			{
 				location const current_loc{
 					pixel_size*static_cast<float>(x),
@@ -222,13 +225,14 @@ int main()
 			}
 		}
 
-		for(uint32_t y = 0; y != uplift_zone.height(); ++y)
-		{
-			for(uint32_t x = 0; x != uplift_zone.width(); ++x)
-			{ uplift_zone(x, y) = uplift_zone_boundary(x, y).value; }
-		}
+		puts("   Running laplace solver");
+		solve_bvp(uplift_zone, terraformer::laplace_solver_params{
+			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
+			.step_executor_factory = std::ref(threads),
+			.boundary = std::cref(uplift_zone_boundary)
+		});
 
-		store(uplift_zone, "uplift_zone.exr");
+		store(uplift_zone.front(), "uplift_zone.exr");
 	}
 
 	basic_image<float> base_elevation{domain_width, domain_height};
@@ -281,7 +285,7 @@ int main()
 			{
 				auto const z_valley = base_elevation(x, y);
 				auto const z_hills = bump_field(x, y);
-				auto const z_uplift = 0.0f; // TODO: uplift_zone(x, y);
+				auto const z_uplift = uplift_zone.front()(x, y);
 				output(x, y) = z_valley*(1.0f + z_hills/heightmap_params.main_ridge.base_elevation) + z_uplift;
 			}
 		}
