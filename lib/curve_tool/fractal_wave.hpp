@@ -1,5 +1,9 @@
+//@	{"dependencies_extra":[{"ref": "./fractal_wave.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_LIB_FRACTALWAVE_HPP
 #define TERRAFORMER_LIB_FRACTALWAVE_HPP
+
+#include "./polyline.hpp"
 
 #include <numbers>
 #include <random>
@@ -83,6 +87,10 @@ namespace terraformer
 	private:
 		std::array<wave_params, 16> m_component_params;
 	};
+
+	std::vector<location> generate(fractal_wave const& wave,
+		wave_params const& wave_params,
+		uniform_polyline_params const& line_params);
 }
 
 #endif
