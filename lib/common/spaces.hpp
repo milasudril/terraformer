@@ -22,6 +22,14 @@ namespace terraformer
 	using hires_direction = hires_geom_space::direction;
 	using hires_rotation = geosimd::rotation<hires_geom_space>;
 	inline constexpr auto hires_origin = geosimd::origin<geosimd::euclidian_space<double, 3>>();
+
+	template<class Point>
+	inline constexpr auto distance_xy(Point a, Point b)
+	{
+		auto dr = a - b;
+		auto val = dr.get()*dr.get();
+		return std::sqrt(val[0] + val[1]);
+	}
 };
 
 
