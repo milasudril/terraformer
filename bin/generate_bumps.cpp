@@ -34,6 +34,7 @@ struct main_ridge_params
 	float distance_to_endpoint;
 	terraformer::fractal_wave_params ridge_curve_xy;
 	float base_elevation;
+	float ridge_elevation;
 	terraformer::fractal_wave_params ridge_curve_xz;
 };
 
@@ -84,6 +85,7 @@ int main()
 				}
 			},
 			.base_elevation = 5120.0f,
+			.ridge_elevation = 8192.0f,
 			.ridge_curve_xz{
 				.shape{
 					.amplitude{
@@ -130,17 +132,19 @@ int main()
 	};
 
 	random_generator rng;
+
+	uniform_polyline_params const ridge_curve_xy_polyline{
+		.start_location = heightmap_params.main_ridge.start_location,
+		.point_count = domain_width,
+		.dx = pixel_size
+	};
 	auto const ridge_curve_xy = generate(rng,
 		heightmap_params.main_ridge.ridge_curve_xy,
-		uniform_polyline_params{
-			.start_location = heightmap_params.main_ridge.start_location,
-			.point_count = domain_width,
-			.dx = pixel_size
-		}
+		ridge_curve_xy_polyline,
+		rotation{}
 	);
 
 	basic_image<float> bump_field{domain_width, domain_height};
-
 	{
 		puts("Generating bumps");
 		auto max_val = -16384.0f;

@@ -4,7 +4,8 @@
 
 std::vector<terraformer::location> terraformer::generate(fractal_wave const& wave,
 	wave_params const& wave_params,
-	uniform_polyline_params const& line_params)
+	uniform_polyline_params const& line_params,
+	rotation const& R)
 {
 	auto const n_points = line_params.point_count;
 	auto const dx = line_params.dx;
@@ -28,6 +29,6 @@ std::vector<terraformer::location> terraformer::generate(fractal_wave const& wav
 	std::vector<location> ret;
 	ret.reserve(n_points);
 	for(size_t k = 0; k != std::size(curve); ++k)
-	{ ret.push_back(line_params.start_location + curve[k].apply(scaling)); }
+	{ ret.push_back(line_params.start_location + curve[k].apply(scaling).apply(R)); }
 	return ret;
 }
