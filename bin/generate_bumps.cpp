@@ -124,8 +124,8 @@ int main()
 				}
 			},
 			.wave_properties{
-				.amplitude = 1024.0f,
-				.wavelength = 5120.0f,
+				.amplitude = 3072.0f,
+				.wavelength = 8192.0f + 3072.0f,
 				.phase = 0.0f
 			}
 		}
