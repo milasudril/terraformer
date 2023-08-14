@@ -159,9 +159,10 @@ int main()
 		auto max_val = -16384.0f;
 		auto min_val = 16384.0f;
 		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.shape};
+		auto const now = std::chrono::steady_clock::now();
 		for(uint32_t y = 0; y != bump_field.height(); ++y)
 		{
-			printf(" %3x\r",static_cast<int>(256*static_cast<float>(y)/static_cast<float>(bump_field.height())));
+//			printf(" %3x\r",static_cast<int>(256*static_cast<float>(y)/static_cast<float>(bump_field.height())));
 			fflush(stdout);
 			for(uint32_t x = 0; x != bump_field.width(); ++x)
 			{
@@ -182,6 +183,8 @@ int main()
 				bump_field(x, y) = convsum;
 			}
 		}
+		auto const t_end = std::chrono::steady_clock::now();
+		printf("%.8g\n", std::chrono::duration<double>{t_end - now}.count());
 
 		for(uint32_t y = 0; y != bump_field.height(); ++y)
 		{

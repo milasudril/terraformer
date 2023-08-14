@@ -4,6 +4,7 @@
 #define TERRAFORMER_LIB_FRACTALWAVE_HPP
 
 #include "./polyline.hpp"
+#include "lib/common/utils.hpp"
 
 #include <numbers>
 #include <random>
@@ -79,7 +80,7 @@ namespace terraformer
 				auto const wavelength = m_component_params[k - 1].wavelength;
 				auto const phase = m_component_params[k - 1].phase;
 
-				sum += amplitude*std::sin(twopi*(x/wavelength - phase));
+				sum += amplitude*approx_sine(twopi*(x/wavelength - phase));
 			}
 			return sum;
 		}
