@@ -149,7 +149,7 @@ int main()
 			.x_distortion{
 				.shape{
 					.amplitude{
-						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_factor = 2.0f*std::numbers::phi_v<float>,
 						.scaling_noise = std::numbers::phi_v<float>/8.0f
 					},
 					.wavelength{
@@ -162,15 +162,15 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 768.0f,
-					.wavelength = 13312.0f,
+					.amplitude = 512.0f,
+					.wavelength = 8192.0f,
 					.phase = 0.0f
 				}
 			},
 			.y_distortion{
 				.shape{
 					.amplitude{
-						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_factor = 4.0f*std::numbers::phi_v<float>,
 						.scaling_noise = std::numbers::phi_v<float>/8.0f
 					},
 					.wavelength{
@@ -183,8 +183,8 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 64.0f,
-					.wavelength = 5120.0f,
+					.amplitude = 512.0f,
+					.wavelength = 16384.0f,
 					.phase = 0.0f
 				}
 			}
