@@ -46,8 +46,9 @@ struct uplift_zone
 
 struct bump_field
 {
-	terraformer::fractal_wave_params generator;
-	float collision_delay;
+	terraformer::fractal_wave_params impact_waves;
+	terraformer::fractal_wave_params x_distortion;
+	terraformer::fractal_wave_params y_distortion;
 };
 
 struct steady_plate_collision_zone_descriptor
@@ -124,7 +125,7 @@ int main()
 			.radius = 12384.0f
 		},
 		.bump_field{
-			.generator{
+			.impact_waves{
 				.shape{
 					.amplitude{
 						.scaling_factor = std::numbers::phi_v<float>,
@@ -145,7 +146,48 @@ int main()
 					.phase = 0.0f
 				}
 			},
-			.collision_delay = 1.0f/49152.0f
+			.x_distortion{
+				.shape{
+					.amplitude{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/8.0f
+					},
+					.wavelength{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/8.0f
+					},
+					.phase{
+						.offset = 2.0f - std::numbers::phi_v<float>,
+						.offset_noise = 1.0f/12.0f
+					}
+				},
+				.wave_properties{
+					.amplitude = 768.0f,
+					.wavelength = 13312.0f,
+					.phase = 0.0f
+				}
+			},
+			.y_distortion{
+				.shape{
+					.amplitude{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/8.0f
+					},
+					.wavelength{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/8.0f
+					},
+					.phase{
+						.offset = 2.0f - std::numbers::phi_v<float>,
+						.offset_noise = 1.0f/12.0f
+					}
+				},
+				.wave_properties{
+					.amplitude = 64.0f,
+					.wavelength = 5120.0f,
+					.phase = 0.0f
+				}
+			}
 		}
 	};
 
@@ -167,7 +209,9 @@ int main()
 		puts("Generating bumps");
 		auto max_val = -16384.0f;
 		auto min_val = 16384.0f;
-		terraformer::fractal_wave ridege_wave{rng, heightmap_params.bump_field.generator.shape};
+		terraformer::fractal_wave const ridege_wave{rng, heightmap_params.bump_field.impact_waves.shape};
+		terraformer::fractal_wave const x_distortion{rng, heightmap_params.bump_field.x_distortion.shape};
+		terraformer::fractal_wave const y_distortion{rng, heightmap_params.bump_field.y_distortion.shape};
 		auto const now = std::chrono::steady_clock::now();
 		for(uint32_t y = 0; y != bump_field.height(); ++y)
 		{
@@ -175,15 +219,25 @@ int main()
 			{
 				auto const xf = pixel_size*static_cast<float>(x);
 				auto const yf = pixel_size*static_cast<float>(y);
-				location const current_loc{xf, yf, 0.0f};
+				auto const current_loc = location{xf, yf, 0.0f}
+					+ displacement{
+						x_distortion(yf/heightmap_params.bump_field.x_distortion.wave_properties.wavelength
+							+ heightmap_params.bump_field.x_distortion.wave_properties.phase),
+						y_distortion(xf/heightmap_params.bump_field.y_distortion.wave_properties.wavelength
+							+ heightmap_params.bump_field.y_distortion.wave_properties.phase),
+						0.0f
+					}.apply(scaling{
+						heightmap_params.bump_field.x_distortion.wave_properties.amplitude,
+						heightmap_params.bump_field.y_distortion.wave_properties.amplitude,
+						1.0f
+					});
 
 				auto convsum = 0.0f;
 				for(size_t k = 0; k != std::size(ridge_curve_xy); ++k)
 				{
 					auto const d = distance_xy(current_loc, ridge_curve_xy[k]);
-					convsum += ridege_wave(d/heightmap_params.bump_field.generator.wave_properties.wavelength
-						+ heightmap_params.bump_field.generator.wave_properties.phase
-						- xf*heightmap_params.bump_field.collision_delay);
+					convsum += ridege_wave(d/heightmap_params.bump_field.impact_waves.wave_properties.wavelength
+						+ heightmap_params.bump_field.impact_waves.wave_properties.phase);
 				}
 				min_val = std::min(convsum, min_val);
 				max_val = std::max(convsum, max_val);
@@ -202,7 +256,7 @@ int main()
 				auto const val = val_normalized != 1.0f?
 					1.0f - (1.0f - val_normalized)/std::sqrt(1.0f - val_normalized) :
 					1.0f;
-				bump_field(x, y) = heightmap_params.bump_field.generator.wave_properties.amplitude*2.0f*(val - 0.5f);
+				bump_field(x, y) = heightmap_params.bump_field.impact_waves.wave_properties.amplitude*2.0f*(val - 0.5f);
 			}
 		}
 		store(bump_field, "bumps.exr");
