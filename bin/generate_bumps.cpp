@@ -9,6 +9,7 @@
 #include "lib/curve_tool/fractal_wave.hpp"
 #include "lib/execution/thread_pool.hpp"
 #include "lib/filters/diffuser.hpp"
+#include "lib/filters/waveshaper.hpp"
 
 #include <random>
 #include <chrono>
@@ -205,20 +206,9 @@ int main()
 		auto range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
 		auto const t_end = std::chrono::steady_clock::now();
 		printf("%.8g\n", std::chrono::duration<double>{t_end - now}.count());
-
-		for(uint32_t y = 0; y != bump_field.height(); ++y)
-		{
-			for(uint32_t x = 0; x != bump_field.width(); ++x)
-			{
-				auto const gen_val = bump_field(x, y);
-				auto const val_normalized = (gen_val - range.min)/(range.max - range.min);
-				auto const val = val_normalized != 1.0f?
-					1.0f - (1.0f - val_normalized)/std::sqrt(1.0f - val_normalized) :
-					1.0f;
-				bump_field(x, y) = heightmap_params.bump_field.impact_waves.wave_properties.amplitude*2.0f*(val - 0.5f);
-			}
-		}
-		store(bump_field, "bumps.exr");
+		store(bump_field, "bumps_0.exr");
+		sharpen_ridges(bump_field, range, heightmap_params.bump_field.impact_waves.wave_properties.amplitude);
+		store(bump_field, "bumps_1.exr");
 	}
 
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
