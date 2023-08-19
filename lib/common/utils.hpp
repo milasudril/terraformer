@@ -6,6 +6,7 @@
 #include <concepts>
 #include <cstdint>
 #include <numbers>
+#include <algorithm>
 
 namespace terraformer
 {
@@ -43,8 +44,12 @@ namespace terraformer
 	}
 
 	constexpr auto mod(int32_t x, int32_t denom)
+	{ return ((x % denom) + denom) % denom; }
+
+	constexpr auto smoothstep(float x)
 	{
-		return ((x % denom) + denom) % denom;
+		x = std::clamp(x, -1.0f, 1.0f);
+		return (2.0f - x)*(x + 1.0f)*(x + 1.0f)/4.0f;
 	}
 
 	template<class T>

@@ -136,7 +136,7 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 2048.0f,
+					.amplitude =  0.0f, // 2048.0f,
 					.wavelength = 8192.0f,
 					.phase = 0.0f
 				}
@@ -243,7 +243,7 @@ int main()
 				});
 
 				if(distance_xy(*i, current_loc) > heightmap_params.uplift_zone.radius)
-				{ uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f}; }
+				{ uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{.weight = 0.25f, .value = 0.0f}; }
 			}
 		}
 
@@ -254,7 +254,7 @@ int main()
 			.boundary = std::cref(uplift_zone_boundary)
 		});
 
-		store(uplift_zone.front(), "uplift_zone.exr");
+		store(uplift_zone.front(), "uplift_zone1.exr");
 	}
 
 	basic_image<float> base_elevation{domain_width, domain_height};
