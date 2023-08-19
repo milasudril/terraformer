@@ -5,6 +5,7 @@
 
 #include "lib/curve_tool/fractal_wave.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/common/domain_size.hpp"
 
 #include <algorithm>
 
