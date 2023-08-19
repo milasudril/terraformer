@@ -117,7 +117,7 @@ int main()
 			}
 		},
 		.uplift_zone{
-			.radius = 12384.0f
+			.radius = 16384.0f
 		},
 		.bump_field{
 			.impact_waves{
@@ -136,7 +136,7 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude =  0.0f, // 2048.0f,
+					.amplitude = 2048.0f,
 					.wavelength = 8192.0f,
 					.phase = 0.0f
 				}
@@ -217,17 +217,6 @@ int main()
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
-		draw(uplift_zone_boundary.pixels(), ridge_curve, line_segment_draw_params{
-			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f},
-			.blend_function = [](auto, auto new_val, auto){
-				return new_val;
-			},
-			.intensity_modulator = [](float curve_intensity, auto brush_value) {
-				brush_value.value *= curve_intensity;
-				return brush_value;
-			},
-			.scale = pixel_size
-		});
 		for(uint32_t y = 0; y != uplift_zone_boundary.height(); ++y)
 		{
 			for(uint32_t x = 0; x != uplift_zone_boundary.width(); ++x)
@@ -242,10 +231,24 @@ int main()
 					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
 				});
 
-				if(distance_xy(*i, current_loc) > heightmap_params.uplift_zone.radius)
-				{ uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{.weight = 0.25f, .value = 0.0f}; }
+				uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{
+					.weight = smoothstep((distance_xy(*i, current_loc) - heightmap_params.uplift_zone.radius)/5120.0f),
+					.value = 0.0f
+				};
 			}
 		}
+
+		draw(uplift_zone_boundary.pixels(), ridge_curve, line_segment_draw_params{
+			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f},
+			.blend_function = [](auto, auto new_val, auto){
+				return new_val;
+			},
+			.intensity_modulator = [](float curve_intensity, auto brush_value) {
+				brush_value.value *= curve_intensity;
+				return brush_value;
+			},
+			.scale = pixel_size
+		});
 
 		puts("   Running laplace solver");
 		solve_bvp(uplift_zone, terraformer::laplace_solver_params{
