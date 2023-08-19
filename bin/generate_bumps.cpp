@@ -5,6 +5,7 @@
 #include "lib/common/spaces.hpp"
 #include "lib/filters/diffuser.hpp"
 #include "lib/filters/curve_rasterizer.hpp"
+#include "lib/filters/bump_field.hpp"
 #include "lib/curve_tool/fractal_wave.hpp"
 #include "lib/execution/thread_pool.hpp"
 #include "lib/filters/diffuser.hpp"
@@ -44,19 +45,12 @@ struct uplift_zone
 	float radius;
 };
 
-struct bump_field
-{
-	terraformer::fractal_wave_params impact_waves;
-	terraformer::fractal_wave_params x_distortion;
-	terraformer::fractal_wave_params y_distortion;
-};
-
 struct steady_plate_collision_zone_descriptor
 {
 	struct corners corners;
 	main_ridge_params main_ridge;
 	struct uplift_zone uplift_zone;
-	struct bump_field bump_field;
+	terraformer::bump_field::params bump_field;
 };
 
 int main()

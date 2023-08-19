@@ -15,19 +15,19 @@ namespace terraformer
 	public:
 		struct params
 		{
-			float pixel_size;
 			fractal_wave_params impact_waves;
 			fractal_wave_params x_distortion;
 			fractal_wave_params y_distortion;
 		};
 
 		template<class Rng>
-		explicit bump_field(Rng&& rng, params const& params):
-			m_pixel_size{params.pixel_size},
-			m_x_distortion{generate(rng, params.x_distortion)},
-			m_y_distortion{generate(rng, params.y_distortion)},
+		explicit bump_field(Rng&& rng, float pixel_size, std::span<location const> ridge_curve, params const& params):
+			m_pixel_size{pixel_size},
+			m_ridge_curve{ridge_curve},
 			m_wave{rng, params.impact_waves.shape},
-			m_wave_params{params.impact_waves.wave_properties}
+			m_wave_params{params.impact_waves.wave_properties},
+			m_x_distortion{generate(rng, params.x_distortion)},
+			m_y_distortion{generate(rng, params.y_distortion)}
 		{}
 
 		float operator()(uint32_t x, uint32_t y) const
@@ -51,14 +51,22 @@ namespace terraformer
 
 	private:
 		float m_pixel_size;
-		std::vector<location> m_x_distortion;
-		std::vector<location> m_y_distortion;
 		std::span<location const> m_ridge_curve;
 		fractal_wave m_wave;
 		wave_params m_wave_params;
+		std::vector<location> m_x_distortion;
+		std::vector<location> m_y_distortion;
 	};
 
 	std::ranges::min_max_result<float> generate(span_2d<float> output_buffer, bump_field const& bumps);
+
+	template<class Rng>
+	auto generate(span_2d<float> output_buffer,
+		Rng&& rng,
+		float pixel_size,
+		std::span<location const> ridge_curve,
+		bump_field::params const& params)
+	{ return generate(output_buffer, bump_field{rng, pixel_size, ridge_curve, params}); }
 }
 
 #endif
