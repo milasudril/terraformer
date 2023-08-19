@@ -36,7 +36,7 @@ struct main_ridge_params
 	terraformer::location start_location;
 	float distance_xy_to_endpoint;
 	float base_elevation;
-	terraformer::fractal_wave_params ridge_curve_xy;
+	terraformer::fractal_wave_params ridge_curve;
 	terraformer::fractal_wave_params ridge_curve_xz;
 };
 
@@ -72,7 +72,7 @@ int main()
 			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
 			.distance_xy_to_endpoint = 49152.0f,
 			.base_elevation = 5120.0f,
-			.ridge_curve_xy{
+			.ridge_curve{
 				.shape{
 					.amplitude{
 						.scaling_factor = std::numbers::phi_v<float>,
@@ -188,8 +188,8 @@ int main()
 	random_generator rng;
 	default_thread_pool threads{16};
 
-	auto const ridge_curve_xy = generate(rng,
-		heightmap_params.main_ridge.ridge_curve_xy,
+	auto const ridge_curve = generate(rng,
+		heightmap_params.main_ridge.ridge_curve,
 		heightmap_params.main_ridge.ridge_curve_xz,
 		uniform_polyline_params{
 			.start_location = heightmap_params.main_ridge.start_location,
@@ -201,43 +201,8 @@ int main()
 	basic_image<float> bump_field{domain_width, domain_height};
 	{
 		puts("Generating bumps");
-		auto max_val = -16384.0f;
-		auto min_val = 16384.0f;
-		terraformer::fractal_wave const ridege_wave{rng, heightmap_params.bump_field.impact_waves.shape};
-		terraformer::fractal_wave const x_distortion{rng, heightmap_params.bump_field.x_distortion.shape};
-		terraformer::fractal_wave const y_distortion{rng, heightmap_params.bump_field.y_distortion.shape};
 		auto const now = std::chrono::steady_clock::now();
-		for(uint32_t y = 0; y != bump_field.height(); ++y)
-		{
-			for(uint32_t x = 0; x != bump_field.width(); ++x)
-			{
-				auto const xf = pixel_size*static_cast<float>(x);
-				auto const yf = pixel_size*static_cast<float>(y);
-				auto const current_loc = location{xf, yf, 0.0f}
-					+ displacement{
-						x_distortion(yf/heightmap_params.bump_field.x_distortion.wave_properties.wavelength
-							+ heightmap_params.bump_field.x_distortion.wave_properties.phase),
-						y_distortion(xf/heightmap_params.bump_field.y_distortion.wave_properties.wavelength
-							+ heightmap_params.bump_field.y_distortion.wave_properties.phase),
-						0.0f
-					}.apply(scaling{
-						heightmap_params.bump_field.x_distortion.wave_properties.amplitude,
-						heightmap_params.bump_field.y_distortion.wave_properties.amplitude,
-						1.0f
-					});
-
-				auto convsum = 0.0f;
-				for(size_t k = 0; k != std::size(ridge_curve_xy); ++k)
-				{
-					auto const d = distance_xy(current_loc, ridge_curve_xy[k]);
-					convsum += ridege_wave(d/heightmap_params.bump_field.impact_waves.wave_properties.wavelength
-						+ heightmap_params.bump_field.impact_waves.wave_properties.phase);
-				}
-				min_val = std::min(convsum, min_val);
-				max_val = std::max(convsum, max_val);
-				bump_field(x, y) = convsum;
-			}
-		}
+		auto range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
 		auto const t_end = std::chrono::steady_clock::now();
 		printf("%.8g\n", std::chrono::duration<double>{t_end - now}.count());
 
@@ -246,7 +211,7 @@ int main()
 			for(uint32_t x = 0; x != bump_field.width(); ++x)
 			{
 				auto const gen_val = bump_field(x, y);
-				auto const val_normalized = (gen_val - min_val)/(max_val - min_val);
+				auto const val_normalized = (gen_val - range.min)/(range.max - range.min);
 				auto const val = val_normalized != 1.0f?
 					1.0f - (1.0f - val_normalized)/std::sqrt(1.0f - val_normalized) :
 					1.0f;
@@ -262,7 +227,7 @@ int main()
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
-		draw(uplift_zone_boundary.pixels(), ridge_curve_xy, line_segment_draw_params{
+		draw(uplift_zone_boundary.pixels(), ridge_curve, line_segment_draw_params{
 			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f},
 			.blend_function = [](auto, auto new_val, auto){
 				return new_val;
@@ -283,7 +248,7 @@ int main()
 					0.0f
 				};
 
-				auto const i = std::ranges::min_element(ridge_curve_xy, [current_loc](auto a, auto b) {
+				auto const i = std::ranges::min_element(ridge_curve, [current_loc](auto a, auto b) {
 					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
 				});
 
@@ -319,9 +284,9 @@ int main()
 				};
 
 				// NOTE: This works because main_ridge is a function of x
-				auto const side = current_loc[1] < ridge_curve_xy[x][1]? -1.0f : 1.0f;
+				auto const side = current_loc[1] < ridge_curve[x][1]? -1.0f : 1.0f;
 
-				auto const i = std::ranges::min_element(ridge_curve_xy, [current_loc](auto a, auto b) {
+				auto const i = std::ranges::min_element(ridge_curve, [current_loc](auto a, auto b) {
 					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
 				});
 				auto const ridge_point = *i;

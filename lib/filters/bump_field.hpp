@@ -1,5 +1,3 @@
-//@	{"dependencies_extra":[{"ref":"./bump_field.o", "rel":"implementation"}]}
-
 #ifndef TERRAFORMER_BUMP_FIELD_HPP
 #define TERRAFORMER_BUMP_FIELD_HPP
 
@@ -22,13 +20,24 @@ namespace terraformer
 		};
 
 		template<class Rng>
-		explicit bump_field(Rng&& rng, float pixel_size, std::span<location const> ridge_curve, params const& params):
-			m_pixel_size{pixel_size},
+		explicit bump_field(Rng&& rng,
+			domain_size const& dom_size,
+			std::span<location const> ridge_curve,
+			params const& params):
+			m_pixel_size{dom_size.pixel_size},
 			m_ridge_curve{ridge_curve},
 			m_wave{rng, params.impact_waves.shape},
 			m_wave_params{params.impact_waves.wave_properties},
-			m_x_distortion{generate(rng, params.x_distortion)},
-			m_y_distortion{generate(rng, params.y_distortion)}
+			m_x_distortion{generate(rng, params.x_distortion, uniform_polyline_params{
+				.start_location = location{0.0f, 0.0f, 0.0f},
+				.point_count = dom_size.height,
+				.dx = dom_size.pixel_size
+			})},
+			m_y_distortion{generate(rng, params.y_distortion, uniform_polyline_params{
+				.start_location = location{0.0f, 0.0f, 0.0f},
+				.point_count = dom_size.width,
+				.dx = dom_size.pixel_size
+			})}
 		{}
 
 		float operator()(uint32_t x, uint32_t y) const
@@ -59,15 +68,24 @@ namespace terraformer
 		std::vector<location> m_y_distortion;
 	};
 
-	std::ranges::min_max_result<float> generate(span_2d<float> output_buffer, bump_field const& bumps);
-
 	template<class Rng>
-	auto generate(span_2d<float> output_buffer,
+	std::ranges::min_max_result<float> generate(span_2d<float> output_buffer,
 		Rng&& rng,
 		float pixel_size,
 		std::span<location const> ridge_curve,
 		bump_field::params const& params)
-	{ return generate(output_buffer, bump_field{rng, pixel_size, ridge_curve, params}); }
+	{
+		return generate_minmax(output_buffer, bump_field{
+			rng,
+			domain_size{
+				.width = output_buffer.width(),
+				.height = output_buffer.height(),
+				.pixel_size = pixel_size
+			},
+			ridge_curve,
+			params
+		});
+	}
 }
 
 #endif

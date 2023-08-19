@@ -9,6 +9,8 @@
 #include <type_traits>
 #include <cstddef>
 #include <cmath>
+#include <limits>
+#include <algorithm>
 
 namespace terraformer
 {
@@ -170,6 +172,27 @@ namespace terraformer
 				out(col, row) = f(col, row);
 			}
 		}
+	}
+
+	template<class Func>
+	auto generate_minmax(span_2d<float> out, Func&& f)
+	{
+		std::ranges::min_max_result<float> ret{
+			.min =  std::numeric_limits<float>::infinity(),
+			.max = -std::numeric_limits<float>::infinity()
+		};
+
+		for(uint32_t y = 0; y != out.height(); ++y)
+		{
+			for(uint32_t x = 0; x != out.width(); ++x)
+			{
+				auto value = f(x, y);
+				ret.min = std::min(value, ret.min);
+				ret.max = std::max(value, ret.max);
+				out(x, y) = value;
+			}
+		}
+		return ret;
 	}
 
 	template<class T>
