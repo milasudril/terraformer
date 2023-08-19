@@ -1,7 +1,7 @@
 //@	{"dependencies_extra":[{"ref":"./bump_field.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_LIB_BUMP_FIELD_HPP
-#define TERRAFORMER_LIB_BUMP_FIELD_HPP
+#ifndef TERRAFORMER_BUMP_FIELD_HPP
+#define TERRAFORMER_BUMP_FIELD_HPP
 
 #include "lib/curve_tool/fractal_wave.hpp"
 #include "lib/common/span_2d.hpp"

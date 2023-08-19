@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_IMAGE_GRAD_TRACER_HPP
-#define TERRAFORMER_LIB_IMAGE_GRAD_TRACER_HPP
+#ifndef TERRAFORMER_IMAGE_GRAD_TRACER_HPP
+#define TERRAFORMER_IMAGE_GRAD_TRACER_HPP
 
 #include "lib/common/span_2d.hpp"
 #include "lib/common/array_tuple.hpp"

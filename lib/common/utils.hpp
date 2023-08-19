@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_UTILS_HPP
-#define TERRAFORMER_LIB_UTILS_HPP
+#ifndef TERRAFORMER_UTILS_HPP
+#define TERRAFORMER_UTILS_HPP
 
 #include <type_traits>
 #include <cmath>

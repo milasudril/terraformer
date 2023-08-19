@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_RIDGE_CURVE_HPP
-#define TERRAFORMER_LIB_RIDGE_CURVE_HPP
+#ifndef TERRAFORMER_RIDGE_CURVE_HPP
+#define TERRAFORMER_RIDGE_CURVE_HPP
 
 #include "./fractal_wave.hpp"
 #include "lib/common/spaces.hpp"

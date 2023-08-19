@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_YEAR_HPP
-#define TERRAFORMER_LIB_YEAR_HPP
+#ifndef TERRAFORMER_YEAR_HPP
+#define TERRAFORMER_YEAR_HPP
 
 #include <compare>
 

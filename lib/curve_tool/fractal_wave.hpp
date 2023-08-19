@@ -1,7 +1,7 @@
 //@	{"dependencies_extra":[{"ref": "./fractal_wave.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_LIB_FRACTALWAVE_HPP
-#define TERRAFORMER_LIB_FRACTALWAVE_HPP
+#ifndef TERRAFORMER_FRACTALWAVE_HPP
+#define TERRAFORMER_FRACTALWAVE_HPP
 
 #include "./polyline.hpp"
 #include "lib/common/utils.hpp"

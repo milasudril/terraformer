@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_SPACES_HPP
-#define TERRAFORMER_LIB_SPACES_HPP
+#ifndef TERRAFORMER_SPACES_HPP
+#define TERRAFORMER_SPACES_HPP
 
 #include <geosimd/euclidian_space.hpp>
 #include <geosimd/rotation.hpp>

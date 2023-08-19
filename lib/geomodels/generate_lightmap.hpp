@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_GENERATE_LIGHTMAP_HPP
-#define TERRAFORMER_LIB_GENERATE_LIGHTMAP_HPP
+#ifndef TERRAFORMER_GENERATE_LIGHTMAP_HPP
+#define TERRAFORMER_GENERATE_LIGHTMAP_HPP
 
 #include "./sun_direction.hpp"
 #include "lib/curve_tool/wave_sum.hpp"

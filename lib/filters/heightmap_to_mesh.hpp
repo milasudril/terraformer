@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_HEIGHTMAP_TO_MESH_HPP
-#define TERRAFORMER_LIB_HEIGHTMAP_TO_MESH_HPP
+#ifndef TERRAFORMER_HEIGHTMAP_TO_MESH_HPP
+#define TERRAFORMER_HEIGHTMAP_TO_MESH_HPP
 
 #include "lib/mesh_store/mesh.hpp"
 #include "lib/common/utils.hpp"

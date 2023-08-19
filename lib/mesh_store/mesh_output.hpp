@@ -1,7 +1,7 @@
 //@	{"dependencies_extra":[{"ref":"./mesh_output.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_LIB_MESH_OUTPUT_HPP
-#define TERRAFORMER_LIB_MESH_OUTPUT_HPP
+#ifndef TERRAFORMER_MESH_OUTPUT_HPP
+#define TERRAFORMER_MESH_OUTPUT_HPP
 
 #include "./mesh.hpp"
 #include "lib/common/cfile_owner.hpp"

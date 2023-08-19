@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_RGBAPIXEL_HPP
-#define TERRAFORMER_LIB_RGBAPIXEL_HPP
+#ifndef TERRAFORMER_RGBAPIXEL_HPP
+#define TERRAFORMER_RGBAPIXEL_HPP
 
 #include <geosimd/vec_t.hpp>
 #include <type_traits>

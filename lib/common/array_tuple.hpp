@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_ARRAY_TUPLE_HPP
-#define TERRAFORMER_LIB_ARRAY_TUPLE_HPP
+#ifndef TERRAFORMER_ARRAY_TUPLE_HPP
+#define TERRAFORMER_ARRAY_TUPLE_HPP
 
 #include "./tuple.hpp"
 #include "./utils.hpp"

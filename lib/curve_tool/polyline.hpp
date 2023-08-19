@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_POLYLINE_HPP
-#define TERRAFORMER_LIB_POLYLINE_HPP
+#ifndef TERRAFORMER_POLYLINE_HPP
+#define TERRAFORMER_POLYLINE_HPP
 
 #include "lib/common/spaces.hpp"
 

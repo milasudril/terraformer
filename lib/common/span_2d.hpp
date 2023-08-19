@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_SPAN2D_HPP
-#define TERRAFORMER_LIB_SPAN2D_HPP
+#ifndef TERRAFORMER_SPAN2D_HPP
+#define TERRAFORMER_SPAN2D_HPP
 
 #include "./utils.hpp"
 #include "./spaces.hpp"

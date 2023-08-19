@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_LIB_CFILE_OWNER_HPP
-#define TERRAFORMER_LIB_CFILE_OWNER_HPP
+#ifndef TERRAFORMER_CFILE_OWNER_HPP
+#define TERRAFORMER_CFILE_OWNER_HPP
 
 #include <memory>
 #include <cstdio>
