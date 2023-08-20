@@ -44,6 +44,7 @@ struct main_ridge_params
 struct uplift_zone
 {
 	float radius;
+	float transition_width;
 };
 
 struct steady_plate_collision_zone_descriptor
@@ -117,7 +118,8 @@ int main()
 			}
 		},
 		.uplift_zone{
-			.radius = 16384.0f
+			.radius = 12384.0f,
+			.transition_width = 5120.0f
 		},
 		.bump_field{
 			.impact_waves{
@@ -231,8 +233,10 @@ int main()
 					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
 				});
 
+				auto const transition_width = heightmap_params.uplift_zone.transition_width;
 				uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{
-					.weight = smoothstep((distance_xy(*i, current_loc) - heightmap_params.uplift_zone.radius)/5120.0f),
+					.weight = smoothstep((distance_xy(*i, current_loc)
+						- (heightmap_params.uplift_zone.radius + 0.5f*transition_width))/transition_width),
 					.value = 0.0f
 				};
 			}
