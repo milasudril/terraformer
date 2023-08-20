@@ -43,8 +43,10 @@ struct main_ridge_params
 
 struct uplift_zone
 {
-	float radius;
-	float transition_width;
+	float radius_south;
+	float transition_width_south;
+	float radius_north;
+	float transition_width_north;
 };
 
 struct steady_plate_collision_zone_descriptor
@@ -118,8 +120,10 @@ int main()
 			}
 		},
 		.uplift_zone{
-			.radius = 12384.0f,
-			.transition_width = 5120.0f
+			.radius_south = 16384.0f,
+			.transition_width_south = 5120.0f,
+			.radius_north = 8192.0f,
+			.transition_width_north = 1024.0f
 		},
 		.bump_field{
 			.impact_waves{
@@ -229,14 +233,23 @@ int main()
 					0.0f
 				};
 
+
 				auto const i = std::ranges::min_element(ridge_curve, [current_loc](auto a, auto b) {
 					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
 				});
 
-				auto const transition_width = heightmap_params.uplift_zone.transition_width;
+				// NOTE: This works because main_ridge is a function of x
+				auto const transition_width = current_loc[1] < ridge_curve[x][1]?
+					 heightmap_params.uplift_zone.transition_width_north
+					:heightmap_params.uplift_zone.transition_width_south;
+
+				auto const radius = current_loc[1] < ridge_curve[x][1]?
+					 heightmap_params.uplift_zone.radius_north
+					:heightmap_params.uplift_zone.radius_south;
+
 				uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{
 					.weight = smoothstep((distance_xy(*i, current_loc)
-						- (heightmap_params.uplift_zone.radius + 0.5f*transition_width))/transition_width),
+						- (radius + 0.5f*transition_width))/transition_width),
 					.value = 0.0f
 				};
 			}
