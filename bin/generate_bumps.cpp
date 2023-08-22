@@ -69,7 +69,7 @@ int main()
 		.corners{
 			.sw = corner{512.0f},
 			.se = corner{1536.0f},
-			.nw = corner{4068.0f},
+			.nw = corner{4608.0f},
 			.ne = corner{3584.0f}
 		},
 		.main_ridge{
@@ -341,7 +341,7 @@ int main()
 #else
 				auto const eta = 1.0f - d(x, y);
 #endif
-				auto const z_valley = z_boundary + eta*eta*(heightmap_params.main_ridge.base_elevation - z_boundary);
+				auto const z_valley = z_boundary + smoothstep(2.0f*eta - 1.0f)*(heightmap_params.main_ridge.base_elevation - z_boundary);
 				base_elevation(x, y) = z_valley;
 			}
 		}
