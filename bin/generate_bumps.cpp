@@ -69,8 +69,8 @@ int main()
 		.corners{
 			.sw = corner{512.0f},
 			.se = corner{1536.0f},
-			.nw = corner{3584.0f},
-			.ne = corner{4068.0f},
+			.nw = corner{4068.0f},
+			.ne = corner{3584.0f}
 		},
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
