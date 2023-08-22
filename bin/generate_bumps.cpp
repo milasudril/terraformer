@@ -205,6 +205,35 @@ int main()
 		}
 	);
 
+	double_buffer<grayscale_image> distance_field{domain_width, domain_height};
+	{
+		puts("Generating distance field");
+		basic_image<dirichlet_boundary_pixel<float>> ridge_line{domain_width, domain_height};
+		draw(ridge_line.pixels(), ridge_curve, line_segment_draw_params{
+			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f},
+			.blend_function = [](auto, auto new_val, auto){
+				return new_val;
+			},
+			.intensity_modulator = [](auto, auto brush_value) {
+				return brush_value;
+			},
+			.scale = pixel_size
+		});
+		solve_bvp(distance_field, terraformer::laplace_solver_params{
+			.tolerance = 1.0e-6f,
+			.step_executor_factory = std::ref(threads),
+			.boundary = [&ridge_line](uint32_t x, uint32_t y)
+			{
+				if(y == domain_height - 1 || y == 0)
+				{ return dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f}; }
+				else
+				{ return ridge_line(x, y); }
+			}
+		});
+		store(distance_field.front(), "distance_field.exr");
+	}
+
+
 	basic_image<float> bump_field{domain_width, domain_height};
 	{
 		puts("Generating bumps");
@@ -271,14 +300,15 @@ int main()
 			.boundary = std::cref(uplift_zone_boundary)
 		});
 
-		store(uplift_zone.front(), "uplift_zone1.exr");
+		store(uplift_zone.front(), "uplift_zone.exr");
 	}
 
 	basic_image<float> base_elevation{domain_width, domain_height};
 	{
 		puts("Generating base elevation");
 		auto const w = static_cast<float>(base_elevation.width());
-		auto const h = static_cast<float>(base_elevation.height());
+//		auto const h = static_cast<float>(base_elevation.height());
+		auto const d = distance_field.front();
 
 		for(uint32_t y = 0; y != base_elevation.height(); ++y)
 		{
@@ -292,21 +322,25 @@ int main()
 
 				// NOTE: This works because main_ridge is a function of x
 				auto const side = current_loc[1] < ridge_curve[x][1]? -1.0f : 1.0f;
+				auto const xi = static_cast<float>(x)/(w - 1.0f);
+				auto const z_boundary = side < 0.0f?
+					std::lerp(heightmap_params.corners.nw.elevation, heightmap_params.corners.ne.elevation, xi):
+					std::lerp(heightmap_params.corners.sw.elevation, heightmap_params.corners.se.elevation, xi);
 
+#if 0
 				auto const i = std::ranges::min_element(ridge_curve, [current_loc](auto a, auto b) {
 					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
 				});
 				auto const ridge_point = *i;
 
 				auto const distance_xy_to_ridge = distance_xy(current_loc, ridge_point);
-				auto const xi = static_cast<float>(x)/(w - 1.0f);
-				auto const z_boundary = side < 0.0f?
-					std::lerp(heightmap_params.corners.nw.elevation, heightmap_params.corners.ne.elevation, xi):
-					std::lerp(heightmap_params.corners.sw.elevation, heightmap_params.corners.se.elevation, xi);
 				auto const distance_xy_to_boundary = side < 0.0f?
 					current_loc[1]:
 					pixel_size*h - current_loc[1];
 				auto const eta = distance_xy_to_boundary/(distance_xy_to_boundary + distance_xy_to_ridge);
+#else
+				auto const eta = 1.0f - d(x, y);
+#endif
 				auto const z_valley = z_boundary + eta*eta*(heightmap_params.main_ridge.base_elevation - z_boundary);
 				base_elevation(x, y) = z_valley;
 			}
