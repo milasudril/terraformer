@@ -120,7 +120,7 @@ int main()
 			}
 		},
 		.uplift_zone{
-			.radius_south = 16384.0f,
+			.radius_south = 8192.0f,
 			.transition_width_south = 5120.0f,
 			.radius_north = 8192.0f,
 			.transition_width_north = 1024.0f
@@ -239,17 +239,14 @@ int main()
 				});
 
 				// NOTE: This works because main_ridge is a function of x
-				auto const transition_width = current_loc[1] < ridge_curve[x][1]?
-					 heightmap_params.uplift_zone.transition_width_north
-					:heightmap_params.uplift_zone.transition_width_south;
 
 				auto const radius = current_loc[1] < ridge_curve[x][1]?
 					 heightmap_params.uplift_zone.radius_north
 					:heightmap_params.uplift_zone.radius_south;
+				auto const curve_z = ridge_curve[x][2];
 
 				uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{
-					.weight = smoothstep((distance_xy(*i, current_loc)
-						- (radius + 0.5f*transition_width))/transition_width),
+					.weight = (distance_xy(*i, current_loc) - curve_z*radius/heightmap_params.main_ridge.start_location[2]) > 0.0f? 1.0f : 0.0f,
 					.value = 0.0f
 				};
 			}
@@ -326,7 +323,7 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-				auto const z_hills = bump_field(x, y);
+				auto const z_hills = 0.0f*bump_field(x, y);
 				auto const z_uplift = uplift_zone.front()(x, y);
 				output(x, y) = z_valley*(1.0f + z_hills/heightmap_params.main_ridge.base_elevation) + z_uplift;
 			}
