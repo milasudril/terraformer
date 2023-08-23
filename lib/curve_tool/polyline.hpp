@@ -11,5 +11,11 @@ namespace terraformer
 		size_t point_count;
 		float dx;
 	};
+
+	struct polyline_displacement_params
+	{
+		size_t point_count;
+		float dx;
+	};
 }
 #endif

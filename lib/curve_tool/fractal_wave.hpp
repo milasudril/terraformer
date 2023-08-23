@@ -99,6 +99,10 @@ namespace terraformer
 		wave_params const& wave_xy_params,
 		uniform_polyline_params const& line_params);
 
+	std::vector<displacement> generate(fractal_wave const& wave_xy,
+		wave_params const& wave_xy_params,
+		polyline_displacement_params const& line_params);
+
 	template<class Rng, class ... Params>
 	auto generate(Rng&& rng,
 		fractal_wave_params const& wave_params_xy,

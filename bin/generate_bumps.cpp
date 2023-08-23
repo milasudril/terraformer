@@ -47,6 +47,7 @@ struct uplift_zone
 	float transition_width_south;
 	float radius_north;
 	float transition_width_north;
+	terraformer::fractal_wave_params radius_distortion;
 };
 
 struct steady_plate_collision_zone_descriptor
@@ -123,7 +124,28 @@ int main()
 			.radius_south = 8192.0f,
 			.transition_width_south = 5120.0f,
 			.radius_north = 8192.0f,
-			.transition_width_north = 1024.0f
+			.transition_width_north = 1024.0f,
+			.radius_distortion{
+				.shape{
+					.amplitude{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/16.0f
+					},
+					.wavelength{
+						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_noise = std::numbers::phi_v<float>/16.0f
+					},
+					.phase{
+						.offset = 2.0f - std::numbers::phi_v<float>,
+						.offset_noise = 1.0f/12.0f
+					}
+				},
+				.wave_properties{
+					.amplitude = 512.0f,
+					.wavelength = 2048.0f,
+					.phase = 0.0f
+				}
+			}
 		},
 		.bump_field{
 			.impact_waves{
@@ -238,7 +260,7 @@ int main()
 	{
 		puts("Generating bumps");
 		auto const now = std::chrono::steady_clock::now();
-		auto range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
+		auto const range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
 		auto const t_end = std::chrono::steady_clock::now();
 		printf("%.8g\n", std::chrono::duration<double>{t_end - now}.count());
 		store(bump_field, "bumps_0.exr");
@@ -252,6 +274,13 @@ int main()
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
+		auto const radius_distortion = generate(rng,
+			heightmap_params.uplift_zone.radius_distortion,
+			polyline_displacement_params{
+				.point_count = domain_width,
+				.dx = pixel_size
+			}
+		);
 		for(uint32_t y = 0; y != uplift_zone_boundary.height(); ++y)
 		{
 			for(uint32_t x = 0; x != uplift_zone_boundary.width(); ++x)
@@ -262,17 +291,16 @@ int main()
 					0.0f
 				};
 
-
 				auto const i = std::ranges::min_element(ridge_curve, [current_loc](auto a, auto b) {
 					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
 				});
 
 				// NOTE: This works because main_ridge is a function of x
 
-				auto const radius = current_loc[1] < ridge_curve[x][1]?
+				auto const radius = (current_loc[1] < ridge_curve[x][1]?
 					 heightmap_params.uplift_zone.radius_north
-					:heightmap_params.uplift_zone.radius_south;
-				auto const curve_z = ridge_curve[x][2];
+					:heightmap_params.uplift_zone.radius_south) + radius_distortion[x][1];
+				auto const curve_z = (*i)[2];
 
 				uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{
 					.weight = (distance_xy(*i, current_loc) - curve_z*radius/heightmap_params.main_ridge.start_location[2]) > 0.0f? 1.0f : 0.0f,
