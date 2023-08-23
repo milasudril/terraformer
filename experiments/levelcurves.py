@@ -17,4 +17,6 @@ if inp:
 	levels = numpy.power(2, exp)
 	matplotlib.pyplot.contour(numpy.flipud(pixels[:, :, 0]), levels, extent = [0, 49152, 0, 49252])
 	matplotlib.pyplot.colorbar()
+	ax = matplotlib.pyplot.gca()
+	ax.set_aspect('equal', adjustable='box')
 	matplotlib.pyplot.show()
