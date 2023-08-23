@@ -12,7 +12,9 @@ if inp:
 	pixels = inp.read_image(0, 0, 0, nchannels, 'float')
 	print(pixels[:, :, 0].ndim)
 	inp.close()
-#	levels = numpy.linspace(0, 8192 + 512, 18)
-	matplotlib.pyplot.contour(numpy.flipud(pixels[:, :, 0]), levels=16, extent = [0, 49152, 0, 49252], cmap='tab20')
+	t = numpy.linspace(0, 16, 17)/16
+	exp = t*13 + (1 - t)*9
+	levels = numpy.power(2, exp)
+	matplotlib.pyplot.contour(numpy.flipud(pixels[:, :, 0]), levels, extent = [0, 49152, 0, 49252])
 	matplotlib.pyplot.colorbar()
 	matplotlib.pyplot.show()
