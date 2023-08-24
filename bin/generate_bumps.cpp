@@ -164,7 +164,7 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 2048.0f,
+					.amplitude = 1024.0f,
 					.wavelength = 8192.0f,
 					.phase = 0.0f
 				}
@@ -385,9 +385,9 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-				auto const z_hills = 0.0f*bump_field(x, y);
+				auto const z_hills = bump_field(x, y)*std::exp2((z_valley - heightmap_params.main_ridge.base_elevation)/4096.0f);
 				auto const z_uplift = uplift_zone.front()(x, y);
-				output(x, y) = z_valley*(1.0f + z_hills/heightmap_params.main_ridge.base_elevation) + z_uplift;
+				output(x, y) = z_valley + z_hills + z_uplift;
 			}
 		}
 		store(output, "output.exr");
