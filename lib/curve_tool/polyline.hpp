@@ -5,7 +5,7 @@
 
 namespace terraformer
 {
-	struct uniform_polyline_params
+	struct polyline_location_params
 	{
 		location start_location;
 		size_t point_count;

@@ -33,7 +33,7 @@ std::vector<terraformer::displacement> terraformer::generate(fractal_wave const&
 
 std::vector<terraformer::location> terraformer::generate(fractal_wave const& wave_xy,
 	wave_params const& wave_xy_params,
-	uniform_polyline_params const& line_params)
+	polyline_location_params const& line_params)
 {
 	auto const n_points = line_params.point_count;
 	auto const dx = line_params.dx;
@@ -66,7 +66,7 @@ std::vector<terraformer::location> terraformer::generate(fractal_wave const& wav
 	wave_params const& wave_xy_params,
 	fractal_wave const& wave_xz,
 	wave_params const& wave_xz_params,
-	uniform_polyline_params const& line_params)
+	polyline_location_params const& line_params)
 {
 	auto const n_points = line_params.point_count;
 	auto const dx = line_params.dx;

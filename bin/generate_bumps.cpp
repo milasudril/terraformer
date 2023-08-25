@@ -222,7 +222,7 @@ int main()
 	auto const ridge_curve = generate(rng,
 		heightmap_params.main_ridge.ridge_curve,
 		heightmap_params.main_ridge.ridge_curve_xz,
-		uniform_polyline_params{
+		polyline_location_params{
 			.start_location = heightmap_params.main_ridge.start_location,
 			.point_count = domain_width,
 			.dx = pixel_size

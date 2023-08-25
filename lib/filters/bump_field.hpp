@@ -28,12 +28,12 @@ namespace terraformer
 			m_ridge_curve{ridge_curve},
 			m_wave{rng, params.impact_waves.shape},
 			m_wave_params{params.impact_waves.wave_properties},
-			m_x_distortion{generate(rng, params.x_distortion, uniform_polyline_params{
+			m_x_distortion{generate(rng, params.x_distortion, polyline_location_params{
 				.start_location = location{0.0f, 0.0f, 0.0f},
 				.point_count = dom_size.height,
 				.dx = dom_size.pixel_size
 			})},
-			m_y_distortion{generate(rng, params.y_distortion, uniform_polyline_params{
+			m_y_distortion{generate(rng, params.y_distortion, polyline_location_params{
 				.start_location = location{0.0f, 0.0f, 0.0f},
 				.point_count = dom_size.width,
 				.dx = dom_size.pixel_size
