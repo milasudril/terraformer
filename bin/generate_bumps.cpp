@@ -223,9 +223,9 @@ int main()
 		heightmap_params.main_ridge.ridge_curve,
 		heightmap_params.main_ridge.ridge_curve_xz,
 		polyline_location_params{
-			.start_location = heightmap_params.main_ridge.start_location,
 			.point_count = domain_width,
-			.dx = pixel_size
+			.dx = pixel_size,
+			.start_location = heightmap_params.main_ridge.start_location
 		}
 	);
 

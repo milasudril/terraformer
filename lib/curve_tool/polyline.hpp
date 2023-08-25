@@ -7,9 +7,9 @@ namespace terraformer
 {
 	struct polyline_location_params
 	{
-		location start_location;
 		size_t point_count;
 		float dx;
+		location start_location;
 	};
 
 	struct polyline_displacement_params
