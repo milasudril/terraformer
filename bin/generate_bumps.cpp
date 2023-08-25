@@ -56,6 +56,7 @@ struct steady_plate_collision_zone_descriptor
 	main_ridge_params main_ridge;
 	struct uplift_zone uplift_zone;
 	terraformer::bump_field::params bump_field;
+	float bump_field_decay_length;
 };
 
 int main()
@@ -211,7 +212,8 @@ int main()
 					.phase = 0.0f
 				}
 			}
-		}
+		},
+		.bump_field_decay_length = 4096.0f
 	};
 
 	random_generator rng;
@@ -385,7 +387,7 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-				auto const z_hills = bump_field(x, y)*std::exp2((z_valley - heightmap_params.main_ridge.base_elevation)/4096.0f);
+				auto const z_hills = bump_field(x, y)*std::exp2((z_valley - heightmap_params.main_ridge.base_elevation)/heightmap_params.bump_field_decay_length);
 				auto const z_uplift = uplift_zone.front()(x, y);
 				output(x, y) = z_valley + z_hills + z_uplift;
 			}
