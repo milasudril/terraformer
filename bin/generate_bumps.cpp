@@ -10,6 +10,7 @@
 #include "lib/execution/thread_pool.hpp"
 #include "lib/filters/diffuser.hpp"
 #include "lib/filters/waveshaper.hpp"
+#include "lib/filters/convhull.hpp"
 
 #include <random>
 #include <chrono>
@@ -225,7 +226,6 @@ int main()
 		}
 	);
 
-
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
 	{
 		puts("Generating uplift zone");
@@ -292,10 +292,10 @@ int main()
 		store(uplift_zone.front(), "uplift_zone.exr");
 	}
 
-
 	double_buffer<grayscale_image> distance_field{domain_width, domain_height};
 	{
 		puts("Generating distance field");
+		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> ridge_line{domain_width, domain_height};
 		draw(ridge_line.pixels(), ridge_curve, line_segment_draw_params{
 			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f},
@@ -307,6 +307,32 @@ int main()
 			},
 			.scale = pixel_size
 		});
+
+		puts("   Initiating laplace solver");
+		{
+			auto& init = distance_field.back();
+			for(uint32_t y = 0; y != domain_height; ++y)
+			{
+				for(uint32_t x = 0; x != domain_width; ++x)
+				{ init(x, y) = ridge_line(x, y).weight; }
+			}
+		}
+		distance_field.swap();
+
+		convhull(distance_field);
+
+		{
+			auto& init = distance_field.back();
+			auto& src = distance_field.front();
+			for(uint32_t y = 0; y != domain_height; ++y)
+			{
+				for(uint32_t x = 0; x != domain_width; ++x)
+				{init(x, y) = 1.0f - src(x, y);}
+			}
+		}
+		distance_field.swap();
+
+		puts("   Running laplace solver");
 		solve_bvp(distance_field, terraformer::laplace_solver_params{
 			.tolerance = 1.0e-6f,
 			.step_executor_factory = std::ref(threads),
@@ -324,10 +350,7 @@ int main()
 	basic_image<float> bump_field{domain_width, domain_height};
 	{
 		puts("Generating bumps");
-		auto const now = std::chrono::steady_clock::now();
 		auto const range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
-		auto const t_end = std::chrono::steady_clock::now();
-		printf("%.8g\n", std::chrono::duration<double>{t_end - now}.count());
 		store(bump_field, "bumps_0.exr");
 		sharpen_ridges(bump_field, range, heightmap_params.bump_field.impact_waves.wave_properties.amplitude);
 		store(bump_field, "bumps_1.exr");
@@ -337,7 +360,6 @@ int main()
 	{
 		puts("Generating base elevation");
 		auto const w = static_cast<float>(base_elevation.width());
-//		auto const h = static_cast<float>(base_elevation.height());
 		auto const d = distance_field.front();
 
 		for(uint32_t y = 0; y != base_elevation.height(); ++y)
@@ -356,21 +378,7 @@ int main()
 				auto const z_boundary = side < 0.0f?
 					std::lerp(heightmap_params.corners.nw.elevation, heightmap_params.corners.ne.elevation, xi):
 					std::lerp(heightmap_params.corners.sw.elevation, heightmap_params.corners.se.elevation, xi);
-
-#if 0
-				auto const i = std::ranges::min_element(ridge_curve, [current_loc](auto a, auto b) {
-					return distance_xy(current_loc, a) < distance_xy(current_loc, b);
-				});
-				auto const ridge_point = *i;
-
-				auto const distance_xy_to_ridge = distance_xy(current_loc, ridge_point);
-				auto const distance_xy_to_boundary = side < 0.0f?
-					current_loc[1]:
-					pixel_size*h - current_loc[1];
-				auto const eta = distance_xy_to_boundary/(distance_xy_to_boundary + distance_xy_to_ridge);
-#else
 				auto const eta = 1.0f - d(x, y);
-#endif
 				auto const z_valley = z_boundary + smoothstep(2.0f*eta - 1.0f)*(heightmap_params.main_ridge.base_elevation - z_boundary);
 				base_elevation(x, y) = z_valley;
 			}

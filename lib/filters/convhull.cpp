@@ -84,14 +84,13 @@ namespace
 	using cgal_mesh = CGAL::Surface_mesh<cgal_point>;
 }
 
-terraformer::basic_image<float> terraformer::convhull(span_2d<float const> values)
-{
-	auto const w = values.width();
-	auto const h = values.height();
 
+
+void terraformer::convhull(span_2d<float const> source, span_2d<float> dest)
+{
 	cgal_mesh convhull;
 	{
-		auto const points = to_location_array<cgal_point>(values);
+		auto const points = to_location_array<cgal_point>(source);
 		CGAL::convex_hull_3(std::begin(points), std::end(points), convhull);
 		CGAL::Polygon_mesh_processing::triangulate_faces(convhull);
 	}
@@ -118,7 +117,6 @@ terraformer::basic_image<float> terraformer::convhull(span_2d<float const> value
 
 	});
 
-	basic_image<float> ret{w, h};
 	for(auto const& face : faces)
 	{
 		auto const T = geosimd::resolve(face, vertices);
@@ -133,10 +131,7 @@ terraformer::basic_image<float> terraformer::convhull(span_2d<float const> value
 			auto const v = location{0.5f, 0.5f, 0.0f} + 0.5f*(loc - location{0.0f, 0.0f, 0.0f});
 			auto const x = std::min(static_cast<uint32_t>(v[0]), pixels.width() - 1);
 			auto const y = std::min(static_cast<uint32_t>(v[1]), pixels.height() - 1);
-			assert(loc[2] > 0.0f);
 			pixels(x, y) = std::max(pixels(x, y), v[2]);
-		}, ret.pixels());
+		}, dest);
 	}
-
-	return ret;
 }
