@@ -44,9 +44,7 @@ struct main_ridge_params
 struct uplift_zone
 {
 	float radius_south;
-	float transition_width_south;
 	float radius_north;
-	float transition_width_north;
 	terraformer::fractal_wave_params radius_distortion;
 };
 
@@ -123,9 +121,7 @@ int main()
 		},
 		.uplift_zone{
 			.radius_south = 8192.0f,
-			.transition_width_south = 5120.0f,
 			.radius_north = 8192.0f,
-			.transition_width_north = 1024.0f,
 			.radius_distortion{
 				.shape{
 					.amplitude{
@@ -230,10 +226,7 @@ int main()
 	);
 
 
-
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
-	double_buffer<grayscale_image> uplift_zone_intensity{domain_width, domain_height};
-
 	{
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
@@ -273,12 +266,9 @@ int main()
 					.value = 0.0f
 				};
 				uplift_zone.back()(x, y) = std::max(0.0f, radius - d);
-				uplift_zone_intensity.back()(x, y) = std::max(0.0f, radius - d);
 			}
 		}
-		uplift_zone_intensity.swap();
 		uplift_zone.swap();
-		store(uplift_zone_intensity.front(), "uplift_zone_intensity.exr");
 
 		draw(uplift_zone_boundary.pixels(), ridge_curve, line_segment_draw_params{
 			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f},
