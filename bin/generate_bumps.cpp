@@ -229,48 +229,10 @@ int main()
 		}
 	);
 
-	double_buffer<grayscale_image> distance_field{domain_width, domain_height};
-	{
-		puts("Generating distance field");
-		basic_image<dirichlet_boundary_pixel<float>> ridge_line{domain_width, domain_height};
-		draw(ridge_line.pixels(), ridge_curve, line_segment_draw_params{
-			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f},
-			.blend_function = [](auto, auto new_val, auto){
-				return new_val;
-			},
-			.intensity_modulator = [](auto, auto brush_value) {
-				return brush_value;
-			},
-			.scale = pixel_size
-		});
-		solve_bvp(distance_field, terraformer::laplace_solver_params{
-			.tolerance = 1.0e-6f,
-			.step_executor_factory = std::ref(threads),
-			.boundary = [&ridge_line](uint32_t x, uint32_t y)
-			{
-				if(y == domain_height - 1 || y == 0)
-				{ return dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f}; }
-				else
-				{ return ridge_line(x, y); }
-			}
-		});
-		store(distance_field.front(), "distance_field.exr");
-	}
 
-
-	basic_image<float> bump_field{domain_width, domain_height};
-	{
-		puts("Generating bumps");
-		auto const now = std::chrono::steady_clock::now();
-		auto const range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
-		auto const t_end = std::chrono::steady_clock::now();
-		printf("%.8g\n", std::chrono::duration<double>{t_end - now}.count());
-		store(bump_field, "bumps_0.exr");
-		sharpen_ridges(bump_field, range, heightmap_params.bump_field.impact_waves.wave_properties.amplitude);
-		store(bump_field, "bumps_1.exr");
-	}
 
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
+	double_buffer<grayscale_image> uplift_zone_intensity{domain_width, domain_height};
 
 	{
 		puts("Generating uplift zone");
@@ -303,13 +265,20 @@ int main()
 					 heightmap_params.uplift_zone.radius_north
 					:heightmap_params.uplift_zone.radius_south) + radius_distortion[x][1];
 				auto const curve_z = (*i)[2];
-
+				auto const z_0 = curve_z*radius/heightmap_params.main_ridge.start_location[2];
+				auto const d = distance_xy(*i, current_loc);
+				auto const zero_line = d - z_0;
 				uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{
-					.weight = (distance_xy(*i, current_loc) - curve_z*radius/heightmap_params.main_ridge.start_location[2]) > 0.0f? 1.0f : 0.0f,
+					.weight = zero_line > 0.0f? 1.0f : 0.0f,
 					.value = 0.0f
 				};
+				uplift_zone.back()(x, y) = std::max(0.0f, radius - d);
+				uplift_zone_intensity.back()(x, y) = std::max(0.0f, radius - d);
 			}
 		}
+		uplift_zone_intensity.swap();
+		uplift_zone.swap();
+		store(uplift_zone_intensity.front(), "uplift_zone_intensity.exr");
 
 		draw(uplift_zone_boundary.pixels(), ridge_curve, line_segment_draw_params{
 			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f},
@@ -331,6 +300,47 @@ int main()
 		});
 
 		store(uplift_zone.front(), "uplift_zone.exr");
+	}
+
+
+	double_buffer<grayscale_image> distance_field{domain_width, domain_height};
+	{
+		puts("Generating distance field");
+		basic_image<dirichlet_boundary_pixel<float>> ridge_line{domain_width, domain_height};
+		draw(ridge_line.pixels(), ridge_curve, line_segment_draw_params{
+			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f},
+			.blend_function = [](auto, auto new_val, auto){
+				return new_val;
+			},
+			.intensity_modulator = [](auto, auto brush_value) {
+				return brush_value;
+			},
+			.scale = pixel_size
+		});
+		solve_bvp(distance_field, terraformer::laplace_solver_params{
+			.tolerance = 1.0e-6f,
+			.step_executor_factory = std::ref(threads),
+			.boundary = [&ridge_line](uint32_t x, uint32_t y)
+			{
+				if(y == domain_height - 1 || y == 0)
+				{ return dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f}; }
+				else
+				{ return ridge_line(x, y); }
+			}
+		});
+		store(distance_field.front(), "distance_field.exr");
+	}
+
+	basic_image<float> bump_field{domain_width, domain_height};
+	{
+		puts("Generating bumps");
+		auto const now = std::chrono::steady_clock::now();
+		auto const range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
+		auto const t_end = std::chrono::steady_clock::now();
+		printf("%.8g\n", std::chrono::duration<double>{t_end - now}.count());
+		store(bump_field, "bumps_0.exr");
+		sharpen_ridges(bump_field, range, heightmap_params.bump_field.impact_waves.wave_properties.amplitude);
+		store(bump_field, "bumps_1.exr");
 	}
 
 	basic_image<float> base_elevation{domain_width, domain_height};
