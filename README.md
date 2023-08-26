@@ -11,4 +11,6 @@ for use in computer graphics.
 
 ![A rendering of a heightmap produced by Terraformer](experiments/topcam-look-north.jpg)
 
+![Levelcurves](experiments/level-curves.svg)
+
 [![A demonstration of generated lightmaps](https://img.youtube.com/vi/9-fhsvYm4iE/maxresdefault.jpg)](https://youtu.be/9-fhsvYm4iE)
