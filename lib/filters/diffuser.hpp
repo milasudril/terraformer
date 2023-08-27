@@ -234,7 +234,10 @@ namespace terraformer
 			auto const delta = diffuser();
 
 			if(delta < tolerance)
-			{ return delta; }
+			{
+				fprintf(stderr, "Laplace solver returned after %zu iterations\n", k + 1);
+				return delta;
+			}
 
 			if(k % 1024 == 0)
 			{
