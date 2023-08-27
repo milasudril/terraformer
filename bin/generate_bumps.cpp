@@ -238,6 +238,8 @@ int main()
 				.dx = pixel_size
 			}
 		);
+		auto const z_avg = heightmap_params.main_ridge.start_location[2];
+		std::uniform_real_distribution init_noise{0.0f, z_avg};
 		for(uint32_t y = 0; y != uplift_zone_boundary.height(); ++y)
 		{
 			for(uint32_t x = 0; x != uplift_zone_boundary.width(); ++x)
@@ -258,14 +260,14 @@ int main()
 					 heightmap_params.uplift_zone.radius_north
 					:heightmap_params.uplift_zone.radius_south) + radius_distortion[x][1];
 				auto const curve_z = (*i)[2];
-				auto const z_0 = curve_z*radius/heightmap_params.main_ridge.start_location[2];
+				auto const z_0 = curve_z*radius/z_avg;
 				auto const d = distance_xy(*i, current_loc);
 				auto const zero_line = d - z_0;
 				uplift_zone_boundary(x, y) = dirichlet_boundary_pixel{
 					.weight = zero_line > 0.0f? 1.0f : 0.0f,
 					.value = 0.0f
 				};
-				uplift_zone.back()(x, y) = std::max(0.0f, radius - d);
+				uplift_zone.back()(x, y) = init_noise(rng);
 			}
 		}
 		uplift_zone.swap();
@@ -284,7 +286,7 @@ int main()
 
 		puts("   Running laplace solver");
 		solve_bvp(uplift_zone, terraformer::laplace_solver_params{
-			.tolerance = 0x1.0p-15,
+			.tolerance = 0.5f,
 			.step_executor_factory = std::ref(threads),
 			.boundary = std::cref(uplift_zone_boundary)
 		});
@@ -315,7 +317,7 @@ int main()
 			for(uint32_t y = 0; y != domain_height; ++y)
 			{
 				for(uint32_t x = 0; x != domain_width; ++x)
-				{ init(x, y) = ridge_line(x, y).weight; }
+				{ init(x, y) = init_noise(rng); }
 			}
 		}
 		distance_field.swap();
@@ -328,14 +330,16 @@ int main()
 			for(uint32_t y = 0; y != domain_height; ++y)
 			{
 				for(uint32_t x = 0; x != domain_width; ++x)
-				{init(x, y) = 1.0f - src(x, y) + (std::abs(src(x, y)) < 1.0f/4.0f ? init_noise(rng) : 0.0f);}
+				{
+					init(x, y) = 1.0f - src(x, y) + (std::abs(src(x, y)) < 1.0f/4.0f ? init_noise(rng) : 0.0f);
+				}
 			}
 		}
 		distance_field.swap();
 
 		puts("   Running laplace solver");
 		solve_bvp(distance_field, terraformer::laplace_solver_params{
-			.tolerance = 0x1.0p-15,
+			.tolerance = 0x1.0p-15f,
 			.step_executor_factory = std::ref(threads),
 			.boundary = [&ridge_line](uint32_t x, uint32_t y)
 			{
