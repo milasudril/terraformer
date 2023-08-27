@@ -15,7 +15,7 @@ if inp:
 	t = numpy.linspace(0, 16, 17)/16
 	exp = t*13 + (1 - t)*9
 	levels = numpy.power(2, exp)
-	matplotlib.pyplot.contour(numpy.flipud(pixels[:, :, 0]), levels, extent = [0, 49152, 0, 49252])
+	matplotlib.pyplot.contour(numpy.flipud(pixels[:, :, 0]), levels, extent = [0, 49152, 0, 49252], linewidths=0.75)
 	matplotlib.pyplot.colorbar()
 	ax = matplotlib.pyplot.gca()
 	ax.set_aspect('equal', adjustable='box')
