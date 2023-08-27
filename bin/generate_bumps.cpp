@@ -301,7 +301,7 @@ int main()
 		basic_image<dirichlet_boundary_pixel<float>> ridge_line{domain_width, domain_height};
 		std::uniform_real_distribution init_noise{0.0f, 1.0f/16.0f};
 		draw(ridge_line.pixels(), ridge_curve, line_segment_draw_params{
-			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f},
+			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f},
 			.blend_function = [](auto, auto new_val, auto){
 				return new_val;
 			},
@@ -317,7 +317,7 @@ int main()
 			for(uint32_t y = 0; y != domain_height; ++y)
 			{
 				for(uint32_t x = 0; x != domain_width; ++x)
-				{ init(x, y) = init_noise(rng); }
+				{ init(x, y) = ridge_line(x, y).value; }
 			}
 		}
 		distance_field.swap();
@@ -330,25 +330,35 @@ int main()
 			for(uint32_t y = 0; y != domain_height; ++y)
 			{
 				for(uint32_t x = 0; x != domain_width; ++x)
-				{
-					init(x, y) = 1.0f - src(x, y) + (std::abs(src(x, y)) < 1.0f/4.0f ? init_noise(rng) : 0.0f);
-				}
+				{ init(x, y) = src(x, y) + smoothstep(16.0f*(std::abs(src(x, y)) - 15.0f/16.0f))*init_noise(rng); }
 			}
 		}
 		distance_field.swap();
+		store(distance_field.front(), "distance_field_init.exr");
 
 		puts("   Running laplace solver");
 		solve_bvp(distance_field, terraformer::laplace_solver_params{
-			.tolerance = 0x1.0p-15f,
+			.tolerance = 0x1.0p-16f,
 			.step_executor_factory = std::ref(threads),
 			.boundary = [&ridge_line](uint32_t x, uint32_t y)
 			{
-				if(y == domain_height - 1 || y == 0)
-				{ return dirichlet_boundary_pixel{.weight = 1.0f, .value = 1.0f}; }
-				else
-				{ return ridge_line(x, y); }
+				if(y == 0 || y == domain_height - 1)
+				{ return dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f}; }
+				return ridge_line(x, y);
 			}
 		});
+		store(distance_field.front(), "distance_field_init_after_laplace.exr");
+
+		{
+			auto& output = distance_field.back();
+			auto& src = distance_field.front();
+			for(uint32_t y = 0; y != domain_height; ++y)
+			{
+				for(uint32_t x = 0; x != domain_width; ++x)
+				{ output(x, y) = std::max(0.0f, 1.0f - src(x, y)); }
+			}
+		}
+		distance_field.swap();
 		store(distance_field.front(), "distance_field.exr");
 	}
 
