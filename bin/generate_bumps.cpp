@@ -284,7 +284,7 @@ int main()
 
 		puts("   Running laplace solver");
 		solve_bvp(uplift_zone, terraformer::laplace_solver_params{
-			.tolerance = 1.0e-6f * heightmap_params.main_ridge.start_location[2],
+			.tolerance = 0x1.0p-15,
 			.step_executor_factory = std::ref(threads),
 			.boundary = std::cref(uplift_zone_boundary)
 		});
@@ -297,6 +297,7 @@ int main()
 		puts("Generating distance field");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> ridge_line{domain_width, domain_height};
+		std::uniform_real_distribution init_noise{0.0f, 1.0f/16.0f};
 		draw(ridge_line.pixels(), ridge_curve, line_segment_draw_params{
 			.value = dirichlet_boundary_pixel{.weight = 1.0f, .value = 0.0f},
 			.blend_function = [](auto, auto new_val, auto){
@@ -327,14 +328,14 @@ int main()
 			for(uint32_t y = 0; y != domain_height; ++y)
 			{
 				for(uint32_t x = 0; x != domain_width; ++x)
-				{init(x, y) = 1.0f - src(x, y);}
+				{init(x, y) = 1.0f - src(x, y) + (std::abs(src(x, y)) < 1.0f/4.0f ? init_noise(rng) : 0.0f);}
 			}
 		}
 		distance_field.swap();
 
 		puts("   Running laplace solver");
 		solve_bvp(distance_field, terraformer::laplace_solver_params{
-			.tolerance = 1.0e-6f,
+			.tolerance = 0x1.0p-15,
 			.step_executor_factory = std::ref(threads),
 			.boundary = [&ridge_line](uint32_t x, uint32_t y)
 			{
