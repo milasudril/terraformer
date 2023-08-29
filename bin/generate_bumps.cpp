@@ -55,7 +55,6 @@ struct steady_plate_collision_zone_descriptor
 	main_ridge_params main_ridge;
 	struct uplift_zone uplift_zone;
 	terraformer::bump_field::params bump_field;
-	float bump_field_decay_length;
 };
 
 int main()
@@ -162,8 +161,8 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 1024.0f,
-					.wavelength = 5120.0f,
+					.amplitude = 512.0f,
+					.wavelength = 10240.0f,
 					.phase = 0.0f
 				}
 			},
@@ -205,12 +204,12 @@ int main()
 				},
 				.wave_properties{
 					.amplitude = 512.0f,
-					.wavelength = 16384.0f,
+					.wavelength = 8192.0f,
 					.phase = 0.0f
 				}
-			}
-		},
-		.bump_field_decay_length = 4096.0f
+			},
+			.half_length = 32768.0f
+		}
 	};
 
 	random_generator rng;
@@ -367,7 +366,7 @@ int main()
 		puts("Generating bumps");
 		auto const range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
 		store(bump_field, "bumps_0.exr");
-		sharpen_ridges(bump_field, range, heightmap_params.bump_field.impact_waves.wave_properties.amplitude);
+		normalize(bump_field, range, heightmap_params.bump_field.impact_waves.wave_properties.amplitude);
 		store(bump_field, "bumps_1.exr");
 	}
 
@@ -410,7 +409,7 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-				auto const z_hills = bump_field(x, y)*std::exp2((z_valley - heightmap_params.main_ridge.base_elevation)/heightmap_params.bump_field_decay_length);
+				auto const z_hills = bump_field(x, y);
 				auto const z_uplift = uplift_zone.front()(x, y);
 				output(x, y) = z_valley + z_hills + z_uplift;
 			}

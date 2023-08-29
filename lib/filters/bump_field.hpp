@@ -17,6 +17,7 @@ namespace terraformer
 			fractal_wave_params impact_waves;
 			fractal_wave_params x_distortion;
 			fractal_wave_params y_distortion;
+			float half_length;
 		};
 
 		template<class Rng>
@@ -28,6 +29,7 @@ namespace terraformer
 			m_ridge_curve{ridge_curve},
 			m_wave{rng, params.impact_waves.shape},
 			m_wave_params{params.impact_waves.wave_properties},
+			m_half_length{params.half_length},
 			m_x_distortion{generate(rng, params.x_distortion, polyline_location_params{
 				.point_count = dom_size.height,
 				.dx = dom_size.pixel_size,
@@ -51,7 +53,9 @@ namespace terraformer
 			for(size_t k = 0; k != std::size(m_ridge_curve); ++k)
 			{
 				auto const d = distance_xy(current_loc, m_ridge_curve[k]);
-				convsum += m_wave(d/m_wave_params.wavelength + m_wave_params.phase);
+				auto const factor = std::exp2(-d/m_half_length);
+				auto const factorl = std::exp2(-d/(2.0f*m_half_length));
+				convsum += factor*m_wave(d/(factorl*m_wave_params.wavelength) + m_wave_params.phase);
 			}
 			return convsum;
 		}
@@ -64,6 +68,7 @@ namespace terraformer
 		std::span<location const> m_ridge_curve;
 		fractal_wave m_wave;
 		wave_params m_wave_params;
+		float m_half_length;
 		std::vector<location> m_x_distortion;
 		std::vector<location> m_y_distortion;
 	};

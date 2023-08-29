@@ -24,6 +24,20 @@ namespace terraformer
 			}
 		}
 	}
+
+	void normalize(span_2d<float> buffer,
+		std::ranges::min_max_result<float> input_range,
+		float output_amplitude)
+	{
+		for(uint32_t y = 0; y != buffer.height(); ++y)
+		{
+			for(uint32_t x = 0; x != buffer.width(); ++x)
+			{
+				auto const val_normalized = (buffer(x, y) - input_range.min)/(input_range.max - input_range.min);
+				buffer(x, y) = output_amplitude*2.0f*(val_normalized - 0.5f);
+			}
+		}
+	}
 }
 
 #endif
