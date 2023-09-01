@@ -75,7 +75,7 @@ int main()
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
 			.distance_xy_to_endpoint = 49152.0f,
-			.base_elevation = 5120.0f,
+			.base_elevation = 4096.0f,
 			.ridge_curve{
 				.shape{
 					.amplitude{
@@ -121,7 +121,7 @@ int main()
 		},
 		.uplift_zone{
 			.radius_south = 8192.0f,
-			.radius_north = 8192.0f,
+			.radius_north = 8912.0f,
 			.radius_distortion{
 				.shape{
 					.amplitude{
@@ -161,9 +161,9 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 512.0f,
+					.amplitude = 1024.0f,
 					.wavelength = 10240.0f,
-					.phase = 0.0f
+					.phase = -0.5f*std::numbers::pi_v<float>
 				}
 			},
 			.x_distortion{
@@ -208,7 +208,7 @@ int main()
 					.phase = 0.0f
 				}
 			},
-			.half_length = 32768.0f
+			.half_length = 24576.0f
 		}
 	};
 
@@ -226,6 +226,7 @@ int main()
 	);
 
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
+#if 1
 	{
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
@@ -292,6 +293,7 @@ int main()
 
 		store(uplift_zone.front(), "uplift_zone.exr");
 	}
+#endif
 
 	double_buffer<grayscale_image> distance_field{domain_width, domain_height};
 	{
@@ -361,6 +363,7 @@ int main()
 		store(distance_field.front(), "distance_field.exr");
 	}
 
+#if 0
 	basic_image<float> bump_field{domain_width, domain_height};
 	{
 		puts("Generating bumps");
@@ -369,6 +372,7 @@ int main()
 		normalize(bump_field, range, heightmap_params.bump_field.impact_waves.wave_properties.amplitude);
 		store(bump_field, "bumps_1.exr");
 	}
+#endif
 
 	basic_image<float> base_elevation{domain_width, domain_height};
 	{
@@ -403,13 +407,23 @@ int main()
 	basic_image<float> output{domain_width, domain_height};
 	{
 		puts("Mixing bumps with base elevation");
-
+		auto const d = distance_field.front();
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-				auto const z_hills = bump_field(x, y);
+
+				auto const hills_value = approx_sine(2.0f*std::numbers::pi_v<float>*(3.0f*d(x, y) + 0.25f));
+/*				auto const hills_value_normailzed = 0.5f*(hills_value + 1.0f);
+				auto const hills_value_transformed = hills_value_normailzed != 1.0f?
+					1.0f - (1.0f - hills_value_normailzed)/std::sqrt(1.0f - hills_value_normailzed):
+					1.0f;*/
+				auto const hills_amplitude = 1024.0f*std::exp2(-d(x, y));
+				auto const z_hills = hills_amplitude*hills_value;
+
+				//2.0f*(hills_value_transformed - 0.5f);
+
 				auto const z_uplift = uplift_zone.front()(x, y);
 				output(x, y) = z_valley + z_hills + z_uplift;
 			}
