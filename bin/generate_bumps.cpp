@@ -348,6 +348,30 @@ int main()
 		store(distance_field.front(), "distance_field.exr");
 	}
 
+	grayscale_image harmoic_conj{domain_width, domain_height};
+	{
+		float minval = std::numeric_limits<float>::infinity();
+		float maxval = -std::numeric_limits<float>::infinity();
+		for(uint32_t y = 0; y != domain_height; ++y)
+		{
+			auto v = 0.0f;
+			for(uint32_t x = 0; x != domain_width; ++x)
+			{
+				harmoic_conj(x, y) = v;
+				minval = std::min(v, minval);
+				maxval = std::max(v, maxval);
+
+				auto const gradvec = direction{grad(distance_field.front().pixels(), x, y, 1.0f, clamp_at_boundary{})};
+				auto const gradvec_conj_x = gradvec[1];
+				v += gradvec_conj_x;
+			}
+		}
+		normalize(harmoic_conj,
+			std::ranges::min_max_result{minval, maxval},
+			std::ranges::min_max_result{0.0f, 1.0f});
+	}
+	store(harmoic_conj, "distance_field_conj.exr");
+
 #if 0
 	basic_image<float> bump_field{domain_width, domain_height};
 	{
