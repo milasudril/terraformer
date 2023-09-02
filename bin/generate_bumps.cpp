@@ -69,8 +69,8 @@ int main()
 		.corners{
 			.sw = corner{512.0f},
 			.se = corner{1536.0f},
-			.nw = corner{4608.0f},
-			.ne = corner{3584.0f}
+			.nw = corner{3584.0f},
+			.ne = corner{2560.0f}
 		},
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
@@ -295,8 +295,10 @@ int main()
 	}
 #endif
 
-	double_buffer<grayscale_image> distance_field{domain_width, domain_height};
+	auto const u_ridge = ridge_curve[0][1]/(pixel_size*static_cast<float>(domain_height));
+	basic_image<std::pair<float, float>> coord_mapping{domain_width, domain_height};
 	{
+		double_buffer<grayscale_image> u_solve{domain_width, domain_height};
 		puts("Generating distance field");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> ridge_line{domain_width, domain_height};
@@ -304,7 +306,7 @@ int main()
 		draw(ridge_line.pixels(), ridge_curve, line_segment_draw_params{
 			.value = dirichlet_boundary_pixel{
 				.weight = 1.0f,
-				.value = ridge_curve[0][1]/(pixel_size*static_cast<float>(domain_height))
+				.value = u_ridge
 			},
 			.blend_function = [](auto, auto new_val, auto){
 				return new_val;
@@ -317,7 +319,7 @@ int main()
 
 		puts("   Initiating laplace solver");
 		{
-			auto& init = distance_field.back();
+			auto& init = u_solve.back();
 			for(uint32_t y = 0; y != domain_height; ++y)
 			{
 				for(uint32_t x = 0; x != domain_width; ++x)
@@ -327,10 +329,10 @@ int main()
 				}
 			}
 		}
-		distance_field.swap();
+		u_solve.swap();
 
 		puts("   Running laplace solver");
-		solve_bvp(distance_field, terraformer::laplace_solver_params{
+		solve_bvp(u_solve, terraformer::laplace_solver_params{
 			.tolerance = 1.0f/static_cast<float>(std::max(domain_width, domain_height)),
 			.step_executor_factory = std::ref(threads),
 			.boundary = [&ridge_line](uint32_t x, uint32_t y)
@@ -345,11 +347,7 @@ int main()
 				return ridge_line(x, y);
 			}
 		});
-		store(distance_field.front(), "distance_field.exr");
-	}
 
-	grayscale_image harmoic_conj{domain_width, domain_height};
-	{
 		float minval = std::numeric_limits<float>::infinity();
 		float maxval = -std::numeric_limits<float>::infinity();
 		for(uint32_t y = 0; y != domain_height; ++y)
@@ -357,57 +355,46 @@ int main()
 			auto v = 0.0f;
 			for(uint32_t x = 0; x != domain_width; ++x)
 			{
-				harmoic_conj(x, y) = v;
+				coord_mapping(x, y).first = u_solve.front()(x, y);
+				coord_mapping(x, y).second = v;
 				minval = std::min(v, minval);
 				maxval = std::max(v, maxval);
 
-				auto const gradvec = direction{grad(distance_field.front().pixels(), x, y, 1.0f, clamp_at_boundary{})};
+				auto const gradvec = direction{grad(u_solve.front().pixels(), x, y, 1.0f, clamp_at_boundary{})};
 				auto const gradvec_conj_x = gradvec[1];
 				v += gradvec_conj_x;
 			}
 		}
-		normalize(harmoic_conj,
-			std::ranges::min_max_result{minval, maxval},
-			std::ranges::min_max_result{0.0f, 1.0f});
+		for(uint32_t y = 0; y != domain_height; ++y)
+		{
+			for(uint32_t x = 0; x != domain_width; ++x)
+			{ coord_mapping(x, y).second = (coord_mapping(x, y).second - minval)/(maxval - minval); }
+		}
 	}
-	store(harmoic_conj, "distance_field_conj.exr");
 
-#if 0
-	basic_image<float> bump_field{domain_width, domain_height};
-	{
-		puts("Generating bumps");
-		auto const range = generate(bump_field.pixels(), rng, pixel_size, ridge_curve, heightmap_params.bump_field);
-		store(bump_field, "bumps_0.exr");
-		normalize(bump_field, range, heightmap_params.bump_field.impact_waves.wave_properties.amplitude);
-		store(bump_field, "bumps_1.exr");
-	}
-#endif
-#if 0
 	basic_image<float> base_elevation{domain_width, domain_height};
 	{
 		puts("Generating base elevation");
-		auto const w = static_cast<float>(base_elevation.width());
-		auto const d = distance_field.front();
+//		auto const w = static_cast<float>(base_elevation.width());
 
 		for(uint32_t y = 0; y != base_elevation.height(); ++y)
 		{
 			for(uint32_t x = 0; x != base_elevation.width(); ++x)
 			{
-				location const current_loc{
-					pixel_size*static_cast<float>(x),
-					pixel_size*static_cast<float>(y),
-					0.0f
-				};
+				auto const u = coord_mapping(x, y).first;
+				auto const du = u - u_ridge;
+				auto const v = coord_mapping(x, y).second;
 
-				// NOTE: This works because main_ridge is a function of x
-				auto const side = current_loc[1] < ridge_curve[x][1]? -1.0f : 1.0f;
-				auto const xi = static_cast<float>(x)/(w - 1.0f);
-				auto const z_boundary = side < 0.0f?
-					std::lerp(heightmap_params.corners.nw.elevation, heightmap_params.corners.ne.elevation, xi):
-					std::lerp(heightmap_params.corners.sw.elevation, heightmap_params.corners.se.elevation, xi);
-				auto const eta = 1.0f - d(x, y);
-				auto const z_valley = z_boundary + smoothstep(2.0f*eta - 1.0f)*(heightmap_params.main_ridge.base_elevation - z_boundary);
-				base_elevation(x, y) = z_valley;
+				auto const z_boundary = du < 0.0f?
+					std::lerp(heightmap_params.corners.nw.elevation, heightmap_params.corners.ne.elevation, v):
+					std::lerp(heightmap_params.corners.sw.elevation, heightmap_params.corners.se.elevation, v);
+
+				auto const eta = du < 0.0f?
+					u/u_ridge:
+					1.0f - du/(1.0f - u_ridge);
+				auto const t = smoothstep(2.0f*(eta - 0.5f));
+				base_elevation(x, y) = t*heightmap_params.main_ridge.base_elevation
+					+ z_boundary*(1.0f - t);
 			}
 		}
 		store(base_elevation, "base_elevation.exr");
@@ -416,19 +403,19 @@ int main()
 	basic_image<float> output{domain_width, domain_height};
 	{
 		puts("Mixing bumps with base elevation");
-		auto const d = distance_field.front();
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
+				auto const u = coord_mapping(x, y).first - u_ridge;
 
-				auto const hills_value = approx_sine(2.0f*std::numbers::pi_v<float>*(3.0f*d(x, y) + 0.25f));
+				auto const hills_value = approx_sine(2.0f*std::numbers::pi_v<float>*(3.0f*u + 0.25f));
 /*				auto const hills_value_normailzed = 0.5f*(hills_value + 1.0f);
 				auto const hills_value_transformed = hills_value_normailzed != 1.0f?
 					1.0f - (1.0f - hills_value_normailzed)/std::sqrt(1.0f - hills_value_normailzed):
 					1.0f;*/
-				auto const hills_amplitude = 1024.0f*std::exp2(-d(x, y));
+				auto const hills_amplitude = 1024.0f*std::exp2(-std::abs(u));
 				auto const z_hills = hills_amplitude*hills_value;
 
 				//2.0f*(hills_value_transformed - 0.5f);
@@ -439,5 +426,4 @@ int main()
 		}
 		store(output, "output.exr");
 	}
-#endif
 }
