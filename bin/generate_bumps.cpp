@@ -120,8 +120,8 @@ int main()
 			}
 		},
 		.uplift_zone{
-			.radius_south = 8192.0f,
-			.radius_north = 8912.0f,
+			.radius_south = 11264.0f,
+			.radius_north = 8192.0f,
 			.radius_distortion{
 				.shape{
 					.amplitude{
@@ -226,7 +226,7 @@ int main()
 	);
 
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
-#if 0
+
 	{
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
@@ -293,7 +293,6 @@ int main()
 
 		store(uplift_zone.front(), "uplift_zone.exr");
 	}
-#endif
 
 	auto const u_ridge = ridge_curve[0][1]/(pixel_size*static_cast<float>(domain_height));
 	basic_image<std::pair<float, float>> coord_mapping{domain_width, domain_height};
@@ -375,8 +374,6 @@ int main()
 	basic_image<float> base_elevation{domain_width, domain_height};
 	{
 		puts("Generating base elevation");
-//		auto const w = static_cast<float>(base_elevation.width());
-
 		for(uint32_t y = 0; y != base_elevation.height(); ++y)
 		{
 			for(uint32_t x = 0; x != base_elevation.width(); ++x)
@@ -409,16 +406,12 @@ int main()
 			{
 				auto const z_valley = base_elevation(x, y);
 				auto const u = coord_mapping(x, y).first - u_ridge;
-
-				auto const hills_value = approx_sine(2.0f*std::numbers::pi_v<float>*(3.0f*u + 0.25f));
-/*				auto const hills_value_normailzed = 0.5f*(hills_value + 1.0f);
-				auto const hills_value_transformed = hills_value_normailzed != 1.0f?
-					1.0f - (1.0f - hills_value_normailzed)/std::sqrt(1.0f - hills_value_normailzed):
-					1.0f;*/
-				auto const hills_amplitude = 1024.0f*std::exp2(-std::abs(u));
+				auto const v = coord_mapping(x, y).second;
+				auto const factor = std::exp2(-std::abs(u));
+				auto const hills_value = approx_sine(2.0f*std::numbers::pi_v<float>*(3.0f*u/factor + 0.25f))
+				 *0.5f*(1.0f + approx_sine(2.0f*std::numbers::pi_v<float>*(5*v)));
+				auto const hills_amplitude = 1024.0f*factor;
 				auto const z_hills = hills_amplitude*hills_value;
-
-				//2.0f*(hills_value_transformed - 0.5f);
 
 				auto const z_uplift = uplift_zone.front()(x, y);
 				output(x, y) = z_valley + z_hills + z_uplift;
