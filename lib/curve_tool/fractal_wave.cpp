@@ -101,7 +101,7 @@ std::vector<terraformer::location> terraformer::generate(fractal_wave const& wav
 	auto const xy_amp = 0.5f*(xy_output_range.max - xy_output_range.min);
 	auto const xy_dc_offset = 0.5f*(xy_output_range.min + xy_output_range.max);
 
-	auto const xz_amp = 0.5f*(xy_output_range.max - xy_output_range.min);
+	auto const xz_amp = 0.5f*(xz_output_range.max - xz_output_range.min);
 	auto const xz_dc_offset = 0.5f*(xz_output_range.min + xz_output_range.max);
 
 	scaling const scaling{1.0f, xy_amp/wave_xy_amplitude, xz_amp/wave_xz_amplitude};

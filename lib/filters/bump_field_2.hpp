@@ -33,9 +33,13 @@ namespace terraformer
 		explicit bump_field_2(Rng&& rng,
 			span_2d<std::pair<float, float> const> coord_mapping,
 			float u_0,
+			float v_0,
 			params const& params):
 			m_coord_mapping{coord_mapping},
 			m_u_0{u_0},
+			m_v_0{v_0},
+			m_x_scale{params.x_scale},
+			m_y_scale{params.y_scale},
 			m_x_wave{rng, params.x_wave.shape},
 			m_x_wave_params{params.x_wave.wave_properties},
 			m_y_wave{rng, params.y_wave.shape},
@@ -47,7 +51,7 @@ namespace terraformer
 		float operator()(uint32_t x, uint32_t y) const
 		{
 			auto const u = m_coord_mapping(x, y).first - m_u_0;
-			auto const v = m_coord_mapping(x, y).second;
+			auto const v = m_coord_mapping(x, y).second - m_v_0;
 
 			auto const x_amp_factor = std::exp2(-std::abs(u)/m_x_scale.amp_half_length);
 			auto const y_amp_factor = std::exp2(-std::abs(u)/m_y_scale.amp_half_length);
@@ -63,6 +67,7 @@ namespace terraformer
 	private:
 		span_2d<std::pair<float, float> const> m_coord_mapping;
 		float m_u_0;
+		float m_v_0;
 		wave_scaling m_x_scale;
 		wave_scaling m_y_scale;
 		fractal_wave m_x_wave;
@@ -77,6 +82,7 @@ namespace terraformer
 		Rng&& rng,
 		span_2d<std::pair<float, float> const> coord_mapping,
 		float u_0,
+		float v_0,
 		output_range output_range,
 		bump_field_2::params const& params)
 	{
@@ -84,6 +90,7 @@ namespace terraformer
 			rng,
 			coord_mapping,
 			u_0,
+			v_0,
 			params
 		});
 		normalize(output_buffer, input_range, output_range);
