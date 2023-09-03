@@ -369,6 +369,15 @@ int main()
 		}
 	}
 
+	grayscale_image bump_field{domain_width, domain_height};
+	generate(bump_field,
+		rng,
+		coord_mapping,
+		u_ridge,
+		output_range{},
+		bump_field_2::params{}
+	);
+
 	basic_image<float> base_elevation{domain_width, domain_height};
 	{
 		puts("Generating base elevation");
