@@ -7,6 +7,12 @@
 
 namespace terraformer
 {
+	struct output_range
+	{
+		float min;
+		float max;
+	};
+
 	void sharpen_ridges(span_2d<float> buffer,
 		std::ranges::min_max_result<float> input_range,
 		float output_amplitude)
@@ -27,7 +33,7 @@ namespace terraformer
 
 	void normalize(span_2d<float> buffer,
 		std::ranges::min_max_result<float> input_range,
-		std::ranges::min_max_result<float> output_range)
+		output_range output_range)
 	{
 		for(uint32_t y = 0; y != buffer.height(); ++y)
 		{
