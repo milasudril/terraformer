@@ -46,6 +46,13 @@ namespace terraformer
 		float phase;
 	};
 
+	struct wave_component
+	{
+		float amplitude;
+		float wavelength;
+		float phase;
+	};
+
 	class fractal_wave
 	{
 	public:
@@ -60,9 +67,9 @@ namespace terraformer
 		explicit fractal_wave(Rng&& rng, params const& params)
 		{
 			std::uniform_real_distribution U{-0.5f, 0.5f};
-			for(size_t k = 0; k != std::size(m_component_params); ++k)
+			for(size_t k = 0; k != std::size(m_components); ++k)
 			{
-				m_component_params[k] = wave_params{
+				m_components[k] = wave_component{
 					.amplitude = get_value(params.amplitude, k, rng),
 					.wavelength = get_value(params.wavelength, k, rng),
 					.phase = get_value(params.phase, k, rng)
@@ -74,11 +81,11 @@ namespace terraformer
 		{
 			auto sum = 0.0f;
 			auto constexpr twopi = 2.0f*std::numbers::pi_v<float>;
-			for(size_t k = std::size(m_component_params); k != 0; --k)
+			for(size_t k = std::size(m_components); k != 0; --k)
 			{
-				auto const amplitude = m_component_params[k - 1].amplitude;
-				auto const wavelength = m_component_params[k - 1].wavelength;
-				auto const phase = m_component_params[k - 1].phase;
+				auto const amplitude = m_components[k - 1].amplitude;
+				auto const wavelength = m_components[k - 1].wavelength;
+				auto const phase = m_components[k - 1].phase;
 
 				sum += amplitude*approx_sine(twopi*(x/wavelength - phase));
 			}
@@ -86,7 +93,7 @@ namespace terraformer
 		}
 
 	private:
-		std::array<wave_params, 16> m_component_params;
+		std::array<wave_component, 16> m_components;
 	};
 
 	struct fractal_wave_params
