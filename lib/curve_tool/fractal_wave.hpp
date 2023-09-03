@@ -5,6 +5,7 @@
 
 #include "./polyline.hpp"
 #include "lib/common/utils.hpp"
+#include "lib/common/output_range.hpp"
 
 #include <numbers>
 #include <random>
@@ -103,23 +104,23 @@ namespace terraformer
 
 	std::vector<displacement> generate(fractal_wave const& wave,
 		wave_params const& wave_params,
-		float amplitude,
+		output_range output_range,
 		polyline_displacement_params const& line_params);
 
 	std::vector<location> generate(fractal_wave const& wave,
 		wave_params const& wave_params,
-		float amplitude,
+		output_range output_range,
 		polyline_location_params const& line_params);
 
 	template<class Rng, class ... Params>
 	auto generate(Rng&& rng,
 		fractal_wave_params const& wave_params,
-		float amplitude,
+		output_range output_range,
 		Params&&... params)
 	{
 		return generate(fractal_wave{rng, wave_params.shape},
 			wave_params.wave_properties,
-			amplitude,
+			output_range,
 			std::forward<Params>(params)...);
 	}
 

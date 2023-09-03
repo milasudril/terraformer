@@ -230,7 +230,7 @@ int main()
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
 		auto const radius_distortion = generate(rng,
 			heightmap_params.uplift_zone.radius_distortion,
-			512.0f, // amp
+			output_range{.min = -512.0f, .max = 512.0f},
 			polyline_displacement_params{
 				.point_count = domain_width,
 				.dx = pixel_size

@@ -2,17 +2,12 @@
 #define TERRAFORMER_WAVESHAPER_HPP
 
 #include "lib/common/span_2d.hpp"
+#include "lib/common/output_range.hpp"
 #include <algorithm>
 #include <cmath>
 
 namespace terraformer
 {
-	struct output_range
-	{
-		float min;
-		float max;
-	};
-
 	void sharpen_ridges(span_2d<float> buffer,
 		std::ranges::min_max_result<float> input_range,
 		float output_amplitude)

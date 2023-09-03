@@ -4,7 +4,7 @@
 
 std::vector<terraformer::displacement> terraformer::generate(fractal_wave const& wave,
 	wave_params const& wave_params,
-	float amplitude,
+	output_range output_range,
 	polyline_displacement_params const& line_params)
 {
 	auto const n_points = line_params.point_count;
@@ -23,17 +23,22 @@ std::vector<terraformer::displacement> terraformer::generate(fractal_wave const&
 		curve.push_back(displacement{x, y, z});
 		wave_amplitude = std::max(std::abs(wave_amplitude), y);
 	}
-;
+
+	auto const amplitude = 0.5f*(output_range.max - output_range.min);
+	displacement const dc_offset{0.0f, 0.5f*(output_range.min + output_range.max), 0.0f};
 	scaling const scaling{1.0f, amplitude/wave_amplitude, 1.0f};
 	for(size_t k = 0; k != std::size(curve); ++k)
-	{ curve[k].apply(scaling); }
+	{
+		curve[k].apply(scaling);
+		curve[k] += dc_offset;
+	}
 
 	return curve;
 }
 
 std::vector<terraformer::location> terraformer::generate(fractal_wave const& wave,
 	wave_params const& wave_params,
-	float amplitude,
+	output_range output_range,
 	polyline_location_params const& line_params)
 {
 	auto const n_points = line_params.point_count;
@@ -53,12 +58,14 @@ std::vector<terraformer::location> terraformer::generate(fractal_wave const& wav
 		wave_amplitude = std::max(std::abs(wave_amplitude), y);
 	}
 
+	auto const amplitude = 0.5f*(output_range.max - output_range.min);
+	displacement const dc_offset{0.0f, 0.5f*(output_range.min + output_range.max), 0.0f};
 	scaling const scaling{1.0f, amplitude/wave_amplitude, 1.0f};
 
 	std::vector<location> ret;
 	ret.reserve(n_points);
 	for(size_t k = 0; k != std::size(curve); ++k)
-	{ ret.push_back(line_params.start_location + curve[k].apply(scaling)); }
+	{ ret.push_back(line_params.start_location + curve[k].apply(scaling) + dc_offset); }
 	return ret;
 }
 
