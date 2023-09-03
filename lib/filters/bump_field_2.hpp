@@ -3,48 +3,84 @@
 
 #include "lib/curve_tool/fractal_wave.hpp"
 #include "lib/common/span_2d.hpp"
-#include "lib/common/domain_size.hpp"
 
 #include <algorithm>
+#include <utility>
 
 namespace terraformer
 {
+	struct wave_scaling
+	{
+		float amp_half_length;
+		float wavelength_half_length;
+	};
+
 	class bump_field_2
 	{
 	public:
-		struct params{};
+		struct params
+		{
+			wave_scaling x_scale;
+			wave_scaling y_scale;
+			fractal_wave_params x_wave;
+			fractal_wave_params y_wave;
+			float xy_blend;
+		};
+
+		template<class Rng>
+		explicit bump_field_2(Rng&& rng,
+			span_2d<std::pair<float, float> const> coord_mapping,
+			float u_0,
+			params const& params):
+			m_coord_mapping{coord_mapping},
+			m_u_0{u_0},
+			m_x_wave{rng, params.x_wave.shape},
+			m_x_wave_params{params.x_wave.wave_properties},
+			m_y_wave{rng, params.y_wave.shape},
+			m_y_wave_params{params.y_wave.wave_properties},
+			m_xy_blend{params.xy_blend}
+		{}
+
 
 		float operator()(uint32_t x, uint32_t y) const
 		{
 			auto const u = m_coord_mapping(x, y).first - m_u_0;
 			auto const v = m_coord_mapping(x, y).second;
-			auto const x_amp_factor = std::exp2(-std::abs(u)/m_x_amp_half_length);
-			auto const y_amp_factor = std::exp2(-std::abs(u)/m_x_amp_half_length);
-			auto const x_wavelenth_factor = std::exp2(std::abs(u)/m_y_wavelength_half_length);
-			auto const y_wavelenth_factor = std::exp2(std::abs(u)/m_y_wavelength_half_length);
 
-			auto const wave_x = m_wave_x(v*x_wavelenth_factor/m_wave_x_params.wavelength + m_wave_x_params.phase);
-			auto const wave_y = m_wave_y(u*y_wavelenth_factor/m_wave_y_params.wavelength + m_wave_y_params.phase);
+			auto const x_amp_factor = std::exp2(-std::abs(u)/m_x_scale.amp_half_length);
+			auto const y_amp_factor = std::exp2(-std::abs(u)/m_y_scale.amp_half_length);
+			auto const x_wavelenth_factor = std::exp2(std::abs(u)/m_x_scale.wavelength_half_length);
+			auto const y_wavelenth_factor = std::exp2(std::abs(u)/m_y_scale.wavelength_half_length);
 
-			return std::lerp(x_amp_factor*wave_x, y_amp_factor*wave_y, m_xy_blend);
+			auto const x_wave_val = m_x_wave(v*x_wavelenth_factor/m_x_wave_params.wavelength + m_x_wave_params.phase);
+			auto const y_wave_val = m_y_wave(u*y_wavelenth_factor/m_y_wave_params.wavelength + m_y_wave_params.phase);
+
+			return std::lerp(x_amp_factor*x_wave_val, y_amp_factor*y_wave_val, m_xy_blend);
 		}
-	}
+
+	private:
+		span_2d<std::pair<float, float> const> m_coord_mapping;
+		float m_u_0;
+		wave_scaling m_x_scale;
+		wave_scaling m_y_scale;
+		fractal_wave m_x_wave;
+		wave_params m_x_wave_params;
+		fractal_wave m_y_wave;
+		wave_params m_y_wave_params;
+		float m_xy_blend;
+	};
 
 	template<class Rng>
 	std::ranges::min_max_result<float> generate(span_2d<float> output_buffer,
 		Rng&& rng,
-		float pixel_size,
 		span_2d<std::pair<float, float> const> coord_mapping,
+		float u_0,
 		bump_field_2::params const& params)
 	{
-		return generate_minmax(output_buffer, bump_field{
+		return generate_minmax(output_buffer, bump_field_2{
 			rng,
-			domain_size{
-				.width = output_buffer.width(),
-				.height = output_buffer.height(),
-				.pixel_size = pixel_size
-			},
-			cooord_mapping,
+			coord_mapping,
+			u_0,
 			params
 		});
 	}

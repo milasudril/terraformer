@@ -6,6 +6,7 @@
 #include "lib/filters/diffuser.hpp"
 #include "lib/filters/curve_rasterizer.hpp"
 #include "lib/filters/bump_field.hpp"
+#include "lib/filters/bump_field_2.hpp"
 #include "lib/curve_tool/fractal_wave.hpp"
 #include "lib/execution/thread_pool.hpp"
 #include "lib/filters/diffuser.hpp"
