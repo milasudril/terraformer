@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_BUMP_FIELD_2_HPP
 #define TERRAFORMER_BUMP_FIELD_2_HPP
 
+#include "./waveshaper.hpp"
+
 #include "lib/curve_tool/fractal_wave.hpp"
 #include "lib/common/span_2d.hpp"
 
@@ -71,18 +73,20 @@ namespace terraformer
 	};
 
 	template<class Rng>
-	std::ranges::min_max_result<float> generate(span_2d<float> output_buffer,
+	void generate(span_2d<float> output_buffer,
 		Rng&& rng,
 		span_2d<std::pair<float, float> const> coord_mapping,
 		float u_0,
+		output_range output_range,
 		bump_field_2::params const& params)
 	{
-		return generate_minmax(output_buffer, bump_field_2{
+		auto const input_range = generate_minmax(output_buffer, bump_field_2{
 			rng,
 			coord_mapping,
 			u_0,
 			params
 		});
+		normalize(output_buffer, input_range, output_range);
 	}
 }
 
