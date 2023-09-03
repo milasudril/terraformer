@@ -61,7 +61,7 @@ namespace terraformer
 		}
 
 		float amplitude() const
-		{ return m_wave_params.amplitude; }
+		{ return 1.0f; }
 
 	private:
 		float m_pixel_size;

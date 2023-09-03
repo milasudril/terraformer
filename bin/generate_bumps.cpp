@@ -93,7 +93,6 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 4096.0f,
 					.wavelength = 24576.0f,
 					.phase = 0.0f
 				}
@@ -114,7 +113,6 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 512.0f,
 					.wavelength = 11264.0f,
 					.phase = 0.0f
 				}
@@ -139,7 +137,6 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 512.0f,
 					.wavelength = 2048.0f,
 					.phase = 0.0f
 				}
@@ -162,7 +159,6 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 1024.0f,
 					.wavelength = 10240.0f,
 					.phase = -0.5f*std::numbers::pi_v<float>
 				}
@@ -183,7 +179,6 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 512.0f,
 					.wavelength = 8192.0f,
 					.phase = 0.0f
 				}
@@ -204,7 +199,6 @@ int main()
 					}
 				},
 				.wave_properties{
-					.amplitude = 512.0f,
 					.wavelength = 8192.0f,
 					.phase = 0.0f
 				}
@@ -218,7 +212,9 @@ int main()
 
 	auto const ridge_curve = generate(rng,
 		heightmap_params.main_ridge.ridge_curve,
+		4096.0f,  //xy_amp
 		heightmap_params.main_ridge.ridge_curve_xz,
+		512.0f,   //xz_amp
 		polyline_location_params{
 			.point_count = domain_width,
 			.dx = pixel_size,
@@ -234,6 +230,7 @@ int main()
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
 		auto const radius_distortion = generate(rng,
 			heightmap_params.uplift_zone.radius_distortion,
+			512.0f, // amp
 			polyline_displacement_params{
 				.point_count = domain_width,
 				.dx = pixel_size

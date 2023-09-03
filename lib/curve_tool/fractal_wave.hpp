@@ -41,7 +41,6 @@ namespace terraformer
 
 	struct wave_params
 	{
-		float amplitude;
 		float wavelength;
 		float phase;
 	};
@@ -102,40 +101,50 @@ namespace terraformer
 		wave_params wave_properties;
 	};
 
-	std::vector<location> generate(fractal_wave const& wave_xy,
-		wave_params const& wave_xy_params,
-		polyline_location_params const& line_params);
-
-	std::vector<displacement> generate(fractal_wave const& wave_xy,
-		wave_params const& wave_xy_params,
+	std::vector<displacement> generate(fractal_wave const& wave,
+		wave_params const& wave_params,
+		float amplitude,
 		polyline_displacement_params const& line_params);
+
+	std::vector<location> generate(fractal_wave const& wave,
+		wave_params const& wave_params,
+		float amplitude,
+		polyline_location_params const& line_params);
 
 	template<class Rng, class ... Params>
 	auto generate(Rng&& rng,
-		fractal_wave_params const& wave_params_xy,
+		fractal_wave_params const& wave_params,
+		float amplitude,
 		Params&&... params)
 	{
-		return generate(fractal_wave{rng, wave_params_xy.shape},
-			wave_params_xy.wave_properties,
+		return generate(fractal_wave{rng, wave_params.shape},
+			wave_params.wave_properties,
+			amplitude,
 			std::forward<Params>(params)...);
 	}
 
 	std::vector<location> generate(fractal_wave const& wave_xy,
 		wave_params const& wave_xy_params,
+		float xy_amp,
 		fractal_wave const& wave_xz,
 		wave_params const& wave_xz_params,
+		float xz_amp,
 		polyline_location_params const& line_params);
 
 	template<class Rng, class ... Params>
 	auto generate(Rng&& rng,
 		fractal_wave_params const& wave_params_xy,
+		float xy_amp,
 		fractal_wave_params const& wave_params_xz,
+		float xz_amp,
 		Params&&... params)
 	{
 		return generate(fractal_wave{rng, wave_params_xy.shape},
 			wave_params_xy.wave_properties,
+			xy_amp,
 			fractal_wave{rng, wave_params_xz.shape},
 			wave_params_xz.wave_properties,
+			xz_amp,
 			std::forward<Params>(params)...);
 	}
 }
