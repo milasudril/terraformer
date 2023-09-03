@@ -76,7 +76,7 @@ int main()
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
 			.distance_xy_to_endpoint = 49152.0f,
-			.base_elevation = 4096.0f,
+			.base_elevation = 5120.0f,
 			.ridge_curve{
 				.shape{
 					.amplitude{
@@ -119,7 +119,7 @@ int main()
 			}
 		},
 		.uplift_zone{
-			.radius_south = 8192.0f,
+			.radius_south = 13312.0f,
 			.radius_north = 8192.0f,
 			.radius_distortion{
 				.shape{
@@ -472,9 +472,9 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-				auto const z_hills = bump_field(x, y);
+			//	auto const z_hills = bump_field(x, y);
 				auto const z_uplift = uplift_zone.front()(x, y);
-				output(x, y) = z_valley + z_hills + z_uplift;
+				output(x, y) = z_valley + z_uplift;
 			}
 		}
 		store(output, "output.exr");
