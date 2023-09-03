@@ -68,10 +68,10 @@ int main()
 
 	steady_plate_collision_zone_descriptor const heightmap_params{
 		.corners{
-			.sw = corner{512.0f},
-			.se = corner{1536.0f},
-			.nw = corner{3584.0f},
-			.ne = corner{2560.0f}
+			.sw = corner{1536.0f},
+			.se = corner{2560.0f},
+			.nw = corner{4608.0f},
+			.ne = corner{3584.0f}
 		},
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
