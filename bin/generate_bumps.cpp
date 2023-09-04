@@ -76,7 +76,7 @@ int main()
 		.main_ridge{
 			.start_location = terraformer::location{0.0f, 16384.0f, 3072.0f},
 			.distance_xy_to_endpoint = 49152.0f,
-			.base_elevation = 5120.0f,
+			.base_elevation = 4096.0f,
 			.ridge_curve{
 				.shape{
 					.amplitude{
@@ -119,8 +119,8 @@ int main()
 			}
 		},
 		.uplift_zone{
-			.radius_south = 13312.0f,
-			.radius_north = 8192.0f,
+			.radius_south = 16384.0f,
+			.radius_north = 10240.0f,
 			.radius_distortion{
 				.shape{
 					.amplitude{
@@ -379,7 +379,7 @@ int main()
 		coord_mapping,
 		u_ridge,
 		0.5f*static_cast<float>(domain_width)*pixel_size,
-		output_range{-512.0f, 1536.0f},
+		output_range{-512.0f, 512.0f},
 		bump_field_2::params{
 			.x_scale{
 				.amp_half_length = 40960.0f,
@@ -387,7 +387,7 @@ int main()
 			},
 			.y_scale{
 				.amp_half_length = 32768.0f,
-				.wavelength_half_length = 16384.0f
+				.wavelength_half_length = 65536.0f
 			},
 			.x_wave{
 				.shape{
@@ -412,7 +412,7 @@ int main()
 			.y_wave{
 				.shape{
 					.amplitude{
-						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_factor = std::numbers::phi_v<float>*std::numbers::phi_v<float>,
 						.scaling_noise = std::numbers::phi_v<float>/8.0f
 					},
 					.wavelength{
@@ -425,8 +425,8 @@ int main()
 					}
 				},
 				.wave_properties{
-					.wavelength = 34916.0f,
-					.phase = -0.25f
+					.wavelength = 16384.0f,
+					.phase = 0.25f
 				}
 			},
 			.xy_blend = std::numbers::phi_v<float> - 1.0f
@@ -472,9 +472,9 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-			//	auto const z_hills = bump_field(x, y);
+				auto const z_hills = bump_field(x, y);
 				auto const z_uplift = uplift_zone.front()(x, y);
-				output(x, y) = z_valley + z_uplift;
+				output(x, y) = z_valley + z_hills + z_uplift;
 			}
 		}
 		store(output, "output.exr");
