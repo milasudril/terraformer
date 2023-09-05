@@ -317,15 +317,45 @@ int main()
 					1.0f;
 
 				u(x, y) = std::lerp(
+					//u_ridge*std::sqrt(std::lerp(u_ridge - d, 0.0f, xi)/u_ridge),
 					u_ridge - d,
 					d + u_ridge,
 					side
 				);
 			}
 		}
-		store(u, "distance_field_u.exr");
+
+		grayscale_image v{domain_width, domain_height};
+		float minval = std::numeric_limits<float>::infinity();
+		float maxval = -std::numeric_limits<float>::infinity();
+		for(uint32_t y = 0; y != domain_height; ++y)
+		{
+			auto v = 0.0f;
+			for(uint32_t x = 0; x != domain_width; ++x)
+			{
+				coord_mapping(x, y).first = u(x, y);
+				coord_mapping(x, y).second = v;
+				minval = std::min(v, minval);
+				maxval = std::max(v, maxval);
+
+				auto const gradvec = direction{grad(std::as_const(u).pixels(), x, y, 1.0f, clamp_at_boundary{})};
+				auto const gradvec_conj_x = gradvec[1];
+				v += gradvec_conj_x;
+			}
+		}
+
+		for(uint32_t y = 0; y != domain_height; ++y)
+		{
+			for(uint32_t x = 0; x != domain_width; ++x)
+			{
+				coord_mapping(x, y).first = u(x, y);
+					// FIXME Verify mapping for non-square domain
+				coord_mapping(x, y).second = pixel_size*static_cast<float>(domain_width)
+					*(coord_mapping(x, y).second - minval)/(maxval - minval);
+			}
+		}
 	}
-#if 0
+
 	grayscale_image bump_field{domain_width, domain_height};
 	generate(bump_field,
 		rng,
@@ -425,12 +455,11 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-				auto const z_hills = bump_field(x, y);
-				auto const z_uplift = uplift_zone.front()(x, y);
-				output(x, y) = z_valley + z_hills + z_uplift;
+//				auto const z_hills = bump_field(x, y);
+//				auto const z_uplift = uplift_zone.front()(x, y);
+				output(x, y) = z_valley;
 			}
 		}
 		store(output, "output.exr");
 	}
-#endif
 }
