@@ -294,7 +294,7 @@ int main()
 #endif
 	}
 
-//	auto const u_ridge = ridge_curve[0][1];
+	auto const u_ridge = ridge_curve[0][1];
 	basic_image<std::pair<float, float>> coord_mapping{domain_width, domain_height};
 	{
 		grayscale_image u{domain_width, domain_height};
@@ -311,7 +311,16 @@ int main()
 					return distance_xy(a, loc) < distance_xy(b, loc);
 				});
 				auto const d = distance_xy(*i, loc);
-				u(x, y) = d;
+
+				auto const side = loc[1] < (*i)[1]?
+					0.0f:
+					1.0f;
+
+				u(x, y) = std::lerp(
+					u_ridge - d,
+					d + u_ridge,
+					side
+				);
 			}
 		}
 		store(u, "distance_field_u.exr");
