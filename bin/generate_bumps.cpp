@@ -225,6 +225,7 @@ int main()
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
 
 	{
+#if 0
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
@@ -290,89 +291,32 @@ int main()
 		});
 
 		store(uplift_zone.front(), "uplift_zone.exr");
+#endif
 	}
 
-	auto const u_ridge = ridge_curve[0][1];
+//	auto const u_ridge = ridge_curve[0][1];
 	basic_image<std::pair<float, float>> coord_mapping{domain_width, domain_height};
 	{
-		double_buffer<grayscale_image> u_solve{domain_width, domain_height};
-		puts("Generating distance field");
-		puts("   Generating boundary values");
-		basic_image<dirichlet_boundary_pixel<float>> ridge_line{domain_width, domain_height};
-		std::uniform_real_distribution init_noise{0.0f, 1.0f/4.0f};
-		draw(ridge_line.pixels(), ridge_curve, line_segment_draw_params{
-			.value = dirichlet_boundary_pixel{
-				.weight = 1.0f,
-				.value = u_ridge/(pixel_size*static_cast<float>(domain_height))
-			},
-			.blend_function = [](auto, auto new_val, auto){
-				return new_val;
-			},
-			.intensity_modulator = [](auto, auto brush_value) {
-				return brush_value;
-			},
-			.scale = pixel_size
-		});
-
-		puts("   Initiating laplace solver");
-		{
-			auto& init = u_solve.back();
-			for(uint32_t y = 0; y != domain_height; ++y)
-			{
-				for(uint32_t x = 0; x != domain_width; ++x)
-				{
-					auto const y_val = static_cast<float>(y)/static_cast<float>(domain_height);
-					init(x, y) = y_val + init_noise(rng);
-				}
-			}
-		}
-		u_solve.swap();
-
-		puts("   Running laplace solver");
-		solve_bvp(u_solve, terraformer::laplace_solver_params{
-			.tolerance = 1.0f/static_cast<float>(std::max(domain_width, domain_height)),
-			.step_executor_factory = std::ref(threads),
-			.boundary = [&ridge_line](uint32_t x, uint32_t y)
-			{
-				if(y == 0 || y == domain_height - 1)
-				{
-					return dirichlet_boundary_pixel{
-						.weight = 1.0f,
-						.value = static_cast<float>(y)/static_cast<float>(domain_height)
-					};
-				}
-				return ridge_line(x, y);
-			}
-		});
-
-		float minval = std::numeric_limits<float>::infinity();
-		float maxval = -std::numeric_limits<float>::infinity();
-		for(uint32_t y = 0; y != domain_height; ++y)
-		{
-			auto v = 0.0f;
-			for(uint32_t x = 0; x != domain_width; ++x)
-			{
-				coord_mapping(x, y).first = u_solve.front()(x, y);
-				coord_mapping(x, y).second = v;
-				minval = std::min(v, minval);
-				maxval = std::max(v, maxval);
-
-				auto const gradvec = direction{grad(u_solve.front().pixels(), x, y, 1.0f, clamp_at_boundary{})};
-				auto const gradvec_conj_x = gradvec[1];
-				v += gradvec_conj_x;
-			}
-		}
-		for(uint32_t y = 0; y != domain_height; ++y)
+		grayscale_image u{domain_width, domain_height};
+		for(uint32_t y = 0 ; y != domain_height; ++y)
 		{
 			for(uint32_t x = 0; x != domain_width; ++x)
 			{
-				coord_mapping(x, y).first *= pixel_size*static_cast<float>(domain_height);
-				// FIXME Verify mapping for non-square domain
-				coord_mapping(x, y).second = pixel_size*static_cast<float>(domain_width)*(coord_mapping(x, y).second - minval)/(maxval - minval);
+				location const loc{
+					pixel_size*static_cast<float>(x),
+					pixel_size*static_cast<float>(y),
+					0.0f
+				};
+				auto const i = std::ranges::min_element(ridge_curve, [loc](auto a, auto b){
+					return distance_xy(a, loc) < distance_xy(b, loc);
+				});
+				auto const d = distance_xy(*i, loc);
+				u(x, y) = d;
 			}
 		}
+		store(u, "distance_field_u.exr");
 	}
-
+#if 0
 	grayscale_image bump_field{domain_width, domain_height};
 	generate(bump_field,
 		rng,
@@ -479,4 +423,5 @@ int main()
 		}
 		store(output, "output.exr");
 	}
+#endif
 }
