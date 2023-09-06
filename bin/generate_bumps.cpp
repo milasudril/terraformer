@@ -317,9 +317,10 @@ int main()
 
 				auto const d_curve = distance_xy(loc, *i);
 				auto const u_end = pixel_size*static_cast<float>(domain_height);
+				auto const radius = std::min(u_ridge, u_end - u_ridge);
 				u(x, y) = std::lerp(
-					std::lerp(loc[1], u_ridge - d_curve, loc[1]/u_ridge),
-					std::lerp(d_curve + u_ridge, loc[1], (loc[1] - u_ridge)/(u_end - u_ridge)),
+					std::lerp(loc[1], u_ridge - d_curve, std::clamp(loc[1]/radius, 0.0f, 1.0f)),
+					std::lerp(d_curve + u_ridge, loc[1], std::clamp((loc[1] - u_ridge)/radius, 0.0f, 1.0f)),
 					side
 				);
 			}
