@@ -307,29 +307,26 @@ int main()
 					pixel_size*static_cast<float>(y),
 					0.0f
 				};
-				auto const i =  &ridge_curve[x];
 
-				/*std::ranges::min_element(ridge_curve, [loc](auto a, auto b){
-					auto const a_loc = a - loc;
-					auto const b_loc = b - loc;
-					return std::abs(a_loc[0]) + std::abs(a_loc[1]) < std::abs(b_loc[0]) + std::abs(b_loc[1]);
-				});*/
-				auto const d =std::abs(loc[1] - (*i)[1]);
-				//distance_xy(*i, loc);
+				auto const i = std::ranges::min_element(ridge_curve, [loc](auto a, auto b){
+					return distance_xy(a, loc) < distance_xy(b, loc);
+				});
 
 				// NOTE: This works because main_ridge is a function of x
-				auto const side = loc[1] < (*i)[1]?
+				auto const side = loc[1] < ridge_curve[x][1]?
 					0.0f:
 					1.0f;
 
+				auto const d_curve = distance_xy(loc, *i);
+				auto const u_end = pixel_size*static_cast<float>(domain_height);
 				u(x, y) = std::lerp(
-					//u_ridge*std::sqrt(std::lerp(u_ridge - d, 0.0f, xi)/u_ridge),
-					u_ridge - d,
-					d + u_ridge,
+					std::lerp(loc[1], u_ridge - d_curve, loc[1]/u_ridge),
+					std::lerp(d_curve + u_ridge, loc[1], (loc[1] - u_ridge)/(u_end - u_ridge)),
 					side
 				);
 			}
 		}
+		store(u, "distance_field_u.exr");
 
 		grayscale_image v{domain_width, domain_height};
 		float minval = std::numeric_limits<float>::infinity();
