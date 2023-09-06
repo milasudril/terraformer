@@ -51,15 +51,17 @@ namespace terraformer
 		float operator()(uint32_t x, uint32_t y) const
 		{
 			auto const u = m_coord_mapping(x, y).first - m_u_0;
-	//	auto const v = m_coord_mapping(x, y).second - m_v_0;
+			auto const v = m_coord_mapping(x, y).second - m_v_0;
 
-	//	auto const x_amp_factor = std::exp2(-std::abs(u)/m_x_scale.amp_half_length);
-	//	auto const x_wavelenth_factor = std::exp2(std::abs(u)/m_x_scale.wavelength_half_length);
-	/*		auto const y_wavelenth_factor = std::exp2(std::abs(u)/m_y_scale.wavelength_half_length);*/
+			auto const x_amp_factor = std::exp2(-std::abs(u)/m_x_scale.amp_half_length);
+			auto const x_wavelenth_factor = std::exp2(std::abs(u)/m_x_scale.wavelength_half_length);
+			auto const y_amp_factor = std::exp2(-std::abs(u)/m_y_scale.amp_half_length);
+			auto const y_wavelenth_factor = std::exp2(std::abs(u)/m_y_scale.wavelength_half_length);
 
-			auto const y_wave_val = m_y_wave(u/m_y_wave_params.wavelength + m_y_wave_params.phase);
+			auto const y_wave_val = y_amp_factor*m_y_wave(u*y_wavelenth_factor/m_y_wave_params.wavelength + m_y_wave_params.phase);
+			auto const x_wave_val = x_amp_factor*m_x_wave(v*x_wavelenth_factor/m_x_wave_params.wavelength + m_x_wave_params.phase);
 
-			return y_wave_val;
+			return std::lerp(x_wave_val, y_wave_val, m_xy_blend);
 		}
 
 	private:

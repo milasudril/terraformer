@@ -307,11 +307,17 @@ int main()
 					pixel_size*static_cast<float>(y),
 					0.0f
 				};
-				auto const i = std::ranges::min_element(ridge_curve, [loc](auto a, auto b){
-					return distance_xy(a, loc) < distance_xy(b, loc);
-				});
-				auto const d = distance_xy(*i, loc);
+				auto const i =  &ridge_curve[x];
 
+				/*std::ranges::min_element(ridge_curve, [loc](auto a, auto b){
+					auto const a_loc = a - loc;
+					auto const b_loc = b - loc;
+					return std::abs(a_loc[0]) + std::abs(a_loc[1]) < std::abs(b_loc[0]) + std::abs(b_loc[1]);
+				});*/
+				auto const d =std::abs(loc[1] - (*i)[1]);
+				//distance_xy(*i, loc);
+
+				// NOTE: This works because main_ridge is a function of x
 				auto const side = loc[1] < (*i)[1]?
 					0.0f:
 					1.0f;
@@ -362,20 +368,20 @@ int main()
 		coord_mapping,
 		u_ridge,
 		0.5f*static_cast<float>(domain_width)*pixel_size,
-		output_range{-512.0f, 512.0f},
+		output_range{-1024.0f, 1024.0f},
 		bump_field_2::params{
 			.x_scale{
 				.amp_half_length = 40960.0f,
-				.wavelength_half_length = 12384.0f
+				.wavelength_half_length = 32768.0f
 			},
 			.y_scale{
-				.amp_half_length = 32768.0f,
-				.wavelength_half_length = 65536.0f
+				.amp_half_length = 40960.0f,
+				.wavelength_half_length = 32768.0f
 			},
 			.x_wave{
 				.shape{
 					.amplitude{
-						.scaling_factor = std::numbers::phi_v<float>,
+						.scaling_factor = std::numbers::phi_v<float>*std::numbers::phi_v<float>,
 						.scaling_noise = std::numbers::phi_v<float>/8.0f
 					},
 					.wavelength{
@@ -395,7 +401,7 @@ int main()
 			.y_wave{
 				.shape{
 					.amplitude{
-						.scaling_factor = std::numbers::phi_v<float>*std::numbers::phi_v<float>,
+						.scaling_factor = std::numbers::sqrt2_v<float>*std::numbers::phi_v<float>,
 						.scaling_noise = std::numbers::phi_v<float>/8.0f
 					},
 					.wavelength{
@@ -412,7 +418,7 @@ int main()
 					.phase = 0.25f
 				}
 			},
-			.xy_blend = std::numbers::phi_v<float> - 1.0f
+			.xy_blend = std::numbers::phi_v<float>
 		}
 	);
 	store(bump_field, "bump_field.exr");
@@ -455,9 +461,9 @@ int main()
 			for(uint32_t x = 0; x != output.width(); ++x)
 			{
 				auto const z_valley = base_elevation(x, y);
-//				auto const z_hills = bump_field(x, y);
-//				auto const z_uplift = uplift_zone.front()(x, y);
-				output(x, y) = z_valley;
+				auto const z_hills = bump_field(x, y);
+				auto const z_uplift = uplift_zone.front()(x, y);
+				output(x, y) = z_valley + z_hills + z_uplift;
 			}
 		}
 		store(output, "output.exr");
