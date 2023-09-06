@@ -225,7 +225,6 @@ int main()
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
 
 	{
-#if 0
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
@@ -291,7 +290,6 @@ int main()
 		});
 
 		store(uplift_zone.front(), "uplift_zone.exr");
-#endif
 	}
 
 	auto const u_ridge = ridge_curve[0][1];
@@ -369,10 +367,10 @@ int main()
 		bump_field_2::params{
 			.x_scale{
 				.amp_half_length = 40960.0f,
-				.wavelength_half_length = 32768.0f
+				.wavelength_half_length = 49152.0f
 			},
 			.y_scale{
-				.amp_half_length = 40960.0f,
+				.amp_half_length = 32768.0f,
 				.wavelength_half_length = 32768.0f
 			},
 			.x_wave{
@@ -415,7 +413,7 @@ int main()
 					.phase = 0.25f
 				}
 			},
-			.xy_blend = std::numbers::phi_v<float>
+			.xy_blend = 0.75f
 		}
 	);
 	store(bump_field, "bump_field.exr");
