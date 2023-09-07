@@ -225,6 +225,7 @@ int main()
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
 
 	{
+#if 1
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
@@ -290,11 +291,13 @@ int main()
 		});
 
 		store(uplift_zone.front(), "uplift_zone.exr");
+#endif
 	}
 
 	auto const u_ridge = ridge_curve[0][1];
 	basic_image<std::pair<float, float>> coord_mapping{domain_width, domain_height};
 	{
+		auto ridge_curve_sorted = ridge_curve;
 		grayscale_image u{domain_width, domain_height};
 		for(uint32_t y = 0 ; y != domain_height; ++y)
 		{
@@ -306,20 +309,25 @@ int main()
 					0.0f
 				};
 
-				auto const i = std::ranges::min_element(ridge_curve, [loc](auto a, auto b){
+				std::ranges::sort(ridge_curve_sorted,  [loc](auto a, auto b){
 					return distance_xy(a, loc) < distance_xy(b, loc);
 				});
+
+				auto d_curve = 0.0f;
+				for(size_t k = 0; k != domain_width/4; ++k)
+				{ d_curve += distance_xy(loc, ridge_curve_sorted[k]); }
+				d_curve /= static_cast<float>(domain_width/4);
 
 				// NOTE: This works because main_ridge is a function of x
 				auto const side = loc[1] < ridge_curve[x][1]?
 					0.0f:
 					1.0f;
 
-				auto const d_curve = distance_xy(loc, *i);
+		//	auto const d_curve = distance_xy(loc, *i);
 				auto const u_end = pixel_size*static_cast<float>(domain_height);
 				auto const radius = std::min(u_ridge, u_end - u_ridge);
 				u(x, y) = std::lerp(
-					std::lerp(loc[1], u_ridge - d_curve, std::clamp(loc[1]/radius, 0.0f, 1.0f)),
+					std::lerp(loc[1], std::max(0.0f, u_ridge - d_curve), std::clamp(loc[1]/radius, 0.0f, 1.0f)),
 					std::lerp(d_curve + u_ridge, loc[1], std::clamp((loc[1] - u_ridge)/radius, 0.0f, 1.0f)),
 					side
 				);
@@ -414,7 +422,7 @@ int main()
 					.phase = 0.25f
 				}
 			},
-			.xy_blend = 0.75f
+			.xy_blend = 1.0f
 		}
 	);
 	store(bump_field, "bump_field.exr");
