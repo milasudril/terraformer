@@ -11,7 +11,7 @@
 #include "lib/execution/thread_pool.hpp"
 #include "lib/filters/diffuser.hpp"
 #include "lib/filters/waveshaper.hpp"
-#include "lib/filters/convhull.hpp"
+//#include "lib/filters/convhull.hpp"
 
 #include <random>
 #include <chrono>
@@ -224,8 +224,9 @@ int main()
 
 	double_buffer<grayscale_image> uplift_zone{domain_width, domain_height};
 
+	auto const ridge_origin = heightmap_params.main_ridge.start_location;
+
 	{
-#if 1
 		puts("Generating uplift zone");
 		puts("   Generating boundary values");
 		basic_image<dirichlet_boundary_pixel<float>> uplift_zone_boundary{domain_width, domain_height};
@@ -237,7 +238,7 @@ int main()
 				.dx = pixel_size
 			}
 		);
-		auto const z_avg = heightmap_params.main_ridge.start_location[2];
+		auto const z_avg = ridge_origin[2];
 		std::uniform_real_distribution init_noise{0.0f, z_avg};
 		for(uint32_t y = 0; y != uplift_zone_boundary.height(); ++y)
 		{
@@ -291,14 +292,21 @@ int main()
 		});
 
 		store(uplift_zone.front(), "uplift_zone.exr");
-#endif
 	}
 
-	auto const u_ridge = ridge_curve[0][1];
+	auto const u_ridge = ridge_origin[1];
 	basic_image<std::pair<float, float>> coord_mapping{domain_width, domain_height};
 	{
-		auto ridge_curve_sorted = ridge_curve;
 		grayscale_image u{domain_width, domain_height};
+		std::vector<location> ridge_curve_sorted;
+		ridge_curve_sorted.reserve(3*std::size(ridge_curve));
+		for(int k = -1; k != 2; ++k)
+		{
+			displacement const offset{static_cast<float>(k)*pixel_size*domain_width, 0.0f, 0.0f};
+			for(size_t l = 0; l != std::size(ridge_curve); ++l)
+			{ ridge_curve_sorted.push_back(ridge_curve[l] + offset); }
+		}
+
 		for(uint32_t y = 0 ; y != domain_height; ++y)
 		{
 			for(uint32_t x = 0; x != domain_width; ++x)
@@ -309,7 +317,9 @@ int main()
 					0.0f
 				};
 
-				std::ranges::sort(ridge_curve_sorted,  [loc](auto a, auto b){
+				std::ranges::nth_element(ridge_curve_sorted,
+					std::begin(ridge_curve_sorted) + domain_width/4,
+					[loc](auto a, auto b){
 					return distance_xy(a, loc) < distance_xy(b, loc);
 				});
 
@@ -323,12 +333,11 @@ int main()
 					0.0f:
 					1.0f;
 
-		//	auto const d_curve = distance_xy(loc, *i);
 				auto const u_end = pixel_size*static_cast<float>(domain_height);
 				auto const radius = std::min(u_ridge, u_end - u_ridge);
 				u(x, y) = std::lerp(
-					std::lerp(loc[1], std::max(0.0f, u_ridge - d_curve), std::clamp(loc[1]/radius, 0.0f, 1.0f)),
-					std::lerp(d_curve + u_ridge, loc[1], std::clamp((loc[1] - u_ridge)/radius, 0.0f, 1.0f)),
+					std::lerp(loc[1], u_ridge - d_curve, std::clamp(loc[1]/radius, 0.0f, 1.0f)),
+					std::lerp(d_curve + u_ridge, loc[1], std::clamp((loc[1] - u_ridge)/(u_end - u_ridge), 0.0f, 1.0f)),
 					side
 				);
 			}
