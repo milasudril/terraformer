@@ -135,7 +135,7 @@ struct textbox
 template<class Callable, class BindingType>
 struct text_display
 {
-	Callable text_source;
+	Callable source;
 	BindingType binding;
 };
 
@@ -211,7 +211,7 @@ void bind(Form& form, domain_size& dom_size)
 			.display_name = "Pixel size",
 			.description = "The physical size of a pixel",
 			.widget = text_display{
-				.text_source = [](domain_size const& dom_size){
+				.source = [](domain_size const& dom_size){
 					return std::to_string(compute_pixel_size(dom_size));
 				},
 				.binding = std::cref(dom_size)
@@ -261,7 +261,7 @@ public:
 	{
 		auto ret = std::make_unique<QLabel>();
 		m_display_callbacks.push_back([&dest = *ret, text_display = std::move(text_display)](){
-			dest.setText(text_display.text_source(text_display.binding.get()).c_str());
+			dest.setText(text_display.source(text_display.binding.get()).c_str());
 		});
 		return ret;
 	}
