@@ -98,8 +98,6 @@ struct string_converter
 			default:
 				throw input_error{"Expected a number"};
 		}
-
-		return range.min;
 	}
 };
 
