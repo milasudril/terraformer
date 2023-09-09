@@ -61,6 +61,12 @@ template<class T>
 bool within(closed_closed_interval<T> range, T val)
 { return val >= range.min && val <= range.max; }
 
+class input_error:public std::runtime_error
+{
+public:
+	explicit input_error(std::string&& str):std::runtime_error{std::move(str)}{}
+};
+
 template<class ValidRange>
 requires std::is_arithmetic_v<typename ValidRange::value_type>
 struct string_converter
@@ -84,13 +90,13 @@ struct string_converter
 			case std::errc{}:
 				if(within(range, val))
 				{ return val; }
-				throw std::runtime_error{"Input value is out of range"};
+				throw input_error{"Input value is out of range"};
 
 			case std::errc::result_out_of_range:
-				throw std::runtime_error{"Input value is out of range"};
+				throw input_error{"Input value is out of range"};
 
 			default:
-				throw std::runtime_error{"Expected a number"};
+				throw input_error{"Expected a number"};
 		}
 
 		return range.min;
