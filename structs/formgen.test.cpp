@@ -238,6 +238,7 @@ public:
 	void insert(FieldDescriptor&& field)
 	{
 		m_widgets.push_back(create_widget(std::move(field.widget)));
+		m_widgets.back()->setToolTip(field.description);
 		m_root.addRow(field.display_name, m_widgets.back().get());
 	}
 
