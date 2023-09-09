@@ -1,4 +1,21 @@
-//@	{"target":{"name":"formgen_test"}}
+//@	{
+//@		"target":{
+//@			"name":"formgen_test",
+//@			"dependencies":[
+//@				{"ref":"Qt5Widgets", "origin":"pkg-config"}
+//@			]
+//@		},
+//@		"compiler":{
+//@			"config": {
+//@				"cflags":[
+//	NOTE: We need to change some compiler flags for Qt
+//@					"-Wno-error=conversion",
+//@					"-Wno-error=deprecated-enum-enum-conversion",
+//@					"-fpic"
+//@				]
+//@			}
+//@		}
+//@	}
 
 #include <type_traits>
 #include <string>
@@ -7,6 +24,9 @@
 
 #include <limits>
 #include <functional>
+
+#include <QApplication>
+#include <QMainWindow>
 
 template<class WidgetType>
 struct field
@@ -164,5 +184,11 @@ void bind(Form& form, domain_size& dom_size)
 	);
 }
 
-int main()
-{}
+int main(int argc, char** argv)
+{
+	QApplication my_app{argc, argv};
+	QMainWindow mainwin;
+	mainwin.show();
+
+	my_app.exec();
+}
