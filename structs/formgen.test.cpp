@@ -132,12 +132,24 @@ struct textbox
 	BindingType binding;
 };
 
+template<class Callable, class BindingType>
+struct text_display
+{
+	Callable text_source;
+	BindingType binding;
+};
+
 struct domain_size
 {
 	float width;
 	float height;
 	int scanline_count;
 };
+
+float compute_pixel_size(domain_size const& dom_size)
+{
+	return dom_size.height/static_cast<float>(dom_size.scanline_count);
+}
 
 template<class Form>
 void bind(Form& form, domain_size& dom_size)
@@ -175,6 +187,7 @@ void bind(Form& form, domain_size& dom_size)
 			}
 		}
 	);
+
 	form.insert(
 		field{
 			.name = "scanline_count",
@@ -188,6 +201,20 @@ void bind(Form& form, domain_size& dom_size)
 					}
 				},
 				.binding = std::ref(dom_size.scanline_count)
+			}
+		}
+	);
+
+	form.insert(
+		field{
+			.name = "pixel_size",
+			.display_name = "Pixel size",
+			.description = "The physical size of a pixel",
+			.widget = text_display{
+				.text_source = [](domain_size const& dom_size){
+					return std::to_string(compute_pixel_size(dom_size));
+				},
+				.binding = std::cref(dom_size)
 			}
 		}
 	);
@@ -215,21 +242,34 @@ public:
 		auto ret = std::make_unique<QLineEdit>();
 		QObject::connect(ret.get(),
 			&QLineEdit::editingFinished,
-			[&src = *ret, textbox = std::move(textbox), on_error = m_error_handler](){
+			[&src = *ret, textbox = std::move(textbox), this](){
 				try
 				{
 					auto const str = src.text().toStdString();
 					textbox.binding.get() = textbox.value_converter.from_string(str);
+					std::ranges::for_each(m_display_callbacks, [](auto const& item){item();});
 				}
 				catch(std::runtime_error const& err)
-				{ on_error(err.what()); }
+				{ m_error_handler(err.what()); }
 			}
 		);
 		return ret;
 	}
 
+	template<class Converter, class BindingType>
+	std::unique_ptr<QWidget> create_widget(text_display<Converter, BindingType>&& text_display)
+	{
+		auto ret = std::make_unique<QLabel>();
+		m_display_callbacks.push_back([&dest = *ret, text_display = std::move(text_display)](){
+			dest.setText(text_display.text_source(text_display.binding.get()).c_str());
+		});
+		return ret;
+	}
+
+
 private:
 	std::vector<std::unique_ptr<QWidget>> m_widgets;
+	std::vector<std::function<void()>> m_display_callbacks;
 	QFormLayout m_root;
 	std::function<void(char const*)> m_error_handler;
 };
