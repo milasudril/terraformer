@@ -27,15 +27,7 @@
 
 #include <QApplication>
 #include <QMainWindow>
-
-template<class WidgetType>
-struct field
-{
-	char const* name;
-	char const* display_name;
-	char const* description;
-	WidgetType widget;
-};
+#include <QBoxLayout>
 
 template<class T>
 struct open_open_interval{
@@ -121,6 +113,21 @@ struct string_converter
 	}
 };
 
+template<class Widget>
+struct field
+{
+	char const* name;
+	char const* display_name;
+	char const* description;
+	Widget widget;
+};
+
+template<class Converter, class BindingType>
+struct textbox
+{
+	Converter value_converter;
+	BindingType binding;
+};
 
 struct domain_size
 {
@@ -137,11 +144,11 @@ void bind(Form& form, domain_size& dom_size)
 			.name = "width",
 			.display_name = "Width",
 			.description = "Sets the width of the domain",
-			.widget = typename Form::textbox{
+			.widget = textbox{
 				.value_converter = string_converter{
 					.range = open_open_interval{
 						.min = 0.0f,
-						.max = std::numeric_limits<float>::infinity(),
+						.max = std::numeric_limits<float>::infinity()
 					}
 				},
 				.binding = std::ref(dom_size.width)
@@ -154,24 +161,23 @@ void bind(Form& form, domain_size& dom_size)
 			.name = "height",
 			.display_name = "Height",
 			.description = "Sets the width of the domain",
-			.widget = typename Form::textbox{
+			.widget = textbox{
 				.value_converter = string_converter{
 					.range = open_open_interval{
 						.min = 0.0f,
-						.max = std::numeric_limits<float>::infinity(),
+						.max = std::numeric_limits<float>::infinity()
 					}
 				},
 				.binding = std::ref(dom_size.height)
 			}
 		}
 	);
-
 	form.insert(
 		field{
 			.name = "scanline_count",
 			.display_name = "Number of scanlines",
 			.description = "Sets the number of scanlines in the generated images",
-			.widget = typename Form::textbox{
+			.widget = textbox{
 				.value_converter = string_converter{
 					.range = closed_closed_interval{
 						.min = 1,
@@ -184,10 +190,38 @@ void bind(Form& form, domain_size& dom_size)
 	);
 }
 
+class value_converter
+{
+public:
+	template<class Converter>
+	value_converter(Converter&& conv);
+
+private:
+};
+
+class qt_form
+{
+public:
+	qt_form(QWidget* parent): m_root{QBoxLayout::Direction::TopToBottom, parent}{}
+
+	template<class FieldDescriptor>
+	void insert(FieldDescriptor&& field)
+	{
+		printf("Inserting %s\n", field.name);
+	}
+
+private:
+	QBoxLayout m_root;
+	std::map<std::string, QWidget> m_widgets;
+};
+
 int main(int argc, char** argv)
 {
 	QApplication my_app{argc, argv};
-	QMainWindow mainwin;
+	QWidget mainwin;
+	qt_form my_form{&mainwin};
+	domain_size dom;
+	bind(my_form, dom);
 	mainwin.show();
 
 	my_app.exec();
