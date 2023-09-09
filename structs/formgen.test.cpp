@@ -196,7 +196,11 @@ void bind(Form& form, domain_size& dom_size)
 class qt_form
 {
 public:
-	qt_form(QWidget* parent): m_root{parent}{}
+	template<class ErrorHandler>
+	qt_form(QWidget* parent, ErrorHandler&& error_handler):
+		m_root{parent},
+		m_error_handler{std::forward<ErrorHandler>(error_handler)}
+	{}
 
 	template<class FieldDescriptor>
 	void insert(FieldDescriptor&& field)
@@ -206,14 +210,19 @@ public:
 	}
 
 	template<class Converter, class BindingType>
-	static std::unique_ptr<QWidget> create_widget(textbox<Converter, BindingType>&& textbox)
+	std::unique_ptr<QWidget> create_widget(textbox<Converter, BindingType>&& textbox)
 	{
 		auto ret = std::make_unique<QLineEdit>();
 		QObject::connect(ret.get(),
 			&QLineEdit::editingFinished,
-			[&src = *ret, textbox = std::move(textbox)](){
-				auto const str = src.text().toStdString();
-				textbox.binding.get() = textbox.value_converter.from_string(str);
+			[&src = *ret, textbox = std::move(textbox), on_error = m_error_handler](){
+				try
+				{
+					auto const str = src.text().toStdString();
+					textbox.binding.get() = textbox.value_converter.from_string(str);
+				}
+				catch(std::runtime_error const& err)
+				{ on_error(err.what()); }
 			}
 		);
 		return ret;
@@ -222,13 +231,17 @@ public:
 private:
 	std::vector<std::unique_ptr<QWidget>> m_widgets;
 	QFormLayout m_root;
+	std::function<void(char const*)> m_error_handler;
 };
 
 int main(int argc, char** argv)
 {
 	QApplication my_app{argc, argv};
 	QWidget mainwin;
-	qt_form my_form{&mainwin};
+	qt_form my_form{&mainwin, [](char const* err){
+		fprintf(stderr, "Error: %s\n", err);
+	}};
+
 	domain_size dom;
 	bind(my_form, dom);
 	mainwin.show();
