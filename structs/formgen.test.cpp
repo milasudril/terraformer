@@ -26,8 +26,9 @@
 #include <functional>
 
 #include <QApplication>
-#include <QMainWindow>
-#include <QBoxLayout>
+#include <QFormLayout>
+#include <QLabel>
+#include <QLineEdit>
 
 template<class T>
 struct open_open_interval{
@@ -202,17 +203,24 @@ private:
 class qt_form
 {
 public:
-	qt_form(QWidget* parent): m_root{QBoxLayout::Direction::TopToBottom, parent}{}
+	qt_form(QWidget* parent): m_root{parent}{}
 
 	template<class FieldDescriptor>
 	void insert(FieldDescriptor&& field)
 	{
-		printf("Inserting %s\n", field.name);
+		m_widgets.push_back(create_widget(field.widget));
+		m_root.addRow(field.display_name, m_widgets.back().get());
+	}
+
+	template<class Converter, class BindingType>
+	static std::unique_ptr<QWidget> create_widget(const textbox<Converter, BindingType>&)
+	{
+		return std::make_unique<QLineEdit>();
 	}
 
 private:
-	QBoxLayout m_root;
-	std::map<std::string, QWidget> m_widgets;
+	std::vector<std::unique_ptr<QWidget>> m_widgets;
+	QFormLayout m_root;
 };
 
 int main(int argc, char** argv)
