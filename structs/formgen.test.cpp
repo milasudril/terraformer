@@ -2,6 +2,7 @@
 
 #include <type_traits>
 #include <string>
+#include <charconv>
 
 #include <limits>
 #include <functional>
@@ -22,11 +23,18 @@ struct string_converter
 	T min;
 	T max;
 
-	static std::string to_string(T)
-	{ return std::string{}; }
+	static std::string to_string(T value)
+	{
+		std::array<char, 32> buffer{};
+		std::to_chars(std::begin(buffer), std::end(buffer), value);
+		return std::string{std::data(buffer)};
+	}
 
-	T from_string(std::string_view)
-	{ return min; }
+	T from_string(std::string_view str)
+	{
+
+		return min;
+	}
 };
 
 
