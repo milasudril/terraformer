@@ -29,6 +29,9 @@
 #include <QFormLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QSplitter>
+#include <QTextEdit>
+#include <QBoxLayout>
 
 template<class T>
 requires std::is_arithmetic_v<T>
@@ -277,6 +280,7 @@ public:
 				catch(std::runtime_error const& err)
 				{
 					m_error_handler(err.what());
+					src.setFocus();
 					refresh();
 				}
 			}
@@ -312,9 +316,21 @@ private:
 int main(int argc, char** argv)
 {
 	QApplication my_app{argc, argv};
-	QWidget mainwin;
-	qt_form my_form{&mainwin, [](char const* err){
-		fprintf(stderr, "Error: %s\n", err);
+	QSplitter mainwin;
+	mainwin.setOrientation(Qt::Vertical);
+
+	QWidget top;
+	QWidget bottom;
+	mainwin.addWidget(&top);
+	mainwin.addWidget(&bottom);
+
+	QTextEdit console_text{};
+	QBoxLayout console_layout{QBoxLayout::Direction::TopToBottom,&bottom};
+	console_layout.addWidget(&console_text);
+
+	qt_form my_form{&top, [&console_text](char const* err){
+		console_text.moveCursor(QTextCursor::End);
+		console_text.insertPlainText(err);
 	}};
 
 	domain_size dom{
