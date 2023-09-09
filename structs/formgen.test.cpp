@@ -156,6 +156,11 @@ float compute_pixel_size(domain_size const& dom_size)
 	return dom_size.height/static_cast<float>(dom_size.scanline_count);
 }
 
+int compute_image_width(domain_size const& dom_size)
+{
+	return static_cast<int>(static_cast<float>(dom_size.scanline_count)*(dom_size.width/dom_size.height));
+}
+
 template<class Form>
 void bind(Form& form, domain_size& dom_size)
 {
@@ -218,6 +223,20 @@ void bind(Form& form, domain_size& dom_size)
 			.widget = text_display{
 				.source = [](domain_size const& dom_size){
 					return to_string_helper(compute_pixel_size(dom_size));
+				},
+				.binding = std::cref(dom_size)
+			}
+		}
+	);
+
+	form.insert(
+		field{
+			.name = "image_width",
+			.display_name = "Image width",
+			.description = "The number of columns in the generated images",
+			.widget = text_display{
+				.source = [](domain_size const& dom_size){
+					return to_string_helper(compute_image_width(dom_size));
 				},
 				.binding = std::cref(dom_size)
 			}
