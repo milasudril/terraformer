@@ -255,7 +255,10 @@ public:
 					refresh();
 				}
 				catch(std::runtime_error const& err)
-				{ m_error_handler(err.what()); }
+				{
+					m_error_handler(err.what());
+					refresh();
+				}
 			}
 		);
 		m_display_callbacks.push_back([&dest = *ret, textbox](){
