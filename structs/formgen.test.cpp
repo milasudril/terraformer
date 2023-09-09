@@ -94,17 +94,19 @@ struct string_converter
 		return std::string{std::data(buffer)};
 	}
 
-	deserialized_type from_string(std::string_view str)
+	deserialized_type from_string(std::string_view str) const
 	{
 		deserialized_type val{};
 		auto const res = std::from_chars(std::begin(str), std::end(str), val);
+		if(res.ec == std::errc{})
+		{
+			if(within(range, val))
+			{ return val; }
+			throw input_error{"Input value is out of range"};
+		}
+
 		switch(res.ec)
 		{
-			case std::errc{}:
-				if(within(range, val))
-				{ return val; }
-				throw input_error{"Input value is out of range"};
-
 			case std::errc::result_out_of_range:
 				throw input_error{"Input value is out of range"};
 
@@ -191,15 +193,6 @@ void bind(Form& form, domain_size& dom_size)
 	);
 }
 
-class value_converter
-{
-public:
-	template<class Converter>
-	value_converter(Converter&& conv);
-
-private:
-};
-
 class qt_form
 {
 public:
@@ -208,14 +201,22 @@ public:
 	template<class FieldDescriptor>
 	void insert(FieldDescriptor&& field)
 	{
-		m_widgets.push_back(create_widget(field.widget));
+		m_widgets.push_back(create_widget(std::move(field.widget)));
 		m_root.addRow(field.display_name, m_widgets.back().get());
 	}
 
 	template<class Converter, class BindingType>
-	static std::unique_ptr<QWidget> create_widget(const textbox<Converter, BindingType>&)
+	static std::unique_ptr<QWidget> create_widget(textbox<Converter, BindingType>&& textbox)
 	{
-		return std::make_unique<QLineEdit>();
+		auto ret = std::make_unique<QLineEdit>();
+		QObject::connect(ret.get(),
+			&QLineEdit::editingFinished,
+			[&src = *ret, textbox = std::move(textbox)](){
+				auto const str = src.text().toStdString();
+				textbox.binding.get() = textbox.value_converter.from_string(str);
+			}
+		);
+		return ret;
 	}
 
 private:
