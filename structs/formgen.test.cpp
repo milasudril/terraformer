@@ -242,22 +242,26 @@ public:
 	}
 
 	template<class Converter, class BindingType>
-	std::unique_ptr<QWidget> create_widget(textbox<Converter, BindingType>&& textbox)
+	std::unique_ptr<QWidget> create_widget(textbox<Converter, BindingType> const& textbox)
 	{
 		auto ret = std::make_unique<QLineEdit>();
 		QObject::connect(ret.get(),
 			&QLineEdit::editingFinished,
-			[&src = *ret, textbox = std::move(textbox), this](){
+			[&src = *ret, textbox, this](){
 				try
 				{
 					auto const str = src.text().toStdString();
 					textbox.binding.get() = textbox.value_converter.from_string(str);
-					update_displays();
+					refresh();
 				}
 				catch(std::runtime_error const& err)
 				{ m_error_handler(err.what()); }
 			}
 		);
+		m_display_callbacks.push_back([&dest = *ret, textbox](){
+			dest.setText(textbox.value_converter.to_string(textbox.binding.get()).c_str());
+		});
+
 		return ret;
 	}
 
@@ -271,7 +275,7 @@ public:
 		return ret;
 	}
 
-	void update_displays()
+	void refresh()
 	{ std::ranges::for_each(m_display_callbacks, [](auto const& item){item();}); }
 
 
@@ -290,9 +294,13 @@ int main(int argc, char** argv)
 		fprintf(stderr, "Error: %s\n", err);
 	}};
 
-	domain_size dom;
+	domain_size dom{
+		.width = 49152,
+		.height = 49152,
+		.scanline_count = 1024
+	};
 	bind(my_form, dom);
-	form.update_displays();
+	my_form.refresh();
 	mainwin.show();
 
 	my_app.exec();
