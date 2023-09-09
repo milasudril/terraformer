@@ -252,7 +252,7 @@ public:
 				{
 					auto const str = src.text().toStdString();
 					textbox.binding.get() = textbox.value_converter.from_string(str);
-					std::ranges::for_each(m_display_callbacks, [](auto const& item){item();});
+					update_displays();
 				}
 				catch(std::runtime_error const& err)
 				{ m_error_handler(err.what()); }
@@ -270,6 +270,9 @@ public:
 		});
 		return ret;
 	}
+
+	void update_displays()
+	{ std::ranges::for_each(m_display_callbacks, [](auto const& item){item();}); }
 
 
 private:
@@ -289,6 +292,7 @@ int main(int argc, char** argv)
 
 	domain_size dom;
 	bind(my_form, dom);
+	form.update_displays();
 	mainwin.show();
 
 	my_app.exec();
