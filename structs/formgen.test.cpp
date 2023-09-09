@@ -31,6 +31,15 @@
 #include <QLineEdit>
 
 template<class T>
+requires std::is_arithmetic_v<T>
+inline std::string to_string_helper(T value)
+{
+	std::array<char, 32> buffer{};
+	std::to_chars(std::begin(buffer), std::end(buffer), value);
+	return std::string{std::data(buffer)};
+}
+
+template<class T>
 struct open_open_interval{
 	using value_type = T;
 	T min;
@@ -88,11 +97,7 @@ struct string_converter
 	ValidRange range;
 
 	static std::string to_string(deserialized_type value)
-	{
-		std::array<char, 32> buffer{};
-		std::to_chars(std::begin(buffer), std::end(buffer), value);
-		return std::string{std::data(buffer)};
-	}
+	{ return to_string_helper(value); }
 
 	deserialized_type from_string(std::string_view str) const
 	{
@@ -212,7 +217,7 @@ void bind(Form& form, domain_size& dom_size)
 			.description = "The physical size of a pixel",
 			.widget = text_display{
 				.source = [](domain_size const& dom_size){
-					return std::to_string(compute_pixel_size(dom_size));
+					return to_string_helper(compute_pixel_size(dom_size));
 				},
 				.binding = std::cref(dom_size)
 			}
