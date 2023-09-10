@@ -434,6 +434,7 @@ size_t write(fdcb_writer writer, std::span<std::byte const> buffer)
 		});
 		console.moveCursor(QTextCursor::End);
 		console.insertPlainText(QString::fromStdString(str));
+		console.moveCursor(QTextCursor::End);
 		return true;
 	});
 	return std::size(buffer);
