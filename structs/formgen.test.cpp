@@ -188,14 +188,14 @@ int compute_image_width(domain_size const& dom_size)
 {
 	auto const ratio = static_cast<double>(dom_size.width)/static_cast<double>(dom_size.height);
 	auto const pixel_area = static_cast<double>(dom_size.number_of_pixels);
-	return static_cast<int>(std::sqrt(ratio*pixel_area));
+	return static_cast<int>(std::sqrt(ratio*pixel_area) + 0.5);
 }
 
 int compute_image_height(domain_size const& dom_size)
 {
 	auto const ratio = static_cast<double>(dom_size.width)/static_cast<double>(dom_size.height);
 	auto const pixel_area = static_cast<double>(dom_size.number_of_pixels);
-	return static_cast<int>(std::sqrt(pixel_area/ratio));
+	return static_cast<int>(std::sqrt(pixel_area/ratio) + 0.5);
 }
 
 template<class Form>
