@@ -5,6 +5,7 @@
 //@				{"ref":"Qt5Widgets", "origin":"pkg-config"}
 //@			]
 //@		},
+//@		"dependencies_extra":[{"ref":"fdcb", "origin":"system", "rel":"external"}],
 //@		"compiler":{
 //@			"config": {
 //@				"cflags":[
@@ -32,6 +33,7 @@
 #include <QSplitter>
 #include <QTextEdit>
 #include <QBoxLayout>
+#include <fdcb.h>
 
 template<class T>
 requires std::is_arithmetic_v<T>
@@ -351,9 +353,71 @@ private:
 	std::function<void(char const*)> m_error_handler;
 };
 
+class application:public QApplication
+{
+public:
+	template<class ... Args>
+	explicit application(Args&&... args):
+		QApplication{std::forward<Args>(args)...},
+		m_internal_event_type{static_cast<QEvent::Type>(QEvent::registerEventType())}
+	{}
+
+	struct internal_event:public QEvent
+	{
+		std::function<bool()> callback;
+
+		template<class Callable>
+	  explicit internal_event(QEvent::Type event_type, Callable&& f) :
+			QEvent{event_type},
+			callback{std::forward<Callable>(f)}
+		{}
+
+		auto fire() const
+		{ return callback(); }
+	};
+
+	bool event(QEvent* e) override
+	{
+		if(e->type() == m_internal_event_type)
+		{ return static_cast<internal_event*>(e)->fire(); }
+		return QApplication::event(e);
+	}
+
+	template<class Callable>
+	void post_event(Callable&& callback)
+	{
+		// NOTE: We use naked new here because Qt will take ownership of the object
+		postEvent(this, new internal_event{m_internal_event_type, std::forward<Callable>(callback)});
+	}
+
+private:
+	QEvent::Type m_internal_event_type;
+};
+
+struct fdcb_writer
+{
+	std::reference_wrapper<application> app;
+	std::reference_wrapper<QTextEdit> console;
+};
+
+size_t write(fdcb_writer writer, std::span<std::byte const> buffer)
+{
+	writer.app.get().post_event([&console = writer.console.get(), buffer](){
+		std::string str{};
+		str.reserve(std::size(buffer));
+		std::ranges::transform(buffer, std::back_inserter(str), [](auto src){
+			return static_cast<char>(src);
+		});
+		console.moveCursor(QTextCursor::End);
+		console.insertPlainText(QString::fromStdString(str));
+		return true;
+	});
+	return std::size(buffer);
+}
+
 int main(int argc, char** argv)
 {
-	QApplication my_app{argc, argv};
+	application my_app{argc, argv};
 	QSplitter mainwin;
 	mainwin.setOrientation(Qt::Vertical);
 
@@ -376,6 +440,8 @@ int main(int argc, char** argv)
 	my_form.refresh();
 	my_form.set_focus();
 	mainwin.show();
+
+	fdcb::context stderr_redirect{STDERR_FILENO, fdcb_writer{my_app, console_text}};
 
 	my_app.exec();
 }
