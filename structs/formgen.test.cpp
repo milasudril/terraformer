@@ -42,11 +42,23 @@ inline std::string to_string_helper(T value)
 	return std::string{std::data(buffer)};
 }
 
+template<class IntervalType>
+inline std::string to_string(IntervalType range)
+{
+	std::string ret{};
+	ret += IntervalType::lower_bound_char;
+	ret.append(to_string_helper(range.min)).append(", ").append(to_string_helper(range.max));
+	ret += IntervalType::upper_bound_char;
+	return ret;
+}
+
 template<class T>
 struct open_open_interval{
 	using value_type = T;
 	T min;
 	T max;
+	static constexpr auto lower_bound_char = ']';
+	static constexpr auto upper_bound_char = '[';
 };
 
 template<class T>
@@ -58,6 +70,8 @@ struct closed_open_interval{
 	using value_type = T;
 	T min;
 	T max;
+	static constexpr auto lower_bound_char = '[';
+	static constexpr auto upper_bound_char = '[';
 };
 
 template<class T>
@@ -69,6 +83,8 @@ struct open_closed_interval{
 	using value_type = T;
 	T min;
 	T max;
+	static constexpr auto lower_bound_char = ']';
+	static constexpr auto upper_bound_char = ']';
 };
 
 template<class T>
@@ -80,6 +96,8 @@ struct closed_closed_interval{
 	using value_type = T;
 	T min;
 	T max;
+	static constexpr auto lower_bound_char = '[';
+	static constexpr auto upper_bound_char = ']';
 };
 
 template<class T>
@@ -89,7 +107,7 @@ bool within(closed_closed_interval<T> range, T val)
 class input_error:public std::runtime_error
 {
 public:
-	explicit input_error(std::string&& str):std::runtime_error{std::move(str)}{}
+	explicit input_error(std::string str):std::runtime_error{std::move(str)}{}
 };
 
 template<class ValidRange>
@@ -114,13 +132,13 @@ struct string_converter
 		{
 			if(within(range, val))
 			{ return val; }
-			throw input_error{"Input value is out of range"};
+			throw input_error{std::string{"Input value is out of range. Valid range is "}.append(::to_string(range)).append(".")};
 		}
 
 		switch(res.ec)
 		{
 			case std::errc::result_out_of_range:
-				throw input_error{"Input value is out of range"};
+			throw input_error{std::string{"Input value is out of range. Valid range is "}.append(::to_string(range)).append(".")};
 
 			default:
 				throw input_error{"Expected a number"};
