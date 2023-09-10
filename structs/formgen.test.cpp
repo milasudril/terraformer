@@ -25,6 +25,7 @@
 
 #include <limits>
 #include <functional>
+#include <cmath>
 
 #include <QApplication>
 #include <QFormLayout>
@@ -175,17 +176,26 @@ struct domain_size
 {
 	float width;
 	float height;
-	int scanline_count;
+	int number_of_pixels;
 };
 
 float compute_pixel_size(domain_size const& dom_size)
 {
-	return dom_size.height/static_cast<float>(dom_size.scanline_count);
+	return std::sqrt(dom_size.height*dom_size.width/static_cast<float>(dom_size.number_of_pixels));
 }
 
 int compute_image_width(domain_size const& dom_size)
 {
-	return static_cast<int>(static_cast<float>(dom_size.scanline_count)*(dom_size.width/dom_size.height));
+	auto const ratio = static_cast<double>(dom_size.width)/static_cast<double>(dom_size.height);
+	auto const pixel_area = static_cast<double>(dom_size.number_of_pixels);
+	return static_cast<int>(std::sqrt(ratio*pixel_area));
+}
+
+int compute_image_height(domain_size const& dom_size)
+{
+	auto const ratio = static_cast<double>(dom_size.width)/static_cast<double>(dom_size.height);
+	auto const pixel_area = static_cast<double>(dom_size.number_of_pixels);
+	return static_cast<int>(std::sqrt(pixel_area/ratio));
 }
 
 template<class Form>
@@ -227,17 +237,17 @@ void bind(Form& form, domain_size& dom_size)
 
 	form.insert(
 		field{
-			.name = "scanline_count",
-			.display_name = "Number of scanlines",
-			.description = "Sets the number of scanlines in the generated images",
+			.name = "number_of_pixels",
+			.display_name = "Number of pixel",
+			.description = "Sets the number of pixels in the generated images",
 			.widget = textbox{
 				.value_converter = string_converter{
 					.range = closed_closed_interval{
 						.min = 1,
-						.max = 8192,
+						.max = 8192*8192,
 					}
 				},
-				.binding = std::ref(dom_size.scanline_count)
+				.binding = std::ref(dom_size.number_of_pixels)
 			}
 		}
 	);
@@ -250,6 +260,20 @@ void bind(Form& form, domain_size& dom_size)
 			.widget = text_display{
 				.source = [](domain_size const& dom_size){
 					return to_string_helper(compute_image_width(dom_size));
+				},
+				.binding = std::cref(dom_size)
+			}
+		}
+	);
+
+	form.insert(
+		field{
+			.name = "image_height",
+			.display_name = "Image height",
+			.description = "The number of canlines in the generated images",
+			.widget = text_display{
+				.source = [](domain_size const& dom_size){
+					return to_string_helper(compute_image_height(dom_size));
 				},
 				.binding = std::cref(dom_size)
 			}
@@ -434,7 +458,7 @@ int main(int argc, char** argv)
 	domain_size dom{
 		.width = 49152,
 		.height = 49152,
-		.scanline_count = 1024
+		.number_of_pixels = 1024*1024
 	};
 	bind(my_form, dom);
 	my_form.refresh();
