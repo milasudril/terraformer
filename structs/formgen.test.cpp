@@ -106,6 +106,10 @@ struct string_converter
 	{
 		deserialized_type val{};
 		auto const res = std::from_chars(std::begin(str), std::end(str), val);
+
+		if(res.ptr != std::end(str))
+		{ throw input_error{"Expected a number"}; }
+
 		if(res.ec == std::errc{})
 		{
 			if(within(range, val))
@@ -247,14 +251,30 @@ void bind(Form& form, domain_size& dom_size)
 	);
 }
 
+template<class Context, class Callable, class ... Args>
+decltype(auto) try_and_catch(Context context, Callable&& func, Args&&... args)
+{
+	try
+	{ return std::invoke(std::forward<Callable>(func), std::forward<Args>(args)...); }
+	catch(std::runtime_error const& error)
+	{ context(error); }
+}
+
+void log_error(char const* msg)
+{
+	fprintf(stderr, "(x) %s\n", msg);
+	fflush(stderr);
+}
+
 class qt_form
 {
 public:
-	template<class ErrorHandler>
-	qt_form(QWidget* parent, ErrorHandler&& error_handler):
-		m_root{parent},
-		m_error_handler{std::forward<ErrorHandler>(error_handler)}
+	qt_form(QWidget* parent):
+		m_root{parent}
 	{}
+
+	void set_focus()
+	{ m_widgets[0]->setFocus(); }
 
 	template<class FieldDescriptor>
 	void insert(FieldDescriptor&& field)
@@ -270,19 +290,15 @@ public:
 		auto ret = std::make_unique<QLineEdit>();
 		QObject::connect(ret.get(),
 			&QLineEdit::editingFinished,
-			[&src = *ret, textbox, this](){
-				try
-				{
+			[this, &src = *ret, textbox](){
+				try_and_catch([&src](auto const& error){
+					log_error(error.what());
+					src.setFocus();
+				}, [this](auto& src, auto const& textbox){
 					auto const str = src.text().toStdString();
 					textbox.binding.get() = textbox.value_converter.from_string(str);
-					refresh();
-				}
-				catch(std::runtime_error const& err)
-				{
-					m_error_handler(err.what());
-					src.setFocus();
-					refresh();
-				}
+				}, src, textbox);
+				refresh();
 			}
 		);
 		m_display_callbacks.push_back([&dest = *ret, textbox](){
@@ -297,7 +313,11 @@ public:
 	{
 		auto ret = std::make_unique<QLabel>();
 		m_display_callbacks.push_back([&dest = *ret, text_display = std::move(text_display)](){
-			dest.setText(text_display.source(text_display.binding.get()).c_str());
+			try_and_catch([](auto const& error){
+				log_error(error.what());
+			},[](auto& dest, auto const& text_display) {
+				dest.setText(text_display.source(text_display.binding.get()).c_str());
+			}, dest, text_display);
 		});
 		return ret;
 	}
@@ -320,18 +340,14 @@ int main(int argc, char** argv)
 	mainwin.setOrientation(Qt::Vertical);
 
 	QWidget top;
-	QWidget bottom;
 	mainwin.addWidget(&top);
-	mainwin.addWidget(&bottom);
+	qt_form my_form{&top};
 
+	QWidget bottom;
+	mainwin.addWidget(&bottom);
 	QTextEdit console_text{};
 	QBoxLayout console_layout{QBoxLayout::Direction::TopToBottom,&bottom};
 	console_layout.addWidget(&console_text);
-
-	qt_form my_form{&top, [&console_text](char const* err){
-		console_text.moveCursor(QTextCursor::End);
-		console_text.insertPlainText(err);
-	}};
 
 	domain_size dom{
 		.width = 49152,
@@ -340,6 +356,7 @@ int main(int argc, char** argv)
 	};
 	bind(my_form, dom);
 	my_form.refresh();
+	my_form.set_focus();
 	mainwin.show();
 
 	my_app.exec();
