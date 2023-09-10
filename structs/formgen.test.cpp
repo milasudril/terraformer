@@ -224,12 +224,12 @@ void bind(Form& form, domain_size& dom_size)
 
 	form.insert(
 		field{
-			.name = "pixel_size",
-			.display_name = "Pixel size",
-			.description = "The physical size of a pixel",
+			.name = "image_width",
+			.display_name = "Image width",
+			.description = "The number of columns in the generated images",
 			.widget = text_display{
 				.source = [](domain_size const& dom_size){
-					return to_string_helper(compute_pixel_size(dom_size));
+					return to_string_helper(compute_image_width(dom_size));
 				},
 				.binding = std::cref(dom_size)
 			}
@@ -238,12 +238,12 @@ void bind(Form& form, domain_size& dom_size)
 
 	form.insert(
 		field{
-			.name = "image_width",
-			.display_name = "Image width",
-			.description = "The number of columns in the generated images",
+			.name = "pixel_size",
+			.display_name = "Pixel size",
+			.description = "The physical size of a pixel",
 			.widget = text_display{
 				.source = [](domain_size const& dom_size){
-					return to_string_helper(compute_image_width(dom_size));
+					return to_string_helper(compute_pixel_size(dom_size));
 				},
 				.binding = std::cref(dom_size)
 			}
