@@ -7,6 +7,8 @@
 #include <cstdint>
 #include <numbers>
 #include <algorithm>
+#include <charconv>
+#include <string>
 
 namespace terraformer
 {
@@ -54,6 +56,15 @@ namespace terraformer
 
 	template<class T>
 	using empty = std::type_identity<T>;
+
+	template<class T>
+	requires std::is_arithmetic_v<T>
+	inline std::string to_string_helper(T value)
+	{
+		std::array<char, 32> buffer{};
+		std::to_chars(std::begin(buffer), std::end(buffer), value);
+		return std::string{std::data(buffer)};
+	}
 }
 
 #endif
