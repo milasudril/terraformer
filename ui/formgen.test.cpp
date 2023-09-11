@@ -18,6 +18,7 @@
 //@		}
 //@	}
 
+#include "./application.hpp"
 #include "./form.hpp"
 #include "lib/modules/domain_size.hpp"
 #include "lib/common/utils.hpp"
@@ -40,50 +41,11 @@
 #include <QBoxLayout>
 #include <fdcb.h>
 
-class application:public QApplication
-{
-public:
-	template<class ... Args>
-	explicit application(Args&&... args):
-		QApplication{std::forward<Args>(args)...},
-		m_internal_event_type{static_cast<QEvent::Type>(QEvent::registerEventType())}
-	{}
 
-	struct internal_event:public QEvent
-	{
-		std::function<bool()> callback;
-
-		template<class Callable>
-	  explicit internal_event(QEvent::Type event_type, Callable&& f) :
-			QEvent{event_type},
-			callback{std::forward<Callable>(f)}
-		{}
-
-		auto fire() const
-		{ return callback(); }
-	};
-
-	bool event(QEvent* e) override
-	{
-		if(e->type() == m_internal_event_type)
-		{ return static_cast<internal_event*>(e)->fire(); }
-		return QApplication::event(e);
-	}
-
-	template<class Callable>
-	void post_event(Callable&& callback)
-	{
-		// NOTE: We use naked new here because Qt will take ownership of the object
-		postEvent(this, new internal_event{m_internal_event_type, std::forward<Callable>(callback)});
-	}
-
-private:
-	QEvent::Type m_internal_event_type;
-};
 
 struct fdcb_writer
 {
-	std::reference_wrapper<application> app;
+	std::reference_wrapper<terraformer::application> app;
 	std::reference_wrapper<QTextEdit> console;
 };
 
@@ -105,7 +67,7 @@ size_t write(fdcb_writer writer, std::span<std::byte const> buffer)
 
 int main(int argc, char** argv)
 {
-	application my_app{argc, argv};
+	terraformer::application my_app{argc, argv};
 	QSplitter mainwin;
 	mainwin.setOrientation(Qt::Vertical);
 
