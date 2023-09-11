@@ -1,10 +1,5 @@
 //@	{
-//@		"target":{
-//@			"name":"formgen_test",
-//@			"dependencies":[
-//				{"ref":"Qt5Widgets", "origin":"pkg-config"}
-//@			]
-//@		},
+//@		"target": {"name":"formgen_test"},
 //@		"dependencies_extra":[{"ref":"fdcb", "origin":"system", "rel":"external"}],
 //@		"compiler":{
 //@			"config": {
@@ -22,25 +17,9 @@
 #include "./application.hpp"
 #include "./form.hpp"
 #include "lib/modules/domain_size.hpp"
-#include "lib/common/utils.hpp"
 
-#include <type_traits>
-#include <string>
-#include <charconv>
-#include <stdexcept>
-
-#include <limits>
-#include <functional>
-#include <cmath>
-
-#include <QApplication>
-#include <QFormLayout>
-#include <QLabel>
-#include <QLineEdit>
-#include <QSplitter>
-#include <QTextEdit>
-#include <QBoxLayout>
 #include <fdcb.h>
+#include <QSplitter>
 
 int main(int argc, char** argv)
 {

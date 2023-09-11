@@ -1,3 +1,7 @@
+//@	{
+//@		"dependencies":[{"ref":"Qt5Widgets", "origin":"pkg-config"}]
+//@	}
+
 #ifndef TERRAFORMER_APPLICATION_HPP
 #define TERRAFORMER_APPLICATION_HPP
 
