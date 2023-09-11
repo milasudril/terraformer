@@ -65,6 +65,21 @@ namespace terraformer
 		std::to_chars(std::begin(buffer), std::end(buffer), value);
 		return std::string{std::data(buffer)};
 	}
+
+	template<class Context, class Callable, class ... Args>
+	decltype(auto) try_and_catch(Context&& context, Callable&& func, Args&&... args)
+	{
+		try
+		{ return std::invoke(std::forward<Callable>(func), std::forward<Args>(args)...); }
+		catch(std::runtime_error const& error)
+		{ std::forward<Context>(context)(error); }
+	}
+
+	inline void log_error(char const* msg)
+	{
+		fprintf(stderr, "(x) %s\n", msg);
+		fflush(stderr);
+	}
 }
 
 #endif

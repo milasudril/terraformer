@@ -19,6 +19,7 @@
 //@	}
 
 #include "lib/modules/domain_size.hpp"
+#include "lib/common/utils.hpp"
 
 #include <type_traits>
 #include <string>
@@ -37,21 +38,6 @@
 #include <QTextEdit>
 #include <QBoxLayout>
 #include <fdcb.h>
-
-template<class Context, class Callable, class ... Args>
-decltype(auto) try_and_catch(Context context, Callable&& func, Args&&... args)
-{
-	try
-	{ return std::invoke(std::forward<Callable>(func), std::forward<Args>(args)...); }
-	catch(std::runtime_error const& error)
-	{ context(error); }
-}
-
-void log_error(char const* msg)
-{
-	fprintf(stderr, "(x) %s\n", msg);
-	fflush(stderr);
-}
 
 class qt_form
 {
@@ -78,8 +64,8 @@ public:
 		QObject::connect(ret.get(),
 			&QLineEdit::editingFinished,
 			[this, &src = *ret, textbox](){
-				try_and_catch([&src](auto const& error){
-					log_error(error.what());
+				terraformer::try_and_catch([&src](auto const& error){
+					terraformer::log_error(error.what());
 					src.setFocus();
 				}, [this](auto& src, auto const& textbox){
 					auto const str = src.text().toStdString();
@@ -100,8 +86,8 @@ public:
 	{
 		auto ret = std::make_unique<QLabel>();
 		m_display_callbacks.push_back([&dest = *ret, text_display = std::move(text_display)](){
-			try_and_catch([](auto const& error){
-				log_error(error.what());
+			terraformer::try_and_catch([](auto const& error){
+				terraformer::log_error(error.what());
 			},[](auto& dest, auto const& text_display) {
 				dest.setText(text_display.source(text_display.binding.get()).c_str());
 			}, dest, text_display);
