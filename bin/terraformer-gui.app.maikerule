@@ -1,0 +1,4 @@
+{
+	"target":{"name":"terraformer-gui"}
+	,"dependencies":[{"ref":"./terraformer-gui.o", "rel":"implementation"}]
+}

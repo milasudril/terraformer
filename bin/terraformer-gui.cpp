@@ -1,29 +1,36 @@
 //@	{
-//@		"target": {"name":"formgen_test"},
-//@		"dependencies_extra":[{"ref":"fdcb", "origin":"system", "rel":"external"}],
+//@		"target":{
+//@			"name":"terraformer-gui.o",
+//@			"dependencies":[
+//@				{"ref":"fdcb", "rel":"external"}
+//@			]
+//@		},
+//	NOTE: We need to change some compiler flags for Qt
 //@		"compiler":{
 //@			"config": {
 //@				"cflags":[
-//	NOTE: We need to change some compiler flags for Qt
+//	Qt headers uses some ugly implicit conversions
 //@					"-Wno-error=conversion",
+//	Qt headers uses enum conversions that have been deprecated in C++20
 //@					"-Wno-error=deprecated-enum-enum-conversion",
+//	Qt requires that we build with fpic
 //@					"-fpic"
 //@				]
 //@			}
 //@		}
 //@	}
 
-#include "./application_log.hpp"
-#include "./application.hpp"
-#include "./form.hpp"
+#include "ui/application_log.hpp"
+#include "ui/application.hpp"
+#include "ui/form.hpp"
 #include "lib/modules/domain_size.hpp"
 
-#include <fdcb.h>
 #include <QSplitter>
+#include <fdcb.h>
 
 int main(int argc, char** argv)
 {
-	terraformer::application my_app{argc, argv};
+	terraformer::application terraformer{argc, argv};
 	QSplitter mainwin;
 	mainwin.setOrientation(Qt::Vertical);
 
@@ -50,10 +57,10 @@ int main(int argc, char** argv)
 	fdcb::context stderr_redirect{
 		STDERR_FILENO,
 		terraformer::application_log{
-			.app = my_app,
+			.app = terraformer,
 			.console = console_text
 		}
 	};
 
-	my_app.exec();
+	return terraformer.exec();
 }
