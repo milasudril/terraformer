@@ -2,7 +2,7 @@
 //@		"target":{
 //@			"name":"formgen_test",
 //@			"dependencies":[
-//@				{"ref":"Qt5Widgets", "origin":"pkg-config"}
+//				{"ref":"Qt5Widgets", "origin":"pkg-config"}
 //@			]
 //@		},
 //@		"dependencies_extra":[{"ref":"fdcb", "origin":"system", "rel":"external"}],
@@ -18,6 +18,7 @@
 //@		}
 //@	}
 
+#include "./application_log.hpp"
 #include "./application.hpp"
 #include "./form.hpp"
 #include "lib/modules/domain_size.hpp"
@@ -40,30 +41,6 @@
 #include <QTextEdit>
 #include <QBoxLayout>
 #include <fdcb.h>
-
-
-
-struct fdcb_writer
-{
-	std::reference_wrapper<terraformer::application> app;
-	std::reference_wrapper<QTextEdit> console;
-};
-
-size_t write(fdcb_writer writer, std::span<std::byte const> buffer)
-{
-	writer.app.get().post_event([&console = writer.console.get(), buffer](){
-		std::string str{};
-		str.reserve(std::size(buffer));
-		std::ranges::transform(buffer, std::back_inserter(str), [](auto src){
-			return static_cast<char>(src);
-		});
-		console.moveCursor(QTextCursor::End);
-		console.insertPlainText(QString::fromStdString(str));
-		console.moveCursor(QTextCursor::End);
-		return true;
-	});
-	return std::size(buffer);
-}
 
 int main(int argc, char** argv)
 {
@@ -91,7 +68,13 @@ int main(int argc, char** argv)
 	my_form.set_focus();
 	mainwin.show();
 
-	fdcb::context stderr_redirect{STDERR_FILENO, fdcb_writer{my_app, console_text}};
+	fdcb::context stderr_redirect{
+		STDERR_FILENO,
+		terraformer::application_log{
+			.app = my_app,
+			.console = console_text
+		}
+	};
 
 	my_app.exec();
 }
