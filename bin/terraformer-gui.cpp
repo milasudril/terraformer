@@ -34,9 +34,8 @@ int main(int argc, char** argv)
 	QSplitter mainwin;
 	mainwin.setOrientation(Qt::Vertical);
 
-	QWidget top;
-	mainwin.addWidget(&top);
-	terraformer::form my_form{&top};
+	terraformer::form my_form{nullptr};
+	mainwin.addWidget(&my_form);
 
 	QWidget bottom;
 	mainwin.addWidget(&bottom);
@@ -44,23 +43,25 @@ int main(int argc, char** argv)
 	QBoxLayout console_layout{QBoxLayout::Direction::TopToBottom,&bottom};
 	console_layout.addWidget(&console_text);
 
-	terraformer::domain_size dom{
-		.width = 49152,
-		.height = 49152,
-		.number_of_pixels = 1024*1024
+	terraformer::simulation sim{
+		.domain_size{
+			.width = 49152,
+			.height = 49152,
+			.number_of_pixels = 1024*1024
+		}
 	};
-	bind(my_form, dom);
+	bind(my_form, sim);
+	my_form.setObjectName("simulation");
 	my_form.refresh();
-	my_form.set_focus();
 	mainwin.show();
-
+/*
 	fdcb::context stderr_redirect{
 		STDERR_FILENO,
 		terraformer::application_log{
 			.app = terraformer,
 			.console = console_text
 		}
-	};
+	};*/
 
 	return terraformer.exec();
 }

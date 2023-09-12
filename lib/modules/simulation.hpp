@@ -5,6 +5,8 @@
 
 namespace terraformer
 {
+	inline int dummy;
+
 	struct simulation
 	{
 		struct domain_size domain_size;
@@ -23,6 +25,21 @@ namespace terraformer
 				}
 			}
 		);
+
+		form.insert(field{
+			.name = "foo",
+			.display_name ="bar",
+			.description ="kaka",
+			.widget = textbox{
+				.value_converter = string_converter{
+					.range = open_open_interval{
+						.min = 0,
+						.max = 10
+					}
+				},
+				.binding = std::ref(dummy)
+			}
+		});
 	}
 }
 
