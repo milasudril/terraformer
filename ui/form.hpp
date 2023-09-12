@@ -15,7 +15,7 @@ namespace terraformer
 	{
 	public:
 		form(QWidget* parent):
-			m_root{parent}
+			m_root{std::make_unique<QFormLayout>(parent)}
 		{}
 
 		void set_focus()
@@ -26,7 +26,7 @@ namespace terraformer
 		{
 			m_widgets.push_back(create_widget(std::move(field.widget)));
 			m_widgets.back()->setToolTip(field.description);
-			m_root.addRow(field.display_name, m_widgets.back().get());
+			m_root->addRow(field.display_name, m_widgets.back().get());
 		}
 
 		template<class Converter, class BindingType>
@@ -74,8 +74,8 @@ namespace terraformer
 	private:
 		std::vector<std::unique_ptr<QWidget>> m_widgets;
 		std::vector<std::function<void()>> m_display_callbacks;
-		QFormLayout m_root;
 		std::function<void(char const*)> m_error_handler;
+		std::unique_ptr<QFormLayout> m_root;
 	};
 }
 
