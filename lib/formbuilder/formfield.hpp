@@ -25,6 +25,12 @@ namespace terraformer
 		Callable source;
 		BindingType binding;
 	};
+
+	template<class BindingType>
+	struct subform
+	{
+		BindingType binding;
+	};
 }
 
 #endif
