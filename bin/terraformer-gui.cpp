@@ -23,7 +23,7 @@
 #include "ui/application_log.hpp"
 #include "ui/application.hpp"
 #include "ui/form.hpp"
-#include "lib/modules/domain_size.hpp"
+#include "lib/modules/simulation.hpp"
 
 #include <QSplitter>
 #include <fdcb.h>
