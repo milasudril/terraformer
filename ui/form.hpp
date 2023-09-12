@@ -11,10 +11,11 @@
 
 namespace terraformer
 {
-	class form
+	class form:public QWidget
 	{
 	public:
 		form(QWidget* parent):
+			QWidget{parent},
 			m_root{std::make_unique<QFormLayout>(parent)}
 		{}
 
