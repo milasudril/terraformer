@@ -1,3 +1,5 @@
+//@	{"dependencies_extra":[{"ref":"./utils.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_UTILS_HPP
 #define TERRAFORMER_UTILS_HPP
 
@@ -65,6 +67,15 @@ namespace terraformer
 		std::to_chars(std::begin(buffer), std::end(buffer), value);
 		return std::string{std::data(buffer)};
 	}
+
+	void bytes_to_hex(char* __restrict__ dest,  void const* __restrict__ src, size_t dest_length);
+
+	struct hex_to_bytes_result
+	{
+		const char* ptr;
+	};
+
+	hex_to_bytes_result hex_to_bytes(void* __restrict__ dest, char const* __restrict__ src, size_t dest_length);
 
 	template<class Context, class Callable, class ... Args>
 	decltype(auto) try_and_catch(Context&& context, Callable&& func, Args&&... args)
