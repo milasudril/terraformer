@@ -3,13 +3,17 @@
 
 #include "./domain_size.hpp"
 
+#include <pcg-cpp/include/pcg_random.hpp>
+
 namespace terraformer
 {
-	inline int dummy;
+	using random_generator = pcg_engines::oneseq_dxsm_128_64;
+	using rng_seed_type = __int128;
 
 	struct simulation
 	{
 		struct domain_size domain_size;
+		rng_seed_type rng_seed;
 	};
 
 	template<class Form>
@@ -27,17 +31,12 @@ namespace terraformer
 		);
 
 		form.insert(field{
-			.name = "foo",
-			.display_name ="bar",
-			.description ="kaka",
+			.name = "rng_seed",
+			.display_name ="Random generator seed",
+			.description = "Sets the initial value for the random bit generator",
 			.widget = textbox{
-				.value_converter = string_converter{
-					.range = open_open_interval{
-						.min = 0,
-						.max = 10
-					}
-				},
-				.binding = std::ref(dummy)
+				.value_converter = hash_string_converter<rng_seed_type>{},
+				.binding = std::ref(params.rng_seed)
 			}
 		});
 	}

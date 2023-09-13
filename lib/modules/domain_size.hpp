@@ -46,7 +46,7 @@ namespace terraformer
 				.display_name = "Width",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = string_converter{
+					.value_converter = num_string_converter{
 						.range = open_open_interval{
 							.min = 0.0f,
 							.max = std::numeric_limits<float>::infinity()
@@ -63,7 +63,7 @@ namespace terraformer
 				.display_name = "Height",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = string_converter{
+					.value_converter = num_string_converter{
 						.range = open_open_interval{
 							.min = 0.0f,
 							.max = std::numeric_limits<float>::infinity()
@@ -80,7 +80,7 @@ namespace terraformer
 				.display_name = "Number of pixel",
 				.description = "Sets the number of pixels in the generated images",
 				.widget = textbox{
-					.value_converter = string_converter{
+					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
 							.min = 1,
 							.max = 8192*8192,

@@ -13,7 +13,7 @@ namespace terraformer
 
 	template<class ValidRange, class T = typename ValidRange::value_type>
 	requires interval<ValidRange, T>
-	struct string_converter
+	struct num_string_converter
 	{
 		using deserialized_type = typename ValidRange::value_type;
 		ValidRange range;
@@ -45,6 +45,17 @@ namespace terraformer
 					throw input_error{"Expected a number"};
 			}
 		}
+	};
+
+	template<class T>
+	requires std::is_integral_v<T> || std::is_same_v<T, __int128>
+	struct hash_string_converter
+	{
+		static std::string convert(T)
+		{ return std::string{}; }
+
+		static T convert(std::string_view)
+		{ return T{}; }
 	};
 }
 

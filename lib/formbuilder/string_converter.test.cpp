@@ -38,15 +38,15 @@
 #endif
 
 
-TESTCASE(terraformer_string_converter_to_string)
+TESTCASE(terraformer_num_string_converter_to_string)
 {
-	auto str = terraformer::string_converter<terraformer::open_open_interval<int>>::convert(123);
+	auto str = terraformer::num_string_converter<terraformer::open_open_interval<int>>::convert(123);
 	EXPECT_EQ(str, "123");
 }
 
-TESTCASE(terraformer_string_converter_from_string_junk_after_data)
+TESTCASE(terraformer_num_string_converter_from_string_junk_after_data)
 {
-	terraformer::string_converter conv{terraformer::open_open_interval{1, 3}};
+	terraformer::num_string_converter conv{terraformer::open_open_interval{1, 3}};
 
 	try
 	{
@@ -62,16 +62,16 @@ TESTCASE(terraformer_string_converter_from_string_junk_after_data)
 	{ abort(); }
 }
 
-TESTCASE(terraformer_string_converter_from_string_good_value)
+TESTCASE(terraformer_num_string_converter_from_string_good_value)
 {
-	terraformer::string_converter conv{terraformer::open_open_interval{1, 3}};
+	terraformer::num_string_converter conv{terraformer::open_open_interval{1, 3}};
 	auto val = conv.convert("2");
 	EXPECT_EQ(val, 2);
 }
 
-TESTCASE(terraformer_string_converter_from_string_outside_interval)
+TESTCASE(terraformer_num_string_converter_from_string_outside_interval)
 {
-	terraformer::string_converter conv{terraformer::open_open_interval{1, 3}};
+	terraformer::num_string_converter conv{terraformer::open_open_interval{1, 3}};
 
 	try
 	{
@@ -87,9 +87,9 @@ TESTCASE(terraformer_string_converter_from_string_outside_interval)
 	{ abort(); }
 }
 
-TESTCASE(terraformer_string_converter_from_string_long_value)
+TESTCASE(terraformer_num_string_converter_from_string_long_value)
 {
-	terraformer::string_converter conv{terraformer::open_open_interval{1, 3}};
+	terraformer::num_string_converter conv{terraformer::open_open_interval{1, 3}};
 
 	try
 	{
@@ -105,9 +105,9 @@ TESTCASE(terraformer_string_converter_from_string_long_value)
 	{ abort(); }
 }
 
-TESTCASE(terraformer_string_converter_from_string_junk)
+TESTCASE(terraformer_num_string_converter_from_string_junk)
 {
-	terraformer::string_converter conv{terraformer::open_open_interval{1, 3}};
+	terraformer::num_string_converter conv{terraformer::open_open_interval{1, 3}};
 
 	try
 	{
