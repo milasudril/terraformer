@@ -20,7 +20,13 @@ namespace terraformer
 		{}
 
 		void set_focus()
-		{ m_widgets[0]->setFocus(); }
+		{
+			auto first_element = m_widgets[0].get();
+			if(auto form = dynamic_cast<class form*>(first_element); form != nullptr)
+			{ form->set_focus(); }
+			else
+			{ first_element->setFocus(); }
+		}
 
 		template<class FieldDescriptor>
 		void insert(FieldDescriptor&& field)
