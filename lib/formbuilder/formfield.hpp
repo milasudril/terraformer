@@ -31,6 +31,23 @@ namespace terraformer
 	{
 		BindingType binding;
 	};
+
+	template<class Callable, class BindingType>
+	struct button
+	{
+		Callable on_activated;
+		BindingType binding;  // To be "read" by on_activated
+		char const* label;
+		char const* description;
+	};
+
+	template<class TextWidget, class CommandWidget, class BindingType>
+	struct picker
+	{
+		TextWidget text_widget;
+		CommandWidget command_widget;
+		BindingType binding;
+	};
 }
 
 #endif
