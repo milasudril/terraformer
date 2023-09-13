@@ -17,10 +17,7 @@ namespace terraformer
 		form(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QFormLayout>(this)}
-		{
-			printf("Created form %p with parent %p\n", this, parent);
-			fflush(stdout);
-		}
+		{}
 
 		void set_focus()
 		{ m_widgets[0]->setFocus(); }
@@ -28,7 +25,6 @@ namespace terraformer
 		template<class FieldDescriptor>
 		void insert(FieldDescriptor&& field)
 		{
-			printf("Inserting field %s\n", field.name);
 			m_widgets.push_back(create_widget(std::move(field.widget)));
 			m_widgets.back()->setObjectName(field.name);
 			m_widgets.back()->setToolTip(field.description);
@@ -38,7 +34,6 @@ namespace terraformer
 		template<class BindingType>
 		void insert(subform<BindingType>&& field)
 		{
-			printf("Inserting field %s\n", field.name);
 			auto form = create_widget(std::move(field.widget));
 			form->setToolTip(field.description);
 			form->setObjectName(field.name);
@@ -49,18 +44,22 @@ namespace terraformer
 		template<class Converter, class BindingType>
 		std::unique_ptr<QLineEdit> create_widget(textbox<Converter, BindingType> const& textbox)
 		{
-			printf("  Add textbox to %p\n", this);
 			auto ret = std::make_unique<QLineEdit>(this);
 			QObject::connect(ret.get(),
 				&QLineEdit::editingFinished,
-				[this, &src = *ret, textbox](){
-					try_and_catch([&src](auto const& error){
+				[this, &src = *ret, textbox, has_been_called = false]() mutable{
+					if(has_been_called)
+					{ return; }
+					has_been_called = true;
+					try_and_catch([this, &src](auto const& error){
 						log_error(error.what());
 						src.setFocus();
 					}, [this](auto& src, auto const& textbox){
 						auto const str = src.text().toStdString();
 						textbox.binding.get() = textbox.value_converter.convert(str);
+						refresh();
 					}, src, textbox);
+					has_been_called = false;
 					refresh();
 				}
 			);
@@ -74,7 +73,6 @@ namespace terraformer
 		template<class Converter, class BindingType>
 		std::unique_ptr<QLabel> create_widget(text_display<Converter, BindingType>&& text_display)
 		{
-			printf("  Add text display to %p\n", this);
 			auto ret = std::make_unique<QLabel>(this);
 			m_display_callbacks.push_back([&dest = *ret, text_display = std::move(text_display)](){
 				try_and_catch([](auto const& error){
@@ -89,7 +87,6 @@ namespace terraformer
 		template<class BindingType>
 		std::unique_ptr<form> create_widget(subform<BindingType>&& subform)
 		{
-			printf("  Add subform to %p\n", this);
 			auto ret = std::make_unique<form>(this);
 			bind(*ret, subform.binding.get());
 			return ret;

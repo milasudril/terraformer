@@ -40,7 +40,6 @@ namespace terraformer
 	template<class Form>
 	void bind(Form& form, domain_size& dom_size)
 	{
-		printf("Binding domain size\n");
 		form.insert(
 			field{
 				.name = "width",

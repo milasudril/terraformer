@@ -53,15 +53,16 @@ int main(int argc, char** argv)
 	bind(my_form, sim);
 	my_form.setObjectName("simulation");
 	my_form.refresh();
+	my_form.set_focus();
 	mainwin.show();
-/*
+
 	fdcb::context stderr_redirect{
 		STDERR_FILENO,
 		terraformer::application_log{
 			.app = terraformer,
 			.console = console_text
 		}
-	};*/
+	};
 
 	return terraformer.exec();
 }
