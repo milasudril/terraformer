@@ -89,10 +89,13 @@ namespace terraformer
 		{
 			auto ret = std::make_unique<form>(this);
 			bind(*ret, subform.binding.get());
+			m_display_callbacks.push_back([&ret = *ret](){
+				ret.refresh();
+			});
 			return ret;
 		}
 
-		void refresh()
+		void refresh() const
 		{ std::ranges::for_each(m_display_callbacks, [](auto const& item){item();}); }
 
 
