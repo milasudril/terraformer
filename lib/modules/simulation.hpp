@@ -39,11 +39,14 @@ namespace terraformer
 					.value_converter = hash_string_converter<rng_seed_type>{},
 					.binding = std::ref(params.rng_seed)
 				},
-				text_display{
-					.source = [](rng_seed_type){
-						return std::string{"Hello"};
+				input_button{
+					.value_generator = [state = rng_seed_type{}]() mutable {
+						++state;
+						return state;
 					},
-					.binding = std::ref(params.rng_seed)
+					.binding = std::ref(params.rng_seed),
+					.label = "🂠",
+					.description = "Gererate a seed value",
 				}
 			}
 		});

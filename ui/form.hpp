@@ -8,6 +8,7 @@
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QLabel>
+#include <QPushButton>
 
 namespace terraformer
 {
@@ -81,6 +82,31 @@ namespace terraformer
 
 			return ret;
 		}
+		
+		template<class Generator, class BindingType>
+		std::unique_ptr<QPushButton> create_widget(input_button<Generator, BindingType>&& input_button, QWidget& parent)
+		{
+			auto ret = std::make_unique<QPushButton>(input_button.label, &parent);
+			ret->setToolTip(input_button.description);
+			QObject::connect(ret.get(),
+				&QPushButton::clicked,
+				[this, &src = *ret, input_button = std::move(input_button), has_been_called = false]() mutable{
+					if(has_been_called)
+					{ return; }
+					has_been_called = true;
+					try_and_catch([this, &src](auto const& error){
+						log_error(error.what());
+						src.setFocus();
+					}, [this](auto& input_button){
+						input_button.binding.get() = input_button.value_generator();
+						refresh();
+					}, input_button);
+					has_been_called = false;
+					refresh();
+				}
+			);
+			return ret;
+		}
 
 		template<class Converter, class BindingType>
 		std::unique_ptr<QLabel> create_widget(text_display<Converter, BindingType>&& text_display, QWidget& parent)
@@ -122,14 +148,9 @@ namespace terraformer
 
 			return ret;
 		}
-		
-
 
 		void refresh() const
-		{ 
-			std::ranges::for_each(m_display_callbacks, [](auto const& item){item();});
-		
-		}
+		{ std::ranges::for_each(m_display_callbacks, [](auto const& item){item();}); }
 
 
 	private:

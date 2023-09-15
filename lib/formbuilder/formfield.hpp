@@ -18,6 +18,15 @@ namespace terraformer
 		Converter value_converter;
 		BindingType binding;
 	};
+	
+	template<class Generator, class BindingType>
+	struct input_button
+	{
+		Generator value_generator;
+		BindingType binding;
+		char const* label;
+		char const* description;
+	};
 
 	template<class Callable, class BindingType>
 	struct text_display
