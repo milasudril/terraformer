@@ -11,10 +11,25 @@
 
 namespace terraformer
 {
+	class widget_row:public QWidget
+	{
+	public:
+		explicit widget_row(QWidget* parent):
+			QWidget{parent},
+			m_root{std::make_unique<QHBoxLayout>(this)}
+			{}
+			
+			void add_widget(QWidget& widget)
+			{ m_root->addWidget(&widget); }
+			
+	private:
+		std::unique_ptr<QHBoxLayout> m_root;
+	};
+	
 	class form:public QWidget
 	{
 	public:
-		form(QWidget* parent):
+		explicit form(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QFormLayout>(this)}
 		{}
@@ -31,26 +46,17 @@ namespace terraformer
 		template<class FieldDescriptor>
 		void insert(FieldDescriptor&& field)
 		{
-			m_widgets.push_back(create_widget(std::move(field.widget)));
-			m_widgets.back()->setObjectName(field.name);
-			m_widgets.back()->setToolTip(field.description);
-			m_root->addRow(field.display_name, m_widgets.back().get());
+			auto entry = create_widget(std::move(field.widget), *this);
+			entry->setObjectName(field.name);
+			entry->setToolTip(field.description);
+			m_root->addRow(field.display_name, entry.get());
+			m_widgets.push_back(std::move(entry));
 		}
-
-		template<class BindingType>
-		void insert(subform<BindingType>&& field)
-		{
-			auto form = create_widget(std::move(field.widget));
-			form->setToolTip(field.description);
-			form->setObjectName(field.name);
-			m_root->addRow(field.display_name, form->m_root);
-			m_widgets.push_back(std::move(form));
-		}
-
+		
 		template<class Converter, class BindingType>
-		std::unique_ptr<QLineEdit> create_widget(textbox<Converter, BindingType> const& textbox)
+		std::unique_ptr<QLineEdit> create_widget(textbox<Converter, BindingType> const& textbox, QWidget& parent)
 		{
-			auto ret = std::make_unique<QLineEdit>(this);
+			auto ret = std::make_unique<QLineEdit>(&parent);
 			QObject::connect(ret.get(),
 				&QLineEdit::editingFinished,
 				[this, &src = *ret, textbox, has_been_called = false]() mutable{
@@ -77,9 +83,9 @@ namespace terraformer
 		}
 
 		template<class Converter, class BindingType>
-		std::unique_ptr<QLabel> create_widget(text_display<Converter, BindingType>&& text_display)
+		std::unique_ptr<QLabel> create_widget(text_display<Converter, BindingType>&& text_display, QWidget& parent)
 		{
-			auto ret = std::make_unique<QLabel>(this);
+			auto ret = std::make_unique<QLabel>(&parent);
 			m_display_callbacks.push_back([&dest = *ret, text_display = std::move(text_display)](){
 				try_and_catch([](auto const& error){
 					log_error(error.what());
@@ -91,18 +97,39 @@ namespace terraformer
 		}
 
 		template<class BindingType>
-		std::unique_ptr<form> create_widget(subform<BindingType>&& subform)
+		std::unique_ptr<form> create_widget(subform<BindingType>&& subform, QWidget& parent)
 		{
-			auto ret = std::make_unique<form>(this);
+			auto ret = std::make_unique<form>(&parent);
 			bind(*ret, subform.binding.get());
 			m_display_callbacks.push_back([&ret = *ret](){
 				ret.refresh();
 			});
 			return ret;
 		}
+		
+		template<class... WidgetTypes>
+		std::unique_ptr<widget_row> create_widget(std::tuple<WidgetTypes...>&& widgets, QWidget& parent)
+		{
+			auto ret = std::make_unique<widget_row>(&parent);
+			auto created_widgets = std::apply([this, parent = ret.get()]<class... Args>(Args&&... args){
+				return std::tuple{create_widget(std::forward<Args>(args), *parent)...};
+			}, std::move(widgets));
+
+			std::apply([this, parent = ret.get()]<class... Args>(Args&&... args) {
+				(parent->add_widget(*args), ...);
+				(m_widgets.push_back(std::forward<Args>(args)), ...);
+			}, std::move(created_widgets));
+
+			return ret;
+		}
+		
+
 
 		void refresh() const
-		{ std::ranges::for_each(m_display_callbacks, [](auto const& item){item();}); }
+		{ 
+			std::ranges::for_each(m_display_callbacks, [](auto const& item){item();});
+		
+		}
 
 
 	private:

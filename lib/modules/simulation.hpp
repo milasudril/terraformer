@@ -34,9 +34,17 @@ namespace terraformer
 			.name = "rng_seed",
 			.display_name ="Random generator seed",
 			.description = "Sets the initial value for the random bit generator",
-			.widget = textbox{
-				.value_converter = hash_string_converter<rng_seed_type>{},
-				.binding = std::ref(params.rng_seed)
+			.widget = std::tuple{
+				textbox{
+					.value_converter = hash_string_converter<rng_seed_type>{},
+					.binding = std::ref(params.rng_seed)
+				},
+				text_display{
+					.source = [](rng_seed_type){
+						return std::string{"Hello"};
+					},
+					.binding = std::ref(params.rng_seed)
+				}
 			}
 		});
 	}
