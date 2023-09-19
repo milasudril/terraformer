@@ -18,7 +18,7 @@ namespace terraformer
 		explicit widget_row(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QHBoxLayout>(this)}
-			{}
+			{ m_root->setContentsMargins(0, 0, 0, 0); }
 			
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
@@ -33,7 +33,7 @@ namespace terraformer
 		explicit widget_column(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QVBoxLayout>(this)}
-			{}
+			{ m_root->setContentsMargins(4, 0, 0, 0); }
 			
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
@@ -48,7 +48,7 @@ namespace terraformer
 		explicit form(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QFormLayout>(this)}
-		{}
+		{ m_root->setContentsMargins(4, 0, 0, 0); }
 
 		void set_focus()
 		{

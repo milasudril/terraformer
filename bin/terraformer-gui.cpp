@@ -32,6 +32,7 @@
 int main(int argc, char** argv)
 {
 	terraformer::application terraformer{argc, argv};
+	terraformer.setStyleSheet("*{padding:0px; margin:0px}\nQPushButton{padding:4px}");
 	QSplitter mainwin;
 	mainwin.setOrientation(Qt::Vertical);
 	
