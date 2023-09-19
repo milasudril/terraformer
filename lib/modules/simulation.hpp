@@ -1,7 +1,8 @@
-#ifndef TERRAFORMER_PARAMETERS_HPP
-#define TERRAFORMER_PARAMETERS_HPP
+#ifndef TERRAFORMER_SIMULATION_HPP
+#define TERRAFORMER_SIMULATION_HPP
 
 #include "./domain_size.hpp"
+#include "lib/common/random_bit_source.hpp"
 
 #include <pcg-cpp/include/pcg_random.hpp>
 
@@ -40,9 +41,8 @@ namespace terraformer
 					.binding = std::ref(params.rng_seed)
 				},
 				input_button{
-					.value_generator = [state = rng_seed_type{}]() mutable {
-						++state;
-						return state;
+					.value_generator = [seed_src = random_bit_source{}]() {
+						return seed_src.get<rng_seed_type>();
 					},
 					.binding = std::ref(params.rng_seed),
 					.label = "🂠",

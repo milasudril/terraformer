@@ -43,8 +43,6 @@ int main(int argc, char** argv)
 	QTextEdit console_text{};
 	QBoxLayout console_layout{QBoxLayout::Direction::TopToBottom,&bottom};
 	console_layout.addWidget(&console_text);
-	
-	terraformer::random_bit_source rng_bit_source;
 
 	terraformer::simulation sim{
 		.domain_size{
@@ -52,7 +50,7 @@ int main(int argc, char** argv)
 			.height = 49152,
 			.number_of_pixels = 1024*1024
 		},
-		.rng_seed = rng_bit_source.get<terraformer::rng_seed_type>()
+		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>()
 	};
 
 	bind(my_form, sim);
