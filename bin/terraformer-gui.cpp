@@ -45,12 +45,13 @@ int main(int argc, char** argv)
 	console_layout.addWidget(&console_text);
 
 	terraformer::simulation sim{
+		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>(),
 		.domain_size{
 			.width = 49152,
 			.height = 49152,
 			.number_of_pixels = 1024*1024
 		},
-		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>()
+		.initial_heightmap{}
 	};
 
 	bind(my_form, sim);
