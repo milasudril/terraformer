@@ -53,6 +53,8 @@ namespace terraformer
 	{
 		static std::string convert(T value)
 		{
+			auto const value_ptr = reinterpret_cast<std::byte*>(&value);
+			std::reverse(value_ptr, value_ptr + sizeof(T));
 			std::array<char, 2*sizeof(T)> buffer;
 			bytes_to_hex(std::data(buffer), &value, 2*sizeof(T));
 			return std::string{std::data(buffer), std::size(buffer)};
@@ -74,6 +76,11 @@ namespace terraformer
 			if(res.ptr != std::data(buffer) + std::size(buffer))
 			{
 				throw input_error{"Input buffer must be a hexadecimal number, without any prefix or suffix."};
+			}
+			
+			{
+				auto const ret_bytes = reinterpret_cast<std::byte*>(&ret);
+				std::reverse(ret_bytes, ret_bytes + sizeof(T));
 			}
 
 			return ret;
