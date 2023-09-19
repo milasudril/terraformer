@@ -27,6 +27,15 @@ namespace terraformer
 		
 		void read(std::span<std::byte> buffer) const;
 		
+		template<class T>
+		requires(std::is_trivial_v<T>)
+		T get() const
+		{
+			T ret;
+			read(std::as_writable_bytes(std::span{&ret, 1}));
+			return ret;
+		}
+		
 		~random_bit_source()
 		{
 			if(m_fd != -1)
