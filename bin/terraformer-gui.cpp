@@ -34,9 +34,16 @@ int main(int argc, char** argv)
 	terraformer::application terraformer{argc, argv};
 	QSplitter mainwin;
 	mainwin.setOrientation(Qt::Vertical);
+	
+	QSplitter input_output{nullptr};
+	mainwin.addWidget(&input_output);
 
-	terraformer::form my_form{nullptr};
-	mainwin.addWidget(&my_form);
+	terraformer::form input{nullptr};
+	input_output.addWidget(&input);
+	
+	QWidget output;
+	QBoxLayout output_layout{QBoxLayout::Direction::TopToBottom,&output};
+	input_output.addWidget(&output);
 
 	QWidget bottom;
 	mainwin.addWidget(&bottom);
@@ -54,10 +61,10 @@ int main(int argc, char** argv)
 		.initial_heightmap{}
 	};
 
-	bind(my_form, sim);
-	my_form.setObjectName("simulation");
-	my_form.refresh();
-	my_form.set_focus();
+	bind(input, sim);
+	input.setObjectName("simulation");
+	input.refresh();
+	input.set_focus();
 	mainwin.show();
 
 	fdcb::context stderr_redirect{
