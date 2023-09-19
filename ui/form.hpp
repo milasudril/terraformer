@@ -27,6 +27,21 @@ namespace terraformer
 		std::unique_ptr<QHBoxLayout> m_root;
 	};
 	
+	class widget_column:public QWidget
+	{
+	public:	
+		explicit widget_column(QWidget* parent):
+			QWidget{parent},
+			m_root{std::make_unique<QVBoxLayout>(this)}
+			{}
+			
+			void add_widget(QWidget& widget)
+			{ m_root->addWidget(&widget); }
+			
+	private:
+		std::unique_ptr<QVBoxLayout> m_root;
+	};
+	
 	class form:public QWidget
 	{
 	public:
@@ -52,6 +67,23 @@ namespace terraformer
 			entry->setToolTip(field.description);
 			m_root->addRow(field.display_name, entry.get());
 			m_widgets.push_back(std::move(entry));
+		}
+
+		template<class BindingType>
+		void insert(field<subform<BindingType>>&& field)
+		{
+			auto outer = std::make_unique<widget_column>(this);
+			auto label = std::make_unique<QLabel>(field.display_name, outer.get());
+			auto entry = create_widget(std::move(field.widget), *outer);
+			entry->setObjectName(field.name);
+			entry->setToolTip(field.description);
+			outer->add_widget(*label);
+			outer->add_widget(*entry);
+			
+			m_root->addRow(outer.get());
+			m_widgets.push_back(std::move(label));
+			m_widgets.push_back(std::move(entry));
+			m_widgets.push_back(std::move(outer));
 		}
 		
 		template<class Converter, class BindingType>
