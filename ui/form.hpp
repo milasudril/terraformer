@@ -65,8 +65,25 @@ namespace terraformer
 			auto entry = create_widget(std::move(field.widget), *this);
 			entry->setObjectName(field.name);
 			entry->setToolTip(field.description);
-			m_root->addRow(field.display_name, entry.get());
-			m_widgets.push_back(std::move(entry));
+			
+			auto const l = strlen(field.display_name);
+			if(l < 16)
+			{
+				m_root->addRow(field.display_name, entry.get());
+				m_widgets.push_back(std::move(entry));
+			}
+			else
+			{
+				auto outer = std::make_unique<widget_column>(this);
+				auto label = std::make_unique<QLabel>(field.display_name, outer.get());
+				outer->add_widget(*label);
+				outer->add_widget(*entry);
+			
+				m_root->addRow(outer.get());
+				m_widgets.push_back(std::move(label));
+				m_widgets.push_back(std::move(entry));
+				m_widgets.push_back(std::move(outer));
+			}
 		}
 
 		template<class BindingType>
