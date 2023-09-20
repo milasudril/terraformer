@@ -52,7 +52,9 @@ namespace terraformer
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},
-					.binding = std::ref(dom_size.width)
+					.binding = std::ref(dom_size.width),
+					.min_width = std::optional<int>{},
+					.value_updated_notifier = [](){puts("Hej"); }
 				}
 			}
 		);

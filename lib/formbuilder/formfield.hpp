@@ -13,13 +13,17 @@ namespace terraformer
 		char const* description;
 		Widget widget;
 	};
+	
 
-	template<class Converter, class BindingType>
+	template<class Converter, class BindingType, class ValueUpdatedNotifier = void(*)()>
 	struct textbox
 	{
+		static void value_updated_default_handler(){}
+		
 		Converter value_converter;
 		BindingType binding;
 		std::optional<int> min_width = std::nullopt;
+		[[no_unique_address]] ValueUpdatedNotifier value_updated_notifier = value_updated_default_handler;
 	};
 	
 	template<class Generator, class BindingType>

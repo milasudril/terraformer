@@ -105,8 +105,8 @@ namespace terraformer
 			m_widgets.push_back(std::move(outer));
 		}
 		
-		template<class Converter, class BindingType>
-		std::unique_ptr<QLineEdit> create_widget(textbox<Converter, BindingType> const& textbox, QWidget& parent)
+		template<class Converter, class BindingType, class ValueUpdatedNotifier>
+		std::unique_ptr<QLineEdit> create_widget(textbox<Converter, BindingType, ValueUpdatedNotifier> const& textbox, QWidget& parent)
 		{
 			auto ret = std::make_unique<QLineEdit>(&parent);
 			QObject::connect(ret.get(),
@@ -121,6 +121,7 @@ namespace terraformer
 					}, [this](auto& src, auto const& textbox){
 						auto const str = src.text().toStdString();
 						textbox.binding.get() = textbox.value_converter.convert(str);
+						textbox.value_updated_notifier();
 						refresh();
 					}, src, textbox);
 					has_been_called = false;
