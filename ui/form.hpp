@@ -12,13 +12,14 @@
 
 namespace terraformer
 {
+	static constexpr auto form_indent = 8;
 	class widget_row:public QWidget
 	{
 	public:
 		explicit widget_row(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QHBoxLayout>(this)}
-			{ m_root->setContentsMargins(0, 0, 0, 0); }
+			{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
 			
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
@@ -33,7 +34,7 @@ namespace terraformer
 		explicit widget_column(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QVBoxLayout>(this)}
-			{ m_root->setContentsMargins(4, 0, 0, 0); }
+			{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
 			
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
@@ -45,10 +46,11 @@ namespace terraformer
 	class form:public QWidget
 	{
 	public:
-		explicit form(QWidget* parent):
+		explicit form(QWidget* parent, size_t level = 0):
 			QWidget{parent},
-			m_root{std::make_unique<QFormLayout>(this)}
-		{ m_root->setContentsMargins(4, 0, 0, 0); }
+			m_root{std::make_unique<QFormLayout>(this)},
+			m_level{level}
+		{ m_root->setContentsMargins(level == 0? 4: form_indent, 0, 0, 0); }
 
 		void set_focus()
 		{
@@ -179,7 +181,7 @@ namespace terraformer
 		template<class BindingType>
 		std::unique_ptr<form> create_widget(subform<BindingType>&& subform, QWidget& parent)
 		{
-			auto ret = std::make_unique<form>(&parent);
+			auto ret = std::make_unique<form>(&parent, m_level + 1);
 			bind(*ret, subform.binding.get());
 			m_display_callbacks.push_back([&ret = *ret](){
 				ret.refresh();
@@ -212,6 +214,7 @@ namespace terraformer
 		std::vector<std::function<void()>> m_display_callbacks;
 		std::function<void(char const*)> m_error_handler;
 		std::unique_ptr<QFormLayout> m_root;
+		size_t m_level;
 	};
 }
 
