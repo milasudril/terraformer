@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_FORMFIELD_HPP
 #define TERRAFORMER_FORMFIELD_HPP
 
+#include <optional>
+
 namespace terraformer
 {
 	template<class Widget>
@@ -17,6 +19,7 @@ namespace terraformer
 	{
 		Converter value_converter;
 		BindingType binding;
+		std::optional<int> min_width = std::nullopt;
 	};
 	
 	template<class Generator, class BindingType>

@@ -29,7 +29,8 @@ namespace terraformer
 			.widget = std::tuple{
 				textbox{
 					.value_converter = hash_string_converter<rng_seed_type>{},
-					.binding = std::ref(params.rng_seed)
+					.binding = std::ref(params.rng_seed),
+					.min_width = 32
 				},
 				input_button{
 					.value_generator = [seed_src = random_bit_source{}]() {

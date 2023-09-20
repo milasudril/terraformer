@@ -128,7 +128,12 @@ namespace terraformer
 			m_display_callbacks.push_back([&dest = *ret, textbox](){
 				dest.setText(textbox.value_converter.convert(textbox.binding.get()).c_str());
 			});
-			ret->setMinimumWidth(224);
+			if(textbox.min_width.has_value())
+			{
+				// TODO: Find a way to estimate the width of a chraracter
+				constexpr auto char_width = 10;
+				ret->setMinimumWidth(char_width*(*textbox.min_width));
+			}
 			return ret;
 		}
 		
