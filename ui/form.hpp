@@ -132,8 +132,12 @@ namespace terraformer
 						src.setFocus();
 					}, [this](auto& src, auto const& textbox){
 						auto const str = src.text().toStdString();
-						textbox.binding.get() = textbox.value_converter.convert(str);
-						m_on_value_changed(make_widget_path(m_path, src.objectName()));
+						if(auto new_val = textbox.value_converter.convert(str);
+							new_val != textbox.binding.get())
+						{ 
+							textbox.binding.get() = std::move(new_val);
+							m_on_value_changed(make_widget_path(m_path, src.objectName()));
+						}
 					}, src, textbox);
 					has_been_called = false;
 					refresh();
@@ -168,8 +172,11 @@ namespace terraformer
 						log_error(error.what());
 						src.setFocus();
 					}, [this, &src](auto& input_button){
-						input_button.binding.get() = input_button.value_generator();
-						m_on_value_changed(make_widget_path(m_path, src.objectName()));
+						if(auto new_val = input_button.value_generator(); new_val != input_button.binding.get())
+						{
+							input_button.binding.get() = std::move(new_val);
+							m_on_value_changed(make_widget_path(m_path, src.objectName()));
+						}
 					}, input_button);
 					has_been_called = false;
 					refresh();
@@ -206,7 +213,7 @@ namespace terraformer
 			});
 			return ret;
 		}
-		
+
 		template<class... WidgetTypes>
 		std::unique_ptr<widget_row> create_widget(std::tuple<WidgetTypes...>&& widgets, QWidget& parent, char const* field_name)
 		{
