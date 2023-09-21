@@ -39,13 +39,14 @@ int main(int argc, char** argv)
 	QSplitter input_output{nullptr};
 	mainwin.addWidget(&input_output);
 
-	terraformer::form input{nullptr, "simulation", [](auto&& field_name) {
+	QLabel output;
+	
+	terraformer::form input{nullptr, "simulation", [&output](auto&& field_name) {
 		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
+		output.setText(QString::fromStdString(field_name));
 	}};
 
 	input_output.addWidget(&input);
-	
-	QWidget output;
 	QBoxLayout output_layout{QBoxLayout::Direction::TopToBottom,&output};
 	input_output.addWidget(&output);
 
