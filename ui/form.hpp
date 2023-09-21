@@ -65,8 +65,7 @@ namespace terraformer
 		template<class FieldDescriptor>
 		void insert(FieldDescriptor&& field)
 		{
-			auto entry = create_widget(std::move(field.widget), *this);
-			entry->setObjectName(field.name);
+			auto entry = create_widget(std::move(field.widget), *this, field.name);
 			entry->setToolTip(field.description);
 			
 			auto const l = strlen(field.display_name);
@@ -112,7 +111,7 @@ namespace terraformer
 		
 		template<class Converter, class BindingType, class ValueUpdatedNotifier>
 		std::unique_ptr<QLineEdit>
-		create_widget(textbox<Converter, BindingType, ValueUpdatedNotifier> const& textbox, QWidget& parent)
+		create_widget(textbox<Converter, BindingType, ValueUpdatedNotifier> const& textbox, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QLineEdit>(&parent);
 			QObject::connect(ret.get(),
@@ -127,8 +126,7 @@ namespace terraformer
 					}, [this](auto& src, auto const& textbox){
 						auto const str = src.text().toStdString();
 						textbox.binding.get() = textbox.value_converter.convert(str);
-						textbox.value_updated_notifier();
-						refresh();
+						fprintf(stderr, "%s/%s\n", m_path.c_str(), src.objectName().toStdString().c_str());
 					}, src, textbox);
 					has_been_called = false;
 					refresh();
@@ -143,12 +141,13 @@ namespace terraformer
 				constexpr auto char_width = 10;
 				ret->setMinimumWidth(char_width*(*textbox.min_width));
 			}
+			ret->setObjectName(field_name);
 			return ret;
 		}
 		
 		template<class Generator, class BindingType>
 		std::unique_ptr<QPushButton> 
-		create_widget(input_button<Generator, BindingType>&& input_button, QWidget& parent)
+		create_widget(input_button<Generator, BindingType>&& input_button, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QPushButton>(input_button.label, &parent);
 			ret->setToolTip(input_button.description);
@@ -161,19 +160,20 @@ namespace terraformer
 					try_and_catch([this, &src](auto const& error){
 						log_error(error.what());
 						src.setFocus();
-					}, [this](auto& input_button){
+					}, [this, &src](auto& input_button){
 						input_button.binding.get() = input_button.value_generator();
-						refresh();
+						fprintf(stderr, "btn %s/%s\n", m_path.c_str(), src.objectName().toStdString().c_str());
 					}, input_button);
 					has_been_called = false;
 					refresh();
 				}
 			);
+			ret->setObjectName(field_name);
 			return ret;
 		}
 
 		template<class Converter, class BindingType>
-		std::unique_ptr<QLabel> create_widget(text_display<Converter, BindingType>&& text_display, QWidget& parent)
+		std::unique_ptr<QLabel> create_widget(text_display<Converter, BindingType>&& text_display, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QLabel>(&parent);
 			m_display_callbacks.push_back([&dest = *ret, text_display = std::move(text_display)](){
@@ -183,6 +183,7 @@ namespace terraformer
 					dest.setText(text_display.source(text_display.binding.get()).c_str());
 				}, dest, text_display);
 			});
+			ret->setObjectName(field_name);
 			return ret;
 		}
 
@@ -200,11 +201,11 @@ namespace terraformer
 		}
 		
 		template<class... WidgetTypes>
-		std::unique_ptr<widget_row> create_widget(std::tuple<WidgetTypes...>&& widgets, QWidget& parent)
+		std::unique_ptr<widget_row> create_widget(std::tuple<WidgetTypes...>&& widgets, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<widget_row>(&parent);
-			auto created_widgets = std::apply([this, parent = ret.get()]<class... Args>(Args&&... args){
-				return std::tuple{create_widget(std::forward<Args>(args), *parent)...};
+			auto created_widgets = std::apply([this, parent = ret.get(), field_name]<class... Args>(Args&&... args){
+				return std::tuple{create_widget(std::forward<Args>(args), *parent, field_name)...};
 			}, std::move(widgets));
 
 			std::apply([this, parent = ret.get()]<class... Args>(Args&&... args) {
