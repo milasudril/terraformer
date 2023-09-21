@@ -109,9 +109,9 @@ namespace terraformer
 			m_widgets.push_back(std::move(outer));
 		}
 		
-		template<class Converter, class BindingType, class ValueUpdatedNotifier>
+		template<class Converter, class BindingType>
 		std::unique_ptr<QLineEdit>
-		create_widget(textbox<Converter, BindingType, ValueUpdatedNotifier> const& textbox, QWidget& parent, char const* field_name)
+		create_widget(textbox<Converter, BindingType> const& textbox, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QLineEdit>(&parent);
 			QObject::connect(ret.get(),
@@ -218,7 +218,6 @@ namespace terraformer
 
 		void refresh() const
 		{ std::ranges::for_each(m_display_callbacks, [](auto const& item){item();}); }
-
 
 	private:
 		std::vector<std::unique_ptr<QWidget>> m_widgets;

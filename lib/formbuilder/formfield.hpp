@@ -15,15 +15,12 @@ namespace terraformer
 	};
 	
 
-	template<class Converter, class BindingType, class ValueUpdatedNotifier = void(*)()>
+	template<class Converter, class BindingType>
 	struct textbox
-	{
-		static void value_updated_default_handler(){}
-		
+	{		
 		Converter value_converter;
 		BindingType binding;
 		std::optional<int> min_width = std::nullopt;
-		[[no_unique_address]] ValueUpdatedNotifier value_updated_notifier = value_updated_default_handler;
 	};
 	
 	template<class Generator, class BindingType>
