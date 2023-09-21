@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	QSplitter input_output{nullptr};
 	mainwin.addWidget(&input_output);
 
-	terraformer::form input{nullptr};
+	terraformer::form input{nullptr, "simulation"};
 	input_output.addWidget(&input);
 	
 	QWidget output;

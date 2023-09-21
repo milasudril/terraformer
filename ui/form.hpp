@@ -46,10 +46,11 @@ namespace terraformer
 	class form:public QWidget
 	{
 	public:
-		explicit form(QWidget* parent, size_t level = 0):
+		explicit form(QWidget* parent, std::string&& path, size_t level = 0):
 			QWidget{parent},
 			m_root{std::make_unique<QFormLayout>(this)},
-			m_level{level}
+			m_level{level},
+			m_path{std::move(path)}
 		{ m_root->setContentsMargins(level == 0? 4: form_indent, 0, 0, 0); }
 
 		void set_focus()
@@ -93,7 +94,10 @@ namespace terraformer
 		{
 			auto outer = std::make_unique<widget_column>(this);
 			auto label = std::make_unique<QLabel>(field.display_name, outer.get());
-			auto entry = create_widget(std::move(field.widget), *outer);
+			auto entry = create_widget(
+				std::move(field.widget),
+				*outer,
+				std::move(std::string{m_path}.append("/").append(field.name)));
 			entry->setObjectName(field.name);
 			entry->setToolTip(field.description);
 			outer->add_widget(*label);
@@ -106,7 +110,8 @@ namespace terraformer
 		}
 		
 		template<class Converter, class BindingType, class ValueUpdatedNotifier>
-		std::unique_ptr<QLineEdit> create_widget(textbox<Converter, BindingType, ValueUpdatedNotifier> const& textbox, QWidget& parent)
+		std::unique_ptr<QLineEdit>
+		create_widget(textbox<Converter, BindingType, ValueUpdatedNotifier> const& textbox, QWidget& parent)
 		{
 			auto ret = std::make_unique<QLineEdit>(&parent);
 			QObject::connect(ret.get(),
@@ -121,6 +126,7 @@ namespace terraformer
 					}, [this](auto& src, auto const& textbox){
 						auto const str = src.text().toStdString();
 						textbox.binding.get() = textbox.value_converter.convert(str);
+						fprintf(stderr, "%s/%s\n", m_path.c_str(), src.objectName().toStdString().c_str());
 						textbox.value_updated_notifier();
 						refresh();
 					}, src, textbox);
@@ -141,7 +147,8 @@ namespace terraformer
 		}
 		
 		template<class Generator, class BindingType>
-		std::unique_ptr<QPushButton> create_widget(input_button<Generator, BindingType>&& input_button, QWidget& parent)
+		std::unique_ptr<QPushButton> 
+		create_widget(input_button<Generator, BindingType>&& input_button, QWidget& parent)
 		{
 			auto ret = std::make_unique<QPushButton>(input_button.label, &parent);
 			ret->setToolTip(input_button.description);
@@ -180,9 +187,11 @@ namespace terraformer
 		}
 
 		template<class BindingType>
-		std::unique_ptr<form> create_widget(subform<BindingType>&& subform, QWidget& parent)
+		std::unique_ptr<form> create_widget(subform<BindingType>&& subform,
+			QWidget& parent,
+			std::string&& name)
 		{
-			auto ret = std::make_unique<form>(&parent, m_level + 1);
+			auto ret = std::make_unique<form>(&parent, std::move(name), m_level + 1);
 			bind(*ret, subform.binding.get());
 			m_display_callbacks.push_back([&ret = *ret](){
 				ret.refresh();
@@ -216,6 +225,7 @@ namespace terraformer
 		std::function<void(char const*)> m_error_handler;
 		std::unique_ptr<QFormLayout> m_root;
 		size_t m_level;
+		std::string m_path;
 	};
 }
 
