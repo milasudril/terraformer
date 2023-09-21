@@ -20,7 +20,7 @@ namespace terraformer
 	void bind(Form& form, corners& params)
 	{
 		form.insert(field{
-			.name = "ne_elev",
+			.name = "nw_elev",
 			.display_name = "NW",
 			.description = "Sets the elevation in north-west",
 			.widget = textbox{
@@ -50,7 +50,7 @@ namespace terraformer
 		});	
 
 		form.insert(field{
-			.name = "se_elev",
+			.name = "sw_elev",
 			.display_name = "SW",
 			.description = "Sets the elevation in south-west",
 			.widget = textbox{

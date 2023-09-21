@@ -87,6 +87,7 @@ namespace terraformer
 				m_widgets.push_back(std::move(entry));
 				m_widgets.push_back(std::move(outer));
 			}
+			printf("%s/%s\n", m_path.c_str(), field.name);
 		}
 
 		template<class BindingType>
@@ -126,7 +127,6 @@ namespace terraformer
 					}, [this](auto& src, auto const& textbox){
 						auto const str = src.text().toStdString();
 						textbox.binding.get() = textbox.value_converter.convert(str);
-						fprintf(stderr, "%s/%s\n", m_path.c_str(), src.objectName().toStdString().c_str());
 						textbox.value_updated_notifier();
 						refresh();
 					}, src, textbox);
