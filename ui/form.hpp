@@ -43,11 +43,19 @@ namespace terraformer
 		std::unique_ptr<QVBoxLayout> m_root;
 	};
 	
+	inline std::string make_widget_path(std::string const& path, QString const& field_name)
+ 	{ return std::string{path}.append("/").append(field_name.toStdString()); }
+	
+	template<class ValueChangedListener>
 	class form:public QWidget
 	{
 	public:
-		explicit form(QWidget* parent, std::string&& path, size_t level = 0):
+		template<class ValueChangedListenerType>
+		explicit form(QWidget* parent, std::string&& path,
+			ValueChangedListenerType&& on_value_changed,
+			size_t level = 0):
 			QWidget{parent},
+			m_on_value_changed{std::forward<ValueChangedListener>(on_value_changed)},
 			m_root{std::make_unique<QFormLayout>(this)},
 			m_level{level},
 			m_path{std::move(path)}
@@ -86,7 +94,6 @@ namespace terraformer
 				m_widgets.push_back(std::move(entry));
 				m_widgets.push_back(std::move(outer));
 			}
-			printf("%s/%s\n", m_path.c_str(), field.name);
 		}
 
 		template<class BindingType>
@@ -126,7 +133,7 @@ namespace terraformer
 					}, [this](auto& src, auto const& textbox){
 						auto const str = src.text().toStdString();
 						textbox.binding.get() = textbox.value_converter.convert(str);
-						fprintf(stderr, "%s/%s\n", m_path.c_str(), src.objectName().toStdString().c_str());
+						m_on_value_changed(make_widget_path(m_path, src.objectName()));
 					}, src, textbox);
 					has_been_called = false;
 					refresh();
@@ -162,7 +169,7 @@ namespace terraformer
 						src.setFocus();
 					}, [this, &src](auto& input_button){
 						input_button.binding.get() = input_button.value_generator();
-						fprintf(stderr, "btn %s/%s\n", m_path.c_str(), src.objectName().toStdString().c_str());
+						m_on_value_changed(make_widget_path(m_path, src.objectName()));
 					}, input_button);
 					has_been_called = false;
 					refresh();
@@ -192,7 +199,7 @@ namespace terraformer
 			QWidget& parent,
 			std::string&& name)
 		{
-			auto ret = std::make_unique<form>(&parent, std::move(name), m_level + 1);
+			auto ret = std::make_unique<form>(&parent, std::move(name), m_on_value_changed, m_level + 1);
 			bind(*ret, subform.binding.get());
 			m_display_callbacks.push_back([&ret = *ret](){
 				ret.refresh();
@@ -220,13 +227,19 @@ namespace terraformer
 		{ std::ranges::for_each(m_display_callbacks, [](auto const& item){item();}); }
 
 	private:
+		[[no_unique_address]] ValueChangedListener m_on_value_changed;
 		std::vector<std::unique_ptr<QWidget>> m_widgets;
 		std::vector<std::function<void()>> m_display_callbacks;
-		std::function<void(char const*)> m_error_handler;
 		std::unique_ptr<QFormLayout> m_root;
 		size_t m_level;
 		std::string m_path;
 	};
+	
+	template<class ValueChangedListenerType>
+	form(QWidget* parent,
+		std::string&& path,
+		ValueChangedListenerType&& on_value_changed,
+		size_t level = 0) -> form<ValueChangedListenerType>;
 }
 
 #endif
