@@ -24,6 +24,7 @@
 #include "ui/application.hpp"
 #include "ui/form.hpp"
 #include "lib/modules/simulation.hpp"
+#include "lib/common/random_bit_source.hpp"
 
 #include <QSplitter>
 #include <fdcb.h>
@@ -31,11 +32,23 @@
 int main(int argc, char** argv)
 {
 	terraformer::application terraformer{argc, argv};
+	terraformer.setStyleSheet("*{padding:0px; margin:0px}\nQPushButton{padding:4px}");
 	QSplitter mainwin;
 	mainwin.setOrientation(Qt::Vertical);
+	
+	QSplitter input_output{nullptr};
+	mainwin.addWidget(&input_output);
 
-	terraformer::form my_form{nullptr};
-	mainwin.addWidget(&my_form);
+	QLabel output;
+	
+	terraformer::form input{nullptr, "simulation", [&output](auto&& field_name) {
+		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
+		output.setText(QString::fromStdString(field_name));
+	}};
+
+	input_output.addWidget(&input);
+	QBoxLayout output_layout{QBoxLayout::Direction::TopToBottom,&output};
+	input_output.addWidget(&output);
 
 	QWidget bottom;
 	mainwin.addWidget(&bottom);
@@ -44,17 +57,19 @@ int main(int argc, char** argv)
 	console_layout.addWidget(&console_text);
 
 	terraformer::simulation sim{
+		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>(),
 		.domain_size{
 			.width = 49152,
 			.height = 49152,
 			.number_of_pixels = 1024*1024
 		},
-		.rng_seed = terraformer::rng_seed_type{}
+		.initial_heightmap{}
 	};
-	bind(my_form, sim);
-	my_form.setObjectName("simulation");
-	my_form.refresh();
-	my_form.set_focus();
+
+	bind(input, sim);
+	input.setObjectName("simulation");
+	input.refresh();
+	input.set_focus();
 	mainwin.show();
 
 	fdcb::context stderr_redirect{
