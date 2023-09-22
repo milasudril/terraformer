@@ -26,6 +26,8 @@
 #include "lib/modules/simulation.hpp"
 #include "lib/common/random_bit_source.hpp"
 
+#include "lib/pixel_store/image.hpp"
+
 #include <QSplitter>
 #include <fdcb.h>
 
@@ -39,10 +41,6 @@ int main(int argc, char** argv)
 	QSplitter input_output{nullptr};
 	mainwin.addWidget(&input_output);
 
-	terraformer::form output{nullptr, "result", [](auto&&...){}};
-	terraformer::domain_resolution resolution{};
-	bind(output, std::cref(resolution));
-
 	terraformer::simulation sim{
 		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>(),
 		.domain_size{
@@ -53,11 +51,19 @@ int main(int argc, char** argv)
 		.initial_heightmap{}
 	};
 
+	auto resolution = to_domain_resolution(sim.domain_size);
+
+	terraformer::form output{nullptr, "result", [](auto&&...){}};
+
 	terraformer::form input{nullptr, "simulation", [&output, &sim, &resolution](auto&& field_name) {
-		resolution = to_domain_resolution(sim.domain_size);
 		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
-		output.refresh();
+		if(field_name.starts_with("simulation/domain_size/"))
+		{
+			resolution = to_domain_resolution(sim.domain_size);
+			output.refresh();
+		}
 	}};
+	input.setObjectName("simulation");
 
 	input_output.addWidget(&input);
 	input_output.addWidget(&output);
@@ -69,13 +75,12 @@ int main(int argc, char** argv)
 	QBoxLayout console_layout{QBoxLayout::Direction::TopToBottom,&bottom};
 	console_layout.addWidget(&console_text);
 
-	resolution = to_domain_resolution(sim.domain_size);
-	output.refresh();
-
 	bind(input, std::ref(sim));
-	input.setObjectName("simulation");
-	input.refresh();
+	bind(output, std::cref(resolution));
+
 	input.set_focus();
+	input.refresh();
+	output.refresh();
 	mainwin.show();
 
 	fdcb::context stderr_redirect{
