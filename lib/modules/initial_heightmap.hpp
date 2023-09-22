@@ -17,7 +17,7 @@ namespace terraformer
 	};
 
 	template<class Form>
-	void bind(Form& form, corners& params)
+	void bind(Form& form, std::reference_wrapper<corners> params)
 	{
 		form.insert(field{
 			.name = "nw_elev",
@@ -30,7 +30,7 @@ namespace terraformer
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.ne.elevation)
+				.binding = std::ref(params.get().ne.elevation)
 			},
 		});
 
@@ -45,9 +45,9 @@ namespace terraformer
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.ne.elevation)
+				.binding = std::ref(params.get().ne.elevation)
 			},
-		});	
+		});
 
 		form.insert(field{
 			.name = "sw_elev",
@@ -60,7 +60,7 @@ namespace terraformer
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.sw.elevation)
+				.binding = std::ref(params.get().sw.elevation)
 			},
 		});
 
@@ -75,19 +75,19 @@ namespace terraformer
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.se.elevation)
+				.binding = std::ref(params.get().se.elevation)
 			},
 		});
 	}
-	
-	
+
+
 	struct initial_heightmap
 	{
 		struct corners corners;
 	};
-	
+
 	template<class Form>
-	void bind(Form& form, initial_heightmap& params)
+	void bind(Form& form, std::reference_wrapper<initial_heightmap> params)
 	{
 		form.insert(
 			field{
@@ -95,7 +95,7 @@ namespace terraformer
 				.display_name = "Corner elevations",
 				.description = "Sets elevation at domain corners",
 				.widget = subform{
-					.binding = std::ref(params.corners)
+					.binding = std::ref(params.get().corners)
 				}
 			}
 		);

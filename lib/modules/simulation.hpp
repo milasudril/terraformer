@@ -20,7 +20,7 @@ namespace terraformer
 	};
 
 	template<class Form>
-	void bind(Form& form, simulation& params)
+	void bind(Form& form, std::reference_wrapper<simulation> params)
 	{
 		form.insert(field{
 			.name = "rng_seed",
@@ -29,14 +29,14 @@ namespace terraformer
 			.widget = std::tuple{
 				textbox{
 					.value_converter = hash_string_converter<rng_seed_type>{},
-					.binding = std::ref(params.rng_seed),
+					.binding = std::ref(params.get().rng_seed),
 					.min_width = 32
 				},
 				input_button{
 					.value_generator = [seed_src = random_bit_source{}]() {
 						return seed_src.get<rng_seed_type>();
 					},
-					.binding = std::ref(params.rng_seed),
+					.binding = std::ref(params.get().rng_seed),
 					.label = "🂠",
 					.description = "Gererate a seed value",
 				}
@@ -49,18 +49,18 @@ namespace terraformer
 				.display_name = "Domain size",
 				.description = "Sets the size of the domain",
 				.widget = subform{
-					.binding = std::ref(params.domain_size)
+					.binding = std::ref(params.get().domain_size)
 				}
 			}
 		);
-		
+
 		form.insert(
 			field{
 				.name = "initial_heightmap",
 				.display_name = "Initial heightmap",
 				.description = "Sets parameters for initial heightmap generation",
 				.widget = subform{
-					.binding = std::ref(params.initial_heightmap)
+					.binding = std::ref(params.get().initial_heightmap)
 				}
 			}
 		);

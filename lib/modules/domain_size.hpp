@@ -38,7 +38,7 @@ namespace terraformer
 	{ return image_size(dom_size).height; }
 
 	template<class Form>
-	void bind(Form& form, domain_size& dom_size)
+	void bind(Form& form, std::reference_wrapper<domain_size> dom_size)
 	{
 		form.insert(
 			field{
@@ -52,7 +52,7 @@ namespace terraformer
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},
-					.binding = std::ref(dom_size.width)
+					.binding = std::ref(dom_size.get().width)
 				}
 			}
 		);
@@ -69,7 +69,7 @@ namespace terraformer
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},
-					.binding = std::ref(dom_size.height)
+					.binding = std::ref(dom_size.get().height)
 				}
 			}
 		);
@@ -86,7 +86,7 @@ namespace terraformer
 							.max = 8192*8192,
 						}
 					},
-					.binding = std::ref(dom_size.number_of_pixels)
+					.binding = std::ref(dom_size.get().number_of_pixels)
 				}
 			}
 		);

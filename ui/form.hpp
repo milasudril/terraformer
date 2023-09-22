@@ -20,32 +20,32 @@ namespace terraformer
 			QWidget{parent},
 			m_root{std::make_unique<QHBoxLayout>(this)}
 			{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
-			
+
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
-			
+
 	private:
 		std::unique_ptr<QHBoxLayout> m_root;
 	};
-	
+
 	class widget_column:public QWidget
 	{
-	public:	
+	public:
 		explicit widget_column(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QVBoxLayout>(this)}
 			{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
-			
+
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
-			
+
 	private:
 		std::unique_ptr<QVBoxLayout> m_root;
 	};
-	
+
 	inline std::string make_widget_path(std::string const& path, QString const& field_name)
  	{ return std::string{path}.append("/").append(field_name.toStdString()); }
-	
+
 	template<class ValueChangedListener>
 	class form:public QWidget
 	{
@@ -75,7 +75,7 @@ namespace terraformer
 		{
 			auto entry = create_widget(std::move(field.widget), *this, field.name);
 			entry->setToolTip(field.description);
-			
+
 			auto const l = strlen(field.display_name);
 			if(l < 16)
 			{
@@ -88,7 +88,7 @@ namespace terraformer
 				auto label = std::make_unique<QLabel>(field.display_name, outer.get());
 				outer->add_widget(*label);
 				outer->add_widget(*entry);
-			
+
 				m_root->addRow(outer.get());
 				m_widgets.push_back(std::move(label));
 				m_widgets.push_back(std::move(entry));
@@ -109,13 +109,13 @@ namespace terraformer
 			entry->setToolTip(field.description);
 			outer->add_widget(*label);
 			outer->add_widget(*entry);
-			
+
 			m_root->addRow(outer.get());
 			m_widgets.push_back(std::move(label));
 			m_widgets.push_back(std::move(entry));
 			m_widgets.push_back(std::move(outer));
 		}
-		
+
 		template<class Converter, class BindingType>
 		std::unique_ptr<QLineEdit>
 		create_widget(textbox<Converter, BindingType> const& textbox, QWidget& parent, char const* field_name)
@@ -134,7 +134,7 @@ namespace terraformer
 						auto const str = src.text().toStdString();
 						if(auto new_val = textbox.value_converter.convert(str);
 							new_val != textbox.binding.get())
-						{ 
+						{
 							textbox.binding.get() = std::move(new_val);
 							m_on_value_changed(make_widget_path(m_path, src.objectName()));
 						}
@@ -155,9 +155,9 @@ namespace terraformer
 			ret->setObjectName(field_name);
 			return ret;
 		}
-		
+
 		template<class Generator, class BindingType>
-		std::unique_ptr<QPushButton> 
+		std::unique_ptr<QPushButton>
 		create_widget(input_button<Generator, BindingType>&& input_button, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QPushButton>(input_button.label, &parent);
@@ -207,7 +207,7 @@ namespace terraformer
 			std::string&& name)
 		{
 			auto ret = std::make_unique<form>(&parent, std::move(name), m_on_value_changed, m_level + 1);
-			bind(*ret, subform.binding.get());
+			bind(*ret, subform.binding);
 			m_display_callbacks.push_back([&ret = *ret](){
 				ret.refresh();
 			});
@@ -241,7 +241,7 @@ namespace terraformer
 		size_t m_level;
 		std::string m_path;
 	};
-	
+
 	template<class ValueChangedListenerType>
 	form(QWidget* parent,
 		std::string&& path,
