@@ -39,23 +39,9 @@ int main(int argc, char** argv)
 	QSplitter input_output{nullptr};
 	mainwin.addWidget(&input_output);
 
-	QLabel output;
-
-	terraformer::form input{nullptr, "simulation", [&output](auto&& field_name) {
-		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
-		output.setText(QString::fromStdString(field_name));
-	}};
-
-	input_output.addWidget(&input);
-	QBoxLayout output_layout{QBoxLayout::Direction::TopToBottom,&output};
-	input_output.addWidget(&output);
-
-	QWidget bottom;
-	mainwin.addWidget(&bottom);
-	QTextEdit console_text{};
-	console_text.setReadOnly(true);
-	QBoxLayout console_layout{QBoxLayout::Direction::TopToBottom,&bottom};
-	console_layout.addWidget(&console_text);
+	terraformer::form output{nullptr, "result", [](auto&&...){}};
+	terraformer::domain_resolution resolution{};
+	bind(output, std::cref(resolution));
 
 	terraformer::simulation sim{
 		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>(),
@@ -66,6 +52,25 @@ int main(int argc, char** argv)
 		},
 		.initial_heightmap{}
 	};
+
+	terraformer::form input{nullptr, "simulation", [&output, &sim, &resolution](auto&& field_name) {
+		resolution = to_domain_resolution(sim.domain_size);
+		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
+		output.refresh();
+	}};
+
+	input_output.addWidget(&input);
+	input_output.addWidget(&output);
+
+	QWidget bottom;
+	mainwin.addWidget(&bottom);
+	QTextEdit console_text{};
+	console_text.setReadOnly(true);
+	QBoxLayout console_layout{QBoxLayout::Direction::TopToBottom,&bottom};
+	console_layout.addWidget(&console_text);
+
+	resolution = to_domain_resolution(sim.domain_size);
+	output.refresh();
 
 	bind(input, std::ref(sim));
 	input.setObjectName("simulation");

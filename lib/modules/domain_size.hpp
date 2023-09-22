@@ -91,47 +91,76 @@ namespace terraformer
 				}
 			}
 		);
+	}
 
-		// TODO These two should use a compound output display {
+	struct domain_resolution
+	{
+		uint32_t width;
+		uint32_t height;
+		float pixel_size;
+	};
+
+	inline domain_resolution to_domain_resolution(domain_size const& dom_size)
+	{
+		auto const img_size = image_size(dom_size);
+		return domain_resolution{
+			.width = img_size.width,
+			.height = img_size.height,
+			.pixel_size = pixel_size(dom_size)
+		};
+	}
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, domain_resolution>)
+	void bind(Form& form, std::reference_wrapper<T> resolution)
+	{
 		form.insert(
 			field{
-				.name = "image_width",
-				.display_name = "Image width",
-				.description = "The number of columns in the generated images",
-				.widget = text_display{
-					.source = [](domain_size const& dom_size){
-						return to_string_helper(image_width(dom_size));
+				.name = "width",
+				.display_name = "Width",
+				.description = "Sets the width of the domain",
+				.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_closed_interval{
+							.min = 1u,
+							.max = std::numeric_limits<uint32_t>::max()
+						}
 					},
-					.binding = std::cref(dom_size)
+					.binding = std::ref(resolution.get().width)
 				}
 			}
 		);
 
 		form.insert(
 			field{
-				.name = "image_height",
-				.display_name = "Image height",
-				.description = "The number of canlines in the generated images",
-				.widget = text_display{
-					.source = [](domain_size const& dom_size){
-						return to_string_helper(image_height(dom_size));
+				.name = "height",
+				.display_name = "Height",
+				.description = "Sets the width of the domain",
+				.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_closed_interval{
+							.min = 1u,
+							.max = std::numeric_limits<uint32_t>::max()
+						}
 					},
-					.binding = std::cref(dom_size)
+					.binding = std::ref(resolution.get().height)
 				}
 			}
 		);
-		// }
 
 		form.insert(
 			field{
 				.name = "pixel_size",
 				.display_name = "Pixel size",
-				.description = "The physical size of a pixel",
-				.widget = text_display{
-					.source = [](domain_size const& dom_size){
-						return to_string_helper(pixel_size(dom_size));
+				.description = "Sets the size of pixels",
+				.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = open_open_interval{
+							.min = 0.0f,
+							.max = std::numeric_limits<float>::infinity(),
+						}
 					},
-					.binding = std::cref(dom_size)
+					.binding = std::ref(resolution.get().pixel_size)
 				}
 			}
 		);
