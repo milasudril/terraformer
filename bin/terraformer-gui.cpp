@@ -35,12 +35,12 @@ int main(int argc, char** argv)
 	terraformer.setStyleSheet("*{padding:0px; margin:0px}\nQPushButton{padding:4px}");
 	QSplitter mainwin;
 	mainwin.setOrientation(Qt::Vertical);
-	
+
 	QSplitter input_output{nullptr};
 	mainwin.addWidget(&input_output);
 
 	QLabel output;
-	
+
 	terraformer::form input{nullptr, "simulation", [&output](auto&& field_name) {
 		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
 		output.setText(QString::fromStdString(field_name));
@@ -66,7 +66,7 @@ int main(int argc, char** argv)
 		.initial_heightmap{}
 	};
 
-	bind(input, sim);
+	bind(input, std::ref(sim));
 	input.setObjectName("simulation");
 	input.refresh();
 	input.set_focus();

@@ -70,5 +70,5 @@ TESTCASE(terraformer_domain_size_bind_to_form)
 	};
 
 	test_form form;
-	bind(form, dom_size);
+	bind(form, std::ref(dom_size));
 }

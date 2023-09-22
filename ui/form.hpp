@@ -121,28 +121,35 @@ namespace terraformer
 		create_widget(textbox<Converter, BindingType> const& textbox, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QLineEdit>(&parent);
-			QObject::connect(ret.get(),
-				&QLineEdit::editingFinished,
-				[this, &src = *ret, textbox, has_been_called = false]() mutable{
-					if(has_been_called)
-					{ return; }
-					has_been_called = true;
-					try_and_catch([this, &src](auto const& error){
-						log_error(error.what());
-						src.setFocus();
-					}, [this](auto& src, auto const& textbox){
-						auto const str = src.text().toStdString();
-						if(auto new_val = textbox.value_converter.convert(str);
-							new_val != textbox.binding.get())
-						{
-							textbox.binding.get() = std::move(new_val);
-							m_on_value_changed(make_widget_path(m_path, src.objectName()));
-						}
-					}, src, textbox);
-					has_been_called = false;
-					refresh();
-				}
-			);
+
+			if constexpr(!std::is_const_v<typename BindingType::type>)
+			{
+				QObject::connect(ret.get(),
+					&QLineEdit::editingFinished,
+					[this, &src = *ret, textbox, has_been_called = false]() mutable{
+						if(has_been_called)
+						{ return; }
+						has_been_called = true;
+						try_and_catch([this, &src](auto const& error){
+							log_error(error.what());
+							src.setFocus();
+						}, [this](auto& src, auto const& textbox){
+							auto const str = src.text().toStdString();
+							if(auto new_val = textbox.value_converter.convert(str);
+								new_val != textbox.binding.get())
+							{
+								textbox.binding.get() = std::move(new_val);
+								m_on_value_changed(make_widget_path(m_path, src.objectName()));
+							}
+						}, src, textbox);
+						has_been_called = false;
+						refresh();
+					}
+				);
+			}
+			else
+			{ ret->setReadOnly(true); }
+
 			m_display_callbacks.push_back([&dest = *ret, textbox](){
 				dest.setText(textbox.value_converter.convert(textbox.binding.get()).c_str());
 			});
@@ -162,26 +169,33 @@ namespace terraformer
 		{
 			auto ret = std::make_unique<QPushButton>(input_button.label, &parent);
 			ret->setToolTip(input_button.description);
-			QObject::connect(ret.get(),
-				&QPushButton::clicked,
-				[this, &src = *ret, input_button = std::move(input_button), has_been_called = false]() mutable{
-					if(has_been_called)
-					{ return; }
-					has_been_called = true;
-					try_and_catch([this, &src](auto const& error){
-						log_error(error.what());
-						src.setFocus();
-					}, [this, &src](auto& input_button){
-						if(auto new_val = input_button.value_generator(); new_val != input_button.binding.get())
-						{
-							input_button.binding.get() = std::move(new_val);
-							m_on_value_changed(make_widget_path(m_path, src.objectName()));
-						}
-					}, input_button);
-					has_been_called = false;
-					refresh();
-				}
-			);
+
+			if constexpr(!std::is_const_v<typename BindingType::type>)
+			{
+				QObject::connect(ret.get(),
+					&QPushButton::clicked,
+					[this, &src = *ret, input_button = std::move(input_button), has_been_called = false]() mutable{
+						if(has_been_called)
+						{ return; }
+						has_been_called = true;
+						try_and_catch([this, &src](auto const& error){
+							log_error(error.what());
+							src.setFocus();
+						}, [this, &src](auto& input_button){
+							if(auto new_val = input_button.value_generator(); new_val != input_button.binding.get())
+							{
+								input_button.binding.get() = std::move(new_val);
+								m_on_value_changed(make_widget_path(m_path, src.objectName()));
+							}
+						}, input_button);
+						has_been_called = false;
+						refresh();
+					}
+				);
+			}
+			else
+			{ ret->setDisabled(true); }
+
 			ret->setObjectName(field_name);
 			return ret;
 		}

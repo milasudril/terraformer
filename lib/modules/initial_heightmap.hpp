@@ -16,8 +16,9 @@ namespace terraformer
 		corner se;
 	};
 
-	template<class Form>
-	void bind(Form& form, std::reference_wrapper<corners> params)
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, corners>)
+	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{
 			.name = "nw_elev",
@@ -86,8 +87,9 @@ namespace terraformer
 		struct corners corners;
 	};
 
-	template<class Form>
-	void bind(Form& form, std::reference_wrapper<initial_heightmap> params)
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, initial_heightmap>)
+	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(
 			field{

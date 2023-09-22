@@ -19,8 +19,9 @@ namespace terraformer
 		struct initial_heightmap initial_heightmap;
 	};
 
-	template<class Form>
-	void bind(Form& form, std::reference_wrapper<simulation> params)
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, simulation>)
+	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{
 			.name = "rng_seed",

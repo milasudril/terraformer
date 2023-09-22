@@ -37,8 +37,9 @@ namespace terraformer
 	uint32_t image_height(domain_size const& dom_size)
 	{ return image_size(dom_size).height; }
 
-	template<class Form>
-	void bind(Form& form, std::reference_wrapper<domain_size> dom_size)
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, domain_size>)
+	void bind(Form& form, std::reference_wrapper<T> dom_size)
 	{
 		form.insert(
 			field{
