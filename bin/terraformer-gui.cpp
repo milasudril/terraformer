@@ -53,6 +53,7 @@ int main(int argc, char** argv)
 	QWidget bottom;
 	mainwin.addWidget(&bottom);
 	QTextEdit console_text{};
+	console_text.setReadOnly(true);
 	QBoxLayout console_layout{QBoxLayout::Direction::TopToBottom,&bottom};
 	console_layout.addWidget(&console_text);
 
