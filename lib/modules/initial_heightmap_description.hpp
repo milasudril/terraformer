@@ -31,7 +31,7 @@ namespace terraformer
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.get().ne.elevation)
+				.binding = std::ref(params.get().nw.elevation)
 			},
 		});
 
