@@ -46,14 +46,6 @@ namespace terraformer
 		char const* label;
 		char const* description;
 	};
-
-	template<class TextWidget, class CommandWidget, class BindingType>
-	struct picker
-	{
-		TextWidget text_widget;
-		CommandWidget command_widget;
-		BindingType binding;
-	};
 }
 
 #endif
