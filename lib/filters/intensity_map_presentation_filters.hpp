@@ -14,6 +14,13 @@ namespace terraformer
 	};
 
 	grayscale_image resize(grayscale_image const& src, image_resize_description const& resize_params);
+
+	struct posterization_description
+	{
+		uint32_t levels;
+	};
+
+	grayscale_image posterize(grayscale_image const& src, posterization_description const& params);
 }
 
 #endif

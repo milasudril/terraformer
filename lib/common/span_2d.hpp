@@ -338,4 +338,7 @@ namespace terraformer
 	}
 }
 
+template<class T>
+inline constexpr bool std::ranges::enable_borrowed_range<terraformer::span_2d<T>> = true;
+
 #endif

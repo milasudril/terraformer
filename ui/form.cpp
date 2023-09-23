@@ -33,33 +33,24 @@ namespace
 
 void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 {
-	auto const container_width = static_cast<double>(m_image_view->width());
-	auto const container_height = static_cast<double>(m_image_view->height());
+	auto const img_to_present = posterize(
+		terraformer::resize(img, image_resize_description{
+			.output_width = static_cast<uint32_t>(m_image_view->width()),
+			.output_height = static_cast<uint32_t>(m_image_view->height())
+		}),
+		posterization_description{
+		.levels = 16
+		}
+	);
 
-	auto const w = static_cast<double>(img.width());
-	auto const h = static_cast<double>(img.height());
-
-	auto const input_ratio = w/h;
-
-	auto const output_width = std::min(input_ratio*container_height, container_width);
-	auto const output_height = std::min(container_width/input_ratio, container_height);
-	auto const r = w/output_width;
-
-	basic_image<output_pixel> img_resampled{static_cast<uint32_t>(output_width), static_cast<uint32_t>(output_height)};
-	for(uint32_t y = 0; y != img_resampled.height(); ++y)
+	basic_image<output_pixel> img_srgb{img_to_present.width(), img_to_present.height()};
+	for(uint32_t y = 0; y != img_srgb.height(); ++y)
 	{
-		for(uint32_t x = 0; x != img_resampled.width(); ++x)
+		for(uint32_t x = 0; x != img_srgb.width(); ++x)
 		{
-			auto const src_x = static_cast<uint32_t>(static_cast<double>(x)*r);
-			auto const src_y = static_cast<uint32_t>(static_cast<double>(y)*r);
+			auto const output_value = static_cast<uint8_t>(255.0f*img_to_present(x, y));
 
-			// TODO:
-			// Compute average
-			// Use normalization
-
-			auto const output_value = static_cast<uint8_t>(255.0f*img(src_x, src_y)/5120.0f);
-
-			img_resampled(x, y) = output_pixel{
+			img_srgb(x, y) = output_pixel{
 				.b = output_value,
 				.g = output_value,
 				.r = output_value,
@@ -69,9 +60,9 @@ void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 	}
 
 	QImage img_out{
-		reinterpret_cast<uchar const*>(img_resampled.pixels().data()),
-		static_cast<int>(img_resampled.width()),
-		static_cast<int>(img_resampled.height()),
+		reinterpret_cast<uchar const*>(img_srgb.pixels().data()),
+		static_cast<int>(img_srgb.width()),
+		static_cast<int>(img_srgb.height()),
 		QImage::Format_ARGB32
 	};
 
