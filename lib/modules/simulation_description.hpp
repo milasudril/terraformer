@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_SIMULATION_HPP
-#define TERRAFORMER_SIMULATION_HPP
+#ifndef TERRAFORMER_SIMULATIONDESCRIPTION_HPP
+#define TERRAFORMER_SIMULATIONDESCRIPTION_HPP
 
 #include "./domain_size.hpp"
 #include "./initial_heightmap.hpp"
@@ -12,7 +12,7 @@ namespace terraformer
 	using random_generator = pcg_engines::oneseq_dxsm_128_64;
 	using rng_seed_type = __int128;
 
-	struct simulation
+	struct simulation_description
 	{
 		rng_seed_type rng_seed;
 		struct domain_size domain_size;
@@ -20,7 +20,7 @@ namespace terraformer
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, simulation>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, simulation_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{

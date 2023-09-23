@@ -23,7 +23,7 @@
 #include "ui/application_log.hpp"
 #include "ui/application.hpp"
 #include "ui/form.hpp"
-#include "lib/modules/simulation.hpp"
+#include "lib/modules/simulation_description.hpp"
 #include "lib/common/random_bit_source.hpp"
 
 #include "lib/pixel_store/image.hpp"
@@ -41,7 +41,7 @@ int main(int argc, char** argv)
 	QSplitter input_output{nullptr};
 	mainwin.addWidget(&input_output);
 
-	terraformer::simulation sim{
+	terraformer::simulation_description sim{
 		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>(),
 		.domain_size{
 			.width = 49152,
@@ -55,15 +55,15 @@ int main(int argc, char** argv)
 
 	terraformer::form output{nullptr, "result", [](auto&&...){}};
 
-	terraformer::form input{nullptr, "simulation", [&output, &sim, &resolution](auto&& field_name) {
+	terraformer::form input{nullptr, "simulation_description", [&output, &sim, &resolution](auto&& field_name) {
 		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
-		if(field_name.starts_with("simulation/domain_size/"))
+		if(field_name.starts_with("simulation_description/domain_size/"))
 		{
 			resolution = to_domain_resolution(sim.domain_size);
 			output.refresh();
 		}
 	}};
-	input.setObjectName("simulation");
+	input.setObjectName("simulation_description");
 
 	input_output.addWidget(&input);
 	input_output.addWidget(&output);
