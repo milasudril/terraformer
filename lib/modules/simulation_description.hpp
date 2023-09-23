@@ -2,7 +2,7 @@
 #define TERRAFORMER_SIMULATIONDESCRIPTION_HPP
 
 #include "./domain_size_description.hpp"
-#include "./initial_heightmap.hpp"
+#include "./initial_heightmap_description.hpp"
 #include "lib/common/random_bit_source.hpp"
 
 #include <pcg-cpp/include/pcg_random.hpp>
@@ -16,7 +16,7 @@ namespace terraformer
 	{
 		rng_seed_type rng_seed;
 		domain_size_description domain_size;
-		struct initial_heightmap initial_heightmap;
+		initial_heightmap_description initial_heightmap;
 	};
 
 	template<class Form, class T>

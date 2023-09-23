@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_INITIAL_HEIGHTMAP_HPP
-#define TERRAFORMER_INITIAL_HEIGHTMAP_HPP
+#ifndef TERRAFORMER_INITIAL_HEIGHTMAP_DESCRIPTION_HPP
+#define TERRAFORMER_INITIAL_HEIGHTMAP_DESCRIPTION_HPP
 
 namespace terraformer
 {
@@ -82,13 +82,13 @@ namespace terraformer
 	}
 
 
-	struct initial_heightmap
+	struct initial_heightmap_description
 	{
 		struct corners corners;
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, initial_heightmap>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, initial_heightmap_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(
