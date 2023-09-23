@@ -43,6 +43,10 @@ namespace terraformer
 
 		auto height() const { return m_height; }
 
+		auto& width_ref() const { return m_width; }
+
+		auto& height_ref() const { return m_height; }
+
 		PixelType operator()(IndexType x, IndexType y) const { return *getAddress(x, y); }
 
 		PixelType& operator()(IndexType x, IndexType y)

@@ -100,7 +100,7 @@ namespace terraformer
 		float pixel_size;
 	};
 
-	inline domain_resolution to_domain_resolution(domain_size_description const& dom_size)
+	inline domain_resolution make_domain_resolution(domain_size_description const& dom_size)
 	{
 		auto const img_size = image_size(dom_size);
 		return domain_resolution{

@@ -24,9 +24,8 @@
 #include "ui/application.hpp"
 #include "ui/form.hpp"
 #include "lib/modules/simulation_description.hpp"
+#include "lib/modules/heightmap.hpp"
 #include "lib/common/random_bit_source.hpp"
-
-#include "lib/pixel_store/image.hpp"
 
 #include <QSplitter>
 #include <fdcb.h>
@@ -50,16 +49,17 @@ int main(int argc, char** argv)
 		},
 		.initial_heightmap{}
 	};
-
-	auto resolution = to_domain_resolution(sim.domain_size);
+	auto initial_heightmap = make_heightmap(sim.domain_size);
 
 	terraformer::form output{nullptr, "result", [](auto&&...){}};
 
-	terraformer::form input{nullptr, "simulation_description", [&output, &sim, &resolution](auto&& field_name) {
+	terraformer::form input{nullptr, "simulation_description", [&output,
+			&sim = std::as_const(sim),
+			&initial_heightmap](auto&& field_name) {
 		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
 		if(field_name.starts_with("simulation_description/domain_size/"))
 		{
-			resolution = to_domain_resolution(sim.domain_size);
+			initial_heightmap = make_heightmap(sim.domain_size);
 			output.refresh();
 		}
 	}};
@@ -76,7 +76,7 @@ int main(int argc, char** argv)
 	console_layout.addWidget(&console_text);
 
 	bind(input, std::ref(sim));
-	bind(output, std::cref(resolution));
+	bind(output, std::cref(initial_heightmap));
 
 	input.set_focus();
 	input.refresh();
