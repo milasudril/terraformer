@@ -74,6 +74,6 @@ void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 		QImage::Format_ARGB32
 	};
 
-	m_image_view->setPixmap(QPixmap::fromImage(img_out));
-	m_image_view->setMinimumSize(0, 0);
+	m_image_view->set_pixmap(QPixmap::fromImage(img_out));
+	m_image_view->update();
 }

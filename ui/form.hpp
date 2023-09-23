@@ -15,6 +15,7 @@
 #include <QLineEdit>
 #include <QLabel>
 #include <QPushButton>
+#include <QPainter>
 
 namespace terraformer
 {
@@ -49,13 +50,31 @@ namespace terraformer
 		std::unique_ptr<QVBoxLayout> m_root;
 	};
 
+	class image_view:public QWidget
+	{
+	public:
+		explicit image_view(QWidget* parent): QWidget{parent}{}
+
+		void set_pixmap(QPixmap&& pixmap)
+		{ m_image_data = std::move(pixmap); }
+
+	private:
+		void paintEvent(QPaintEvent*) override
+		{
+			QPainter p{this};
+			p.drawPixmap(0, 0, m_image_data);
+		}
+
+		QPixmap m_image_data;
+	};
+
 	class topographic_map_renderer:public QWidget
 	{
 	public:
 		explicit topographic_map_renderer(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QVBoxLayout>(this)},
-			m_image_view{std::make_unique<QLabel>(this)}
+			m_image_view{std::make_unique<image_view>(this)}
 			{
 				m_root->setContentsMargins(form_indent, 0, 0, 0);
 				m_image_view->setSizePolicy(QSizePolicy{
@@ -69,7 +88,7 @@ namespace terraformer
 
 	private:
 		std::unique_ptr<QVBoxLayout> m_root;
-		std::unique_ptr<QLabel> m_image_view;
+		std::unique_ptr<image_view> m_image_view;
 	};
 
 	inline std::string make_widget_path(std::string const& path, QString const& field_name)
