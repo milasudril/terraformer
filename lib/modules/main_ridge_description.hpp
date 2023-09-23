@@ -7,9 +7,8 @@ namespace terraformer
 {
 	struct main_ridge_description
 	{
-		float y_0;
-//		terraformer::fractal_wave_params ridge_curve;
-//		terraformer::fractal_wave_params ridge_curve_xz;
+		float y0;
+		float z0;
 	};
 
 	template<class Form, class T>
@@ -28,7 +27,24 @@ namespace terraformer
 							.max = 1.0f
 						}
 					},
-					.binding = std::ref(params.get().y_0)
+					.binding = std::ref(params.get().y0)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "z0",
+				.display_name = "z<sub>0</sub>",
+				.description = "Controls the nominal elevation at the main ridge",
+				.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = open_open_interval{
+							.min = -std::numeric_limits<float>::infinity(),
+							.max = std::numeric_limits<float>::infinity()
+						}
+					},
+					.binding = std::ref(params.get().z0)
 				}
 			}
 		);
