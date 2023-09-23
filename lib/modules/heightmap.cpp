@@ -25,7 +25,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			auto const eta = static_cast<float>(y)/static_cast<float>(h - 1);
 
 			auto const north = std::lerp(nw_elev, ne_elev, xi);
-			auto const south = std::lerp(se_elev, sw_elev, xi);
+			auto const south = std::lerp(sw_elev, se_elev, xi);
 
 			pixels(x, y) = std::lerp(north, south, eta);
 		}

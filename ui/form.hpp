@@ -1,3 +1,8 @@
+//@	{
+//@		"dependencies_extra":[{"ref": "./form.o", "rel":"implementation"}],
+//@		"dependencies":[{"ref":"Qt5Widgets", "origin":"pkg-config"}]
+//@	}
+
 #ifndef TERRAFORMER_FORM_HPP
 #define TERRAFORMER_FORM_HPP
 
@@ -49,13 +54,22 @@ namespace terraformer
 	public:
 		explicit topographic_map_renderer(QWidget* parent):
 			QWidget{parent},
-			m_root{std::make_unique<QVBoxLayout>(this)}
-			{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
+			m_root{std::make_unique<QVBoxLayout>(this)},
+			m_image_view{std::make_unique<QLabel>(this)}
+			{
+				m_root->setContentsMargins(form_indent, 0, 0, 0);
+				m_image_view->setSizePolicy(QSizePolicy{
+					QSizePolicy::Policy::Expanding,
+					QSizePolicy::Policy::Expanding
+				});
+				m_root->addWidget(m_image_view.get());
+			}
 
-		void upload(grayscale_image const&) {}
+		void upload(grayscale_image const& img);
 
 	private:
 		std::unique_ptr<QVBoxLayout> m_root;
+		std::unique_ptr<QLabel> m_image_view;
 	};
 
 	inline std::string make_widget_path(std::string const& path, QString const& field_name)
