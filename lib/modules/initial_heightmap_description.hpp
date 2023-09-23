@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_INITIAL_HEIGHTMAP_DESCRIPTION_HPP
 #define TERRAFORMER_INITIAL_HEIGHTMAP_DESCRIPTION_HPP
 
+#include "./main_ridge_description.hpp"
+
 namespace terraformer
 {
 	struct corner
@@ -85,6 +87,7 @@ namespace terraformer
 	struct initial_heightmap_description
 	{
 		struct corners corners;
+		main_ridge_description main_ridge;
 	};
 
 	template<class Form, class T>
@@ -98,6 +101,17 @@ namespace terraformer
 				.description = "Sets elevation at domain corners",
 				.widget = subform{
 					.binding = std::ref(params.get().corners)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "main_ridge",
+				.display_name = "Main ridge parameters",
+				.description = "Controls the location and shape of the main ridge",
+				.widget = subform{
+					.binding = std::ref(params.get().main_ridge)
 				}
 			}
 		);

@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 			output.refresh();
 		}
 		else
-		if(field_name.starts_with("simulation_description/initial_heightmap/corners"))
+		if(field_name.starts_with("simulation_description/initial_heightmap/"))
 		{
 			generate(initial_heightmap, sim.initial_heightmap);
 			output.refresh();
