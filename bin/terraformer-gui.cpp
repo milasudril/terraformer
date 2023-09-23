@@ -60,6 +60,7 @@ int main(int argc, char** argv)
 		if(field_name.starts_with("simulation_description/domain_size/"))
 		{
 			initial_heightmap = make_heightmap(sim.domain_size);
+			generate(initial_heightmap, sim.initial_heightmap);
 			output.refresh();
 		}
 		else
