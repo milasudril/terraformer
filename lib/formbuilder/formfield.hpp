@@ -23,6 +23,15 @@ namespace terraformer
 		std::optional<int> min_width = std::nullopt;
 	};
 
+	template<class BindingType>
+	requires(std::is_same_v<std::remove_cvref_t<typename BindingType::type>, float>)
+	struct knob
+	{
+		float min;
+		float max;
+		BindingType binding;
+	};
+
 	template<class Generator, class BindingType>
 	struct input_button
 	{

@@ -14,6 +14,7 @@
 #include <QFormLayout>
 #include <QLineEdit>
 #include <QLabel>
+#include <QDial>
 #include <QPushButton>
 #include <QPainter>
 
@@ -190,8 +191,8 @@ namespace terraformer
 								m_on_value_changed(make_widget_path(m_path, src.objectName()));
 							}
 						}, src, textbox);
-						has_been_called = false;
 						refresh();
+						has_been_called = false;
 					}
 				);
 			}
@@ -207,6 +208,51 @@ namespace terraformer
 				constexpr auto char_width = 10;
 				ret->setMinimumWidth(char_width*(*textbox.min_width));
 			}
+			ret->setObjectName(field_name);
+			return ret;
+		}
+
+
+		template<class BindingType>
+		std::unique_ptr<QDial>
+		create_widget(knob<BindingType> const& knob, QWidget& parent, char const* field_name)
+		{
+			auto ret = std::make_unique<QDial>(&parent);
+			constexpr auto maxval = 16777215;
+			ret->setMinimum(0);
+			ret->setMaximum(maxval);
+
+			if constexpr(!std::is_const_v<typename BindingType::type>)
+			{
+				QObject::connect(ret.get(),
+					&QDial::valueChanged,
+					[this, &src = *ret, knob, has_been_called = false]() mutable{
+						if(has_been_called)
+						{ return; }
+						has_been_called = true;
+						try_and_catch([this, &src](auto const& error){
+							log_error(error.what());
+							src.setFocus();
+						}, [this](auto& src, auto const& knob){
+							if(auto new_val = std::lerp(knob.min, knob.max, static_cast<float>(src.value())/maxval);
+								new_val != knob.binding.get())
+							{
+								knob.binding.get() = new_val;
+								m_on_value_changed(make_widget_path(m_path, src.objectName()));
+							}
+						}, src, knob);
+						refresh();
+						has_been_called = false;
+					}
+				);
+			}
+			else
+			{ ret->setDisabled(true); }
+
+			m_display_callbacks.push_back([&dest = *ret, knob](){
+				dest.setValue(static_cast<int>(maxval*(knob.binding.get() - knob.min)/(knob.max - knob.min)));
+			});
+
 			ret->setObjectName(field_name);
 			return ret;
 		}

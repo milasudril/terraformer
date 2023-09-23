@@ -20,14 +20,21 @@ namespace terraformer
 				.name = "y0",
 				.display_name = "y<sub>0</sub>",
 				.description = "Controls the main ridge offset in the north-south direction",
-				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							.min = 0.0f,
-							.max = 1.0f
-						}
+				.widget = std::tuple{
+					knob{
+						.min = 0.0f,
+						.max = 1.0f,
+						.binding = std::ref(params.get().y0)
 					},
-					.binding = std::ref(params.get().y0)
+					textbox{
+						.value_converter = num_string_converter{
+							.range = closed_closed_interval{
+								.min = 0.0f,
+								.max = 1.0f
+							}
+						},
+						.binding = std::ref(params.get().y0)
+					}
 				}
 			}
 		);
