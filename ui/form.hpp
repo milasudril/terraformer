@@ -301,6 +301,9 @@ namespace terraformer
 		std::unique_ptr<QFormLayout> m_root;
 		size_t m_level;
 		std::string m_path;
+
+		void resizeEvent(QResizeEvent*) override
+		{ refresh(); }
 	};
 
 	template<class ValueChangedListenerType>
