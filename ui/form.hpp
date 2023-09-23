@@ -3,6 +3,7 @@
 
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/common/utils.hpp"
+#include "lib/pixel_store/image.hpp"
 
 #include <QWidget>
 #include <QFormLayout>
@@ -38,6 +39,20 @@ namespace terraformer
 
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
+
+	private:
+		std::unique_ptr<QVBoxLayout> m_root;
+	};
+
+	class topographic_map_renderer:public QWidget
+	{
+	public:
+		explicit topographic_map_renderer(QWidget* parent):
+			QWidget{parent},
+			m_root{std::make_unique<QVBoxLayout>(this)}
+			{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
+
+		void upload(grayscale_image const&) {}
 
 	private:
 		std::unique_ptr<QVBoxLayout> m_root;
@@ -210,6 +225,20 @@ namespace terraformer
 			m_display_callbacks.push_back([&ret = *ret](){
 				ret.refresh();
 			});
+			return ret;
+		}
+
+		template<class BindingType>
+		std::unique_ptr<topographic_map_renderer> create_widget(topographic_map_view<BindingType>&& view,
+			QWidget& parent,
+			char const* field_name)
+		{
+			auto ret = std::make_unique<topographic_map_renderer>(&parent);
+			m_display_callbacks.push_back([&dest = *ret, pixels = view.binding](){
+				// TODO: Avoid uploading pixels if nothing has been changed since last update
+				dest.upload(pixels.get());
+			});
+			ret->setObjectName(field_name);
 			return ret;
 		}
 

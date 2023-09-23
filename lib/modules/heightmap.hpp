@@ -85,8 +85,18 @@ namespace terraformer
 				}
 			}
 		);
-	}
 
+		form.insert(
+			field{
+				.name = "initial_heightmap",
+				.display_name = "Initial heightmap",
+				.description = "Shows the initial heightmap",
+				.widget = topographic_map_view{
+					.binding = std::ref(heightmap.get().pixel_storage)
+				}
+			}
+		);
+	}
 }
 
 #endif

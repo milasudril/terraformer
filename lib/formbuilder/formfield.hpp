@@ -38,6 +38,11 @@ namespace terraformer
 		BindingType binding;
 	};
 
+	template<class BindingType>
+	struct topographic_map_view
+	{
+		BindingType binding;
+	};
 }
 
 #endif
