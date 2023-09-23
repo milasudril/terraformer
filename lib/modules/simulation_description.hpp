@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_SIMULATIONDESCRIPTION_HPP
 #define TERRAFORMER_SIMULATIONDESCRIPTION_HPP
 
-#include "./domain_size.hpp"
+#include "./domain_size_description.hpp"
 #include "./initial_heightmap.hpp"
 #include "lib/common/random_bit_source.hpp"
 
@@ -15,7 +15,7 @@ namespace terraformer
 	struct simulation_description
 	{
 		rng_seed_type rng_seed;
-		struct domain_size domain_size;
+		domain_size_description domain_size;
 		struct initial_heightmap initial_heightmap;
 	};
 

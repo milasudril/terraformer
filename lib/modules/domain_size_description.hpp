@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_DOMAIN_SIZE_HPP
-#define TERRAFORMER_DOMAIN_SIZE_HPP
+#ifndef TERRAFORMER_DOMAIN_SIZE_DESCRIPTION_HPP
+#define TERRAFORMER_DOMAIN_SIZE_DESCRIPTION_HPP
 
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/common/span_2d.hpp"
@@ -9,14 +9,14 @@
 
 namespace terraformer
 {
-	struct domain_size
+	struct domain_size_description
 	{
 		float width;
 		float height;
 		int number_of_pixels;
 	};
 
-	inline span_2d_extents image_size(domain_size const& dom_size)
+	inline span_2d_extents image_size(domain_size_description const& dom_size)
 	{
 		auto const ratio = static_cast<double>(dom_size.width)/static_cast<double>(dom_size.height);
 		auto const pixel_area = static_cast<double>(dom_size.number_of_pixels);
@@ -26,19 +26,19 @@ namespace terraformer
 		};
 	}
 
-	inline float pixel_size(domain_size const& dom_size)
+	inline float pixel_size(domain_size_description const& dom_size)
 	{
 		return std::sqrt(dom_size.height*dom_size.width/static_cast<float>(dom_size.number_of_pixels));
 	}
 
-	uint32_t image_width(domain_size const& dom_size)
+	uint32_t image_width(domain_size_description const& dom_size)
 	{ return image_size(dom_size).width; }
 
-	uint32_t image_height(domain_size const& dom_size)
+	uint32_t image_height(domain_size_description const& dom_size)
 	{ return image_size(dom_size).height; }
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, domain_size>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, domain_size_description>)
 	void bind(Form& form, std::reference_wrapper<T> dom_size)
 	{
 		form.insert(
@@ -100,7 +100,7 @@ namespace terraformer
 		float pixel_size;
 	};
 
-	inline domain_resolution to_domain_resolution(domain_size const& dom_size)
+	inline domain_resolution to_domain_resolution(domain_size_description const& dom_size)
 	{
 		auto const img_size = image_size(dom_size);
 		return domain_resolution{

@@ -1,12 +1,12 @@
-//@	{"target":{"name":"domain_size.test"}}
+//@	{"target":{"name":"domain_size_description.test"}}
 
-#include "./domain_size.hpp"
+#include "./domain_size_description.hpp"
 
 #include <testfwk/testfwk.hpp>
 
 TESTCASE(terraformer_domain_size_image_size)
 {
-	auto const val = image_size(terraformer::domain_size{
+	auto const val = image_size(terraformer::domain_size_description{
 		.width = 1024.0f,
 		.height = 512.0f,
 		.number_of_pixels = 4*1024*512
@@ -18,7 +18,7 @@ TESTCASE(terraformer_domain_size_image_size)
 
 TESTCASE(terraformer_domain_size_pixel_size)
 {
-	auto const val = pixel_size(terraformer::domain_size{
+	auto const val = pixel_size(terraformer::domain_size_description{
 		.width = 1024.0f,
 		.height = 512.0f,
 		.number_of_pixels = 4*1024*512
@@ -29,7 +29,7 @@ TESTCASE(terraformer_domain_size_pixel_size)
 
 TESTCASE(terraformer_domain_size_image_width)
 {
-	auto const val = image_width(terraformer::domain_size{
+	auto const val = image_width(terraformer::domain_size_description{
 		.width = 1024.0f,
 		.height = 512.0f,
 		.number_of_pixels = 4*1024*512
@@ -40,7 +40,7 @@ TESTCASE(terraformer_domain_size_image_width)
 
 TESTCASE(terraformer_domain_size_image_height)
 {
-	auto const val = image_height(terraformer::domain_size{
+	auto const val = image_height(terraformer::domain_size_description{
 		.width = 1024.0f,
 		.height = 512.0f,
 		.number_of_pixels = 4*1024*512
@@ -63,7 +63,7 @@ namespace
 
 TESTCASE(terraformer_domain_size_bind_to_form)
 {
-	terraformer::domain_size dom_size{
+	terraformer::domain_size_description dom_size{
 		.width = 1024.0f,
 		.height = 512.0f,
 		.number_of_pixels = 4*1024*512
