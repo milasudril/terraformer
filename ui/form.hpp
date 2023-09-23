@@ -200,21 +200,6 @@ namespace terraformer
 			return ret;
 		}
 
-		template<class Converter, class BindingType>
-		std::unique_ptr<QLabel> create_widget(text_display<Converter, BindingType>&& text_display, QWidget& parent, char const* field_name)
-		{
-			auto ret = std::make_unique<QLabel>(&parent);
-			m_display_callbacks.push_back([&dest = *ret, text_display = std::move(text_display)](){
-				try_and_catch([](auto const& error){
-					log_error(error.what());
-				},[](auto& dest, auto const& text_display) {
-					dest.setText(text_display.source(text_display.binding.get()).c_str());
-				}, dest, text_display);
-			});
-			ret->setObjectName(field_name);
-			return ret;
-		}
-
 		template<class BindingType>
 		std::unique_ptr<form> create_widget(subform<BindingType>&& subform,
 			QWidget& parent,
