@@ -1,9 +1,12 @@
+//@	{"dependencies_extra":[{"ref":"./heightmap.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_HEIGHTMAP_HPP
 #define TERRAFORMER_HEIGHTMAP_HPP
 
 #include "lib/pixel_store/image.hpp"
 
 #include "./domain_size_description.hpp"
+#include "./initial_heightmap_description.hpp"
 
 namespace terraformer
 {
@@ -26,6 +29,8 @@ namespace terraformer
 		return make_heightmap(make_domain_resolution(dom_size));
 	}
 
+	void generate(heightmap& output, initial_heightmap_description const&);
+
 	template<class Form, class T>
 	requires(std::is_same_v<std::remove_cvref_t<T>, heightmap>)
 	void bind(Form& form, std::reference_wrapper<T> heightmap)
@@ -38,7 +43,7 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 1u,
+							.min = 2u,
 							.max = std::numeric_limits<uint32_t>::max()
 						}
 					},
@@ -55,7 +60,7 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 1u,
+							.min = 2u,
 							.max = std::numeric_limits<uint32_t>::max()
 						}
 					},

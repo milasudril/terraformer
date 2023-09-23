@@ -62,6 +62,12 @@ int main(int argc, char** argv)
 			initial_heightmap = make_heightmap(sim.domain_size);
 			output.refresh();
 		}
+		else
+		if(field_name.starts_with("simulation_description/initial_heightmap/corners"))
+		{
+			generate(initial_heightmap, sim.initial_heightmap);
+			output.refresh();
+		}
 	}};
 	input.setObjectName("simulation_description");
 

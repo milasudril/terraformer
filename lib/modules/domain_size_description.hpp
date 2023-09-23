@@ -31,10 +31,10 @@ namespace terraformer
 		return std::sqrt(dom_size.height*dom_size.width/static_cast<float>(dom_size.number_of_pixels));
 	}
 
-	uint32_t image_width(domain_size_description const& dom_size)
+	inline uint32_t image_width(domain_size_description const& dom_size)
 	{ return image_size(dom_size).width; }
 
-	uint32_t image_height(domain_size_description const& dom_size)
+	inline uint32_t image_height(domain_size_description const& dom_size)
 	{ return image_size(dom_size).height; }
 
 	template<class Form, class T>
