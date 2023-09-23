@@ -18,6 +18,7 @@
 //@	}
 
 #include "./form.hpp"
+#include "lib/filters/intensity_map_presentation_filters.hpp"
 
 namespace
 {
