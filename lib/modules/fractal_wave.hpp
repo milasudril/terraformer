@@ -118,6 +118,41 @@ namespace terraformer
 		float phase;
 	};
 
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, wave_params>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "wavelength",
+			.display_name = "Wavelength",
+			.description = "Controls the wavelength",
+			.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = open_open_interval{
+							.min = 0.0f,
+							.max = std::numeric_limits<float>::infinity()
+						}
+					},
+					.binding = std::ref(params.get().wavelength)
+				}
+		});
+
+		form.insert(field{
+			.name = "phase",
+			.display_name = "Phase",
+			.description = "Controls the phase",
+			.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_closed_interval{
+							.min = -0.5f,
+							.max = 0.5f
+						}
+					},
+					.binding = std::ref(params.get().phase)
+				}
+		});
+	}
+
 	struct wave_component
 	{
 		float amplitude;
@@ -219,6 +254,15 @@ namespace terraformer
 			.description = "Controls the progression of individual wave components",
 			.widget = subform{
 				.binding = std::ref(params.get().shape)
+			}
+		});
+
+		form.insert(field{
+			.name = "wave_properties",
+			.display_name = "Wave properties",
+			.description = "Controls the total wave",
+			.widget = subform{
+				.binding = std::ref(params.get().wave_properties)
 			}
 		});
 	}
