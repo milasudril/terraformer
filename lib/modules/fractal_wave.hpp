@@ -64,14 +64,49 @@ namespace terraformer
 		return std::pow(val.scaling_factor, -(static_cast<float>(k) + val.scaling_noise*U(rng)));
 	}
 
-	struct linear_progression
+	struct linear_mod_progression
 	{
 		float offset;
 		float offset_noise;
 	};
 
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, linear_mod_progression>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "offset",
+			.display_name = "Offset",
+			.description = "Controls the offset between two consecutive elements",
+			.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_closed_interval{
+							.min = -0.5f,
+							.max = 0.5f
+						}
+					},
+					.binding = std::ref(params.get().offset)
+				}
+		});
+
+		form.insert(field{
+			.name = "offset_noise",
+			.display_name = "Offset noise",
+			.description = "Controls the amount of noise to add to the offset",
+			.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_closed_interval{
+							.min = 0.0f,
+							.max = 1.0f
+						}
+					},
+					.binding = std::ref(params.get().offset_noise)
+				}
+		});
+	}
+
 	template<class Rng>
-	inline float get_value(linear_progression const& val, size_t k, Rng&& rng)
+	inline float get_value(linear_mod_progression const& val, size_t k, Rng&& rng)
 	{
 		std::uniform_real_distribution U{-0.5f, 0.5f};
 		return -(static_cast<float>(k)*val.offset + val.offset_noise*U(rng));
@@ -97,7 +132,7 @@ namespace terraformer
 		{
 			exponential_progression amplitude;
 			exponential_progression wavelength;
-			linear_progression phase;
+			linear_mod_progression phase;
 		};
 
 		template<class Rng>
@@ -149,6 +184,15 @@ namespace terraformer
 			.description = "Controls the amplitude progression",
 			.widget = subform{
 				.binding = std::ref(params.get().amplitude)
+			}
+		});
+
+		form.insert(field{
+			.name = "phase",
+			.display_name = "Phase",
+			.description = "Controls the phase progression",
+			.widget = subform{
+				.binding = std::ref(params.get().phase)
 			}
 		});
 	}
