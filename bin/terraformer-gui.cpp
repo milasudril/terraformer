@@ -28,6 +28,7 @@
 #include "lib/common/random_bit_source.hpp"
 
 #include <QSplitter>
+#include <QScrollArea>
 #include <fdcb.h>
 
 int main(int argc, char** argv)
@@ -72,9 +73,6 @@ int main(int argc, char** argv)
 	}};
 	input.setObjectName("simulation_description");
 
-	input_output.addWidget(&input);
-	input_output.addWidget(&output);
-
 	QWidget bottom;
 	mainwin.addWidget(&bottom);
 	QTextEdit console_text{};
@@ -84,6 +82,9 @@ int main(int argc, char** argv)
 
 	bind(input, std::ref(sim));
 	bind(output, std::cref(initial_heightmap));
+	QScrollArea input_scroll_area{&input_output};
+	input_scroll_area.setWidget(&input);
+	input_output.addWidget(&output);
 
 	input.set_focus();
 	input.refresh();
@@ -98,5 +99,9 @@ int main(int argc, char** argv)
 		}
 	};
 
-	return terraformer.exec();
+	auto ret = terraformer.exec();
+	// NOTE: QScrollArea is odd because it takes ownership of the widget. Fix this issue
+	//       by calling takeWidget
+	(void)input_scroll_area.takeWidget();
+	return ret;
 }

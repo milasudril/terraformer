@@ -133,7 +133,7 @@ namespace terraformer
 			}
 			else
 			{
-				auto outer = std::make_unique<widget_column>(this);
+				auto outer = std::make_unique<widget_column>(this, 0);
 				auto label = std::make_unique<QLabel>(field.display_name, outer.get());
 				outer->add_widget(*label);
 				outer->add_widget(*entry);
