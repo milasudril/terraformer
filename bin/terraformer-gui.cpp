@@ -86,7 +86,7 @@ int main(int argc, char** argv)
 					.wave{
 						.shape{
 							.amplitude{
-								.scaling_factor = 2.0f,
+								.scaling_factor = std::numbers::phi_v<float>,
 								.scaling_noise = 1.0f/16.0f
 							},
 							.wavelength{
