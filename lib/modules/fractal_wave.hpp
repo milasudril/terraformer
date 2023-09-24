@@ -53,7 +53,13 @@ namespace terraformer
 			.name = "scaling_noise",
 			.display_name = "Scaling noise",
 			.description = "Controls the amount of noise to add to the scaling factor",
-			.widget = textbox{
+			.widget = std::tuple{
+				knob{
+					.min = 0.0f,
+					.max = 2.0f,
+					.binding = std::ref(params.get().scaling_noise)
+				},
+				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_open_interval{
 							.min = 0.0f,
@@ -62,6 +68,7 @@ namespace terraformer
 					},
 					.binding = std::ref(params.get().scaling_noise)
 				}
+			}
 		});
 	}
 
@@ -86,7 +93,13 @@ namespace terraformer
 			.name = "offset",
 			.display_name = "Offset",
 			.description = "Controls the offset between two consecutive elements",
-			.widget = textbox{
+			.widget = std::tuple{
+				knob{
+					.min = -0.5f,
+					.max = 0.5f,
+					.binding = std::ref(params.get().offset)
+				},
+				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
 							.min = -0.5f,
@@ -95,13 +108,20 @@ namespace terraformer
 					},
 					.binding = std::ref(params.get().offset)
 				}
+			}
 		});
 
 		form.insert(field{
 			.name = "offset_noise",
 			.display_name = "Offset noise",
 			.description = "Controls the amount of noise to add to the offset",
-			.widget = textbox{
+			.widget = std::tuple{
+				knob{
+					.min = 0.0f,
+					.max = 1.f,
+					.binding = std::ref(params.get().offset_noise)
+				},
+				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
 							.min = 0.0f,
@@ -110,6 +130,7 @@ namespace terraformer
 					},
 					.binding = std::ref(params.get().offset_noise)
 				}
+			}
 		});
 	}
 
@@ -134,7 +155,14 @@ namespace terraformer
 			.name = "wavelength",
 			.display_name = "Wavelength",
 			.description = "Controls the wavelength",
-			.widget = textbox{
+			.widget = std::tuple{
+				knob{
+					.min = 8.0f,
+					.max = 17.0f,
+					.binding = std::ref(params.get().wavelength),
+					.mapping = numeric_input_mapping_type::log
+				},
+				textbox{
 					.value_converter = num_string_converter{
 						.range = open_open_interval{
 							.min = 0.0f,
@@ -143,13 +171,20 @@ namespace terraformer
 					},
 					.binding = std::ref(params.get().wavelength)
 				}
+			}
 		});
 
 		form.insert(field{
 			.name = "phase",
 			.display_name = "Phase",
 			.description = "Controls the phase",
-			.widget = textbox{
+			.widget = std::tuple{
+				knob{
+					.min = -0.5f,
+					.max = 0.5f,
+					.binding = std::ref(params.get().phase)
+				},
+				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
 							.min = -0.5f,
@@ -158,6 +193,7 @@ namespace terraformer
 					},
 					.binding = std::ref(params.get().phase)
 				}
+			}
 		});
 	}
 
@@ -189,7 +225,6 @@ namespace terraformer
 					.wavelength = get_value(params.wavelength, k, rng),
 					.phase = get_value(params.phase, k, rng)
 				};
-//				printf("%s: %.8g %.8g %.8g\n", __FILE__, m_components[k].amplitude,m_components[k].wavelength, m_components[k].phase);
 			}
 		}
 
@@ -204,9 +239,7 @@ namespace terraformer
 				auto const phase = m_components[k - 1].phase;
 
 				sum += amplitude*approx_sine(twopi*(x/wavelength - phase));
-			//	printf("%s: %.8g\n", __FILE__, twopi*(x/wavelength - phase));
 			}
-			// printf("------\n");
 			return sum;
 		}
 
