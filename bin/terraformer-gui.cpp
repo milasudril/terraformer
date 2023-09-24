@@ -63,13 +63,16 @@ int main(int argc, char** argv)
 						.shape{
 							.amplitude{
 								.scaling_factor = 2.0f,
-								.scaling_noise = 0.0f
+								.scaling_noise = 1.0f/16.0f
 							},
 							.wavelength{
-								.scaling_factor = 1.618f,
-								.scaling_noise = 0.0f
+								.scaling_factor = std::numbers::phi_v<float>,
+								.scaling_noise = std::numbers::phi_v<float>/16.0f
 							},
-							.phase{}
+							.phase{
+								.offset = 2.0f - std::numbers::phi_v<float>,
+								.offset_noise = 1.0f/16.0f
+							}
 						},
 						.wave_properties{
 							.wavelength = 24576.0f,
@@ -84,13 +87,16 @@ int main(int argc, char** argv)
 						.shape{
 							.amplitude{
 								.scaling_factor = 2.0f,
-								.scaling_noise = 0.0f
+								.scaling_noise = 1.0f/16.0f
 							},
 							.wavelength{
-								.scaling_factor = 1.618f,
-								.scaling_noise = 0.0f
+								.scaling_factor = std::numbers::phi_v<float>,
+								.scaling_noise = std::numbers::phi_v<float>/16.0f
 							},
-							.phase{}
+							.phase{
+								.offset = 2.0f - std::numbers::phi_v<float>,
+								.offset_noise = 1.0f/16.0f
+							}
 						},
 						.wave_properties{
 							.wavelength = 12384.0f,
