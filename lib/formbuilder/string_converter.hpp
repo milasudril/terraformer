@@ -48,7 +48,7 @@ namespace terraformer
 	};
 
 	template<class T>
-	requires std::is_integral_v<T> || std::is_same_v<T, __int128>
+	requires std::is_integral_v<T> || std::is_same_v<T, __int128> || std::is_same_v<T, __int128 unsigned>
 	struct hash_string_converter
 	{
 		static std::string convert(T value)
@@ -77,7 +77,7 @@ namespace terraformer
 			{
 				throw input_error{"Input buffer must be a hexadecimal number, without any prefix or suffix."};
 			}
-			
+
 			{
 				auto const ret_bytes = reinterpret_cast<std::byte*>(&ret);
 				std::reverse(ret_bytes, ret_bytes + sizeof(T));

@@ -29,7 +29,7 @@ namespace terraformer
 		return make_heightmap(make_domain_resolution(dom_size));
 	}
 
-	void generate(heightmap& output, initial_heightmap_description const&);
+	void generate(heightmap& output, initial_heightmap_description const& description, random_generator& rng);
 
 	template<class Form, class T>
 	requires(std::is_same_v<std::remove_cvref_t<T>, heightmap>)

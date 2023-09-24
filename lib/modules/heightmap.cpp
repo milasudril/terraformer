@@ -6,7 +6,7 @@
 
 #include "lib/pixel_store/image_io.hpp"
 
-void terraformer::generate(heightmap& hm, initial_heightmap_description const& params)
+void terraformer::generate(heightmap& hm, initial_heightmap_description const& params, random_generator& rng)
 {
 	auto& pixels = hm.pixel_storage;
 	auto const h = pixels.height();
@@ -17,7 +17,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 	auto const ay = params.main_ridge.ridge_curve_xy.amplitude*static_cast<float>(h - 1);
 	auto const az = params.main_ridge.ridge_curve_xz.amplitude;
-	auto const ridge_curve = generate(per_thread_rng,
+	auto const ridge_curve = generate(rng,
 		params.main_ridge.ridge_curve_xy.wave,
 		output_range{-ay, ay},
 		params.main_ridge.ridge_curve_xz.wave,

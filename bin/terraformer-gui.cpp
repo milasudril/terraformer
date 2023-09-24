@@ -109,7 +109,8 @@ int main(int argc, char** argv)
 	};
 
 	auto initial_heightmap = make_heightmap(sim.domain_size);
-	generate(initial_heightmap, sim.initial_heightmap);
+	terraformer::random_generator rng{sim.rng_seed};
+	generate(initial_heightmap, sim.initial_heightmap, rng);
 
 	terraformer::form output{nullptr, "result", [](auto&&...){}};
 
@@ -117,16 +118,18 @@ int main(int argc, char** argv)
 			&sim = std::as_const(sim),
 			&initial_heightmap](auto&& field_name) {
 		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
+		terraformer::random_generator rng{sim.rng_seed};
 		if(field_name.starts_with("simulation_description/domain_size/"))
 		{
 			initial_heightmap = make_heightmap(sim.domain_size);
-			generate(initial_heightmap, sim.initial_heightmap);
+			generate(initial_heightmap, sim.initial_heightmap, rng);
 			output.refresh();
 		}
 		else
-		if(field_name.starts_with("simulation_description/initial_heightmap/"))
+		if(field_name.starts_with("simulation_description/initial_heightmap/")
+			|| field_name.starts_with("simulation_description/rng_seed"))
 		{
-			generate(initial_heightmap, sim.initial_heightmap);
+			generate(initial_heightmap, sim.initial_heightmap, rng);
 			output.refresh();
 		}
 	}};

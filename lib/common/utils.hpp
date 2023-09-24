@@ -95,7 +95,7 @@ namespace terraformer
 	}
 
 	using random_generator = pcg_engines::oneseq_dxsm_128_64;
-	using rng_seed_type = __int128;
+	using rng_seed_type = __int128 unsigned;
 
 	inline thread_local random_generator per_thread_rng{};
 }
