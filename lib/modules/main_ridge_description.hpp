@@ -49,9 +49,10 @@ namespace terraformer
 				.description = "Sets the amplitude of the generated wave fucntion",
 				.widget = std::tuple{
 					knob{
-						.min = 0.0f,
-						.max = 32768.0f,
-						.binding = std::ref(params.get().amplitude)
+						.min = -4.0f,
+						.max = 15.0f,
+						.binding = std::ref(params.get().amplitude),
+						.mapping = numeric_input_mapping_type::log
 					},
 					textbox{
 						.value_converter = num_string_converter{
