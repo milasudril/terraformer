@@ -37,7 +37,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	auto const sw_elev = corners.sw.elevation;
 	auto const se_elev = corners.se.elevation;
 //	auto const ridge_loc_y = params.main_ridge.y0;
-	auto const ridge_loc_z = params.main_ridge.z0;
+//	auto const ridge_loc_z = params.main_ridge.z0;
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -50,6 +50,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			auto const south = std::lerp(sw_elev, se_elev, xi);
 
 			auto const ridge_loc_y = ridge_curve[x][1]/static_cast<float>(h - 1);
+			auto const ridge_loc_z = ridge_curve[x][2];
 
 			auto const side = eta - ridge_loc_y;
 			auto const t = side < 0.0f?
@@ -62,5 +63,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
 		}
 	}
+
+	store(pixels, "output.exr");
 }
 
