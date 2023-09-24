@@ -82,6 +82,7 @@ int main(int argc, char** argv)
 
 	bind(input, std::ref(sim));
 	bind(output, std::cref(initial_heightmap));
+
 	QScrollArea input_scroll_area{&input_output};
 	input_scroll_area.setWidget(&input);
 	input_output.addWidget(&output);
