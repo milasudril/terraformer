@@ -59,6 +59,29 @@ namespace terraformer
 				}
 			}
 		);
+
+		form.insert(
+			field{
+				.name = "ridge_curve_xy",
+				.display_name = "Horizontal ridge curve",
+				.description = "Controls the horizontal properties of the main ridge",
+				.widget = subform{
+					.binding = std::ref(params.get().ridge_curve_xy)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "ridge_curve_xz",
+				.display_name = "Vertical ridge curve",
+				.description = "Controls the vertical properties of the main ridge",
+				.widget = subform{
+					.binding = std::ref(params.get().ridge_curve_xz)
+				}
+			}
+		);
+
 	}
 }
 

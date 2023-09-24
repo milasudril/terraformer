@@ -6,6 +6,8 @@
 #include "./polyline.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/common/output_range.hpp"
+#include "lib/formbuilder/string_converter.hpp"
+#include "lib/formbuilder/formfield.hpp"
 
 #include <numbers>
 #include <random>
@@ -19,6 +21,41 @@ namespace terraformer
 		float scaling_factor;
 		float scaling_noise;
 	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, exponential_progression>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "scaling_factor",
+			.display_name = "Scaling factor",
+			.description = "Controls the relative size between two consecutive elements",
+			.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = open_open_interval{
+							.min = 0.0f,
+							.max = std::numeric_limits<float>::infinity()
+						}
+					},
+					.binding = std::ref(params.get().scaling_factor)
+				}
+		});
+
+		form.insert(field{
+			.name = "scaling_noise",
+			.display_name = "Scaling noise",
+			.description = "Controls the amount of noise to add to the scaling factor",
+			.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_open_interval{
+							.min = 0.0f,
+							.max = std::numeric_limits<float>::infinity()
+						}
+					},
+					.binding = std::ref(params.get().scaling_noise)
+				}
+		});
+	}
 
 	template<class Rng>
 	inline float get_value(exponential_progression const& val, size_t k, Rng&& rng)
@@ -101,6 +138,34 @@ namespace terraformer
 		fractal_wave::params shape;
 		wave_params wave_properties;
 	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, fractal_wave::params>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "amplitude",
+			.display_name = "Amplitude",
+			.description = "Controls the amplitude progression",
+			.widget = subform{
+				.binding = std::ref(params.get().amplitude)
+			}
+		});
+	}
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, fractal_wave_description>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "shape",
+			.display_name = "Shape",
+			.description = "Controls the progression of individual wave components",
+			.widget = subform{
+				.binding = std::ref(params.get().shape)
+			}
+		});
+	}
 
 	std::vector<displacement> generate(fractal_wave const& wave,
 		wave_params const& wave_params,
