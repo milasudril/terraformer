@@ -12,6 +12,8 @@
 #include <charconv>
 #include <string>
 
+#include <pcg-cpp/include/pcg_random.hpp>
+
 namespace terraformer
 {
 	template<class T, class U>
@@ -91,6 +93,11 @@ namespace terraformer
 		fprintf(stderr, "(x) %s\n", msg);
 		fflush(stderr);
 	}
+
+	using random_generator = pcg_engines::oneseq_dxsm_128_64;
+	using rng_seed_type = __int128;
+
+	inline thread_local random_generator per_thread_rng{};
 }
 
 #endif

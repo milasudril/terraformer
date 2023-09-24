@@ -5,13 +5,8 @@
 #include "./initial_heightmap_description.hpp"
 #include "lib/common/random_bit_source.hpp"
 
-#include <pcg-cpp/include/pcg_random.hpp>
-
 namespace terraformer
 {
-	using random_generator = pcg_engines::oneseq_dxsm_128_64;
-	using rng_seed_type = __int128;
-
 	struct simulation_description
 	{
 		rng_seed_type rng_seed;

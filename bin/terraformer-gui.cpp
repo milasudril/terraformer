@@ -48,7 +48,52 @@ int main(int argc, char** argv)
 			.height = 49152,
 			.number_of_pixels = 1024*1024
 		},
-		.initial_heightmap{}
+		.initial_heightmap{
+			.corners{
+				.nw = 4096.0f,
+				.ne = 3072.0f,
+				.sw = 512.0f,
+				.se = 1536.0f,
+			},
+			.main_ridge{
+				.y0 = 0.5f,
+				.z0 = 8192.0f,
+				.ridge_curve_xy{
+					.shape{
+						.amplitude{
+							.scaling_factor = 2.0f,
+							.scaling_noise = 0.0f
+						},
+						.wavelength{
+							.scaling_factor = 2.0f,
+							.scaling_noise = 0.0f
+						},
+						.phase{}
+					},
+					.wave_properties{
+						.wavelength = 24576.0f,
+						.phase = 0.0f
+					}
+				},
+				.ridge_curve_xz{
+					.shape{
+						.amplitude{
+							.scaling_factor = 2.0f,
+							.scaling_noise = 0.0f
+						},
+						.wavelength{
+							.scaling_factor = 2.0f,
+							.scaling_noise = 0.0f
+						},
+						.phase{}
+					},
+					.wave_properties{
+						.wavelength = 12384.0f,
+						.phase = 0.0f
+					}
+				}
+			}
+		}
 	};
 	auto initial_heightmap = make_heightmap(sim.domain_size);
 

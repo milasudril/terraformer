@@ -146,6 +146,7 @@ namespace terraformer
 					.wavelength = get_value(params.wavelength, k, rng),
 					.phase = get_value(params.phase, k, rng)
 				};
+//				printf("%s: %.8g %.8g %.8g\n", __FILE__, m_components[k].amplitude,m_components[k].wavelength, m_components[k].phase);
 			}
 		}
 
@@ -160,7 +161,9 @@ namespace terraformer
 				auto const phase = m_components[k - 1].phase;
 
 				sum += amplitude*approx_sine(twopi*(x/wavelength - phase));
+			//	printf("%s: %.8g\n", __FILE__, twopi*(x/wavelength - phase));
 			}
+			// printf("------\n");
 			return sum;
 		}
 
@@ -184,6 +187,15 @@ namespace terraformer
 			.description = "Controls the amplitude progression",
 			.widget = subform{
 				.binding = std::ref(params.get().amplitude)
+			}
+		});
+
+		form.insert(field{
+			.name = "wavelength",
+			.display_name = "Wavelength",
+			.description = "Controls the wavelength progression",
+			.widget = subform{
+				.binding = std::ref(params.get().wavelength)
 			}
 		});
 
