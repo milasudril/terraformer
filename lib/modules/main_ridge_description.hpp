@@ -48,14 +48,21 @@ namespace terraformer
 				.name = "z0",
 				.display_name = "z<sub>0</sub>",
 				.description = "Controls the nominal elevation at the main ridge",
-				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = open_open_interval{
-							.min = -std::numeric_limits<float>::infinity(),
-							.max = std::numeric_limits<float>::infinity()
-						}
+				.widget = std::tuple{
+					knob{
+						.min = -16384.0f,
+						.max = 16384.0f,
+						.binding = std::ref(params.get().z0)
 					},
-					.binding = std::ref(params.get().z0)
+					textbox{
+						.value_converter = num_string_converter{
+							.range = open_open_interval{
+								.min = -std::numeric_limits<float>::infinity(),
+								.max = std::numeric_limits<float>::infinity()
+							}
+						},
+						.binding = std::ref(params.get().z0)
+					}
 				}
 			}
 		);
