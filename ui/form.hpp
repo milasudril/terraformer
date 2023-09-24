@@ -221,6 +221,7 @@ namespace terraformer
 			constexpr auto maxval = 16777215;
 			ret->setMinimum(0);
 			ret->setMaximum(maxval);
+			ret->setMaximumWidth(ret->height());
 
 			if constexpr(!std::is_const_v<typename BindingType::type>)
 			{
