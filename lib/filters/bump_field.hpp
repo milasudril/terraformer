@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_BUMP_FIELD_HPP
 #define TERRAFORMER_BUMP_FIELD_HPP
 
-#include "lib/curve_tool/fractal_wave.hpp"
+#include "lib/modules/fractal_wave.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/common/domain_size.hpp"
 
@@ -14,9 +14,9 @@ namespace terraformer
 	public:
 		struct params
 		{
-			fractal_wave_params impact_waves;
-			fractal_wave_params x_distortion;
-			fractal_wave_params y_distortion;
+			fractal_wave_description impact_waves;
+			fractal_wave_description x_distortion;
+			fractal_wave_description y_distortion;
 			float half_length;
 		};
 

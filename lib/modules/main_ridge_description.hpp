@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_MAINRIDGE_DESCRIPTION_HPP
 #define TERRAFORMER_MAINRIDGE_DESCRIPTION_HPP
 
+#include "./fractal_wave.hpp"
+
 #include <functional>
 
 namespace terraformer
@@ -9,6 +11,8 @@ namespace terraformer
 	{
 		float y0;
 		float z0;
+		fractal_wave_description ridge_curve_xy;
+		fractal_wave_description ridge_curve_xz;
 	};
 
 	template<class Form, class T>

@@ -7,7 +7,7 @@
 #include "lib/filters/curve_rasterizer.hpp"
 #include "lib/filters/bump_field.hpp"
 #include "lib/filters/bump_field_2.hpp"
-#include "lib/curve_tool/fractal_wave.hpp"
+#include "lib/modules/fractal_wave.hpp"
 #include "lib/execution/thread_pool.hpp"
 #include "lib/filters/diffuser.hpp"
 #include "lib/filters/waveshaper.hpp"
@@ -39,15 +39,15 @@ struct main_ridge_params
 	terraformer::location start_location;
 	float distance_xy_to_endpoint;
 	float base_elevation;
-	terraformer::fractal_wave_params ridge_curve;
-	terraformer::fractal_wave_params ridge_curve_xz;
+	terraformer::fractal_wave_description ridge_curve;
+	terraformer::fractal_wave_description ridge_curve_xz;
 };
 
 struct uplift_zone
 {
 	float radius_south;
 	float radius_north;
-	terraformer::fractal_wave_params radius_distortion;
+	terraformer::fractal_wave_description radius_distortion;
 };
 
 struct steady_plate_collision_zone_descriptor

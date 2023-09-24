@@ -3,7 +3,7 @@
 
 #include "./waveshaper.hpp"
 
-#include "lib/curve_tool/fractal_wave.hpp"
+#include "lib/modules/fractal_wave.hpp"
 #include "lib/common/span_2d.hpp"
 
 #include <algorithm>
@@ -24,8 +24,8 @@ namespace terraformer
 		{
 			wave_scaling x_scale;
 			wave_scaling y_scale;
-			fractal_wave_params x_wave;
-			fractal_wave_params y_wave;
+			fractal_wave_description x_wave;
+			fractal_wave_description y_wave;
 			float xy_blend;
 		};
 

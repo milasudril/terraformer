@@ -4,6 +4,8 @@
 
 #include "lib/common/utils.hpp"
 
+#include "lib/pixel_store/image_io.hpp"
+
 void terraformer::generate(heightmap& hm, initial_heightmap_description const& params)
 {
 	auto& pixels = hm.pixel_storage;
@@ -42,5 +44,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
 		}
 	}
+
+
+	store(pixels, "output.exr");
 }
 

@@ -96,7 +96,7 @@ namespace terraformer
 		std::array<wave_component, 16> m_components;
 	};
 
-	struct fractal_wave_params
+	struct fractal_wave_description
 	{
 		fractal_wave::params shape;
 		wave_params wave_properties;
@@ -114,7 +114,7 @@ namespace terraformer
 
 	template<class Rng, class ... Params>
 	auto generate(Rng&& rng,
-		fractal_wave_params const& wave_params,
+		fractal_wave_description const& wave_params,
 		output_range output_range,
 		Params&&... params)
 	{
@@ -134,9 +134,9 @@ namespace terraformer
 
 	template<class Rng, class ... Params>
 	auto generate(Rng&& rng,
-		fractal_wave_params const& wave_params_xy,
+		fractal_wave_description const& wave_params_xy,
 		output_range xy_output_range,
-		fractal_wave_params const& wave_params_xz,
+		fractal_wave_description const& wave_params_xz,
 		output_range xz_output_range,
 		Params&&... params)
 	{
