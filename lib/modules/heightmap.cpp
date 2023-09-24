@@ -15,18 +15,20 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	if(h < 2 || w < 2)
 	{ throw std::runtime_error{"Output resolution is too small"}; }
 
+	auto const ay = params.main_ridge.ridge_curve_xy.amplitude;
+	auto const az = params.main_ridge.ridge_curve_xz.amplitude;
 	auto const ridge_curve = generate(per_thread_rng,
-		params.main_ridge.ridge_curve_xy,
-		output_range{-4096.0f/hm.pixel_size, 4096.0f/hm.pixel_size},
-		params.main_ridge.ridge_curve_xz,
-		output_range{-512.0f, 512.0f},
+		params.main_ridge.ridge_curve_xy.wave,
+		output_range{-ay/hm.pixel_size, ay/hm.pixel_size},
+		params.main_ridge.ridge_curve_xz.wave,
+		output_range{-az, az},
 		polyline_location_params{
 			.point_count = w,
  			.dx = hm.pixel_size,
 			.start_location = terraformer::location{
 				0.0f,
-				params.main_ridge.y0*static_cast<float>(h - 1),
-				params.main_ridge.z0,
+				params.main_ridge.ridge_curve_xy.initial_value/hm.pixel_size,
+				params.main_ridge.ridge_curve_xz.initial_value
 			}
 		}
 	);
@@ -36,8 +38,6 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	auto const ne_elev = corners.ne.elevation;
 	auto const sw_elev = corners.sw.elevation;
 	auto const se_elev = corners.se.elevation;
-//	auto const ridge_loc_y = params.main_ridge.y0;
-//	auto const ridge_loc_z = params.main_ridge.z0;
 
 	for(uint32_t y = 0; y != h; ++y)
 	{

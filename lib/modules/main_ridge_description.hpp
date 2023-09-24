@@ -7,52 +7,27 @@
 
 namespace terraformer
 {
-	struct main_ridge_description
+	struct ridge_curve_description
 	{
-		float y0;
-		float z0;
-		fractal_wave_description ridge_curve_xy;
-		fractal_wave_description ridge_curve_xz;
+		float initial_value;
+		float amplitude;
+		fractal_wave_description wave;
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, main_ridge_description>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, ridge_curve_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(
 			field{
-				.name = "y0",
-				.display_name = "y<sub>0</sub>",
-				.description = "Controls the main ridge offset in the north-south direction",
+				.name = "initial_value",
+				.display_name = "Initial value",
+				.description = "Sets the initial value of the generated wave function",
 				.widget = std::tuple{
 					knob{
-						.min = 0.0f,
-						.max = 1.0f,
-						.binding = std::ref(params.get().y0)
-					},
-					textbox{
-						.value_converter = num_string_converter{
-							.range = closed_closed_interval{
-								.min = 0.0f,
-								.max = 1.0f
-							}
-						},
-						.binding = std::ref(params.get().y0)
-					}
-				}
-			}
-		);
-
-		form.insert(
-			field{
-				.name = "z0",
-				.display_name = "z<sub>0</sub>",
-				.description = "Controls the nominal elevation at the main ridge",
-				.widget = std::tuple{
-					knob{
-						.min = -16384.0f,
-						.max = 16384.0f,
-						.binding = std::ref(params.get().z0)
+						.min = -65536.0f,
+						.max = 65536.0f,
+						.binding = std::ref(params.get().initial_value)
 					},
 					textbox{
 						.value_converter = num_string_converter{
@@ -61,12 +36,58 @@ namespace terraformer
 								.max = std::numeric_limits<float>::infinity()
 							}
 						},
-						.binding = std::ref(params.get().z0)
+						.binding = std::ref(params.get().initial_value)
 					}
 				}
 			}
 		);
 
+		form.insert(
+			field{
+				.name = "amplitude",
+				.display_name = "Amplitude",
+				.description = "Sets the amplitude of the generated wave fucntion",
+				.widget = std::tuple{
+					knob{
+						.min = 0.0f,
+						.max = 32768.0f,
+						.binding = std::ref(params.get().amplitude)
+					},
+					textbox{
+						.value_converter = num_string_converter{
+							.range = closed_open_interval{
+								.min = 0.0f,
+								.max = std::numeric_limits<float>::infinity()
+							}
+						},
+						.binding = std::ref(params.get().amplitude)
+					}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "wave",
+				.display_name = "Wave parameters",
+				.description = "Sets different parameters for the wave function",
+				.widget = subform{
+					.binding = std::ref(params.get().wave)
+				}
+			}
+		);
+	}
+
+	struct main_ridge_description
+	{
+		ridge_curve_description ridge_curve_xy;
+		ridge_curve_description ridge_curve_xz;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, main_ridge_description>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
 		form.insert(
 			field{
 				.name = "ridge_curve_xy",
