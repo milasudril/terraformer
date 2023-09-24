@@ -238,8 +238,7 @@ namespace terraformer
 							if(auto new_val = std::lerp(knob.min, knob.max, static_cast<float>(src.value())/maxval);
 								new_val != knob.binding.get())
 							{
-								using knob_ = struct knob<BindingType>;
-								knob.binding.get() = knob.mapping == knob_::mapping_type::lin ? new_val: std::exp2(new_val);
+								knob.binding.get() = knob.mapping == numeric_input_mapping_type::lin ? new_val: std::exp2(new_val);
 								m_on_value_changed(make_widget_path(m_path, src.objectName()));
 							}
 						}, src, knob);
@@ -252,7 +251,9 @@ namespace terraformer
 			{ ret->setDisabled(true); }
 
 			m_display_callbacks.push_back([&dest = *ret, knob](){
-				dest.setValue(static_cast<int>(maxval*(knob.binding.get() - knob.min)/(knob.max - knob.min)));
+				auto const val = knob.mapping == numeric_input_mapping_type::lin? knob.binding.get()
+					: std::log2(knob.binding.get());
+				dest.setValue(static_cast<int>(maxval*(val - knob.min)/(knob.max - knob.min)));
 			});
 
 			ret->setObjectName(field_name);

@@ -23,6 +23,8 @@ namespace terraformer
 		std::optional<int> min_width = std::nullopt;
 	};
 
+	enum class numeric_input_mapping_type{lin, log};
+
 	template<class BindingType>
 	requires(std::is_same_v<std::remove_cvref_t<typename BindingType::type>, float>)
 	struct knob
@@ -30,8 +32,7 @@ namespace terraformer
 		float min;
 		float max;
 		BindingType binding;
-		enum class mapping_type{lin, log};
-		mapping_type mapping = mapping_type::lin;
+		numeric_input_mapping_type mapping = numeric_input_mapping_type::lin;
 	};
 
 	template<class Generator, class BindingType>

@@ -64,6 +64,6 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		}
 	}
 
-	store(pixels, "output.exr");
+//	store(pixels, "output.exr");
 }
 

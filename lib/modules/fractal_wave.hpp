@@ -30,7 +30,14 @@ namespace terraformer
 			.name = "scaling_factor",
 			.display_name = "Scaling factor",
 			.description = "Controls the relative size between two consecutive elements",
-			.widget = textbox{
+			.widget = std::tuple{
+				knob{
+					.min = 0.0f,
+					.max = 2.0f,
+					.binding = std::ref(params.get().scaling_factor),
+					.mapping = numeric_input_mapping_type::log
+				},
+				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_open_interval{
 							.min = 1.0f,
@@ -39,6 +46,7 @@ namespace terraformer
 					},
 					.binding = std::ref(params.get().scaling_factor)
 				}
+			}
 		});
 
 		form.insert(field{
