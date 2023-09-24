@@ -39,10 +39,10 @@ namespace terraformer
 	class widget_column:public QWidget
 	{
 	public:
-		explicit widget_column(QWidget* parent):
+		explicit widget_column(QWidget* parent, int indent = form_indent):
 			QWidget{parent},
 			m_root{std::make_unique<QVBoxLayout>(this)}
-			{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
+			{ m_root->setContentsMargins(indent, 0, 0, 0); }
 
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
@@ -148,7 +148,7 @@ namespace terraformer
 		template<class BindingType>
 		void insert(field<subform<BindingType>>&& field)
 		{
-			auto outer = std::make_unique<widget_column>(this);
+			auto outer = std::make_unique<widget_column>(this, 0);
 			auto label = std::make_unique<QLabel>(field.display_name, outer.get());
 			auto entry = create_widget(
 				std::move(field.widget),
