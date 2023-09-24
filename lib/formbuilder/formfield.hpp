@@ -30,6 +30,8 @@ namespace terraformer
 		float min;
 		float max;
 		BindingType binding;
+		enum class mapping_type{lin, log};
+		mapping_type mapping = mapping_type::lin;
 	};
 
 	template<class Generator, class BindingType>

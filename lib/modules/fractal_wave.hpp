@@ -32,8 +32,8 @@ namespace terraformer
 			.description = "Controls the relative size between two consecutive elements",
 			.widget = textbox{
 					.value_converter = num_string_converter{
-						.range = open_open_interval{
-							.min = 0.0f,
+						.range = closed_open_interval{
+							.min = 1.0f,
 							.max = std::numeric_limits<float>::infinity()
 						}
 					},

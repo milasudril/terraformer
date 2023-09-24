@@ -238,7 +238,8 @@ namespace terraformer
 							if(auto new_val = std::lerp(knob.min, knob.max, static_cast<float>(src.value())/maxval);
 								new_val != knob.binding.get())
 							{
-								knob.binding.get() = new_val;
+								using knob_ = struct knob<BindingType>;
+								knob.binding.get() = knob.mapping == knob_::mapping_type::lin ? new_val: std::exp2(new_val);
 								m_on_value_changed(make_widget_path(m_path, src.objectName()));
 							}
 						}, src, knob);
