@@ -95,7 +95,9 @@ int main(int argc, char** argv)
 			}
 		}
 	};
+
 	auto initial_heightmap = make_heightmap(sim.domain_size);
+	generate(initial_heightmap, sim.initial_heightmap);
 
 	terraformer::form output{nullptr, "result", [](auto&&...){}};
 
