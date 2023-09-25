@@ -15,7 +15,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	if(h < 2 || w < 2)
 	{ throw std::runtime_error{"Output resolution is too small"}; }
 
-	auto const ay = params.main_ridge.ridge_curve_xy.amplitude*static_cast<float>(h - 1);
+	auto const ay = params.main_ridge.ridge_curve_xy.amplitude*static_cast<float>(h - 1)*hm.pixel_size;
 	auto const az = params.main_ridge.ridge_curve_xz.amplitude;
 	auto const ridge_curve = generate(rng,
 		params.main_ridge.ridge_curve_xy.wave,
@@ -27,11 +27,43 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
  			.dx = hm.pixel_size,
 			.start_location = terraformer::location{
 				0.0f,
-				params.main_ridge.ridge_curve_xy.initial_value*static_cast<float>(h - 1),
+				params.main_ridge.ridge_curve_xy.initial_value*static_cast<float>(h - 1)*hm.pixel_size,
 				params.main_ridge.ridge_curve_xz.initial_value
 			}
 		}
 	);
+
+	grayscale_image u{w, h};
+	{
+		for(uint32_t y = 0 ; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				location const loc{
+					static_cast<float>(x)*hm.pixel_size,
+					static_cast<float>(y)*hm.pixel_size,
+					0.0f
+				};
+
+				auto const i = std::ranges::min_element(ridge_curve,
+					[loc](auto a, auto b){
+					return distance_xy(a, loc) < distance_xy(b, loc);
+				});
+
+				auto const d_curve = distance_xy(*i, loc);
+				auto const y_curve = ridge_curve[x][1];
+				auto const side = loc[1] - y_curve;
+				auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
+				auto const d_curve_boundary = side < 0.0f?
+					y_curve:
+					y_south - y_curve;
+				auto const distance = d_curve/d_curve_boundary;
+				auto const t = side < 0.0f? loc[1]/y_curve : (loc[1] - y_south)/(y_curve - y_south);
+
+				u(x, y) = std::sqrt(1.0f - std::lerp(1.0f, distance, t));
+			}
+		}
+	}
 
 	auto const& corners = params.corners;
 	auto const nw_elev = corners.nw.elevation;
@@ -49,21 +81,13 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			auto const north = std::lerp(nw_elev, ne_elev, xi);
 			auto const south = std::lerp(sw_elev, se_elev, xi);
 
-			auto const ridge_loc_y = ridge_curve[x][1]/static_cast<float>(h - 1);
 			auto const ridge_loc_z = ridge_curve[x][2];
 
-			auto const side = eta - ridge_loc_y;
-			auto const t = side < 0.0f?
-				1.0f + (eta - ridge_loc_y)/ridge_loc_y:
-				1.0f - (eta - ridge_loc_y)/(1.0f - ridge_loc_y);
-
-			auto const bump = smoothstep(2.0f*(t - 0.5f));
+			auto const bump = smoothstep(2.0f*(u(x, y) - 0.5f));
 
 			auto const base_elevation = std::lerp(north, south, eta);
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
 		}
 	}
-
-//	store(pixels, "output.exr");
 }
 
