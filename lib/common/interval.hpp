@@ -1,3 +1,6 @@
+#ifndef TERRAFORMER_INTERVAL_HPP
+#define TERRAFORMER_INTERVAL_HPP
+
 #include "./utils.hpp"
 
 #include <concepts>
@@ -80,3 +83,4 @@ namespace terraformer
 	bool within(closed_closed_interval<T> range, T val)
 	{ return val >= range.min && val <= range.max; }
 }
+#endif
