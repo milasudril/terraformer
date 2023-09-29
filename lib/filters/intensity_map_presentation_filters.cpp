@@ -21,23 +21,38 @@ terraformer::resize(grayscale_image const& src, image_resize_description const& 
 
 	grayscale_image ret{static_cast<uint32_t>(output_width), static_cast<uint32_t>(output_height)};
 
-	for(uint32_t y = 0; y != ret.height(); ++y)
+	if(r >= 1.0)
 	{
-		for(uint32_t x = 0; x != ret.width(); ++x)
+		for(uint32_t y = 0; y != ret.height(); ++y)
 		{
-			auto const src_x = static_cast<uint32_t>(static_cast<double>(x)*r);
-			auto const src_y = static_cast<uint32_t>(static_cast<double>(y)*r);
-			auto const src_x_end = static_cast<uint32_t>(static_cast<double>(x + 1)*r);
-			auto const src_y_end = static_cast<uint32_t>(static_cast<double>(y + 1)*r);
-
-			auto output_value = 0.0f;
-			for(uint32_t k = src_y; k != src_y_end; ++k)
+			for(uint32_t x = 0; x != ret.width(); ++x)
 			{
-				for(uint32_t l = src_x; l != src_x_end; ++l)
-				{ output_value += src(l, k); }
-			}
+				auto const src_x = static_cast<uint32_t>(static_cast<double>(x)*r);
+				auto const src_y = static_cast<uint32_t>(static_cast<double>(y)*r);
+				auto const src_x_end = static_cast<uint32_t>(static_cast<double>(x + 1)*r);
+				auto const src_y_end = static_cast<uint32_t>(static_cast<double>(y + 1)*r);
 
-			ret(x, y) = output_value/static_cast<float>(((src_x_end - src_x)*(src_y_end - src_y)));
+				auto output_value = 0.0f;
+				for(uint32_t k = src_y; k != src_y_end; ++k)
+				{
+					for(uint32_t l = src_x; l != src_x_end; ++l)
+					{ output_value += src(l, k); }
+				}
+
+				ret(x, y) = output_value/static_cast<float>(((src_x_end - src_x)*(src_y_end - src_y)));
+			}
+		}
+	}
+	else
+	{
+		for(uint32_t y = 0; y != ret.height(); ++y)
+		{
+			for(uint32_t x = 0; x != ret.width(); ++x)
+			{
+				auto const src_x = static_cast<uint32_t>(static_cast<double>(x)*r);
+				auto const src_y = static_cast<uint32_t>(static_cast<double>(y)*r);
+				ret(x, y) = src(src_x, src_y);
+			}
 		}
 	}
 
