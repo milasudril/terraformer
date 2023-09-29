@@ -26,6 +26,7 @@
 #include "lib/modules/simulation_description.hpp"
 #include "lib/modules/heightmap.hpp"
 #include "lib/common/random_bit_source.hpp"
+#include "lib/execution/task_receiver.hpp"
 
 #include <QSplitter>
 #include <QScrollArea>
@@ -114,24 +115,17 @@ int main(int argc, char** argv)
 
 	terraformer::form output{nullptr, "result", [](auto&&...){}};
 
+	terraformer::task_receiver<std::function<void()>> processor;
+
 	terraformer::form input{nullptr, "simulation_description", [&output,
 			&sim = std::as_const(sim),
-			&initial_heightmap](auto&& field_name) {
-		fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
-		terraformer::random_generator rng{sim.rng_seed};
-		if(field_name.starts_with("simulation_description/domain_size/"))
-		{
-			initial_heightmap = make_heightmap(sim.domain_size);
+			&processor](auto&& field_name) {
+		processor.replace_pending_task([sim, field_name = std::move(field_name)](){
+			fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
+			terraformer::random_generator rng{sim.rng_seed};
+			auto initial_heightmap = make_heightmap(sim.domain_size);
 			generate(initial_heightmap, sim.initial_heightmap, rng);
-			output.refresh();
-		}
-		else
-		if(field_name.starts_with("simulation_description/initial_heightmap/")
-			|| field_name.starts_with("simulation_description/rng_seed"))
-		{
-			generate(initial_heightmap, sim.initial_heightmap, rng);
-			output.refresh();
-		}
+		});
 	}};
 	input.setObjectName("simulation_description");
 
@@ -151,8 +145,8 @@ int main(int argc, char** argv)
 
 	input.set_focus();
 	input.refresh();
-	output.refresh();
 	mainwin.show();
+	output.refresh();
 
 	fdcb::context stderr_redirect{
 		STDERR_FILENO,
