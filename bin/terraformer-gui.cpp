@@ -117,14 +117,27 @@ int main(int argc, char** argv)
 
 	terraformer::task_receiver<std::function<void()>> processor;
 
-	terraformer::form input{nullptr, "simulation_description", [&output,
+	terraformer::form input{nullptr, "simulation_description", [
+			&terraformer,
+			&output,
+			&initial_heightmap,
 			&sim = std::as_const(sim),
 			&processor](auto&& field_name) {
-		processor.replace_pending_task([sim, field_name = std::move(field_name)](){
+		processor.replace_pending_task([
+				sim,
+				field_name = std::move(field_name),
+				&terraformer,
+				&output,
+				&initial_heightmap](){
 			fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
 			terraformer::random_generator rng{sim.rng_seed};
-			auto initial_heightmap = make_heightmap(sim.domain_size);
-			generate(initial_heightmap, sim.initial_heightmap, rng);
+			auto new_heightmap = make_heightmap(sim.domain_size);
+			generate(new_heightmap, sim.initial_heightmap, rng);
+			terraformer.post_event([&output, &initial_heightmap, res = std::move(new_heightmap)]() mutable {
+				initial_heightmap = std::move(res);
+				output.refresh();
+				return true;
+			});
 		});
 	}};
 	input.setObjectName("simulation_description");
