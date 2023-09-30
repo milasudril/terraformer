@@ -90,7 +90,7 @@ namespace terraformer
 			m_digit_height = fm.ascent();
 
 			setMinimumWidth(scale_width + m_label_width + 2*m_em);
-			setMinimumHeight(scale_min_height + 2*m_label_height);
+			setMinimumHeight(scale_min_height + m_label_height);
 			m_range = std::ranges::minmax_result{0.0f, 1.0f};
 		}
 

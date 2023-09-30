@@ -36,7 +36,7 @@ void terraformer::colorbar::generate_image()
 	std::span<rgba_pixel const> colors{m_colormap};
 
 	auto const width = scale_width;
-	auto const height = this->height() - 2*m_label_height;
+	auto const height = this->height() - m_label_height;
 	basic_image<output_pixel> img_srgb{static_cast<uint32_t>(width), static_cast<uint32_t>(height)};
 	for(uint32_t y = 0; y != img_srgb.height(); ++y)
 	{
@@ -68,15 +68,15 @@ void terraformer::colorbar::generate_image()
 void terraformer::colorbar::paintEvent(QPaintEvent*)
 {
 	QPainter p{this};
-	p.drawPixmap(0, m_label_height, m_image_data);
+	p.drawPixmap(0, m_label_height/2, m_image_data);
 
-	auto const height = this->height() - 2*m_label_height;
+	auto const height = this->height() - m_label_height;
 	auto const N = 16;
 	auto const min = m_range.min;
 	auto const max = m_range.max;
 	auto const dv = (max - min)/static_cast<float>(N);
 	auto const em = m_em;
-	auto const y_0 = static_cast<float>(m_label_height);
+	auto const y_0 = 0.5f*static_cast<float>(m_label_height);
 	auto const y_txt_ofs = 0.25f*static_cast<float>(m_digit_height);
 
 	for(size_t k = 0; k != N + 1; ++k)
