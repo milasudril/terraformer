@@ -131,23 +131,23 @@ namespace terraformer
 			m_root{std::make_unique<QHBoxLayout>(this)},
 			m_image_view{std::make_unique<image_view>(this)},
 			m_colorbar{std::make_unique<colorbar>(this)}
-			{
-				m_root->setContentsMargins(form_indent, 0, 0, 0);
-				m_image_view->setSizePolicy(QSizePolicy{
-					QSizePolicy::Policy::Fixed,
-					QSizePolicy::Policy::Expanding
-				});
+		{
+			m_root->setContentsMargins(form_indent, 0, 0, 0);
+			m_image_view->setSizePolicy(QSizePolicy{
+				QSizePolicy::Policy::Fixed,
+				QSizePolicy::Policy::Expanding
+			});
 
-				m_colorbar->setSizePolicy(QSizePolicy{
-					QSizePolicy::Policy::Expanding,
-					QSizePolicy::Policy::Expanding
-				});
+			m_colorbar->setSizePolicy(QSizePolicy{
+				QSizePolicy::Policy::Expanding,
+				QSizePolicy::Policy::Expanding
+			});
 
-				m_root->addWidget(m_image_view.get());
-				m_root->addWidget(m_colorbar.get());
-				m_root->addSpacing(0);
-				set_colormap(earth_colormap);
-			}
+			m_root->addWidget(m_image_view.get());
+			m_root->addWidget(m_colorbar.get());
+			m_root->addSpacing(0);
+			set_colormap(earth_colormap);
+		}
 
 		void upload(grayscale_image const& img);
 
@@ -167,6 +167,18 @@ namespace terraformer
 		std::unique_ptr<colorbar> m_colorbar;
 	};
 
+	class topographic_map_view_xsection_view:public QWidget
+	{
+	public:
+		explicit topographic_map_view_xsection_view(QWidget* parent):
+			QWidget{parent},
+			m_root{std::make_unique<QVBoxLayout>(this)}
+		{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
+
+	private:
+		std::unique_ptr<QVBoxLayout> m_root;
+	};
+
 	class topographic_map_renderer:public QWidget
 	{
 	public:
@@ -174,10 +186,12 @@ namespace terraformer
 			QWidget{parent},
 			m_root{std::make_unique<QHBoxLayout>(this)},
 			m_tabs{std::make_unique<QTabWidget>(this)},
-			m_map{new topographic_map_view_map_view{nullptr}}
+			m_map{new topographic_map_view_map_view{nullptr}},
+			m_crossection{new topographic_map_view_xsection_view{nullptr}}
 		{
 			m_root->addWidget(m_tabs.get());
 			m_tabs->addTab(m_map, "Topographic map");
+			m_tabs->addTab(m_crossection, "Cross-sections");
 		}
 
 		void upload(grayscale_image const& img)
@@ -195,6 +209,7 @@ namespace terraformer
 		// NOTE: According to the documentation for QTabWidget, a QTabWidget takes ownership
 		//       of the object. Thus, we do not use unique_ptr here.
 		topographic_map_view_map_view* m_map;
+		topographic_map_view_xsection_view* m_crossection;
 	};
 
 	inline std::string make_widget_path(std::string const& path, QString const& field_name)
