@@ -24,6 +24,8 @@ namespace terraformer
 
 	grayscale_image generate_level_curves(grayscale_image const& src,
 	posterization_description const& params);
+
+	image apply_colormap(grayscale_image const& src, std::span<rgba_pixel const> colors);
 }
 
 #endif

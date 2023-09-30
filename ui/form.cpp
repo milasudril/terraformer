@@ -19,6 +19,7 @@
 
 #include "./form.hpp"
 #include "lib/filters/intensity_map_presentation_filters.hpp"
+#include "lib/filters/earth_colormap.hpp"
 
 namespace
 {
@@ -33,6 +34,7 @@ namespace
 
 void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 {
+#if 0
 	auto const img_to_present = generate_level_curves(
 		terraformer::resize(img, image_resize_description{
 			.output_width = static_cast<uint32_t>(m_image_view->width()),
@@ -42,18 +44,27 @@ void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 		.levels = 16
 		}
 	);
+#else
+	auto const img_to_present = apply_colormap(
+		terraformer::resize(img, image_resize_description{
+			.output_width = static_cast<uint32_t>(m_image_view->width()),
+			.output_height = static_cast<uint32_t>(m_image_view->height())
+		}),
+		earth_colormap
+	);
+#endif
 
 	basic_image<output_pixel> img_srgb{img_to_present.width(), img_to_present.height()};
 	for(uint32_t y = 0; y != img_srgb.height(); ++y)
 	{
 		for(uint32_t x = 0; x != img_srgb.width(); ++x)
 		{
-			auto const output_value = static_cast<uint8_t>(255.0f*img_to_present(x, y));
+			auto const output_value = img_to_present(x, y);
 
 			img_srgb(x, y) = output_pixel{
-				.b = output_value,
-				.g = output_value,
-				.r = output_value,
+				.b = static_cast<uint8_t>(255.0f*std::pow(output_value.blue(), 1.0f/2.2f)),
+				.g = static_cast<uint8_t>(255.0f*std::pow(output_value.green(), 1.0f/2.2f)),
+				.r = static_cast<uint8_t>(255.0f*std::pow(output_value.red(), 1.0f/2.2f)),
 				.a = 0xff,
 			};
 		}

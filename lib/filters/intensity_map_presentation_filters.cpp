@@ -1,6 +1,7 @@
 //@	{"target":{"name": "intensity_map_presentation_filters.o"}}
 
 #include "./intensity_map_presentation_filters.hpp"
+#include "lib/common/utils.hpp"
 
 #include <cassert>
 
@@ -98,5 +99,27 @@ terraformer::grayscale_image terraformer::generate_level_curves(grayscale_image 
 			ret(x, y) = ddx*ddx + ddy*ddy > 0.0f;
 		}
 	}
+	return ret;
+}
+
+terraformer::image terraformer::apply_colormap(grayscale_image const& src,
+	std::span<rgba_pixel const> colors)
+{
+	terraformer::image ret{src.width(), src.height()};
+	auto const range = std::ranges::minmax_element(src.pixels());
+	auto const min = *range.min;
+	auto const z_range = *range.max - min;
+	if(z_range == 0.0f)
+	{ return ret; }
+
+	for(uint32_t y = 0; y != ret.height(); ++y)
+	{
+		for(uint32_t x = 0; x != ret.width(); ++x)
+		{
+			auto const xi = static_cast<float>(std::size(colors) - 1)*(src(x, y) - min)/z_range;
+			ret(x, y) = interp(colors, xi);
+		}
+	}
+
 	return ret;
 }
