@@ -201,11 +201,30 @@ namespace terraformer
 	public:
 		explicit topographic_map_view_xsection_view(QWidget* parent):
 			QWidget{parent},
-			m_root{std::make_unique<QVBoxLayout>(this)}
-		{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
+			m_root{std::make_unique<QVBoxLayout>(this)},
+			m_ns_view{std::make_unique<QLabel>("Feature is not implemented yet", this)},
+			m_we_view{std::make_unique<QLabel>("Feature is not implemented yet", this)}
+		{
+			m_root->setContentsMargins(form_indent, 0, 0, 0);
+			m_ns_view->setSizePolicy(QSizePolicy{
+				QSizePolicy::Policy::Expanding,
+				QSizePolicy::Policy::Expanding
+			});
+			m_ns_view->setToolTip("Shows cross-sections from west to east");
+			m_root->addWidget(m_ns_view.get());
+
+			m_we_view->setSizePolicy(QSizePolicy{
+				QSizePolicy::Policy::Expanding,
+				QSizePolicy::Policy::Expanding
+			});
+			m_we_view->setToolTip("Shows cross-sections from north to south");
+			m_root->addWidget(m_we_view.get());
+		}
 
 	private:
 		std::unique_ptr<QVBoxLayout> m_root;
+		std::unique_ptr<QLabel> m_ns_view;
+		std::unique_ptr<QLabel> m_we_view;
 	};
 
 	class topographic_map_renderer:public QWidget
