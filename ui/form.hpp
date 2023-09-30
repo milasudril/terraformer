@@ -170,6 +170,7 @@ namespace terraformer
 				QSizePolicy::Policy::Expanding,
 				QSizePolicy::Policy::Expanding
 			});
+			m_colorbar->setToolTip("Shows mapping between color and elevation");
 
 			m_root->addWidget(m_image_view.get());
 			m_root->addWidget(m_colorbar.get());
