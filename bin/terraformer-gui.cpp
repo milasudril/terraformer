@@ -160,6 +160,8 @@ int main(int argc, char** argv)
 	input.refresh();
 	mainwin.show();
 	output.refresh();
+	input_scroll_area.setMinimumWidth(384);
+	input_scroll_area.adjustSize();
 
 	fdcb::context stderr_redirect{
 		STDERR_FILENO,

@@ -9,6 +9,7 @@
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/pixel_store/image.hpp"
+#include "lib/filters/earth_colormap.hpp"
 
 #include <QWidget>
 #include <QFormLayout>
@@ -17,6 +18,7 @@
 #include <QDial>
 #include <QPushButton>
 #include <QPainter>
+#include <QApplication>
 
 namespace terraformer
 {
@@ -69,27 +71,100 @@ namespace terraformer
 		QPixmap m_image_data;
 	};
 
+	class colorbar:public QWidget
+	{
+	public:
+		static constexpr auto scale_width = 32;
+		static constexpr auto scale_min_height = 8*scale_width;
+
+		explicit colorbar(QWidget* parent): QWidget{parent}
+		{
+			auto const app_font = QApplication::font(this);
+			QFontMetrics fm{app_font};
+			m_label_width = fm.horizontalAdvance("99999")+fm.horizontalAdvance("mm");
+			m_label_height = fm.lineSpacing();
+
+			setMinimumWidth(scale_width + m_label_width);
+			setMinimumHeight(scale_min_height + 2*m_label_height);
+		}
+
+		void set_colormap(std::span<rgba_pixel const> colormap)
+		{
+			m_colormap = std::vector<rgba_pixel>{std::begin(colormap), std::end(colormap)};
+			generate_image();
+		}
+
+		void set_range(float min, float max)
+		{
+			m_min = min;
+			m_max = max;
+		}
+
+		void redraw()
+		{
+			generate_image();
+			update();
+		}
+
+	private:
+		void generate_image();
+
+		void paintEvent(QPaintEvent*) override
+		{
+			QPainter p{this};
+			p.drawPixmap(0, m_label_height, m_image_data);
+		}
+
+		QPixmap m_image_data;
+		float m_min;
+		float m_max;
+		int m_label_width;
+		int m_label_height;
+		std::vector<rgba_pixel> m_colormap;
+	};
+
 	class topographic_map_renderer:public QWidget
 	{
 	public:
 		explicit topographic_map_renderer(QWidget* parent):
 			QWidget{parent},
-			m_root{std::make_unique<QVBoxLayout>(this)},
-			m_image_view{std::make_unique<image_view>(this)}
+			m_root{std::make_unique<QHBoxLayout>(this)},
+			m_image_view{std::make_unique<image_view>(this)},
+			m_colorbar{std::make_unique<colorbar>(this)}
 			{
 				m_root->setContentsMargins(form_indent, 0, 0, 0);
 				m_image_view->setSizePolicy(QSizePolicy{
+					QSizePolicy::Policy::Fixed,
+					QSizePolicy::Policy::Expanding
+				});
+
+				m_colorbar->setSizePolicy(QSizePolicy{
 					QSizePolicy::Policy::Expanding,
 					QSizePolicy::Policy::Expanding
 				});
+
 				m_root->addWidget(m_image_view.get());
+				m_root->addWidget(m_colorbar.get());
+				m_root->addSpacing(0);
+				set_colormap(earth_colormap);
 			}
 
 		void upload(grayscale_image const& img);
 
+		void set_colormap(std::span<rgba_pixel const> colormap)
+		{
+			m_colormap = std::vector<rgba_pixel>{std::begin(colormap), std::end(colormap)};
+			m_colorbar->set_colormap(colormap);
+		}
+
+		void redraw_colorbar()
+		{ m_colorbar->redraw(); }
+
 	private:
-		std::unique_ptr<QVBoxLayout> m_root;
+		std::unique_ptr<QHBoxLayout> m_root;
+		std::vector<rgba_pixel> m_colormap;
 		std::unique_ptr<image_view> m_image_view;
+		std::unique_ptr<colorbar> m_colorbar;
 	};
 
 	inline std::string make_widget_path(std::string const& path, QString const& field_name)
@@ -319,6 +394,7 @@ namespace terraformer
 			m_display_callbacks.push_back([&dest = *ret, pixels = view.binding](){
 				// TODO: Avoid uploading pixels if nothing has been changed since last update
 				dest.upload(pixels.get());
+				dest.redraw_colorbar();
 			});
 			ret->setObjectName(field_name);
 			return ret;
