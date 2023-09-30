@@ -34,13 +34,6 @@
 
 int main(int argc, char** argv)
 {
-	terraformer::application terraformer{argc, argv};
-	terraformer.setStyleSheet("*{padding:0px; margin:0px}\nQPushButton{padding:4px}");
-	QSplitter mainwin;
-	mainwin.setOrientation(Qt::Vertical);
-
-	QSplitter input_output{nullptr};
-	mainwin.addWidget(&input_output);
 
 	terraformer::simulation_description sim{
 		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>(),
@@ -112,6 +105,14 @@ int main(int argc, char** argv)
 	auto initial_heightmap = make_heightmap(sim.domain_size);
 	terraformer::random_generator rng{sim.rng_seed};
 	generate(initial_heightmap, sim.initial_heightmap, rng);
+
+	terraformer::application terraformer{argc, argv};
+	terraformer.setStyleSheet("*{padding:0px; margin:0px}\nQPushButton{padding:4px}");
+	QSplitter mainwin;
+	mainwin.setOrientation(Qt::Vertical);
+
+	QSplitter input_output{nullptr};
+	mainwin.addWidget(&input_output);
 
 	terraformer::form output{nullptr, "result", [](auto&&...){}};
 
