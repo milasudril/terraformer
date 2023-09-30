@@ -60,43 +60,52 @@ terraformer::resize(grayscale_image const& src, image_resize_description const& 
 	return ret;
 }
 
-terraformer::grayscale_image
+std::pair<terraformer::grayscale_image, std::ranges::minmax_result<float>>
 terraformer::posterize(grayscale_image const& src, posterization_description const& params)
 {
-	terraformer::grayscale_image ret{src.width(), src.height()};
 	auto const range = std::ranges::minmax_element(src.pixels());
 	auto const min = *range.min;
-	auto const z_range = *range.max - min;
 
+	std::pair<grayscale_image, std::ranges::minmax_result<float>> ret{
+		grayscale_image{src.width(), src.height()},
+		std::ranges::minmax_result{.min = *range.min, .max=*range.max}
+	};
+
+	auto const z_range = *range.max - min;
 	if(z_range == 0.0f)
 	{ return ret; }
 
 	auto const levels = static_cast<float>(params.levels);
 
-	for(uint32_t y = 0; y != ret.height(); ++y)
+	for(uint32_t y = 0; y != ret.first.height(); ++y)
 	{
-		for(uint32_t x = 0; x != ret.width(); ++x)
+		for(uint32_t x = 0; x != ret.first.width(); ++x)
 		{
 			auto const val = static_cast<int>(levels*(src(x, y) - min)/z_range + 0.5f)/levels;
-			ret(x, y) = val;
+			ret.first(x, y) = val;
 		}
 	}
 	return ret;
 }
 
-terraformer::grayscale_image terraformer::generate_level_curves(grayscale_image const& src,
+std::pair<terraformer::grayscale_image, std::ranges::minmax_result<float>>
+terraformer::generate_level_curves(grayscale_image const& src,
 	posterization_description const& params)
 {
 	auto img_posterized = posterize(src, params);
-	terraformer::grayscale_image ret{src.width(), src.height()};
-	for(uint32_t y = 1; y != ret.height() - 1; ++y)
-	{
-		for(uint32_t x = 1; x != ret.width() - 1; ++x)
-		{
-			auto ddx = img_posterized(x + 1, y) - img_posterized(x - 1, y);
-			auto ddy = img_posterized(x, y + 1) - img_posterized(x, y - 1);
+	std::pair<grayscale_image, std::ranges::minmax_result<float>> ret{
+		grayscale_image{src.width(), src.height()},
+		img_posterized.second
+	};
 
-			ret(x, y) = ddx*ddx + ddy*ddy > 0.0f;
+	for(uint32_t y = 1; y != ret.first.height() - 1; ++y)
+	{
+		for(uint32_t x = 1; x != ret.first.width() - 1; ++x)
+		{
+			auto ddx = img_posterized.first(x + 1, y) - img_posterized.first(x - 1, y);
+			auto ddy = img_posterized.first(x, y + 1) - img_posterized.first(x, y - 1);
+
+			ret.first(x, y) = ddx*ddx + ddy*ddy > 0.0f;
 		}
 	}
 	return ret;

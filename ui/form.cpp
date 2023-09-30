@@ -73,7 +73,8 @@ void terraformer::colorbar::paintEvent(QPaintEvent*)
 	auto const height = this->height() - 2*m_label_height;
 	auto const N = 16;
 	auto const dy = static_cast<float>(height)/static_cast<float>(N);
-	auto const dv = (m_max - m_min)/static_cast<float>(N);
+	auto const dv = (m_range.max - m_range.min)/static_cast<float>(N);
+	auto const min = m_range.min;
 	auto const em = m_em;
 	auto const y_0 = static_cast<float>(m_label_height);
 	auto const y_txt_ofs = 0.25f*static_cast<float>(m_digit_height);
@@ -84,7 +85,7 @@ void terraformer::colorbar::paintEvent(QPaintEvent*)
 		auto const y_marker = height - static_cast<int>(static_cast<float>(k)*dy - y_0);
 		auto const y_txt = height - static_cast<int>(static_cast<float>(k)*dy - y_0 - y_txt_ofs);
 		p.drawLine(x, y_marker, x + em, y_marker);
-		auto const value = static_cast<float>(k)*dv + m_min;
+		auto const value = static_cast<float>(k)*dv + min;
 		p.drawText(x + 2*em, y_txt, QString::fromStdString(std::to_string(value)));
 	}
 }
@@ -108,6 +109,8 @@ void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 		}
 	);
 
+	m_colorbar->set_range(level_curves.second);
+
 	auto const mapped_intensity = apply_colormap(fitted_image, m_colormap);
 
 	basic_image<output_pixel> img_srgb{fitted_image.width(), fitted_image.height()};
@@ -115,7 +118,7 @@ void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 	{
 		for(uint32_t x = 0; x != img_srgb.width(); ++x)
 		{
-			auto const output_value = mapped_intensity(x, y)*(1.0f - 0.5f*level_curves(x, y));
+			auto const output_value = mapped_intensity(x, y)*(1.0f - 0.5f*level_curves.first(x, y));
 
 			img_srgb(x, y) = output_pixel{
 				.b = static_cast<uint8_t>(255.0f*std::pow(output_value.blue(), 1.0f/2.2f)),

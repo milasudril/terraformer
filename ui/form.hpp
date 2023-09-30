@@ -20,6 +20,8 @@
 #include <QPainter>
 #include <QApplication>
 
+#include <ranges>
+
 namespace terraformer
 {
 	static constexpr auto form_indent = 8;
@@ -88,8 +90,7 @@ namespace terraformer
 
 			setMinimumWidth(scale_width + m_label_width + 2*m_em);
 			setMinimumHeight(scale_min_height + 2*m_label_height);
-			m_min = 0.0f;
-			m_max = 1.0f;
+			m_range = std::ranges::minmax_result{0.0f, 1.0f};
 		}
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
@@ -98,11 +99,8 @@ namespace terraformer
 			generate_image();
 		}
 
-		void set_range(float min, float max)
-		{
-			m_min = min;
-			m_max = max;
-		}
+		void set_range(std::ranges::minmax_result<float> range)
+		{ m_range = range; }
 
 		void redraw()
 		{
@@ -116,8 +114,7 @@ namespace terraformer
 		void paintEvent(QPaintEvent*) override;
 
 		QPixmap m_image_data;
-		float m_min;
-		float m_max;
+		std::ranges::minmax_result<float> m_range;
 		int m_label_width;
 		int m_em;
 		int m_label_height;

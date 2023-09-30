@@ -5,6 +5,8 @@
 
 #include "lib/pixel_store/image.hpp"
 
+#include <ranges>
+
 namespace terraformer
 {
 	struct image_resize_description
@@ -20,9 +22,10 @@ namespace terraformer
 		uint32_t levels;
 	};
 
-	grayscale_image posterize(grayscale_image const& src, posterization_description const& params);
+	std::pair<grayscale_image, std::ranges::minmax_result<float>> posterize(grayscale_image const& src, posterization_description const& params);
 
-	grayscale_image generate_level_curves(grayscale_image const& src,
+	std::pair<grayscale_image, std::ranges::minmax_result<float>>
+	generate_level_curves(grayscale_image const& src,
 	posterization_description const& params);
 
 	image apply_colormap(grayscale_image const& src, std::span<rgba_pixel const> colors);
