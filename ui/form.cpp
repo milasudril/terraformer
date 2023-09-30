@@ -72,21 +72,24 @@ void terraformer::colorbar::paintEvent(QPaintEvent*)
 
 	auto const height = this->height() - 2*m_label_height;
 	auto const N = 16;
-	auto const dy = static_cast<float>(height)/static_cast<float>(N);
-	auto const dv = (m_range.max - m_range.min)/static_cast<float>(N);
 	auto const min = m_range.min;
+	auto const max = m_range.max;
+	auto const dv = (max - min)/static_cast<float>(N);
 	auto const em = m_em;
 	auto const y_0 = static_cast<float>(m_label_height);
 	auto const y_txt_ofs = 0.25f*static_cast<float>(m_digit_height);
 
 	for(size_t k = 0; k != N + 1; ++k)
 	{
+		auto const value = std::round(static_cast<float>(k)*dv + min);
+		auto const y = std::lerp(static_cast<float>(height), 0.0f, (value - min)/(max - min));
+
 		auto const x = scale_width;
-		auto const y_marker = height - static_cast<int>(static_cast<float>(k)*dy - y_0);
-		auto const y_txt = height - static_cast<int>(static_cast<float>(k)*dy - y_0 - y_txt_ofs);
-		p.drawLine(x, y_marker, x + em, y_marker);
-		auto const value = static_cast<float>(k)*dv + min;
-		p.drawText(x + 2*em, y_txt, QString::fromStdString(std::to_string(value)));
+		auto const y_marker = y + y_0;
+		auto const y_txt = y_marker + y_txt_ofs;
+		p.drawLine(x, static_cast<int>(y_marker), x + em, static_cast<int>(y_marker));
+
+		p.drawText(x + 2*em, static_cast<int>(y_txt), QString::fromStdString(std::to_string(static_cast<int>(value))));
 	}
 }
 

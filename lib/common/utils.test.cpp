@@ -51,3 +51,16 @@ TESTCASE(terraformer_smoothstep)
 		printf("%.8g   %.8g\n", x, terraformer::smoothstep(x));
 	}
 }
+
+TESTCASE(terraformer_round_to_n_digits)
+{
+	{
+		auto res = terraformer::round_to_n_digits(512.0f, 1);
+		EXPECT_EQ(res, 512.0f);
+	}
+
+	{
+		auto res = terraformer::round_to_n_digits(900.0f, 1);
+		EXPECT_EQ(res, 1024.0f);
+	}
+}

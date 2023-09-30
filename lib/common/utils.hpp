@@ -116,6 +116,12 @@ namespace terraformer
 
 		return (1.0f - t)*left + right*t;
 	}
+
+	inline float round_to_n_digits(float x, int n)
+	{
+		auto const scale = std::exp2(static_cast<float>(n) - std::ceil(std::log2(std::abs(x))));
+		return std::round(x * scale) / scale;
+	}
 }
 
 #endif
