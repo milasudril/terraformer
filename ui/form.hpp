@@ -81,11 +81,15 @@ namespace terraformer
 		{
 			auto const app_font = QApplication::font(this);
 			QFontMetrics fm{app_font};
-			m_label_width = fm.horizontalAdvance("99999")+fm.horizontalAdvance("mm");
+			m_label_width = fm.horizontalAdvance("99999");
+			m_em = fm.horizontalAdvance("m");
 			m_label_height = fm.lineSpacing();
+			m_digit_height = fm.ascent();
 
-			setMinimumWidth(scale_width + m_label_width);
+			setMinimumWidth(scale_width + m_label_width + 2*m_em);
 			setMinimumHeight(scale_min_height + 2*m_label_height);
+			m_min = 0.0f;
+			m_max = 1.0f;
 		}
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
@@ -109,17 +113,15 @@ namespace terraformer
 	private:
 		void generate_image();
 
-		void paintEvent(QPaintEvent*) override
-		{
-			QPainter p{this};
-			p.drawPixmap(0, m_label_height, m_image_data);
-		}
+		void paintEvent(QPaintEvent*) override;
 
 		QPixmap m_image_data;
 		float m_min;
 		float m_max;
 		int m_label_width;
+		int m_em;
 		int m_label_height;
+		int m_digit_height;
 		std::vector<rgba_pixel> m_colormap;
 	};
 

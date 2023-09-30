@@ -65,6 +65,30 @@ void terraformer::colorbar::generate_image()
 	m_image_data = QPixmap::fromImage(img_out);
 }
 
+void terraformer::colorbar::paintEvent(QPaintEvent*)
+{
+	QPainter p{this};
+	p.drawPixmap(0, m_label_height, m_image_data);
+
+	auto const height = this->height() - 2*m_label_height;
+	auto const N = 16;
+	auto const dy = static_cast<float>(height)/static_cast<float>(N);
+	auto const dv = (m_max - m_min)/static_cast<float>(N);
+	auto const em = m_em;
+	auto const y_0 = static_cast<float>(m_label_height);
+	auto const y_txt_ofs = 0.25f*static_cast<float>(m_digit_height);
+
+	for(size_t k = 0; k != N + 1; ++k)
+	{
+		auto const x = scale_width;
+		auto const y_marker = height - static_cast<int>(static_cast<float>(k)*dy - y_0);
+		auto const y_txt = height - static_cast<int>(static_cast<float>(k)*dy - y_0 - y_txt_ofs);
+		p.drawLine(x, y_marker, x + em, y_marker);
+		auto const value = static_cast<float>(k)*dv + m_min;
+		p.drawText(x + 2*em, y_txt, QString::fromStdString(std::to_string(value)));
+	}
+}
+
 void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 {
 	auto const r = static_cast<double>(img.width())/static_cast<double>(img.height());
