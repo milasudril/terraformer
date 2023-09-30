@@ -111,7 +111,7 @@ void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 
 	m_colorbar->set_range(level_curves.second);
 
-	auto const mapped_intensity = apply_colormap(fitted_image, m_colormap);
+	auto const mapped_intensity = apply_colormap(fitted_image, m_colormap, level_curves.second);
 
 	basic_image<output_pixel> img_srgb{fitted_image.width(), fitted_image.height()};
 	for(uint32_t y = 0; y != img_srgb.height(); ++y)

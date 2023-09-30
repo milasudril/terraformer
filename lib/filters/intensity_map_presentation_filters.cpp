@@ -112,12 +112,21 @@ terraformer::generate_level_curves(grayscale_image const& src,
 }
 
 terraformer::image terraformer::apply_colormap(grayscale_image const& src,
-	std::span<rgba_pixel const> colors)
+	std::span<rgba_pixel const> colors,
+	std::optional<std::ranges::minmax_result<float>> range)
 {
 	terraformer::image ret{src.width(), src.height()};
-	auto const range = std::ranges::minmax_element(src.pixels());
-	auto const min = *range.min;
-	auto const z_range = *range.max - min;
+	auto const computed_range = [](auto pixels, auto range){
+		if(range.has_value())
+		{ return *range; }
+
+		auto const range_iter = std::ranges::minmax_element(pixels);
+		return std::ranges::minmax_result{*range_iter.min, *range_iter.max};
+	}(src.pixels(), range);
+
+	auto const z_range = computed_range.max - computed_range.min;
+	auto const min = computed_range.min;
+
 	if(z_range == 0.0f)
 	{ return ret; }
 

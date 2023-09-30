@@ -6,6 +6,7 @@
 #include "lib/pixel_store/image.hpp"
 
 #include <ranges>
+#include <optional>
 
 namespace terraformer
 {
@@ -28,7 +29,9 @@ namespace terraformer
 	generate_level_curves(grayscale_image const& src,
 	posterization_description const& params);
 
-	image apply_colormap(grayscale_image const& src, std::span<rgba_pixel const> colors);
+	image apply_colormap(grayscale_image const& src,
+		std::span<rgba_pixel const> colors,
+		std::optional<std::ranges::minmax_result<float>> range = std::nullopt);
 }
 
 #endif
