@@ -93,7 +93,7 @@ void terraformer::colorbar::paintEvent(QPaintEvent*)
 	}
 }
 
-void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
+void terraformer::topographic_map_view_map_view::upload(grayscale_image const& img)
 {
 	auto const r = static_cast<double>(img.width())/static_cast<double>(img.height());
 	auto const min_width = static_cast<uint32_t>(static_cast<double>(m_image_view->height())*r);

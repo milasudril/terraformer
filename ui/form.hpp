@@ -19,6 +19,7 @@
 #include <QPushButton>
 #include <QPainter>
 #include <QApplication>
+#include <QTabWidget>
 
 #include <ranges>
 
@@ -122,10 +123,10 @@ namespace terraformer
 		std::vector<rgba_pixel> m_colormap;
 	};
 
-	class topographic_map_renderer:public QWidget
+	class topographic_map_view_map_view:public QWidget
 	{
 	public:
-		explicit topographic_map_renderer(QWidget* parent):
+		explicit topographic_map_view_map_view(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QHBoxLayout>(this)},
 			m_image_view{std::make_unique<image_view>(this)},
@@ -164,6 +165,36 @@ namespace terraformer
 		std::vector<rgba_pixel> m_colormap;
 		std::unique_ptr<image_view> m_image_view;
 		std::unique_ptr<colorbar> m_colorbar;
+	};
+
+	class topographic_map_renderer:public QWidget
+	{
+	public:
+		explicit topographic_map_renderer(QWidget* parent):
+			QWidget{parent},
+			m_root{std::make_unique<QHBoxLayout>(this)},
+			m_tabs{std::make_unique<QTabWidget>(this)},
+			m_map{new topographic_map_view_map_view{nullptr}}
+		{
+			m_root->addWidget(m_tabs.get());
+			m_tabs->addTab(m_map, "Topographic map");
+		}
+
+		void upload(grayscale_image const& img)
+		{ m_map->upload(img); }
+
+		void set_colormap(std::span<rgba_pixel const> colormap)
+		{ m_map->set_colormap(colormap); }
+
+		void redraw_colorbar()
+		{ m_map->redraw_colorbar(); }
+
+	private:
+		std::unique_ptr<QHBoxLayout> m_root;
+		std::unique_ptr<QTabWidget> m_tabs;
+		// NOTE: According to the documentation for QTabWidget, a QTabWidget takes ownership
+		//       of the object. Thus, we do not use unique_ptr here.
+		topographic_map_view_map_view* m_map;
 	};
 
 	inline std::string make_widget_path(std::string const& path, QString const& field_name)
