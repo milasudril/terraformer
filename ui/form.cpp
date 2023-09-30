@@ -33,7 +33,7 @@ namespace
 
 void terraformer::topographic_map_renderer::upload(grayscale_image const& img)
 {
-	auto const img_to_present = posterize(
+	auto const img_to_present = generate_level_curves(
 		terraformer::resize(img, image_resize_description{
 			.output_width = static_cast<uint32_t>(m_image_view->width()),
 			.output_height = static_cast<uint32_t>(m_image_view->height())

@@ -21,6 +21,9 @@ namespace terraformer
 	};
 
 	grayscale_image posterize(grayscale_image const& src, posterization_description const& params);
+
+	grayscale_image generate_level_curves(grayscale_image const& src,
+	posterization_description const& params);
 }
 
 #endif

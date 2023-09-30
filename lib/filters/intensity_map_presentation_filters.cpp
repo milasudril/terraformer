@@ -82,3 +82,21 @@ terraformer::posterize(grayscale_image const& src, posterization_description con
 	}
 	return ret;
 }
+
+terraformer::grayscale_image terraformer::generate_level_curves(grayscale_image const& src,
+	posterization_description const& params)
+{
+	auto img_posterized = posterize(src, params);
+	terraformer::grayscale_image ret{src.width(), src.height()};
+	for(uint32_t y = 1; y != ret.height() - 1; ++y)
+	{
+		for(uint32_t x = 1; x != ret.width() - 1; ++x)
+		{
+			auto ddx = img_posterized(x + 1, y) - img_posterized(x - 1, y);
+			auto ddy = img_posterized(x, y + 1) - img_posterized(x, y - 1);
+
+			ret(x, y) = ddx*ddx + ddy*ddy > 0.0f;
+		}
+	}
+	return ret;
+}
