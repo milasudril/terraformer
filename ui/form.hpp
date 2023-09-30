@@ -20,6 +20,8 @@
 #include <QPainter>
 #include <QApplication>
 #include <QTabWidget>
+#include <QMouseEvent>
+#include <QToolTip>
 
 #include <ranges>
 
@@ -59,10 +61,15 @@ namespace terraformer
 	class image_view:public QWidget
 	{
 	public:
-		explicit image_view(QWidget* parent): QWidget{parent}{}
+		explicit image_view(QWidget* parent): QWidget{parent}
+		{ setMouseTracking(true); }
 
 		void set_pixmap(QPixmap&& pixmap)
 		{ m_image_data = std::move(pixmap); }
+
+		template<class Callable>
+		void set_mouse_move_callback(Callable&& cb)
+		{ m_mouse_move_callback = std::forward<Callable>(cb);  }
 
 	private:
 		void paintEvent(QPaintEvent*) override
@@ -72,6 +79,13 @@ namespace terraformer
 		}
 
 		QPixmap m_image_data;
+		std::function<void(QMouseEvent const& event)> m_mouse_move_callback;
+
+		void mouseMoveEvent(QMouseEvent* event) override
+		{
+			if(m_mouse_move_callback)
+			{ m_mouse_move_callback(*event); }
+		}
 	};
 
 	class colorbar:public QWidget
@@ -136,6 +150,20 @@ namespace terraformer
 			m_image_view->setSizePolicy(QSizePolicy{
 				QSizePolicy::Policy::Fixed,
 				QSizePolicy::Policy::Expanding
+			});
+
+			m_image_view->set_mouse_move_callback([&image_view = *m_image_view](QMouseEvent const& event) {
+				auto tooltip_string = QString::fromStdString(
+						std::to_string(event.x())
+						.append(", ")
+						.append(std::to_string(event.y()))
+					);
+
+				image_view.setToolTip(tooltip_string);
+				QToolTip::showText(
+					event.globalPos(),
+					tooltip_string
+				);
 			});
 
 			m_colorbar->setSizePolicy(QSizePolicy{
