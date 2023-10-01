@@ -187,12 +187,12 @@ namespace terraformer
 		{
 			m_root->setContentsMargins(form_indent, 0, 0, 0);
 			m_axis->setSizePolicy(QSizePolicy{
-				QSizePolicy::Policy::Fixed,
+				QSizePolicy::Policy::Expanding,
 				QSizePolicy::Policy::Expanding
 			});
 
 			m_colorbar->setSizePolicy(QSizePolicy{
-				QSizePolicy::Policy::Expanding,
+				QSizePolicy::Policy::Fixed,
 				QSizePolicy::Policy::Expanding
 			});
 			m_colorbar->setToolTip("Shows mapping between color and location");

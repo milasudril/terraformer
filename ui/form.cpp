@@ -22,6 +22,9 @@
 #include "./form.hpp"
 #include "lib/filters/intensity_map_presentation_filters.hpp"
 
+#include <QChart>
+#include <QLineSeries>
+
 namespace
 {
 	struct output_pixel
@@ -224,4 +227,71 @@ void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const
 		.min = 0.0f,
 		.max = (m_axis_dir == axis_direction::north_to_south)? domain_height : domain_width
 	});
+
+	constexpr size_t N = 17;
+	auto chart = new QtCharts::QChart;
+	chart->legend()->hide();
+	for(size_t k = N; k != 0; --k)
+	{
+		auto line_series = new QtCharts::QLineSeries;
+		if(m_axis_dir == axis_direction::north_to_south)
+		{
+			auto const wred = img.width() - 1;
+			auto const dx = static_cast<float>(wred)/static_cast<float>(N - 1);
+			uint32_t x = static_cast<uint32_t>(static_cast<float>(k - 1)*dx);
+
+			auto const val = static_cast<float>(std::size(m_colormap) - 1)
+				*static_cast<float>(x)/static_cast<float>(wred);
+			auto const output_value = interp(m_colormap, val);
+			output_pixel const line_color{
+				.b = static_cast<uint8_t>(255.0f*std::pow(output_value.blue(), 1.0f/2.2f)),
+				.g = static_cast<uint8_t>(255.0f*std::pow(output_value.green(), 1.0f/2.2f)),
+				.r = static_cast<uint8_t>(255.0f*std::pow(output_value.red(), 1.0f/2.2f)),
+				.a = 0xff
+			};
+			auto pen = line_series->pen();
+			pen.setWidth(1);
+			pen.setColor(QColor{line_color.r, line_color.g, line_color.b});
+			line_series->setPen(pen);
+
+			for(uint32_t y = 0; y != img.height(); ++y)
+			{ line_series->append((static_cast<float>(y) + 0.5f)*pixel_size, img(x, y)); }
+		}
+		else
+		{
+			auto const hred = img.height() - 1;
+			auto const dy = static_cast<float>(hred)/static_cast<float>(N - 1);
+			uint32_t y = static_cast<uint32_t>(static_cast<float>(k - 1)*dy);
+
+			auto const val = static_cast<float>(std::size(m_colormap) - 1)
+				*static_cast<float>(y)/static_cast<float>(hred);
+			auto const output_value = interp(m_colormap, val);
+			output_pixel const line_color{
+				.b = static_cast<uint8_t>(255.0f*std::pow(output_value.blue(), 1.0f/2.2f)),
+				.g = static_cast<uint8_t>(255.0f*std::pow(output_value.green(), 1.0f/2.2f)),
+				.r = static_cast<uint8_t>(255.0f*std::pow(output_value.red(), 1.0f/2.2f)),
+				.a = 0xff
+			};
+			auto pen = line_series->pen();
+			pen.setWidth(1);
+			pen.setColor(QColor{line_color.r, line_color.g, line_color.b});
+			line_series->setPen(pen);
+
+			for(uint32_t x = 0; x != img.width(); ++x)
+			{ line_series->append((static_cast<float>(x) + 0.5f)*pixel_size, img(x, y)); }
+		}
+
+		chart->addSeries(line_series);
+	}
+	chart->createDefaultAxes();
+	chart->axes(Qt::Vertical).front()->setTitleText("Elevation");
+	if(m_axis_dir == axis_direction::north_to_south)
+	{ chart->axes(Qt::Horizontal).front()->setTitleText("North ⟷ South"); }
+	else
+	{ chart->axes(Qt::Horizontal).front()->setTitleText("West ⟷ East"); }
+
+	auto current_chart = m_axis->chart();
+	m_axis->setChart(chart);
+	delete current_chart;
+	m_axis->setRenderHint(QPainter::Antialiasing);
 }
