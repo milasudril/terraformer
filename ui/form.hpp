@@ -13,6 +13,7 @@
 #include "lib/common/utils.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/filters/earth_colormap.hpp"
+#include "lib/filters/ground_depth_colormap.hpp"
 
 #include <QWidget>
 #include <QFormLayout>
@@ -200,7 +201,7 @@ namespace terraformer
 			m_root->addWidget(m_axis.get());
 			m_root->addWidget(m_colorbar.get());
 			m_root->addSpacing(0);
-			set_colormap(earth_colormap);
+			set_colormap(ground_depth_colormap);
 		}
 
 		void upload(grayscale_image const& img, float pixel_size);
