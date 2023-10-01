@@ -146,7 +146,6 @@ terraformer::topographic_map_view_map_view::topographic_map_view_map_view(QWidge
 
 	m_root->addWidget(m_image_view.get());
 	m_root->addWidget(m_colorbar.get());
-	m_root->addSpacing(0);
 	set_colormap(earth_colormap);
 }
 
