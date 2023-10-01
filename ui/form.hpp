@@ -414,8 +414,9 @@ namespace terraformer
 			});
 			if(textbox.min_width.has_value())
 			{
-				// TODO: Find a way to estimate the width of a chraracter
-				constexpr auto char_width = 10;
+				auto const app_font = QApplication::font(this);
+				QFontMetrics fm{app_font};
+				auto const char_width = fm.horizontalAdvance("0");
 				ret->setMinimumWidth(char_width*(*textbox.min_width));
 			}
 			ret->setObjectName(field_name);
