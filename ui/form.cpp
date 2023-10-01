@@ -153,6 +153,8 @@ void terraformer::topographic_map_view_map_view::upload(
 	m_heightmap = &img.get();
 	m_pixel_size = pixel_size;
 	auto const r = static_cast<double>(img.get().width())/static_cast<double>(img.get().height());
+
+	// TODO: Must limit min_width in case user specifies an extreme aspect ratio
 	auto const min_width = static_cast<uint32_t>(static_cast<double>(m_image_view->height())*r);
 	m_image_view->setMinimumWidth(static_cast<int>(min_width));
 
