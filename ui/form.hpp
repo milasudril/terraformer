@@ -142,7 +142,7 @@ namespace terraformer
 	public:
 		explicit topographic_map_view_map_view(QWidget* parent);
 
-		void upload(grayscale_image const& img, float pixel_size = 1.0f);
+		void upload(std::reference_wrapper<grayscale_image const> img, float pixel_size);
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
 		{
@@ -209,8 +209,8 @@ namespace terraformer
 			m_tabs->addTab(m_crossection, "Cross-sections");
 		}
 
-		void upload(grayscale_image const& img)
-		{ m_map->upload(img); }
+		void upload(std::reference_wrapper<grayscale_image const> img, float pixel_size)
+		{ m_map->upload(img, pixel_size); }
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
 		{ m_map->set_colormap(colormap); }
@@ -445,15 +445,15 @@ namespace terraformer
 			return ret;
 		}
 
-		template<class BindingType>
-		std::unique_ptr<topographic_map_renderer> create_widget(topographic_map_view<BindingType>&& view,
+		template<class HeightmapType, class PixelSizeType>
+		std::unique_ptr<topographic_map_renderer> create_widget(topographic_map_view<HeightmapType, PixelSizeType>&& view,
 			QWidget& parent,
 			char const* field_name)
 		{
 			auto ret = std::make_unique<topographic_map_renderer>(&parent);
-			m_display_callbacks.push_back([&dest = *ret, pixels = view.binding](){
+			m_display_callbacks.push_back([&dest = *ret, pixels = view.heightmap, pixel_size = view.pixel_size](){
 				// TODO: Avoid uploading pixels if nothing has been changed since last update
-				dest.upload(pixels.get());
+				dest.upload(pixels, pixel_size);
 				dest.redraw_colorbar();
 			});
 			ret->setObjectName(field_name);

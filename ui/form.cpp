@@ -108,19 +108,22 @@ terraformer::topographic_map_view_map_view::topographic_map_view_map_view(QWidge
 	m_image_view->set_mouse_move_callback([this](QMouseEvent const& event) {
 		if(m_heightmap != nullptr)
 		{
-			auto const real_xy =
-				location{0.0f, 0.0f, 0.0f}
-				+ m_pixel_size*m_render_scale*displacement{static_cast<float>(event.x()),
-						static_cast<float>(event.y()),
-						0.0f};
+			auto const heigtmap_displacement = m_render_scale*displacement{
+				static_cast<float>(event.x()),
+				static_cast<float>(event.y()),
+				0.0f
+			};
 
+			auto const world_displacement = m_pixel_size*heigtmap_displacement;
+			auto const z_src = location{0.0f, 0.0f, 0.0f} + heigtmap_displacement;
 			displacement const elevation{
 				0.0f,
 				0.0f,
-				(*m_heightmap)(static_cast<uint32_t>(real_xy[0]), static_cast<uint32_t>(real_xy[1]))
+				(*m_heightmap)(static_cast<uint32_t>(z_src[0]), static_cast<uint32_t>(z_src[1]))
 			};
+			auto const world_loc = location{0.0f, 0.0f, 0.0f} + world_displacement + elevation;
 
-			auto tooltip_string = QString::fromStdString(to_string(real_xy + elevation));
+			auto tooltip_string = QString::fromStdString(to_string(world_loc));
 			QToolTip::showText(event.globalPos(), tooltip_string);
 			m_image_view->setToolTip(tooltip_string);
 		}
@@ -141,11 +144,13 @@ terraformer::topographic_map_view_map_view::topographic_map_view_map_view(QWidge
 }
 
 
-void terraformer::topographic_map_view_map_view::upload(grayscale_image const& img, float pixel_size)
+void terraformer::topographic_map_view_map_view::upload(
+	std::reference_wrapper<grayscale_image const> img,
+	float pixel_size)
 {
-	m_heightmap = &img;
+	m_heightmap = &img.get();
 	m_pixel_size = pixel_size;
-	auto const r = static_cast<double>(img.width())/static_cast<double>(img.height());
+	auto const r = static_cast<double>(img.get().width())/static_cast<double>(img.get().height());
 	auto const min_width = static_cast<uint32_t>(static_cast<double>(m_image_view->height())*r);
 	m_image_view->setMinimumWidth(static_cast<int>(min_width));
 
@@ -155,7 +160,7 @@ void terraformer::topographic_map_view_map_view::upload(grayscale_image const& i
 	};
 
 	auto const fitted_image = terraformer::resize(img, resize_op);
-	m_render_scale = static_cast<float>(img.width())/static_cast<float>(resize_op.output_width);
+	m_render_scale = static_cast<float>(img.get().width())/static_cast<float>(resize_op.output_width);
 
 	auto const level_curves = generate_level_curves(fitted_image,
 		posterization_description{
