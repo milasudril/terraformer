@@ -163,14 +163,50 @@ namespace terraformer
 		float m_pixel_size;
 	};
 
+	class topographic_map_xsection_diagram:public QWidget
+	{
+	public:
+		explicit topographic_map_xsection_diagram(QWidget* parent):
+			QWidget{parent},
+			m_root{std::make_unique<QHBoxLayout>(this)},
+			m_axis{std::make_unique<QLabel>("Feature is not implemented yet", this)},
+			m_colorbar{std::make_unique<colorbar>(this)}
+		{
+			m_root->setContentsMargins(form_indent, 0, 0, 0);
+			m_axis->setSizePolicy(QSizePolicy{
+				QSizePolicy::Policy::Fixed,
+				QSizePolicy::Policy::Expanding
+			});
+
+			m_colorbar->setSizePolicy(QSizePolicy{
+				QSizePolicy::Policy::Expanding,
+				QSizePolicy::Policy::Expanding
+			});
+			m_colorbar->setToolTip("Shows mapping between color and location");
+
+			m_root->addWidget(m_axis.get());
+			m_root->addWidget(m_colorbar.get());
+			m_root->addSpacing(0);
+			set_colormap(earth_colormap);
+		}
+
+		void set_colormap(std::span<rgba_pixel const> colormap)
+		{ m_colorbar->set_colormap(colormap); }
+
+	private:
+		std::unique_ptr<QHBoxLayout> m_root;
+		std::unique_ptr<QLabel> m_axis;
+		std::unique_ptr<colorbar> m_colorbar;
+	};
+
 	class topographic_map_view_xsection_view:public QWidget
 	{
 	public:
 		explicit topographic_map_view_xsection_view(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QVBoxLayout>(this)},
-			m_ns_view{std::make_unique<QLabel>("Feature is not implemented yet", this)},
-			m_we_view{std::make_unique<QLabel>("Feature is not implemented yet", this)}
+			m_ns_view{std::make_unique<topographic_map_xsection_diagram>(this)},
+			m_we_view{std::make_unique<topographic_map_xsection_diagram>(this)}
 		{
 			m_root->setContentsMargins(form_indent, 0, 0, 0);
 			m_ns_view->setSizePolicy(QSizePolicy{
@@ -190,8 +226,8 @@ namespace terraformer
 
 	private:
 		std::unique_ptr<QVBoxLayout> m_root;
-		std::unique_ptr<QLabel> m_ns_view;
-		std::unique_ptr<QLabel> m_we_view;
+		std::unique_ptr<topographic_map_xsection_diagram> m_ns_view;
+		std::unique_ptr<topographic_map_xsection_diagram> m_we_view;
 	};
 
 	class topographic_map_renderer:public QWidget
