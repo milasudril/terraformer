@@ -290,20 +290,20 @@ namespace terraformer
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{
-			.name = "shape",
-			.display_name = "Shape",
-			.description = "Controls the progression of individual wave components",
-			.widget = subform{
-				.binding = std::ref(params.get().shape)
-			}
-		});
-
-		form.insert(field{
 			.name = "wave_properties",
 			.display_name = "Wave properties",
 			.description = "Controls the total wave",
 			.widget = subform{
 				.binding = std::ref(params.get().wave_properties)
+			}
+		});
+
+		form.insert(field{
+			.name = "shape",
+			.display_name = "Shape",
+			.description = "Controls the progression of individual wave components",
+			.widget = subform{
+				.binding = std::ref(params.get().shape)
 			}
 		});
 	}
