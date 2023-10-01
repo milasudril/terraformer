@@ -1,6 +1,9 @@
 //@	{
 //@		"dependencies_extra":[{"ref": "./form.o", "rel":"implementation"}],
-//@		"dependencies":[{"ref":"Qt5Widgets", "origin":"pkg-config"}]
+//@		"dependencies":[
+//@			{"ref":"Qt5Widgets", "origin":"pkg-config"},
+//@			{"ref":"Qt5Charts", "origin":"pkg-config"}
+//@		]
 //@	}
 
 #ifndef TERRAFORMER_FORM_HPP
@@ -22,6 +25,7 @@
 #include <QTabWidget>
 #include <QMouseEvent>
 #include <QToolTip>
+#include <QChartView>
 
 #include <ranges>
 
@@ -169,7 +173,7 @@ namespace terraformer
 		explicit topographic_map_xsection_diagram(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QHBoxLayout>(this)},
-			m_axis{std::make_unique<QLabel>("Feature is not implemented yet", this)},
+			m_axis{std::make_unique<QtCharts::QChartView>(this)},
 			m_colorbar{std::make_unique<colorbar>(this)}
 		{
 			m_root->setContentsMargins(form_indent, 0, 0, 0);
@@ -190,13 +194,19 @@ namespace terraformer
 			set_colormap(earth_colormap);
 		}
 
+		void upload(grayscale_image const& img, float pixel_size);
+
 		void set_colormap(std::span<rgba_pixel const> colormap)
-		{ m_colorbar->set_colormap(colormap); }
+		{
+			m_colormap = std::vector<rgba_pixel>{std::begin(colormap), std::end(colormap)};
+			m_colorbar->set_colormap(colormap);
+		}
 
 	private:
 		std::unique_ptr<QHBoxLayout> m_root;
-		std::unique_ptr<QLabel> m_axis;
+		std::unique_ptr<QtCharts::QChartView> m_axis;
 		std::unique_ptr<colorbar> m_colorbar;
+		std::vector<rgba_pixel> m_colormap;
 	};
 
 	class topographic_map_view_xsection_view:public QWidget
@@ -224,6 +234,12 @@ namespace terraformer
 			m_root->addWidget(m_we_view.get());
 		}
 
+		void upload(grayscale_image const& img, float pixel_size)
+		{
+			m_ns_view->upload(img, pixel_size);
+			m_we_view->upload(img, pixel_size);
+		}
+
 	private:
 		std::unique_ptr<QVBoxLayout> m_root;
 		std::unique_ptr<topographic_map_xsection_diagram> m_ns_view;
@@ -246,7 +262,10 @@ namespace terraformer
 		}
 
 		void upload(std::reference_wrapper<grayscale_image const> img, float pixel_size)
-		{ m_map->upload(img, pixel_size); }
+		{
+			m_map->upload(img, pixel_size);
+			m_crossection->upload(img, pixel_size);
+		}
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
 		{ m_map->set_colormap(colormap); }

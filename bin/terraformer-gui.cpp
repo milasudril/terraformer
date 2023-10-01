@@ -13,6 +13,8 @@
 //@					"-Wno-error=conversion",
 //	Qt headers uses enum conversions that have been deprecated in C++20
 //@					"-Wno-error=deprecated-enum-enum-conversion",
+//	QtCharts does not use override everywhere where it is applicable
+//@					"-Wno-error=suggest-override",
 //	Qt requires that we build with fpic
 //@					"-fpic"
 //@				]
