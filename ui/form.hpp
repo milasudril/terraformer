@@ -170,10 +170,13 @@ namespace terraformer
 	class topographic_map_xsection_diagram:public QWidget
 	{
 	public:
-		explicit topographic_map_xsection_diagram(QWidget* parent):
+		enum class axis_direction{north_to_south, west_to_east};
+
+		explicit topographic_map_xsection_diagram(QWidget* parent, axis_direction axis_dir):
 			QWidget{parent},
 			m_root{std::make_unique<QHBoxLayout>(this)},
 			m_axis{std::make_unique<QtCharts::QChartView>(this)},
+			m_axis_dir{axis_dir},
 			m_colorbar{std::make_unique<colorbar>(this)}
 		{
 			m_root->setContentsMargins(form_indent, 0, 0, 0);
@@ -202,9 +205,13 @@ namespace terraformer
 			m_colorbar->set_colormap(colormap);
 		}
 
+		void redraw_colorbar()
+		{ m_colorbar->redraw(); }
+
 	private:
 		std::unique_ptr<QHBoxLayout> m_root;
 		std::unique_ptr<QtCharts::QChartView> m_axis;
+		axis_direction m_axis_dir;
 		std::unique_ptr<colorbar> m_colorbar;
 		std::vector<rgba_pixel> m_colormap;
 	};
@@ -215,8 +222,12 @@ namespace terraformer
 		explicit topographic_map_view_xsection_view(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QVBoxLayout>(this)},
-			m_ns_view{std::make_unique<topographic_map_xsection_diagram>(this)},
-			m_we_view{std::make_unique<topographic_map_xsection_diagram>(this)}
+			m_ns_view{std::make_unique<topographic_map_xsection_diagram>(this,
+				topographic_map_xsection_diagram::axis_direction::north_to_south
+			)},
+			m_we_view{std::make_unique<topographic_map_xsection_diagram>(this,
+				topographic_map_xsection_diagram::axis_direction::west_to_east),
+			}
 		{
 			m_root->setContentsMargins(form_indent, 0, 0, 0);
 			m_ns_view->setSizePolicy(QSizePolicy{
@@ -238,6 +249,12 @@ namespace terraformer
 		{
 			m_ns_view->upload(img, pixel_size);
 			m_we_view->upload(img, pixel_size);
+		}
+
+		void redraw_colorbar()
+		{
+			m_ns_view->redraw_colorbar();
+			m_we_view->redraw_colorbar();
 		}
 
 	private:
@@ -271,7 +288,10 @@ namespace terraformer
 		{ m_map->set_colormap(colormap); }
 
 		void redraw_colorbar()
-		{ m_map->redraw_colorbar(); }
+		{
+			m_map->redraw_colorbar();
+			m_crossection->redraw_colorbar();
+		}
 
 	private:
 		std::unique_ptr<QHBoxLayout> m_root;

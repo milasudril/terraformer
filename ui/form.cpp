@@ -201,6 +201,12 @@ void terraformer::topographic_map_view_map_view::upload(
 	m_image_view->update();
 }
 
-void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const&, float)
+void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const& img, float pixel_size)
 {
+	auto const domain_width = pixel_size*static_cast<float>(img.width());
+	auto const domain_height = pixel_size*static_cast<float>(img.height());
+	m_colorbar->set_range(std::ranges::minmax_result{
+		.min = 0.0f,
+		.max = (m_axis_dir == axis_direction::north_to_south)? domain_height : domain_width
+	});
 }
