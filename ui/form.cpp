@@ -103,18 +103,18 @@ terraformer::topographic_map_view_map_view::topographic_map_view_map_view(QWidge
 {
 	m_root->setContentsMargins(form_indent, 0, 0, 0);
 	m_image_view->setSizePolicy(QSizePolicy{
-		QSizePolicy::Policy::Fixed,
+		QSizePolicy::Policy::Expanding,
 		QSizePolicy::Policy::Expanding
 	});
 
 	m_image_view->set_mouse_move_callback([this](QMouseEvent const& event) {
 		if(m_heightmap != nullptr)
 		{
-			auto const heigtmap_displacement = m_render_scale*displacement{
+			auto const heigtmap_displacement = displacement{
 				static_cast<float>(event.x()),
 				static_cast<float>(event.y()),
 				0.0f
-			};
+			}/m_render_scale;
 
 			if(static_cast<uint32_t>(heigtmap_displacement[0]) >= m_heightmap->width()
 				|| static_cast<uint32_t>(heigtmap_displacement[1]) >= m_heightmap->height())
@@ -139,7 +139,7 @@ terraformer::topographic_map_view_map_view::topographic_map_view_map_view(QWidge
 	});
 
 	m_colorbar->setSizePolicy(QSizePolicy{
-		QSizePolicy::Policy::Expanding,
+		QSizePolicy::Policy::Fixed,
 		QSizePolicy::Policy::Expanding
 	});
 	m_colorbar->setToolTip("Shows mapping between color and elevation");
@@ -157,19 +157,25 @@ void terraformer::topographic_map_view_map_view::upload(
 {
 	m_heightmap = &img.get();
 	m_pixel_size = pixel_size;
-	auto const r = static_cast<double>(img.get().width())/static_cast<double>(img.get().height());
 
-	// TODO: Must limit min_width in case user specifies an extreme aspect ratio
-	auto const min_width = static_cast<uint32_t>(static_cast<double>(m_image_view->height())*r);
-	m_image_view->setMinimumWidth(static_cast<int>(min_width));
+	auto const input_width = static_cast<double>(img.get().width());
+	auto const input_height = static_cast<double>(img.get().height());
+	auto const output_width = static_cast<double>(m_image_view->width());
+	auto const output_height = static_cast<double>(m_image_view->height());
+
+	auto const input_ratio = input_width/input_height;
+	auto const output_ratio = output_width/output_height;
+	auto const scaling_factor = (input_ratio > output_ratio)?
+		output_width/input_width:
+		output_height/input_height;
 
 	image_resize_description resize_op{
-		.output_width = min_width,
-		.output_height = static_cast<uint32_t>(m_image_view->height())
+		.output_width = static_cast<uint32_t>(input_width*scaling_factor),
+		.output_height = static_cast<uint32_t>(input_height*scaling_factor)
 	};
 
 	auto const fitted_image = terraformer::resize(img, resize_op);
-	m_render_scale = static_cast<float>(img.get().width())/static_cast<float>(resize_op.output_width);
+	m_render_scale = static_cast<float>(scaling_factor);
 
 	auto const level_curves = generate_level_curves(fitted_image,
 		posterization_description{
