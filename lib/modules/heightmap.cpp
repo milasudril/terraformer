@@ -63,25 +63,23 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				u(x, y) = std::sqrt(1.0f - std::lerp(1.0f, distance, t));
 			}
 		}
+		store(u, "distance_field_u.exr");
 	}
-
-	auto const& corners = params.corners;
-	auto const nw_elev = corners.nw.elevation;
-	auto const ne_elev = corners.ne.elevation;
-	auto const sw_elev = corners.sw.elevation;
-	auto const se_elev = corners.se.elevation;
 
 	grayscale_image ns_wave_output{w, h};
 	{
 		fractal_wave const ns_wave{rng, params.ns_wave.wave.shape};
-		auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
+	//	auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
 		auto const phase = params.ns_wave.wave.wave_properties.phase;
 		auto amplitude = 0.0f;
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
-				auto const val = ns_wave(static_cast<float>(h)*u(x, y)/wavelength + phase);
+				// TODO: need to fix u such that its range is the same as
+				//       the domain. Also u(ridge) should be equal to
+				//       params.main_ridge.ridge_curve_xy.initial_value*pixel_size
+				auto const val = ns_wave(2.0f*u(x, y) + phase);
 				amplitude = std::max(std::abs(val), amplitude);
 				ns_wave_output(x, y) = val;
 			}
@@ -95,7 +93,15 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				ns_wave_output(x, y) *= gain;
 			}
 		}
+
+		store(ns_wave_output, "wave.exr");
 	}
+
+	auto const& corners = params.corners;
+	auto const nw_elev = corners.nw.elevation - ns_wave_output(0, 0);
+	auto const ne_elev = corners.ne.elevation - ns_wave_output(w - 1, 0);
+	auto const sw_elev = corners.sw.elevation - ns_wave_output(0, h - 1);
+	auto const se_elev = corners.se.elevation - ns_wave_output(w - 1, h - 1);
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -115,5 +121,6 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
 		}
 	}
+	store(pixels, "output.exr");
 }
 

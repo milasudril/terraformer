@@ -106,11 +106,11 @@ int main(int argc, char** argv)
 				.wave{
 					.shape{
 						.amplitude{
-							.scaling_factor = 1.5f,
+							.scaling_factor = 2.371499f,
 							.scaling_noise = 1.0f/16.0f
 						},
 						.wavelength{
-							.scaling_factor = std::numbers::phi_v<float>,
+							.scaling_factor = 2.0212822f,
 							.scaling_noise = std::numbers::phi_v<float>/16.0f
 						},
 						.phase{
@@ -119,8 +119,8 @@ int main(int argc, char** argv)
 						}
 					},
 					.wave_properties{
-						.wavelength = 8192.0f,
-						.phase = 1.4430218f
+						.wavelength = 4096.0f,
+						.phase = 1.1387005f
 					}
 				}
 			}
