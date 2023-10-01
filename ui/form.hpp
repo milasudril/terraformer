@@ -128,6 +128,9 @@ namespace terraformer
 		}
 
 	private:
+		void showEvent(QShowEvent*) override
+		{ redraw(); }
+
 		void generate_image();
 
 		void paintEvent(QPaintEvent*) override;
@@ -158,6 +161,9 @@ namespace terraformer
 		{ m_colorbar->redraw(); }
 
 	private:
+		void showEvent(QShowEvent*) override
+		{ upload(*m_heightmap, m_pixel_size); }
+
 		std::unique_ptr<QHBoxLayout> m_root;
 		std::vector<rgba_pixel> m_colormap;
 		std::unique_ptr<image_view> m_image_view;
