@@ -152,18 +152,27 @@ namespace terraformer
 				QSizePolicy::Policy::Expanding
 			});
 
-			m_image_view->set_mouse_move_callback([&image_view = *m_image_view](QMouseEvent const& event) {
-				auto tooltip_string = QString::fromStdString(
-						std::to_string(event.x())
-						.append(", ")
-						.append(std::to_string(event.y()))
-					);
+			m_image_view->set_mouse_move_callback([this](QMouseEvent const& event) {
+				if(m_heightmap != nullptr)
+				{
+					auto const real_xy =
+						location{0.0f, 0.0f, 0.0f}
+						+ m_pixel_size*m_render_scale*displacement{static_cast<float>(event.x()),
+								static_cast<float>(event.y()),
+								0.0f};
 
-				image_view.setToolTip(tooltip_string);
-				QToolTip::showText(
-					event.globalPos(),
-					tooltip_string
-				);
+					displacement const elevation{
+						0.0f,
+						0.0f,
+						(*m_heightmap)(static_cast<uint32_t>(real_xy[0]), static_cast<uint32_t>(real_xy[1]))
+					};
+
+					auto tooltip_string = QString::fromStdString(to_string(real_xy + elevation));
+					QToolTip::showText(event.globalPos(), tooltip_string);
+					m_image_view->setToolTip(tooltip_string);
+				}
+				else
+				{ m_image_view->setToolTip("No elevation data to show"); }
 			});
 
 			m_colorbar->setSizePolicy(QSizePolicy{
@@ -178,7 +187,7 @@ namespace terraformer
 			set_colormap(earth_colormap);
 		}
 
-		void upload(grayscale_image const& img);
+		void upload(grayscale_image const& img, float pixel_size = 1.0f);
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
 		{
@@ -194,6 +203,9 @@ namespace terraformer
 		std::vector<rgba_pixel> m_colormap;
 		std::unique_ptr<image_view> m_image_view;
 		std::unique_ptr<colorbar> m_colorbar;
+		grayscale_image const* m_heightmap;
+		float m_render_scale;
+		float m_pixel_size;
 	};
 
 	class topographic_map_view_xsection_view:public QWidget

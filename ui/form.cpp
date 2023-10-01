@@ -93,8 +93,10 @@ void terraformer::colorbar::paintEvent(QPaintEvent*)
 	}
 }
 
-void terraformer::topographic_map_view_map_view::upload(grayscale_image const& img)
+void terraformer::topographic_map_view_map_view::upload(grayscale_image const& img, float pixel_size)
 {
+	m_heightmap = &img;
+	m_pixel_size = pixel_size;
 	auto const r = static_cast<double>(img.width())/static_cast<double>(img.height());
 	auto const min_width = static_cast<uint32_t>(static_cast<double>(m_image_view->height())*r);
 	m_image_view->setMinimumWidth(static_cast<int>(min_width));
@@ -105,6 +107,7 @@ void terraformer::topographic_map_view_map_view::upload(grayscale_image const& i
 	};
 
 	auto const fitted_image = terraformer::resize(img, resize_op);
+	m_render_scale = static_cast<float>(img.width())/static_cast<float>(resize_op.output_width);
 
 	auto const level_curves = generate_level_curves(fitted_image,
 		posterization_description{
