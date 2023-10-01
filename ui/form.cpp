@@ -174,6 +174,9 @@ void terraformer::topographic_map_view_map_view::upload(
 		.output_height = static_cast<uint32_t>(input_height*scaling_factor)
 	};
 
+	if(resize_op.output_width == 0 || resize_op.output_height == 0)
+	{ return; }
+
 	auto const fitted_image = terraformer::resize(img, resize_op);
 	m_render_scale = static_cast<float>(scaling_factor);
 
