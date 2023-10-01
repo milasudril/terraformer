@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 						},
 						.wave_properties{
 							.wavelength = 24576.0f,
-							.phase = 0.0f
+							.phase = 2.0f
 						}
 					}
 				},
@@ -98,6 +98,29 @@ int main(int argc, char** argv)
 							.wavelength = 12384.0f,
 							.phase = 0.0f
 						}
+					}
+				}
+			},
+			.ns_wave{
+				.amplitude = 1024.0f,
+				.wave{
+					.shape{
+						.amplitude{
+							.scaling_factor = 1.5f,
+							.scaling_noise = 1.0f/16.0f
+						},
+						.wavelength{
+							.scaling_factor = std::numbers::phi_v<float>,
+							.scaling_noise = std::numbers::phi_v<float>/16.0f
+						},
+						.phase{
+							.offset = 2.0f - std::numbers::phi_v<float>,
+							.offset_noise = 1.0f/16.0f
+						}
+					},
+					.wave_properties{
+						.wavelength = 8192.0f,
+						.phase = 1.4430218f
 					}
 				}
 			}

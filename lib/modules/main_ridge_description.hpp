@@ -7,8 +7,6 @@
 
 namespace terraformer
 {
-
-
 	template<bool ValueIsNormalized>
 	struct ridge_curve_description
 	{

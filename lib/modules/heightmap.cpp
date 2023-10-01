@@ -71,6 +71,32 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	auto const sw_elev = corners.sw.elevation;
 	auto const se_elev = corners.se.elevation;
 
+	grayscale_image ns_wave_output{w, h};
+	{
+		fractal_wave const ns_wave{rng, params.ns_wave.wave.shape};
+		auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
+		auto const phase = params.ns_wave.wave.wave_properties.phase;
+		auto amplitude = 0.0f;
+		for(uint32_t y = 0; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				auto const val = ns_wave(static_cast<float>(h)*u(x, y)/wavelength + phase);
+				amplitude = std::max(std::abs(val), amplitude);
+				ns_wave_output(x, y) = val;
+			}
+		}
+
+		auto const gain = params.ns_wave.amplitude/amplitude;
+		for(uint32_t y = 0; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				ns_wave_output(x, y) *= gain;
+			}
+		}
+	}
+
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		for(uint32_t x = 0; x != w; ++x)
@@ -85,7 +111,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 			auto const bump = smoothstep(2.0f*(u(x, y) - 0.5f));
 
-			auto const base_elevation = std::lerp(north, south, eta);
+			auto const base_elevation = std::lerp(north, south, eta) + ns_wave_output(x, y);
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
 		}
 	}
