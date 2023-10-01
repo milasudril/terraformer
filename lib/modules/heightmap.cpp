@@ -69,7 +69,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	grayscale_image ns_wave_output{w, h};
 	{
 		fractal_wave const ns_wave{rng, params.ns_wave.wave.shape};
-	//	auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
+		auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
 		auto const phase = params.ns_wave.wave.wave_properties.phase;
 		auto amplitude = 0.0f;
 		for(uint32_t y = 0; y != h; ++y)
@@ -79,7 +79,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				// TODO: need to fix u such that its range is the same as
 				//       the domain. Also u(ridge) should be equal to
 				//       params.main_ridge.ridge_curve_xy.initial_value*pixel_size
-				auto const val = ns_wave(2.0f*u(x, y) + phase);
+				auto const val = ns_wave(0.5f*static_cast<float>(h)*hm.pixel_size*u(x, y)/wavelength + phase);
 				amplitude = std::max(std::abs(val), amplitude);
 				ns_wave_output(x, y) = val;
 			}

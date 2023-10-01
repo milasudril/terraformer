@@ -119,7 +119,7 @@ int main(int argc, char** argv)
 						}
 					},
 					.wave_properties{
-						.wavelength = 4096.0f,
+						.wavelength = 12384.0f,
 						.phase = 1.1387005f
 					}
 				}
