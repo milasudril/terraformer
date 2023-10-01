@@ -116,6 +116,11 @@ terraformer::topographic_map_view_map_view::topographic_map_view_map_view(QWidge
 				0.0f
 			};
 
+			if(static_cast<uint32_t>(heigtmap_displacement[0]) >= m_heightmap->width()
+				|| static_cast<uint32_t>(heigtmap_displacement[1]) >= m_heightmap->height())
+			{ return; }
+
+
 			auto const world_displacement = m_pixel_size*heigtmap_displacement;
 			auto const z_src = location{0.0f, 0.0f, 0.0f} + heigtmap_displacement;
 			displacement const elevation{
