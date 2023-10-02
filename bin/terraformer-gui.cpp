@@ -45,6 +45,10 @@ int main(int argc, char** argv)
 			.number_of_pixels = 1024*1024
 		},
 		.initial_heightmap{
+			.output_range{
+				.min = 512.0f,
+				.max = 8704.0f,
+			},
 			.corners{
 				.nw = 4096.0f,
 				.ne = 3072.0f,

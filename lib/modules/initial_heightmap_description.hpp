@@ -5,6 +5,47 @@
 
 namespace terraformer
 {
+	struct elevation_range
+	{
+		float min;
+		float max;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, elevation_range>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "min",
+			.display_name = "Min",
+			.description = "Sets the minimum elevation",
+			.widget = textbox{
+				.value_converter = num_string_converter{
+						.range = open_open_interval{
+							.min = -std::numeric_limits<float>::infinity(),
+							.max = std::numeric_limits<float>::infinity()
+						}
+					},
+				.binding = std::ref(params.get().min)
+			},
+		});
+
+		form.insert(field{
+			.name = "max",
+			.display_name = "Max",
+			.description = "Sets the maximum elevation",
+			.widget = textbox{
+				.value_converter = num_string_converter{
+						.range = open_open_interval{
+							.min = -std::numeric_limits<float>::infinity(),
+							.max = std::numeric_limits<float>::infinity()
+						}
+					},
+				.binding = std::ref(params.get().max)
+			},
+		});
+	}
+
 	struct corner
 	{
 		float elevation;
@@ -131,6 +172,7 @@ namespace terraformer
 
 	struct initial_heightmap_description
 	{
+		elevation_range output_range;
 		struct corners corners;
 		main_ridge_description main_ridge;
 		plane_wave_description ns_wave;
@@ -140,6 +182,17 @@ namespace terraformer
 	requires(std::is_same_v<std::remove_cvref_t<T>, initial_heightmap_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
+		form.insert(
+			field{
+				.name = "output_range",
+				.display_name = "Output range",
+				.description = "Sets the output elevation range. Data is normalized to fit within these limits",
+				.widget = subform{
+					.binding = std::ref(params.get().output_range)
+				}
+			}
+		);
+
 		form.insert(
 			field{
 				.name = "corners",

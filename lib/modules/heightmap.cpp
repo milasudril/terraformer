@@ -86,7 +86,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				range = std::ranges::minmax_result{*range.min, *range.max},
 				maxval = static_cast<float>(w)*hm.pixel_size
 			](auto const val) {
-				return maxval*val/(range.max - range.min);
+				return maxval*(val - range.min)/(range.max - range.min);
 		});
 	}
 
@@ -143,6 +143,17 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			auto const base_elevation = std::lerp(north, south, eta) + ns_wave_output(x, y);
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
 		}
+	}
+
+	{
+		auto const range = std::ranges::minmax_element(pixels.pixels());
+		std::ranges::transform(pixels.pixels(),
+			pixels.pixels().begin(), [
+				range = std::ranges::minmax_result{*range.min, *range.max},
+				output_range = params.output_range
+			](auto const val) {
+				return std::lerp(output_range.min, output_range.max, (val - range.min)/(range.max - range.min));
+		});
 	}
 }
 
