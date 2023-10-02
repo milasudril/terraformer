@@ -180,15 +180,15 @@ namespace terraformer
 			.description = "Controls the phase",
 			.widget = std::tuple{
 				knob{
-					.min = -16.0f,
-					.max = 16.0f,
+					.min = -4.0f,
+					.max = 4.0f,
 					.binding = std::ref(params.get().phase)
 				},
 				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = -16.0f,
-							.max = 16.0f
+							.min = -4.0f,
+							.max = 4.0f
 						}
 					},
 					.binding = std::ref(params.get().phase)
