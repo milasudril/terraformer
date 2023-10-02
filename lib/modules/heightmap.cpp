@@ -33,6 +33,9 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		}
 	);
 
+	auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
+	auto const ridge_loc = params.main_ridge.ridge_curve_xy.initial_value*y_south;
+
 	grayscale_image u{w, h};
 	{
 		for(uint32_t y = 0 ; y != h; ++y)
@@ -53,17 +56,16 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				auto const d_curve = distance_xy(*i, loc);
 				auto const y_curve = ridge_curve[x][1];
 				auto const side = loc[1] - y_curve;
-				auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
 				auto const d_curve_boundary = side < 0.0f?
 					y_curve:
 					y_south - y_curve;
 				auto const distance = d_curve/d_curve_boundary;
 				auto const t = side < 0.0f? loc[1]/y_curve : (loc[1] - y_south)/(y_curve - y_south);
+				auto const val = std::sqrt(1.0f - std::lerp(1.0f, distance, t));
 
-				u(x, y) = std::sqrt(1.0f - std::lerp(1.0f, distance, t));
+				u(x, y) = side < 0.0f? ridge_loc*val : val*ridge_loc + y_south*(1.0f - val);
 			}
 		}
-		store(u, "distance_field_u.exr");
 	}
 
 	grayscale_image ns_wave_output{w, h};
@@ -76,10 +78,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
-				// TODO: need to fix u such that its range is the same as
-				//       the domain. Also u(ridge) should be equal to
-				//       params.main_ridge.ridge_curve_xy.initial_value*pixel_size
-				auto const val = ns_wave(0.5f*static_cast<float>(h)*hm.pixel_size*u(x, y)/wavelength + phase);
+				auto const val = ns_wave(u(x, y)/wavelength + phase);
 				amplitude = std::max(std::abs(val), amplitude);
 				ns_wave_output(x, y) = val;
 			}
@@ -89,19 +88,15 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
-			{
-				ns_wave_output(x, y) *= gain;
-			}
+			{ ns_wave_output(x, y) *= gain; }
 		}
-
-		store(ns_wave_output, "wave.exr");
 	}
 
 	auto const& corners = params.corners;
-	auto const nw_elev = corners.nw.elevation - ns_wave_output(0, 0);
-	auto const ne_elev = corners.ne.elevation - ns_wave_output(w - 1, 0);
-	auto const sw_elev = corners.sw.elevation - ns_wave_output(0, h - 1);
-	auto const se_elev = corners.se.elevation - ns_wave_output(w - 1, h - 1);
+	auto const nw_elev = corners.nw.elevation;
+	auto const ne_elev = corners.ne.elevation;
+	auto const sw_elev = corners.sw.elevation;
+	auto const se_elev = corners.se.elevation;
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -115,7 +110,17 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 			auto const ridge_loc_z = ridge_curve[x][2];
 
-			auto const bump = smoothstep(2.0f*(u(x, y) - 0.5f));
+			location const loc{
+				static_cast<float>(x)*hm.pixel_size,
+				static_cast<float>(y)*hm.pixel_size,
+				0.0f
+			};
+			auto const y_curve = ridge_curve[x][1];
+			auto const side = loc[1] - y_curve;
+			auto const bump_param = side < 0.0f? u(x, y)/ridge_loc :
+				(u(x, y) - y_south)/(ridge_loc - y_south);
+
+			auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
 
 			auto const base_elevation = std::lerp(north, south, eta) + ns_wave_output(x, y);
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
