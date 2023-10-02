@@ -106,7 +106,8 @@ int main(int argc, char** argv)
 				}
 			},
 			.ns_wave{
-				.amplitude = 1024.0f,
+				.amplitude = 4096.0f,
+				.half_distance = 16384.0f,
 				.wave{
 					.shape{
 						.amplitude{
@@ -123,8 +124,8 @@ int main(int argc, char** argv)
 						}
 					},
 					.wave_properties{
-						.wavelength = 12384.0f,
-						.phase = 1.1387005f
+						.wavelength = 16384.0f,
+						.phase = 2.3471332f
 					}
 				}
 			}

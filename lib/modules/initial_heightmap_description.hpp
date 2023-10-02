@@ -124,14 +124,15 @@ namespace terraformer
 		});
 	}
 
-	struct plane_wave_description
+	struct damped_wave_description
 	{
 		float amplitude;
+		float half_distance;
 		fractal_wave_description wave;
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, plane_wave_description>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, damped_wave_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(
@@ -158,6 +159,32 @@ namespace terraformer
 				}
 			}
 		);
+
+		form.insert(
+			field{
+				.name = "half_distance",
+				.display_name = "Half distance",
+				.description = "The disntance that halfs the amplitude",
+				.widget = std::tuple{
+					knob{
+						.min = 8.0f,
+						.max = 17.0f,
+						.binding = std::ref(params.get().half_distance),
+						.mapping = numeric_input_mapping_type::log
+					},
+					textbox{
+						.value_converter = num_string_converter{
+							.range = closed_open_interval{
+								.min = 256.0f,
+								.max = std::numeric_limits<float>::infinity()
+							}
+						},
+						.binding = std::ref(params.get().half_distance)
+					}
+				}
+			}
+		);
+
 		form.insert(
 			field{
 				.name = "wave",
@@ -175,7 +202,7 @@ namespace terraformer
 		elevation_range output_range;
 		struct corners corners;
 		main_ridge_description main_ridge;
-		plane_wave_description ns_wave;
+		damped_wave_description ns_wave;
 	};
 
 	template<class Form, class T>

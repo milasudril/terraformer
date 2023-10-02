@@ -87,7 +87,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				maxval = static_cast<float>(w)*hm.pixel_size
 			](auto const val) {
 				return maxval*(val - range.min)/(range.max - range.min);
-		});
+			}
+		);
 	}
 
 	grayscale_image ns_wave_output{w, h};
@@ -95,6 +96,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		fractal_wave const ns_wave{rng, params.ns_wave.wave.shape};
 		auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
 		auto const phase = params.ns_wave.wave.wave_properties.phase;
+		auto const half_distance = params.ns_wave.half_distance;
+		auto const output_ampllitude = params.ns_wave.amplitude;
 		auto amplitude = 0.0f;
 		for(uint32_t y = 0; y != h; ++y)
 		{
@@ -106,11 +109,18 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			}
 		}
 		std::ranges::transform(ns_wave_output.pixels(),
-			ns_wave_output.pixels().begin(), [
-				gain = params.ns_wave.amplitude/amplitude
-			](auto const val) {
-			return val*gain;
+			ns_wave_output.pixels().begin(),
+			[gain = output_ampllitude/amplitude](auto const val) {
+				return val*gain;
 		});
+
+		for(uint32_t y = 0; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				ns_wave_output(x, y) = ns_wave_output(x, y)*std::exp2(-std::abs(u(x, y) - ridge_loc)/half_distance);
+			}
+		}
 	}
 
 	auto const& corners = params.corners;
@@ -152,7 +162,10 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				output_range = params.output_range
 			](auto const val) {
 				return std::lerp(output_range.min, output_range.max, (val - range.min)/(range.max - range.min));
-		});
+			}
+		);
 	}
+
+	store(pixels, "output.exr");
 }
 
