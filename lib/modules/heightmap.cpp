@@ -37,34 +37,45 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	auto const ridge_loc = params.main_ridge.ridge_curve_xy.initial_value*y_south;
 
 	grayscale_image u{w, h};
+	for(uint32_t y = 0; y != h; ++y)
 	{
-		for(uint32_t y = 0 ; y != h; ++y)
+		for(uint32_t x = 0; x != w; ++x)
 		{
-			for(uint32_t x = 0; x != w; ++x)
-			{
-				location const loc{
-					static_cast<float>(x)*hm.pixel_size,
-					static_cast<float>(y)*hm.pixel_size,
-					0.0f
-				};
+			location const loc{
+				static_cast<float>(x)*hm.pixel_size,
+				static_cast<float>(y)*hm.pixel_size,
+				0.0f
+			};
 
-				auto const i = std::ranges::min_element(ridge_curve,
-					[loc](auto a, auto b){
-					return distance_xy(a, loc) < distance_xy(b, loc);
-				});
+			auto const i = std::ranges::min_element(ridge_curve,
+				[loc](auto a, auto b){
+				return distance_xy(a, loc) < distance_xy(b, loc);
+			});
 
-				auto const d_curve = distance_xy(*i, loc);
-				auto const y_curve = ridge_curve[x][1];
-				auto const side = loc[1] - y_curve;
-				auto const d_curve_boundary = side < 0.0f?
-					y_curve:
-					y_south - y_curve;
-				auto const distance = d_curve/d_curve_boundary;
-				auto const t = side < 0.0f? loc[1]/y_curve : (loc[1] - y_south)/(y_curve - y_south);
-				auto const val = std::sqrt(1.0f - std::lerp(1.0f, distance, t));
+			auto const d_curve = distance_xy(*i, loc);
+			auto const y_curve = ridge_curve[x][1];
+			auto const side = loc[1] - y_curve;
+			auto const d_curve_boundary = side < 0.0f?
+				y_curve:
+				y_south - y_curve;
+			auto const distance = d_curve/d_curve_boundary;
+			auto const t = side < 0.0f? loc[1]/y_curve : (loc[1] - y_south)/(y_curve - y_south);
+			auto const val = std::sqrt(1.0f - std::lerp(1.0f, distance, t));
 
-				u(x, y) = side < 0.0f? ridge_loc*val : val*ridge_loc + y_south*(1.0f - val);
-			}
+			u(x, y) = side < 0.0f? ridge_loc*val : val*ridge_loc + y_south*(1.0f - val);
+		}
+	}
+
+	grayscale_image v{w, h};
+	for(uint32_t y = 0; y != h; ++y)
+	{
+		auto v_sum = 0.0f;
+		for(uint32_t x = 0; x != w; ++x)
+		{
+			auto const gradvec = grad(std::as_const(u).pixels(), x, y, 1.0f, clamp_at_boundary{});
+			auto const v_val = hm.pixel_size*gradvec[1]/norm(gradvec);
+			v(x, y) = v_sum;
+			v_sum += v_val;
 		}
 	}
 
@@ -110,13 +121,9 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 			auto const ridge_loc_z = ridge_curve[x][2];
 
-			location const loc{
-				static_cast<float>(x)*hm.pixel_size,
-				static_cast<float>(y)*hm.pixel_size,
-				0.0f
-			};
+			auto const yf = static_cast<float>(y)*hm.pixel_size;
 			auto const y_curve = ridge_curve[x][1];
-			auto const side = loc[1] - y_curve;
+			auto const side = yf - y_curve;
 			auto const bump_param = side < 0.0f? u(x, y)/ridge_loc :
 				(u(x, y) - y_south)/(ridge_loc - y_south);
 
@@ -126,6 +133,5 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
 		}
 	}
-	store(pixels, "output.exr");
 }
 
