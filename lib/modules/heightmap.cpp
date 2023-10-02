@@ -67,16 +67,27 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	}
 
 	grayscale_image v{w, h};
-	for(uint32_t y = 0; y != h; ++y)
 	{
-		auto v_sum = 0.0f;
-		for(uint32_t x = 0; x != w; ++x)
+		for(uint32_t y = 0; y != h; ++y)
 		{
-			auto const gradvec = grad(std::as_const(u).pixels(), x, y, 1.0f, clamp_at_boundary{});
-			auto const v_val = hm.pixel_size*gradvec[1]/norm(gradvec);
-			v(x, y) = v_sum;
-			v_sum += v_val;
+			auto v_sum = 0.0f;
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				auto const gradvec = grad(std::as_const(u).pixels(), x, y, 1.0f, clamp_at_boundary{});
+				auto const v_val = std::clamp(gradvec[1], -hm.pixel_size, hm.pixel_size);
+				v(x, y) = v_sum;
+				v_sum += v_val;
+			}
 		}
+
+		auto const range = std::ranges::minmax_element(v.pixels());
+		std::ranges::transform(v.pixels(),
+			v.pixels().begin(), [
+				range = std::ranges::minmax_result{*range.min, *range.max},
+				maxval = static_cast<float>(w)*hm.pixel_size
+			](auto const val) {
+				return maxval*val/(range.max - range.min);
+		});
 	}
 
 	grayscale_image ns_wave_output{w, h};
