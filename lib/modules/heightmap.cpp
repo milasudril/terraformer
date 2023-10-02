@@ -97,7 +97,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
 		auto const phase = params.ns_wave.wave.wave_properties.phase;
 		auto const half_distance = params.ns_wave.half_distance;
-		auto const output_ampllitude = params.ns_wave.amplitude;
+		auto const output_amplitude = params.ns_wave.amplitude;
 		auto amplitude = 0.0f;
 		for(uint32_t y = 0; y != h; ++y)
 		{
@@ -110,7 +110,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		}
 		std::ranges::transform(ns_wave_output.pixels(),
 			ns_wave_output.pixels().begin(),
-			[gain = output_ampllitude/amplitude](auto const val) {
+			[gain = output_amplitude/amplitude](auto const val) {
 				return val*gain;
 		});
 
@@ -121,6 +121,29 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				ns_wave_output(x, y) = ns_wave_output(x, y)*std::exp2(-std::abs(u(x, y) - ridge_loc)/half_distance);
 			}
 		}
+	}
+
+	grayscale_image we_wave_output{w, h};
+	{
+		fractal_wave const we_wave{rng, params.ns_wave.wave.shape};
+		auto const wavelength = 6144.0f;
+		auto const phase = 0.0f;
+		auto const output_amplitude = 128.0f;
+		auto amplitude = 0.0f;
+		for(uint32_t y = 0; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				auto const val = we_wave(v(x, y)/wavelength + phase);
+				amplitude = std::max(std::abs(val), amplitude);
+				we_wave_output(x, y) = val;
+			}
+		}
+		std::ranges::transform(we_wave_output.pixels(),
+			we_wave_output.pixels().begin(),
+			[gain = output_amplitude/amplitude](auto const val) {
+				return val*gain;
+		});
 	}
 
 	auto const& corners = params.corners;
@@ -149,7 +172,9 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 			auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
 
-			auto const base_elevation = std::lerp(north, south, eta) + ns_wave_output(x, y);
+			auto const base_elevation = std::lerp(north, south, eta)
+				+ ns_wave_output(x, y)
+				+ we_wave_output(x, y);
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
 		}
 	}
