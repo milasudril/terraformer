@@ -105,13 +105,12 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				ns_wave_output(x, y) = val;
 			}
 		}
-
-		auto const gain = params.ns_wave.amplitude/amplitude;
-		for(uint32_t y = 0; y != h; ++y)
-		{
-			for(uint32_t x = 0; x != w; ++x)
-			{ ns_wave_output(x, y) *= gain; }
-		}
+		std::ranges::transform(ns_wave_output.pixels(),
+			ns_wave_output.pixels().begin(), [
+				gain = params.ns_wave.amplitude/amplitude
+			](auto const val) {
+			return val*gain;
+		});
 	}
 
 	auto const& corners = params.corners;
