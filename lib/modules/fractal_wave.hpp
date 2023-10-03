@@ -180,15 +180,15 @@ namespace terraformer
 			.description = "Controls the phase",
 			.widget = std::tuple{
 				knob{
-					.min = -4.0f,
-					.max = 4.0f,
+					.min = 0.0f,
+					.max = 8.0f,
 					.binding = std::ref(params.get().phase)
 				},
 				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = -4.0f,
-							.max = 4.0f
+							.min = 0.0f,
+							.max = 8.0f
 						}
 					},
 					.binding = std::ref(params.get().phase)
@@ -238,7 +238,7 @@ namespace terraformer
 				auto const wavelength = m_components[k - 1].wavelength;
 				auto const phase = m_components[k - 1].phase;
 
-				sum += amplitude*approx_sine(twopi*(x/wavelength - phase));
+				sum += amplitude*approx_sine(twopi*(x/wavelength - phase + 0.25f));
 			}
 			return sum;
 		}
