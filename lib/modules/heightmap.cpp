@@ -96,29 +96,35 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		fractal_wave const ns_wave{rng, params.ns_wave.wave.shape};
 		auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
 		auto const phase = params.ns_wave.wave.wave_properties.phase;
-		auto const half_distance = params.ns_wave.half_distance;
-		auto const output_amplitude = params.ns_wave.amplitude;
-		auto amplitude = 0.0f;
+		auto const amp_out = params.ns_wave.amplitude;
+		auto min =  std::numeric_limits<float>::infinity();
+		auto max = -std::numeric_limits<float>::infinity();
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
-				auto const val = ns_wave(u(x, y)/wavelength + phase);
-				amplitude = std::max(std::abs(val), amplitude);
+				auto const y_val = u(x, y) - ridge_loc;
+				auto const val = ns_wave(y_val/wavelength + phase);
+				min = std::min(val, min);
+				max = std::max(val, max);
 				ns_wave_output(x, y) = val;
 			}
 		}
+		auto const amp_in = 0.5f*(max - min);
+		auto const offset = 0.5f*(max + min);
 		std::ranges::transform(ns_wave_output.pixels(),
 			ns_wave_output.pixels().begin(),
-			[gain = output_amplitude/amplitude](auto const val) {
-				return val*gain;
+			[gain = amp_out/amp_in, offset](auto const val) {
+				return (val - offset)*gain;
 		});
 
+		auto const half_distance = params.ns_wave.half_distance;
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
-				ns_wave_output(x, y) = ns_wave_output(x, y)*std::exp2(-std::abs(u(x, y) - ridge_loc)/half_distance);
+				auto const y_val = u(x, y) - ridge_loc;
+				ns_wave_output(x, y) = ns_wave_output(x, y)*std::exp2(-std::abs(y_val)/half_distance);
 			}
 		}
 	}
@@ -172,13 +178,13 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 			auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
 
-			auto const base_elevation = std::lerp(north, south, eta)
-				+ ns_wave_output(x, y)
-				+ we_wave_output(x, y);
-			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump);
+			auto const base_elevation = std::lerp(north, south, eta);
+			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump)
+				+ ns_wave_output(x, y);
+//				+ we_wave_output(x, y);
 		}
 	}
-
+#if 0
 	{
 		auto const range = std::ranges::minmax_element(pixels.pixels());
 		std::ranges::transform(pixels.pixels(),
@@ -190,7 +196,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			}
 		);
 	}
-
+#endif
 	store(pixels, "output.exr");
 }
 
