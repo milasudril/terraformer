@@ -82,7 +82,7 @@ int main(int argc, char** argv)
 				},
 				.ridge_curve_xz{
 					.initial_value = 6150.0f,
-					.amplitude = 187.1956f,
+					.amplitude = 190.00002f,
 					.wave{
 						.shape{
 							.amplitude{
@@ -99,8 +99,8 @@ int main(int argc, char** argv)
 							}
 						},
 						.wave_properties{
-							.wavelength = 12384.0f,
-							.phase = 1.2729393f
+							.wavelength = 13475.382f,
+							.phase = 1.071294f
 						}
 					}
 				}
