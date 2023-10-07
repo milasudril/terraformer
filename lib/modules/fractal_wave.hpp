@@ -219,15 +219,25 @@ namespace terraformer
 			auto const a = 1.0f/params.amplitude.scaling_factor;
 			auto const phi = params.phase.offset;
 			auto constexpr twopi = 2.0f*std::numbers::pi_v<float>;
-			return std::sqrt(a*a - 2.0f*a*std::cos(twopi*phi) + 1.0f);
+			return std::max(std::sqrt(a*a - 2.0f*a*std::cos(twopi*phi) + 1.0f), 1.0f/4096.0f);
+		}
+
+		static auto compute_number_of_waves(params const& params)
+		{
+			auto const k_amp = 14.0f/std::log2(params.amplitude.scaling_factor);
+			auto const k_lambda = 14.0f/std::log2(params.wavelength.scaling_factor);
+			auto const k_max = 64.0f;
+			return static_cast<size_t>(std::min(k_max, std::min(k_amp, k_lambda)) + 0.5f) + 1;
 		}
 
 		template<class Rng>
 		explicit fractal_wave(Rng&& rng, params const& params):
-		m_normalization_constant{compute_normalization_constant(params)}
+		m_normalization_constant{compute_normalization_constant(params)},
+		m_num_waves{compute_number_of_waves(params)},
+		m_components{std::make_unique_for_overwrite<wave_component[]>(m_num_waves)}
 		{
 			std::uniform_real_distribution U{-0.5f, 0.5f};
-			for(size_t k = 0; k != std::size(m_components); ++k)
+			for(size_t k = 0; k != m_num_waves; ++k)
 			{
 				m_components[k] = wave_component{
 					.amplitude = get_value(params.amplitude, k, rng),
@@ -241,7 +251,7 @@ namespace terraformer
 		{
 			auto sum = 0.0f;
 			auto constexpr twopi = 2.0f*std::numbers::pi_v<float>;
-			for(size_t k = std::size(m_components); k != 0; --k)
+			for(size_t k = m_num_waves; k != 0; --k)
 			{
 				auto const amplitude = m_components[k - 1].amplitude;
 				auto const wavelength = m_components[k - 1].wavelength;
@@ -254,7 +264,8 @@ namespace terraformer
 
 	private:
 		float m_normalization_constant;
-		std::array<wave_component, 16> m_components;
+		size_t m_num_waves;
+		std::unique_ptr<wave_component[]> m_components;
 	};
 
 	struct fractal_wave_description

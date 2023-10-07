@@ -36,3 +36,33 @@ TESTCASE(fractal_wave_generate)
 		printf("%.8g    %.8g\n", x, w(x));
 	}
 }
+
+TESTCASE(fractal_wave_generate_no_amp_scaling)
+{
+	terraformer::fractal_wave::params const params{
+		.amplitude{
+			.scaling_factor = 1.0f,
+			.scaling_noise = 0.0f
+		},
+		.wavelength{
+			.scaling_factor = 1.0f,
+			.scaling_noise = 0.0f
+		},
+		.phase{
+			.offset = 0.0f,
+			.offset_noise = 0.0f
+		}
+	};
+
+	auto const c = terraformer::fractal_wave::compute_normalization_constant(params);
+	printf("%.8g\n", c);
+
+	random_generator rng;
+	terraformer::fractal_wave w{rng, params};
+
+	for(size_t k = 0; k != 17; ++k)
+	{
+		auto const x = static_cast<float>(k)/16.0f;
+		printf("%.8g    %.8g\n", x, w(x));
+	}
+}
