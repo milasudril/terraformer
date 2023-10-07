@@ -11,18 +11,21 @@ TESTCASE(fractal_wave_generate)
 {
 	terraformer::fractal_wave::params const params{
 		.amplitude{
-			.scaling_factor = std::numbers::phi_v<float>,
-			.scaling_noise = std::numbers::phi_v<float>/8.0f
+			.scaling_factor = 2.0f,
+			.scaling_noise = 0.0f
 		},
 		.wavelength{
-			.scaling_factor = std::numbers::phi_v<float>,
-			.scaling_noise = std::numbers::phi_v<float>/8.0f
+			.scaling_factor = 1.0f,
+			.scaling_noise = 0.0f
 		},
 		.phase{
-			.offset = 2.0f - std::numbers::phi_v<float>,
-			.offset_noise = 1.0f/12.0f
+			.offset = 0.0f,
+			.offset_noise = 0.0f
 		}
 	};
+
+	auto const c = terraformer::fractal_wave::compute_normalization_constant(params);
+	printf("%.8g\n", c);
 
 	random_generator rng;
 	terraformer::fractal_wave w{rng, params};
@@ -30,6 +33,6 @@ TESTCASE(fractal_wave_generate)
 	for(size_t k = 0; k != 17; ++k)
 	{
 		auto const x = static_cast<float>(k)/16.0f;
-		printf("%.8g %.8g\n", x, w(x));
+		printf("%.8g    %.8g\n", x, w(x));
 	}
 }

@@ -214,8 +214,17 @@ namespace terraformer
 			linear_mod_progression phase;
 		};
 
+		static auto compute_normalization_constant(params const& params)
+		{
+			auto const a = 1.0f/params.amplitude.scaling_factor;
+			auto const phi = params.phase.offset;
+			auto constexpr twopi = 2.0f*std::numbers::pi_v<float>;
+			return std::sqrt(a*a - 2.0f*a*std::cos(twopi*phi) + 1.0f);
+		}
+
 		template<class Rng>
-		explicit fractal_wave(Rng&& rng, params const& params)
+		explicit fractal_wave(Rng&& rng, params const& params):
+		m_normalization_constant{compute_normalization_constant(params)}
 		{
 			std::uniform_real_distribution U{-0.5f, 0.5f};
 			for(size_t k = 0; k != std::size(m_components); ++k)
@@ -240,10 +249,11 @@ namespace terraformer
 
 				sum += amplitude*approx_sine(twopi*(x/wavelength - phase + 0.25f));
 			}
-			return sum;
+			return sum*m_normalization_constant;
 		}
 
 	private:
+		float m_normalization_constant;
 		std::array<wave_component, 16> m_components;
 	};
 

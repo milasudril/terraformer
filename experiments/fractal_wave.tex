@@ -1,0 +1,103 @@
+\documentclass[a4paper, 12pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+
+\title{A ``fractal wave''}
+\author{Torbjörn Rathsman}
+
+\begin{document}
+\maketitle
+\section{Quantities}
+\begin{tabular}{ll}
+ $A$ & The amplitude \\
+ $\lambda_0$ & The wave length of longest wave \\
+ $\lambda_k$ & The wave length of wave $k$ \\
+ $A_k$ & The amplitude of wave $k$ \\
+ $a$ & Scaling factor for the amplitude $a\in]0, 1[$ \\
+ $b$ & Scaling factor for the wavelength $b \in]0, 1[$\\
+ $\Delta\phi$  & Phase difference between two waves\\
+ $c$ & A normalization constant\\
+ $\alpha$ & Wavelength to amplitude exponent\\
+\end{tabular}
+
+\section{Model}
+\begin{equation}
+\left\{
+\begin{aligned}
+	A_k &= A_0 a^k\\
+	\lambda_k &= \lambda_0 b^k
+\end{aligned}
+\right.
+\end{equation}
+
+\begin{equation}
+ \Psi(x) = c A_0\sum_{k=0}^\infty a^k\cos\left(2\pi \frac{x}{\lambda_0 b^k} + k\Delta \phi\right)
+\end{equation}
+
+
+\section{Amplitude spectrum}
+\[
+ \lambda_k = \lambda_0 b^k \Leftrightarrow
+ \frac{\lambda_k}{\lambda_0} = b^k \Leftrightarrow
+ \log\left(\frac{\lambda_k}{\lambda_0}\right) = \log(b^k) = k\log(b) \Leftrightarrow
+ k = \frac{\log\left(\frac{\lambda_k}{\lambda_0}\right)}{\log(b)}
+\]
+\[
+ A_k = A_0a^k = A_0\exp(k\log(a))
+ =A_0a^k = A_0\exp\left(\frac{\log\left(\frac{\lambda_k}{\lambda_0}\right)}{\log(b)}\log(a)\right)
+ = A_0\left(\frac{\lambda_k}{\lambda_0}\right)^{ \frac{\log(a)}{\log(b)} }
+\]
+
+The amplitude spectrum follows a power law with exponent $\alpha = \frac{\log(a)}{\log(b)}$. If $a$ and $\alpha$ are known, then
+\[
+ \frac{1}{\log(b)} = \frac{\alpha}{\log(a)} \Leftrightarrow
+ \log(b) = \frac{\log(a)}{\alpha}\Leftrightarrow
+ b = \exp\left(\frac{\log(a)}{\alpha}\right) = a^{\frac{1}{\alpha}}
+\]
+
+
+\section{Normalization constant}
+To estimate the amplitude, assume $b = 1$, and let $t = \frac{2\pi x}{\lambda_0}$. Then
+\[
+\begin{aligned}
+ \Psi(t) &= c A_0\sum_{k=0}^\infty a^k\cos\left(t + k\Delta \phi\right)\\
+	&= cA_0\Re\left( \sum_{k=0}^\infty a^k \left(\cos\left(t + k\Delta \phi\right) + i \sin\left(t + k\Delta \phi\right)\right)\right)\\
+	&= cA_0\Re\left( \sum_{k=0}^\infty a^k \exp\left(i\left(t + k\Delta\phi\right)\right)\right)\\
+	&= cA_0\Re\left( \sum_{k=0}^\infty a^k \exp\left(i t\right)\exp\left(i k\Delta\phi\right)\right)\\
+	&= cA_0\Re\left(\exp\left(i t\right) \sum_{k=0}^\infty a^k \exp\left(i k\Delta\phi\right)\right)\\
+	&= cA_0\Re\left(\exp\left(i t\right) \sum_{k=0}^\infty \left(a \exp\left(i k\Delta\phi\right)\right)^k\right)\\
+	&= cA_0\Re\left(\exp\left(i t\right) \frac{1}{1 - a\exp\left(i\Delta\phi\right)}\right)\\
+	&= cA_0\frac{a\cos\left(\Delta\phi - t\right) - \cos(t)}
+		{2a\cos\left( \Delta\phi \right) -a^{2}-1}
+ \end{aligned}
+\]
+Using some trigonometric identities, it follows that
+\[
+\begin{aligned}
+ \Psi(t) &= cA_0\frac{a \cos{\left( t - \Delta\phi\right) }-\cos(t)}{2 a \cos\left( \Delta\phi \right) - a^2-1} \\
+ &= cA_0\frac{a \sin\left( \left(t - \frac{\pi}{2}\right) - \Delta\phi\right)-\sin\left(t - \frac{\pi}{2}\right)}{2 a \cos\left( \Delta\phi \right) - a^2-1}\\
+ &= -cA_0\frac{\sqrt{a^2 - 2a\cos\left(\Delta\phi\right) + 1}}
+ {a^2 - 2 a \cos\left(\Delta\phi \right) + 1}\sin(t + \varphi) \\
+ &= -cA_0\frac{\sqrt{a^2 - 2a\cos\left(\Delta\phi\right) + 1}}
+ {a^2 - 2 a \cos\left(\Delta\phi \right) + 1}\sin(t + \varphi) \\
+  &= -cA_0\frac{1}{\sqrt{a^2 - 2a\cos\left(\Delta\phi\right) + 1}}\sin(t + \varphi)
+\end{aligned}
+\]
+Thus, we can use
+\[
+ cA_0\frac{1}{\sqrt{a^2 - 2a\cos\left(\Delta\phi\right) + 1}}
+\]
+as the amplitude of $\Psi$. The point of the constant $c$ is to normalize $\Psi$ such that its amplitude equals $A_0$. Then,
+\[
+ 1 = c\frac{1}{\sqrt{a^2 - 2a\cos\left(\Delta\phi\right) + 1}} \Leftrightarrow c = \sqrt{a^2 - 2a\cos\left(\Delta\phi\right) + 1}
+\]
+
+
+
+
+
+
+
+\end{document}

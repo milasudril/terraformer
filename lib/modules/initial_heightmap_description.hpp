@@ -209,6 +209,7 @@ namespace terraformer
 	requires(std::is_same_v<std::remove_cvref_t<T>, initial_heightmap_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
+#if 0
 		form.insert(
 			field{
 				.name = "output_range",
@@ -219,6 +220,7 @@ namespace terraformer
 				}
 			}
 		);
+#endif
 
 		form.insert(
 			field{
