@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 				.max = 8704.0f,
 			},
 			.corners{
-				.nw = 4096.0f,
+				.nw = 5072.0f,
 				.ne = 3072.0f,
 				.sw = 512.0f,
 				.se = 1536.0f,
@@ -58,31 +58,31 @@ int main(int argc, char** argv)
 			.main_ridge{
 				.ridge_curve_xy{
 					.initial_value = 1.0f/3.0f,
-					.amplitude = 4096.0f/49152.0f,
+					.amplitude = 0.042485807f,
 					.wave{
 						.shape{
 							.amplitude{
-								.scaling_factor = 2.0f,
+								.scaling_factor = std::numbers::phi_v<float>,
 								.scaling_noise = 1.0f/16.0f
 							},
 							.wavelength{
 								.scaling_factor = std::numbers::phi_v<float>,
-								.scaling_noise = std::numbers::phi_v<float>/16.0f
+								.scaling_noise = std::numbers::phi_v<float>/64.0f
 							},
 							.phase{
 								.offset = 2.0f - std::numbers::phi_v<float>,
-								.offset_noise = 1.0f/16.0f
+								.offset_noise = 1.0f/24.0f
 							}
 						},
 						.wave_properties{
 							.wavelength = 24576.0f,
-							.phase = 2.0f
+							.phase = 3.127061f,
 						}
 					}
 				},
 				.ridge_curve_xz{
-					.initial_value = 8192.0f,
-					.amplitude = 512.0f,
+					.initial_value = 6150.0f,
+					.amplitude = 187.1956f,
 					.wave{
 						.shape{
 							.amplitude{
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 							},
 							.wavelength{
 								.scaling_factor = std::numbers::phi_v<float>,
-								.scaling_noise = std::numbers::phi_v<float>/16.0f
+								.scaling_noise = std::numbers::phi_v<float>/64.0f
 							},
 							.phase{
 								.offset = 2.0f - std::numbers::phi_v<float>,
@@ -100,32 +100,32 @@ int main(int argc, char** argv)
 						},
 						.wave_properties{
 							.wavelength = 12384.0f,
-							.phase = 0.0f
+							.phase = 1.2729393f
 						}
 					}
 				}
 			},
 			.ns_wave{
-				.amplitude = 4096.0f,
-				.half_distance = 16384.0f,
+				.amplitude = 2048.0f,
+				.half_distance = 32768.0f,
 				.wave{
 					.shape{
 						.amplitude{
-							.scaling_factor = 2.371499f,
+ 							.scaling_factor = std::numbers::phi_v<float>,
 							.scaling_noise = 1.0f/16.0f
 						},
 						.wavelength{
-							.scaling_factor = 2.0212822f,
-							.scaling_noise = std::numbers::phi_v<float>/16.0f
+							.scaling_factor = 1.378240f,
+							.scaling_noise = 1.378240f/1024.0f
 						},
 						.phase{
 							.offset = 2.0f - std::numbers::phi_v<float>,
-							.offset_noise = 1.0f/16.0f
+							.offset_noise = 1.0f/24.0f
 						}
 					},
 					.wave_properties{
-						.wavelength = 16384.0f,
-						.phase = 2.3471332f
+						.wavelength = 32768.0f,
+						.phase = 7.9810004f
 					}
 				}
 			}
