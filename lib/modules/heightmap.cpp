@@ -98,30 +98,41 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		auto const phase = params.ns_wave.wave.wave_properties.phase;
 		auto const amp_out = params.ns_wave.amplitude;
 
+		fractal_wave const amp_mod{rng, params.ns_wave.wave.shape};
+		auto const amp_mod_wavelength = 6144.0f;
+		auto const amp_mod_amplitude = 0.0f;
+
+		fractal_wave const wavelength_mod{rng, params.ns_wave.wave.shape};
+		auto const wavelength_mod_wavelength = 12384.0f;
+		auto const wavelength_mod_amplitude = 0.0f;
+
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
 				auto const y_val = u(x, y) - ridge_loc;
-				auto const val = ns_wave(y_val/wavelength + phase);
-				ns_wave_output(x, y) = val;
+				auto const wl_mod =
+					std::clamp(wavelength_mod(v(x, y)/wavelength_mod_wavelength), -1.0f, 1.0f);
+				auto const val = ns_wave(y_val/((1.0f + wavelength_mod_amplitude*wl_mod) *wavelength ) + phase);
+				auto const a_mod = std::clamp(amp_mod(v(x, y)/amp_mod_wavelength), -1.0f, 1.0f);
+				ns_wave_output(x, y) = (1.0f + amp_mod_amplitude*a_mod)*val*amp_out;
 			}
 		}
 
-		std::ranges::transform(ns_wave_output.pixels(),
-			ns_wave_output.pixels().begin(),
-			[gain = amp_out](auto const val) {
-				return val*gain;
-		});
-
 		auto const half_distance = params.ns_wave.half_distance;
+
+		fractal_wave const half_distance_mod{rng, params.ns_wave.wave.shape};
+		auto const half_distance_mod_wavelength = 12384.0f;
+		auto const half_distance_mod_amplitude = 0.5f;
 
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
 				auto const y_val = u(x, y) - ridge_loc;
-				ns_wave_output(x, y) = ns_wave_output(x, y)*std::exp2(-std::abs(y_val)/half_distance);
+				auto const d_mod = std::clamp(half_distance_mod(v(x, y)/half_distance_mod_wavelength), -1.0f, 1.0f);
+				ns_wave_output(x, y) = ns_wave_output(x, y)
+					*std::exp2(-std::abs(y_val)/((1.0f + half_distance_mod_amplitude*d_mod)*half_distance));
 			}
 		}
 	}
