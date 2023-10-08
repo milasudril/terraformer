@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 				}
 			},
 			.ns_wave{
-				.amplitude = 2048.0f,
+				.amplitude = 1237.7599f,
 				.half_distance = 32768.0f,
 				.wave{
 					.shape{

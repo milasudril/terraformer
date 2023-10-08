@@ -97,28 +97,25 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
 		auto const phase = params.ns_wave.wave.wave_properties.phase;
 		auto const amp_out = params.ns_wave.amplitude;
-		auto min =  std::numeric_limits<float>::infinity();
-		auto max = -std::numeric_limits<float>::infinity();
+
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
 				auto const y_val = u(x, y) - ridge_loc;
 				auto const val = ns_wave(y_val/wavelength + phase);
-				min = std::min(val, min);
-				max = std::max(val, max);
 				ns_wave_output(x, y) = val;
 			}
 		}
-		auto const amp_in = 0.5f*(max - min);
-		auto const offset = 0.5f*(max + min);
+
 		std::ranges::transform(ns_wave_output.pixels(),
 			ns_wave_output.pixels().begin(),
-			[gain = amp_out/amp_in, offset](auto const val) {
-				return (val - offset)*gain;
+			[gain = amp_out](auto const val) {
+				return val*gain;
 		});
 
 		auto const half_distance = params.ns_wave.half_distance;
+
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
@@ -128,14 +125,9 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			}
 		}
 	}
-
+#if 0
 	grayscale_image we_wave_output{w, h};
 	{
-		fractal_wave const we_wave{rng, params.ns_wave.wave.shape};
-		auto const wavelength = 6144.0f;
-		auto const phase = 0.0f;
-		auto const output_amplitude = 128.0f;
-		auto amplitude = 0.0f;
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
@@ -151,6 +143,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				return val*gain;
 		});
 	}
+#endif
 
 	auto const& corners = params.corners;
 	auto const nw_elev = corners.nw.elevation;
