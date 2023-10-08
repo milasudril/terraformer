@@ -24,9 +24,6 @@ TESTCASE(fractal_wave_generate)
 		}
 	};
 
-	auto const c = terraformer::fractal_wave::compute_normalization_constant(params);
-	printf("%.8g\n", c);
-
 	random_generator rng;
 	terraformer::fractal_wave w{rng, params};
 
@@ -53,9 +50,6 @@ TESTCASE(fractal_wave_generate_no_amp_scaling)
 			.offset_noise = 0.0f
 		}
 	};
-
-	auto const c = terraformer::fractal_wave::compute_normalization_constant(params);
-	printf("%.8g\n", c);
 
 	random_generator rng;
 	terraformer::fractal_wave w{rng, params};

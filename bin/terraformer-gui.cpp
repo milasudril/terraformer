@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 			.main_ridge{
 				.ridge_curve_xy{
 					.initial_value = 1.0f/3.0f,
-					.amplitude = 0.042485807f,
+					.amplitude = 6144.0f/49152.0f,
 					.wave{
 						.shape{
 							.amplitude{
@@ -81,8 +81,8 @@ int main(int argc, char** argv)
 					}
 				},
 				.ridge_curve_xz{
-					.initial_value = 6150.0f,
-					.amplitude = 190.00002f,
+					.initial_value = 6144.0f,
+					.amplitude = 512.00002f,
 					.wave{
 						.shape{
 							.amplitude{
@@ -106,7 +106,7 @@ int main(int argc, char** argv)
 				}
 			},
 			.ns_wave{
-				.amplitude = 1237.7599f,
+				.amplitude = 4096.0f,
 				.half_distance = 32768.0f,
 				.wave{
 					.shape{

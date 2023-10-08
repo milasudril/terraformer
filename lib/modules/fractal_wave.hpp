@@ -214,14 +214,6 @@ namespace terraformer
 			linear_mod_progression phase;
 		};
 
-		static auto compute_normalization_constant(params const& params)
-		{
-			auto const a = 1.0f/params.amplitude.scaling_factor;
-			auto const phi = params.phase.offset;
-			auto constexpr twopi = 2.0f*std::numbers::pi_v<float>;
-			return std::max(std::sqrt(a*a - 2.0f*a*std::cos(twopi*phi) + 1.0f), 1.0f/4096.0f);
-		}
-
 		static auto compute_number_of_waves(params const& params)
 		{
 			auto const k_amp = 14.0f/std::log2(params.amplitude.scaling_factor);
@@ -232,7 +224,6 @@ namespace terraformer
 
 		template<class Rng>
 		explicit fractal_wave(Rng&& rng, params const& params):
-		m_normalization_constant{compute_normalization_constant(params)},
 		m_num_waves{compute_number_of_waves(params)},
 		m_components{std::make_unique_for_overwrite<wave_component[]>(m_num_waves)}
 		{
@@ -245,9 +236,25 @@ namespace terraformer
 					.phase = get_value(params.phase, k, rng)
 				};
 			}
+
+			auto min = std::numeric_limits<float>::infinity();
+			auto max = -std::numeric_limits<float>::infinity();
+			for(size_t k = 0; k != 1024; ++k)
+			{
+				auto x = static_cast<float>(k)/32.0f;
+				auto val = generate_unnormalized(x);
+				min = std::min(val, min);
+				max = std::max(val, max);
+			}
+			m_offset = 0.5f*(max + min);
+			m_amplitude = 0.5f*(max - min);
 		}
 
 		auto operator()(float x) const
+		{ return (generate_unnormalized(x) - m_offset)/m_amplitude; }
+
+	private:
+		float generate_unnormalized(float x) const
 		{
 			auto sum = 0.0f;
 			auto constexpr twopi = 2.0f*std::numbers::pi_v<float>;
@@ -259,13 +266,13 @@ namespace terraformer
 
 				sum += amplitude*approx_sine(twopi*(x/wavelength - phase + 0.25f));
 			}
-			return sum*m_normalization_constant;
+			return sum;
 		}
 
-	private:
-		float m_normalization_constant;
 		size_t m_num_waves;
 		std::unique_ptr<wave_component[]> m_components;
+		float m_amplitude;
+		float m_offset;
 	};
 
 	struct fractal_wave_description
