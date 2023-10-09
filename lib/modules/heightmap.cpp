@@ -141,25 +141,6 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			}
 		}
 	}
-#if 0
-	grayscale_image we_wave_output{w, h};
-	{
-		for(uint32_t y = 0; y != h; ++y)
-		{
-			for(uint32_t x = 0; x != w; ++x)
-			{
-				auto const val = we_wave(v(x, y)/wavelength + phase);
-				amplitude = std::max(std::abs(val), amplitude);
-				we_wave_output(x, y) = val;
-			}
-		}
-		std::ranges::transform(we_wave_output.pixels(),
-			we_wave_output.pixels().begin(),
-			[gain = output_amplitude/amplitude](auto const val) {
-				return val*gain;
-		});
-	}
-#endif
 
 	auto const& corners = params.corners;
 	auto const nw_elev = corners.nw.elevation;
@@ -190,7 +171,6 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			auto const base_elevation = std::lerp(north, south, eta);
 			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump)
 				+ ns_wave_output(x, y);
-//				+ we_wave_output(x, y);
 		}
 	}
 #if 0
