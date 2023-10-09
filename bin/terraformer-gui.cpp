@@ -106,28 +106,33 @@ int main(int argc, char** argv)
 				}
 			},
 			.ns_wave{
-				.amplitude = 2048.0f,
-				.half_distance = 32768.0f,
+				.initial_amplitude = 2048.0f,
 				.wave{
-					.shape{
-						.amplitude{
- 							.scaling_factor = std::numbers::phi_v<float>,
-							.scaling_noise = 1.0f/16.0f
+					.half_distance = 32768.0f,
+					.wave{
+						.shape{
+							.amplitude{
+								.scaling_factor = std::numbers::phi_v<float>,
+								.scaling_noise = 1.0f/16.0f
+							},
+							.wavelength{
+								.scaling_factor = 1.378240f,
+								.scaling_noise = 1.378240f/1024.0f
+							},
+							.phase{
+								.offset = 2.0f - std::numbers::phi_v<float>,
+								.offset_noise = 1.0f/24.0f
+							}
 						},
-						.wavelength{
-							.scaling_factor = 1.378240f,
-							.scaling_noise = 1.378240f/1024.0f
-						},
-						.phase{
-							.offset = 2.0f - std::numbers::phi_v<float>,
-							.offset_noise = 1.0f/24.0f
+						.wave_properties{
+							.wavelength = 32768.0f,
+							.phase = 7.9810004f
 						}
-					},
-					.wave_properties{
-						.wavelength = 32768.0f,
-						.phase = 7.9810004f
 					}
-				}
+				},
+				.amplitude_modulation{},
+				.wavelength_modulation{},
+				.half_distance_modulation{}
 			}
 		}
 	};

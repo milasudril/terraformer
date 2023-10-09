@@ -126,7 +126,6 @@ namespace terraformer
 
 	struct damped_wave_description
 	{
-		float amplitude;
 		float half_distance;
 		fractal_wave_description wave;
 	};
@@ -135,31 +134,6 @@ namespace terraformer
 	requires(std::is_same_v<std::remove_cvref_t<T>, damped_wave_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
-		form.insert(
-			field{
-				.name = "amplitude",
-				.display_name = "Amplitude",
-				.description = "Sets the amplitude of the generated wave function",
-				.widget = std::tuple{
-					knob{
-						.min = -1.0f,
-						.max = 15.0f,
-						.binding = std::ref(params.get().amplitude),
-						.mapping = numeric_input_mapping_type::log
-					},
-					textbox{
-						.value_converter = num_string_converter{
-							.range = closed_open_interval{
-								.min = 0.0f,
-								.max = std::numeric_limits<float>::infinity()
-							}
-						},
-						.binding = std::ref(params.get().amplitude)
-					}
-				}
-			}
-		);
-
 		form.insert(
 			field{
 				.name = "half_distance",
@@ -197,12 +171,138 @@ namespace terraformer
 		);
 	}
 
+	struct modulation_description
+	{
+		float depth;
+		fractal_wave_description modulating_wave;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, modulation_description>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "depth",
+			.display_name = "Depth",
+			.description = "Sets the modulation depth",
+			.widget = std::tuple{
+				knob{
+					.min = 0.0f,
+					.max = 1.0f,
+					.binding = std::ref(params.get().depth),
+					.mapping = numeric_input_mapping_type::lin
+				},
+				textbox{
+					.value_converter = num_string_converter{
+						.range = closed_closed_interval{
+							.min = 0.0f,
+							.max = 1.0f,
+						}
+					},
+					.binding = std::ref(params.get().depth)
+				}
+			}
+		});
+
+		form.insert(field{
+			.name = "modulating_wave",
+			.display_name = "Modulating wave",
+			.description = "Controls the shape of the modulatiing wave",
+			.widget = subform{
+				.binding = std::ref(params.get().modulating_wave)
+			}
+		});
+	}
+
+	struct modulated_damped_wave_description
+	{
+		float initial_amplitude;
+		damped_wave_description wave;
+		modulation_description amplitude_modulation;
+		modulation_description wavelength_modulation;
+		modulation_description half_distance_modulation;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, modulated_damped_wave_description>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(
+			field{
+				.name = "initial_amplitude",
+				.display_name = "Initial amplitude",
+				.description = "Initial (undamped) amplitude of the generated wave",
+				.widget = std::tuple{
+					knob{
+						.min = -1.0f,
+						.max = 15.0f,
+						.binding = std::ref(params.get().initial_amplitude),
+						.mapping = numeric_input_mapping_type::log
+					},
+					textbox{
+						.value_converter = num_string_converter{
+							.range = closed_open_interval{
+								.min = 0.0f,
+								.max = std::numeric_limits<float>::infinity()
+							}
+						},
+						.binding = std::ref(params.get().initial_amplitude)
+					}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "wave",
+				.display_name = "Wave",
+				.description = "Controls the behaviour of the wave",
+				.widget = subform{
+					.binding = std::ref(params.get().wave)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "amplitude_modulation",
+				.display_name = "Amplitude modulation",
+				.description = "Controls amplitude modulation",
+				.widget = subform{
+					.binding = std::ref(params.get().amplitude_modulation)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "wavelength_modulation",
+				.display_name = "Wavelength modulation",
+				.description = "Controls wavelength modulation",
+				.widget = subform{
+					.binding = std::ref(params.get().wavelength_modulation)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "half_distance_modulation",
+				.display_name = "Half distance modulation",
+				.description = "Controls half distance modulation",
+				.widget = subform{
+					.binding = std::ref(params.get().half_distance_modulation)
+				}
+			}
+		);
+	}
+
 	struct initial_heightmap_description
 	{
 		elevation_range output_range;
 		struct corners corners;
 		main_ridge_description main_ridge;
-		damped_wave_description ns_wave;
+		modulated_damped_wave_description ns_wave;
 	};
 
 	template<class Form, class T>

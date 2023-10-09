@@ -93,46 +93,51 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 	grayscale_image ns_wave_output{w, h};
 	{
-		fractal_wave const ns_wave{rng, params.ns_wave.wave.shape};
-		auto const wavelength = params.ns_wave.wave.wave_properties.wavelength;
-		auto const phase = params.ns_wave.wave.wave_properties.phase;
-		auto const amp_out = params.ns_wave.amplitude;
+		auto const& ns_wave_desc = params.ns_wave;
 
-		fractal_wave const amp_mod{rng, params.ns_wave.wave.shape};
-		auto const amp_mod_wavelength = 6144.0f;
-		auto const amp_mod_amplitude = 0.0f;
+		fractal_wave const wave{rng, ns_wave_desc.wave.wave.shape};
+		auto const wavelength = ns_wave_desc.wave.wave.wave_properties.wavelength;
+		auto const phase = ns_wave_desc.wave.wave.wave_properties.phase;
+		auto const amplitude = ns_wave_desc.initial_amplitude;
+		auto const half_distance = ns_wave_desc.wave.half_distance;
 
-		fractal_wave const wavelength_mod{rng, params.ns_wave.wave.shape};
-		auto const wavelength_mod_wavelength = 12384.0f;
-		auto const wavelength_mod_amplitude = 0.0f;
+		auto const& amp_mod_desc = ns_wave_desc.amplitude_modulation;
+		fractal_wave const amp_mod{rng, amp_mod_desc.modulating_wave.shape};
+		auto const amp_mod_wavelength = amp_mod_desc.modulating_wave.wave_properties.wavelength;
+		auto const amp_mod_phase = amp_mod_desc.modulating_wave.wave_properties.phase;
+		auto const amp_mod_depth = amp_mod_desc.depth;
 
-		for(uint32_t y = 0; y != h; ++y)
-		{
-			for(uint32_t x = 0; x != w; ++x)
-			{
-				auto const y_val = u(x, y) - ridge_loc;
-				auto const wl_mod =
-					std::clamp(wavelength_mod(v(x, y)/wavelength_mod_wavelength), -1.0f, 1.0f);
-				auto const val = ns_wave(y_val/((1.0f + wavelength_mod_amplitude*wl_mod) *wavelength ) + phase);
-				auto const a_mod = std::clamp(amp_mod(v(x, y)/amp_mod_wavelength), -1.0f, 1.0f);
-				ns_wave_output(x, y) = (1.0f + amp_mod_amplitude*a_mod)*val*amp_out;
-			}
-		}
+		auto const& wavelength_mod_desc = ns_wave_desc.wavelength_modulation;
+		fractal_wave const wavelength_mod{rng, wavelength_mod_desc.modulating_wave.shape};
+		auto const wavelength_mod_wavelength = wavelength_mod_desc.modulating_wave.wave_properties.wavelength;
+		auto const wavelength_mod_phase = wavelength_mod_desc.modulating_wave.wave_properties.phase;
+		auto const wavelength_mod_depth = wavelength_mod_desc.depth;
 
-		auto const half_distance = params.ns_wave.half_distance;
-
-		fractal_wave const half_distance_mod{rng, params.ns_wave.wave.shape};
-		auto const half_distance_mod_wavelength = 12384.0f;
-		auto const half_distance_mod_amplitude = 0.5f;
+		auto const& half_distance_mod_desc = ns_wave_desc.half_distance_modulation;
+		fractal_wave const half_distance_mod{rng, half_distance_mod_desc.modulating_wave.shape};
+		auto const half_distance_mod_wavelength = half_distance_mod_desc.modulating_wave.wave_properties.wavelength;
+		auto const half_distance_mod_phase = half_distance_mod_desc.modulating_wave.wave_properties.phase;
+		auto const half_distance_mod_depth = half_distance_mod_desc.depth;
 
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
 				auto const y_val = u(x, y) - ridge_loc;
-				auto const d_mod = std::clamp(half_distance_mod(v(x, y)/half_distance_mod_wavelength), -1.0f, 1.0f);
-				ns_wave_output(x, y) = ns_wave_output(x, y)
-					*std::exp2(-std::abs(y_val)/((1.0f + half_distance_mod_amplitude*d_mod)*half_distance));
+				auto const x_val = v(x, y);
+
+				auto const amp_mod_value = std::clamp(amp_mod(x_val/amp_mod_wavelength + amp_mod_phase), -1.0f, 1.0f);
+				auto const amp_res = (1.0f + amp_mod_depth*amp_mod_value)*amplitude;
+
+				auto const wavelength_mod_value = std::clamp(wavelength_mod(x_val/wavelength_mod_wavelength + wavelength_mod_phase), -1.0f, 1.0f);
+				auto const wavelength_res = (1.0f + wavelength_mod_depth*wavelength_mod_value)*wavelength;
+
+				auto const half_distnace_mod_value = std::clamp(half_distance_mod(x_val/half_distance_mod_wavelength + half_distance_mod_phase), -1.0f, 1.0f);
+				auto const half_distance_res = (1.0f + half_distance_mod_depth*half_distnace_mod_value)*half_distance;
+
+				auto const z_val = amp_res*wave(y_val/wavelength_res + phase)*std::exp2(-std::abs(y_val)/half_distance_res);
+
+				ns_wave_output(x, y) = z_val;
 			}
 		}
 	}
