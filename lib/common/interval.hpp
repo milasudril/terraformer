@@ -39,90 +39,84 @@ namespace terraformer
 	}
 
 	template<class T>
-	class open_open_interval
+	struct open_open_interval
 	{
-	public:
 		using value_type = T;
 		static constexpr auto lower_bound_char = ']';
 		static constexpr auto upper_bound_char = '[';
 
-		constexpr open_open_interval(T min, T max):m_min{min}, m_max{max}
+		constexpr open_open_interval(T min, T max):_m_min{min}, _m_max{max}
 		{ validate(*this); }
 
 		constexpr T min() const
-		{ return m_min; }
+		{ return _m_min; }
 
 		constexpr T max() const
-		{ return m_max; }
+		{ return _m_max; }
 
 		constexpr bool operator==(open_open_interval const&) const = default;
 		constexpr bool operator!=(open_open_interval const&) const = default;
 
-	private:
-		T m_min;
-		T m_max;
+		T _m_min;
+		T _m_max;
 	};
 
 	template<class T>
-	bool within(open_open_interval<T> range, T val)
+	constexpr bool within(open_open_interval<T> range, T val)
 	{ return val > range.min() && val < range.max(); }
 
 	template<class T>
 	struct closed_open_interval
 	{
-	public:
 		using value_type = T;
 		static constexpr auto lower_bound_char = '[';
 		static constexpr auto upper_bound_char = '[';
 
-		constexpr closed_open_interval(T min, T max):m_min{min}, m_max{max}
+		constexpr closed_open_interval(T min, T max):_m_min{min}, _m_max{max}
 		{ validate(*this); }
 
 		constexpr T min() const
-		{ return m_min; }
+		{ return _m_min; }
 
 		constexpr T max() const
-		{ return m_max; }
+		{ return _m_max; }
 
 		constexpr bool operator==(closed_open_interval const&) const = default;
 		constexpr bool operator!=(closed_open_interval const&) const = default;
 
-	private:
-		T m_min;
-		T m_max;
+		T _m_min;
+		T _m_max;
 	};
 
 	template<class T>
-	bool within(closed_open_interval<T> range, T val)
+	constexpr bool within(closed_open_interval<T> range, T val)
 	{ return val >= range.min() && val < range.max(); }
 
 	template<class T>
-	class open_closed_interval
+	struct open_closed_interval
 	{
-	public:
 		using value_type = T;
 		static constexpr auto lower_bound_char = ']';
 		static constexpr auto upper_bound_char = ']';
 
-		constexpr open_closed_interval(T min, T max):m_min{min}, m_max{max}
+		constexpr open_closed_interval(T min, T max):_m_min{min}, _m_max{max}
 		{ validate(*this); }
 
 		constexpr T min() const
-		{ return m_min; }
+		{ return _m_min; }
 
 		constexpr T max() const
-		{ return m_max; }
+		{ return _m_max; }
 
 		constexpr bool operator==(open_closed_interval const&) const = default;
 		constexpr bool operator!=(open_closed_interval const&) const = default;
 
-	private:
-		T m_min;
-		T m_max;
+		T _m_min;
+		T _m_max;
 	};
 
 	template<class T>
-	bool within(open_closed_interval<T> range, T val)
+	constexpr bool within(open_closed_interval<T> range, T val)
 	{ return val > range.min() && val <= range.max(); }
 
 	template<class T>
@@ -133,25 +127,24 @@ namespace terraformer
 		static constexpr auto lower_bound_char = '[';
 		static constexpr auto upper_bound_char = ']';
 
-		constexpr closed_closed_interval(T min, T max):m_min{min}, m_max{max}
+		constexpr closed_closed_interval(T min, T max):_m_min{min}, _m_max{max}
 		{ validate(*this); }
 
 		constexpr T min() const
-		{ return m_min; }
+		{ return _m_min; }
 
 		constexpr T max() const
-		{ return m_max; }
+		{ return _m_max; }
 
 		constexpr bool operator==(closed_closed_interval const&) const = default;
 		constexpr bool operator!=(closed_closed_interval const&) const = default;
 
-	private:
-		T m_min;
-		T m_max;
+		T _m_min;
+		T _m_max;
 	};
 
 	template<class T>
-	bool within(closed_closed_interval<T> range, T val)
+	constexpr bool within(closed_closed_interval<T> range, T val)
 	{ return val >= range.min() && val <= range.max(); }
 }
 #endif
