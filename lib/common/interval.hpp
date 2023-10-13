@@ -35,7 +35,7 @@ namespace terraformer
 	constexpr void validate(I const& range)
 	{
 		if(range.min() >= range.max())
-		{ throw std::runtime_error{"Max must be strictly greater than min."}; }
+		{ throw std::runtime_error{"Max must be strictly greater than min"}; }
 	}
 
 	template<class T>
