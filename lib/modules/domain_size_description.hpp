@@ -1,18 +1,16 @@
 #ifndef TERRAFORMER_DOMAIN_SIZE_DESCRIPTION_HPP
 #define TERRAFORMER_DOMAIN_SIZE_DESCRIPTION_HPP
 
+#include "./dimensions.hpp"
+
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/formbuilder/string_converter.hpp"
-#include "lib/common/bounded_value.hpp"
 
 #include <cmath>
 
 namespace terraformer
 {
-	using domain_length = bounded_value<open_open_interval{0.0f, 131072.0f}, 49152.0f>;
-	using pixel_count = bounded_value<closed_closed_interval{9, 67'108'864}, 1'048'576>;
-
 	struct domain_size_description
 	{
 		domain_length width;
