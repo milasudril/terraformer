@@ -4,16 +4,20 @@
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/formbuilder/string_converter.hpp"
+#include "lib/common/bounded_value.hpp"
 
 #include <cmath>
 
 namespace terraformer
 {
+	using domain_length = bounded_value<open_open_interval{0.0f, 131072.0f}, 49152.0f>;
+	using pixel_count = bounded_value<closed_closed_interval{9, 67'108'864}, 1'048'576>;
+
 	struct domain_size_description
 	{
-		float width;
-		float height;
-		int number_of_pixels;
+		domain_length width;
+		domain_length height;
+		pixel_count number_of_pixels;
 	};
 
 	inline span_2d_extents image_size(domain_size_description const& dom_size)

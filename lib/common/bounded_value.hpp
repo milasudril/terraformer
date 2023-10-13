@@ -22,6 +22,14 @@ namespace terraformer
 			{ throw std::runtime_error{"Value is out of range"}; }
 		}
 
+		auto& operator=(value_type val)
+		{
+			if(!within(Interval, val))
+			{ throw std::runtime_error{"Value is out of range"}; }
+			m_val = val;
+			return *this;
+		}
+
 		constexpr auto operator<=>(bounded_value const& other) const = default;
 
 		constexpr auto operator<=>(value_type other) const

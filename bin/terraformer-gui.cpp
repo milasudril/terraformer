@@ -39,11 +39,7 @@ int main(int argc, char** argv)
 
 	terraformer::simulation_description sim{
 		.rng_seed = terraformer::random_bit_source{}.get<terraformer::rng_seed_type>(),
-		.domain_size{
-			.width = 49152,
-			.height = 49152,
-			.number_of_pixels = 16384
-		},
+		.domain_size{},
 		.initial_heightmap{
 			.output_range{
 				.min = 512.0f,
