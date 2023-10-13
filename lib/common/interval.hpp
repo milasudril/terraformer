@@ -30,6 +30,14 @@ namespace terraformer
 		return ret;
 	}
 
+	template<class I, class T = typename I::value_type>
+	requires interval<I, T>
+	constexpr void validate(I const& range)
+	{
+		if(range.min() >= range.max())
+		{ throw std::runtime_error{"Max must be strictly greater than min."}; }
+	}
+
 	template<class T>
 	class open_open_interval
 	{
@@ -38,7 +46,8 @@ namespace terraformer
 		static constexpr auto lower_bound_char = ']';
 		static constexpr auto upper_bound_char = '[';
 
-		constexpr open_open_interval(T min, T max):m_min{min}, m_max{max}{}
+		constexpr open_open_interval(T min, T max):m_min{min}, m_max{max}
+		{ validate(*this); }
 
 		constexpr T min() const
 		{ return m_min; }
@@ -66,7 +75,8 @@ namespace terraformer
 		static constexpr auto lower_bound_char = '[';
 		static constexpr auto upper_bound_char = '[';
 
-		constexpr closed_open_interval(T min, T max):m_min{min}, m_max{max}{}
+		constexpr closed_open_interval(T min, T max):m_min{min}, m_max{max}
+		{ validate(*this); }
 
 		constexpr T min() const
 		{ return m_min; }
@@ -94,7 +104,8 @@ namespace terraformer
 		static constexpr auto lower_bound_char = ']';
 		static constexpr auto upper_bound_char = ']';
 
-		constexpr open_closed_interval(T min, T max):m_min{min}, m_max{max}{}
+		constexpr open_closed_interval(T min, T max):m_min{min}, m_max{max}
+		{ validate(*this); }
 
 		constexpr T min() const
 		{ return m_min; }
@@ -122,7 +133,8 @@ namespace terraformer
 		static constexpr auto lower_bound_char = '[';
 		static constexpr auto upper_bound_char = ']';
 
-		constexpr closed_closed_interval(T min, T max):m_min{min}, m_max{max}{}
+		constexpr closed_closed_interval(T min, T max):m_min{min}, m_max{max}
+		{ validate(*this); }
 
 		constexpr T min() const
 		{ return m_min; }
