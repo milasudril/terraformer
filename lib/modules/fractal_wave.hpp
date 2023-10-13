@@ -40,8 +40,8 @@ namespace terraformer
 				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_open_interval{
-							.min = 1.0f,
-							.max = std::numeric_limits<float>::infinity()
+							1.0f,
+							std::numeric_limits<float>::infinity()
 						}
 					},
 					.binding = std::ref(params.get().scaling_factor)
@@ -62,8 +62,8 @@ namespace terraformer
 				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_open_interval{
-							.min = 0.0f,
-							.max = std::numeric_limits<float>::infinity()
+							0.0f,
+							std::numeric_limits<float>::infinity()
 						}
 					},
 					.binding = std::ref(params.get().scaling_noise)
@@ -102,8 +102,8 @@ namespace terraformer
 				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = -0.5f,
-							.max = 0.5f
+							-0.5f,
+							0.5f
 						}
 					},
 					.binding = std::ref(params.get().offset)
@@ -118,14 +118,14 @@ namespace terraformer
 			.widget = std::tuple{
 				knob{
 					.min = 0.0f,
-					.max = 1.f,
+					.max = 1.0f,
 					.binding = std::ref(params.get().offset_noise)
 				},
 				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 0.0f,
-							.max = 1.0f
+							0.0f,
+							1.0f
 						}
 					},
 					.binding = std::ref(params.get().offset_noise)
@@ -165,8 +165,8 @@ namespace terraformer
 				textbox{
 					.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = 0.0f,
-							.max = std::numeric_limits<float>::infinity()
+							0.0f,
+							std::numeric_limits<float>::infinity()
 						}
 					},
 					.binding = std::ref(params.get().wavelength)
@@ -187,8 +187,8 @@ namespace terraformer
 				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 0.0f,
-							.max = 8.0f
+							0.0f,
+							8.0f
 						}
 					},
 					.binding = std::ref(params.get().phase)

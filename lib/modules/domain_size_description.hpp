@@ -49,8 +49,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = 0.0f,
-							.max = std::numeric_limits<float>::infinity()
+							0.0f,
+							std::numeric_limits<float>::infinity()
 						}
 					},
 					.binding = std::ref(dom_size.get().width)
@@ -66,8 +66,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = 0.0f,
-							.max = std::numeric_limits<float>::infinity()
+							0.0f,
+							std::numeric_limits<float>::infinity()
 						}
 					},
 					.binding = std::ref(dom_size.get().height)
@@ -83,8 +83,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 1,
-							.max = 8192*8192,
+							9,
+							8192*8192,
 						}
 					},
 					.binding = std::ref(dom_size.get().number_of_pixels)
@@ -122,8 +122,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 1u,
-							.max = std::numeric_limits<uint32_t>::max()
+							1u,
+							std::numeric_limits<uint32_t>::max()
 						}
 					},
 					.binding = std::ref(resolution.get().width)
@@ -139,8 +139,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 1u,
-							.max = std::numeric_limits<uint32_t>::max()
+							1u,
+							std::numeric_limits<uint32_t>::max()
 						}
 					},
 					.binding = std::ref(resolution.get().height)
@@ -156,8 +156,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = 0.0f,
-							.max = std::numeric_limits<float>::infinity(),
+							0.0f,
+							std::numeric_limits<float>::infinity()
 						}
 					},
 					.binding = std::ref(resolution.get().pixel_size)

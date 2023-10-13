@@ -22,8 +22,8 @@ namespace terraformer
 			.widget = textbox{
 				.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = -std::numeric_limits<float>::infinity(),
-							.max = std::numeric_limits<float>::infinity()
+							-std::numeric_limits<float>::infinity(),
+							std::numeric_limits<float>::infinity()
 						}
 					},
 				.binding = std::ref(params.get().min)
@@ -37,8 +37,8 @@ namespace terraformer
 			.widget = textbox{
 				.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = -std::numeric_limits<float>::infinity(),
-							.max = std::numeric_limits<float>::infinity()
+							-std::numeric_limits<float>::infinity(),
+							std::numeric_limits<float>::infinity()
 						}
 					},
 				.binding = std::ref(params.get().max)
@@ -70,8 +70,8 @@ namespace terraformer
 			.widget = textbox{
 				.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = -std::numeric_limits<float>::infinity(),
-							.max = std::numeric_limits<float>::infinity()
+							-std::numeric_limits<float>::infinity(),
+							std::numeric_limits<float>::infinity()
 						}
 					},
 				.binding = std::ref(params.get().nw.elevation)
@@ -85,8 +85,8 @@ namespace terraformer
 			.widget = textbox{
 				.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = -std::numeric_limits<float>::infinity(),
-							.max = std::numeric_limits<float>::infinity()
+							-std::numeric_limits<float>::infinity(),
+							std::numeric_limits<float>::infinity()
 						}
 					},
 				.binding = std::ref(params.get().ne.elevation)
@@ -100,8 +100,8 @@ namespace terraformer
 			.widget = textbox{
 				.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = -std::numeric_limits<float>::infinity(),
-							.max = std::numeric_limits<float>::infinity()
+							-std::numeric_limits<float>::infinity(),
+							std::numeric_limits<float>::infinity()
 						}
 					},
 				.binding = std::ref(params.get().sw.elevation)
@@ -115,8 +115,8 @@ namespace terraformer
 			.widget = textbox{
 				.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = -std::numeric_limits<float>::infinity(),
-							.max = std::numeric_limits<float>::infinity()
+							-std::numeric_limits<float>::infinity(),
+							std::numeric_limits<float>::infinity()
 						}
 					},
 				.binding = std::ref(params.get().se.elevation)
@@ -149,8 +149,8 @@ namespace terraformer
 					textbox{
 						.value_converter = num_string_converter{
 							.range = closed_open_interval{
-								.min = 256.0f,
-								.max = std::numeric_limits<float>::infinity()
+								256.0f,
+								std::numeric_limits<float>::infinity()
 							}
 						},
 						.binding = std::ref(params.get().half_distance)
@@ -195,8 +195,8 @@ namespace terraformer
 				textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 0.0f,
-							.max = 1.0f,
+							0.0f,
+							1.0f,
 						}
 					},
 					.binding = std::ref(params.get().depth)
@@ -242,8 +242,8 @@ namespace terraformer
 					textbox{
 						.value_converter = num_string_converter{
 							.range = closed_open_interval{
-								.min = 0.0f,
-								.max = std::numeric_limits<float>::infinity()
+								0.0f,
+								std::numeric_limits<float>::infinity()
 							}
 						},
 						.binding = std::ref(params.get().initial_amplitude)

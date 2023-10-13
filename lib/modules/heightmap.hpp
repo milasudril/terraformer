@@ -43,8 +43,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 2u,
-							.max = std::numeric_limits<uint32_t>::max()
+							2u,
+							std::numeric_limits<uint32_t>::max()
 						}
 					},
 					.binding = std::ref(heightmap.get().pixel_storage.width_ref())
@@ -60,8 +60,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
-							.min = 2u,
-							.max = std::numeric_limits<uint32_t>::max()
+							2u,
+							std::numeric_limits<uint32_t>::max()
 						}
 					},
 					.binding = std::ref(heightmap.get().pixel_storage.height_ref())
@@ -77,8 +77,8 @@ namespace terraformer
 				.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = open_open_interval{
-							.min = 0.0f,
-							.max = std::numeric_limits<float>::infinity(),
+							0.0f,
+							std::numeric_limits<float>::infinity()
 						}
 					},
 					.binding = std::ref(heightmap.get().pixel_size)

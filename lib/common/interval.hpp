@@ -3,6 +3,8 @@
 
 #include "./utils.hpp"
 
+#include <stdexcept>
+
 #include <concepts>
 
 namespace terraformer
@@ -31,6 +33,8 @@ namespace terraformer
 	struct open_open_interval
 	{
 		using value_type = T;
+		constexpr open_open_interval(T min, T max):min{min}, max{max}{}
+
 		T min;
 		T max;
 		static constexpr auto lower_bound_char = ']';
@@ -45,6 +49,7 @@ namespace terraformer
 	struct closed_open_interval
 	{
 		using value_type = T;
+		constexpr closed_open_interval(T min, T max):min{min}, max{max}{}
 		T min;
 		T max;
 		static constexpr auto lower_bound_char = '[';
@@ -59,6 +64,7 @@ namespace terraformer
 	struct open_closed_interval
 	{
 		using value_type = T;
+		constexpr open_closed_interval(T min, T max):min{min}, max{max}{}
 		T min;
 		T max;
 		static constexpr auto lower_bound_char = ']';
@@ -73,6 +79,7 @@ namespace terraformer
 	struct closed_closed_interval
 	{
 		using value_type = T;
+		constexpr closed_closed_interval(T min, T max):min{min}, max{max}{}
 		T min;
 		T max;
 		static constexpr auto lower_bound_char = '[';

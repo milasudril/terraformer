@@ -38,8 +38,8 @@ namespace terraformer
 					textbox{
 						.value_converter = num_string_converter{
 							.range = closed_open_interval{
-								.min = 0.0f,
-								.max = T::value_is_normalized? 1.0f : std::numeric_limits<float>::infinity()
+								0.0f,
+								T::value_is_normalized? 1.0f : std::numeric_limits<float>::infinity()
 							}
 						},
 						.binding = std::ref(params.get().initial_value)
@@ -63,8 +63,8 @@ namespace terraformer
 					textbox{
 						.value_converter = num_string_converter{
 							.range = closed_open_interval{
-								.min = 0.0f,
-								.max = T::value_is_normalized? 0.5f : std::numeric_limits<float>::infinity()
+								0.0f,
+								T::value_is_normalized? 0.5f : std::numeric_limits<float>::infinity()
 							}
 						},
 						.binding = std::ref(params.get().amplitude)
