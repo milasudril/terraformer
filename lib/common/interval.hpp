@@ -46,6 +46,9 @@ namespace terraformer
 		constexpr T max() const
 		{ return m_max; }
 
+		constexpr bool operator==(open_open_interval const&) const = default;
+		constexpr bool operator!=(open_open_interval const&) const = default;
+
 	private:
 		T m_min;
 		T m_max;
@@ -70,6 +73,9 @@ namespace terraformer
 
 		constexpr T max() const
 		{ return m_max; }
+
+		constexpr bool operator==(closed_open_interval const&) const = default;
+		constexpr bool operator!=(closed_open_interval const&) const = default;
 
 	private:
 		T m_min;
@@ -96,6 +102,9 @@ namespace terraformer
 		constexpr T max() const
 		{ return m_max; }
 
+		constexpr bool operator==(open_closed_interval const&) const = default;
+		constexpr bool operator!=(open_closed_interval const&) const = default;
+
 	private:
 		T m_min;
 		T m_max;
@@ -120,6 +129,9 @@ namespace terraformer
 
 		constexpr T max() const
 		{ return m_max; }
+
+		constexpr bool operator==(closed_closed_interval const&) const = default;
+		constexpr bool operator!=(closed_closed_interval const&) const = default;
 
 	private:
 		T m_min;
