@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 		.domain_size{
 			.width = 49152,
 			.height = 49152,
-			.number_of_pixels = 1024*1024
+			.number_of_pixels = 16384
 		},
 		.initial_heightmap{
 			.output_range{
