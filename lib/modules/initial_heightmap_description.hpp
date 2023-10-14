@@ -20,12 +20,7 @@ namespace terraformer
 			.display_name = "Min",
 			.description = "Sets the minimum elevation",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-						.range = open_open_interval{
-							-std::numeric_limits<float>::infinity(),
-							std::numeric_limits<float>::infinity()
-						}
-					},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().min)
 			},
 		});
@@ -35,12 +30,7 @@ namespace terraformer
 			.display_name = "Max",
 			.description = "Sets the maximum elevation",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-						.range = open_open_interval{
-							-std::numeric_limits<float>::infinity(),
-							std::numeric_limits<float>::infinity()
-						}
-					},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().max)
 			},
 		});
@@ -68,12 +58,7 @@ namespace terraformer
 			.display_name = "NW",
 			.description = "Sets the elevation in north-west",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-						.range = open_open_interval{
-							-std::numeric_limits<float>::infinity(),
-							std::numeric_limits<float>::infinity()
-						}
-					},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().nw.z)
 			},
 		});
@@ -83,12 +68,7 @@ namespace terraformer
 			.display_name = "NE",
 			.description = "Sets the elevation in north-east",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-						.range = open_open_interval{
-							-std::numeric_limits<float>::infinity(),
-							std::numeric_limits<float>::infinity()
-						}
-					},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().ne.z)
 			},
 		});
@@ -98,12 +78,7 @@ namespace terraformer
 			.display_name = "SW",
 			.description = "Sets the elevation in south-west",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-						.range = open_open_interval{
-							-std::numeric_limits<float>::infinity(),
-							std::numeric_limits<float>::infinity()
-						}
-					},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().sw.z)
 			},
 		});
@@ -113,12 +88,7 @@ namespace terraformer
 			.display_name = "SE",
 			.description = "Sets the elevation in south-east",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-						.range = open_open_interval{
-							-std::numeric_limits<float>::infinity(),
-							std::numeric_limits<float>::infinity()
-						}
-					},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().se.z)
 			},
 		});
@@ -140,12 +110,7 @@ namespace terraformer
 				.display_name = "Half distance",
 				.description = "The disntance that halfs the amplitude",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_open_interval{
-							256.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(params.get().half_distance)
 				}
 			}
@@ -178,12 +143,7 @@ namespace terraformer
 			.display_name = "Depth",
 			.description = "Sets the modulation depth",
 			.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							0.0f,
-							1.0f,
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(params.get().depth)
 				}
 		});
@@ -217,12 +177,7 @@ namespace terraformer
 				.display_name = "Initial amplitude",
 				.description = "Initial (undamped) amplitude of the generated wave",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(params.get().initial_amplitude)
 				}
 			}

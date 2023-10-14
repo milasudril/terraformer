@@ -25,12 +25,7 @@ namespace terraformer
 				.display_name = "Initial value",
 				.description = "Sets the initial value of the generated wave function",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(params.get().initial_value)
 				}
 			}
@@ -42,12 +37,7 @@ namespace terraformer
 				.display_name = "Amplitude",
 				.description = "Sets the amplitude of the generated wave function",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(params.get().amplitude)
 				}
 			}
@@ -96,9 +86,6 @@ namespace terraformer
 				}
 			}
 		);
-
 	}
 }
-
-
 #endif

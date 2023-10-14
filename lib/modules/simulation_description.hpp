@@ -34,7 +34,7 @@ namespace terraformer
 					},
 					.binding = std::ref(params.get().rng_seed),
 					.label = "🂠",
-					.description = "Gererate a seed value",
+					.description = "Generate a seed value",
 				}
 			}
 		});

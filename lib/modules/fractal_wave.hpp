@@ -32,12 +32,7 @@ namespace terraformer
 			.display_name = "Scaling factor",
 			.description = "Controls the relative size between two consecutive elements",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-					.range = closed_open_interval{
-						1.0f,
-						std::numeric_limits<float>::infinity()
-					}
-				},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().factor)
 			}
 		});
@@ -47,12 +42,7 @@ namespace terraformer
 			.display_name = "Scaling noise",
 			.description = "Controls the amount of noise to add to the scaling factor",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-					.range = closed_open_interval{
-						0.0f,
-						std::numeric_limits<float>::infinity()
-					}
-				},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().scaling_noise)
 			}
 		});
@@ -80,12 +70,7 @@ namespace terraformer
 			.display_name = "Offset",
 			.description = "Controls the offset between two consecutive elements",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-					.range = closed_closed_interval{
-						-0.5f,
-						0.5f
-					}
-				},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().offset)
 			}
 		});
@@ -95,12 +80,7 @@ namespace terraformer
 			.display_name = "Offset noise",
 			.description = "Controls the amount of noise to add to the offset",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-					.range = closed_closed_interval{
-						0.0f,
-						1.0f
-					}
-				},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().offset_noise)
 			}
 		});
@@ -128,12 +108,7 @@ namespace terraformer
 			.display_name = "Wavelength",
 			.description = "Controls the wavelength",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-					.range = open_open_interval{
-						0.0f,
-						std::numeric_limits<float>::infinity()
-					}
-				},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().wavelength)
 			}
 		});
@@ -143,12 +118,7 @@ namespace terraformer
 			.display_name = "Phase",
 			.description = "Controls the phase",
 			.widget = textbox{
-				.value_converter = num_string_converter{
-					.range = closed_closed_interval{
-						0.0f,
-						8.0f
-					}
-				},
+				.value_converter = num_string_converter<float>{},
 				.binding = std::ref(params.get().phase)
 			}
 		});

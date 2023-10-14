@@ -41,12 +41,7 @@ namespace terraformer
 				.display_name = "Width",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							2u,
-							std::numeric_limits<uint32_t>::max()
-						}
-					},
+					.value_converter = num_string_converter<int>{},
 					.binding = std::ref(heightmap.get().pixel_storage.width_ref())
 				}
 			}
@@ -58,12 +53,7 @@ namespace terraformer
 				.display_name = "Height",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							2u,
-							std::numeric_limits<uint32_t>::max()
-						}
-					},
+					.value_converter = num_string_converter<int>{},
 					.binding = std::ref(heightmap.get().pixel_storage.height_ref())
 				}
 			}
@@ -75,12 +65,7 @@ namespace terraformer
 				.display_name = "Pixel size",
 				.description = "Sets the size of pixels",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = open_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(heightmap.get().pixel_size)
 				}
 			}

@@ -11,12 +11,10 @@ namespace terraformer
 		explicit input_error(std::string str):std::runtime_error{std::move(str)}{}
 	};
 
-	template<class ValidRange, class T = typename ValidRange::value_type>
-	requires interval<ValidRange, T>
+	template<class T>
 	struct num_string_converter
 	{
-		using deserialized_type = typename ValidRange::value_type;
-		ValidRange range;
+		using deserialized_type = T;
 
 		static std::string convert(deserialized_type value)
 		{ return to_string_helper(value); }
@@ -27,19 +25,15 @@ namespace terraformer
 			auto const res = std::from_chars(std::begin(str), std::end(str), val);
 
 			if(res.ptr != std::end(str))
-			{ throw input_error{"Expected a number."}; }
+			{ throw input_error{"Expected a number"}; }
 
 			if(res.ec == std::errc{})
-			{
-				if(within(range, val))
-				{ return val; }
-				throw input_error{std::string{"Input value is out of range. Valid range is "}.append(to_string(range)).append(".")};
-			}
+			{ return val; }
 
 			switch(res.ec)
 			{
 				case std::errc::result_out_of_range:
-				throw input_error{std::string{"Input value is out of range. Valid range is "}.append(to_string(range)).append(".")};
+					throw input_error{"Number too large"};
 
 				default:
 					throw input_error{"Expected a number"};

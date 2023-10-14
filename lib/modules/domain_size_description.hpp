@@ -49,12 +49,7 @@ namespace terraformer
 				.display_name = "Width",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = open_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(dom_size.get().width)
 				}
 			}
@@ -66,12 +61,7 @@ namespace terraformer
 				.display_name = "Height",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = open_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(dom_size.get().height)
 				}
 			}
@@ -83,12 +73,7 @@ namespace terraformer
 				.display_name = "Number of pixel",
 				.description = "Sets the number of pixels in the generated images",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							9,
-							8192*8192,
-						}
-					},
+					.value_converter = num_string_converter<int>{},
 					.binding = std::ref(dom_size.get().number_of_pixels)
 				}
 			}
@@ -122,12 +107,7 @@ namespace terraformer
 				.display_name = "Width",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							1u,
-							std::numeric_limits<uint32_t>::max()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(resolution.get().width)
 				}
 			}
@@ -139,12 +119,7 @@ namespace terraformer
 				.display_name = "Height",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							1u,
-							std::numeric_limits<uint32_t>::max()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(resolution.get().height)
 				}
 			}
@@ -156,12 +131,7 @@ namespace terraformer
 				.display_name = "Pixel size",
 				.description = "Sets the size of pixels",
 				.widget = textbox{
-					.value_converter = num_string_converter{
-						.range = open_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
+					.value_converter = num_string_converter<float>{},
 					.binding = std::ref(resolution.get().pixel_size)
 				}
 			}
