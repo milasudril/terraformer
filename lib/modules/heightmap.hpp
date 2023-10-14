@@ -41,8 +41,8 @@ namespace terraformer
 				.display_name = "Width",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter<int>{},
-					.binding = std::ref(heightmap.get().pixel_storage.width_ref())
+					.binding = std::ref(heightmap.get().pixel_storage.width_ref()),
+					.value_converter = num_string_converter<int>{}
 				}
 			}
 		);
@@ -53,8 +53,8 @@ namespace terraformer
 				.display_name = "Height",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter<int>{},
-					.binding = std::ref(heightmap.get().pixel_storage.height_ref())
+					.binding = std::ref(heightmap.get().pixel_storage.height_ref()),
+					.value_converter = num_string_converter<int>{}
 				}
 			}
 		);
@@ -65,8 +65,8 @@ namespace terraformer
 				.display_name = "Pixel size",
 				.description = "Sets the size of pixels",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
-					.binding = std::ref(heightmap.get().pixel_size)
+					.binding = std::ref(heightmap.get().pixel_size),
+					.value_converter = num_string_converter<float>{}
 				}
 			}
 		);
@@ -77,8 +77,8 @@ namespace terraformer
 				.display_name = "Initial heightmap",
 				.description = "Shows the initial heightmap",
 				.widget = topographic_map_view{
-					.heightmap = std::ref(heightmap.get().pixel_storage),
-					.pixel_size = std::ref(heightmap.get().pixel_size)
+					.pixel_size = std::ref(heightmap.get().pixel_size),
+					.heightmap = std::ref(heightmap.get().pixel_storage)
 				}
 			}
 		);

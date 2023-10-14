@@ -18,8 +18,8 @@ namespace terraformer
 	template<class Converter, class BindingType>
 	struct textbox
 	{
-		Converter value_converter;
 		BindingType binding;
+		Converter value_converter;
 		std::optional<int> min_width = std::nullopt;
 	};
 
@@ -29,17 +29,17 @@ namespace terraformer
 	requires(std::is_same_v<std::remove_cvref_t<typename BindingType::type>, float>)
 	struct knob
 	{
+		BindingType binding;
 		float min;
 		float max;
-		BindingType binding;
 		numeric_input_mapping_type mapping = numeric_input_mapping_type::lin;
 	};
 
 	template<class Generator, class BindingType>
 	struct input_button
 	{
-		Generator value_generator;
 		BindingType binding;
+		Generator value_generator;
 		char const* label;
 		char const* description;
 	};
@@ -53,8 +53,8 @@ namespace terraformer
 	template<class HeightmapType, class PixelSizeType>
 	struct topographic_map_view
 	{
-		HeightmapType heightmap;
 		PixelSizeType pixel_size;
+		HeightmapType heightmap;
 	};
 }
 

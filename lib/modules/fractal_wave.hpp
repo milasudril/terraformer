@@ -32,8 +32,8 @@ namespace terraformer
 			.display_name = "Scaling factor",
 			.description = "Controls the relative size between two consecutive elements",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().factor)
+				.binding = std::ref(params.get().factor),
+				.value_converter = num_string_converter<float>{}
 			}
 		});
 
@@ -42,8 +42,8 @@ namespace terraformer
 			.display_name = "Scaling noise",
 			.description = "Controls the amount of noise to add to the scaling factor",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().scaling_noise)
+				.binding = std::ref(params.get().scaling_noise),
+				.value_converter = num_string_converter<float>{}
 			}
 		});
 	}
@@ -70,8 +70,8 @@ namespace terraformer
 			.display_name = "Offset",
 			.description = "Controls the offset between two consecutive elements",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().offset)
+				.binding = std::ref(params.get().offset),
+				.value_converter = num_string_converter<float>{}
 			}
 		});
 
@@ -80,8 +80,8 @@ namespace terraformer
 			.display_name = "Offset noise",
 			.description = "Controls the amount of noise to add to the offset",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().offset_noise)
+				.binding = std::ref(params.get().offset_noise),
+				.value_converter = num_string_converter<float>{}
 			}
 		});
 	}
@@ -108,8 +108,8 @@ namespace terraformer
 			.display_name = "Wavelength",
 			.description = "Controls the wavelength",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().wavelength)
+				.binding = std::ref(params.get().wavelength),
+				.value_converter = num_string_converter<float>{}
 			}
 		});
 
@@ -118,8 +118,8 @@ namespace terraformer
 			.display_name = "Phase",
 			.description = "Controls the phase",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().phase)
+				.binding = std::ref(params.get().phase),
+				.value_converter = num_string_converter<float>{}
 			}
 		});
 	}

@@ -24,15 +24,15 @@ namespace terraformer
 			.description = "Sets the initial value for the random bit generator",
 			.widget = std::tuple{
 				textbox{
-					.value_converter = hash_string_converter<rng_seed_type>{},
 					.binding = std::ref(params.get().rng_seed),
+					.value_converter = hash_string_converter<rng_seed_type>{},
 					.min_width = 32
 				},
 				input_button{
+					.binding = std::ref(params.get().rng_seed),
 					.value_generator = [seed_src = random_bit_source{}]() {
 						return seed_src.get<rng_seed_type>();
 					},
-					.binding = std::ref(params.get().rng_seed),
 					.label = "🂠",
 					.description = "Generate a seed value",
 				}

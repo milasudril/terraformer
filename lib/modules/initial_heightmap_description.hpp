@@ -20,8 +20,8 @@ namespace terraformer
 			.display_name = "Min",
 			.description = "Sets the minimum elevation",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().min)
+				.binding = std::ref(params.get().min),
+				.value_converter = num_string_converter<float>{}
 			},
 		});
 
@@ -30,8 +30,8 @@ namespace terraformer
 			.display_name = "Max",
 			.description = "Sets the maximum elevation",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().max)
+				.binding = std::ref(params.get().max),
+				.value_converter = num_string_converter<float>{}
 			},
 		});
 	}
@@ -58,8 +58,8 @@ namespace terraformer
 			.display_name = "NW",
 			.description = "Sets the elevation in north-west",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().nw.z)
+				.binding = std::ref(params.get().nw.z),
+				.value_converter = num_string_converter<float>{}
 			},
 		});
 
@@ -68,8 +68,8 @@ namespace terraformer
 			.display_name = "NE",
 			.description = "Sets the elevation in north-east",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().ne.z)
+				.binding = std::ref(params.get().ne.z),
+				.value_converter = num_string_converter<float>{}
 			},
 		});
 
@@ -78,8 +78,8 @@ namespace terraformer
 			.display_name = "SW",
 			.description = "Sets the elevation in south-west",
 			.widget = textbox{
-				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().sw.z)
+				.binding = std::ref(params.get().sw.z),
+				.value_converter = num_string_converter<float>{}
 			},
 		});
 
@@ -88,8 +88,8 @@ namespace terraformer
 			.display_name = "SE",
 			.description = "Sets the elevation in south-east",
 			.widget = textbox{
+				.binding = std::ref(params.get().se.z),
 				.value_converter = num_string_converter<float>{},
-				.binding = std::ref(params.get().se.z)
 			},
 		});
 	}
@@ -110,8 +110,8 @@ namespace terraformer
 				.display_name = "Half distance",
 				.description = "The disntance that halfs the amplitude",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
-					.binding = std::ref(params.get().half_distance)
+					.binding = std::ref(params.get().half_distance),
+					.value_converter = num_string_converter<float>{}
 				}
 			}
 		);
@@ -143,8 +143,8 @@ namespace terraformer
 			.display_name = "Depth",
 			.description = "Sets the modulation depth",
 			.widget = textbox{
-					.value_converter = num_string_converter<float>{},
-					.binding = std::ref(params.get().depth)
+					.binding = std::ref(params.get().depth),
+					.value_converter = num_string_converter<float>{}
 				}
 		});
 
@@ -177,8 +177,8 @@ namespace terraformer
 				.display_name = "Initial amplitude",
 				.description = "Initial (undamped) amplitude of the generated wave",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
-					.binding = std::ref(params.get().initial_amplitude)
+					.binding = std::ref(params.get().initial_amplitude),
+					.value_converter = num_string_converter<float>{}
 				}
 			}
 		);

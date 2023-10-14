@@ -25,8 +25,8 @@ namespace terraformer
 				.display_name = "Initial value",
 				.description = "Sets the initial value of the generated wave function",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
-					.binding = std::ref(params.get().initial_value)
+					.binding = std::ref(params.get().initial_value),
+					.value_converter = num_string_converter<float>{}
 				}
 			}
 		);
@@ -37,8 +37,8 @@ namespace terraformer
 				.display_name = "Amplitude",
 				.description = "Sets the amplitude of the generated wave function",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
-					.binding = std::ref(params.get().amplitude)
+					.binding = std::ref(params.get().amplitude),
+					.value_converter = num_string_converter<float>{}
 				}
 			}
 		);

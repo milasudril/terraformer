@@ -49,8 +49,8 @@ namespace terraformer
 				.display_name = "Width",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
-					.binding = std::ref(dom_size.get().width)
+					.binding = std::ref(dom_size.get().width),
+					.value_converter = num_string_converter<float>{}
 				}
 			}
 		);
@@ -61,8 +61,8 @@ namespace terraformer
 				.display_name = "Height",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
-					.binding = std::ref(dom_size.get().height)
+					.binding = std::ref(dom_size.get().height),
+					.value_converter = num_string_converter<float>{}
 				}
 			}
 		);
@@ -73,8 +73,8 @@ namespace terraformer
 				.display_name = "Number of pixel",
 				.description = "Sets the number of pixels in the generated images",
 				.widget = textbox{
-					.value_converter = num_string_converter<int>{},
-					.binding = std::ref(dom_size.get().number_of_pixels)
+					.binding = std::ref(dom_size.get().number_of_pixels),
+					.value_converter = num_string_converter<int>{}
 				}
 			}
 		);
