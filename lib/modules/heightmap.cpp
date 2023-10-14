@@ -118,14 +118,16 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				auto const y_val = u(x, y) - ridge_loc;
 				auto const x_val = v(x, y);
 
-				auto const amp_mod_value = std::clamp(amp_mod(x_val/amp_mod_wavelength + amp_mod_phase), -1.0f, 1.0f);
-				auto const amp_res = (1.0f + amp_mod_depth*amp_mod_value)*amplitude;
+				auto const amp_mod_value = amp_mod(x_val/amp_mod_wavelength + amp_mod_phase);
+				auto const amp_res = std::exp2(amp_mod_depth*amp_mod_value)*amplitude;
 
-				auto const wavelength_mod_value = std::clamp(wavelength_mod(x_val/wavelength_mod_wavelength + wavelength_mod_phase), -1.0f, 1.0f);
-				auto const wavelength_res = (1.0f + wavelength_mod_depth*wavelength_mod_value)*wavelength;
+				auto const wavelength_mod_value = wavelength_mod(x_val/wavelength_mod_wavelength
+					+ wavelength_mod_phase);
+				auto const wavelength_res = std::exp2(wavelength_mod_depth*wavelength_mod_value)*wavelength;
 
-				auto const half_distnace_mod_value = std::clamp(half_distance_mod(x_val/half_distance_mod_wavelength + half_distance_mod_phase), -1.0f, 1.0f);
-				auto const half_distance_res = (1.0f + half_distance_mod_depth*half_distnace_mod_value)*half_distance;
+				auto const half_distnace_mod_value = half_distance_mod(x_val/half_distance_mod_wavelength
+					+ half_distance_mod_phase);
+				auto const half_distance_res = std::exp2(half_distance_mod_depth*half_distnace_mod_value)*half_distance;
 
 				auto const z_val = amp_res*wave(y_val/wavelength_res + phase)*std::exp2(-std::abs(y_val)/half_distance_res);
 
