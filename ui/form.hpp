@@ -93,21 +93,6 @@ namespace terraformer
 		}
 	};
 
-	class action_label:public QLabel
-	{
-	public:
-		using QLabel::QLabel;
-
-		std::function<void()> callback;
-
-	private:
-		void mouseReleaseEvent(QMouseEvent*) override
-		{
-			if(callback)
-			{ callback(); }
-		}
-	};
-
 	class colorbar:public QWidget
 	{
 	public:
@@ -382,17 +367,20 @@ namespace terraformer
 		void insert(field<subform<BindingType>>&& field)
 		{
 			auto outer = std::make_unique<widget_column>(this, 0);
-			auto label = std::make_unique<action_label>(field.display_name, outer.get());
+			auto label = std::make_unique<QPushButton>(field.display_name, outer.get());
 			auto entry = create_widget(
 				std::move(field.widget),
 				*outer,
 				std::move(std::string{m_path}.append("/").append(field.name)));
 			label->setToolTip("Click to see details");
-			label->callback = [&entry = *entry, entry_visible = true]() mutable {
-				entry.setVisible(!entry_visible);
-				entry_visible = !entry_visible;
-			};
-			label->setSizePolicy(QSizePolicy{QSizePolicy::Minimum, QSizePolicy::Minimum});
+			label->setStyleSheet("border: none; text-align:left; margin:0; padding: 0; font-weight: bold");
+			QObject::connect(label.get(),
+				&QPushButton::clicked,
+				[&entry = *entry, entry_visible = true]() mutable {
+					entry.setVisible(!entry_visible);
+					entry_visible = !entry_visible;
+				}
+			);
 			entry->setObjectName(field.name);
 			entry->setToolTip(field.description);
 			outer->add_widget(*label);
