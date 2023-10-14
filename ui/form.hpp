@@ -93,6 +93,21 @@ namespace terraformer
 		}
 	};
 
+	class action_label:public QLabel
+	{
+	public:
+		using QLabel::QLabel;
+
+		std::function<void()> callback;
+
+	private:
+		void mouseReleaseEvent(QMouseEvent*) override
+		{
+			if(callback)
+			{ callback(); }
+		}
+	};
+
 	class colorbar:public QWidget
 	{
 	public:
@@ -367,11 +382,17 @@ namespace terraformer
 		void insert(field<subform<BindingType>>&& field)
 		{
 			auto outer = std::make_unique<widget_column>(this, 0);
-			auto label = std::make_unique<QLabel>(field.display_name, outer.get());
+			auto label = std::make_unique<action_label>(field.display_name, outer.get());
 			auto entry = create_widget(
 				std::move(field.widget),
 				*outer,
 				std::move(std::string{m_path}.append("/").append(field.name)));
+			label->setToolTip("Click to see details");
+			label->callback = [&entry = *entry, entry_visible = true]() mutable {
+				entry.setVisible(!entry_visible);
+				entry_visible = !entry_visible;
+			};
+			label->setSizePolicy(QSizePolicy{QSizePolicy::Minimum, QSizePolicy::Minimum});
 			entry->setObjectName(field.name);
 			entry->setToolTip(field.description);
 			outer->add_widget(*label);
@@ -424,7 +445,7 @@ namespace terraformer
 			{
 				auto const app_font = QApplication::font(this);
 				QFontMetrics fm{app_font};
-				auto const char_width = fm.horizontalAdvance("0");
+				auto const char_width = fm.horizontalAdvance("A");
 				ret->setMinimumWidth(char_width*(*textbox.min_width));
 			}
 			ret->setObjectName(field_name);
