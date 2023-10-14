@@ -13,6 +13,15 @@ namespace terraformer
 		static_assert(within(Interval, DefaultValue));
 		using value_type = decltype(DefaultValue);
 
+		static constexpr auto min()
+		{ return Interval.min(); }
+
+		static constexpr auto max()
+		{ return Interval.max(); }
+
+		static constexpr auto default_value()
+		{ return DefaultValue; }
+
 		constexpr bounded_value(): m_val{DefaultValue}{}
 
 		constexpr explicit bounded_value(value_type val):m_val{val}

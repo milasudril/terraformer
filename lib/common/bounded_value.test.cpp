@@ -16,6 +16,9 @@ TESTCASE(terraformer_bounded_value_default)
 	EXPECT_EQ(str, "0.5");
 
 	static_assert(std::is_same_v<zero_to_one_value::value_type, float>);
+	static_assert(zero_to_one_value::min() == 0.0f);
+	static_assert(zero_to_one_value::max() == 1.0f);
+	static_assert(zero_to_one_value::default_value() == 0.5f);
 }
 
 TESTCASE(terraformer_bounded_value_construct_within_range)
