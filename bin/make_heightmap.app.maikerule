@@ -1,4 +1,0 @@
-{
-	"target":{"name":"generate_bumps"}
-	,"dependencies":[{"ref":"./generate_bumps.o", "rel":"implementation"}]
-}

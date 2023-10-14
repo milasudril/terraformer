@@ -11,6 +11,10 @@ namespace terraformer
 	using elevation = bounded_value<closed_closed_interval{-16384.0f, 16384.0f}, 768.0f>;
 	using vertical_amplitude = bounded_value<closed_closed_interval{0.0f, 8192.0f}, 0.0f>;
 	using pixel_count = bounded_value<closed_closed_interval{9, 67'108'864}, 1'048'576>;
+	using global_phase = bounded_value<closed_closed_interval{-8.0f, 8.0f}, 0.0f>;
+	using scaling_factor = bounded_value<closed_closed_interval{1.0f, 8.0f}, 1.0f>;
+	using noise_amplitude = bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f>;
+	using phase_offset = bounded_value<closed_closed_interval{-0.5f, 0.5f}, 0.0f>;
 }
 
 #endif

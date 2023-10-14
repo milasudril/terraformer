@@ -11,16 +11,16 @@ TESTCASE(fractal_wave_generate)
 {
 	terraformer::fractal_wave::params const params{
 		.amplitude{
-			.scaling_factor = 2.0f,
-			.scaling_noise = 0.0f
+			.factor = terraformer::scaling_factor{2.0f},
+			.scaling_noise = terraformer::noise_amplitude{0.0f}
 		},
 		.wavelength{
-			.scaling_factor = 1.0f,
-			.scaling_noise = 0.0f
+			.factor = terraformer::scaling_factor{1.0f},
+			.scaling_noise = terraformer::noise_amplitude{0.0f}
 		},
 		.phase{
-			.offset = 0.0f,
-			.offset_noise = 0.0f
+			.offset = terraformer::phase_offset{0.0f},
+			.offset_noise = terraformer::noise_amplitude{0.0f}
 		}
 	};
 
@@ -38,16 +38,16 @@ TESTCASE(fractal_wave_generate_no_amp_scaling)
 {
 	terraformer::fractal_wave::params const params{
 		.amplitude{
-			.scaling_factor = 1.0f,
-			.scaling_noise = 0.0f
+			.factor = terraformer::scaling_factor{1.0f},
+			.scaling_noise = terraformer::noise_amplitude{0.0f}
 		},
 		.wavelength{
-			.scaling_factor = 1.0f,
-			.scaling_noise = 0.0f
+			.factor = terraformer::scaling_factor{1.0f},
+			.scaling_noise = terraformer::noise_amplitude{0.0f}
 		},
 		.phase{
-			.offset = 0.0f,
-			.offset_noise = 0.0f
+			.offset = terraformer::phase_offset{0.0f},
+			.offset_noise = terraformer::noise_amplitude{0.0f}
 		}
 	};
 

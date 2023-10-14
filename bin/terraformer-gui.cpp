@@ -58,21 +58,21 @@ int main(int argc, char** argv)
 					.wave{
 						.shape{
 							.amplitude{
-								.scaling_factor = std::numbers::phi_v<float>,
-								.scaling_noise = 1.0f/16.0f
+								.factor = terraformer::scaling_factor{std::numbers::phi_v<float>},
+								.scaling_noise = terraformer::noise_amplitude{1.0f/16.0f}
 							},
 							.wavelength{
-								.scaling_factor = std::numbers::phi_v<float>,
-								.scaling_noise = std::numbers::phi_v<float>/64.0f
+								.factor = terraformer::scaling_factor{std::numbers::phi_v<float>},
+								.scaling_noise = terraformer::noise_amplitude{std::numbers::phi_v<float>/64.0f}
 							},
 							.phase{
-								.offset = 2.0f - std::numbers::phi_v<float>,
-								.offset_noise = 1.0f/24.0f
+								.offset = terraformer::phase_offset{2.0f - std::numbers::phi_v<float>},
+								.offset_noise = terraformer::noise_amplitude{1.0f/24.0f}
 							}
 						},
 						.wave_properties{
-							.wavelength = 24576.0f,
-							.phase = 3.127061f,
+							.wavelength = terraformer::domain_length{24576.0f},
+							.phase = terraformer::global_phase{3.127061f},
 						}
 					}
 				},
@@ -82,21 +82,21 @@ int main(int argc, char** argv)
 					.wave{
 						.shape{
 							.amplitude{
-								.scaling_factor = std::numbers::phi_v<float>,
-								.scaling_noise = 1.0f/16.0f
+								.factor = terraformer::scaling_factor{std::numbers::phi_v<float>},
+								.scaling_noise = terraformer::noise_amplitude{1.0f/16.0f}
 							},
 							.wavelength{
-								.scaling_factor = std::numbers::phi_v<float>,
-								.scaling_noise = std::numbers::phi_v<float>/64.0f
+								.factor = terraformer::scaling_factor{std::numbers::phi_v<float>},
+								.scaling_noise = terraformer::noise_amplitude{std::numbers::phi_v<float>/64.0f}
 							},
 							.phase{
-								.offset = 2.0f - std::numbers::phi_v<float>,
-								.offset_noise = 1.0f/16.0f
+								.offset = terraformer::phase_offset{2.0f - std::numbers::phi_v<float>},
+								.offset_noise = terraformer::noise_amplitude{1.0f/16.0f}
 							}
 						},
 						.wave_properties{
-							.wavelength = 13475.382f,
-							.phase = 1.071294f
+							.wavelength = terraformer::domain_length{13475.382f},
+							.phase = terraformer::global_phase{1.071294f}
 						}
 					}
 				}
@@ -108,21 +108,21 @@ int main(int argc, char** argv)
 					.wave{
 						.shape{
 							.amplitude{
-								.scaling_factor = std::numbers::phi_v<float>,
-								.scaling_noise = 1.0f/16.0f
+								.factor = terraformer::scaling_factor{std::numbers::phi_v<float>},
+								.scaling_noise = terraformer::noise_amplitude{1.0f/16.0f}
 							},
 							.wavelength{
-								.scaling_factor = 1.378240f,
-								.scaling_noise = 1.378240f/1024.0f
+								.factor = terraformer::scaling_factor{1.378240f},
+								.scaling_noise = terraformer::noise_amplitude{1.378240f/1024.0f}
 							},
 							.phase{
-								.offset = 2.0f - std::numbers::phi_v<float>,
-								.offset_noise = 1.0f/24.0f
+								.offset = terraformer::phase_offset{2.0f - std::numbers::phi_v<float>},
+								.offset_noise = terraformer::noise_amplitude{1.0f/24.0f}
 							}
 						},
 						.wave_properties{
-							.wavelength = 32768.0f,
-							.phase = 7.9810004f
+							.wavelength = terraformer::domain_length{32768.0f},
+							.phase = terraformer::global_phase{7.9810004f}
 						}
 					}
 				},

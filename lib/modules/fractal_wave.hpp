@@ -4,6 +4,7 @@
 #define TERRAFORMER_FRACTALWAVE_HPP
 
 #include "./polyline.hpp"
+#include "./dimensions.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/common/output_range.hpp"
 #include "lib/formbuilder/string_converter.hpp"
@@ -16,36 +17,28 @@
 
 namespace terraformer
 {
-	struct exponential_progression
+	struct wave_size_progression
 	{
-		float scaling_factor;
-		float scaling_noise;
+		scaling_factor factor;
+		noise_amplitude scaling_noise;
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, exponential_progression>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, wave_size_progression>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{
-			.name = "scaling_factor",
+			.name = "factor",
 			.display_name = "Scaling factor",
 			.description = "Controls the relative size between two consecutive elements",
-			.widget = std::tuple{
-				knob{
-					.min = 0.0f,
-					.max = 2.0f,
-					.binding = std::ref(params.get().scaling_factor),
-					.mapping = numeric_input_mapping_type::log
+			.widget = textbox{
+				.value_converter = num_string_converter{
+					.range = closed_open_interval{
+						1.0f,
+						std::numeric_limits<float>::infinity()
+					}
 				},
-				textbox{
-					.value_converter = num_string_converter{
-						.range = closed_open_interval{
-							1.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
-					.binding = std::ref(params.get().scaling_factor)
-				}
+				.binding = std::ref(params.get().factor)
 			}
 		});
 
@@ -53,61 +46,47 @@ namespace terraformer
 			.name = "scaling_noise",
 			.display_name = "Scaling noise",
 			.description = "Controls the amount of noise to add to the scaling factor",
-			.widget = std::tuple{
-				knob{
-					.min = 0.0f,
-					.max = 2.0f,
-					.binding = std::ref(params.get().scaling_noise)
+			.widget = textbox{
+				.value_converter = num_string_converter{
+					.range = closed_open_interval{
+						0.0f,
+						std::numeric_limits<float>::infinity()
+					}
 				},
-				textbox{
-					.value_converter = num_string_converter{
-						.range = closed_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
-					.binding = std::ref(params.get().scaling_noise)
-				}
+				.binding = std::ref(params.get().scaling_noise)
 			}
 		});
 	}
 
 	template<class Rng>
-	inline float get_value(exponential_progression const& val, size_t k, Rng&& rng)
+	inline float get_value(wave_size_progression const& val, size_t k, Rng&& rng)
 	{
 		std::uniform_real_distribution U{-0.5f, 0.5f};
-		return std::pow(val.scaling_factor, -(static_cast<float>(k) + val.scaling_noise*U(rng)));
+		return std::pow(val.factor, -(static_cast<float>(k) + val.scaling_noise*U(rng)));
 	}
 
-	struct linear_mod_progression
+	struct wave_phase_progression
 	{
-		float offset;
-		float offset_noise;
+		phase_offset offset;
+		noise_amplitude offset_noise;
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, linear_mod_progression>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, wave_phase_progression>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{
 			.name = "offset",
 			.display_name = "Offset",
 			.description = "Controls the offset between two consecutive elements",
-			.widget = std::tuple{
-				knob{
-					.min = -0.5f,
-					.max = 0.5f,
-					.binding = std::ref(params.get().offset)
+			.widget = textbox{
+				.value_converter = num_string_converter{
+					.range = closed_closed_interval{
+						-0.5f,
+						0.5f
+					}
 				},
-				textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							-0.5f,
-							0.5f
-						}
-					},
-					.binding = std::ref(params.get().offset)
-				}
+				.binding = std::ref(params.get().offset)
 			}
 		});
 
@@ -115,27 +94,20 @@ namespace terraformer
 			.name = "offset_noise",
 			.display_name = "Offset noise",
 			.description = "Controls the amount of noise to add to the offset",
-			.widget = std::tuple{
-				knob{
-					.min = 0.0f,
-					.max = 1.0f,
-					.binding = std::ref(params.get().offset_noise)
+			.widget = textbox{
+				.value_converter = num_string_converter{
+					.range = closed_closed_interval{
+						0.0f,
+						1.0f
+					}
 				},
-				textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							0.0f,
-							1.0f
-						}
-					},
-					.binding = std::ref(params.get().offset_noise)
-				}
+				.binding = std::ref(params.get().offset_noise)
 			}
 		});
 	}
 
 	template<class Rng>
-	inline float get_value(linear_mod_progression const& val, size_t k, Rng&& rng)
+	inline float get_value(wave_phase_progression const& val, size_t k, Rng&& rng)
 	{
 		std::uniform_real_distribution U{-0.5f, 0.5f};
 		return -(static_cast<float>(k)*val.offset + val.offset_noise*U(rng));
@@ -143,8 +115,8 @@ namespace terraformer
 
 	struct wave_params
 	{
-		float wavelength;
-		float phase;
+		domain_length wavelength;
+		global_phase phase;
 	};
 
 	template<class Form, class T>
@@ -155,22 +127,14 @@ namespace terraformer
 			.name = "wavelength",
 			.display_name = "Wavelength",
 			.description = "Controls the wavelength",
-			.widget = std::tuple{
-				knob{
-					.min = 8.0f,
-					.max = 17.0f,
-					.binding = std::ref(params.get().wavelength),
-					.mapping = numeric_input_mapping_type::log
+			.widget = textbox{
+				.value_converter = num_string_converter{
+					.range = open_open_interval{
+						0.0f,
+						std::numeric_limits<float>::infinity()
+					}
 				},
-				textbox{
-					.value_converter = num_string_converter{
-						.range = open_open_interval{
-							0.0f,
-							std::numeric_limits<float>::infinity()
-						}
-					},
-					.binding = std::ref(params.get().wavelength)
-				}
+				.binding = std::ref(params.get().wavelength)
 			}
 		});
 
@@ -178,21 +142,14 @@ namespace terraformer
 			.name = "phase",
 			.display_name = "Phase",
 			.description = "Controls the phase",
-			.widget = std::tuple{
-				knob{
-					.min = 0.0f,
-					.max = 8.0f,
-					.binding = std::ref(params.get().phase)
+			.widget = textbox{
+				.value_converter = num_string_converter{
+					.range = closed_closed_interval{
+						0.0f,
+						8.0f
+					}
 				},
-				textbox{
-					.value_converter = num_string_converter{
-						.range = closed_closed_interval{
-							0.0f,
-							8.0f
-						}
-					},
-					.binding = std::ref(params.get().phase)
-				}
+				.binding = std::ref(params.get().phase)
 			}
 		});
 	}
@@ -209,15 +166,15 @@ namespace terraformer
 	public:
 		struct params
 		{
-			exponential_progression amplitude;
-			exponential_progression wavelength;
-			linear_mod_progression phase;
+			wave_size_progression amplitude;
+			wave_size_progression wavelength;
+			wave_phase_progression phase;
 		};
 
 		static auto compute_number_of_waves(params const& params)
 		{
-			auto const k_amp = 14.0f/std::log2(params.amplitude.scaling_factor);
-			auto const k_lambda = 14.0f/std::log2(params.wavelength.scaling_factor);
+			auto const k_amp = 14.0f/std::log2(params.amplitude.factor);
+			auto const k_lambda = 14.0f/std::log2(params.wavelength.factor);
 			auto const k_max = 64.0f;
 			return static_cast<size_t>(std::min(k_max, std::min(k_amp, k_lambda)) + 0.5f) + 1;
 		}
