@@ -7,43 +7,31 @@
 
 namespace terraformer
 {
-	template<bool ValueIsNormalized>
+	template<class OffsetType, class AmplitudeType>
 	struct ridge_curve_description
 	{
-		static constexpr auto value_is_normalized = ValueIsNormalized;
-
-		float initial_value;
-		float amplitude;
+		OffsetType initial_value;
+		AmplitudeType amplitude;
 		fractal_wave_description wave;
 	};
 
-	template<class Form, class T>
-	requires(
-		std::is_same_v<std::remove_cvref_t<T>, ridge_curve_description<true>> ||
-		std::is_same_v<std::remove_cvref_t<T>, ridge_curve_description<false>>
-	)
-	void bind(Form& form, std::reference_wrapper<T> params)
+	template<class Form, class OffsetType, class AmplitudeType>
+	void bind(Form& form,
+		std::reference_wrapper<ridge_curve_description<OffsetType, AmplitudeType>> params)
 	{
 		form.insert(
 			field{
 				.name = "initial_value",
 				.display_name = "Initial value",
 				.description = "Sets the initial value of the generated wave function",
-				.widget = std::tuple{
-					knob{
-						.min = 0.0f,
-						.max = T::value_is_normalized? 1.0f : 16384.0f,
-						.binding = std::ref(params.get().initial_value)
+				.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_open_interval{
+							0.0f,
+							std::numeric_limits<float>::infinity()
+						}
 					},
-					textbox{
-						.value_converter = num_string_converter{
-							.range = closed_open_interval{
-								0.0f,
-								T::value_is_normalized? 1.0f : std::numeric_limits<float>::infinity()
-							}
-						},
-						.binding = std::ref(params.get().initial_value)
-					}
+					.binding = std::ref(params.get().initial_value)
 				}
 			}
 		);
@@ -53,22 +41,14 @@ namespace terraformer
 				.name = "amplitude",
 				.display_name = "Amplitude",
 				.description = "Sets the amplitude of the generated wave function",
-				.widget = std::tuple{
-					knob{
-						.min = T::value_is_normalized? 0.0f : -1.0f,
-						.max = T::value_is_normalized? 0.5f : 15.0f,
-						.binding = std::ref(params.get().amplitude),
-						.mapping = T::value_is_normalized?numeric_input_mapping_type::lin : numeric_input_mapping_type::log
+				.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_open_interval{
+							0.0f,
+							std::numeric_limits<float>::infinity()
+						}
 					},
-					textbox{
-						.value_converter = num_string_converter{
-							.range = closed_open_interval{
-								0.0f,
-								T::value_is_normalized? 0.5f : std::numeric_limits<float>::infinity()
-							}
-						},
-						.binding = std::ref(params.get().amplitude)
-					}
+					.binding = std::ref(params.get().amplitude)
 				}
 			}
 		);
@@ -87,8 +67,8 @@ namespace terraformer
 
 	struct main_ridge_description
 	{
-		ridge_curve_description<true> ridge_curve_xy;
-		ridge_curve_description<false> ridge_curve_xz;
+		ridge_curve_description<domain_length, horizontal_amplitude> ridge_curve_xy;
+		ridge_curve_description<elevation, vertical_amplitude> ridge_curve_xz;
 	};
 
 	template<class Form, class T>

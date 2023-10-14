@@ -53,8 +53,8 @@ int main(int argc, char** argv)
 			},
 			.main_ridge{
 				.ridge_curve_xy{
-					.initial_value = 1.0f/3.0f,
-					.amplitude = 6144.0f/49152.0f,
+					.initial_value = terraformer::domain_length{16384.0f},
+					.amplitude = terraformer::horizontal_amplitude{6144.0f},
 					.wave{
 						.shape{
 							.amplitude{
@@ -77,8 +77,8 @@ int main(int argc, char** argv)
 					}
 				},
 				.ridge_curve_xz{
-					.initial_value = 7168.0f,
-					.amplitude = 512.00002f,
+					.initial_value = terraformer::elevation{7168.0f},
+					.amplitude = terraformer::vertical_amplitude{512.0f},
 					.wave{
 						.shape{
 							.amplitude{

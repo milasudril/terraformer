@@ -15,7 +15,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	if(h < 2 || w < 2)
 	{ throw std::runtime_error{"Output resolution is too small"}; }
 
-	auto const ay = params.main_ridge.ridge_curve_xy.amplitude*static_cast<float>(h - 1)*hm.pixel_size;
+	auto const ay = params.main_ridge.ridge_curve_xy.amplitude;
 	auto const az = params.main_ridge.ridge_curve_xz.amplitude;
 	auto const ridge_curve = generate(rng,
 		params.main_ridge.ridge_curve_xy.wave,
@@ -27,8 +27,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
  			.dx = hm.pixel_size,
 			.start_location = terraformer::location{
 				0.0f,
-				params.main_ridge.ridge_curve_xy.initial_value*static_cast<float>(h - 1)*hm.pixel_size,
-				params.main_ridge.ridge_curve_xz.initial_value
+				static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value),
+				static_cast<float>(params.main_ridge.ridge_curve_xz.initial_value)
 			}
 		}
 	);
