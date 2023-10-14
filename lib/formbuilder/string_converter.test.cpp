@@ -48,7 +48,7 @@ TESTCASE(terraformer_num_string_converter_from_string_long_value)
 	catch(terraformer::input_error const& err)
 	{
 		auto str = std::string_view{err.what()};
-		EXPECT_EQ(str, "Number too large");
+		EXPECT_EQ(str, "The given number does not fit within machine limits");
 	}
 	catch(...)
 	{ abort(); }

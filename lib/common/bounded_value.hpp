@@ -2,8 +2,7 @@
 #define TERRAFORMER_BOUNDED_VALUE_HPP
 
 #include "./utils.hpp"
-
-#include <stdexcept>
+#include "./input_error.hpp"
 
 namespace terraformer
 {
@@ -19,13 +18,13 @@ namespace terraformer
 		constexpr explicit bounded_value(value_type val):m_val{val}
 		{
 			if(!within(Interval, m_val))
-			{ throw std::runtime_error{"Value is out of range"}; }
+			{ throw input_error{std::string{"Value is out of range. Expected range is "}.append(to_string(Interval))}; }
 		}
 
 		auto& operator=(value_type val)
 		{
 			if(!within(Interval, val))
-			{ throw std::runtime_error{"Value is out of range"}; }
+			{ throw input_error{std::string{"Value is out of range. Expected range is "}.append(to_string(Interval))}; }
 			m_val = val;
 			return *this;
 		}

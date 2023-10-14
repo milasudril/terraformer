@@ -2,15 +2,10 @@
 #define TERRAFORMER_STRING_CONVERTER_HPP
 
 #include "lib/common/interval.hpp"
+#include "lib/common/input_error.hpp"
 
 namespace terraformer
 {
-	class input_error:public std::runtime_error
-	{
-	public:
-		explicit input_error(std::string str):std::runtime_error{std::move(str)}{}
-	};
-
 	template<class T>
 	struct num_string_converter
 	{
@@ -33,7 +28,7 @@ namespace terraformer
 			switch(res.ec)
 			{
 				case std::errc::result_out_of_range:
-					throw input_error{"Number too large"};
+					throw input_error{"The given number does not fit within machine limits"};
 
 				default:
 					throw input_error{"Expected a number"};
