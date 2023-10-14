@@ -34,7 +34,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	);
 
 	auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
-	auto const ridge_loc = params.main_ridge.ridge_curve_xy.initial_value*y_south;
+	auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
 
 	grayscale_image u{w, h};
 	for(uint32_t y = 0; y != h; ++y)
@@ -135,10 +135,10 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	}
 
 	auto const& corners = params.corners;
-	auto const nw_elev = corners.nw.elevation;
-	auto const ne_elev = corners.ne.elevation;
-	auto const sw_elev = corners.sw.elevation;
-	auto const se_elev = corners.se.elevation;
+	auto const nw_elev = corners.nw.z;
+	auto const ne_elev = corners.ne.z;
+	auto const sw_elev = corners.sw.z;
+	auto const se_elev = corners.se.z;
 
 	for(uint32_t y = 0; y != h; ++y)
 	{

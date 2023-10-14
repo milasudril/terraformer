@@ -42,14 +42,14 @@ int main(int argc, char** argv)
 		.domain_size{},
 		.initial_heightmap{
 			.output_range{
-				.min = 512.0f,
-				.max = 8704.0f,
+				.min = terraformer::elevation{512.0f},
+				.max = terraformer::elevation{8704.0f},
 			},
 			.corners{
-				.nw = 5072.0f,
-				.ne = 3072.0f,
-				.sw = 512.0f,
-				.se = 1536.0f,
+				.nw = terraformer::elevation{5072.0f},
+				.ne = terraformer::elevation{3072.0f},
+				.sw = terraformer::elevation{512.0f},
+				.se = terraformer::elevation{1536.0f},
 			},
 			.main_ridge{
 				.ridge_curve_xy{
@@ -102,9 +102,9 @@ int main(int argc, char** argv)
 				}
 			},
 			.ns_wave{
-				.initial_amplitude = 2048.0f,
+				.initial_amplitude = terraformer::vertical_amplitude{2048.0f},
 				.wave{
-					.half_distance = 32768.0f,
+					.half_distance = terraformer::domain_length{32768.0f},
 					.wave{
 						.shape{
 							.amplitude{

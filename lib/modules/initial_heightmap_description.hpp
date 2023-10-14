@@ -7,8 +7,8 @@ namespace terraformer
 {
 	struct elevation_range
 	{
-		float min;
-		float max;
+		elevation min;
+		elevation max;
 	};
 
 	template<class Form, class T>
@@ -48,7 +48,7 @@ namespace terraformer
 
 	struct corner
 	{
-		float elevation;
+		elevation z;
 	};
 
 	struct corners
@@ -74,7 +74,7 @@ namespace terraformer
 							std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.get().nw.elevation)
+				.binding = std::ref(params.get().nw.z)
 			},
 		});
 
@@ -89,7 +89,7 @@ namespace terraformer
 							std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.get().ne.elevation)
+				.binding = std::ref(params.get().ne.z)
 			},
 		});
 
@@ -104,7 +104,7 @@ namespace terraformer
 							std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.get().sw.elevation)
+				.binding = std::ref(params.get().sw.z)
 			},
 		});
 
@@ -119,14 +119,14 @@ namespace terraformer
 							std::numeric_limits<float>::infinity()
 						}
 					},
-				.binding = std::ref(params.get().se.elevation)
+				.binding = std::ref(params.get().se.z)
 			},
 		});
 	}
 
 	struct damped_wave_description
 	{
-		float half_distance;
+		domain_length half_distance;
 		fractal_wave_description wave;
 	};
 
@@ -139,22 +139,14 @@ namespace terraformer
 				.name = "half_distance",
 				.display_name = "Half distance",
 				.description = "The disntance that halfs the amplitude",
-				.widget = std::tuple{
-					knob{
-						.min = 8.0f,
-						.max = 17.0f,
-						.binding = std::ref(params.get().half_distance),
-						.mapping = numeric_input_mapping_type::log
+				.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_open_interval{
+							256.0f,
+							std::numeric_limits<float>::infinity()
+						}
 					},
-					textbox{
-						.value_converter = num_string_converter{
-							.range = closed_open_interval{
-								256.0f,
-								std::numeric_limits<float>::infinity()
-							}
-						},
-						.binding = std::ref(params.get().half_distance)
-					}
+					.binding = std::ref(params.get().half_distance)
 				}
 			}
 		);
@@ -173,7 +165,7 @@ namespace terraformer
 
 	struct modulation_description
 	{
-		float depth;
+		modulation_depth depth;
 		fractal_wave_description modulating_wave;
 	};
 
@@ -185,14 +177,7 @@ namespace terraformer
 			.name = "depth",
 			.display_name = "Depth",
 			.description = "Sets the modulation depth",
-			.widget = std::tuple{
-				knob{
-					.min = 0.0f,
-					.max = 1.0f,
-					.binding = std::ref(params.get().depth),
-					.mapping = numeric_input_mapping_type::lin
-				},
-				textbox{
+			.widget = textbox{
 					.value_converter = num_string_converter{
 						.range = closed_closed_interval{
 							0.0f,
@@ -201,7 +186,6 @@ namespace terraformer
 					},
 					.binding = std::ref(params.get().depth)
 				}
-			}
 		});
 
 		form.insert(field{
@@ -216,7 +200,7 @@ namespace terraformer
 
 	struct modulated_damped_wave_description
 	{
-		float initial_amplitude;
+		vertical_amplitude initial_amplitude;
 		damped_wave_description wave;
 		modulation_description amplitude_modulation;
 		modulation_description wavelength_modulation;
@@ -232,22 +216,14 @@ namespace terraformer
 				.name = "initial_amplitude",
 				.display_name = "Initial amplitude",
 				.description = "Initial (undamped) amplitude of the generated wave",
-				.widget = std::tuple{
-					knob{
-						.min = -1.0f,
-						.max = 15.0f,
-						.binding = std::ref(params.get().initial_amplitude),
-						.mapping = numeric_input_mapping_type::log
+				.widget = textbox{
+					.value_converter = num_string_converter{
+						.range = closed_open_interval{
+							0.0f,
+							std::numeric_limits<float>::infinity()
+						}
 					},
-					textbox{
-						.value_converter = num_string_converter{
-							.range = closed_open_interval{
-								0.0f,
-								std::numeric_limits<float>::infinity()
-							}
-						},
-						.binding = std::ref(params.get().initial_amplitude)
-					}
+					.binding = std::ref(params.get().initial_amplitude)
 				}
 			}
 		);
@@ -309,18 +285,16 @@ namespace terraformer
 	requires(std::is_same_v<std::remove_cvref_t<T>, initial_heightmap_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
-#if 0
 		form.insert(
 			field{
 				.name = "output_range",
 				.display_name = "Output range",
-				.description = "Sets the output elevation range. Data is normalized to fit within these limits",
+				.description = "Controls the output elevation range",
 				.widget = subform{
 					.binding = std::ref(params.get().output_range)
 				}
 			}
 		);
-#endif
 
 		form.insert(
 			field{
