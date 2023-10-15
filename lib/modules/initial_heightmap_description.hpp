@@ -109,7 +109,7 @@ namespace terraformer
 				.name = "half_distance",
 				.display_name = "Half distance",
 				.description = "The disntance that halfs the amplitude",
-				.widget = textbox{
+				.widget = numeric_input_log{
 					.binding = std::ref(params.get().half_distance),
 					.value_converter = num_string_converter<float>{}
 				}
@@ -233,6 +233,7 @@ namespace terraformer
 		elevation_range output_range;
 		struct corners corners;
 		main_ridge_description main_ridge;
+
 		modulated_damped_wave_description ns_wave;
 	};
 
