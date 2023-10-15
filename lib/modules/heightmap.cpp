@@ -87,11 +87,11 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	{
 		auto const& ns_wave_desc = params.ns_wave;
 
-		fractal_wave const wave{rng, ns_wave_desc.wave.wave.shape};
-		auto const wavelength = ns_wave_desc.wave.wave.wave_properties.wavelength;
-		auto const phase = ns_wave_desc.wave.wave.wave_properties.phase;
-		auto const amplitude = ns_wave_desc.wave.initial_amplitude;
-		auto const half_distance = ns_wave_desc.wave.half_distance;
+		fractal_wave const wave{rng, ns_wave_desc.nominal_oscillations.wave.shape};
+		auto const wavelength = ns_wave_desc.nominal_oscillations.wave.wave_properties.wavelength;
+		auto const phase = ns_wave_desc.nominal_oscillations.wave.wave_properties.phase;
+		auto const amplitude = ns_wave_desc.nominal_oscillations.initial_amplitude;
+		auto const half_distance = ns_wave_desc.nominal_oscillations.half_distance;
 
 		auto const& amp_mod_desc = ns_wave_desc.amplitude_modulation;
 		fractal_wave const amp_mod{rng, amp_mod_desc.modulating_wave.shape};

@@ -173,7 +173,7 @@ namespace terraformer
 
 	struct modulated_damped_wave_description
 	{
-		damped_wave_description wave;
+		damped_wave_description nominal_oscillations;
 		modulation_description amplitude_modulation;
 		modulation_description wavelength_modulation;
 		modulation_description half_distance_modulation;
@@ -185,11 +185,11 @@ namespace terraformer
 	{
 		form.insert(
 			field{
-				.name = "wave",
-				.display_name = "Wave",
-				.description = "Controls the behaviour of the wave",
+				.name = "nominal_oscillations",
+				.display_name = "Nominal oscillations",
+				.description = "Controls the behaviour of oscillations without any modulation",
 				.widget = subform{
-					.binding = std::ref(params.get().wave)
+					.binding = std::ref(params.get().nominal_oscillations)
 				}
 			}
 		);
