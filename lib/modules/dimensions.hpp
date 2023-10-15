@@ -6,7 +6,7 @@
 
 namespace terraformer
 {
-	using domain_length = bounded_value<open_closed_interval{0.0f, 131072.0f}, 49152.0f>;
+	using domain_length = bounded_value<closed_closed_interval{1.0f, 131072.0f}, 49152.0f>;
 	using horizontal_amplitude = bounded_value<closed_closed_interval{0.0f, 65536.0f}, 0.0f>;
 	using elevation = bounded_value<closed_closed_interval{-16384.0f, 16384.0f}, 768.0f>;
 	using vertical_amplitude = bounded_value<closed_closed_interval{0.0f, 8192.0f}, 0.0f>;

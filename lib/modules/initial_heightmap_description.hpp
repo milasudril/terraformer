@@ -19,7 +19,7 @@ namespace terraformer
 			.name = "min",
 			.display_name = "Min",
 			.description = "Sets the minimum elevation",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().min),
 				.value_converter = num_string_converter<float>{}
 			},
@@ -29,7 +29,7 @@ namespace terraformer
 			.name = "max",
 			.display_name = "Max",
 			.description = "Sets the maximum elevation",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().max),
 				.value_converter = num_string_converter<float>{}
 			},
@@ -57,7 +57,7 @@ namespace terraformer
 			.name = "nw_elev",
 			.display_name = "NW",
 			.description = "Sets the elevation in north-west",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().nw.z),
 				.value_converter = num_string_converter<float>{}
 			},
@@ -67,7 +67,7 @@ namespace terraformer
 			.name = "ne_elev",
 			.display_name = "NE",
 			.description = "Sets the elevation in north-east",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().ne.z),
 				.value_converter = num_string_converter<float>{}
 			},
@@ -77,7 +77,7 @@ namespace terraformer
 			.name = "sw_elev",
 			.display_name = "SW",
 			.description = "Sets the elevation in south-west",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().sw.z),
 				.value_converter = num_string_converter<float>{}
 			},
@@ -87,7 +87,7 @@ namespace terraformer
 			.name = "se_elev",
 			.display_name = "SE",
 			.description = "Sets the elevation in south-east",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().se.z),
 				.value_converter = num_string_converter<float>{},
 			},
@@ -142,7 +142,7 @@ namespace terraformer
 			.name = "depth",
 			.display_name = "Depth",
 			.description = "Sets the modulation depth",
-			.widget = textbox{
+			.widget = numeric_input{
 					.binding = std::ref(params.get().depth),
 					.value_converter = num_string_converter<float>{}
 				}

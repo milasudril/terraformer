@@ -31,7 +31,7 @@ namespace terraformer
 			.name = "factor",
 			.display_name = "Scaling factor",
 			.description = "Controls the relative size between two consecutive elements",
-			.widget = textbox{
+			.widget = numeric_input_log{
 				.binding = std::ref(params.get().factor),
 				.value_converter = num_string_converter<float>{}
 			}
@@ -41,7 +41,7 @@ namespace terraformer
 			.name = "scaling_noise",
 			.display_name = "Scaling noise",
 			.description = "Controls the amount of noise to add to the scaling factor",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().scaling_noise),
 				.value_converter = num_string_converter<float>{}
 			}
@@ -69,7 +69,7 @@ namespace terraformer
 			.name = "offset",
 			.display_name = "Offset",
 			.description = "Controls the offset between two consecutive elements",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().offset),
 				.value_converter = num_string_converter<float>{}
 			}
@@ -79,7 +79,7 @@ namespace terraformer
 			.name = "offset_noise",
 			.display_name = "Offset noise",
 			.description = "Controls the amount of noise to add to the offset",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().offset_noise),
 				.value_converter = num_string_converter<float>{}
 			}
@@ -107,7 +107,7 @@ namespace terraformer
 			.name = "wavelength",
 			.display_name = "Wavelength",
 			.description = "Controls the wavelength",
-			.widget = textbox{
+			.widget = numeric_input_log{
 				.binding = std::ref(params.get().wavelength),
 				.value_converter = num_string_converter<float>{}
 			}
@@ -117,7 +117,7 @@ namespace terraformer
 			.name = "phase",
 			.display_name = "Phase",
 			.description = "Controls the phase",
-			.widget = textbox{
+			.widget = numeric_input{
 				.binding = std::ref(params.get().phase),
 				.value_converter = num_string_converter<float>{}
 			}

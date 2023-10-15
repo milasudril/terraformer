@@ -49,14 +49,8 @@ namespace terraformer
 		Converter value_converter;
 	};
 
-	template< numeric_input_mapping_type Mapping, class BindingType, class Converter>
-	auto make_numeric_input(BindingType&& binding, Converter&& converter)
-	{
-		return numeric_input<BindingType, Converter, Mapping>{
-			.binding = std::forward<BindingType>(binding),
-			.value_converter = std::forward<Converter>(converter)
-		};
-	}
+	template<class BindingType, class Converter>
+	using numeric_input_log = numeric_input<BindingType, Converter, numeric_input_mapping_type::log>;
 
 	template<class BindingType, class Generator>
 	struct input_button
