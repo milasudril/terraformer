@@ -187,6 +187,7 @@ int main(int argc, char** argv)
 	QScrollArea input_scroll_area{&input_output};
 	input_scroll_area.setWidget(&input);
 	input_output.addWidget(&output);
+	input_scroll_area.setWidgetResizable(true);
 
 	input.set_focus();
 	input.refresh();
