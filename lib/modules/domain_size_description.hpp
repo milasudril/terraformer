@@ -72,10 +72,10 @@ namespace terraformer
 				.name = "number_of_pixels",
 				.display_name = "Number of pixel",
 				.description = "Sets the number of pixels in the generated images",
-				.widget = numeric_input<std::reference_wrapper<pixel_count>, num_string_converter<int>, numeric_input_mapping_type::log>{
-					.binding = std::ref(dom_size.get().number_of_pixels),
-					.value_converter = num_string_converter<int>{}
-				}
+				.widget = make_numeric_input<numeric_input_mapping_type::log>(
+					std::ref(dom_size.get().number_of_pixels),
+					num_string_converter<int>{}
+				)
 			}
 		);
 	}
