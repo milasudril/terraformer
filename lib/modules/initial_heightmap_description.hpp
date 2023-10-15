@@ -233,7 +233,7 @@ namespace terraformer
 		elevation_range output_range;
 		struct corners corners;
 		main_ridge_description main_ridge;
-
+		damped_wave_description ns_distortion;
 		modulated_damped_wave_description ns_wave;
 	};
 
@@ -270,6 +270,17 @@ namespace terraformer
 				.description = "Controls the location and shape of the main ridge",
 				.widget = subform{
 					.binding = std::ref(params.get().main_ridge)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "ns_distortion",
+				.display_name = "North-south distortion",
+				.description = "Controls properites north-south distortion",
+				.widget = subform{
+					.binding = std::ref(params.get().ns_distortion)
 				}
 			}
 		);

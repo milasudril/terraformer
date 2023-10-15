@@ -68,14 +68,21 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 	grayscale_image v{w, h};
 	{
+		auto const& ns_distortion = params.ns_distortion;
+		fractal_wave const wave{rng, ns_distortion.wave.shape};
+		auto const wavelength = ns_distortion.wave.wave_properties.wavelength;
+		auto const phase = ns_distortion.wave.wave_properties.phase;
+		auto const amplitude = ns_distortion.initial_amplitude;
+		auto const half_distance = ns_distortion.half_distance;
+
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
 				auto const x_val = hm.pixel_size*static_cast<float>(x);
 				auto const y_val = u(x, y) - ridge_loc;
-				auto const amp = (y_val/24576.0f)*(y_val/24576.0f);
-				v(x, y) = x_val  + 1024.0f*amp*std::sin(2.0f*std::numbers::pi_v<float>*y_val/10240.0f);
+				v(x, y) = x_val + amplitude*wave(y_val/wavelength + phase)
+					*std::exp2(std::min(std::abs(y_val)/half_distance, std::max(16.0f - std::log2(amplitude), 0.0f)));
 			}
 		}
 	}

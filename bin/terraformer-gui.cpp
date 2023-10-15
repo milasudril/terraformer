@@ -101,6 +101,7 @@ int main(int argc, char** argv)
 					}
 				}
 			},
+			.ns_distortion{},
 			.ns_wave{
 				.nominal_oscillations{
 					.initial_amplitude = terraformer::vertical_amplitude{2048.0f},
