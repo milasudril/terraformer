@@ -39,10 +39,34 @@ namespace terraformer
 		explicit widget_row(QWidget* parent):
 			QWidget{parent},
 			m_root{std::make_unique<QHBoxLayout>(this)}
-			{ m_root->setContentsMargins(form_indent, 0, 0, 0); }
+			{ m_root->setContentsMargins(0, 0, 0, 0); }
 
 			void add_widget(QWidget& widget)
 			{ m_root->addWidget(&widget); }
+
+			void compact_height()
+			{
+				auto min_height = 32;
+				auto const num_items = m_root->count();
+
+				for(int k = 0; k != num_items; ++k)
+				{
+					auto const item = m_root->itemAt(k);
+					auto new_val = item->minimumSize();
+					min_height = std::min(min_height, new_val.height());
+				}
+
+				for(int k = 0; k != num_items; ++k)
+				{
+					auto const item = m_root->itemAt(k);
+					auto widget = dynamic_cast<QWidgetItem&>(*item).widget();
+					widget->setMaximumHeight(min_height);
+					if(auto knob = dynamic_cast<QDial*>(widget); knob != nullptr)
+					{
+						knob->setMaximumWidth(min_height);
+					}
+				}
+			}
 
 	private:
 		std::unique_ptr<QHBoxLayout> m_root;
@@ -441,15 +465,14 @@ namespace terraformer
 		}
 
 
-		template<class BindingType>
+		template<class BindingType, numeric_input_mapping_type Mapping>
 		std::unique_ptr<QDial>
-		create_widget(knob<BindingType> const& knob, QWidget& parent, char const* field_name)
+		create_widget(knob<BindingType, Mapping> const& knob, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QDial>(&parent);
-			constexpr auto maxval = 16777215;
+			constexpr auto maxval = 16777216;
 			ret->setMinimum(0);
 			ret->setMaximum(maxval);
-			ret->setMaximumWidth(ret->height());
 
 			if constexpr(!std::is_const_v<typename BindingType::type>)
 			{
@@ -463,11 +486,30 @@ namespace terraformer
 							log_error(error.what());
 							src.setFocus();
 						}, [this](auto& src, auto const& knob){
-							if(auto new_val = std::lerp(knob.min, knob.max, static_cast<float>(src.value())/maxval);
-								new_val != knob.binding.get())
+							if constexpr(Mapping == numeric_input_mapping_type::lin)
 							{
-								knob.binding.get() = knob.mapping == numeric_input_mapping_type::lin ? new_val: std::exp2(new_val);
-								m_on_value_changed(make_widget_path(m_path, src.objectName()));
+								if(auto new_val =
+									static_cast<BindingType::type::value_type>(std::lerp(
+										static_cast<double>(knob.min),
+										static_cast<double>(knob.max),
+										static_cast<double>(src.value())/maxval));
+									new_val != knob.binding.get())
+								{
+									knob.binding.get() = new_val;
+									m_on_value_changed(make_widget_path(m_path, src.objectName()));
+								}
+							}
+							else
+							{
+								auto const output_min = std::log2(static_cast<double>(knob.binding.get().min()));
+								auto const output_max = std::log2(static_cast<double>(knob.binding.get().max()));
+								auto const logval = std::lerp(output_min, output_max, static_cast<double>(src.value())/maxval);
+								auto const new_val = std::exp2(logval);
+								if(new_val != knob.binding.get())
+								{
+									knob.binding.get() = static_cast<BindingType::type::value_type>(new_val);
+									m_on_value_changed(make_widget_path(m_path, src.objectName()));
+								}
 							}
 						}, src, knob);
 						refresh();
@@ -479,10 +521,25 @@ namespace terraformer
 			{ ret->setDisabled(true); }
 
 			m_display_callbacks.push_back([&dest = *ret, knob](){
-				auto const val = knob.mapping == numeric_input_mapping_type::lin? knob.binding.get()
-					: std::log2(knob.binding.get());
-				dest.setValue(static_cast<int>(maxval*(val - knob.min)/(knob.max - knob.min)));
+				if constexpr(Mapping == numeric_input_mapping_type::lin)
+				{
+					auto const val = knob.binding.get();
+					auto const val_normalized = static_cast<double>(val - knob.min)/static_cast<double>(knob.max - knob.min);
+					dest.setValue(static_cast<int>(static_cast<double>(maxval)*val_normalized + 0.5));
+				}
+				else
+				{
+					auto const val = knob.binding.get();
+					auto const logval = std::log2(static_cast<double>(val));
+					auto const output_min = std::log2(static_cast<double>(knob.binding.get().min()));
+					auto const output_max = std::log2(static_cast<double>(knob.binding.get().max()));
+					auto const val_normalized = static_cast<double>(logval - output_min)/static_cast<double>(output_max - output_min);
+					dest.blockSignals(true);
+					dest.setValue(static_cast<int>(static_cast<double>(maxval)*val_normalized + 0.5));
+					dest.blockSignals(false);
+				}
 			});
+
 
 			ret->setObjectName(field_name);
 			return ret;
@@ -566,13 +623,25 @@ namespace terraformer
 				(m_widgets.push_back(std::forward<Args>(args)), ...);
 			}, std::move(created_widgets));
 
+			ret->compact_height();
+
 			return ret;
 		}
 
 		template<class BindingType, class Converter, numeric_input_mapping_type Mapping>
 		auto create_widget(numeric_input<BindingType, Converter, Mapping>&& widget, QWidget& parent, char const* field_name)
 		{
-			return create_widget(textbox{widget.binding, widget.value_converter}, parent, field_name);
+			return create_widget(std::tuple{
+				knob<BindingType, Mapping>{
+					.binding = widget.binding,
+					.min = widget.binding.get().min(),
+					.max = widget.binding.get().max()
+				},
+				textbox{
+					.binding = widget.binding,
+					.value_converter = widget.value_converter
+				}
+			}, parent, field_name);
 		}
 
 		void refresh() const
@@ -596,5 +665,4 @@ namespace terraformer
 		ValueChangedListenerType&& on_value_changed,
 		size_t level = 0) -> form<ValueChangedListenerType>;
 }
-
 #endif

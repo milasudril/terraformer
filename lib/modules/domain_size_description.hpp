@@ -60,7 +60,7 @@ namespace terraformer
 				.name = "height",
 				.display_name = "Height",
 				.description = "Sets the width of the domain",
-				.widget = textbox{
+				.widget = numeric_input{
 					.binding = std::ref(dom_size.get().height),
 					.value_converter = num_string_converter<float>{}
 				}
@@ -72,7 +72,7 @@ namespace terraformer
 				.name = "number_of_pixels",
 				.display_name = "Number of pixel",
 				.description = "Sets the number of pixels in the generated images",
-				.widget = textbox{
+				.widget = numeric_input<std::reference_wrapper<pixel_count>, num_string_converter<int>, numeric_input_mapping_type::log>{
 					.binding = std::ref(dom_size.get().number_of_pixels),
 					.value_converter = num_string_converter<int>{}
 				}

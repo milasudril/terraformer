@@ -25,14 +25,15 @@ namespace terraformer
 
 	enum class numeric_input_mapping_type{lin, log};
 
-	template<class BindingType>
-	requires(std::is_same_v<std::remove_cvref_t<typename BindingType::type>, float>)
+	template<class BindingType, numeric_input_mapping_type Mapping = numeric_input_mapping_type::lin>
 	struct knob
 	{
 		BindingType binding;
-		float min;
-		float max;
-		numeric_input_mapping_type mapping = numeric_input_mapping_type::lin;
+		static constexpr auto mapping()
+		{ return Mapping; }
+
+		BindingType::type::value_type min;
+		BindingType::type::value_type max;
 	};
 
 	template<class BindingType, class Converter, numeric_input_mapping_type Mapping = numeric_input_mapping_type::lin>
@@ -40,6 +41,9 @@ namespace terraformer
 	{
 		static_assert(!BindingType::type::accepts_value(0.0f)
 			|| Mapping != numeric_input_mapping_type::log);
+
+		static constexpr auto mapping()
+		{ return Mapping; }
 
 		BindingType binding;
 		Converter value_converter;
