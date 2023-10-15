@@ -90,7 +90,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		fractal_wave const wave{rng, ns_wave_desc.wave.wave.shape};
 		auto const wavelength = ns_wave_desc.wave.wave.wave_properties.wavelength;
 		auto const phase = ns_wave_desc.wave.wave.wave_properties.phase;
-		auto const amplitude = ns_wave_desc.initial_amplitude;
+		auto const amplitude = ns_wave_desc.wave.initial_amplitude;
 		auto const half_distance = ns_wave_desc.wave.half_distance;
 
 		auto const& amp_mod_desc = ns_wave_desc.amplitude_modulation;

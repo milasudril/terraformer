@@ -96,6 +96,7 @@ namespace terraformer
 
 	struct damped_wave_description
 	{
+		vertical_amplitude initial_amplitude;
 		domain_length half_distance;
 		fractal_wave_description wave;
 	};
@@ -104,6 +105,18 @@ namespace terraformer
 	requires(std::is_same_v<std::remove_cvref_t<T>, damped_wave_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
+		form.insert(
+			field{
+				.name = "initial_amplitude",
+				.display_name = "Initial amplitude",
+				.description = "Initial (undamped) amplitude of the generated wave",
+				.widget = numeric_input_log{
+					.binding = std::ref(params.get().initial_amplitude),
+					.value_converter = num_string_converter<float>{}
+				}
+			}
+		);
+
 		form.insert(
 			field{
 				.name = "half_distance",
@@ -118,7 +131,7 @@ namespace terraformer
 
 		form.insert(
 			field{
-				.name = "wave",
+				.name = "wave_parameters",
 				.display_name = "Wave parameters",
 				.description = "Sets different parameters for the wave function",
 				.widget = subform{
@@ -160,7 +173,6 @@ namespace terraformer
 
 	struct modulated_damped_wave_description
 	{
-		vertical_amplitude initial_amplitude;
 		damped_wave_description wave;
 		modulation_description amplitude_modulation;
 		modulation_description wavelength_modulation;
@@ -171,18 +183,6 @@ namespace terraformer
 	requires(std::is_same_v<std::remove_cvref_t<T>, modulated_damped_wave_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
-		form.insert(
-			field{
-				.name = "initial_amplitude",
-				.display_name = "Initial amplitude",
-				.description = "Initial (undamped) amplitude of the generated wave",
-				.widget = numeric_input_log{
-					.binding = std::ref(params.get().initial_amplitude),
-					.value_converter = num_string_converter<float>{}
-				}
-			}
-		);
-
 		form.insert(
 			field{
 				.name = "wave",

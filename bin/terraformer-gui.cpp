@@ -102,8 +102,8 @@ int main(int argc, char** argv)
 				}
 			},
 			.ns_wave{
-				.initial_amplitude = terraformer::vertical_amplitude{2048.0f},
 				.wave{
+					.initial_amplitude = terraformer::vertical_amplitude{2048.0f},
 					.half_distance = terraformer::domain_length{32768.0f},
 					.wave{
 						.shape{
