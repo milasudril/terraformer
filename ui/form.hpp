@@ -403,7 +403,10 @@ namespace terraformer
 		void insert(field<subform<BindingType>>&& field)
 		{
 			auto outer = std::make_unique<widget_column>(this, 0);
-			auto label = std::make_unique<QPushButton>(field.display_name, outer.get());
+			auto label = std::make_unique<QPushButton>(
+				QString::fromStdString(std::string{"⊞ "}.append(field.display_name)),
+				outer.get()
+			);
 			auto entry = create_widget(
 				std::move(field.widget),
 				*outer,
@@ -411,10 +414,18 @@ namespace terraformer
 			label->setToolTip("Click to see details");
 			label->setStyleSheet("border: none; text-align:left; margin:0; padding: 0; font-weight: bold");
 			QObject::connect(label.get(),
-				&QPushButton::clicked,
-				[&entry = *entry, entry_visible = false]() mutable {
+				&QPushButton::clicked,[
+					&entry = *entry,
+					&label = *label,
+					entry_visible = false,
+					raw_name = std::string{field.display_name}
+				]() mutable {
 					entry.setVisible(!entry_visible);
 					entry_visible = !entry_visible;
+					if(entry_visible)
+					{ label.setText(QString::fromStdString(std::string{"⊟ "}.append(raw_name))); }
+					else
+					{ label.setText(QString::fromStdString(std::string{"⊞ "}.append(raw_name))); }
 				}
 			);
 			entry->setObjectName(field.name);
