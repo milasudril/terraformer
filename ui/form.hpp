@@ -569,6 +569,12 @@ namespace terraformer
 			return ret;
 		}
 
+		template<class BindingType, class Converter, numeric_input_mapping_type Mapping>
+		auto create_widget(numeric_input<BindingType, Converter, Mapping>&& widget, QWidget& parent, char const* field_name)
+		{
+			return create_widget(textbox{widget.binding, widget.value_converter}, parent, field_name);
+		}
+
 		void refresh() const
 		{ std::ranges::for_each(m_display_callbacks, [](auto const& item){item();}); }
 

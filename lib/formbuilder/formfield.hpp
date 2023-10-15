@@ -35,6 +35,16 @@ namespace terraformer
 		numeric_input_mapping_type mapping = numeric_input_mapping_type::lin;
 	};
 
+	template<class BindingType, class Converter, numeric_input_mapping_type Mapping = numeric_input_mapping_type::lin>
+	struct numeric_input
+	{
+		static_assert(!BindingType::type::accepts_value(0.0f)
+			|| Mapping != numeric_input_mapping_type::log);
+
+		BindingType binding;
+		Converter value_converter;
+	};
+
 	template<class BindingType, class Generator>
 	struct input_button
 	{

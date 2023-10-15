@@ -48,7 +48,7 @@ namespace terraformer
 				.name = "width",
 				.display_name = "Width",
 				.description = "Sets the width of the domain",
-				.widget = textbox{
+				.widget = numeric_input{
 					.binding = std::ref(dom_size.get().width),
 					.value_converter = num_string_converter<float>{}
 				}

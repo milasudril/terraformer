@@ -13,6 +13,9 @@ namespace terraformer
 		static_assert(within(Interval, DefaultValue));
 		using value_type = decltype(DefaultValue);
 
+		static constexpr auto accepts_value(value_type val)
+		{ return within(Interval, val); }
+
 		static constexpr auto min()
 		{ return Interval.min(); }
 
