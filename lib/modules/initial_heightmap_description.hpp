@@ -176,7 +176,7 @@ namespace terraformer
 				.name = "initial_amplitude",
 				.display_name = "Initial amplitude",
 				.description = "Initial (undamped) amplitude of the generated wave",
-				.widget = textbox{
+				.widget = numeric_input_log{
 					.binding = std::ref(params.get().initial_amplitude),
 					.value_converter = num_string_converter<float>{}
 				}

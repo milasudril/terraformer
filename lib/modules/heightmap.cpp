@@ -167,6 +167,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				+ ns_wave_output(x, y);
 		}
 	}
+
 #if 0
 	{
 		auto const range = std::ranges::minmax_element(pixels.pixels());
