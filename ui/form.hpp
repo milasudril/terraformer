@@ -392,9 +392,9 @@ namespace terraformer
 			m_widgets.push_back(std::move(outer));
 		}
 
-		template<class Converter, class BindingType>
+		template<class BindingType, class Converter>
 		std::unique_ptr<QLineEdit>
-		create_widget(textbox<Converter, BindingType> const& textbox, QWidget& parent, char const* field_name)
+		create_widget(textbox<BindingType, Converter> const& textbox, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QLineEdit>(&parent);
 
@@ -488,9 +488,9 @@ namespace terraformer
 			return ret;
 		}
 
-		template<class Generator, class BindingType>
+		template<class BindingType, class Generator>
 		std::unique_ptr<QPushButton>
-		create_widget(input_button<Generator, BindingType>&& input_button, QWidget& parent, char const* field_name)
+		create_widget(input_button<BindingType, Generator>&& input_button, QWidget& parent, char const* field_name)
 		{
 			auto ret = std::make_unique<QPushButton>(input_button.label, &parent);
 			ret->setToolTip(input_button.description);
@@ -538,8 +538,8 @@ namespace terraformer
 			return ret;
 		}
 
-		template<class HeightmapType, class PixelSizeType>
-		std::unique_ptr<topographic_map_renderer> create_widget(topographic_map_view<HeightmapType, PixelSizeType>&& view,
+		template<class PixelSizeType, class HeightmapType>
+		std::unique_ptr<topographic_map_renderer> create_widget(topographic_map_view<PixelSizeType, HeightmapType>&& view,
 			QWidget& parent,
 			char const* field_name)
 		{

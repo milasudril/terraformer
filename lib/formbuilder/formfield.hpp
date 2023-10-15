@@ -15,7 +15,7 @@ namespace terraformer
 	};
 
 
-	template<class Converter, class BindingType>
+	template<class BindingType, class Converter>
 	struct textbox
 	{
 		BindingType binding;
@@ -35,7 +35,7 @@ namespace terraformer
 		numeric_input_mapping_type mapping = numeric_input_mapping_type::lin;
 	};
 
-	template<class Generator, class BindingType>
+	template<class BindingType, class Generator>
 	struct input_button
 	{
 		BindingType binding;
@@ -50,7 +50,7 @@ namespace terraformer
 		BindingType binding;
 	};
 
-	template<class HeightmapType, class PixelSizeType>
+	template<class PixelSizeType, class HeightmapType>
 	struct topographic_map_view
 	{
 		PixelSizeType pixel_size;
