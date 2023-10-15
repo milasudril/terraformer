@@ -73,6 +73,14 @@ namespace terraformer
 		PixelSizeType pixel_size;
 		HeightmapType heightmap;
 	};
+
+	template<class BindingType, class Converter, class LabelContainer>
+	struct enum_input
+	{
+		BindingType binding;
+		Converter value_converter;
+		LabelContainer labels;
+	};
 }
 
 #endif

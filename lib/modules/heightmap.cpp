@@ -175,19 +175,47 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		}
 	}
 
-#if 0
+	switch(params.output_range.control_mode)
 	{
-		auto const range = std::ranges::minmax_element(pixels.pixels());
-		std::ranges::transform(pixels.pixels(),
-			pixels.pixels().begin(), [
-				range = std::ranges::minmax_result{*range.min, *range.max},
-				output_range = params.output_range
-			](auto const val) {
-				return std::lerp(output_range.min, output_range.max, (val - range.min)/(range.max - range.min));
-			}
-		);
+		case elevation_range_control_mode::use_guides_only:
+			break;
+		case elevation_range_control_mode::normalize_output:
+		{
+			auto range = std::ranges::minmax_element(pixels.pixels());
+			std::ranges::transform(pixels.pixels(),
+				pixels.pixels().begin(), [
+					range = std::ranges::minmax_result{*range.min, *range.max},
+					output_range = params.output_range
+				](auto const val) {
+					return std::lerp(output_range.min, output_range.max, (val - range.min)/(range.max - range.min));
+				}
+			);
+			break;
+		}
+		case elevation_range_control_mode::softclamp_output:
+		{
+			std::ranges::transform(pixels.pixels(),
+				pixels.pixels().begin(), [
+					output_range = params.output_range
+				](auto const val) {
+					auto const t = (val - output_range.min)/(output_range.max - output_range.min);
+					auto const y = smoothstep(4.0f*std::lerp(-1.0f, 1.0f, t)/6.0f);
+					return std::lerp(static_cast<float>(output_range.min), static_cast<float>(output_range.max), y);
+				}
+			);
+			break;
+		}
+		case elevation_range_control_mode::clamp_output:
+			std::ranges::transform(pixels.pixels(),
+				pixels.pixels().begin(), [
+					output_range = params.output_range
+				](auto const val) {
+					return std::clamp(val, static_cast<float>(output_range.min), static_cast<float>(output_range.max));
+				}
+			);
+			break;
 	}
-#endif
+
 	store(pixels, "output.exr");
 }
 

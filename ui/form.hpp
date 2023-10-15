@@ -27,6 +27,7 @@
 #include <QMouseEvent>
 #include <QToolTip>
 #include <QChartView>
+#include <QComboBox>
 
 #include <ranges>
 
@@ -666,6 +667,53 @@ namespace terraformer
 					.value_converter = widget.value_converter
 				}
 			}, parent, field_name);
+		}
+
+		template<class BindingType, class Converter, class LabelArray>
+		std::unique_ptr<QComboBox>
+		create_widget(enum_input<BindingType, Converter, LabelArray> const& enum_input, QWidget& parent, char const* field_name)
+		{
+			auto ret = std::make_unique<QComboBox>(&parent);
+			for(auto const& label : enum_input.labels)
+			{ ret->addItem(label); }
+
+			if constexpr(!std::is_const_v<typename BindingType::type>)
+			{
+				QObject::connect(ret.get(),
+					qOverload<int>(&QComboBox::currentIndexChanged),
+					[this, &src = *ret, enum_input, has_been_called = false](int selected_index) mutable{
+						if(has_been_called)
+						{ return; }
+						has_been_called = true;
+
+						try_and_catch([this, &src](auto const& error){
+							log_error(error.what());
+							src.setFocus();
+						}, [this](auto& src, auto const& enum_input, int selected_index){
+							if(auto new_val = enum_input.value_converter.convert(selected_index);
+								new_val != enum_input.binding.get())
+							{
+								enum_input.binding.get() = std::move(new_val);
+								m_on_value_changed(make_widget_path(m_path, src.objectName()));
+							}
+						}, src, enum_input, selected_index);
+
+						refresh();
+						has_been_called = false;
+					}
+				);
+			}
+			else
+			{ ret->setDisabled(true); }
+
+			m_display_callbacks.push_back([&dest = *ret, enum_input](){
+				dest.blockSignals(true);
+				dest.setCurrentIndex(enum_input.value_converter.convert(enum_input.binding.get()));
+				dest.blockSignals(false);
+			});
+
+			ret->setObjectName(field_name);
+			return ret;
 		}
 
 		void refresh() const

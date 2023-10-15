@@ -7,16 +7,53 @@ namespace terraformer
 {
 	enum elevation_range_control_mode
 	{
-		guides_only,
-		normalize,
-		clamp
+		use_guides_only,
+		normalize_output,
+		softclamp_output,
+		clamp_output
 	};
 
 	struct elevation_range_control
 	{
 		elevation min;
 		elevation max;
-		elevation_range_control_mode mode;
+		elevation_range_control_mode control_mode;
+	};
+
+	struct elevation_range_control_mode_converter
+	{
+		static constexpr int convert(elevation_range_control_mode value)
+		{
+			switch(value)
+			{
+				case elevation_range_control_mode::use_guides_only:
+					return 0;
+				case elevation_range_control_mode::normalize_output:
+					return 1;
+				case elevation_range_control_mode::softclamp_output:
+					return 2;
+				case elevation_range_control_mode::clamp_output:
+					return 3;
+			}
+			__builtin_unreachable();
+		}
+
+		static constexpr elevation_range_control_mode convert(int value)
+		{
+			switch(value)
+			{
+				case 0:
+					return elevation_range_control_mode::use_guides_only;
+				case 1:
+					return elevation_range_control_mode::normalize_output;
+				case 2:
+					return elevation_range_control_mode::softclamp_output;
+				case 3:
+					return elevation_range_control_mode::clamp_output;
+				default:
+					throw std::runtime_error{"Invalid elevation range control mode"};
+			}
+		}
 	};
 
 	template<class Form, class T>
@@ -42,17 +79,22 @@ namespace terraformer
 				.value_converter = num_string_converter<float>{}
 			},
 		});
-#if 0
-		//TODO:
+
 		form.insert(field{
 			.name = "mode",
-			.display_name = "Mode",
-			.description = "Sets the maximum elevation",
+			.display_name = "Control mode",
+			.description = "Selects the elevation range control mode",
 			.widget = enum_input{
-				.binding = std::ref(params.get().mode),
-			},
+				.binding = std::ref(params.get().control_mode),
+				.value_converter = elevation_range_control_mode_converter{},
+				.labels = std::array<char const*, 4>{
+					"Use guides only",
+					"Normalize output",
+					"Softclamp output",
+					"Clamp output"
+				}
+			}
 		});
-#endif
 	}
 
 	struct corner
