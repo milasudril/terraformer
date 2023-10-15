@@ -44,6 +44,7 @@ int main(int argc, char** argv)
 			.output_range{
 				.min = terraformer::elevation{512.0f},
 				.max = terraformer::elevation{8704.0f},
+				.mode = terraformer::elevation_range_control_mode::guides_only
 			},
 			.corners{
 				.nw = terraformer::elevation{5072.0f},

@@ -5,14 +5,22 @@
 
 namespace terraformer
 {
-	struct elevation_range
+	enum elevation_range_control_mode
+	{
+		guides_only,
+		normalize,
+		clamp
+	};
+
+	struct elevation_range_control
 	{
 		elevation min;
 		elevation max;
+		elevation_range_control_mode mode;
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, elevation_range>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, elevation_range_control>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{
@@ -34,6 +42,17 @@ namespace terraformer
 				.value_converter = num_string_converter<float>{}
 			},
 		});
+#if 0
+		//TODO:
+		form.insert(field{
+			.name = "mode",
+			.display_name = "Mode",
+			.description = "Sets the maximum elevation",
+			.widget = enum_input{
+				.binding = std::ref(params.get().mode),
+			},
+		});
+#endif
 	}
 
 	struct corner
@@ -230,7 +249,7 @@ namespace terraformer
 
 	struct initial_heightmap_description
 	{
-		elevation_range output_range;
+		elevation_range_control output_range;
 		struct corners corners;
 		main_ridge_description main_ridge;
 		damped_wave_description ns_distortion;
