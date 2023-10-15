@@ -46,8 +46,8 @@ namespace terraformer
 
 			void compact_height()
 			{
-				auto min_height = 32;
 				auto const num_items = m_root->count();
+				auto min_height = 32;
 
 				for(int k = 0; k != num_items; ++k)
 				{
@@ -68,7 +68,21 @@ namespace terraformer
 				}
 			}
 
+		int minimumWidth() const
+		{
+			auto const num_items = m_root->count();
+			auto sum = 0;
+
+			for(int k = 0; k != num_items; ++k)
+			{
+				auto const item = m_root->itemAt(k);
+				sum += item->minimumSize().width();
+			}
+			return sum;
+		}
+
 	private:
+
 		std::unique_ptr<QHBoxLayout> m_root;
 	};
 
@@ -366,9 +380,7 @@ namespace terraformer
 		{
 			auto entry = create_widget(std::move(field.widget), *this, field.name);
 			entry->setToolTip(field.description);
-
-			auto const l = strlen(field.display_name);
-			if(l < 16)
+			if(entry->minimumWidth() < 128)
 			{
 				m_root->addRow(field.display_name, entry.get());
 				m_widgets.push_back(std::move(entry));
