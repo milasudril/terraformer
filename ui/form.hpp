@@ -412,12 +412,13 @@ namespace terraformer
 			label->setStyleSheet("border: none; text-align:left; margin:0; padding: 0; font-weight: bold");
 			QObject::connect(label.get(),
 				&QPushButton::clicked,
-				[&entry = *entry, entry_visible = true]() mutable {
+				[&entry = *entry, entry_visible = false]() mutable {
 					entry.setVisible(!entry_visible);
 					entry_visible = !entry_visible;
 				}
 			);
 			entry->setObjectName(field.name);
+			entry->setVisible(false);
 			entry->setToolTip(field.description);
 			outer->add_widget(*label);
 			outer->add_widget(*entry);
