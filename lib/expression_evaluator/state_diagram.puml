@@ -1,0 +1,33 @@
+@startuml
+hide empty description
+[*] --> init
+init --> error:is_delimiter
+init --> init:is_whitespace
+init --> read_command_name:otherwise [keep char]
+
+read_command_name --> before_list_item:'(' [flush]
+read_command_name --> after_command_name:is_whitespace
+read_command_name --> error:','
+read_command_name --> error:')'
+read_command_name --> read_command_name:otherwise [keep char]
+
+before_list_item --> error:is_delimiter
+before_list_item --> before_list_item:is_whitespace
+before_list_item --> read_list_item:otherwise [keep char]
+
+read_list_item --> read_list_item:'(' | ',' [flush]
+read_list_item --> after_command:')' [flush]
+read_list_item --> after_list_item:is_whitespace && buffer_not_empty
+read_list_item --> read_list_item:otherwise [keep char]
+
+after_list_item --> read_list_item:'(' | ',' [flush]
+
+after_command --> read_list_item:','
+after_command --> after_command: ')' | is_whitespace
+after_command --> error: otherwise
+
+after_command_name --> before_list_item:'(' [flush]
+after_command_name --> after_command_name : is_whitespace
+after_command_name --> error: otherwise
+
+@enduml
