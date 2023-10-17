@@ -5,7 +5,7 @@
 
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/common/span_2d.hpp"
-#include "lib/formbuilder/string_converter.hpp"
+#include "lib/common/string_converter.hpp"
 
 #include <cmath>
 
