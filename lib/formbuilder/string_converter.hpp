@@ -14,7 +14,7 @@ namespace terraformer
 		static std::string convert(deserialized_type value)
 		{ return to_string_helper(value); }
 
-		deserialized_type convert(std::string_view str) const
+		static deserialized_type convert(std::string_view str)
 		{
 			deserialized_type val{};
 			auto const res = std::from_chars(std::begin(str), std::end(str), val);
