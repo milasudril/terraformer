@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_EXPRESSION_EVALUATOR_HPP
 #define TERRAFORMER_EXPRESSION_EVALUATOR_HPP
 
+#include "lib/common/string_converter.hpp"
+
 #include <string_view>
 #include <stack>
 #include <string>
@@ -31,6 +33,16 @@ namespace terraformer::expression_evaluator
 		std::string command_name;
 		std::vector<double> args;
 	};
+
+	double evaluate(parser_context const& ctxt)
+	{
+		printf("%s(", ctxt.command_name.c_str());
+		for(size_t k = 0; k != std::size(ctxt.args); ++k)
+		{
+			printf("%.8g%s", ctxt.args[k], k != std::size(ctxt.args) - 1? ", " : ")\n");
+		}
+		return 513.0;
+	}
 
 //"  foo ( 1,  3, bar( kaka(5)) , 7)"
 	double evaluate(std::string_view expression)
@@ -100,23 +112,27 @@ namespace terraformer::expression_evaluator
 						case '(':
 							contexts.push(parser_context{std::move(buffer), std::vector<double>{}});
 							current_context = &contexts.top();
-							printf("<%s>\n", current_context->command_name.c_str());
 							buffer.clear();
 							break;
 
 						case ',':
-							printf(", [%s]\n", buffer.c_str());
+							current_context->args.push_back(num_string_converter<double>::convert(buffer));
 							buffer.clear();
 							break;
 
 						case ')':
-							printf(") [%s]\n", buffer.c_str());
+						{
+							current_context->args.push_back(num_string_converter<double>::convert(buffer));
 							buffer.clear();
-							current_state = parser_state::after_command;
-							printf("</%s>\n", current_context->command_name.c_str());
+							auto res = evaluate(*current_context);
 							contexts.pop();
+							if(contexts.empty())
+							{ return res; }
+							current_state = parser_state::after_command;
 							current_context = &contexts.top();
+							current_context->args.push_back(res);
 							break;
+						}
 
 						default:
 							if(is_whitespace(ch_in))
@@ -135,13 +151,12 @@ namespace terraformer::expression_evaluator
 						case '(':
 							contexts.push(parser_context{std::move(buffer), std::vector<double>{}});
 							current_context = &contexts.top();
-							printf("<%s>\n", current_context->command_name.c_str());
 							buffer.clear();
 							current_state = parser_state::read_list_item;
 							break;
 
 						case ',':
-							printf(", [%s]\n", buffer.c_str());
+							current_context->args.push_back(num_string_converter<double>::convert(buffer));
 							buffer.clear();
 							current_state = parser_state::read_list_item;
 							break;
@@ -159,10 +174,15 @@ namespace terraformer::expression_evaluator
 							break;
 
 						case ')':
-							printf("</%s>\n", current_context->command_name.c_str());
+						{
+							auto res = evaluate(*current_context);
 							contexts.pop();
+							if(contexts.empty())
+							{ return res; }
 							current_context = &contexts.top();
+							current_context->args.push_back(res);
 							break;
+						}
 
 						default:
 							if(!is_whitespace(ch_in))
@@ -176,7 +196,6 @@ namespace terraformer::expression_evaluator
 						case '(':
 							contexts.push(parser_context{std::move(buffer), std::vector<double>{}});
 							current_context = &contexts.top();
-							printf("<%s>\n", current_context->command_name.c_str());
 							buffer.clear();
 							current_state = parser_state::before_list_item;
 							break;
@@ -188,7 +207,6 @@ namespace terraformer::expression_evaluator
 					break;
 			}
 		}
-		putchar('\n');
 		return 0.0;
 	}
 }
