@@ -235,3 +235,12 @@ TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args_junk_afte
 	catch(terraformer::input_error const& err)
 	{ EXPECT_EQ(err.what(), std::string_view{"Unexpected character at end of command"}); }
 }
+
+TESTCASE(terraformer_expression_evaluator_parse_nested_command_with_whitespace_after_inner_arg)
+{
+	context_evalutor eval{};
+	string_converter converter{};
+	std::string_view str{"foobar(arg1, arg2(foo ))"};
+	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	printf("%s\n", res.result.c_str());
+}
