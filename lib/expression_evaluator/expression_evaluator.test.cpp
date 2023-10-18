@@ -242,5 +242,27 @@ TESTCASE(terraformer_expression_evaluator_parse_nested_command_with_whitespace_a
 	string_converter converter{};
 	std::string_view str{"foobar(arg1, arg2(foo ))"};
 	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
-	printf("%s\n", res.result.c_str());
+	EXPECT_EQ(res.result, "[foobar(+arg1_conv+[arg2(+foo_conv)])]");
+	EXPECT_EQ(res.expression_end, std::end(str));
+}
+
+TESTCASE(terraformer_expression_evaluator_parse_nested_command_command_left_after_command)
+{
+	context_evalutor eval{};
+	string_converter converter{};
+	std::string_view str{"foobar(arg1, arg2(arg3(foo )))"};
+	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	EXPECT_EQ(res.result, "[foobar(+arg1_conv+[arg2(+[arg3(+foo_conv)])])]");
+	EXPECT_EQ(res.expression_end, std::end(str));
+}
+
+TESTCASE(terraformer_expression_evaluator_parse_unterminated_command)
+{
+	context_evalutor eval{};
+	string_converter converter{};
+	std::string_view str{"foobar(arg1, arg2(arg3(foo ))"};
+	try
+	{ auto const res = terraformer::expression_evaluator::parse(str, eval, converter); }
+	catch(terraformer::input_error const& err)
+	{ EXPECT_EQ(err.what(), std::string_view{"Unterminated command"}); }
 }

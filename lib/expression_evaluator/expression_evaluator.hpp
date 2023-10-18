@@ -237,6 +237,10 @@ namespace terraformer::expression_evaluator
 					break;
 			}
 		}
+
+		if(!contexts.empty())
+		{ throw input_error{"Unterminated command"}; }
+
 		return parse_result{string_converter.convert(buffer), ptr};
 	}
 }
