@@ -102,16 +102,9 @@ namespace terraformer::expression_evaluator
 							throw input_error{"A list item may not contain `,`"};
 
 						case ')':
-						{
-							auto res = evaluator.evaluate(*current_context);
-							contexts.pop();
-							if(contexts.empty())
-							{ return parse_result{res, ptr}; }
-							current_state = parser_state::after_command;
-							current_context = &contexts.top();
-							current_context->args.push_back(res);
-							break;
-						}
+							// NOTE: No need to continue since we know that the only way to
+							//       this state is from the initial states
+							return parse_result{evaluator.evaluate(*current_context), ptr};
 
 						default:
 							if(!is_whitespace(ch_in))
