@@ -6,11 +6,23 @@
 
 namespace
 {
+	struct parser_context
+	{
+		std::string command_name;
+		std::vector<std::string> args;
+	};
+
 	struct context_evalutor
 	{
 		using argument_type = std::string;
 
-		std::string evaluate(terraformer::expression_evaluator::parser_context<std::string> const& ctxt)
+		auto create_context(std::string&& command_name)
+		{
+			return parser_context{std::move(command_name), std::vector<std::string>{}};
+		}
+
+
+		std::string evaluate(parser_context const& ctxt)
 		{
 			std::string ret{"["};
 			ret.append(ctxt.command_name).append("(");

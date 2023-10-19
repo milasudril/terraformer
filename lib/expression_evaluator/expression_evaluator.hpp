@@ -28,13 +28,6 @@ namespace terraformer::expression_evaluator
 	};
 
 	template<class ArgumentType>
-	struct parser_context
-	{
-		std::string command_name;
-		std::vector<ArgumentType> args;
-	};
-
-	template<class ArgumentType>
 	struct parse_result
 	{
 		ArgumentType result;
@@ -48,9 +41,9 @@ namespace terraformer::expression_evaluator
 		auto current_state = parser_state::init;
 
 		std::string buffer;
-		using argument_type = typename std::remove_cvref_t<ContextEvaluator>::argument_type;
-		std::stack<parser_context<argument_type>> contexts;
-		parser_context<argument_type>* current_context = nullptr;
+		using context_type = decltype(evaluator.create_context(std::declval<std::string>()));
+		std::stack<context_type> contexts;
+		context_type* current_context = nullptr;
 		while(ptr != std::end(expression))
 		{
 			auto ch_in = *ptr;
@@ -72,9 +65,9 @@ namespace terraformer::expression_evaluator
 					switch(ch_in)
 					{
 						case '(':
-							contexts.push(parser_context{std::move(buffer), std::vector<argument_type>{}});
-							current_context = &contexts.top();
+							contexts.push(evaluator.create_context(std::move(buffer)));
 							buffer.clear();
+							current_context = &contexts.top();
 							current_state = parser_state::before_list_item;
 							break;
 
@@ -119,9 +112,9 @@ namespace terraformer::expression_evaluator
 					switch(ch_in)
 					{
 						case '(':
-							contexts.push(parser_context{std::move(buffer), std::vector<argument_type>{}});
-							current_context = &contexts.top();
+							contexts.push(evaluator.create_context(std::move(buffer)));
 							buffer.clear();
+							current_context = &contexts.top();
 							break;
 
 						case ',':
@@ -161,9 +154,9 @@ namespace terraformer::expression_evaluator
 					switch(ch_in)
 					{
 						case '(':
-							contexts.push(parser_context{std::move(buffer), std::vector<argument_type>{}});
-							current_context = &contexts.top();
+							contexts.push(evaluator.create_context(std::move(buffer)));
 							buffer.clear();
+							current_context = &contexts.top();
 							current_state = parser_state::read_list_item;
 							break;
 
@@ -224,9 +217,9 @@ namespace terraformer::expression_evaluator
 					switch(ch_in)
 					{
 						case '(':
-							contexts.push(parser_context{std::move(buffer), std::vector<argument_type>{}});
-							current_context = &contexts.top();
+							contexts.push(evaluator.create_context(std::move(buffer)));
 							buffer.clear();
+							current_context = &contexts.top();
 							current_state = parser_state::before_list_item;
 							break;
 
