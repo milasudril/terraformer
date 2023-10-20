@@ -10,6 +10,9 @@ namespace
 	{
 		std::string command_name;
 		std::vector<std::string> args;
+
+		void append_argument(std::string&& buffer)
+		{ return args.push_back(std::move(buffer) + "_conv"); }
 	};
 
 	struct context_evalutor
@@ -20,7 +23,6 @@ namespace
 		{
 			return parser_context{std::move(command_name), std::vector<std::string>{}};
 		}
-
 
 		std::string evaluate(parser_context const& ctxt)
 		{
@@ -34,56 +36,44 @@ namespace
 			return ret;
 		}
 	};
-
-	struct string_converter
-	{
-		std::string convert(std::string const& buffer)
-		{
-			return buffer + "_conv";
-		}
-	};
 }
 
 
 TESTCASE(terraformer_expression_evaluator_parse_value_only)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
-	EXPECT_EQ(res.result, "foobar_conv")
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
+	EXPECT_EQ(res.result, "[(+foobar_conv)]")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
 
 TESTCASE(terraformer_expression_evaluator_parse_value_only_leading_whitespace)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"    foobar"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
-	EXPECT_EQ(res.result, "foobar_conv")
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
+	EXPECT_EQ(res.result, "[(+foobar_conv)]")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
 
 TESTCASE(terraformer_expression_evaluator_parse_value_only_trailing_whitespace)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar    "};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
-	EXPECT_EQ(res.result, "foobar_conv")
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
+	EXPECT_EQ(res.result, "[(+foobar_conv)]")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
 
 TESTCASE(terraformer_expression_evaluator_parse_start_with_delimiter)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	{
 		std::string_view str{"(foobar    "};
 		try
 		{
-			auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+			auto const res = terraformer::expression_evaluator::parse(str, eval);
 			abort();
 		}
 		catch(terraformer::input_error const& err)
@@ -94,7 +84,7 @@ TESTCASE(terraformer_expression_evaluator_parse_start_with_delimiter)
 		std::string_view str{"     ,foobar    "};
 		try
 		{
-			auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+			auto const res = terraformer::expression_evaluator::parse(str, eval);
 			abort();
 		}
 		catch(terraformer::input_error const& err)
@@ -105,12 +95,11 @@ TESTCASE(terraformer_expression_evaluator_parse_start_with_delimiter)
 TESTCASE(terraformer_expression_evaluator_parse_wrong_delimiter_after_initial_command_name)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	{
 		std::string_view str{"foobar,"};
 		try
 		{
-			auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+			auto const res = terraformer::expression_evaluator::parse(str, eval);
 			abort();
 		}
 		catch(terraformer::input_error const& err)
@@ -121,7 +110,7 @@ TESTCASE(terraformer_expression_evaluator_parse_wrong_delimiter_after_initial_co
 		std::string_view str{"foobar)"};
 		try
 		{
-			auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+			auto const res = terraformer::expression_evaluator::parse(str, eval);
 			abort();
 		}
 		catch(terraformer::input_error const& err)
@@ -132,11 +121,10 @@ TESTCASE(terraformer_expression_evaluator_parse_wrong_delimiter_after_initial_co
 TESTCASE(terraformer_expression_evaluator_parse_bad_char_after_initial_command_name)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar kaka"};
 	try
 	{
-		auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+		auto const res = terraformer::expression_evaluator::parse(str, eval);
 		abort();
 	}
 	catch(terraformer::input_error const& err)
@@ -146,12 +134,11 @@ TESTCASE(terraformer_expression_evaluator_parse_bad_char_after_initial_command_n
 TESTCASE(terraformer_expression_evaluator_parse_wrong_delimiter_before_list_item)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	{
 		std::string_view str{"foobar(,"};
 		try
 		{
-			auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+			auto const res = terraformer::expression_evaluator::parse(str, eval);
 			abort();
 		}
 		catch(terraformer::input_error const& err)
@@ -162,7 +149,7 @@ TESTCASE(terraformer_expression_evaluator_parse_wrong_delimiter_before_list_item
 		std::string_view str{"foobar(("};
 		try
 		{
-			auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+			auto const res = terraformer::expression_evaluator::parse(str, eval);
 			abort();
 		}
 		catch(terraformer::input_error const& err)
@@ -173,9 +160,8 @@ TESTCASE(terraformer_expression_evaluator_parse_wrong_delimiter_before_list_item
 TESTCASE(terraformer_expression_evaluator_parse_command_with_no_arguments)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar()"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
 	EXPECT_EQ(res.result, "[foobar()]")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
@@ -183,9 +169,8 @@ TESTCASE(terraformer_expression_evaluator_parse_command_with_no_arguments)
 TESTCASE(terraformer_expression_evaluator_parse_command_whitespace_after_command_name_with_no_arguments)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar   ()"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
 	EXPECT_EQ(res.result, "[foobar()]")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
@@ -193,9 +178,8 @@ TESTCASE(terraformer_expression_evaluator_parse_command_whitespace_after_command
 TESTCASE(terraformer_expression_evaluator_parse_two_nested_commands_no_arguments)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar(  kaka())"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
 	EXPECT_EQ(res.result, "[foobar(+[kaka()])]")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
@@ -203,9 +187,8 @@ TESTCASE(terraformer_expression_evaluator_parse_two_nested_commands_no_arguments
 TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar(arg1, arg2 ,arg3 () , arg4)"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
 	EXPECT_EQ(res.result, "[foobar(+arg1_conv+arg2_conv+[arg3()]+arg4_conv)]");
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
@@ -213,9 +196,8 @@ TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args)
 TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args_whitespace_before_end)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar(arg1, arg2 ,arg3 () , arg4  )"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
 	EXPECT_EQ(res.result, "[foobar(+arg1_conv+arg2_conv+[arg3()]+arg4_conv)]");
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
@@ -223,11 +205,10 @@ TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args_whitespac
 TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args_junk_after_list_item)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar(arg1, arg2 arg3)"};
 	try
 	{
-		auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+		auto const res = terraformer::expression_evaluator::parse(str, eval);
 		abort();
 	}
 	catch(terraformer::input_error const& err)
@@ -237,11 +218,10 @@ TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args_junk_afte
 TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args_junk_after_command)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar(arg1, arg2() arg3)"};
 	try
 	{
-		auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+		auto const res = terraformer::expression_evaluator::parse(str, eval);
 		abort();
 	}
 	catch(terraformer::input_error const& err)
@@ -251,9 +231,8 @@ TESTCASE(terraformer_expression_evaluator_parse_command_with_some_args_junk_afte
 TESTCASE(terraformer_expression_evaluator_parse_nested_command_with_whitespace_after_inner_arg)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar(arg1, arg2(foo ))"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
 	EXPECT_EQ(res.result, "[foobar(+arg1_conv+[arg2(+foo_conv)])]");
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
@@ -261,9 +240,8 @@ TESTCASE(terraformer_expression_evaluator_parse_nested_command_with_whitespace_a
 TESTCASE(terraformer_expression_evaluator_parse_nested_command_command_left_after_command)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar(arg1, arg2(arg3(foo )))"};
-	auto const res = terraformer::expression_evaluator::parse(str, eval, converter);
+	auto const res = terraformer::expression_evaluator::parse(str, eval);
 	EXPECT_EQ(res.result, "[foobar(+arg1_conv+[arg2(+[arg3(+foo_conv)])])]");
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
@@ -271,10 +249,9 @@ TESTCASE(terraformer_expression_evaluator_parse_nested_command_command_left_afte
 TESTCASE(terraformer_expression_evaluator_parse_unterminated_command)
 {
 	context_evalutor eval{};
-	string_converter converter{};
 	std::string_view str{"foobar(arg1, arg2(arg3(foo ))"};
 	try
-	{ auto const res = terraformer::expression_evaluator::parse(str, eval, converter); }
+	{ auto const res = terraformer::expression_evaluator::parse(str, eval); }
 	catch(terraformer::input_error const& err)
 	{ EXPECT_EQ(err.what(), std::string_view{"Unterminated command"}); }
 }

@@ -34,8 +34,8 @@ namespace terraformer::expression_evaluator
 		std::string_view::iterator expression_end;
 	};
 
-	template<class ContextEvaluator, class StringConverter>
-	[[nodiscard]] auto parse(std::string_view expression, ContextEvaluator&& evaluator, StringConverter&& string_converter)
+	template<class ContextEvaluator>
+	[[nodiscard]] auto parse(std::string_view expression, ContextEvaluator&& evaluator)
 	{
 		auto ptr = std::begin(expression);
 		auto current_state = parser_state::init;
@@ -118,7 +118,7 @@ namespace terraformer::expression_evaluator
 							break;
 
 						case ',':
-							current_context->args.push_back(string_converter.convert(std::move(buffer)));
+							current_context->append_argument(std::move(buffer));
 							buffer.clear();
 							break;
 
@@ -126,7 +126,7 @@ namespace terraformer::expression_evaluator
 						{
 							if(!buffer.empty())
 							{
-								current_context->args.push_back(string_converter.convert(std::move(buffer)));
+								current_context->append_argument(std::move(buffer));
 								buffer.clear();
 							}
 							auto res = evaluator.evaluate(*current_context);
@@ -161,7 +161,7 @@ namespace terraformer::expression_evaluator
 							break;
 
 						case ',':
-							current_context->args.push_back(string_converter.convert(std::move(buffer)));
+							current_context->append_argument(std::move(buffer));
 							buffer.clear();
 							current_state = parser_state::read_list_item;
 							break;
@@ -170,7 +170,7 @@ namespace terraformer::expression_evaluator
 						{
 							if(!buffer.empty())
 							{
-								current_context->args.push_back(string_converter.convert(std::move(buffer)));
+								current_context->append_argument(std::move(buffer));
 								buffer.clear();
 							}
 							auto res = evaluator.evaluate(*current_context);
@@ -234,7 +234,10 @@ namespace terraformer::expression_evaluator
 		if(!contexts.empty())
 		{ throw input_error{"Unterminated command"}; }
 
-		return parse_result{string_converter.convert(buffer), ptr};
+		auto dummy_context = evaluator.create_context("");
+		dummy_context.append_argument(std::move(buffer));
+
+		return parse_result{evaluator.evaluate(dummy_context), ptr};
 	}
 }
 
