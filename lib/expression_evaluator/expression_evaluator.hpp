@@ -95,9 +95,16 @@ namespace terraformer::expression_evaluator
 							throw input_error{"A list item may not contain `,`"};
 
 						case ')':
-							// NOTE: No need to continue since we know that the only way to
-							//       this state is from the initial states
-							return parse_result{evaluator.evaluate(*current_context), ptr};
+						{
+							auto res = evaluator.evaluate(*current_context);
+							contexts.pop();
+							if(contexts.empty())
+							{ return parse_result{std::move(res), ptr}; }
+							current_context = &contexts.top();
+							current_context->args.push_back(std::move(res));
+							current_state = parser_state::after_command;
+							break;
+						}
 
 						default:
 							if(!is_whitespace(ch_in))
@@ -115,11 +122,13 @@ namespace terraformer::expression_evaluator
 							contexts.push(evaluator.create_context(std::move(buffer)));
 							buffer.clear();
 							current_context = &contexts.top();
+							current_state = parser_state::before_list_item;
 							break;
 
 						case ',':
 							current_context->append_argument(std::move(buffer));
 							buffer.clear();
+							current_state = parser_state::before_list_item;
 							break;
 
 						case ')':

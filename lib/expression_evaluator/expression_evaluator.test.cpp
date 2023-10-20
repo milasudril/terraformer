@@ -176,7 +176,7 @@ TESTCASE(terraformer_expression_evaluator_parse_two_nested_commands_no_arguments
 	context_evalutor eval{};
 	std::string_view str{"foobar(  kaka())"};
 	auto const res = terraformer::expression_evaluator::parse(str, eval);
-	EXPECT_EQ(res.result, "[foobar(+[kaka()])]")
+	EXPECT_EQ(res.result, "[foobar(+[kaka()])]");
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
 
@@ -250,4 +250,30 @@ TESTCASE(terraformer_expression_evaluator_parse_unterminated_command)
 	{ auto const res = terraformer::expression_evaluator::parse(str, eval); }
 	catch(terraformer::input_error const& err)
 	{ EXPECT_EQ(err.what(), std::string_view{"Unterminated command"}); }
+}
+
+TESTCASE(terraformaer_expression_evaluator_parse_empty_args)
+{
+	context_evalutor eval{};
+	std::string_view str{"foobar(,,)"};
+	try
+	{
+		auto const res = terraformer::expression_evaluator::parse(str, eval);
+		abort();
+	}
+	catch(terraformer::input_error const& err)
+	{ EXPECT_EQ(err.what(), std::string_view{"A list item may not contain `,`"}); }
+}
+
+TESTCASE(terraformaer_expression_evaluator_parse_empty_command_name)
+{
+	context_evalutor eval{};
+	std::string_view str{"foobar(kaka,(),bajs)"};
+	try
+	{
+		auto const res = terraformer::expression_evaluator::parse(str, eval);
+		abort();
+	}
+	catch(terraformer::input_error const& err)
+	{ EXPECT_EQ(err.what(), std::string_view{"A list item may not contain `(`"}); }
 }
