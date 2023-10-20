@@ -15,7 +15,7 @@ before_list_item --> error:is_delimiter
 before_list_item --> before_list_item:is_whitespace
 before_list_item --> read_list_item:otherwise [keep char]
 
-read_list_item --> read_list_item:'(' | ',' [flush]
+read_list_item --> before_list_item:'(' | ',' [flush]
 read_list_item --> after_command:')' [flush]
 read_list_item --> after_list_item:is_whitespace && buffer_not_empty
 read_list_item --> read_list_item:otherwise [keep char]
