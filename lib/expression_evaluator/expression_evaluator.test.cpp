@@ -17,12 +17,8 @@ namespace
 
 	struct context_evalutor
 	{
-		using argument_type = std::string;
-
 		auto create_context(std::string&& command_name)
-		{
-			return parser_context{std::move(command_name), std::vector<std::string>{}};
-		}
+		{ return parser_context{std::move(command_name), std::vector<std::string>{}}; }
 
 		std::string evaluate(parser_context const& ctxt)
 		{
