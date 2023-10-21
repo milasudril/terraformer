@@ -141,10 +141,10 @@ namespace terraformer::expression_evaluator
 							auto res = evaluator.evaluate(*current_context);
 							contexts.pop();
 							if(contexts.empty())
-							{ return parse_result{res, ptr}; }
+							{ return parse_result{std::move(res), ptr}; }
 							current_state = parser_state::after_command;
 							current_context = &contexts.top();
-							current_context->args.push_back(res);
+							current_context->args.push_back(std::move(res));
 							break;
 						}
 
@@ -185,10 +185,10 @@ namespace terraformer::expression_evaluator
 							auto res = evaluator.evaluate(*current_context);
 							contexts.pop();
 							if(contexts.empty())
-							{ return parse_result{res, ptr}; }
+							{ return parse_result{std::move(res), ptr}; }
 							current_state = parser_state::after_command;
 							current_context = &contexts.top();
-							current_context->args.push_back(res);
+							current_context->args.push_back(std::move(res));
 							break;
 						}
 
@@ -210,9 +210,9 @@ namespace terraformer::expression_evaluator
 							auto res = evaluator.evaluate(*current_context);
 							contexts.pop();
 							if(contexts.empty())
-							{ return parse_result{res, ptr}; }
+							{ return parse_result{std::move(res), ptr}; }
 							current_context = &contexts.top();
-							current_context->args.push_back(res);
+							current_context->args.push_back(std::move(res));
 							break;
 						}
 
