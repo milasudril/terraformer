@@ -7,6 +7,7 @@
 
 #include "./domain_size_description.hpp"
 #include "./initial_heightmap_description.hpp"
+#include "./calculator.hpp"
 
 namespace terraformer
 {
@@ -66,7 +67,7 @@ namespace terraformer
 				.description = "Sets the size of pixels",
 				.widget = textbox{
 					.binding = std::ref(heightmap.get().pixel_size),
-					.value_converter = num_string_converter<float>{}
+					.value_converter = calculator{}
 				}
 			}
 		);

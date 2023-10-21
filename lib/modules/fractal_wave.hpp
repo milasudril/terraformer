@@ -5,9 +5,9 @@
 
 #include "./polyline.hpp"
 #include "./dimensions.hpp"
+#include "./calculator.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/common/output_range.hpp"
-#include "lib/common/string_converter.hpp"
 #include "lib/formbuilder/formfield.hpp"
 
 #include <numbers>
@@ -33,7 +33,7 @@ namespace terraformer
 			.description = "Controls the relative size between two consecutive elements",
 			.widget = numeric_input_log{
 				.binding = std::ref(params.get().factor),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			}
 		});
 
@@ -43,7 +43,7 @@ namespace terraformer
 			.description = "Controls the amount of noise to add to the scaling factor",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().scaling_noise),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			}
 		});
 	}
@@ -71,7 +71,7 @@ namespace terraformer
 			.description = "Controls the offset between two consecutive elements",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().offset),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			}
 		});
 
@@ -81,7 +81,7 @@ namespace terraformer
 			.description = "Controls the amount of noise to add to the offset",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().offset_noise),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			}
 		});
 	}
@@ -109,7 +109,7 @@ namespace terraformer
 			.description = "Controls the wavelength",
 			.widget = numeric_input_log{
 				.binding = std::ref(params.get().wavelength),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			}
 		});
 
@@ -119,7 +119,7 @@ namespace terraformer
 			.description = "Controls the phase",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().phase),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			}
 		});
 	}

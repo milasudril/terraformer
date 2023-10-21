@@ -2,6 +2,7 @@
 #define TERRAFORMER_MAINRIDGE_DESCRIPTION_HPP
 
 #include "./fractal_wave.hpp"
+#include "./calculator.hpp"
 
 #include <functional>
 
@@ -26,7 +27,7 @@ namespace terraformer
 				.description = "Sets the initial value of the generated wave function",
 				.widget = numeric_input{
 					.binding = std::ref(params.get().initial_value),
-					.value_converter = num_string_converter<float>{}
+					.value_converter = calculator{}
 				}
 			}
 		);
@@ -38,7 +39,7 @@ namespace terraformer
 				.description = "Sets the amplitude of the generated wave function",
 				.widget = numeric_input_log{
 					.binding = std::ref(params.get().amplitude),
-					.value_converter = num_string_converter<float>{}
+					.value_converter = calculator{}
 				}
 			}
 		);

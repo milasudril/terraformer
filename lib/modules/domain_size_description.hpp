@@ -2,6 +2,7 @@
 #define TERRAFORMER_DOMAIN_SIZE_DESCRIPTION_HPP
 
 #include "./dimensions.hpp"
+#include "./calculator.hpp"
 
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/common/span_2d.hpp"
@@ -50,7 +51,7 @@ namespace terraformer
 				.description = "Sets the width of the domain",
 				.widget = numeric_input{
 					.binding = std::ref(dom_size.get().width),
-					.value_converter = num_string_converter<float>{}
+					.value_converter = calculator{}
 				}
 			}
 		);
@@ -62,7 +63,7 @@ namespace terraformer
 				.description = "Sets the width of the domain",
 				.widget = numeric_input{
 					.binding = std::ref(dom_size.get().height),
-					.value_converter = num_string_converter<float>{}
+					.value_converter = calculator{}
 				}
 			}
 		);
@@ -107,7 +108,7 @@ namespace terraformer
 				.display_name = "Width",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
+					.value_converter = calculator{},
 					.binding = std::ref(resolution.get().width)
 				}
 			}
@@ -119,7 +120,7 @@ namespace terraformer
 				.display_name = "Height",
 				.description = "Sets the width of the domain",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
+					.value_converter = calculator{},
 					.binding = std::ref(resolution.get().height)
 				}
 			}
@@ -131,7 +132,7 @@ namespace terraformer
 				.display_name = "Pixel size",
 				.description = "Sets the size of pixels",
 				.widget = textbox{
-					.value_converter = num_string_converter<float>{},
+					.value_converter = calculator{},
 					.binding = std::ref(resolution.get().pixel_size)
 				}
 			}

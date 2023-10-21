@@ -2,6 +2,7 @@
 #define TERRAFORMER_INITIAL_HEIGHTMAP_DESCRIPTION_HPP
 
 #include "./main_ridge_description.hpp"
+#include "./calculator.hpp"
 
 namespace terraformer
 {
@@ -66,7 +67,7 @@ namespace terraformer
 			.description = "Sets the minimum elevation",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().min),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			},
 		});
 
@@ -76,7 +77,7 @@ namespace terraformer
 			.description = "Sets the maximum elevation",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().max),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			},
 		});
 
@@ -120,7 +121,7 @@ namespace terraformer
 			.description = "Sets the elevation in north-west",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().nw.z),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			},
 		});
 
@@ -130,7 +131,7 @@ namespace terraformer
 			.description = "Sets the elevation in north-east",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().ne.z),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			},
 		});
 
@@ -140,7 +141,7 @@ namespace terraformer
 			.description = "Sets the elevation in south-west",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().sw.z),
-				.value_converter = num_string_converter<float>{}
+				.value_converter = calculator{}
 			},
 		});
 
@@ -150,7 +151,7 @@ namespace terraformer
 			.description = "Sets the elevation in south-east",
 			.widget = numeric_input{
 				.binding = std::ref(params.get().se.z),
-				.value_converter = num_string_converter<float>{},
+				.value_converter = calculator{},
 			},
 		});
 	}
@@ -173,7 +174,7 @@ namespace terraformer
 				.description = "Initial (undamped) amplitude of the generated wave",
 				.widget = numeric_input_log{
 					.binding = std::ref(params.get().initial_amplitude),
-					.value_converter = num_string_converter<float>{}
+					.value_converter = calculator{}
 				}
 			}
 		);
@@ -185,7 +186,7 @@ namespace terraformer
 				.description = "The disntance that halfs the amplitude",
 				.widget = numeric_input_log{
 					.binding = std::ref(params.get().half_distance),
-					.value_converter = num_string_converter<float>{}
+					.value_converter = calculator{}
 				}
 			}
 		);
@@ -218,7 +219,7 @@ namespace terraformer
 			.description = "Sets the modulation depth",
 			.widget = numeric_input{
 					.binding = std::ref(params.get().depth),
-					.value_converter = num_string_converter<float>{}
+					.value_converter = calculator{}
 				}
 		});
 
