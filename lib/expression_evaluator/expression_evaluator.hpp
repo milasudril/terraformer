@@ -41,7 +41,7 @@ namespace terraformer::expression_evaluator
 		auto current_state = parser_state::init;
 
 		std::string buffer;
-		using context_type = decltype(evaluator.create_context(std::declval<std::string>()));
+		using context_type = decltype(evaluator.make_context(std::declval<std::string>()));
 		std::stack<context_type> contexts;
 		context_type* current_context = nullptr;
 		while(ptr != std::end(expression))
@@ -65,7 +65,7 @@ namespace terraformer::expression_evaluator
 					switch(ch_in)
 					{
 						case '(':
-							contexts.push(evaluator.create_context(std::move(buffer)));
+							contexts.push(evaluator.make_context(std::move(buffer)));
 							buffer.clear();
 							current_context = &contexts.top();
 							current_state = parser_state::before_list_item;
@@ -119,14 +119,14 @@ namespace terraformer::expression_evaluator
 					switch(ch_in)
 					{
 						case '(':
-							contexts.push(evaluator.create_context(std::move(buffer)));
+							contexts.push(evaluator.make_context(std::move(buffer)));
 							buffer.clear();
 							current_context = &contexts.top();
 							current_state = parser_state::before_list_item;
 							break;
 
 						case ',':
-							current_context->append_argument(std::move(buffer));
+							current_context->args.push_back(evaluator.make_argument(std::move(buffer)));
 							buffer.clear();
 							current_state = parser_state::before_list_item;
 							break;
@@ -135,7 +135,7 @@ namespace terraformer::expression_evaluator
 						{
 							if(!buffer.empty())
 							{
-								current_context->append_argument(std::move(buffer));
+								current_context->args.push_back(evaluator.make_argument(std::move(buffer)));
 								buffer.clear();
 							}
 							auto res = evaluator.evaluate(*current_context);
@@ -163,14 +163,14 @@ namespace terraformer::expression_evaluator
 					switch(ch_in)
 					{
 						case '(':
-							contexts.push(evaluator.create_context(std::move(buffer)));
+							contexts.push(evaluator.make_context(std::move(buffer)));
 							buffer.clear();
 							current_context = &contexts.top();
 							current_state = parser_state::read_list_item;
 							break;
 
 						case ',':
-							current_context->append_argument(std::move(buffer));
+							current_context->args.push_back(evaluator.make_argument(std::move(buffer)));
 							buffer.clear();
 							current_state = parser_state::read_list_item;
 							break;
@@ -179,7 +179,7 @@ namespace terraformer::expression_evaluator
 						{
 							if(!buffer.empty())
 							{
-								current_context->append_argument(std::move(buffer));
+								current_context->args.push_back(evaluator.make_argument(std::move(buffer)));
 								buffer.clear();
 							}
 							auto res = evaluator.evaluate(*current_context);
@@ -226,7 +226,7 @@ namespace terraformer::expression_evaluator
 					switch(ch_in)
 					{
 						case '(':
-							contexts.push(evaluator.create_context(std::move(buffer)));
+							contexts.push(evaluator.make_context(std::move(buffer)));
 							buffer.clear();
 							current_context = &contexts.top();
 							current_state = parser_state::before_list_item;
@@ -243,10 +243,7 @@ namespace terraformer::expression_evaluator
 		if(!contexts.empty())
 		{ throw input_error{"Unterminated command"}; }
 
-		auto dummy_context = evaluator.create_context("");
-		dummy_context.append_argument(std::move(buffer));
-
-		return parse_result{evaluator.evaluate(dummy_context), ptr};
+		return parse_result{evaluator.make_argument(std::move(buffer)), ptr};
 	}
 }
 

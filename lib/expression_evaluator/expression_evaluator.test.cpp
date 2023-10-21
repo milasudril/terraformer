@@ -10,15 +10,15 @@ namespace
 	{
 		std::string command_name;
 		std::vector<std::string> args;
-
-		void append_argument(std::string&& buffer)
-		{ return args.push_back(std::move(buffer) + "_conv"); }
 	};
 
 	struct context_evalutor
 	{
-		auto create_context(std::string&& command_name)
+		auto make_context(std::string&& command_name)
 		{ return parser_context{std::move(command_name), std::vector<std::string>{}}; }
+
+		auto make_argument(std::string&& buffer)
+		{ return std::move(buffer) + "_conv"; }
 
 		std::string evaluate(parser_context const& ctxt)
 		{
@@ -40,7 +40,7 @@ TESTCASE(terraformer_expression_evaluator_parse_value_only)
 	context_evalutor eval{};
 	std::string_view str{"foobar"};
 	auto const res = terraformer::expression_evaluator::parse(str, eval);
-	EXPECT_EQ(res.result, "[(+foobar_conv)]")
+	EXPECT_EQ(res.result, "foobar_conv")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
 
@@ -49,7 +49,7 @@ TESTCASE(terraformer_expression_evaluator_parse_value_only_leading_whitespace)
 	context_evalutor eval{};
 	std::string_view str{"    foobar"};
 	auto const res = terraformer::expression_evaluator::parse(str, eval);
-	EXPECT_EQ(res.result, "[(+foobar_conv)]")
+	EXPECT_EQ(res.result, "foobar_conv")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
 
@@ -58,7 +58,7 @@ TESTCASE(terraformer_expression_evaluator_parse_value_only_trailing_whitespace)
 	context_evalutor eval{};
 	std::string_view str{"foobar    "};
 	auto const res = terraformer::expression_evaluator::parse(str, eval);
-	EXPECT_EQ(res.result, "[(+foobar_conv)]")
+	EXPECT_EQ(res.result, "foobar_conv")
 	EXPECT_EQ(res.expression_end, std::end(str));
 }
 
