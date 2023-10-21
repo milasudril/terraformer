@@ -73,7 +73,7 @@ namespace terraformer
 		double div(std::span<double const> vals)
 		{
 			if(std::size(vals) != 2)
-			{ throw input_error{"`div` requires exactly two argument"}; }
+			{ throw input_error{"`div` requires exactly two arguments"}; }
 
 			return vals[0]/vals[1];
 		}
@@ -127,7 +127,7 @@ namespace terraformer
 			if(std::size(vals) == 2)
 			{ return std::pow(vals[0], vals[1]); }
 
-			throw input_error{"`exp` requires one or two argument"};
+			throw input_error{"`exp` requires one or two arguments"};
 		}
 
 		double log(std::span<double const> vals)
@@ -138,7 +138,7 @@ namespace terraformer
 			if(std::size(vals) == 2)
 			{ return std::log2(vals[1])/std::log2(vals[0]); }
 
-			throw input_error{"`log` requires one or two argument"};
+			throw input_error{"`log` requires one or two arguments"};
 		}
 
 		double count(std::span<double const> vals)
@@ -147,7 +147,7 @@ namespace terraformer
 		double aritmean(std::span<double const> vals)
 		{
 			if(std::size(vals) == 0)
-			{ throw input_error{"`aritmean` requres at least one argument"}; }
+			{ throw input_error{"`aritmean` requires at least one argument"}; }
 
 			return add(vals)/count(vals);
 		}
@@ -155,7 +155,7 @@ namespace terraformer
 		double geommean(std::span<double const> vals)
 		{
 			if(std::size(vals) == 0)
-			{ throw input_error{"`geommean` requres at least one argument"}; }
+			{ throw input_error{"`geommean` requires at least one argument"}; }
 
 			return std::pow(mul(vals), 1.0/count(vals));
 		}
@@ -163,7 +163,7 @@ namespace terraformer
 		double median(std::vector<double> vals)
 		{
 			if(std::size(vals) == 0)
-			{ throw input_error{"`median` requres at least one argument"}; }
+			{ throw input_error{"`median` requires at least one argument"}; }
 
 			auto const size = std::size(vals);
 			auto const mid = size/2;
@@ -193,7 +193,7 @@ namespace terraformer
 		double rms(std::span<double const> vals)
 		{
 			if(std::size(vals) == 0)
-			{ throw input_error{"`rms` requres at least one argument"}; }
+			{ throw input_error{"`rms` requires at least one argument"}; }
 
 			return norm(vals)/std::sqrt(count(vals));
 		}
@@ -201,7 +201,7 @@ namespace terraformer
 		double fibseq(std::span<double const> vals)
 		{
 			if(std::size(vals) != 1)
-			{ throw input_error{"`fibseq` requres exactly one argument"}; }
+			{ throw input_error{"`fibseq` requires exactly one argument"}; }
 
 			auto const n = vals[0];
 
@@ -211,9 +211,9 @@ namespace terraformer
 		double mersenneseq(std::span<double const> vals)
 		{
 			if(std::size(vals) != 1)
-			{ throw input_error{"`mersenneseq` requres exactly one argument"}; }
+			{ throw input_error{"`mersenneseq` requires exactly one argument"}; }
 
-			return std::exp2(vals[0] - 1.0);
+			return std::exp2(vals[0]) - 1.0;
 		}
 	}
 }
