@@ -4,6 +4,7 @@
 #define TERRAFORMER_CALCULATOR_HPP
 
 #include "lib/expression_evaluator/expression_evaluator.hpp"
+#include "lib/common/utils.hpp"
 
 namespace terraformer
 {
@@ -16,7 +17,8 @@ namespace terraformer
 		};
 
 	public:
-		static std::string convert(float value);
+		static std::string convert(float value)
+		{ return to_string_helper(value); }
 
 		float convert(std::string_view str) const
 		{
