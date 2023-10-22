@@ -17,8 +17,18 @@ namespace terraformer
 
 	struct heightmap
 	{
+		explicit heightmap(domain_resolution const& dom_res,
+			initial_heightmap_description const& hm,
+			random_generator& rng):
+			pixel_storage{dom_res.width, dom_res.height},
+			pixel_size{dom_res.pixel_size},
+			output_range{hm.output_range.min, hm.output_range.max}
+		{ generate(*this, hm, rng); }
+
+
 		grayscale_image pixel_storage;
 		float pixel_size;
+		closed_closed_interval<float> output_range;
 
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
 		{ generate(*this, description, rng); }
@@ -32,20 +42,14 @@ namespace terraformer
 			pixel_size = dom_res.pixel_size;
 			generate(*this, hm, rng);
 		}
+
+		void output_range_updated(initial_heightmap_description const& hm,
+			random_generator& rng)
+		{
+			output_range = closed_closed_interval<float>(hm.output_range.min, hm.output_range.max);
+			generate(*this, hm, rng);
+		}
 	};
-
-	inline heightmap make_heightmap(domain_resolution const& dom_res)
-	{
-		return heightmap{
-			.pixel_storage = grayscale_image{dom_res.width, dom_res.height},
-			.pixel_size = dom_res.pixel_size
-		};
-	}
-
-	inline heightmap make_heightmap(domain_size_description const& dom_size)
-	{
-		return make_heightmap(make_domain_resolution(dom_size));
-	}
 
 	void generate(heightmap& output, initial_heightmap_description const& description, random_generator& rng);
 

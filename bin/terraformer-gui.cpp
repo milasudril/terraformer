@@ -38,10 +38,12 @@ int main(int argc, char** argv)
 {
 
 	terraformer::simulation_description sim{};
-
-	auto initial_heightmap = make_heightmap(sim.domain_size);
 	terraformer::random_generator rng{sim.rng_seed};
-	generate(initial_heightmap, sim.initial_heightmap, rng);
+	terraformer::heightmap initial_heightmap{
+		make_domain_resolution(sim.domain_size),
+		sim.initial_heightmap,
+		rng
+	};
 
 	terraformer::application terraformer{argc, argv};
 	terraformer.setStyleSheet("*{padding:0px; margin:0px}\nQPushButton{padding:4px}");
@@ -82,9 +84,19 @@ int main(int argc, char** argv)
 				goto done;
 			}
 
+			if(field_name.starts_with("simulation_description/initial_heightmap/output_range/"))
+			{
+				temp_heightmap.output_range_updated(sim.initial_heightmap, rng);
+				goto done;
+			}
+
 			fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
 
-			temp_heightmap = make_heightmap(sim.domain_size);
+			temp_heightmap = terraformer::heightmap{
+				make_domain_resolution(sim.domain_size),
+				sim.initial_heightmap,
+				rng
+			};
 			generate(temp_heightmap, sim.initial_heightmap, rng);
 			done:
 			terraformer.post_event([&output, &initial_heightmap, temp_heightmap]() mutable {
