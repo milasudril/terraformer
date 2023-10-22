@@ -69,10 +69,17 @@ int main(int argc, char** argv)
 				&output,
 				&initial_heightmap,
 				&temp_heightmap](){
-			fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
 			terraformer::random_generator rng{sim.rng_seed};
+			if(field_name == "simulation_description/rng_seed")
+			{
+				temp_heightmap.rng_seed_updated(sim.initial_heightmap, rng);
+				goto done;
+			}
+			fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
+
 			temp_heightmap = make_heightmap(sim.domain_size);
 			generate(temp_heightmap, sim.initial_heightmap, rng);
+			done:
 			terraformer.post_event([&output, &initial_heightmap, temp_heightmap]() mutable {
 				initial_heightmap = std::move(temp_heightmap);
 				output.refresh();

@@ -11,10 +11,19 @@
 
 namespace terraformer
 {
+	struct heightmap;
+
+	void generate(heightmap& output, initial_heightmap_description const& description, random_generator& rng);
+
 	struct heightmap
 	{
 		grayscale_image pixel_storage;
 		float pixel_size;
+
+		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
+		{
+			generate(*this, description, rng);
+		}
 	};
 
 	inline heightmap make_heightmap(domain_resolution const& dom_res)
