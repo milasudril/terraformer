@@ -90,6 +90,30 @@ int main(int argc, char** argv)
 				goto done;
 			}
 
+			if(field_name.starts_with("simulation_description/initial_heightmap/corners/"))
+			{
+				temp_heightmap.corners_updated(sim.initial_heightmap, rng);
+				goto done;
+			}
+
+			if(field_name.starts_with("simulation_description/initial_heightmap/main_ridge/"))
+			{
+				temp_heightmap.main_ridge_updated(sim.initial_heightmap, rng);
+				goto done;
+			}
+
+			if(field_name.starts_with("simulation_description/initial_heightmap/ns_distortion"))
+			{
+				temp_heightmap.ns_distortion_updated(sim.initial_heightmap, rng);
+				goto done;
+			}
+
+			if(field_name.starts_with("simulation_description/initial_heightmap/ns_wave/"))
+			{
+				temp_heightmap.ns_wave_updated(sim.initial_heightmap, rng);
+				goto done;
+			}
+
 			fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
 
 			temp_heightmap = terraformer::heightmap{

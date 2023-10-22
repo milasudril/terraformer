@@ -49,6 +49,18 @@ namespace terraformer
 			output_range = closed_closed_interval<float>(hm.output_range.min, hm.output_range.max);
 			generate(*this, hm, rng);
 		}
+
+		void corners_updated(initial_heightmap_description const& description, random_generator& rng)
+		{ generate(*this, description, rng); }
+
+		void main_ridge_updated(initial_heightmap_description const& description, random_generator& rng)
+		{ generate(*this, description, rng); }
+
+		void ns_distortion_updated(initial_heightmap_description const& description, random_generator& rng)
+		{ generate(*this, description, rng); }
+
+		void ns_wave_updated(initial_heightmap_description const& description, random_generator& rng)
+		{ generate(*this, description, rng); }
 	};
 
 	void generate(heightmap& output, initial_heightmap_description const& description, random_generator& rng);
