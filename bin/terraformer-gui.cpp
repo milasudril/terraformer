@@ -114,14 +114,7 @@ int main(int argc, char** argv)
 				goto done;
 			}
 
-			fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
-
-			temp_heightmap = terraformer::heightmap{
-				make_domain_resolution(sim.domain_size),
-				sim.initial_heightmap,
-				rng
-			};
-			generate(temp_heightmap, sim.initial_heightmap, rng);
+			fprintf(stderr, "(x) %s was changed\n", field_name.c_str());
 			done:
 			terraformer.post_event([&output, &initial_heightmap, temp_heightmap]() mutable {
 				initial_heightmap = std::move(temp_heightmap);

@@ -25,9 +25,15 @@ namespace terraformer
 		damped_wave_description const& ns_distortion,
 		random_generator& rng);
 
+	grayscale_image generate(span_2d<float const> u,
+		span_2d<float const> v,
+		float ridge_loc,
+		modulated_damped_wave_description const& ns_wave_desc,
+		random_generator& rng);
+
 	struct heightmap;
 
-	void generate(heightmap& output, initial_heightmap_description const& description, random_generator& rng);
+	void generate(heightmap& output, initial_heightmap_description const& description);
 
 	struct heightmap
 	{
@@ -38,8 +44,9 @@ namespace terraformer
 			pixel_size{dom_res.pixel_size},
 			output_range{hm.output_range.min, hm.output_range.max},
 			ridge_curve{generate(hm.main_ridge, rng, dom_res.width, dom_res.pixel_size)},
-			coords{generate(dom_res.width, dom_res.height, pixel_size, ridge_curve, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_distortion, rng)}
-		{ generate(*this, hm, rng); }
+			coords{generate(dom_res.width, dom_res.height, pixel_size, ridge_curve, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_distortion, rng)},
+			ns_wave{generate(coords.u, coords.v, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_wave, rng)}
+		{ generate(*this, hm); }
 
 
 		grayscale_image pixel_storage;
@@ -49,6 +56,7 @@ namespace terraformer
 		// Cached partial results
 		std::vector<location> ridge_curve;
 		distance_field coords;
+		grayscale_image ns_wave;
 
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
 		{ main_ridge_updated(description, rng); }
@@ -64,14 +72,14 @@ namespace terraformer
 		}
 
 		void output_range_updated(initial_heightmap_description const& hm,
-			random_generator& rng)
+			random_generator&)
 		{
 			output_range = closed_closed_interval<float>(hm.output_range.min, hm.output_range.max);
-			generate(*this, hm, rng);
+			generate(*this, hm);
 		}
 
-		void corners_updated(initial_heightmap_description const& description, random_generator& rng)
-		{ generate(*this, description, rng); }
+		void corners_updated(initial_heightmap_description const& description, random_generator&)
+		{ generate(*this, description); }
 
 		void main_ridge_updated(initial_heightmap_description const& description, random_generator& rng)
 		{
@@ -83,14 +91,18 @@ namespace terraformer
 				static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value),
 				description.ns_distortion,
 				rng);
-			generate(*this, description, rng);
+			ns_wave = generate(coords.u, coords.v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
+			generate(*this, description);
 		}
 
 		void ns_distortion_updated(initial_heightmap_description const& description, random_generator& rng)
 		{ main_ridge_updated(description, rng); }
 
 		void ns_wave_updated(initial_heightmap_description const& description, random_generator& rng)
-		{ generate(*this, description, rng); }
+		{
+			ns_wave = generate(coords.u, coords.v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
+			generate(*this, description);
+		}
 	};
 
 	void generate(heightmap& output, initial_heightmap_description const& description, random_generator& rng);
