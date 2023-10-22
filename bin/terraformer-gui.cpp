@@ -75,6 +75,13 @@ int main(int argc, char** argv)
 				temp_heightmap.rng_seed_updated(sim.initial_heightmap, rng);
 				goto done;
 			}
+
+			if(field_name.starts_with("simulation_description/domain_size/"))
+			{
+				temp_heightmap.domain_size_updated(sim.domain_size, sim.initial_heightmap, rng);
+				goto done;
+			}
+
 			fprintf(stderr, "(i) %s was changed\n", field_name.c_str());
 
 			temp_heightmap = make_heightmap(sim.domain_size);

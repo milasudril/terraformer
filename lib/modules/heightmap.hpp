@@ -21,8 +21,16 @@ namespace terraformer
 		float pixel_size;
 
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
+		{ generate(*this, description, rng); }
+
+		void domain_size_updated(domain_size_description const& dom_size,
+			initial_heightmap_description const& hm,
+			random_generator& rng)
 		{
-			generate(*this, description, rng);
+			auto const dom_res = make_domain_resolution(dom_size);
+			pixel_storage = grayscale_image{dom_res.width, dom_res.height};
+			pixel_size = dom_res.pixel_size;
+			generate(*this, hm, rng);
 		}
 	};
 
