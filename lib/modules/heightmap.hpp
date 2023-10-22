@@ -22,7 +22,8 @@ namespace terraformer
 			random_generator& rng):
 			pixel_storage{dom_res.width, dom_res.height},
 			pixel_size{dom_res.pixel_size},
-			output_range{hm.output_range.min, hm.output_range.max}
+			output_range{hm.output_range.min, hm.output_range.max},
+			ridge_curve{generate(hm.main_ridge, rng, dom_res.width, dom_res.pixel_size)}
 		{ generate(*this, hm, rng); }
 
 
@@ -30,8 +31,10 @@ namespace terraformer
 		float pixel_size;
 		closed_closed_interval<float> output_range;
 
+		std::vector<location> ridge_curve;
+
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
-		{ generate(*this, description, rng); }
+		{ main_ridge_updated(description, rng); }
 
 		void domain_size_updated(domain_size_description const& dom_size,
 			initial_heightmap_description const& hm,
@@ -40,7 +43,7 @@ namespace terraformer
 			auto const dom_res = make_domain_resolution(dom_size);
 			pixel_storage = grayscale_image{dom_res.width, dom_res.height};
 			pixel_size = dom_res.pixel_size;
-			generate(*this, hm, rng);
+			main_ridge_updated(hm, rng);
 		}
 
 		void output_range_updated(initial_heightmap_description const& hm,
@@ -54,7 +57,10 @@ namespace terraformer
 		{ generate(*this, description, rng); }
 
 		void main_ridge_updated(initial_heightmap_description const& description, random_generator& rng)
-		{ generate(*this, description, rng); }
+		{
+			ridge_curve = generate(description.main_ridge, rng, pixel_storage.width(), pixel_size);
+			generate(*this, description, rng);
+		}
 
 		void ns_distortion_updated(initial_heightmap_description const& description, random_generator& rng)
 		{ generate(*this, description, rng); }
