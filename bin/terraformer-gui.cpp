@@ -53,8 +53,8 @@ int main(int argc, char** argv)
 
 	terraformer::form output{nullptr, "result", [](auto&&...){}};
 
-	terraformer::task_receiver<std::function<void()>> processor;
 	auto temp_heightmap = initial_heightmap;
+	terraformer::task_receiver<std::function<void()>> processor;
 	terraformer::form input{nullptr, "simulation_description", [
 			&terraformer,
 			&output,
