@@ -6,28 +6,23 @@
 
 #include "lib/pixel_store/image_io.hpp"
 
-void terraformer::generate(heightmap& hm, initial_heightmap_description const& params, random_generator& rng)
+terraformer::distance_field terraformer::generate(uint32_t width,
+	uint32_t height,
+	float pixel_size,
+	std::span<location const> ridge_curve,
+	float ridge_loc,
+	damped_wave_description const& ns_distortion,
+	random_generator& rng)
 {
-	auto& pixels = hm.pixel_storage;
-	auto const h = pixels.height();
-	auto const w = pixels.width();
-
-	if(h < 2 || w < 2)
-	{ throw std::runtime_error{"Output resolution is too small"}; }
-
-	auto const ridge_curve = std::span{hm.ridge_curve};
-
-	auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
-	auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
-
-	grayscale_image u{w, h};
-	for(uint32_t y = 0; y != h; ++y)
+	auto const y_south =static_cast<float>(height - 1)*pixel_size;
+	grayscale_image u{width, height};
+	for(uint32_t y = 0; y != height; ++y)
 	{
-		for(uint32_t x = 0; x != w; ++x)
+		for(uint32_t x = 0; x != width; ++x)
 		{
 			location const loc{
-				static_cast<float>(x)*hm.pixel_size,
-				static_cast<float>(y)*hm.pixel_size,
+				static_cast<float>(x)*pixel_size,
+				static_cast<float>(y)*pixel_size,
 				0.0f
 			};
 
@@ -50,20 +45,19 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		}
 	}
 
-	grayscale_image v{w, h};
+	grayscale_image v{width, height};
 	{
-		auto const& ns_distortion = params.ns_distortion;
 		fractal_wave const wave{rng, ns_distortion.wave.shape};
 		auto const wavelength = ns_distortion.wave.wave_properties.wavelength;
 		auto const phase = ns_distortion.wave.wave_properties.phase;
 		auto const amplitude = ns_distortion.initial_amplitude;
 		auto const half_distance = ns_distortion.half_distance;
 
-		for(uint32_t y = 0; y != h; ++y)
+		for(uint32_t y = 0; y != height; ++y)
 		{
-			for(uint32_t x = 0; x != w; ++x)
+			for(uint32_t x = 0; x != width; ++x)
 			{
-				auto const x_val = hm.pixel_size*static_cast<float>(x);
+				auto const x_val = pixel_size*static_cast<float>(x);
 				auto const y_val = u(x, y) - ridge_loc;
 				v(x, y) = x_val + amplitude*wave(y_val/wavelength + phase)
 					*std::exp2(std::min(std::abs(y_val)/half_distance, std::max(16.0f - std::log2(amplitude), 0.0f)));
@@ -71,9 +65,26 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		}
 	}
 
-	store(u, "distance_field_u.exr");
-	store(v, "distance_field_v.exr");
+	return distance_field{
+		.u = std::move(u),
+		.v = std::move(v)
+	};
+}
 
+void terraformer::generate(heightmap& hm, initial_heightmap_description const& params, random_generator& rng)
+{
+	auto& pixels = hm.pixel_storage;
+	auto const h = pixels.height();
+	auto const w = pixels.width();
+
+	if(h < 2 || w < 2)
+	{ throw std::runtime_error{"Output resolution is too small"}; }
+
+
+	auto const u = hm.coords.u.pixels();
+	auto const v = hm.coords.v.pixels();
+
+	auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
 	grayscale_image ns_wave_output{w, h};
 	{
 		auto const& ns_wave_desc = params.ns_wave;
@@ -132,6 +143,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	auto const ne_elev = corners.ne.z;
 	auto const sw_elev = corners.sw.z;
 	auto const se_elev = corners.se.z;
+	auto const ridge_curve = std::span{hm.ridge_curve};
+	auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -200,6 +213,6 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			break;
 	}
 
-	store(pixels, "output.exr");
+//	store(pixels, "output.exr");
 }
 

@@ -11,6 +11,20 @@
 
 namespace terraformer
 {
+	struct distance_field
+	{
+		grayscale_image u;
+		grayscale_image v;
+	};
+
+	distance_field generate(uint32_t width,
+		uint32_t height,
+		float pixel_size,
+		std::span<location const> ridge_curve,
+		float ridge_loc,
+		damped_wave_description const& ns_distortion,
+		random_generator& rng);
+
 	struct heightmap;
 
 	void generate(heightmap& output, initial_heightmap_description const& description, random_generator& rng);
@@ -23,7 +37,8 @@ namespace terraformer
 			pixel_storage{dom_res.width, dom_res.height},
 			pixel_size{dom_res.pixel_size},
 			output_range{hm.output_range.min, hm.output_range.max},
-			ridge_curve{generate(hm.main_ridge, rng, dom_res.width, dom_res.pixel_size)}
+			ridge_curve{generate(hm.main_ridge, rng, dom_res.width, dom_res.pixel_size)},
+			coords{generate(dom_res.width, dom_res.height, pixel_size, ridge_curve, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_distortion, rng)}
 		{ generate(*this, hm, rng); }
 
 
@@ -31,7 +46,9 @@ namespace terraformer
 		float pixel_size;
 		closed_closed_interval<float> output_range;
 
+		// Cached partial results
 		std::vector<location> ridge_curve;
+		distance_field coords;
 
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
 		{ main_ridge_updated(description, rng); }
@@ -59,11 +76,18 @@ namespace terraformer
 		void main_ridge_updated(initial_heightmap_description const& description, random_generator& rng)
 		{
 			ridge_curve = generate(description.main_ridge, rng, pixel_storage.width(), pixel_size);
+			coords = generate(pixel_storage.width(),
+				pixel_storage.height(),
+				pixel_size,
+				ridge_curve,
+				static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value),
+				description.ns_distortion,
+				rng);
 			generate(*this, description, rng);
 		}
 
 		void ns_distortion_updated(initial_heightmap_description const& description, random_generator& rng)
-		{ generate(*this, description, rng); }
+		{ main_ridge_updated(description, rng); }
 
 		void ns_wave_updated(initial_heightmap_description const& description, random_generator& rng)
 		{ generate(*this, description, rng); }
