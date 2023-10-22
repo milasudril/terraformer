@@ -6,13 +6,11 @@
 
 #include "lib/pixel_store/image_io.hpp"
 
-terraformer::distance_field terraformer::generate(uint32_t width,
+terraformer::grayscale_image terraformer::generate(uint32_t width,
 	uint32_t height,
 	float pixel_size,
 	std::span<location const> ridge_curve,
-	float ridge_loc,
-	damped_wave_description const& ns_distortion,
-	random_generator& rng)
+	float ridge_loc)
 {
 	auto const y_south =static_cast<float>(height - 1)*pixel_size;
 	grayscale_image u{width, height};
@@ -44,7 +42,17 @@ terraformer::distance_field terraformer::generate(uint32_t width,
 			u(x, y) = side < 0.0f? ridge_loc*val : val*ridge_loc + y_south*(1.0f - val);
 		}
 	}
+	return u;
+}
 
+terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
+	float pixel_size,
+	float ridge_loc,
+	damped_wave_description const& ns_distortion,
+	random_generator& rng)
+{
+	auto const width = u.width();
+	auto const height = u.height();
 	grayscale_image v{width, height};
 	{
 		fractal_wave const wave{rng, ns_distortion.wave.shape};
@@ -65,10 +73,7 @@ terraformer::distance_field terraformer::generate(uint32_t width,
 		}
 	}
 
-	return distance_field{
-		.u = std::move(u),
-		.v = std::move(v)
-	};
+	return v;
 }
 
 terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
@@ -141,7 +146,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	{ throw std::runtime_error{"Output resolution is too small"}; }
 
 
-	auto const u = hm.coords.u.pixels();
+	auto const u = hm.u.pixels();
 	auto const ns_wave_output = hm.ns_wave.pixels();
 
 	auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);

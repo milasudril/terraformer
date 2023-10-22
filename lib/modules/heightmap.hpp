@@ -17,10 +17,14 @@ namespace terraformer
 		grayscale_image v;
 	};
 
-	distance_field generate(uint32_t width,
+	grayscale_image generate(uint32_t width,
 		uint32_t height,
 		float pixel_size,
 		std::span<location const> ridge_curve,
+		float ridge_loc);
+
+	grayscale_image generate(span_2d<float const> u,
+		float pixel_size,
 		float ridge_loc,
 		damped_wave_description const& ns_distortion,
 		random_generator& rng);
@@ -44,8 +48,9 @@ namespace terraformer
 			pixel_size{dom_res.pixel_size},
 			output_range{hm.output_range.min, hm.output_range.max},
 			ridge_curve{generate(hm.main_ridge, rng, dom_res.width, dom_res.pixel_size)},
-			coords{generate(dom_res.width, dom_res.height, pixel_size, ridge_curve, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_distortion, rng)},
-			ns_wave{generate(coords.u, coords.v, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_wave, rng)}
+			u{generate(dom_res.width, dom_res.height, pixel_size, ridge_curve, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value))},
+			v{generate(u.pixels(), pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_distortion, rng)},
+			ns_wave{generate(u, v, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_wave, rng)}
 		{ generate(*this, hm); }
 
 
@@ -55,7 +60,8 @@ namespace terraformer
 
 		// Cached partial results
 		std::vector<location> ridge_curve;
-		distance_field coords;
+		grayscale_image u;
+		grayscale_image v;
 		grayscale_image ns_wave;
 
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
@@ -84,28 +90,25 @@ namespace terraformer
 		void main_ridge_updated(initial_heightmap_description const& description, random_generator& rng)
 		{
 			ridge_curve = generate(description.main_ridge, rng, pixel_storage.width(), pixel_size);
-			coords = generate(pixel_storage.width(),
-				pixel_storage.height(),
-				pixel_size,
-				ridge_curve,
-				static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value),
-				description.ns_distortion,
-				rng);
-			ns_wave = generate(coords.u, coords.v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
+			u = generate(pixel_storage.width(), pixel_storage.height(), pixel_size, ridge_curve, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value));
+			v = generate(u.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_distortion, rng);
+			ns_wave = generate(u, v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
 			generate(*this, description);
 		}
 
 		void ns_distortion_updated(initial_heightmap_description const& description, random_generator& rng)
-		{ main_ridge_updated(description, rng); }
+		{
+			v = generate(u.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_distortion, rng);
+			ns_wave = generate(u, v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
+			generate(*this, description);
+		}
 
 		void ns_wave_updated(initial_heightmap_description const& description, random_generator& rng)
 		{
-			ns_wave = generate(coords.u, coords.v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
+			ns_wave = generate(u, v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
 			generate(*this, description);
 		}
 	};
-
-	void generate(heightmap& output, initial_heightmap_description const& description, random_generator& rng);
 
 	template<class Form, class T>
 	requires(std::is_same_v<std::remove_cvref_t<T>, heightmap>)
