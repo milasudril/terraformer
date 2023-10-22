@@ -62,6 +62,30 @@ namespace terraformer
 		ridge_curve_description<elevation, vertical_amplitude> ridge_curve_xz;
 	};
 
+	inline std::vector<location> generate(main_ridge_description const& params,
+		random_generator& rng,
+		uint32_t num_pixels,
+		float dx)
+	{
+		auto const ay = params.ridge_curve_xy.amplitude;
+		auto const az = params.ridge_curve_xz.amplitude;
+		return generate(rng,
+			params.ridge_curve_xy.wave,
+			output_range{-ay, ay},
+			params.ridge_curve_xz.wave,
+			output_range{-az, az},
+				polyline_location_params{
+				.point_count = num_pixels,
+				.dx = dx,
+				.start_location = terraformer::location{
+					0.0f,
+					static_cast<float>(params.ridge_curve_xy.initial_value),
+					static_cast<float>(params.ridge_curve_xz.initial_value)
+				}
+			}
+		);
+	}
+
 	template<class Form, class T>
 	requires(std::is_same_v<std::remove_cvref_t<T>, main_ridge_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
