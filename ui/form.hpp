@@ -189,7 +189,9 @@ namespace terraformer
 	public:
 		explicit topographic_map_view_map_view(QWidget* parent);
 
-		void upload(std::reference_wrapper<grayscale_image const> img, float pixel_size);
+		void upload(std::reference_wrapper<grayscale_image const> img,
+			float pixel_size,
+			std::ranges::minmax_result<float> valid_range);
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
 		{
@@ -202,7 +204,7 @@ namespace terraformer
 
 	private:
 		void showEvent(QShowEvent*) override
-		{ upload(*m_heightmap, m_pixel_size); }
+		{ upload(*m_heightmap, m_pixel_size, m_valid_range); }
 
 		std::unique_ptr<QHBoxLayout> m_root;
 		std::vector<rgba_pixel> m_colormap;
@@ -211,6 +213,7 @@ namespace terraformer
 		grayscale_image const* m_heightmap;
 		float m_render_scale;
 		float m_pixel_size;
+		std::ranges::minmax_result<float> m_valid_range;
 	};
 
 	class topographic_map_xsection_diagram:public QWidget
@@ -244,7 +247,9 @@ namespace terraformer
 			set_colormap(ground_depth_colormap);
 		}
 
-		void upload(grayscale_image const& img, float pixel_size);
+		void upload(grayscale_image const& img,
+			float pixel_size,
+			std::ranges::minmax_result<float> valid_range);
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
 		{
@@ -292,10 +297,10 @@ namespace terraformer
 			m_root->addWidget(m_we_view.get());
 		}
 
-		void upload(grayscale_image const& img, float pixel_size)
+		void upload(grayscale_image const& img, float pixel_size, std::ranges::minmax_result<float> valid_range)
 		{
-			m_ns_view->upload(img, pixel_size);
-			m_we_view->upload(img, pixel_size);
+			m_ns_view->upload(img, pixel_size, valid_range);
+			m_we_view->upload(img, pixel_size, valid_range);
 		}
 
 		void redraw_colorbar()
@@ -325,10 +330,12 @@ namespace terraformer
 			m_tabs->addTab(m_crossection, "Cross-sections");
 		}
 
-		void upload(std::reference_wrapper<grayscale_image const> img, float pixel_size)
+		void upload(std::reference_wrapper<grayscale_image const> img,
+			float pixel_size,
+			std::ranges::minmax_result<float> valid_range)
 		{
-			m_map->upload(img, pixel_size);
-			m_crossection->upload(img, pixel_size);
+			m_map->upload(img, pixel_size, valid_range);
+			m_crossection->upload(img, pixel_size, valid_range);
 		}
 
 		void set_colormap(std::span<rgba_pixel const> colormap)
@@ -620,15 +627,23 @@ namespace terraformer
 			return ret;
 		}
 
-		template<class PixelSizeType, class HeightmapType>
-		std::unique_ptr<topographic_map_renderer> create_widget(topographic_map_view<PixelSizeType, HeightmapType>&& view,
+		template<class PixelSizeType, class HeightmapType, class RangeType>
+		std::unique_ptr<topographic_map_renderer> create_widget(topographic_map_view<PixelSizeType, HeightmapType, RangeType>&& view,
 			QWidget& parent,
 			char const* field_name)
 		{
 			auto ret = std::make_unique<topographic_map_renderer>(&parent);
-			m_display_callbacks.push_back([&dest = *ret, pixels = view.heightmap, pixel_size = view.pixel_size](){
-				// TODO: Avoid uploading pixels if nothing has been changed since last update
-				dest.upload(pixels, pixel_size);
+			m_display_callbacks.push_back([&dest = *ret,
+				pixels = view.heightmap,
+				pixel_size = view.pixel_size,
+				valid_range = view.valid_range](){
+				dest.upload(pixels,
+					pixel_size,
+					std::ranges::minmax_result{
+						.min = static_cast<float>(valid_range.get().min()),
+						.max = static_cast<float>(valid_range.get().max())
+					}
+				);
 				dest.redraw_colorbar();
 			});
 			ret->setObjectName(field_name);

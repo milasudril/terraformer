@@ -67,11 +67,12 @@ namespace terraformer
 		BindingType binding;
 	};
 
-	template<class PixelSizeType, class HeightmapType>
+	template<class PixelSizeType, class HeightmapType, class RangeType>
 	struct topographic_map_view
 	{
 		PixelSizeType pixel_size;
 		HeightmapType heightmap;
+		RangeType valid_range;
 	};
 
 	template<class BindingType, class Converter, class LabelContainer>

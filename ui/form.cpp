@@ -155,7 +155,8 @@ terraformer::topographic_map_view_map_view::topographic_map_view_map_view(QWidge
 
 void terraformer::topographic_map_view_map_view::upload(
 	std::reference_wrapper<grayscale_image const> img,
-	float pixel_size)
+	float pixel_size,
+	std::ranges::minmax_result<float>)
 {
 	m_heightmap = &img.get();
 	m_pixel_size = pixel_size;
@@ -219,7 +220,9 @@ void terraformer::topographic_map_view_map_view::upload(
 	m_image_view->update();
 }
 
-void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const& img, float pixel_size)
+void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const& img,
+	float pixel_size,
+	std::ranges::minmax_result<float> valid_range)
 {
 	auto const domain_width = pixel_size*static_cast<float>(img.width());
 	auto const domain_height = pixel_size*static_cast<float>(img.height());
@@ -290,22 +293,9 @@ void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const
 			(m_axis_dir == axis_direction::north_to_south? static_cast<float>(img.height()):
 			static_cast<float>(img.width()));
 
-		// FIXME: Make it possible to adjust "upper ceiling"
-		upper_ceiling->append(0.0f, 8704.0f);
-		upper_ceiling->append(l, 8704.0f);
+		upper_ceiling->append(0.0f, valid_range.max);
+		upper_ceiling->append(l, valid_range.max);
 		chart->addSeries(upper_ceiling);
-	}
-
-	{
-		auto ceiling = new QtCharts::QLineSeries;
-		auto const l = pixel_size*
-			(m_axis_dir == axis_direction::north_to_south? static_cast<float>(img.height()):
-			static_cast<float>(img.width()));
-
-		// FIXME: Make it possible to adjust "ceiling"
-		ceiling->append(0.0f, 8192.0f);
-		ceiling->append(l, 8192.0f);
-		chart->addSeries(ceiling);
 	}
 
 	{
@@ -314,16 +304,16 @@ void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const
 			(m_axis_dir == axis_direction::north_to_south? static_cast<float>(img.height()):
 			static_cast<float>(img.width()));
 
-		// FIXME: Make it possible to adjust "floor"
-		floor->append(0.0f, 512.0f);
-		floor->append(l, 512.0f);
+		floor->append(0.0f, valid_range.min);
+		floor->append(l, valid_range.min);
 		chart->addSeries(floor);
 	}
 
 	chart->createDefaultAxes();
 	auto y_axis = chart->axes(Qt::Vertical).front();
 	y_axis->setTitleText("Elevation");
-	y_axis->setRange(0.0f, 8192.0f + 2048.0f);
+	auto const dz = valid_range.max - valid_range.min;
+	y_axis->setRange(valid_range.min - dz/8.0f, valid_range.max+dz/8.0f);
 	if(m_axis_dir == axis_direction::north_to_south)
 	{ chart->axes(Qt::Horizontal).front()->setTitleText("North ⟷ South"); }
 	else

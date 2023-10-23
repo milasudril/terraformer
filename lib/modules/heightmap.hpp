@@ -157,7 +157,8 @@ namespace terraformer
 				.description = "Shows the initial heightmap",
 				.widget = topographic_map_view{
 					.pixel_size = std::ref(heightmap.get().pixel_size),
-					.heightmap = std::ref(heightmap.get().pixel_storage)
+					.heightmap = std::ref(heightmap.get().pixel_storage),
+					.valid_range = std::ref(heightmap.get().output_range)
 				}
 			}
 		);
