@@ -64,3 +64,36 @@ TESTCASE(terraformer_round_to_n_digits)
 		EXPECT_EQ(res, 1024.0f);
 	}
 }
+
+TESTCASE(teraformer_round_to_odd)
+{
+	{
+		auto res = terraformer::round_to_odd(0.0f);
+		EXPECT_EQ(res, 1);
+	}
+
+	{
+		auto res = terraformer::round_to_odd(0.5f);
+		EXPECT_EQ(res, 1);
+	}
+
+	{
+		auto res = terraformer::round_to_odd(1.5f);
+		EXPECT_EQ(res, 1);
+	}
+
+	{
+		auto res = terraformer::round_to_odd(2.0f);
+		EXPECT_EQ(res, 3);
+	}
+
+	{
+		auto res = terraformer::round_to_odd(2.5f);
+		EXPECT_EQ(res, 3);
+	}
+
+	{
+		auto res = terraformer::round_to_odd(3.0f);
+		EXPECT_EQ(res, 3);
+	}
+}
