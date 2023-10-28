@@ -102,9 +102,15 @@ int main(int argc, char** argv)
 				goto done;
 			}
 
-			if(field_name.starts_with("simulation_description/initial_heightmap/ns_distortion"))
+			if(field_name.starts_with("simulation_description/initial_heightmap/ns_distortion/"))
 			{
 				temp_heightmap.ns_distortion_updated(sim.initial_heightmap, rng);
+				goto done;
+			}
+
+			if(field_name.starts_with("simulation_description/initial_heightmap/bump_field/"))
+			{
+				temp_heightmap.bump_field_updated(sim.initial_heightmap, rng);
 				goto done;
 			}
 

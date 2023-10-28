@@ -296,6 +296,7 @@ namespace terraformer
 		struct corners corners;
 		main_ridge_description main_ridge;
 		damped_wave_description ns_distortion;
+		bump_field_description bump_field;
 		modulated_damped_wave_description ns_wave;
 	};
 
@@ -340,9 +341,20 @@ namespace terraformer
 			field{
 				.name = "ns_distortion",
 				.display_name = "North-south distortion",
-				.description = "Controls properites north-south distortion",
+				.description = "Controls properties north-south distortion",
 				.widget = subform{
 					.binding = std::ref(params.get().ns_distortion)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "bump_field",
+				.display_name = "Bumpfield",
+				.description = "Controls properties the bump field",
+				.widget = subform{
+					.binding = std::ref(params.get().bump_field)
 				}
 			}
 		);

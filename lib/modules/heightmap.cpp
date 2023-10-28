@@ -136,6 +136,33 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	return ns_wave_output;
 }
 
+terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
+	span_2d<float const> v,
+	float ridge_loc,
+	bump_field_description const& bump_field_desc,
+	random_generator& rng)
+{
+	auto const w = u.width();
+	auto const h = u.height();
+	grayscale_image bump_field{w, h};
+	auto const lambda_x = bump_field_desc.wave_properties_x.wavelength;
+	auto const phase_x = bump_field_desc.wave_properties_x.phase;
+	auto const lambda_y = bump_field_desc.wave_properties_y.wavelength;
+	auto const phase_y = bump_field_desc.wave_properties_y.phase;
+
+	bump_field_generator gen{rng, bump_field_desc.shape};
+	for(uint32_t y = 0; y != h; ++y)
+	{
+		for(uint32_t x = 0; x != w; ++x)
+		{
+			auto const y_val = u(x, y) - ridge_loc;
+			auto const x_val = v(x, y);
+			bump_field(x, y) = gen(x_val/lambda_x - phase_x, y_val/lambda_y + phase_y);
+		}
+	}
+	return bump_field;
+}
+
 void terraformer::generate(heightmap& hm, initial_heightmap_description const& params)
 {
 	auto& pixels = hm.pixel_storage;
@@ -151,37 +178,39 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 	auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
 
-	auto const& corners = params.corners;
-	auto const nw_elev = corners.nw.z;
-	auto const ne_elev = corners.ne.z;
-	auto const sw_elev = corners.sw.z;
-	auto const se_elev = corners.se.z;
-	auto const ridge_curve = std::span{hm.ridge_curve};
-	auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
-
-	for(uint32_t y = 0; y != h; ++y)
 	{
-		for(uint32_t x = 0; x != w; ++x)
+		auto const& corners = params.corners;
+		auto const nw_elev = corners.nw.z;
+		auto const ne_elev = corners.ne.z;
+		auto const sw_elev = corners.sw.z;
+		auto const se_elev = corners.se.z;
+		auto const ridge_curve = std::span{hm.ridge_curve};
+		auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
+
+		for(uint32_t y = 0; y != h; ++y)
 		{
-			auto const xi = static_cast<float>(x)/static_cast<float>(w - 1);
-			auto const eta = static_cast<float>(y)/static_cast<float>(h - 1);
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				auto const xi = static_cast<float>(x)/static_cast<float>(w - 1);
+				auto const eta = static_cast<float>(y)/static_cast<float>(h - 1);
 
-			auto const north = std::lerp(nw_elev, ne_elev, xi);
-			auto const south = std::lerp(sw_elev, se_elev, xi);
+				auto const north = std::lerp(nw_elev, ne_elev, xi);
+				auto const south = std::lerp(sw_elev, se_elev, xi);
 
-			auto const ridge_loc_z = ridge_curve[x][2];
+				auto const ridge_loc_z = ridge_curve[x][2];
 
-			auto const yf = static_cast<float>(y)*hm.pixel_size;
-			auto const y_curve = ridge_curve[x][1];
-			auto const side = yf - y_curve;
-			auto const bump_param = side < 0.0f? u(x, y)/ridge_loc :
-				(u(x, y) - y_south)/(ridge_loc - y_south);
+				auto const yf = static_cast<float>(y)*hm.pixel_size;
+				auto const y_curve = ridge_curve[x][1];
+				auto const side = yf - y_curve;
+				auto const bump_param = side < 0.0f? u(x, y)/ridge_loc :
+					(u(x, y) - y_south)/(ridge_loc - y_south);
 
-			auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
+				auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
 
-			auto const base_elevation = std::lerp(north, south, eta);
-			pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump)
-				+ ns_wave_output(x, y);
+				auto const base_elevation = std::lerp(north, south, eta);
+				pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump)
+					+ ns_wave_output(x, y) + 4096.0f*hm.bump_field(x, y);
+			}
 		}
 	}
 

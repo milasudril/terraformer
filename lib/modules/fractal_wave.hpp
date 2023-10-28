@@ -6,9 +6,11 @@
 #include "./polyline.hpp"
 #include "./dimensions.hpp"
 #include "./calculator.hpp"
+#include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/common/output_range.hpp"
 #include "lib/formbuilder/formfield.hpp"
+#include "lib/pixel_store/image.hpp"
 
 #include <numbers>
 #include <random>
@@ -124,13 +126,6 @@ namespace terraformer
 		});
 	}
 
-	struct wave_component
-	{
-		float amplitude;
-		float wavelength;
-		float phase;
-	};
-
 	class fractal_wave
 	{
 	public:
@@ -181,6 +176,13 @@ namespace terraformer
 		{ return (generate_unnormalized(x) - m_offset)/m_amplitude; }
 
 	private:
+		struct wave_component
+		{
+			float amplitude;
+			float wavelength;
+			float phase;
+		};
+
 		float generate_unnormalized(float x) const
 		{
 			auto sum = 0.0f;
@@ -191,7 +193,7 @@ namespace terraformer
 				auto const wavelength = m_components[k - 1].wavelength;
 				auto const phase = m_components[k - 1].phase;
 
-				sum += amplitude*approx_sine(twopi*(x/wavelength - phase + 0.25f));
+				sum += amplitude*approx_sine(twopi*(x/wavelength + phase + 0.25f));
 			}
 			return sum;
 		}
@@ -308,6 +310,210 @@ namespace terraformer
 			wave_params_xz.wave_properties,
 			xz_output_range,
 			std::forward<Params>(params)...);
+	}
+
+
+	class bump_field_generator
+	{
+	public:
+		struct params
+		{
+			fractal_wave::params x;
+			fractal_wave::params y;
+		};
+
+		static auto compute_number_of_waves(fractal_wave::params const& params)
+		{
+			auto const k_amp = 14.0f/std::log2(params.amplitude.factor);
+			auto const k_lambda = 14.0f/std::log2(params.wavelength.factor);
+			auto const k_max = 8.0f;
+
+			return round_to_odd(std::max(std::min(k_max, std::min(k_amp, k_lambda)), 3.0f));
+		}
+
+		static auto compute_number_of_waves(params const& params)
+		{
+			auto size_x = compute_number_of_waves(params.x);
+			auto size_y = compute_number_of_waves(params.y);
+
+			return std::max(size_x, size_y);
+		}
+
+		template<class Rng>
+		static auto get_scale(Rng&& rng, displacement r, scaling scale, displacement noise_amount)
+		{
+			std::uniform_real_distribution U{-0.5f, 0.5f};
+			return std::exp2(-norm((r + noise_amount.apply(scaling{U(rng), U(rng), 0.0f})).apply(scale)));
+		}
+
+		template<class Rng>
+		static auto get_shift(Rng&& rng, displacement r, scaling offset, displacement noise_amount)
+		{
+			std::uniform_real_distribution U{-0.5f, 0.5f};
+			return norm(r.apply(offset) + noise_amount.apply(scaling{U(rng), U(rng), 0.0f}));
+		}
+
+		template<class Rng>
+		explicit bump_field_generator(Rng&& rng, params const& params):
+			m_size{compute_number_of_waves(params)},
+			m_components{std::make_unique_for_overwrite<wave_component[]>(m_size*m_size)}
+		{
+			auto const size = static_cast<int32_t>(m_size);
+			auto const mid = 0;
+			size_t index = 0;
+			auto const n = m_size*m_size;
+
+			scaling const amp_scale{
+				std::log2(params.x.amplitude.factor),
+				std::log2(params.y.amplitude.factor),
+				std::log2(1.0f)
+			};
+
+			displacement const amp_noise{
+				static_cast<float>(params.x.amplitude.scaling_noise),
+				static_cast<float>(params.y.amplitude.scaling_noise),
+				0.0f
+			};
+
+			scaling const wavelength_scale{
+				std::log2(params.x.wavelength.factor),
+				std::log2(params.y.wavelength.factor),
+				std::log2(1.0f)
+			};
+
+			displacement const wavelength_noise{
+				static_cast<float>(params.x.wavelength.scaling_noise),
+				static_cast<float>(params.y.wavelength.scaling_noise),
+				0.0f
+			};
+
+			scaling const phase_shift{
+				static_cast<float>(params.x.phase.offset),
+				static_cast<float>(params.y.phase.offset),
+				0.0f
+			};
+
+			displacement const phase_shift_noise{
+				static_cast<float>(params.x.phase.offset_noise),
+				static_cast<float>(params.y.phase.offset_noise),
+				0.0f
+			};
+
+			for(int32_t k = 0; k != size; ++k)
+			{
+				for(int32_t l = 0; l != size; ++l)
+				{
+					auto const r = displacement{
+						static_cast<float>(l - mid),
+						static_cast<float>(k - mid),
+						0.0f
+					};
+
+					m_components[index] = wave_component{
+						.amplitude = get_scale(rng, r, amp_scale, amp_noise),
+						.wavelength = get_scale(rng, r, wavelength_scale, wavelength_noise),
+						.phase = get_shift(rng, r, phase_shift, phase_shift_noise),
+					};
+
+					++index;
+				}
+			}
+
+			std::sort(m_components.get(), m_components.get() + n, [](auto const& a, auto const& b){
+				return a.amplitude < b.amplitude;
+			});
+		}
+
+		float operator()(float x, float y) const
+		{
+			constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
+			auto sum = 0.0f;
+			auto const n = m_size*m_size - 1;
+
+			for(size_t k = 0; k != n; ++k)
+			{
+				auto const& component = m_components[k];
+				sum += component.amplitude*approx_sine(twopi*(x/component.wavelength + component.phase + 0.25f))
+					*approx_sine(twopi*(y/component.wavelength + component.phase + 0.25f));
+			}
+
+			return sum/static_cast<float>(n);
+		}
+
+	private:
+
+		struct wave_component
+		{
+			float amplitude;
+			float wavelength;
+			float phase;
+		};
+
+		size_t m_size;
+		std::unique_ptr<wave_component[]> m_components;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, bump_field_generator::params>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "x",
+			.display_name = "x",
+			.description = "Controls the shape of the x wave",
+			.widget = subform{
+				.binding = std::ref(params.get().x)
+			}
+		});
+
+		form.insert(field{
+			.name = "y",
+			.display_name = "y",
+			.description = "Controls the shape of the y wave",
+			.widget = subform{
+				.binding = std::ref(params.get().y)
+			}
+		});
+	}
+
+
+	struct bump_field_description
+	{
+		bump_field_generator::params shape;
+		wave_params wave_properties_x;
+		wave_params wave_properties_y;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, bump_field_description>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "wave_properties_x",
+			.display_name = "Wave properties x",
+			.description = "Controls the total wave in x direction",
+			.widget = subform{
+				.binding = std::ref(params.get().wave_properties_x)
+			}
+		});
+
+		form.insert(field{
+			.name = "wave_properties_y",
+			.display_name = "Wave properties y",
+			.description = "Controls the total wave in y direction",
+			.widget = subform{
+				.binding = std::ref(params.get().wave_properties_y)
+			}
+		});
+
+		form.insert(field{
+			.name = "shape",
+			.display_name = "Shape",
+			.description = "Controls the progression of individual wave components",
+			.widget = subform{
+				.binding = std::ref(params.get().shape)
+			}
+		});
 	}
 }
 
