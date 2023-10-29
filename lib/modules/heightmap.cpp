@@ -194,13 +194,12 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	if(h < 2 || w < 2)
 	{ throw std::runtime_error{"Output resolution is too small"}; }
 
-
-	auto const u = hm.u.pixels();
-	auto const ns_wave_output = hm.ns_wave.pixels();
-
-	auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
-
 	{
+		auto const u = hm.u.pixels();
+		auto const ns_wave_output = hm.ns_wave.pixels();
+		auto const bump_field_output = hm.bump_field.pixels();
+		auto const bump_field_amplitude = params.bump_field.amplitude;
+		auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
 		auto const& corners = params.corners;
 		auto const nw_elev = corners.nw.z;
 		auto const ne_elev = corners.ne.z;
@@ -231,7 +230,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 				auto const base_elevation = std::lerp(north, south, eta);
 				pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump)
-					+ ns_wave_output(x, y) + 4096.0f*hm.bump_field(x, y);
+					+ ns_wave_output(x, y)
+					+ bump_field_amplitude*bump_field_output(x, y);
 			}
 		}
 	}

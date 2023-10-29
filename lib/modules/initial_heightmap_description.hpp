@@ -290,13 +290,47 @@ namespace terraformer
 		);
 	}
 
+	struct bump_field_description
+	{
+		vertical_amplitude amplitude;
+		fractal_wave_description_2d wave;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, bump_field_description>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(
+			field{
+				.name = "amplitude",
+				.display_name = "Amplitude",
+				.description = "Sets the amplitude of the generated wave function",
+				.widget = numeric_input_log{
+					.binding = std::ref(params.get().amplitude),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "wave",
+				.display_name = "Wave parameters",
+				.description = "Sets different parameters for the wave function",
+				.widget = subform{
+					.binding = std::ref(params.get().wave)
+				}
+			}
+		);
+	}
+
 	struct initial_heightmap_description
 	{
 		elevation_range_control output_range;
 		struct corners corners;
 		main_ridge_description main_ridge;
 		damped_wave_description ns_distortion;
-		fractal_wave_description_2d bump_field;
+		bump_field_description bump_field;
 		modulated_damped_wave_description ns_wave;
 	};
 
