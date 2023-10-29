@@ -296,7 +296,7 @@ namespace terraformer
 		struct corners corners;
 		main_ridge_description main_ridge;
 		damped_wave_description ns_distortion;
-		bump_field_description bump_field;
+		fractal_wave_description_2d bump_field;
 		modulated_damped_wave_description ns_wave;
 	};
 

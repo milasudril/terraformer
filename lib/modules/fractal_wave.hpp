@@ -312,14 +312,14 @@ namespace terraformer
 			std::forward<Params>(params)...);
 	}
 
-	struct bump_field_description
+	struct fractal_wave_description_2d
 	{
 		fractal_wave_description x_wave;
 		fractal_wave_description y_wave;
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, bump_field_description>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, fractal_wave_description_2d>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{

@@ -139,7 +139,7 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	span_2d<float const> v,
 	float ridge_loc,
-	bump_field_description const& bump_field_desc,
+	fractal_wave_description_2d const& bump_field_desc,
 	random_generator& rng)
 {
 	auto const w = u.width();
