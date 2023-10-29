@@ -389,6 +389,12 @@ namespace terraformer
 				0.0f
 			};
 
+			displacement const phase_offset_noise{
+				static_cast<float>(params.x.phase.offset_noise),
+				static_cast<float>(params.y.phase.offset_noise),
+				0.0f
+			};
+
 			std::uniform_real_distribution U{-0.5f, 0.5f};
 
 			for(int32_t k = 0; k != size; ++k)
@@ -420,7 +426,7 @@ namespace terraformer
 							)
 						),
 						.wave_vector = wave_vector,
-						.phase = norm(r.apply(phase_offset))
+						.phase = norm(r.apply(phase_offset) + phase_offset_noise.apply(scaling{U(rng), U(rng), 0.0f}))
 					};
 
 					++index;
