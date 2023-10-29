@@ -458,7 +458,7 @@ namespace terraformer
 					+approx_sine(twopi*(inner_product(vec, q4) + component.phase + 0.25f))
 				);
 			}
-			return sum;
+			return sum/static_cast<float>(n);
 		}
 
 	private:
