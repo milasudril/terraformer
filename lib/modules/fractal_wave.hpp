@@ -447,19 +447,18 @@ namespace terraformer
 			for(size_t k = 0; k != n; ++k)
 			{
 				auto const& component = m_components[k];
-				auto const k1 = component.wave_vector;
-				auto const k2 = component.wave_vector.apply(scaling{-1.0f, 1.0f, 1.0f});
-				auto const k3 = component.wave_vector.apply(scaling{1.0f, -1.0f, 1.0f});
-				auto const k4 = component.wave_vector.apply(scaling{-1.0f, -1.0f ,1.0f});
+				auto const q1 = component.wave_vector;
+				auto const q2 = component.wave_vector.apply(scaling{-1.0f, 1.0f, 1.0f});
+				auto const q3 = component.wave_vector.apply(scaling{-1.0f, -1.0f ,1.0f});
+				auto const q4 = component.wave_vector.apply(scaling{1.0f, -1.0f, 1.0f});
 				sum += component.amplitude*(
-					 approx_sine(twopi*(inner_product(vec, k1) + component.phase + 0.25f))
-					+approx_sine(twopi*(inner_product(vec, k2) + component.phase + 0.25f))
-					+approx_sine(twopi*(inner_product(vec, k3) + component.phase + 0.25f))
-					+approx_sine(twopi*(inner_product(vec, k4) + component.phase + 0.25f))
+					 approx_sine(twopi*(inner_product(vec, q1) + component.phase + 0.25f))
+					+approx_sine(twopi*(inner_product(vec, q2) + component.phase + 0.25f))
+					+approx_sine(twopi*(inner_product(vec, q3) + component.phase + 0.25f))
+					+approx_sine(twopi*(inner_product(vec, q4) + component.phase + 0.25f))
 				);
 			}
-
-			return sum/static_cast<float>(n);
+			return sum;
 		}
 
 	private:
