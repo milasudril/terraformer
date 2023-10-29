@@ -153,7 +153,8 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	bump_field_generator gen{rng,
 		bump_field_generator::params{
 			.x = bump_field_desc.x_wave.shape,
-			.y = bump_field_desc.y_wave.shape
+			.y = bump_field_desc.y_wave.shape,
+			.symmetry = bump_field_desc.symmetry
 		}
 	};
 	auto min = 2.0f;
@@ -276,5 +277,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			);
 			break;
 	}
+
+	store(hm.pixel_storage, "output.exr");
 }
 

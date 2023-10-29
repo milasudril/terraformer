@@ -312,10 +312,53 @@ namespace terraformer
 			std::forward<Params>(params)...);
 	}
 
+	struct fractal_wave_2d_quadrant_weights
+	{
+		blend_value q2;
+		blend_value q3;
+		blend_value q4;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, fractal_wave_2d_quadrant_weights>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "q2",
+			.display_name = "Q2",
+			.description = "Intensity of Q2 point",
+			.widget = numeric_input{
+				.binding = std::ref(params.get().q2),
+				.value_converter = calculator{}
+			}
+		});
+
+		form.insert(field{
+			.name = "q3",
+			.display_name = "Q3",
+			.description = "Intensity of Q3 point",
+			.widget = numeric_input{
+				.binding = std::ref(params.get().q3),
+				.value_converter = calculator{}
+			}
+		});
+
+		form.insert(field{
+			.name = "q4",
+			.display_name = "Q4",
+			.description = "Intensity of Q4 point",
+			.widget = numeric_input{
+				.binding = std::ref(params.get().q4),
+				.value_converter = calculator{}
+			}
+		});
+	}
+
 	struct fractal_wave_description_2d
 	{
 		fractal_wave_description x_wave;
 		fractal_wave_description y_wave;
+		fractal_wave_2d_quadrant_weights symmetry;
 	};
 
 	template<class Form, class T>
@@ -339,15 +382,26 @@ namespace terraformer
 				.binding = std::ref(params.get().y_wave)
 			}
 		});
+
+		form.insert(field{
+			.name = "symmetry",
+			.display_name = "Symmetry",
+			.description = "Controls the bump field symmetry",
+			.widget = subform{
+				.binding = std::ref(params.get().symmetry)
+			}
+		});
 	}
 
 	class bump_field_generator
 	{
 	public:
+
 		struct params
 		{
 			fractal_wave::params x;
 			fractal_wave::params y;
+			fractal_wave_2d_quadrant_weights symmetry;
 		};
 
 		static auto compute_number_of_waves(fractal_wave::params const& params)
@@ -378,6 +432,7 @@ namespace terraformer
 
 		template<class Rng>
 		explicit bump_field_generator(Rng&& rng, params const& params):
+			m_quadrant_weights{1.0f, params.symmetry.q2, params.symmetry.q3, params.symmetry.q4},
 			m_size{compute_number_of_waves(params)},
 			m_components{std::make_unique_for_overwrite<wave_component[]>(m_size*m_size)}
 		{
@@ -472,6 +527,7 @@ namespace terraformer
 			auto sum = 0.0f;
 			auto const n = m_size*m_size - 1;
 			displacement const vec{x, y, 0.0f};
+			auto const quadrant_weights = m_quadrant_weights;
 			for(size_t k = 0; k != n; ++k)
 			{
 				auto const& component = m_components[k];
@@ -479,12 +535,17 @@ namespace terraformer
 				auto const q2 = component.wave_vector.apply(scaling{-1.0f, 1.0f, 1.0f});
 				auto const q3 = component.wave_vector.apply(scaling{-1.0f, -1.0f ,1.0f});
 				auto const q4 = component.wave_vector.apply(scaling{1.0f, -1.0f, 1.0f});
-				sum += component.amplitude*(
-					 approx_sine(twopi*(inner_product(vec, q1) + component.phase + 0.25f))
-					+approx_sine(twopi*(inner_product(vec, q2) + component.phase + 0.25f))
-					+approx_sine(twopi*(inner_product(vec, q3) + component.phase + 0.25f))
-					+approx_sine(twopi*(inner_product(vec, q4) + component.phase + 0.25f))
-				);
+
+				vec4f_t const vals{
+					approx_sine(twopi*(inner_product(vec, q1) + component.phase + 0.25f)),
+					approx_sine(twopi*(inner_product(vec, q2) + component.phase + 0.25f)),
+					approx_sine(twopi*(inner_product(vec, q3) + component.phase + 0.25f)),
+					approx_sine(twopi*(inner_product(vec, q4) + component.phase + 0.25f))
+				};
+
+				auto const v = vals*quadrant_weights;
+
+				sum += component.amplitude*(v[0] + v[1] + v[2] + v[3]);
 			}
 			return sum/static_cast<float>(n);
 		}
@@ -498,6 +559,7 @@ namespace terraformer
 			float phase;
 		};
 
+		vec4f_t m_quadrant_weights;
 		size_t m_size;
 		std::unique_ptr<wave_component[]> m_components;
 	};

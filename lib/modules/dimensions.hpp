@@ -16,6 +16,8 @@ namespace terraformer
 	using noise_amplitude = bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f>;
 	using phase_offset = bounded_value<closed_closed_interval{-0.5f, 0.5f}, 0.0f>;
 	using modulation_depth = bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f>;
+
+	using blend_value = bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f>;
 }
 
 #endif
