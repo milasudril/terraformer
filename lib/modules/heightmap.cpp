@@ -145,12 +145,17 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const w = u.width();
 	auto const h = u.height();
 	grayscale_image bump_field{w, h};
-	auto const lambda_x = bump_field_desc.wave_properties_x.wavelength;
-	auto const phase_x = bump_field_desc.wave_properties_x.phase;
-	auto const lambda_y = bump_field_desc.wave_properties_y.wavelength;
-	auto const phase_y = bump_field_desc.wave_properties_y.phase;
+	auto const lambda_x = bump_field_desc.x_wave.wave_properties.wavelength;
+	auto const phase_x = bump_field_desc.x_wave.wave_properties.phase;
+	auto const lambda_y = bump_field_desc.y_wave.wave_properties.wavelength;
+	auto const phase_y = bump_field_desc.y_wave.wave_properties.phase;
 
-	bump_field_generator gen{rng, bump_field_desc.shape};
+	bump_field_generator gen{rng,
+		bump_field_generator::params{
+			.x = bump_field_desc.x_wave.shape,
+			.y = bump_field_desc.y_wave.shape
+		}
+	};
 	auto min = 2.0f;
 	auto max = -2.0f;
 	for(uint32_t y = 0; y != h; ++y)

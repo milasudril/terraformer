@@ -312,6 +312,34 @@ namespace terraformer
 			std::forward<Params>(params)...);
 	}
 
+	struct bump_field_description
+	{
+		fractal_wave_description x_wave;
+		fractal_wave_description y_wave;
+	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, bump_field_description>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "x_wave",
+			.display_name = "X wave",
+			.description = "Controls the behaviour in the x direction",
+			.widget = subform{
+				.binding = std::ref(params.get().x_wave)
+			}
+		});
+
+		form.insert(field{
+			.name = "y_wave",
+			.display_name = "Y wave",
+			.description = "Controls the behaviour in the x direction",
+			.widget = subform{
+				.binding = std::ref(params.get().y_wave)
+			}
+		});
+	}
 
 	class bump_field_generator
 	{
@@ -473,69 +501,6 @@ namespace terraformer
 		size_t m_size;
 		std::unique_ptr<wave_component[]> m_components;
 	};
-
-	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, bump_field_generator::params>)
-	void bind(Form& form, std::reference_wrapper<T> params)
-	{
-		form.insert(field{
-			.name = "x",
-			.display_name = "x",
-			.description = "Controls the shape of the x wave",
-			.widget = subform{
-				.binding = std::ref(params.get().x)
-			}
-		});
-
-		form.insert(field{
-			.name = "y",
-			.display_name = "y",
-			.description = "Controls the shape of the y wave",
-			.widget = subform{
-				.binding = std::ref(params.get().y)
-			}
-		});
-	}
-
-
-	struct bump_field_description
-	{
-		bump_field_generator::params shape;
-		wave_params wave_properties_x;
-		wave_params wave_properties_y;
-	};
-
-	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, bump_field_description>)
-	void bind(Form& form, std::reference_wrapper<T> params)
-	{
-		form.insert(field{
-			.name = "wave_properties_x",
-			.display_name = "Wave properties x",
-			.description = "Controls the total wave in x direction",
-			.widget = subform{
-				.binding = std::ref(params.get().wave_properties_x)
-			}
-		});
-
-		form.insert(field{
-			.name = "wave_properties_y",
-			.display_name = "Wave properties y",
-			.description = "Controls the total wave in y direction",
-			.widget = subform{
-				.binding = std::ref(params.get().wave_properties_y)
-			}
-		});
-
-		form.insert(field{
-			.name = "shape",
-			.display_name = "Shape",
-			.description = "Controls the progression of individual wave components",
-			.widget = subform{
-				.binding = std::ref(params.get().shape)
-			}
-		});
-	}
 }
 
 #endif
