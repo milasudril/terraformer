@@ -349,7 +349,7 @@ namespace terraformer
 		}
 
 		template<class Rng>
-		explicit bump_field_generator(Rng&&, params const& params):
+		explicit bump_field_generator(Rng&& rng, params const& params):
 			m_size{compute_number_of_waves(params)},
 			m_components{std::make_unique_for_overwrite<wave_component[]>(m_size*m_size)}
 		{
@@ -360,6 +360,12 @@ namespace terraformer
 			scaling const amp_scale{
 				std::log2(params.x.amplitude.factor),
 				std::log2(params.y.amplitude.factor),
+				0.0f
+			};
+
+			displacement const amp_scale_noise{
+				static_cast<float>(params.x.amplitude.scaling_noise),
+				static_cast<float>(params.y.amplitude.scaling_noise),
 				0.0f
 			};
 
@@ -375,6 +381,8 @@ namespace terraformer
 				0.0f,
 				0.0f
 			};
+
+			std::uniform_real_distribution U{-0.5f, 0.5f};
 
 			for(int32_t k = 0; k != size; ++k)
 			{
@@ -398,7 +406,11 @@ namespace terraformer
 					};
 
 					m_components[index] = wave_component{
-						.amplitude = std::exp2(-norm(r.apply(amp_scale))),
+						.amplitude = std::exp2(
+							-norm(
+								(r + amp_scale_noise.apply(scaling{U(rng), U(rng), 0.0f})).apply(amp_scale)
+							)
+						),
 						.wave_vector = wave_vector,
 						.phase = norm(r.apply(phase_offset))
 					};
