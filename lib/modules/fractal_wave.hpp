@@ -363,6 +363,12 @@ namespace terraformer
 				0.0f
 			};
 
+			scaling const phase_offset{
+				static_cast<float>(params.x.phase.offset),
+				static_cast<float>(params.y.phase.offset),
+				0.0f
+			};
+
 			vec4f_t const wavelength_scale{
 				params.x.wavelength.factor,
 				params.y.wavelength.factor,
@@ -394,7 +400,7 @@ namespace terraformer
 					m_components[index] = wave_component{
 						.amplitude = std::exp2(-norm(r.apply(amp_scale))),
 						.wave_vector = wave_vector,
-						.phase = 0.0f
+						.phase = norm(r.apply(phase_offset))
 					};
 
 					++index;
