@@ -2,7 +2,9 @@
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
 \usepackage{lmodern}
-\usepackage{amsmath}
+\usepackage[intlimits]{amsmath}
+\usepackage{fixme}
+
 
 \title{A ``fractal wave''}
 \author{Torbjörn Rathsman}
@@ -104,7 +106,32 @@ as the amplitude of $\Psi$. The point of the constant $c$ is to normalize $\Psi$
 \section{2d extension}
 
 \[
- \Psi(x, y) = \sum_{k=0}^\infty \sum_{l=0}^\infty a_x^k\cos\left(2\pi \frac{x}{\lambda_0 b_x^k} + k\Delta \phi_x\right)a_y^l\cos\left(2\pi \frac{y}{\lambda_0 b_y^l} + l\Delta \phi_y\right)
+\begin{aligned}
+ \Psi(x, y) &= \int_{-\infty}^\infty \int_{-\infty}^\infty F(u, v)\exp\left(2\pi i\left(xu + yv\right)\right) \mathrm{d}u\mathrm{d}u\\
+  &=\int_{-\infty}^\infty\int_{-\infty}^\infty  \sum_{k=-\infty}^\infty \sum_{l=-\infty}^\infty\delta(u - \tilde{u}_l, v - \tilde{v}_k)f(u, v)\exp\left(2\pi i\left(xu + yv\right)\right) \mathrm{d}u\mathrm{d}u\\
+  &=\sum_{k=-\infty}^\infty \sum_{l=-\infty}^\infty f(\tilde{u}_l, \tilde{v}_k)\exp\left(2\pi i\left(x\tilde{u}_l + y\tilde{v}_k\right)\right)\\
+  &=\sum_{k=-\infty}^\infty \sum_{l=-\infty}^\infty f(\tilde{u}_l, \tilde{v}_k)\left(
+  \cos\left(2\pi\left(x\tilde{u}_l + y\tilde{v}_k\right)\right)
++i\sin\left(2\pi\left(x\tilde{u}_l + y\tilde{v}_k\right)\right)
+  \right)\\
+&=\sum_{k=-\infty}^\infty \sum_{l=-\infty}^\infty f(\tilde{u}_l, \tilde{v}_k)
+  \cos\left(2\pi\left(x\tilde{u}_l + y\tilde{v}_k\right)\right)
++i\sum_{k=-\infty}^\infty \sum_{l=-\infty}^\infty f(\tilde{u}_l, \tilde{v}_k)\sin\left(2\pi\left(x\tilde{u}_l + y\tilde{v}_k\right)
+  \right)
+ \end{aligned}
 \]
+
+\[
+ \tilde{u} = b_x^{|l|},\quad \tilde{v} = b_{y}^{|k|}
+\]
+
+\fxfatal[draft]{The expression below does not use the same $\tilde{u}$, and $\tilde{v}$.}
+
+\[
+ f(l, k) = \exp\left(-\sqrt{\left(l\ln(a_x)\right)^2 + \left(k\ln(a_y)\right)^2}\right)
+\]
+
+
+
 
 \end{document}

@@ -339,63 +339,34 @@ namespace terraformer
 			return std::max(size_x, size_y);
 		}
 
-		template<class Rng>
-		static auto get_scale(Rng&& rng, displacement r, scaling scale, displacement noise_amount)
+		using vec4f_t = geosimd::vector_storage<float, 4>;
+
+		static auto pow(vec4f_t x, vec4f_t y)
 		{
-			std::uniform_real_distribution U{-0.5f, 0.5f};
-			return std::exp2(-norm((r + noise_amount.apply(scaling{U(rng), U(rng), 0.0f})).apply(scale)));
+			for(int k = 0; k != 4; ++k)
+			{ x[k] = std::pow(x[k], y[k]); }
+			return x;
 		}
 
 		template<class Rng>
-		static auto get_shift(Rng&& rng, displacement r, scaling offset, displacement noise_amount)
-		{
-			std::uniform_real_distribution U{-0.5f, 0.5f};
-			return norm(r.apply(offset) + noise_amount.apply(scaling{U(rng), U(rng), 0.0f}));
-		}
-
-		template<class Rng>
-		explicit bump_field_generator(Rng&& rng, params const& params):
+		explicit bump_field_generator(Rng&&, params const& params):
 			m_size{compute_number_of_waves(params)},
 			m_components{std::make_unique_for_overwrite<wave_component[]>(m_size*m_size)}
 		{
 			auto const size = static_cast<int32_t>(m_size);
-			auto const mid = 0;
 			size_t index = 0;
 			auto const n = m_size*m_size;
 
 			scaling const amp_scale{
 				std::log2(params.x.amplitude.factor),
 				std::log2(params.y.amplitude.factor),
-				std::log2(1.0f)
-			};
-
-			displacement const amp_noise{
-				static_cast<float>(params.x.amplitude.scaling_noise),
-				static_cast<float>(params.y.amplitude.scaling_noise),
 				0.0f
 			};
 
-			scaling const wavelength_scale{
-				std::log2(params.x.wavelength.factor),
-				std::log2(params.y.wavelength.factor),
-				std::log2(1.0f)
-			};
-
-			displacement const wavelength_noise{
-				static_cast<float>(params.x.wavelength.scaling_noise),
-				static_cast<float>(params.y.wavelength.scaling_noise),
-				0.0f
-			};
-
-			scaling const phase_shift{
-				static_cast<float>(params.x.phase.offset),
-				static_cast<float>(params.y.phase.offset),
-				0.0f
-			};
-
-			displacement const phase_shift_noise{
-				static_cast<float>(params.x.phase.offset_noise),
-				static_cast<float>(params.y.phase.offset_noise),
+			vec4f_t const wavelength_scale{
+				params.x.wavelength.factor,
+				params.y.wavelength.factor,
+				0.0f,
 				0.0f
 			};
 
@@ -403,16 +374,27 @@ namespace terraformer
 			{
 				for(int32_t l = 0; l != size; ++l)
 				{
-					auto const r = displacement{
-						static_cast<float>(l - mid),
-						static_cast<float>(k - mid),
+					displacement const r{
+						static_cast<float>(l),
+						static_cast<float>(k),
 						0.0f
 					};
 
+					displacement const wave_vector{
+						pow(wavelength_scale,
+							vec4f_t{
+								static_cast<float>(l),
+								static_cast<float>(k),
+								1.0f,
+								1.0f
+							}
+						)
+					};
+
 					m_components[index] = wave_component{
-						.amplitude = get_scale(rng, r, amp_scale, amp_noise),
-						.wavelength = get_scale(rng, r, wavelength_scale, wavelength_noise),
-						.phase = get_shift(rng, r, phase_shift, phase_shift_noise),
+						.amplitude = std::exp2(-norm(r.apply(amp_scale))),
+						.wave_vector = wave_vector,
+						.phase = 0.0f
 					};
 
 					++index;
@@ -429,12 +411,20 @@ namespace terraformer
 			constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
 			auto sum = 0.0f;
 			auto const n = m_size*m_size - 1;
-
+			displacement const vec{x, y, 0.0f};
 			for(size_t k = 0; k != n; ++k)
 			{
 				auto const& component = m_components[k];
-				sum += component.amplitude*approx_sine(twopi*(x/component.wavelength + component.phase + 0.25f))
-					*approx_sine(twopi*(y/component.wavelength + component.phase + 0.25f));
+				auto const k1 = component.wave_vector;
+				auto const k2 = component.wave_vector.apply(scaling{-1.0f, 1.0f, 1.0f});
+				auto const k3 = component.wave_vector.apply(scaling{1.0f, -1.0f, 1.0f});
+				auto const k4 = component.wave_vector.apply(scaling{-1.0f, -1.0f ,1.0f});
+				sum += component.amplitude*(
+					 approx_sine(twopi*(inner_product(vec, k1) + component.phase + 0.25f))
+					+approx_sine(twopi*(inner_product(vec, k2) + component.phase + 0.25f))
+					+approx_sine(twopi*(inner_product(vec, k3) + component.phase + 0.25f))
+					+approx_sine(twopi*(inner_product(vec, k4) + component.phase + 0.25f))
+				);
 			}
 
 			return sum/static_cast<float>(n);
@@ -445,7 +435,7 @@ namespace terraformer
 		struct wave_component
 		{
 			float amplitude;
-			float wavelength;
+			displacement wave_vector;
 			float phase;
 		};
 
