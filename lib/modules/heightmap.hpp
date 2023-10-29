@@ -101,7 +101,7 @@ namespace terraformer
 			u = generate(pixel_storage.width(), pixel_storage.height(), pixel_size, ridge_curve, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value));
 			v = generate(u.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_distortion, rng);
 			ns_wave = generate(u, v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
-			bump_field_updated(description, rng);
+			bump_field = generate(u.pixels(), v.pixels(), static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.bump_field, rng);
 			generate(*this, description);
 		}
 
@@ -109,6 +109,7 @@ namespace terraformer
 		{
 			v = generate(u.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_distortion, rng);
 			ns_wave = generate(u, v, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
+			bump_field = generate(u.pixels(), v.pixels(), static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.bump_field, rng);
 			generate(*this, description);
 		}
 
