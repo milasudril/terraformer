@@ -369,16 +369,23 @@ namespace terraformer
 				0.0f
 			};
 
-			scaling const phase_offset{
-				static_cast<float>(params.x.phase.offset),
-				static_cast<float>(params.y.phase.offset),
-				0.0f
-			};
-
 			vec4f_t const wavelength_scale{
 				params.x.wavelength.factor,
 				params.y.wavelength.factor,
 				0.0f,
+				0.0f
+			};
+
+			vec4f_t const wavelength_scale_noise{
+				static_cast<float>(params.x.wavelength.scaling_noise),
+				static_cast<float>(params.y.wavelength.scaling_noise),
+				0.0f,
+				0.0f
+			};
+
+			scaling const phase_offset{
+				static_cast<float>(params.x.phase.offset),
+				static_cast<float>(params.y.phase.offset),
 				0.0f
 			};
 
@@ -402,6 +409,7 @@ namespace terraformer
 								1.0f,
 								1.0f
 							}
+							+ wavelength_scale_noise*vec4f_t{U(rng), U(rng), 0.0f, 0.0f}
 						)
 					};
 
