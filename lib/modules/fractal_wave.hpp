@@ -314,6 +314,7 @@ namespace terraformer
 
 	struct fractal_wave_2d_quadrant_weights
 	{
+		blend_value q1;
 		blend_value q2;
 		blend_value q3;
 		blend_value q4;
@@ -323,6 +324,16 @@ namespace terraformer
 	requires(std::is_same_v<std::remove_cvref_t<T>, fractal_wave_2d_quadrant_weights>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
+		form.insert(field{
+			.name = "q1",
+			.display_name = "Q1",
+			.description = "Intensity of Q1 point",
+			.widget = numeric_input{
+				.binding = std::ref(params.get().q1),
+				.value_converter = calculator{}
+			}
+		});
+
 		form.insert(field{
 			.name = "q2",
 			.display_name = "Q2",
@@ -408,7 +419,7 @@ namespace terraformer
 		{
 			auto const k_amp = 14.0f/std::log2(params.amplitude.factor);
 			auto const k_lambda = 14.0f/std::log2(params.wavelength.factor);
-			auto const k_max = 8.0f;
+			auto const k_max = 32.0f;
 
 			return round_to_odd(std::max(std::min(k_max, std::min(k_amp, k_lambda)), 3.0f));
 		}
@@ -432,7 +443,7 @@ namespace terraformer
 
 		template<class Rng>
 		explicit bump_field_generator(Rng&& rng, params const& params):
-			m_quadrant_weights{1.0f, params.symmetry.q2, params.symmetry.q3, params.symmetry.q4},
+			m_quadrant_weights{params.symmetry.q1, params.symmetry.q2, params.symmetry.q3, params.symmetry.q4},
 			m_size{compute_number_of_waves(params)},
 			m_components{std::make_unique_for_overwrite<wave_component[]>(m_size*m_size)}
 		{
