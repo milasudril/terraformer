@@ -159,13 +159,33 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	};
 	auto min = 2.0f;
 	auto max = -2.0f;
+
+	location origin{
+		0.5f*static_cast<float>(w),
+		ridge_loc,
+		0.0f
+	};
+
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		for(uint32_t x = 0; x != w; ++x)
 		{
-			auto const y_val = u(x, y) - ridge_loc;
-			auto const x_val = v(x, y);
-			auto const z_val = gen(x_val/lambda_x - phase_x, y_val/lambda_y + phase_y);
+			auto const vec = (location{u(x, y), v(x, y), 0.0f} - origin)
+				.apply(rotation{geosimd::rotation_angle{geosimd::turns{0.125f}}, geosimd::dimension_tag<2>{}})
+				.apply(
+					scaling{
+						1.0f/lambda_x,
+						1.0f/lambda_y,
+						1.0f
+					}
+				)
+				+ displacement{
+					static_cast<float>(phase_x),
+					static_cast<float>(phase_y),
+					0.0f
+				};
+
+			auto const z_val = gen(vec);
 
 			min = std::min(min, z_val);
 			max = std::max(max, z_val);

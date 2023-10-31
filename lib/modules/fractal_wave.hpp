@@ -419,7 +419,7 @@ namespace terraformer
 		{
 			auto const k_amp = 14.0f/std::log2(params.amplitude.factor);
 			auto const k_lambda = 14.0f/std::log2(params.wavelength.factor);
-			auto const k_max = 32.0f;
+			auto const k_max = 64.0f;
 
 			return round_to_odd(std::max(std::min(k_max, std::min(k_amp, k_lambda)), 3.0f));
 		}
@@ -532,12 +532,11 @@ namespace terraformer
 			});
 		}
 
-		float operator()(float x, float y) const
+		float operator()(displacement vec) const
 		{
 			constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
 			auto sum = 0.0f;
 			auto const n = m_size*m_size - 1;
-			displacement const vec{x, y, 0.0f};
 			auto const quadrant_weights = m_quadrant_weights;
 			for(size_t k = 0; k != n; ++k)
 			{
