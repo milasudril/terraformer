@@ -5,7 +5,7 @@
 
 #include "./dft_engine.hpp"
 
-#include <mutex>
+#include <algorithm>
 
 namespace
 {
@@ -25,4 +25,44 @@ terraformer::dft_execution_plan::dft_execution_plan(size_t size, dft_direction d
 	                                                                  output_buff_ptr,
 	                                                                  static_cast<int>(dir),
 	                                                                  FFTW_MEASURE)};
+}
+
+terraformer::dft_execution_plan const&
+terraformer::dft_execution_plan_cache::get_plan(size_t buffer_size, dft_direction dir) const
+
+{
+	std::lock_guard lock{m_access_mutex};
+	auto const i = std::ranges::find(m_transform_sizes, std::pair{buffer_size, dir});
+	if(i != std::end(m_transform_sizes)) [[likely]]
+	{
+		auto const index = i - std::begin(m_transform_sizes);
+		auto& plan_info = m_plans[index];
+		if(!plan_info.plan)
+		{ plan_info.plan = dft_execution_plan{buffer_size, dir}; }
+
+		plan_info.last_used = m_counter;
+		++m_counter;
+		return plan_info.plan;
+	}
+
+	auto const reject = std::ranges::min_element(m_plans, [](auto const& a, auto const& b) {
+		return a.last_used < b.last_used;
+	});
+
+	auto const reject_index = reject - std::begin(m_plans);
+	reject->plan = dft_execution_plan{buffer_size, dir};
+	reject->last_used = m_counter;
+	++m_counter;
+	m_transform_sizes[reject_index] = std::pair{buffer_size, dir};
+	return reject->plan;
+}
+
+namespace
+{
+	terraformer::dft_execution_plan_cache dft_execution_plans;
+}
+
+terraformer::dft_execution_plan const& terraformer::get_plan(size_t buffer_size, dft_direction dir)
+{
+	return dft_execution_plans.get_plan(buffer_size, dir);
 }
