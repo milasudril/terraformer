@@ -1,6 +1,6 @@
 //@	{
 //@	"target":{"name":"./dft_engine.o", "type":"object"},
-//@	"dependencies":[{"ref":"OpenEXR", "origin":"pkg-config"}]
+//@	"dependencies":[{"ref":"fftw3f", "origin":"pkg-config"}]
 //@	}
 
 #include "./dft_engine.hpp"

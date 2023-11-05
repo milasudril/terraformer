@@ -21,7 +21,7 @@ namespace terraformer
 
 		dft_execution_plan() = default;
 
-		void execute(std::complex<float> const* input_buffer, float* output_buffer) const
+		void execute(std::complex<float> const* input_buffer, std::complex<float>* output_buffer) const
 		{
 			// NOTE: The plan is not configured for an inplace transform. Therefore, it is safe to do
 			//       a const_cast on the input buffer.
