@@ -12,6 +12,7 @@ TESTCASE(terraformer_filtered_noise_generator_generate)
 		.lambda_0 = 14043.0f,
 		.hp_order = 8.0f,
 		.lp_order = 2.0f,
+		.peak_offset = 6144.0f,
 		.dx = 48,
 		.point_count = 1024
 	});
