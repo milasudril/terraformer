@@ -20,6 +20,7 @@
 //@	}
 
 #include "./form.hpp"
+#include "lib/interp.hpp"
 #include "lib/filters/intensity_map_presentation_filters.hpp"
 
 #include <QChart>
