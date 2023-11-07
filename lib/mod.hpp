@@ -16,7 +16,7 @@ namespace terraformer
 	}
 
 	constexpr auto mod(int32_t x, int32_t denom)
-	{ return ((x % denom) + denom) % denom; }
+	{ return ((x %= denom) < 0) ? x+denom : x; }
 }
 
 #endif
