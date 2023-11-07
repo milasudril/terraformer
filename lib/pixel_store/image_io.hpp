@@ -7,6 +7,7 @@
 
 #include "./image.hpp"
 #include "./ilm_io.hpp"
+#include "lib/common/utils.hpp"
 
 #include <OpenEXR/ImfOutputFile.h>
 #include <OpenEXR/ImfInputFile.h>
