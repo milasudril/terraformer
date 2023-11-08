@@ -1,9 +1,9 @@
 #ifndef TERRAFORMER_SPAN2D_HPP
 #define TERRAFORMER_SPAN2D_HPP
 
+#include "lib/boundary_sampling_policies.hpp"
 #include "lib/boundary_sampling_policy.hpp"
 #include "./spaces.hpp"
-#include "lib/mod.hpp"
 
 #include <functional>
 #include <cstdint>
@@ -195,43 +195,6 @@ namespace terraformer
 		}
 		return ret;
 	}
-
-
-	struct wrap_around_at_boundary
-	{
-		auto operator()(float x, uint32_t max) const
-		{
-			return static_cast<uint32_t>(mod(x, static_cast<float>(max)));
-		}
-
-		auto operator()(int32_t x, uint32_t max) const
-		{
-			return static_cast<uint32_t>(mod(x, static_cast<int32_t>(max)));
-		}
-
-		auto operator()(uint32_t x, uint32_t max) const
-		{
-			return x % max;
-		}
-	};
-
-	struct clamp_at_boundary
-	{
-		uint32_t operator()(float x, uint32_t max) const
-		{
-			return static_cast<uint32_t>(std::clamp(x, 0.0f, static_cast<float>(max - 1)));
-		}
-
-		uint32_t operator()(int32_t x, uint32_t max) const
-		{
-			return static_cast<uint32_t>(std::clamp(x, 0, static_cast<int32_t>(max) - 1));
-		}
-
-		uint32_t operator()(uint32_t x, uint32_t max) const
-		{
-			return std::clamp(x, 0u, max - 1);
-		}
-	};
 
 	template<class T, boundary_sampling_policy U = wrap_around_at_boundary>
 	auto interp(span_2d<T const> span, float x, float y, U&& bsp = wrap_around_at_boundary{})
