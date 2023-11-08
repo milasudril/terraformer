@@ -20,7 +20,9 @@
 //@	}
 
 #include "./form.hpp"
+#include "lib/interp.hpp"
 #include "lib/filters/intensity_map_presentation_filters.hpp"
+#include "lib/boundary_sampling_policies.hpp"
 
 #include <QChart>
 #include <QLineSeries>
@@ -50,7 +52,7 @@ void terraformer::colorbar::generate_image()
 			auto const hred = height - 1;
 			auto const val = static_cast<float>(std::size(colors) - 1)
 				*static_cast<float>(hred - y)/static_cast<float>(hred);
-			auto const output_value = interp(colors, val);
+			auto const output_value = interp(colors, val, clamp_at_boundary{});
 
 			img_srgb(x, y) = output_pixel{
 				.b = static_cast<uint8_t>(255.0f*std::pow(output_value.blue(), 1.0f/2.2f)),
@@ -245,7 +247,7 @@ void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const
 
 			auto const val = static_cast<float>(std::size(m_colormap) - 1)
 				*static_cast<float>(x)/static_cast<float>(wred);
-			auto const output_value = interp(m_colormap, val);
+			auto const output_value = interp(m_colormap, val, clamp_at_boundary{});
 			output_pixel const line_color{
 				.b = static_cast<uint8_t>(255.0f*std::pow(output_value.blue(), 1.0f/2.2f)),
 				.g = static_cast<uint8_t>(255.0f*std::pow(output_value.green(), 1.0f/2.2f)),
@@ -268,7 +270,7 @@ void terraformer::topographic_map_xsection_diagram::upload(grayscale_image const
 
 			auto const val = static_cast<float>(std::size(m_colormap) - 1)
 				*static_cast<float>(y)/static_cast<float>(hred);
-			auto const output_value = interp(m_colormap, val);
+			auto const output_value = interp(m_colormap, val, clamp_at_boundary{});
 			output_pixel const line_color{
 				.b = static_cast<uint8_t>(255.0f*std::pow(output_value.blue(), 1.0f/2.2f)),
 				.g = static_cast<uint8_t>(255.0f*std::pow(output_value.green(), 1.0f/2.2f)),

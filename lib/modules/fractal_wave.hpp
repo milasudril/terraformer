@@ -6,6 +6,8 @@
 #include "./polyline.hpp"
 #include "./dimensions.hpp"
 #include "./calculator.hpp"
+
+#include "lib/trigfunc.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/common/output_range.hpp"

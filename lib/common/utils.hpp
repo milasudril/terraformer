@@ -30,29 +30,6 @@ namespace terraformer
 		{f(x, y)} -> std::convertible_to<MappedType>;
 	};
 
-	constexpr auto fast_fmod(float val, float divisor)
-	{
-		auto const reciprocal = 1.0f/divisor;
-		return val - divisor * static_cast<int>(val * reciprocal);
-	}
-
-	constexpr auto mod(float x, float denom)
-	{
-		auto const ret = fast_fmod(x, denom);
-		auto const alt_ret = ret + denom;
-		return ret < 0.0f ? (alt_ret > 0.0f ? alt_ret : 0.0f) : ret;
-	}
-
-	constexpr auto approx_sine(float x)
-	{
-		auto const xi = 2.0f*(0.5f - mod(x/(2.0f*std::numbers::pi_v<float>), 1.0f));
-		return -(xi*(xi - 1.0f)*(xi + 1.0f)
-			*((13968.0f/31680.0f)*(xi*xi)*(xi*xi) - (63304.0f/31680.0f)*(xi*xi) + 99433.0f/31680.0f));
-	}
-
-	constexpr auto mod(int32_t x, int32_t denom)
-	{ return ((x % denom) + denom) % denom; }
-
 	constexpr auto smoothstep(float x)
 	{
 		x = std::clamp(x, -1.0f, 1.0f);
@@ -99,23 +76,6 @@ namespace terraformer
 	using rng_seed_type = __int128 unsigned;
 
 	inline thread_local random_generator per_thread_rng{};
-
-	template<std::ranges::random_access_range R>
-	constexpr auto interp(R&& lut, float value)
-	{
-		if(value < 0.0f)
-		{ return lut[0]; }
-
-		if(value >= static_cast<float>(std::size(lut) - 1))
-		{ return lut[std::size(lut) - 1]; }
-
-		auto const int_part = static_cast<int>(value);
-		auto const t = value - static_cast<float>(int_part);
-		auto const left = lut[int_part];
-		auto const right = lut[int_part + 1];
-
-		return (1.0f - t)*left + right*t;
-	}
 
 	inline float round_to_n_digits(float x, int n)
 	{
