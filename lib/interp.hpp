@@ -1,10 +1,20 @@
 #ifndef TERRAFORMER_INTERP_HPP
 #define TERRAFORMER_INTERP_HPP
 
+#include "./boundary_sampling_policy.hpp"
+
 #include <ranges>
 
 namespace terraformer
 {
+	template<class T, class U>
+	concept readable_image = requires(T image, uint32_t x, uint32_t y)
+	{
+		{image.width()} -> std::same_as<uint32_t>;
+		{image.height()} -> std::same_as<uint32_t>;
+		{image(x, y)} -> std::convertible_to<U const&>;
+	};
+
 	template<std::ranges::random_access_range R>
 	constexpr auto interp(R&& lut, float value)
 	{
