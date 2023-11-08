@@ -1,7 +1,6 @@
 #ifndef TERRAFORMER_SPAN2D_HPP
 #define TERRAFORMER_SPAN2D_HPP
 
-#include "lib/boundary_sampling_policies.hpp"
 #include "lib/boundary_sampling_policy.hpp"
 #include "./spaces.hpp"
 
@@ -196,8 +195,8 @@ namespace terraformer
 		return ret;
 	}
 
-	template<class T, boundary_sampling_policy U = wrap_around_at_boundary>
-	auto interp(span_2d<T const> span, float x, float y, U&& bsp = wrap_around_at_boundary{})
+	template<class T, boundary_sampling_policy U>
+	auto interp(span_2d<T const> span, float x, float y, U&& bsp)
 	{
 		auto const w = span.width();
 		auto const h = span.height();
@@ -220,8 +219,8 @@ namespace terraformer
 		return (1.0f - eta)*z_x0 + eta*z_x1;
 	}
 
-	template<class T, boundary_sampling_policy U = wrap_around_at_boundary>
-	inline auto grad(span_2d<T const> span, float x, float y, float scale, U bsp = wrap_around_at_boundary{})
+	template<class T, boundary_sampling_policy U>
+	inline auto grad(span_2d<T const> span, float x, float y, float scale, U&& bsp)
 	{
 		auto const x0 = x - 1.0f;
 		auto const x1 = x + 1.0f;
@@ -236,8 +235,8 @@ namespace terraformer
 		return 0.5f*scale*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}
 
-	template<class T, boundary_sampling_policy U = wrap_around_at_boundary>
-	inline auto grad(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U&& bsp = wrap_around_at_boundary{})
+	template<class T, boundary_sampling_policy U>
+	inline auto grad(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U&& bsp)
 	{
 		auto const w = span.width();
 		auto const h = span.height();
@@ -255,8 +254,8 @@ namespace terraformer
 		return 0.5f*scale*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
 	}
 
-	template<class T, boundary_sampling_policy U = wrap_around_at_boundary>
-	inline auto normal(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U&& bsp = wrap_around_at_boundary{})
+	template<class T, boundary_sampling_policy U>
+	inline auto normal(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U&& bsp)
 	{
 		auto const g = grad(span, x, y, scale, bsp);
 		return direction{displacement{-g[0], -g[1], 1.0f}};
