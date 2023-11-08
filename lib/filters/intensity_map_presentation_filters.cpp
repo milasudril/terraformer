@@ -1,7 +1,7 @@
 //@	{"target":{"name": "intensity_map_presentation_filters.o"}}
 
 #include "./intensity_map_presentation_filters.hpp"
-//#include "lib/common/utils.hpp"
+#include "lib/boundary_sampling_policies.hpp"
 #include "lib/interp.hpp"
 
 #include <cassert>
@@ -136,7 +136,7 @@ terraformer::image terraformer::apply_colormap(grayscale_image const& src,
 		for(uint32_t x = 0; x != ret.width(); ++x)
 		{
 			auto const xi = static_cast<float>(std::size(colors) - 1)*(src(x, y) - min)/z_range;
-			ret(x, y) = interp(colors, xi);
+			ret(x, y) = interp(colors, xi, clamp_at_boundary{});
 		}
 	}
 

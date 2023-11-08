@@ -15,19 +15,16 @@ namespace terraformer
 		{image(x, y)} -> std::convertible_to<U const&>;
 	};
 
-	template<std::ranges::random_access_range R>
-	constexpr auto interp(R&& lut, float value)
+	template<std::ranges::random_access_range R, boundary_sampling_policy U>
+	constexpr auto interp(R&& lut, float value, U&& bsp)
 	{
-		if(value < 0.0f)
-		{ return lut[0]; }
+		auto const n = static_cast<uint32_t>(std::size(lut));
+		auto const x_0 = bsp(value, n);
+		auto const x_1 = bsp(value + 1.0f, n);
 
-		if(value >= static_cast<float>(std::size(lut) - 1))
-		{ return lut[std::size(lut) - 1]; }
-
-		auto const int_part = static_cast<int>(value);
-		auto const t = value - static_cast<float>(int_part);
-		auto const left = lut[int_part];
-		auto const right = lut[int_part + 1];
+		auto const t = value - static_cast<float>(x_0);
+		auto const left = lut[x_0];
+		auto const right = lut[x_1];
 
 		return (1.0f - t)*left + right*t;
 	}
