@@ -13,10 +13,9 @@ TESTCASE(terraformer_filtered_noise_generator_generate)
 		1024,
 		48.0f,
 		terraformer::filtered_noise_description_1d{
-			.lambda_0 = 14043.0f,
-			.hp_order = 8.0f,
-			.lp_order = 2.0f,
-			.peak_offset = 6144.0f,
+			.lambda_0 = terraformer::domain_length{14043.0f},
+			.hp_order = terraformer::filter_order{8.0f},
+			.lp_order = terraformer::filter_order{2.0f}
 		}
 	};
 

@@ -7,6 +7,7 @@
 #include "lib/common/utils.hpp"
 #include "lib/interp.hpp"
 #include "lib/boundary_sampling_policies.hpp"
+#include "./dimensions.hpp"
 
 #include <random>
 #include <algorithm>
@@ -17,10 +18,9 @@ namespace terraformer
 {
 	struct filtered_noise_description_1d
 	{
-		float lambda_0;
-		float hp_order;
-		float lp_order;
-		float peak_offset;
+		domain_length lambda_0;
+		filter_order hp_order;
+		filter_order lp_order;
 	};
 
 	void apply_filter(std::span<float const> input, float* output, float lambda_max, filtered_noise_description_1d const& params);
