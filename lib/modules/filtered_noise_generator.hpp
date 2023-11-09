@@ -3,11 +3,14 @@
 #ifndef TERRAFORMER_FILTERED_NOISE_GENERATOR_HPP
 #define TERRAFORMER_FILTERED_NOISE_GENERATOR_HPP
 
+#include "./dimensions.hpp"
+#include "./calculator.hpp"
+
+#include "lib/formbuilder/formfield.hpp"
 #include "lib/filters/dft_engine.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/interp.hpp"
 #include "lib/boundary_sampling_policies.hpp"
-#include "./dimensions.hpp"
 
 #include <random>
 #include <algorithm>
@@ -22,6 +25,41 @@ namespace terraformer
 		filter_order hp_order;
 		filter_order lp_order;
 	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, filtered_noise_description_1d>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(field{
+			.name = "lambda_0",
+			.display_name = "Wavelength",
+			.description = "Sets the dominant wavelength",
+			.widget = numeric_input_log{
+				.binding = std::ref(params.get().lambda_0),
+				.value_converter = calculator{}
+			}
+		});
+
+		form.insert(field{
+			.name = "hp_order",
+			.display_name = "High-pass filter order",
+			.description = "Sets the order of high-pass filter",
+			.widget = numeric_input_log{
+				.binding = std::ref(params.get().hp_order),
+				.value_converter = calculator{}
+			}
+		});
+
+		form.insert(field{
+			.name = "lp_order",
+			.display_name = "Low-pass filter order",
+			.description = "Sets the order of low-pass filter",
+			.widget = numeric_input_log{
+				.binding = std::ref(params.get().lp_order),
+				.value_converter = calculator{}
+			}
+		});
+	}
 
 	void apply_filter(std::span<float const> input, float* output, float lambda_max, filtered_noise_description_1d const& params);
 
