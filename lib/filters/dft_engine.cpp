@@ -59,7 +59,7 @@ terraformer::dft_execution_plan_cache::get_plan(size_t buffer_size, dft_directio
 
 namespace
 {
-	terraformer::dft_execution_plan_cache dft_execution_plans;
+	constinit terraformer::dft_execution_plan_cache dft_execution_plans;
 }
 
 terraformer::dft_execution_plan const& terraformer::get_plan(size_t buffer_size, dft_direction dir)
