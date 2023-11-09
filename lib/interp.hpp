@@ -19,10 +19,11 @@ namespace terraformer
 	constexpr auto interp(R&& lut, float value, U&& bsp)
 	{
 		auto const n = static_cast<uint32_t>(std::size(lut));
-		auto const x_0 = bsp(value, n);
-		auto const x_1 = bsp(value + 1.0f, n);
+		auto const x = bsp(value, n);
+		auto const x_0 = static_cast<uint32_t>(x);;
+		auto const x_1 = bsp(x_0 + 1, n);
 
-		auto const t = value - static_cast<float>(x_0);
+		auto const t = x - static_cast<float>(x_0);
 		auto const left = lut[x_0];
 		auto const right = lut[x_1];
 
