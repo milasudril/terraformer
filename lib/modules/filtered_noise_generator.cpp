@@ -17,7 +17,7 @@ void terraformer::apply_filter(std::span<float const> input,
 	for(size_t k = 1; k != signal_length/2; ++k)
 	{
 		auto const omega = static_cast<float>(k);
-		auto const xi = omega*lambda_0/lambda_max;
+		auto const xi = std::min(omega*lambda_0/lambda_max, 16.0f);
 		auto const amp = 1.0f/
 			std::sqrt((1.0f + std::pow(xi, -2.0f*hp_order)) * (1.0f + std::pow(xi, 2.0f*lp_order)));
 		filter[k] = amp;

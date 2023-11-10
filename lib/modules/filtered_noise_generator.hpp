@@ -79,7 +79,7 @@ namespace terraformer
 			auto noise = std::make_unique_for_overwrite<float[]>(m_signal_length);
 			for(size_t k = 0; k != m_signal_length; ++k)
 			{ noise[k] = U(rng); }
-			apply_filter(std::span{noise.get(), m_signal_length}, m_signal.get(), static_cast<float>(point_count)*dx, params);
+			apply_filter(std::span{noise.get(), m_signal_length}, m_signal.get(), 2.0f*static_cast<float>(point_count)*dx, params);
 		}
 
 		float operator()(float x) const
