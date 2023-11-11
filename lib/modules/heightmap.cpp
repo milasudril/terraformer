@@ -55,9 +55,7 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const height = u.height();
 	grayscale_image v{width, height};
 	{
-		fractal_wave const wave{rng, ns_distortion.wave.shape};
-		auto const wavelength = ns_distortion.wave.wave_properties.wavelength;
-		auto const phase = ns_distortion.wave.wave_properties.phase;
+		filtered_noise_generator_1d const wave{rng, height, pixel_size, ns_distortion.wave};
 		auto const amplitude = ns_distortion.initial_amplitude;
 		auto const half_distance = ns_distortion.half_distance;
 
@@ -67,7 +65,7 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 			{
 				auto const x_val = pixel_size*static_cast<float>(x);
 				auto const y_val = u(x, y) - ridge_loc;
-				v(x, y) = x_val + amplitude*wave(y_val/wavelength + phase)
+				v(x, y) = x_val + amplitude*wave(y_val)
 					*std::exp2(std::min(std::abs(y_val)/half_distance, std::max(16.0f - std::log2(amplitude), 0.0f)));
 			}
 		}
@@ -78,6 +76,7 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 
 terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	span_2d<float const> v,
+	float pixel_size,
 	float ridge_loc,
 	modulated_damped_wave_description const& ns_wave_desc,
 	random_generator& rng)
@@ -86,9 +85,7 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const h = u.height();
 	grayscale_image ns_wave_output{w, h};
 
-	fractal_wave const wave{rng, ns_wave_desc.nominal_oscillations.wave.shape};
-	auto const wavelength = ns_wave_desc.nominal_oscillations.wave.wave_properties.wavelength;
-	auto const phase = ns_wave_desc.nominal_oscillations.wave.wave_properties.phase;
+	filtered_noise_generator_1d const wave{rng, h, pixel_size, ns_wave_desc.nominal_oscillations.wave};
 	auto const amplitude = ns_wave_desc.nominal_oscillations.initial_amplitude;
 	auto const half_distance = ns_wave_desc.nominal_oscillations.half_distance;
 
@@ -97,12 +94,6 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const amp_mod_wavelength = amp_mod_desc.modulating_wave.wave_properties.wavelength;
 	auto const amp_mod_phase = amp_mod_desc.modulating_wave.wave_properties.phase;
 	auto const amp_mod_depth = amp_mod_desc.depth;
-
-	auto const& wavelength_mod_desc = ns_wave_desc.wavelength_modulation;
-	fractal_wave const wavelength_mod{rng, wavelength_mod_desc.modulating_wave.shape};
-	auto const wavelength_mod_wavelength = wavelength_mod_desc.modulating_wave.wave_properties.wavelength;
-	auto const wavelength_mod_phase = wavelength_mod_desc.modulating_wave.wave_properties.phase;
-	auto const wavelength_mod_depth = wavelength_mod_desc.depth;
 
 	auto const& half_distance_mod_desc = ns_wave_desc.half_distance_modulation;
 	fractal_wave const half_distance_mod{rng, half_distance_mod_desc.modulating_wave.shape};
@@ -120,15 +111,11 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 			auto const amp_mod_value = amp_mod(x_val/amp_mod_wavelength + amp_mod_phase);
 			auto const amp_res = std::exp2(amp_mod_depth*amp_mod_value)*amplitude;
 
-			auto const wavelength_mod_value = wavelength_mod(x_val/wavelength_mod_wavelength
-				+ wavelength_mod_phase);
-			auto const wavelength_res = std::exp2(wavelength_mod_depth*wavelength_mod_value)*wavelength;
-
 			auto const half_distnace_mod_value = half_distance_mod(x_val/half_distance_mod_wavelength
 				+ half_distance_mod_phase);
 			auto const half_distance_res = std::exp2(half_distance_mod_depth*half_distnace_mod_value)*half_distance;
 
-			auto const z_val = amp_res*wave(y_val/wavelength_res + phase)*std::exp2(-std::abs(y_val)/half_distance_res);
+			auto const z_val = amp_res*wave(y_val)*std::exp2(-std::abs(y_val)/half_distance_res);
 
 			ns_wave_output(x, y) = z_val;
 		}

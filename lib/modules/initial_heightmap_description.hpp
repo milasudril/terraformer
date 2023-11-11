@@ -160,7 +160,7 @@ namespace terraformer
 	{
 		vertical_amplitude initial_amplitude;
 		domain_length half_distance;
-		fractal_wave_description wave;
+		filtered_noise_description_1d wave;
 	};
 
 	template<class Form, class T>
@@ -237,7 +237,6 @@ namespace terraformer
 	{
 		damped_wave_description nominal_oscillations;
 		modulation_description amplitude_modulation;
-		modulation_description wavelength_modulation;
 		modulation_description half_distance_modulation;
 	};
 
@@ -263,17 +262,6 @@ namespace terraformer
 				.description = "Controls amplitude modulation",
 				.widget = subform{
 					.binding = std::ref(params.get().amplitude_modulation)
-				}
-			}
-		);
-
-		form.insert(
-			field{
-				.name = "wavelength_modulation",
-				.display_name = "Wavelength modulation",
-				.description = "Controls wavelength modulation",
-				.widget = subform{
-					.binding = std::ref(params.get().wavelength_modulation)
 				}
 			}
 		);
