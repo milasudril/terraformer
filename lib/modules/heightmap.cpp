@@ -90,11 +90,11 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const half_distance = ns_wave_desc.nominal_oscillations.half_distance;
 
 	auto const& amp_mod_desc = ns_wave_desc.amplitude_modulation;
-	filtered_noise_generator_1d const amp_mod{rng, h, pixel_size, amp_mod_desc.modulating_wave};
+	filtered_noise_generator_1d const amp_mod{rng, w, pixel_size, amp_mod_desc.modulating_wave};
 	auto const amp_mod_depth = amp_mod_desc.depth;
 
 	auto const& half_distance_mod_desc = ns_wave_desc.half_distance_modulation;
-	filtered_noise_generator_1d const half_distance_mod{rng, h, pixel_size, half_distance_mod_desc.modulating_wave};
+	filtered_noise_generator_1d const half_distance_mod{rng, w, pixel_size, half_distance_mod_desc.modulating_wave};
 	auto const half_distance_mod_depth = half_distance_mod_desc.depth;
 
 	for(uint32_t y = 0; y != h; ++y)
