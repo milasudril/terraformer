@@ -159,6 +159,7 @@ namespace terraformer
 	struct damped_wave_description
 	{
 		vertical_amplitude initial_amplitude;
+		horizontal_offset peak_location;
 		domain_length half_distance;
 		filtered_noise_description_1d wave;
 	};
@@ -174,6 +175,18 @@ namespace terraformer
 				.description = "Initial (undamped) amplitude of the generated wave",
 				.widget = numeric_input_log{
 					.binding = std::ref(params.get().initial_amplitude),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "peak_location",
+				.display_name = "Peak location",
+				.description = "Sets the peak location of the modulated wave",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().peak_location),
 					.value_converter = calculator{}
 				}
 			}
@@ -206,6 +219,7 @@ namespace terraformer
 	struct modulation_description
 	{
 		modulation_depth depth;
+		horizontal_offset peak_location;
 		filtered_noise_description_1d modulating_wave;
 	};
 
@@ -222,6 +236,18 @@ namespace terraformer
 					.value_converter = calculator{}
 				}
 		});
+
+		form.insert(
+			field{
+				.name = "peak_location",
+				.display_name = "Peak location",
+				.description = "Sets the peak location of the modulating wave",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().peak_location),
+					.value_converter = calculator{}
+				}
+			}
+		);
 
 		form.insert(field{
 			.name = "modulating_wave",
