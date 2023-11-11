@@ -206,7 +206,7 @@ namespace terraformer
 	struct modulation_description
 	{
 		modulation_depth depth;
-		fractal_wave_description modulating_wave;
+		filtered_noise_description_1d modulating_wave;
 	};
 
 	template<class Form, class T>

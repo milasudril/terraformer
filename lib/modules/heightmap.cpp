@@ -90,15 +90,11 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const half_distance = ns_wave_desc.nominal_oscillations.half_distance;
 
 	auto const& amp_mod_desc = ns_wave_desc.amplitude_modulation;
-	fractal_wave const amp_mod{rng, amp_mod_desc.modulating_wave.shape};
-	auto const amp_mod_wavelength = amp_mod_desc.modulating_wave.wave_properties.wavelength;
-	auto const amp_mod_phase = amp_mod_desc.modulating_wave.wave_properties.phase;
+	filtered_noise_generator_1d const amp_mod{rng, h, pixel_size, amp_mod_desc.modulating_wave};
 	auto const amp_mod_depth = amp_mod_desc.depth;
 
 	auto const& half_distance_mod_desc = ns_wave_desc.half_distance_modulation;
-	fractal_wave const half_distance_mod{rng, half_distance_mod_desc.modulating_wave.shape};
-	auto const half_distance_mod_wavelength = half_distance_mod_desc.modulating_wave.wave_properties.wavelength;
-	auto const half_distance_mod_phase = half_distance_mod_desc.modulating_wave.wave_properties.phase;
+	filtered_noise_generator_1d const half_distance_mod{rng, h, pixel_size, half_distance_mod_desc.modulating_wave};
 	auto const half_distance_mod_depth = half_distance_mod_desc.depth;
 
 	for(uint32_t y = 0; y != h; ++y)
@@ -108,11 +104,10 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 			auto const y_val = u(x, y) - ridge_loc;
 			auto const x_val = v(x, y);
 
-			auto const amp_mod_value = amp_mod(x_val/amp_mod_wavelength + amp_mod_phase);
+			auto const amp_mod_value = amp_mod(x_val);
 			auto const amp_res = std::exp2(amp_mod_depth*amp_mod_value)*amplitude;
 
-			auto const half_distnace_mod_value = half_distance_mod(x_val/half_distance_mod_wavelength
-				+ half_distance_mod_phase);
+			auto const half_distnace_mod_value = half_distance_mod(x_val);
 			auto const half_distance_res = std::exp2(half_distance_mod_depth*half_distnace_mod_value)*half_distance;
 
 			auto const z_val = amp_res*wave(y_val)*std::exp2(-std::abs(y_val)/half_distance_res);

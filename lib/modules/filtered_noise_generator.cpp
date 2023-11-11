@@ -17,7 +17,7 @@ void terraformer::apply_filter(std::span<float const> input,
 	for(size_t k = 1; k != signal_length/2; ++k)
 	{
 		auto const omega = static_cast<float>(k);
-		auto const xi = std::min(omega*lambda_0/lambda_max, 16.0f);
+		auto const xi = std::clamp(omega*lambda_0/lambda_max, 1.0f/16.0f, 16.0f);
 		auto const amp = 1.0f/
 			std::sqrt((1.0f + std::pow(xi, -2.0f*hp_order)) * (1.0f + std::pow(xi, 2.0f*lp_order)));
 		filter[k] = amp;
@@ -54,13 +54,13 @@ void terraformer::apply_filter(std::span<float const> input,
 }
 
 std::vector<terraformer::location> terraformer::generate(
-		filtered_noise_generator_1d const& wave_xy,
-		float amp_xy,
-		float peak_loc_xy,
-		filtered_noise_generator_1d const& wave_xz,
-		float amp_xz,
-		float peak_loc_xz,
-		polyline_location_params const& line_params)
+	filtered_noise_generator_1d const& wave_xy,
+	float amp_xy,
+	float peak_loc_xy,
+	filtered_noise_generator_1d const& wave_xz,
+	float amp_xz,
+	float peak_loc_xz,
+	polyline_location_params const& line_params)
 {
 	auto const n_points = line_params.point_count;
 	auto const dx = line_params.dx;
