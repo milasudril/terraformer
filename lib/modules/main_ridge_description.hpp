@@ -14,6 +14,7 @@ namespace terraformer
 	{
 		OffsetType initial_value;
 		AmplitudeType amplitude;
+		horizontal_offset peak_location;
 		filtered_noise_description_1d wave;
 	};
 
@@ -40,6 +41,18 @@ namespace terraformer
 				.description = "Sets the amplitude of the generated wave function",
 				.widget = numeric_input_log{
 					.binding = std::ref(params.get().amplitude),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "peak_location",
+				.display_name = "Peak location",
+				.description = "Sets the x coordinate of the highest peak",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().peak_location),
 					.value_converter = calculator{}
 				}
 			}
