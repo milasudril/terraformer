@@ -81,13 +81,13 @@ namespace terraformer
 		uint32_t num_pixels,
 		float dx)
 	{
-		auto const ay = params.ridge_curve_xy.amplitude;
-		auto const az = params.ridge_curve_xz.amplitude;
 		return generate(rng,
 			params.ridge_curve_xy.wave,
-			output_range{-ay, ay},
+			params.ridge_curve_xy.amplitude,
+			params.ridge_curve_xy.peak_location,
 			params.ridge_curve_xz.wave,
-			output_range{-az, az},
+			params.ridge_curve_xz.amplitude,
+			params.ridge_curve_xz.peak_location,
 			polyline_location_params{
 				.point_count = num_pixels,
 				.dx = dx,

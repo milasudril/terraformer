@@ -100,17 +100,21 @@ namespace terraformer
 
 	std::vector<location> generate(
 		filtered_noise_generator_1d const& wave_xy,
-		output_range xy_output_range,
+		float amp_xy,
+		float peak_loc_xy,
 		filtered_noise_generator_1d const& wave_xz,
-		output_range xz_output_range,
+		float amp_xz,
+		float peak_loc_xz,
 		polyline_location_params const& line_params);
 
 	template<class Rng>
 	auto generate(Rng&& rng,
 		filtered_noise_description_1d const& wave_xy,
-		output_range xy_output_range,
+		float amp_xy,
+		float peak_loc_xy,
 		filtered_noise_description_1d const& wave_xz,
-		output_range xz_output_range,
+		float amp_xz,
+		float peak_loc_xz,
 		polyline_location_params const& line_params)
 	{
 		return generate(
@@ -120,14 +124,16 @@ namespace terraformer
 				line_params.dx,
 				wave_xy
 			},
-			xy_output_range,
+			amp_xy,
+			peak_loc_xy,
 			filtered_noise_generator_1d{
 				rng,
 				line_params.point_count,
 				line_params.dx,
 				wave_xz
 			},
-			xz_output_range,
+			amp_xz,
+			peak_loc_xz,
 			line_params
 		);
 	}
