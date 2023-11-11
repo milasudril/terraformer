@@ -52,3 +52,41 @@ void terraformer::apply_filter(std::span<float const> input,
 		output[k - max_index] = (src_val - offset)/amplitude;
 	}
 }
+
+std::vector<terraformer::location> terraformer::generate(
+	filtered_noise_generator_1d const& wave_xy,
+	output_range xy_output_range,
+	filtered_noise_generator_1d const& wave_xz,
+	output_range xz_output_range,
+	polyline_location_params const& line_params)
+{
+	auto const n_points = line_params.point_count;
+	auto const dx = line_params.dx;
+	auto const phase_xy = 0.0f;
+	auto const phase_xz = 0.0f;
+
+	std::vector<displacement> curve;
+	curve.reserve(n_points);
+	for(size_t k = 0; k != n_points; ++k)
+	{
+		auto const x = static_cast<float>(k)*dx;
+		auto const y = wave_xy(x + phase_xy);
+		auto const z = wave_xz(x + phase_xz);
+		curve.push_back(displacement{x, y, z});
+	}
+
+	auto const xy_amp_out = 0.5f*(xy_output_range.max - xy_output_range.min);
+	auto const xy_offset_out = 0.5f*(xy_output_range.min + xy_output_range.max);
+
+	auto const xz_amp_out = 0.5f*(xz_output_range.max - xz_output_range.min);
+	auto const xz_offset_out = 0.5f*(xz_output_range.min + xz_output_range.max);
+
+	scaling const scaling{1.0f, xy_amp_out, xz_amp_out};
+	displacement const offset_out{0.0f, xy_offset_out, xz_offset_out};
+
+	std::vector<location> ret;
+	ret.reserve(n_points);
+	for(size_t k = 0; k != std::size(curve); ++k)
+	{ ret.push_back(line_params.start_location + curve[k].apply(scaling) + offset_out); }
+	return ret;
+}

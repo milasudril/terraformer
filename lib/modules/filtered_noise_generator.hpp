@@ -5,10 +5,12 @@
 
 #include "./dimensions.hpp"
 #include "./calculator.hpp"
+#include "./polyline.hpp"
 
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/filters/dft_engine.hpp"
-#include "lib/common/utils.hpp"
+//#include "lib/common/utils.hpp"
+#include "lib/common/output_range.hpp"
 #include "lib/interp.hpp"
 #include "lib/boundary_sampling_policies.hpp"
 
@@ -87,11 +89,48 @@ namespace terraformer
 
 		float dx() const { return m_dx; }
 
+		size_t point_count() const { return m_signal_length/2; }
+
 	private:
 		size_t m_signal_length;
 		std::unique_ptr<float[]> m_signal;
 		float m_dx;
 	};
+
+
+	std::vector<location> generate(
+		filtered_noise_generator_1d const& wave_xy,
+		output_range xy_output_range,
+		filtered_noise_generator_1d const& wave_xz,
+		output_range xz_output_range,
+		polyline_location_params const& line_params);
+
+	template<class Rng>
+	auto generate(Rng&& rng,
+		filtered_noise_description_1d const& wave_xy,
+		output_range xy_output_range,
+		filtered_noise_description_1d const& wave_xz,
+		output_range xz_output_range,
+		polyline_location_params const& line_params)
+	{
+		return generate(
+			filtered_noise_generator_1d{
+				rng,
+				line_params.point_count,
+				line_params.dx,
+				wave_xy
+			},
+			xy_output_range,
+			filtered_noise_generator_1d{
+				rng,
+				line_params.point_count,
+				line_params.dx,
+				wave_xz
+			},
+			xz_output_range,
+			line_params
+		);
+	}
 }
 
 #endif

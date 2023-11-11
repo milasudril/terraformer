@@ -3,6 +3,7 @@
 
 #include "./fractal_wave.hpp"
 #include "./calculator.hpp"
+#include "./filtered_noise_generator.hpp"
 
 #include <functional>
 
@@ -13,7 +14,7 @@ namespace terraformer
 	{
 		OffsetType initial_value;
 		AmplitudeType amplitude;
-		fractal_wave_description wave;
+		filtered_noise_description_1d wave;
 	};
 
 	template<class Form, class OffsetType, class AmplitudeType>
@@ -74,7 +75,7 @@ namespace terraformer
 			output_range{-ay, ay},
 			params.ridge_curve_xz.wave,
 			output_range{-az, az},
-				polyline_location_params{
+			polyline_location_params{
 				.point_count = num_pixels,
 				.dx = dx,
 				.start_location = terraformer::location{
