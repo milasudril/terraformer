@@ -23,7 +23,6 @@ TESTCASE(terraformer_filtered_noise_generator_generate)
 	EXPECT_EQ(generator(0.0f), 1.0f);
 	EXPECT_EQ(generator(65536.0f), 1.0f);
 
-#if 1
 	auto y_0 = generator(0.0f);
 	auto goes_up = false;
 	for(size_t k = 1; k != 2048; ++k)
@@ -46,5 +45,4 @@ TESTCASE(terraformer_filtered_noise_generator_generate)
 		}
 		y_0 = y;
 	}
-#endif
 }

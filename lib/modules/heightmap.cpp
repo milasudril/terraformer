@@ -93,17 +93,21 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const peak_location = ns_wave_desc.nominal_oscillations.peak_location;
 	auto const half_distance = ns_wave_desc.nominal_oscillations.half_distance;
 	auto const y_dir = ns_wave_desc.nominal_oscillations.flip_direction? -1.0f : 1.0f;
-	auto const x_dir = ns_wave_desc.nominal_oscillations.invert_displacement? -1.0f : 1.0f;
+	auto const z_dir = ns_wave_desc.nominal_oscillations.invert_displacement? -1.0f : 1.0f;
 
 	auto const& amp_mod_desc = ns_wave_desc.amplitude_modulation;
 	filtered_noise_generator_1d const amp_mod{rng, w, pixel_size, amp_mod_desc.modulating_wave};
 	auto const amp_mod_depth = amp_mod_desc.depth;
 	auto const amp_mod_peak_loc = amp_mod_desc.peak_location;
+	auto const amp_mod_x_dir = amp_mod_desc.flip_direction? -1.0f : 1.0f;
+	auto const amp_mod_z_dir = amp_mod_desc.invert_displacement? -1.0f : 1.0f;
 
 	auto const& half_distance_mod_desc = ns_wave_desc.half_distance_modulation;
 	filtered_noise_generator_1d const half_distance_mod{rng, w, pixel_size, half_distance_mod_desc.modulating_wave};
 	auto const half_distance_mod_depth = half_distance_mod_desc.depth;
 	auto const half_distance_mod_peak_loc = half_distance_mod_desc.peak_location;
+	auto const half_distance_mod_x_dir = half_distance_mod_desc.flip_direction? -1.0f : 1.0f;
+	auto const half_distance_mod_z_dir = half_distance_mod_desc.invert_displacement? -1.0f : 1.0f;
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -112,13 +116,13 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 			auto const y_val = u(x, y) - ridge_loc;
 			auto const x_val = v(x, y);
 
-			auto const amp_mod_value = amp_mod(x_val - amp_mod_peak_loc);
+			auto const amp_mod_value = amp_mod_z_dir*amp_mod(amp_mod_x_dir*(x_val - amp_mod_peak_loc));
 			auto const amp_res = std::exp2(amp_mod_depth*amp_mod_value)*amplitude;
 
-			auto const half_distnace_mod_value = half_distance_mod(x_val - half_distance_mod_peak_loc);
+			auto const half_distnace_mod_value = half_distance_mod_z_dir*half_distance_mod(half_distance_mod_x_dir*(x_val - half_distance_mod_peak_loc));
 			auto const half_distance_res = std::exp2(half_distance_mod_depth*half_distnace_mod_value)*half_distance;
 
-			auto const z_val = x_dir*amp_res*wave(y_dir*(y_val - peak_location))*std::exp2(-std::abs(y_val)/half_distance_res);
+			auto const z_val = z_dir*amp_res*wave(y_dir*(y_val - peak_location))*std::exp2(-std::abs(y_val)/half_distance_res);
 
 			ns_wave_output(x, y) = z_val;
 		}

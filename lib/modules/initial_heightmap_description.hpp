@@ -244,6 +244,8 @@ namespace terraformer
 	{
 		modulation_depth depth;
 		horizontal_offset peak_location;
+		bool flip_direction{};
+		bool invert_displacement{};
 		filtered_noise_description_1d modulating_wave;
 	};
 
@@ -269,6 +271,28 @@ namespace terraformer
 				.widget = numeric_input{
 					.binding = std::ref(params.get().peak_location),
 					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "flip_direction",
+				.display_name = "Flip direction",
+				.description = "Flips the \"travel direction\" of the wave",
+				.widget = bool_input{
+					.binding = std::ref(params.get().flip_direction)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "invert_displacement",
+				.display_name = "Invert displacement",
+				.description = "Inverts displacements caused by the wave the wave",
+				.widget = bool_input{
+					.binding = std::ref(params.get().invert_displacement)
 				}
 			}
 		);
