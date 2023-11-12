@@ -34,6 +34,12 @@ TESTCASE(terraformer_mod_float)
    }
 }
 
+TESTCASE(terraformer_mod_float_negative_close_to_zero)
+{
+	auto const x = terraformer::mod(-2.00373302e-06f, 2048.0f);
+	EXPECT_EQ(x, 0.0f);  // rounded to zero due to out of precision
+}
+
 TESTCASE(terraformer_mod_int)
 {
 	std::unordered_map<int32_t, int32_t> correct_values

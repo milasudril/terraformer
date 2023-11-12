@@ -12,6 +12,8 @@ namespace terraformer
 	{
 		auto const ret = fast_fmod(x, denom);
 		auto const alt_ret = ret + denom;
+		if(alt_ret == denom)  // This may happen due to lack of precision
+		{ return 0.0f; }
 		return ret < 0.0f ? (alt_ret > 0.0f ? alt_ret : 0.0f) : ret;
 	}
 
