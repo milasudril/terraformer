@@ -82,6 +82,12 @@ namespace terraformer
 		Converter value_converter;
 		LabelContainer labels;
 	};
+
+	template<class BindingType>
+	struct bool_input
+	{
+		BindingType binding;
+	};
 }
 
 #endif

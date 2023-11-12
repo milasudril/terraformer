@@ -15,6 +15,8 @@ namespace terraformer
 		OffsetType initial_value;
 		AmplitudeType amplitude;
 		horizontal_offset peak_location;
+		bool flip_x{};
+		bool flip_displacement{};
 		filtered_noise_description_1d wave;
 	};
 
@@ -48,12 +50,22 @@ namespace terraformer
 
 		form.insert(
 			field{
-				.name = "peak_location",
-				.display_name = "Peak location",
-				.description = "Sets the x coordinate of the highest peak",
-				.widget = numeric_input{
-					.binding = std::ref(params.get().peak_location),
-					.value_converter = calculator{}
+				.name = "flip_x",
+				.display_name = "Flip x",
+				.description = "Filps the x direction",
+				.widget = bool_input{
+					.binding = std::ref(params.get().flip_x)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "flip_displacement",
+				.display_name = "Flip displacement",
+				.description = "Filps the displacement direction (y or z)",
+				.widget = bool_input{
+					.binding = std::ref(params.get().flip_displacement)
 				}
 			}
 		);
@@ -85,9 +97,13 @@ namespace terraformer
 			params.ridge_curve_xy.wave,
 			params.ridge_curve_xy.amplitude,
 			params.ridge_curve_xy.peak_location,
+			params.ridge_curve_xy.flip_x,
+			params.ridge_curve_xy.flip_displacement,
 			params.ridge_curve_xz.wave,
 			params.ridge_curve_xz.amplitude,
 			params.ridge_curve_xz.peak_location,
+			params.ridge_curve_xz.flip_x,
+			params.ridge_curve_xz.flip_displacement,
 			polyline_location_params{
 				.point_count = num_pixels,
 				.dx = dx,

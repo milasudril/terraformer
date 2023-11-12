@@ -57,9 +57,13 @@ std::vector<terraformer::location> terraformer::generate(
 	filtered_noise_generator_1d const& wave_xy,
 	float amp_xy,
 	float peak_loc_xy,
+	bool flip_x_xy,
+	bool flip_displacement_xy,
 	filtered_noise_generator_1d const& wave_xz,
 	float amp_xz,
 	float peak_loc_xz,
+	bool flip_x_xz,
+	bool flip_displacement_xz,
 	polyline_location_params const& line_params)
 {
 	auto const n_points = line_params.point_count;
@@ -67,11 +71,15 @@ std::vector<terraformer::location> terraformer::generate(
 
 	std::vector<displacement> curve;
 	curve.reserve(n_points);
+	auto const xy_x = flip_x_xy? -1.0f : 1.0f;
+	amp_xy = flip_displacement_xy? -amp_xy:amp_xy;
+	auto const xz_x = flip_x_xz? -1.0f : 1.0f;
+	amp_xz = flip_displacement_xz? -amp_xz:amp_xz;
 	for(size_t k = 0; k != n_points; ++k)
 	{
 		auto const x = static_cast<float>(k)*dx;
-		auto const y = amp_xy*wave_xy(x - peak_loc_xy);
-		auto const z = amp_xz*wave_xz(x - peak_loc_xz);
+		auto const y = amp_xy*wave_xy(xy_x*(x - peak_loc_xy));
+		auto const z = amp_xz*wave_xz(xz_x*(x - peak_loc_xz));
 		curve.push_back(displacement{x, y, z});
 	}
 

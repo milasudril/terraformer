@@ -102,9 +102,13 @@ namespace terraformer
 		filtered_noise_generator_1d const& wave_xy,
 		float amp_xy,
 		float peak_loc_xy,
+		bool flip_x_xy,
+		bool flip_displacement_xy,
 		filtered_noise_generator_1d const& wave_xz,
 		float amp_xz,
 		float peak_loc_xz,
+		bool flip_x_xz,
+		bool flip_displacement_xz,
 		polyline_location_params const& line_params);
 
 	template<class Rng>
@@ -112,9 +116,13 @@ namespace terraformer
 		filtered_noise_description_1d const& wave_xy,
 		float amp_xy,
 		float peak_loc_xy,
+		bool flip_x_xy,
+		bool flip_displacement_xy,
 		filtered_noise_description_1d const& wave_xz,
 		float amp_xz,
 		float peak_loc_xz,
+		bool flip_x_xz,
+		bool flip_displacement_xz,
 		polyline_location_params const& line_params)
 	{
 		return generate(
@@ -126,6 +134,8 @@ namespace terraformer
 			},
 			amp_xy,
 			peak_loc_xy,
+			flip_x_xy,
+			flip_displacement_xy,
 			filtered_noise_generator_1d{
 				rng,
 				line_params.point_count,
@@ -134,6 +144,8 @@ namespace terraformer
 			},
 			amp_xz,
 			peak_loc_xz,
+			flip_x_xz,
+			flip_displacement_xz,
 			line_params
 		);
 	}

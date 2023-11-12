@@ -28,6 +28,7 @@
 #include <QToolTip>
 #include <QChartView>
 #include <QComboBox>
+#include <QCheckBox>
 
 #include <ranges>
 
@@ -492,6 +493,50 @@ namespace terraformer
 				auto const char_width = fm.horizontalAdvance("A");
 				ret->setMinimumWidth(char_width*(*textbox.min_width));
 			}
+			ret->setObjectName(field_name);
+			return ret;
+		}
+
+		template<class BindingType>
+		std::unique_ptr<QCheckBox>
+		create_widget(bool_input<BindingType> const& checkbox, QWidget& parent, char const* field_name)
+		{
+			auto ret = std::make_unique<QCheckBox>(&parent);
+
+			if constexpr(!std::is_const_v<typename BindingType::type>)
+			{
+				QObject::connect(ret.get(),
+					&QCheckBox::stateChanged,
+					[this, &src = *ret, checkbox, has_been_called = false]() mutable{
+						if(has_been_called)
+						{ return; }
+						has_been_called = true;
+						try_and_catch([this, &src](auto const& error){
+							log_error(error.what());
+							src.setFocus();
+						}, [this](auto& src, auto const& checkbox){
+							auto const str = src.text().toStdString();
+							if(auto new_val = src.isChecked(); new_val != checkbox.binding.get())
+							{
+								checkbox.binding.get() = new_val;
+								m_on_value_changed(make_widget_path(m_path, src.objectName()));
+							}
+						}, src, checkbox);
+						refresh();
+						has_been_called = false;
+					}
+				);
+			}
+			else
+			{
+				// NOTE: Workaround since checkbox has no "readonly" property
+				ret->setEnabled(false);
+			}
+
+			m_display_callbacks.push_back([&dest = *ret, checkbox](){
+				dest.setChecked(checkbox.binding.get());
+			});
+
 			ret->setObjectName(field_name);
 			return ret;
 		}
