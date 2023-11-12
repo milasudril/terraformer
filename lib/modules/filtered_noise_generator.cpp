@@ -8,21 +8,28 @@ void terraformer::apply_filter(std::span<float const> input,
 	filtered_noise_description_1d const& params)
 {
 	auto const signal_length = std::size(input);
-	auto const lambda_0 = params.lambda_0;
-	auto const hp_order = params.hp_order;
-	auto const lp_order = params.lp_order;
+	auto const lambda_0 = static_cast<double>(params.lambda_0);
+	auto const hp_order = static_cast<double>(params.hp_order);
+	auto const lp_order = static_cast<double>(params.lp_order);
 
 	auto filter = std::make_unique<float[]>(signal_length);
 	std::uniform_real_distribution U{0.0f, 1.0f};
 	for(size_t k = 1; k != signal_length/2; ++k)
 	{
-		auto const omega = static_cast<float>(k);
-		auto const xi = std::clamp(omega*lambda_0/lambda_max, 1.0f/16.0f, 16.0f);
-		auto const amp = 1.0f/
-			std::sqrt((1.0f + std::pow(xi, -2.0f*hp_order)) * (1.0f + std::pow(xi, 2.0f*lp_order)));
-		filter[k] = amp;
-		filter[signal_length - k] = amp;
+		auto const omega = static_cast<double>(k);
+		auto const xi = omega*lambda_0/lambda_max;
+		auto const amp = 1.0/
+			std::sqrt((1.0 + std::pow(xi, -2.0*hp_order)) * (1.0 + std::pow(xi, 2.0*lp_order)));
+		filter[k] = static_cast<float>(amp);
+		filter[signal_length - k] = static_cast<float>(amp);
 	}
+
+#if 0
+	for(size_t k = 0; k != signal_length; ++k)
+	{
+		printf("%zu %.8g\n", k, filter[k]);
+	}
+#endif
 
 	auto complex_signal = std::make_unique_for_overwrite<std::complex<float>[]>(signal_length);
 	std::ranges::copy(input, complex_signal.get());
