@@ -50,6 +50,18 @@ namespace terraformer
 
 		form.insert(
 			field{
+				.name = "peak_location",
+				.display_name = "Peak location",
+				.description = "Sets the x coordinate of the highest peak",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().peak_location),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
 				.name = "flip_x",
 				.display_name = "Flip x",
 				.description = "Filps the x direction",
