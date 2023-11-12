@@ -15,8 +15,8 @@ namespace terraformer
 		OffsetType initial_value;
 		AmplitudeType amplitude;
 		horizontal_offset peak_location;
-		bool flip_x{};
-		bool flip_displacement{};
+		bool flip_direction{};
+		bool invert_displacement{};
 		filtered_noise_description_1d wave;
 	};
 
@@ -62,22 +62,22 @@ namespace terraformer
 
 		form.insert(
 			field{
-				.name = "flip_x",
-				.display_name = "Flip x",
-				.description = "Filps the x direction",
+				.name = "flip_direction",
+				.display_name = "Flip direction",
+				.description = "Flips the \"travel direction\" of the wave",
 				.widget = bool_input{
-					.binding = std::ref(params.get().flip_x)
+					.binding = std::ref(params.get().flip_direction)
 				}
 			}
 		);
 
 		form.insert(
 			field{
-				.name = "flip_displacement",
-				.display_name = "Flip displacement",
-				.description = "Filps the displacement direction (y or z)",
+				.name = "invert_displacement",
+				.display_name = "Invert displacement",
+				.description = "Inverts displacements caused by the wave the wave",
 				.widget = bool_input{
-					.binding = std::ref(params.get().flip_displacement)
+					.binding = std::ref(params.get().invert_displacement)
 				}
 			}
 		);
@@ -109,13 +109,13 @@ namespace terraformer
 			params.ridge_curve_xy.wave,
 			params.ridge_curve_xy.amplitude,
 			params.ridge_curve_xy.peak_location,
-			params.ridge_curve_xy.flip_x,
-			params.ridge_curve_xy.flip_displacement,
+			params.ridge_curve_xy.flip_direction,
+			params.ridge_curve_xy.invert_displacement,
 			params.ridge_curve_xz.wave,
 			params.ridge_curve_xz.amplitude,
 			params.ridge_curve_xz.peak_location,
-			params.ridge_curve_xz.flip_x,
-			params.ridge_curve_xz.flip_displacement,
+			params.ridge_curve_xz.flip_direction,
+			params.ridge_curve_xz.invert_displacement,
 			polyline_location_params{
 				.point_count = num_pixels,
 				.dx = dx,
