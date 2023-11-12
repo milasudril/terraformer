@@ -160,6 +160,7 @@ namespace terraformer
 	{
 		vertical_amplitude initial_amplitude;
 		horizontal_offset peak_location;
+		bool flip_wave_direction{};
 		domain_length half_distance;
 		filtered_noise_description_1d wave;
 	};
@@ -188,6 +189,17 @@ namespace terraformer
 				.widget = numeric_input{
 					.binding = std::ref(params.get().peak_location),
 					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "flip_wave_direction",
+				.display_name = "Flip wave direction",
+				.description = "Flips the \"travel direction\" of the wave",
+				.widget = bool_input{
+					.binding = std::ref(params.get().flip_wave_direction)
 				}
 			}
 		);
