@@ -7,7 +7,6 @@
 #include <complex>
 #include <memory>
 #include <type_traits>
-#include <mutex>
 #include <array>
 
 namespace terraformer
@@ -52,7 +51,6 @@ namespace terraformer
 
 	private:
 		static constexpr size_t cache_size = 16;
-		mutable std::mutex m_access_mutex;
 		mutable std::array<std::pair<size_t, dft_direction>, cache_size> m_transform_sizes{};
 		struct plan_info
 		{
