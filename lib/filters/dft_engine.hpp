@@ -3,11 +3,14 @@
 #ifndef TERRAFORMER_DFT_ENGINE_HPP
 #define TERRAFORMER_DFT_ENGINE_HPP
 
+#include "lib/common/span_2d.hpp"
+
 #include <fftw3.h>
 #include <complex>
 #include <memory>
 #include <type_traits>
 #include <array>
+#include <variant>
 
 namespace terraformer
 {
@@ -16,7 +19,9 @@ namespace terraformer
 	class dft_execution_plan
 	{
 	public:
-		explicit dft_execution_plan(size_t size, dft_direction);
+		explicit dft_execution_plan(size_t size, dft_direction dir);
+
+		explicit dft_execution_plan(span_2d_extents size, dft_direction);
 
 		dft_execution_plan() = default;
 
@@ -47,22 +52,26 @@ namespace terraformer
 	class dft_execution_plan_cache
 	{
 	public:
-		dft_execution_plan const& get_plan(size_t buffer_size, dft_direction dir) const;
+		using sizes = std::variant<size_t, span_2d_extents>;
+
+		dft_execution_plan const& get_plan(sizes size, dft_direction dir) const;
 
 	private:
 		static constexpr size_t cache_size = 16;
-		mutable std::array<std::pair<size_t, dft_direction>, cache_size> m_transform_sizes{};
+
 		struct plan_info
 		{
 			dft_execution_plan plan;
 			size_t last_used{0};
 		};
-		mutable size_t m_counter{0};
 
+
+		mutable size_t m_counter{0};
+		mutable std::array<std::pair<sizes, dft_direction>, cache_size> m_transform_sizes{};
 		mutable std::array<plan_info, cache_size> m_plans;
 	};
 
-	dft_execution_plan const& get_plan(size_t buffer_size, dft_direction dir);
+	dft_execution_plan const& get_plan(dft_execution_plan_cache::sizes buffer_size, dft_direction dir);
 }
 
 #endif

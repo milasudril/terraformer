@@ -18,6 +18,9 @@ namespace terraformer
 	{
 		uint32_t width;
 		uint32_t height;
+
+		constexpr bool operator==(span_2d_extents const&) const = default;
+		constexpr bool operator!=(span_2d_extents const&) const = default;
 	};
 
 	inline auto diagonal(span_2d_extents extents)
