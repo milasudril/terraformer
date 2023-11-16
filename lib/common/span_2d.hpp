@@ -3,6 +3,7 @@
 
 #include "lib/boundary_sampling_policy.hpp"
 #include "./spaces.hpp"
+#include "lib/interp.hpp"
 
 #include <functional>
 #include <cstdint>
@@ -226,30 +227,6 @@ namespace terraformer
 			}
 		}
 		return ret;
-	}
-
-	template<class T, boundary_sampling_policy U>
-	auto interp(span_2d<T const> span, float x, float y, U&& bsp)
-	{
-		auto const w = span.width();
-		auto const h = span.height();
-
-		auto const x_0 = bsp(x, w);
-		auto const y_0 = bsp(y, h);
-		auto const x_1 = bsp(x_0 + 1, w);
-		auto const y_1 = bsp(y_0 + 1, h);
-
-		auto const z_00 = span(x_0, y_0);
-		auto const z_01 = span(x_0, y_1);
-		auto const z_10 = span(x_1, y_0);
-		auto const z_11 = span(x_1, y_1);
-
-		auto const xi = x - static_cast<float>(x_0);
-		auto const eta = y  - static_cast<float>(y_0);
-
-		auto const z_x0 = (1.0f - static_cast<float>(xi)) * z_00 + static_cast<float>(xi) * z_10;
-		auto const z_x1 = (1.0f - static_cast<float>(xi)) * z_01 + static_cast<float>(xi) * z_11;
-		return (1.0f - eta)*z_x0 + eta*z_x1;
 	}
 
 	template<class T, boundary_sampling_policy U>

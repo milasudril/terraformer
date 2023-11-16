@@ -9,7 +9,7 @@
 
 #include "lib/formbuilder/formfield.hpp"
 #include "lib/filters/dft_engine.hpp"
-//#include "lib/common/utils.hpp"
+#include "lib/pixel_store/image.hpp"
 #include "lib/common/output_range.hpp"
 #include "lib/interp.hpp"
 #include "lib/boundary_sampling_policies.hpp"
@@ -203,6 +203,42 @@ namespace terraformer
 	}
 
 	void apply_filter(span_2d<float const> input, span_2d<float> output, double lambda_max, filtered_noise_description_2d const& params);
+
+	class filtered_noise_generator_2d
+	{
+	public:
+		template<class Rng>
+		explicit filtered_noise_generator_2d(Rng&& rng,
+			span_2d_extents size,
+			float dx,
+			filtered_noise_description_2d const& params):
+			m_signal{2*size.width, 2*size.height},
+			m_dx{dx}
+		{
+			grayscale_image noise{m_signal.width(), m_signal.height()};
+			generate(
+				noise.pixels(),
+				[&rng, U = std::uniform_real_distribution{0.0f, 1.0f}](auto...) mutable {
+					return U(rng);
+				}
+			);
+
+			apply_filter(
+				noise.pixels(),
+				m_signal.pixels(),
+				2.0*static_cast<double>(std::min(size.width, size.height))*static_cast<double>(dx),
+				params);
+		}
+
+		float operator()(float x, float y) const
+		{ return interp(m_signal.pixels(), x/m_dx, y/m_dx, wrap_around_at_boundary{}); }
+
+		float dx() const { return m_dx; }
+
+	private:
+		grayscale_image m_signal;
+		float m_dx;
+	};
 }
 
 #endif

@@ -4,6 +4,8 @@
 
 #include "lib/pixel_store/image.hpp"
 
+#include "lib/pixel_store/image_io.hpp"
+
 #include <testfwk/testfwk.hpp>
 
 TESTCASE(terraformer_filtered_noise_generator_generate)
@@ -51,30 +53,27 @@ TESTCASE(terraformer_filtered_noise_generator_generate)
 
 TESTCASE(terraformer_filtered_noise_generator_2d_generate)
 {
-#if 0
-	span_2d<float const> input, span_2d<float> output, double lambda_max, filtered_noise_description_2d const& params
-#endif
-
-	terraformer::grayscale_image dummy{128, 128};
 	terraformer::random_generator rng{};
-	std::uniform_real_distribution U{0.0f, 1.0f};
-	for(uint32_t y = 0; y != dummy.height(); ++y)
-	{
-		for(uint32_t x = 0; x != dummy.width(); ++x)
-		{
-			dummy(x, y) = U(rng);
-		}
-	}
 
-	apply_filter(
-		dummy,
-		dummy,
-		2.0*128*512.0,
+	terraformer::filtered_noise_generator_2d generator{
+		rng,
+		terraformer::span_2d_extents{1024, 1024},
+		32.0f,
 		terraformer::filtered_noise_description_2d{
 			.wavelength_x = terraformer::domain_length{8192.0f},
-			.wavelength_y = terraformer::domain_length{8192.0f},
-			.hp_order = terraformer::filter_order{1.0f},
-			.lp_order = terraformer::filter_order{2.0f}
+			.wavelength_y = terraformer::domain_length{4096.0f},
+			.hp_order = terraformer::filter_order{8.0f},
+			.lp_order = terraformer::filter_order{8.0f}
 		}
-	);
+	};
+
+	terraformer::grayscale_image img_out{2048, 2048};
+	for(uint32_t y = 0; y != 2048; ++y)
+	{
+		for(uint32_t x = 0; x != 2048; ++x)
+		{
+			img_out(x, y) = generator(static_cast<float>(x)*32.0f, static_cast<float>(y)*32.0f);
+		}
+	}
+	store(img_out, "test.exr");
 }

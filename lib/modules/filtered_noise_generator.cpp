@@ -3,8 +3,6 @@
 #include "./filtered_noise_generator.hpp"
 #include "lib/pixel_store/image.hpp"
 
-#include "lib/pixel_store/image_io.hpp"
-
 void terraformer::apply_filter(std::span<float const> input,
 	float* output,
 	double lambda_max,
