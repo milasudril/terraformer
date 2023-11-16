@@ -69,9 +69,7 @@ namespace terraformer
 		constexpr auto extents() const { return span_2d_extents{m_width, m_height}; }
 
 		constexpr T& operator()(IndexType x, IndexType y) const
-		{
-			return *(m_ptr + y * width() + x);
-		}
+		{	return *(m_ptr + y * width() + x); }
 
 	private:
 		IndexType m_width;
@@ -132,8 +130,40 @@ namespace terraformer
 				}
 			}
 		}
-
 		return ret;
+	}
+
+	template<class T, class Cmp = std::less<T>>
+	std::ranges::min_max_result<pixel_coordinates>
+	minmax_element(span_2d<T> span, Cmp&& cmp = std::less<T>{})
+	{
+		using IndexType = typename span_2d<T>::IndexType;
+		pixel_coordinates minloc{static_cast<IndexType>(0), static_cast<IndexType>(0)};
+		pixel_coordinates maxloc{static_cast<IndexType>(0), static_cast<IndexType>(0)};
+		auto min = span(minloc.x, minloc.y);
+		auto max = span(maxloc.x, maxloc.y);
+		for(IndexType row = 0; row != span.height(); ++row)
+		{
+			for(IndexType col = 0; col != span.width(); ++col)
+			{
+				auto const val = span(col, row);
+				if(cmp(val, min))
+				{
+					min = val;
+					minloc = pixel_coordinates{col, row};
+				}
+
+				if(cmp(max, val))
+				{
+					max = val;
+					maxloc = pixel_coordinates{col, row};
+				}
+			}
+		}
+		return std::ranges::min_max_result{
+			.min = minloc,
+			.max = maxloc
+		};
 	}
 
 	template<class In, class Out, class Func>
