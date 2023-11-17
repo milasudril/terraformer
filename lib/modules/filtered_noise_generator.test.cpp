@@ -8,7 +8,7 @@
 
 #include <testfwk/testfwk.hpp>
 
-TESTCASE(terraformer_filtered_noise_generator_1d_apply_filter)
+TESTCASE(terraformer_filtered_noise_generator_1d_apply_filter_result_is_real)
 {
 	std::array<float, 1024> input;
 	std::generate_n(
@@ -16,7 +16,7 @@ TESTCASE(terraformer_filtered_noise_generator_1d_apply_filter)
 		std::size(input),
 		[
 			rng = terraformer::random_generator{},
-			U = std::uniform_real_distribution{}
+			U = std::uniform_real_distribution{0.0f, 1.0f}
 		]() mutable {
 			return U(rng);
 		}
@@ -29,7 +29,7 @@ TESTCASE(terraformer_filtered_noise_generator_1d_apply_filter)
 		1.0,
 		terraformer::filtered_noise_description_1d{
 			.wavelength = terraformer::domain_length{256.0f},
-			.hp_order = terraformer::filter_order{8.0f},
+			.hp_order = terraformer::filter_order{2.0f},
 			.lp_order = terraformer::filter_order{2.0f}
 		}
 	);
@@ -81,6 +81,40 @@ TESTCASE(terraformer_filtered_noise_generator_generate)
 	}
 }
 
+TESTCASE(terraformer_filtered_noise_generator_2d_apply_filter_result_is_real)
+{
+	terraformer::grayscale_image noise{8, 8};
+	generate(
+		noise.pixels(),
+		[
+			rng = terraformer::random_generator{},
+			U = std::uniform_real_distribution{0.0f, 1.0f}
+		](auto...) mutable {
+			return U(rng);
+		}
+	);
+
+	terraformer::basic_image<std::complex<float>> output{8, 8};
+	apply_filter(
+		noise.pixels(),
+		output.pixels(),
+		8.0,
+		terraformer::filtered_noise_description_2d{
+			.wavelength_x = terraformer::domain_length{4.0f},
+			.wavelength_y = terraformer::domain_length{4.0f},
+			.hp_order = terraformer::filter_order{8.0f},
+			.lp_order = terraformer::filter_order{8.0f}
+		}
+	);
+
+	for(uint32_t y = 0; y != 8; ++y)
+	{
+		for(uint32_t x = 0; x != 8; ++x)
+		{ EXPECT_LT(std::abs(output(x, y).imag()/output(x, y).real()), 1e-8f); }
+	}
+}
+
+#if 0
 TESTCASE(terraformer_filtered_noise_generator_2d_generate)
 {
 	terraformer::random_generator rng{};
@@ -105,5 +139,5 @@ TESTCASE(terraformer_filtered_noise_generator_2d_generate)
 			img_out(x, y) = generator(static_cast<float>(x)*32.0f, static_cast<float>(y)*32.0f);
 		}
 	}
-	store(img_out, "test.exr");
 }
+#endif

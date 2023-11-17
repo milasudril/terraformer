@@ -100,8 +100,9 @@ std::vector<terraformer::location> terraformer::generate(
 	return ret;
 }
 
-void terraformer::apply_filter(span_2d<float const> input,
-	span_2d<float> output,
+void terraformer::apply_filter(
+	span_2d<float const> input,
+	span_2d<std::complex<float>> output,
 	double lambda_max,
 	filtered_noise_description_2d const& params)
 {
@@ -140,13 +141,12 @@ void terraformer::apply_filter(span_2d<float const> input,
 		}
 	}
 
-	basic_image<std::complex<float>> complex_image{w, h};
 	auto const signal_length = static_cast<size_t>(w)*static_cast<size_t>(h);
-	std::copy_n(input.data(), signal_length, complex_image.pixels().data());
+	std::copy_n(input.data(), signal_length, output.data());
 
 	basic_image<std::complex<float>> transformed_image{w, h};
 	get_plan(span_2d_extents{w, h}, dft_direction::forward)
-		.execute(complex_image.pixels().data(), transformed_image.pixels().data());
+		.execute(output.data(), transformed_image.pixels().data());
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -155,7 +155,18 @@ void terraformer::apply_filter(span_2d<float const> input,
 	}
 
 	get_plan(span_2d_extents{w, h}, dft_direction::backward)
-		.execute(transformed_image.pixels().data(), complex_image.pixels().data());
+		.execute(transformed_image.pixels().data(), output.data());
+}
+
+void terraformer::apply_filter(span_2d<float const> input,
+	span_2d<float> output,
+	double lambda_max,
+	filtered_noise_description_2d const& params)
+{
+	auto const w = input.width();
+	auto const h = input.height();
+	basic_image<std::complex<float>> complex_image{w, h};
+	apply_filter(input, complex_image.pixels(), lambda_max, params);
 
 	auto range = minmax_element(complex_image.pixels(), [](auto a, auto b) {
 		return a.real() < b.real();

@@ -212,6 +212,12 @@ namespace terraformer
 		});
 	}
 
+	void apply_filter(
+		span_2d<float const> input,
+		span_2d<std::complex<float>> output,
+		double lambda_max,
+		filtered_noise_description_2d const& params);
+
 	void apply_filter(span_2d<float const> input, span_2d<float> output, double lambda_max, filtered_noise_description_2d const& params);
 
 	class filtered_noise_generator_2d
