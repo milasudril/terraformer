@@ -63,7 +63,17 @@ namespace terraformer
 		});
 	}
 
-	void apply_filter(std::span<float const> input, float* output, double lambda_max, filtered_noise_description_1d const& params);
+	void apply_filter(
+		std::span<float const> input,
+		std::span<std::complex<float>> output,
+		double lambda_max,
+		filtered_noise_description_1d const& params);
+
+	void apply_filter(
+		std::span<float const> input,
+		float* output,
+		double lambda_max,
+		filtered_noise_description_1d const& params);
 
 	class filtered_noise_generator_1d
 	{

@@ -3,8 +3,9 @@
 #include "./filtered_noise_generator.hpp"
 #include "lib/pixel_store/image.hpp"
 
-void terraformer::apply_filter(std::span<float const> input,
-	float* output,
+void terraformer::apply_filter(
+	std::span<float const> input,
+	std::span<std::complex<float>> output,
 	double lambda_max,
 	filtered_noise_description_1d const& params)
 {
@@ -24,17 +25,26 @@ void terraformer::apply_filter(std::span<float const> input,
 		filter[signal_length - k] = static_cast<float>(amp);
 	}
 
-	auto complex_signal = std::make_unique_for_overwrite<std::complex<float>[]>(signal_length);
-	std::ranges::copy(input, complex_signal.get());
+	std::ranges::copy(input, output.data());
 
 	auto transformed_signal = std::make_unique<std::complex<float>[]>(signal_length);
 	get_plan(signal_length, dft_direction::forward)
-		.execute(complex_signal.get(), transformed_signal.get());
+		.execute(output.data(), transformed_signal.get());
 
 	for(size_t k = 0; k != signal_length; ++k)
 	{ transformed_signal[k] *= filter[k]; }
 
-	get_plan(signal_length, dft_direction::backward).execute(transformed_signal.get(), complex_signal.get());
+	get_plan(signal_length, dft_direction::backward).execute(transformed_signal.get(), output.data());
+}
+
+void terraformer::apply_filter(std::span<float const> input,
+	float* output,
+	double lambda_max,
+	filtered_noise_description_1d const& params)
+{
+	auto const signal_length = std::size(input);
+	auto complex_signal = std::make_unique_for_overwrite<std::complex<float>[]>(signal_length);
+	apply_filter(input, std::span{complex_signal.get(), signal_length}, lambda_max, params);
 
 	std::span const output_vals{complex_signal.get(), signal_length};
 
