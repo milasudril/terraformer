@@ -8,6 +8,36 @@
 
 #include <testfwk/testfwk.hpp>
 
+TESTCASE(terraformer_filtered_noise_generator_1d_apply_filter)
+{
+	std::array<float, 1024> input;
+	std::generate_n(
+		std::data(input),
+		std::size(input),
+		[
+			rng = terraformer::random_generator{},
+			U = std::uniform_real_distribution{}
+		]() mutable {
+			return U(rng);
+		}
+	);
+
+	std::array<std::complex<float>, 1024> output;
+	apply_filter(
+		input,
+		output,
+		1.0,
+		terraformer::filtered_noise_description_1d{
+			.wavelength = terraformer::domain_length{256.0f},
+			.hp_order = terraformer::filter_order{8.0f},
+			.lp_order = terraformer::filter_order{2.0f}
+		}
+	);
+
+	for(size_t k = 0; k != std::size(output); ++k)
+	{ EXPECT_LT(std::abs(output[k].imag()/output[k].real()), 1e-3f); }
+}
+
 TESTCASE(terraformer_filtered_noise_generator_generate)
 {
 	terraformer::random_generator rng{};
