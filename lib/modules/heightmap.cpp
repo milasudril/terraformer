@@ -134,19 +134,34 @@ terraformer::grayscale_image terraformer::generate(
 	span_2d<float const> u,
 	span_2d<float const> v,
 	float pixel_size,
-	filtered_noise_2d_description const& bump_field_desc,
+	float ridge_loc,
+	bump_field_description const& bump_field_desc,
 	random_generator& rng)
 {
 	auto const w = u.width();
 	auto const h = u.height();
 	grayscale_image bump_field{w, h};
 
-	filtered_noise_2d_generator gen{rng, span_2d_extents{w, h}, pixel_size, bump_field_desc};
+	filtered_noise_2d_generator gen{rng, span_2d_extents{w, h}, pixel_size, bump_field_desc.wave};
+
+	location const peak_loc{
+		static_cast<float>(bump_field_desc.peak_loc_x),
+		ridge_loc - static_cast<float>(bump_field_desc.peak_loc_y),
+		0.0f
+	};
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		for(uint32_t x = 0; x != w; ++x)
-		{ bump_field(x, y) = gen(u(x, y), v(x, y)); }
+		{
+			displacement const r{
+				v(x, y),
+				u(x, y),
+				0.0f
+			};
+			auto const sample_at = peak_loc - r;
+			bump_field(x, y) = gen(sample_at[0], sample_at[1]);
+		}
 	}
 
 	return bump_field;
