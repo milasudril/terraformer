@@ -68,8 +68,8 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 			{
 				auto const x_val = pixel_size*static_cast<float>(x);
 				auto const y_val = u(x, y) - ridge_loc;
-				v(x, y) = x_val + x_dir*amplitude*wave(y_dir*(y_val - peak_location))
-					*std::exp2(std::min(std::abs(y_val)/half_distance, std::max(16.0f - std::log2(amplitude), 0.0f)));
+				auto const scale = std::exp2(std::min(std::abs(y_val)/half_distance), 16.0f);
+				v(x, y) = x_val + x_dir*scale*amplitude*wave(y_dir*(y_val - peak_location)/scale);
 			}
 		}
 	}
