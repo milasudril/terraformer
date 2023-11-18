@@ -355,7 +355,7 @@ namespace terraformer
 	struct bump_field_description
 	{
 		vertical_amplitude amplitude;
-		fractal_wave_description_2d wave;
+		filtered_noise_description_2d wave;
 	};
 
 	template<class Form, class T>

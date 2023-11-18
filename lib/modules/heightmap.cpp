@@ -132,69 +132,20 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 
 terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	span_2d<float const> v,
-	float ridge_loc,
-	fractal_wave_description_2d const& bump_field_desc,
+	float pixel_size,
+	filtered_noise_description_2d const& bump_field_desc,
 	random_generator& rng)
 {
 	auto const w = u.width();
 	auto const h = u.height();
 	grayscale_image bump_field{w, h};
-	auto const lambda_x = bump_field_desc.x_wave.wave_properties.wavelength;
-	auto const phase_x = bump_field_desc.x_wave.wave_properties.phase;
-	auto const lambda_y = bump_field_desc.y_wave.wave_properties.wavelength;
-	auto const phase_y = bump_field_desc.y_wave.wave_properties.phase;
 
-	bump_field_generator gen{rng,
-		bump_field_generator::params{
-			.x = bump_field_desc.x_wave.shape,
-			.y = bump_field_desc.y_wave.shape,
-			.symmetry = bump_field_desc.symmetry
-		}
-	};
-	auto min = 2.0f;
-	auto max = -2.0f;
-
-	location origin{
-		0.5f*static_cast<float>(w),
-		ridge_loc,
-		0.0f
-	};
+	filtered_noise_generator_2d gen{rng, span_2d_extents{w, h}, pixel_size, bump_field_desc};
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		for(uint32_t x = 0; x != w; ++x)
-		{
-			auto const vec = (location{u(x, y), v(x, y), 0.0f} - origin)
-				.apply(rotation{geosimd::rotation_angle{geosimd::turns{0.125f}}, geosimd::dimension_tag<2>{}})
-				.apply(
-					scaling{
-						1.0f/lambda_x,
-						1.0f/lambda_y,
-						1.0f
-					}
-				)
-				+ displacement{
-					static_cast<float>(phase_x),
-					static_cast<float>(phase_y),
-					0.0f
-				};
-
-			auto const z_val = gen(vec);
-
-			min = std::min(min, z_val);
-			max = std::max(max, z_val);
-
-			bump_field(x, y) = z_val;
-		}
-	}
-
-	auto const amplitude = 0.5f*(max - min);
-	auto const offset = 0.5f*(max + min);
-
-	for(uint32_t y = 0; y != h; ++y)
-	{
-		for(uint32_t x = 0; x != w; ++x)
-		{ bump_field(x, y) = (bump_field(x, y) - offset)/amplitude; }
+		{ bump_field(x, y) = gen(u(x, y), v(x, y)); }
 	}
 
 	return bump_field;
@@ -212,8 +163,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	{
 		auto const u = hm.u.pixels();
 		auto const ns_wave_output = hm.ns_wave.pixels();
-	//	auto const bump_field_output = hm.bump_field.pixels();
-	//	auto const bump_field_amplitude = params.bump_field.amplitude;
+		auto const bump_field_output = hm.bump_field.pixels();
+		auto const bump_field_amplitude = params.bump_field.amplitude;
 		auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
 		auto const& corners = params.corners;
 		auto const nw_elev = corners.nw.z;
@@ -245,8 +196,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 				auto const base_elevation = std::lerp(north, south, eta);
 				pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump)
-					+ ns_wave_output(x, y);
-//					+ bump_field_amplitude*bump_field_output(x, y);
+					+ ns_wave_output(x, y)
+					+ bump_field_amplitude*bump_field_output(x, y);
 			}
 		}
 	}
