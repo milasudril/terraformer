@@ -16,8 +16,8 @@ namespace terraformer
 
 	struct elevation_range_control
 	{
-		elevation min;
-		elevation max{min*1.25f};
+		elevation min{elevation::default_value()/1.25f};
+		elevation max{elevation::default_value()*1.25f};
 		elevation_range_control_mode control_mode;
 	};
 
