@@ -357,6 +357,8 @@ namespace terraformer
 		vertical_amplitude amplitude;
 		horizontal_offset peak_loc_x;
 		horizontal_offset peak_loc_y;
+		opening_angle axis_angle;
+		rotation_angle rotation;
 		filtered_noise_2d_description wave;
 	};
 
@@ -395,6 +397,30 @@ namespace terraformer
 				.description = "Sets Y coordinate of the highest point",
 				.widget = numeric_input{
 					.binding = std::ref(params.get().peak_loc_y),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "axis_angle",
+				.display_name = "Axis angle",
+				.description = "Sets the angle between X and Y axis",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().axis_angle),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "rotation",
+				.display_name = "Rotation",
+				.description = "Sets the rotation of the coordinate system",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().rotation),
 					.value_converter = calculator{}
 				}
 			}

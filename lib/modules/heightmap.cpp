@@ -144,11 +144,29 @@ terraformer::grayscale_image terraformer::generate(
 
 	filtered_noise_2d_generator gen{rng, span_2d_extents{w, h}, pixel_size, bump_field_desc.wave};
 
-	location const peak_loc{
+	displacement const peak_loc{
 		static_cast<float>(bump_field_desc.peak_loc_x),
-		ridge_loc - static_cast<float>(bump_field_desc.peak_loc_y),
+		static_cast<float>(bump_field_desc.peak_loc_y) - ridge_loc,
 		0.0f
 	};
+
+	auto const rot_x = 2.0f*std::numbers::pi_v<float>*bump_field_desc.rotation;
+	auto const rot_y = 2.0f*std::numbers::pi_v<float>*
+		(bump_field_desc.rotation - 0.25f + bump_field_desc.axis_angle);
+
+	displacement const x_hat{
+		std::cos(rot_x),
+		std::sin(rot_x),
+		0.0f
+	};
+
+	displacement const y_hat{
+		-std::sin(rot_y),
+		std::cos(rot_y),
+		0.0f
+	};
+
+	auto const det_mat = x_hat[0]*y_hat[1] - x_hat[1]*y_hat[0];
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -159,8 +177,10 @@ terraformer::grayscale_image terraformer::generate(
 				u(x, y),
 				0.0f
 			};
-			auto const sample_at = peak_loc - r;
-			bump_field(x, y) = gen(sample_at[0], sample_at[1]);
+			auto const sample_at = r - peak_loc;
+			auto const sample_at_x = inner_product(x_hat, sample_at)/det_mat;
+			auto const sample_at_y = inner_product(y_hat, sample_at)/det_mat;
+			bump_field(x, y) = gen(sample_at_x, sample_at_y);
 		}
 	}
 
