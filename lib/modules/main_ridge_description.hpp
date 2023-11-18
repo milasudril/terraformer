@@ -107,15 +107,19 @@ namespace terraformer
 	{
 		return generate(rng,
 			params.ridge_curve_xy.wave,
-			params.ridge_curve_xy.amplitude,
-			params.ridge_curve_xy.peak_location,
-			params.ridge_curve_xy.flip_direction,
-			params.ridge_curve_xy.invert_displacement,
+			filtered_noise_1d_render_params{
+				params.ridge_curve_xy.amplitude,
+				params.ridge_curve_xy.peak_location,
+				params.ridge_curve_xy.flip_direction,
+				params.ridge_curve_xy.invert_displacement
+			},
 			params.ridge_curve_xz.wave,
-			params.ridge_curve_xz.amplitude,
-			params.ridge_curve_xz.peak_location,
-			params.ridge_curve_xz.flip_direction,
-			params.ridge_curve_xz.invert_displacement,
+			filtered_noise_1d_render_params{
+				params.ridge_curve_xz.amplitude,
+				params.ridge_curve_xz.peak_location,
+				params.ridge_curve_xz.flip_direction,
+				params.ridge_curve_xz.invert_displacement
+			},
 			polyline_location_params{
 				.point_count = num_pixels,
 				.dx = dx,

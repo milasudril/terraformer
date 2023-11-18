@@ -107,31 +107,26 @@ namespace terraformer
 		float m_dx;
 	};
 
-	std::vector<location> generate(
-		filtered_noise_1d_generator const& wave_xy,
-		float amp_xy,
-		float peak_loc_xy,
-		bool flip_x_xy,
-		bool flip_displacement_xy,
+	struct filtered_noise_1d_render_params
+	{
+		float amplitude;
+		float peak_location;
+		bool flip_direction;
+		bool invert_displacement;
+	};
+
+	std::vector<location> generate(filtered_noise_1d_generator const& wave_xy,
+		filtered_noise_1d_render_params const& render_params_xy,
 		filtered_noise_1d_generator const& wave_xz,
-		float amp_xz,
-		float peak_loc_xz,
-		bool flip_x_xz,
-		bool flip_displacement_xz,
+		filtered_noise_1d_render_params const& render_params_xz,
 		polyline_location_params const& line_params);
 
 	template<class Rng>
 	auto generate(Rng&& rng,
 		filtered_noise_1d_description const& wave_xy,
-		float amp_xy,
-		float peak_loc_xy,
-		bool flip_x_xy,
-		bool flip_displacement_xy,
+		filtered_noise_1d_render_params const& render_params_xy,
 		filtered_noise_1d_description const& wave_xz,
-		float amp_xz,
-		float peak_loc_xz,
-		bool flip_x_xz,
-		bool flip_displacement_xz,
+		filtered_noise_1d_render_params const& render_params_xz,
 		polyline_location_params const& line_params)
 	{
 		return generate(
@@ -141,20 +136,14 @@ namespace terraformer
 				line_params.dx,
 				wave_xy
 			},
-			amp_xy,
-			peak_loc_xy,
-			flip_x_xy,
-			flip_displacement_xy,
+			render_params_xy,
 			filtered_noise_1d_generator{
 				rng,
 				line_params.point_count,
 				line_params.dx,
 				wave_xz
 			},
-			amp_xz,
-			peak_loc_xz,
-			flip_x_xz,
-			flip_displacement_xz,
+			render_params_xz,
 			line_params
 		);
 	}

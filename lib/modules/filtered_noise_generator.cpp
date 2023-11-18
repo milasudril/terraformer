@@ -63,17 +63,10 @@ void terraformer::apply_filter(std::span<float const> input,
 	}
 }
 
-std::vector<terraformer::location> terraformer::generate(
-	filtered_noise_1d_generator const& wave_xy,
-	float amp_xy,
-	float peak_loc_xy,
-	bool flip_x_xy,
-	bool flip_displacement_xy,
+std::vector<terraformer::location> terraformer::generate(filtered_noise_1d_generator const& wave_xy,
+	filtered_noise_1d_render_params const& render_params_xy,
 	filtered_noise_1d_generator const& wave_xz,
-	float amp_xz,
-	float peak_loc_xz,
-	bool flip_x_xz,
-	bool flip_displacement_xz,
+	filtered_noise_1d_render_params const& render_params_xz,
 	polyline_location_params const& line_params)
 {
 	auto const n_points = line_params.point_count;
@@ -81,10 +74,15 @@ std::vector<terraformer::location> terraformer::generate(
 
 	std::vector<displacement> curve;
 	curve.reserve(n_points);
-	auto const xy_x = flip_x_xy? -1.0f : 1.0f;
-	amp_xy = flip_displacement_xy? -amp_xy:amp_xy;
-	auto const xz_x = flip_x_xz? -1.0f : 1.0f;
-	amp_xz = flip_displacement_xz? -amp_xz:amp_xz;
+	auto const peak_loc_xy = render_params_xy.peak_location;
+	auto const xy_x = render_params_xy.flip_direction? -1.0f : 1.0f;
+	auto const amp_xy = render_params_xy.invert_displacement?
+		-render_params_xy.amplitude:render_params_xy.amplitude;
+
+	auto const peak_loc_xz = render_params_xz.peak_location;
+	auto const xz_x = render_params_xz.flip_direction? -1.0f : 1.0f;
+	auto const amp_xz = render_params_xz.invert_displacement?
+		-render_params_xz.amplitude:render_params_xz.amplitude;
 	for(size_t k = 0; k != n_points; ++k)
 	{
 		auto const x = static_cast<float>(k)*dx;
