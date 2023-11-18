@@ -146,7 +146,7 @@ terraformer::grayscale_image terraformer::generate(
 
 	displacement const peak_loc{
 		static_cast<float>(bump_field_desc.peak_loc_x),
-		static_cast<float>(bump_field_desc.peak_loc_y) - ridge_loc,
+		ridge_loc + static_cast<float>(bump_field_desc.peak_loc_y),
 		0.0f
 	};
 
