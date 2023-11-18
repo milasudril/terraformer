@@ -1,10 +1,7 @@
 //@	{"target":{"name": "filtered_noise_generator.test"}}
 
 #include "./filtered_noise_generator.hpp"
-
 #include "lib/pixel_store/image.hpp"
-
-#include "lib/pixel_store/image_io.hpp"
 
 #include <testfwk/testfwk.hpp>
 
@@ -115,7 +112,9 @@ TESTCASE(terraformer_filtered_noise_generator_2d_apply_filter_result_is_real)
 }
 
 #if 0
-TESTCASE(terraformer_filtered_noise_generator_2d_generate)
+// TODO: Validate number of periods in rows/colums and the total number of local
+//       maxima
+TESTCASE(terraformer_filtered_noise_generator_2d_generate_period_count)
 {
 	terraformer::random_generator rng{};
 
@@ -139,5 +138,7 @@ TESTCASE(terraformer_filtered_noise_generator_2d_generate)
 			img_out(x, y) = generator(static_cast<float>(x)*32.0f, static_cast<float>(y)*32.0f);
 		}
 	}
+
+	store(img_out, "test.exr");
 }
 #endif
