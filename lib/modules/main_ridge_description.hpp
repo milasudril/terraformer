@@ -96,7 +96,7 @@ namespace terraformer
 
 	struct main_ridge_description
 	{
-		ridge_curve_description<domain_length, horizontal_amplitude> ridge_curve_xy;
+		ridge_curve_description<horizontal_offset, horizontal_amplitude> ridge_curve_xy;
 		ridge_curve_description<elevation, vertical_amplitude> ridge_curve_xz;
 	};
 
