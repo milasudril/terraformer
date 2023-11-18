@@ -125,8 +125,8 @@ void terraformer::apply_filter(
 			{
 				auto const omega_x = static_cast<double>(x);
 				auto const omega_y = static_cast<double>(y);
-				auto const xi_x = omega_x*wavelength_x/lambda_max;
-				auto const xi_y = omega_y*wavelength_y/lambda_max;
+				auto const xi_x = omega_x*wavelength_y/lambda_max;
+				auto const xi_y = omega_y*wavelength_x/lambda_max;
 				auto const xi = xi_x*xi_x + xi_y*xi_y;
 				auto const amp = 1.0/
 					std::sqrt((1.0 + std::pow(xi, -hp_order)) * (1.0 + std::pow(xi, lp_order)));
