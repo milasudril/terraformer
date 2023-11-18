@@ -186,7 +186,7 @@ namespace terraformer
 			.display_name = "Wavelength Y",
 			.description = "Sets the dominant wavelength in the y direction",
 			.widget = numeric_input_log{
-				.binding = std::ref(params.get().wavelength_x),
+				.binding = std::ref(params.get().wavelength_y),
 				.value_converter = calculator{}
 			}
 		});
