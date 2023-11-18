@@ -5,7 +5,7 @@
 
 void terraformer::apply_filter(
 	std::span<float const> input,
-	std::span<std::complex<float>> output,
+	std::span<std::complex<double>> output,
 	double lambda_max,
 	filtered_noise_description_1d const& params)
 {
@@ -14,20 +14,20 @@ void terraformer::apply_filter(
 	auto const hp_order = static_cast<double>(params.hp_order);
 	auto const lp_order = static_cast<double>(params.lp_order);
 
-	auto filter = std::make_unique<float[]>(signal_length);
+	auto filter = std::make_unique<double[]>(signal_length);
 	for(size_t k = 1; k != signal_length/2; ++k)
 	{
 		auto const omega = static_cast<double>(k);
 		auto const xi = omega*wavelength/lambda_max;
 		auto const amp = 1.0/
 			std::sqrt((1.0 + std::pow(xi, -2.0*hp_order)) * (1.0 + std::pow(xi, 2.0*lp_order)));
-		filter[k] = static_cast<float>(amp);
-		filter[signal_length - k] = static_cast<float>(amp);
+		filter[k] = amp;
+		filter[signal_length - k] = amp;
 	}
 
 	std::ranges::copy(input, output.data());
 
-	auto transformed_signal = std::make_unique<std::complex<float>[]>(signal_length);
+	auto transformed_signal = std::make_unique<std::complex<double>[]>(signal_length);
 	get_plan(signal_length, dft_direction::forward)
 		.execute(output.data(), transformed_signal.get());
 
@@ -43,7 +43,7 @@ void terraformer::apply_filter(std::span<float const> input,
 	filtered_noise_description_1d const& params)
 {
 	auto const signal_length = std::size(input);
-	auto complex_signal = std::make_unique_for_overwrite<std::complex<float>[]>(signal_length);
+	auto complex_signal = std::make_unique_for_overwrite<std::complex<double>[]>(signal_length);
 	apply_filter(input, std::span{complex_signal.get(), signal_length}, lambda_max, params);
 
 	std::span const output_vals{complex_signal.get(), signal_length};
@@ -51,15 +51,15 @@ void terraformer::apply_filter(std::span<float const> input,
 	auto range = std::ranges::minmax_element(output_vals, [](auto a, auto b) {
 		return a.real() < b.real();
 	});
-	auto const amplitude = 0.5f*(*range.max - *range.min).real();
-	auto const offset = 0.5f*(*range.max + *range.min).real();
+	auto const amplitude = 0.5*(*range.max - *range.min).real();
+	auto const offset = 0.5*(*range.max + *range.min).real();
 	auto const max_index = range.max - std::begin(output_vals);
 
 	for(size_t k = max_index; k != signal_length + max_index; ++k)
 	{
 		auto const src_index = k%signal_length;
 		auto const src_val = output_vals[src_index].real();
-		output[k - max_index] = (src_val - offset)/amplitude;
+		output[k - max_index] = static_cast<float>((src_val - offset)/amplitude);
 	}
 }
 
@@ -102,7 +102,7 @@ std::vector<terraformer::location> terraformer::generate(
 
 void terraformer::apply_filter(
 	span_2d<float const> input,
-	span_2d<std::complex<float>> output,
+	span_2d<std::complex<double>> output,
 	double lambda_max,
 	filtered_noise_description_2d const& params)
 {
@@ -114,7 +114,7 @@ void terraformer::apply_filter(
 	auto const hp_order = static_cast<double>(params.hp_order);
 	auto const lp_order = static_cast<double>(params.lp_order);
 
-	grayscale_image filter{w, h};
+	basic_image<double> filter{w, h};
 	for(uint32_t y = 0; y != h/2; ++y)
 	{
 		for(uint32_t x = 0; x != w/2; ++x)
@@ -130,13 +130,13 @@ void terraformer::apply_filter(
 				auto const xi = xi_x*xi_x + xi_y*xi_y;
 				auto const amp = 1.0/
 					std::sqrt((1.0 + std::pow(xi, -hp_order)) * (1.0 + std::pow(xi, lp_order)));
-				filter(x, y) = static_cast<float>(amp);
+				filter(x, y) = amp;
 				if(x != 0)
-				{ filter(w - x, y) = static_cast<float>(amp); }
+				{ filter(w - x, y) = amp; }
 				if(y != 0)
-				{ filter(x, h - y) = static_cast<float>(amp); }
+				{ filter(x, h - y) = amp; }
 				if(x != 0 && y != 0)
-				{ filter(w - x, h - y) = static_cast<float>(amp); }
+				{ filter(w - x, h - y) = amp; }
 			}
 		}
 	}
@@ -144,7 +144,7 @@ void terraformer::apply_filter(
 	auto const signal_length = static_cast<size_t>(w)*static_cast<size_t>(h);
 	std::copy_n(input.data(), signal_length, output.data());
 
-	basic_image<std::complex<float>> transformed_image{w, h};
+	basic_image<std::complex<double>> transformed_image{w, h};
 	get_plan(span_2d_extents{w, h}, dft_direction::forward)
 		.execute(output.data(), transformed_image.pixels().data());
 
@@ -165,7 +165,7 @@ void terraformer::apply_filter(span_2d<float const> input,
 {
 	auto const w = input.width();
 	auto const h = input.height();
-	basic_image<std::complex<float>> complex_image{w, h};
+	basic_image<std::complex<double>> complex_image{w, h};
 	apply_filter(input, complex_image.pixels(), lambda_max, params);
 
 	auto range = minmax_element(complex_image.pixels(), [](auto a, auto b) {
@@ -185,7 +185,7 @@ void terraformer::apply_filter(span_2d<float const> input,
 			auto const src_y = y % h;
 			auto const src_x = x % w;
 			auto const src_val = complex_image(src_x, src_y).real();
-			output(x - range.max.x, y - range.max.y) = (src_val - offset)/amplitude;
+			output(x - range.max.x, y - range.max.y) = static_cast<float>((src_val - offset)/amplitude);
 		}
 	}
 }

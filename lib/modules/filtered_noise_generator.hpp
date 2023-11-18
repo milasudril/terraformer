@@ -65,7 +65,7 @@ namespace terraformer
 
 	void apply_filter(
 		std::span<float const> input,
-		std::span<std::complex<float>> output,
+		std::span<std::complex<double>> output,
 		double lambda_max,
 		filtered_noise_description_1d const& params);
 
@@ -214,7 +214,7 @@ namespace terraformer
 
 	void apply_filter(
 		span_2d<float const> input,
-		span_2d<std::complex<float>> output,
+		span_2d<std::complex<double>> output,
 		double lambda_max,
 		filtered_noise_description_2d const& params);
 
@@ -224,7 +224,8 @@ namespace terraformer
 	{
 	public:
 		template<class Rng>
-		explicit filtered_noise_generator_2d(Rng&& rng,
+		explicit filtered_noise_generator_2d(
+			Rng&& rng,
 			span_2d_extents size,
 			float dx,
 			filtered_noise_description_2d const& params):
