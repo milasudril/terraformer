@@ -39,7 +39,7 @@ namespace terraformer
 	grayscale_image generate(span_2d<float const> u,
 		span_2d<float const> v,
 		float ridge_loc,
-		filtered_noise_description_2d const& bump_field_desc,
+		filtered_noise_2d_description const& bump_field_desc,
 		random_generator& rng);
 
 	struct heightmap;

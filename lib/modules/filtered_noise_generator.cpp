@@ -7,7 +7,7 @@ void terraformer::apply_filter(
 	std::span<float const> input,
 	std::span<std::complex<double>> output,
 	double lambda_max,
-	filtered_noise_description_1d const& params)
+	filtered_noise_1d_description const& params)
 {
 	auto const signal_length = std::size(input);
 	auto const wavelength = static_cast<double>(params.wavelength);
@@ -40,7 +40,7 @@ void terraformer::apply_filter(
 void terraformer::apply_filter(std::span<float const> input,
 	float* output,
 	double lambda_max,
-	filtered_noise_description_1d const& params)
+	filtered_noise_1d_description const& params)
 {
 	auto const signal_length = std::size(input);
 	auto complex_signal = std::make_unique_for_overwrite<std::complex<double>[]>(signal_length);
@@ -64,12 +64,12 @@ void terraformer::apply_filter(std::span<float const> input,
 }
 
 std::vector<terraformer::location> terraformer::generate(
-	filtered_noise_generator_1d const& wave_xy,
+	filtered_noise_1d_generator const& wave_xy,
 	float amp_xy,
 	float peak_loc_xy,
 	bool flip_x_xy,
 	bool flip_displacement_xy,
-	filtered_noise_generator_1d const& wave_xz,
+	filtered_noise_1d_generator const& wave_xz,
 	float amp_xz,
 	float peak_loc_xz,
 	bool flip_x_xz,
@@ -104,7 +104,7 @@ void terraformer::apply_filter(
 	span_2d<float const> input,
 	span_2d<std::complex<double>> output,
 	double lambda_max,
-	filtered_noise_description_2d const& params)
+	filtered_noise_2d_description const& params)
 {
 	auto const w = input.width();
 	auto const h = input.height();
@@ -161,7 +161,7 @@ void terraformer::apply_filter(
 void terraformer::apply_filter(span_2d<float const> input,
 	span_2d<float> output,
 	double lambda_max,
-	filtered_noise_description_2d const& params)
+	filtered_noise_2d_description const& params)
 {
 	auto const w = input.width();
 	auto const h = input.height();

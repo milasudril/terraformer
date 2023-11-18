@@ -55,7 +55,7 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const height = u.height();
 	grayscale_image v{width, height};
 	{
-		filtered_noise_generator_1d const wave{rng, height, pixel_size, ns_distortion.wave};
+		filtered_noise_1d_generator const wave{rng, height, pixel_size, ns_distortion.wave};
 		auto const amplitude = ns_distortion.initial_amplitude;
 		auto const peak_location = ns_distortion.peak_location;
 		auto const half_distance = ns_distortion.half_distance;
@@ -68,7 +68,7 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 			{
 				auto const x_val = pixel_size*static_cast<float>(x);
 				auto const y_val = u(x, y) - ridge_loc;
-				auto const scale = std::exp2(std::min(std::abs(y_val)/half_distance), 16.0f);
+				auto const scale = std::exp2(std::min(std::abs(y_val)/half_distance, 16.0f));
 				v(x, y) = x_val + x_dir*scale*amplitude*wave(y_dir*(y_val - peak_location)/scale);
 			}
 		}
@@ -88,7 +88,7 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const h = u.height();
 	grayscale_image ns_wave_output{w, h};
 
-	filtered_noise_generator_1d const wave{rng, h, pixel_size, ns_wave_desc.nominal_oscillations.wave};
+	filtered_noise_1d_generator const wave{rng, h, pixel_size, ns_wave_desc.nominal_oscillations.wave};
 	auto const amplitude = ns_wave_desc.nominal_oscillations.initial_amplitude;
 	auto const peak_location = ns_wave_desc.nominal_oscillations.peak_location;
 	auto const half_distance = ns_wave_desc.nominal_oscillations.half_distance;
@@ -96,14 +96,14 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	auto const z_dir = ns_wave_desc.nominal_oscillations.invert_displacement? -1.0f : 1.0f;
 
 	auto const& amp_mod_desc = ns_wave_desc.amplitude_modulation;
-	filtered_noise_generator_1d const amp_mod{rng, w, pixel_size, amp_mod_desc.modulating_wave};
+	filtered_noise_1d_generator const amp_mod{rng, w, pixel_size, amp_mod_desc.modulating_wave};
 	auto const amp_mod_depth = amp_mod_desc.depth;
 	auto const amp_mod_peak_loc = amp_mod_desc.peak_location;
 	auto const amp_mod_x_dir = amp_mod_desc.flip_direction? -1.0f : 1.0f;
 	auto const amp_mod_z_dir = amp_mod_desc.invert_displacement? -1.0f : 1.0f;
 
 	auto const& half_distance_mod_desc = ns_wave_desc.half_distance_modulation;
-	filtered_noise_generator_1d const half_distance_mod{rng, w, pixel_size, half_distance_mod_desc.modulating_wave};
+	filtered_noise_1d_generator const half_distance_mod{rng, w, pixel_size, half_distance_mod_desc.modulating_wave};
 	auto const half_distance_mod_depth = half_distance_mod_desc.depth;
 	auto const half_distance_mod_peak_loc = half_distance_mod_desc.peak_location;
 	auto const half_distance_mod_x_dir = half_distance_mod_desc.flip_direction? -1.0f : 1.0f;
@@ -130,17 +130,18 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	return ns_wave_output;
 }
 
-terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
+terraformer::grayscale_image terraformer::generate(
+	span_2d<float const> u,
 	span_2d<float const> v,
 	float pixel_size,
-	filtered_noise_description_2d const& bump_field_desc,
+	filtered_noise_2d_description const& bump_field_desc,
 	random_generator& rng)
 {
 	auto const w = u.width();
 	auto const h = u.height();
 	grayscale_image bump_field{w, h};
 
-	filtered_noise_generator_2d gen{rng, span_2d_extents{w, h}, pixel_size, bump_field_desc};
+	filtered_noise_2d_generator gen{rng, span_2d_extents{w, h}, pixel_size, bump_field_desc};
 
 	for(uint32_t y = 0; y != h; ++y)
 	{

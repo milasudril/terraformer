@@ -21,7 +21,7 @@
 
 namespace terraformer
 {
-	struct filtered_noise_description_1d
+	struct filtered_noise_1d_description
 	{
 		domain_length wavelength;
 		filter_order hp_order;
@@ -29,7 +29,7 @@ namespace terraformer
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, filtered_noise_description_1d>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, filtered_noise_1d_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{
@@ -67,22 +67,22 @@ namespace terraformer
 		std::span<float const> input,
 		std::span<std::complex<double>> output,
 		double lambda_max,
-		filtered_noise_description_1d const& params);
+		filtered_noise_1d_description const& params);
 
 	void apply_filter(
 		std::span<float const> input,
 		float* output,
 		double lambda_max,
-		filtered_noise_description_1d const& params);
+		filtered_noise_1d_description const& params);
 
-	class filtered_noise_generator_1d
+	class filtered_noise_1d_generator
 	{
 	public:
 		template<class Rng>
-		explicit filtered_noise_generator_1d(Rng&& rng,
+		explicit filtered_noise_1d_generator(Rng&& rng,
 			size_t point_count,
 			float dx,
-			filtered_noise_description_1d const& params):
+			filtered_noise_1d_description const& params):
 			m_signal_length{2*point_count},
 			m_signal{std::make_unique<float[]>(m_signal_length)},
 			m_dx{dx}
@@ -108,12 +108,12 @@ namespace terraformer
 	};
 
 	std::vector<location> generate(
-		filtered_noise_generator_1d const& wave_xy,
+		filtered_noise_1d_generator const& wave_xy,
 		float amp_xy,
 		float peak_loc_xy,
 		bool flip_x_xy,
 		bool flip_displacement_xy,
-		filtered_noise_generator_1d const& wave_xz,
+		filtered_noise_1d_generator const& wave_xz,
 		float amp_xz,
 		float peak_loc_xz,
 		bool flip_x_xz,
@@ -122,12 +122,12 @@ namespace terraformer
 
 	template<class Rng>
 	auto generate(Rng&& rng,
-		filtered_noise_description_1d const& wave_xy,
+		filtered_noise_1d_description const& wave_xy,
 		float amp_xy,
 		float peak_loc_xy,
 		bool flip_x_xy,
 		bool flip_displacement_xy,
-		filtered_noise_description_1d const& wave_xz,
+		filtered_noise_1d_description const& wave_xz,
 		float amp_xz,
 		float peak_loc_xz,
 		bool flip_x_xz,
@@ -135,7 +135,7 @@ namespace terraformer
 		polyline_location_params const& line_params)
 	{
 		return generate(
-			filtered_noise_generator_1d{
+			filtered_noise_1d_generator{
 				rng,
 				line_params.point_count,
 				line_params.dx,
@@ -145,7 +145,7 @@ namespace terraformer
 			peak_loc_xy,
 			flip_x_xy,
 			flip_displacement_xy,
-			filtered_noise_generator_1d{
+			filtered_noise_1d_generator{
 				rng,
 				line_params.point_count,
 				line_params.dx,
@@ -159,7 +159,7 @@ namespace terraformer
 		);
 	}
 
-	struct filtered_noise_description_2d
+	struct filtered_noise_2d_description
 	{
 		domain_length wavelength_x;
 		domain_length wavelength_y;
@@ -168,7 +168,7 @@ namespace terraformer
 	};
 
 	template<class Form, class T>
-	requires(std::is_same_v<std::remove_cvref_t<T>, filtered_noise_description_2d>)
+	requires(std::is_same_v<std::remove_cvref_t<T>, filtered_noise_2d_description>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
 		form.insert(field{
@@ -216,19 +216,19 @@ namespace terraformer
 		span_2d<float const> input,
 		span_2d<std::complex<double>> output,
 		double lambda_max,
-		filtered_noise_description_2d const& params);
+		filtered_noise_2d_description const& params);
 
-	void apply_filter(span_2d<float const> input, span_2d<float> output, double lambda_max, filtered_noise_description_2d const& params);
+	void apply_filter(span_2d<float const> input, span_2d<float> output, double lambda_max, filtered_noise_2d_description const& params);
 
-	class filtered_noise_generator_2d
+	class filtered_noise_2d_generator
 	{
 	public:
 		template<class Rng>
-		explicit filtered_noise_generator_2d(
+		explicit filtered_noise_2d_generator(
 			Rng&& rng,
 			span_2d_extents size,
 			float dx,
-			filtered_noise_description_2d const& params):
+			filtered_noise_2d_description const& params):
 			m_signal{2*size.width, 2*size.height},
 			m_dx{dx}
 		{

@@ -17,7 +17,7 @@ namespace terraformer
 		horizontal_offset peak_location;
 		bool flip_direction{};
 		bool invert_displacement{};
-		filtered_noise_description_1d wave;
+		filtered_noise_1d_description wave;
 	};
 
 	template<class Form, class OffsetType, class AmplitudeType>

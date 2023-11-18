@@ -5,7 +5,7 @@
 
 #include <testfwk/testfwk.hpp>
 
-TESTCASE(terraformer_filtered_noise_generator_1d_apply_filter_result_is_real)
+TESTCASE(terraformer_filtered_noise_1d_generator_apply_filter_result_is_real)
 {
 	std::array<float, 1024> input;
 	std::generate_n(
@@ -24,7 +24,7 @@ TESTCASE(terraformer_filtered_noise_generator_1d_apply_filter_result_is_real)
 		input,
 		output,
 		1024.0,
-		terraformer::filtered_noise_description_1d{
+		terraformer::filtered_noise_1d_description{
 			.wavelength = terraformer::domain_length{256.0f},
 			.hp_order = terraformer::filter_order{2.0f},
 			.lp_order = terraformer::filter_order{2.0f}
@@ -39,11 +39,11 @@ TESTCASE(terraformer_filtered_noise_generator_generate)
 {
 	terraformer::random_generator rng{};
 
-	terraformer::filtered_noise_generator_1d generator{
+	terraformer::filtered_noise_1d_generator generator{
 		rng,
 		1024,
 		32.0f,
-		terraformer::filtered_noise_description_1d{
+		terraformer::filtered_noise_1d_description{
 			.wavelength = terraformer::domain_length{8192.0f},
 			.hp_order = terraformer::filter_order{8.0f},
 			.lp_order = terraformer::filter_order{8.0f}
@@ -96,7 +96,7 @@ TESTCASE(terraformer_filtered_noise_generator_2d_apply_filter_result_is_real)
 		noise.pixels(),
 		output.pixels(),
 		1024.0,
-		terraformer::filtered_noise_description_2d{
+		terraformer::filtered_noise_2d_description{
 			.wavelength_x = terraformer::domain_length{256.0f},
 			.wavelength_y = terraformer::domain_length{256.0f},
 			.hp_order = terraformer::filter_order{2.0f},
@@ -122,7 +122,7 @@ TESTCASE(terraformer_filtered_noise_generator_2d_generate_period_count)
 		rng,
 		terraformer::span_2d_extents{1024, 1024},
 		32.0f,
-		terraformer::filtered_noise_description_2d{
+		terraformer::filtered_noise_2d_description{
 			.wavelength_x = terraformer::domain_length{8192.0f},
 			.wavelength_y = terraformer::domain_length{4096.0f},
 			.hp_order = terraformer::filter_order{8.0f},

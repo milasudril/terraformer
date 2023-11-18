@@ -163,7 +163,7 @@ namespace terraformer
 		bool flip_direction{};
 		bool invert_displacement{};
 		domain_length half_distance;
-		filtered_noise_description_1d wave;
+		filtered_noise_1d_description wave;
 	};
 
 	template<class Form, class T>
@@ -246,7 +246,7 @@ namespace terraformer
 		horizontal_offset peak_location;
 		bool flip_direction{};
 		bool invert_displacement{};
-		filtered_noise_description_1d modulating_wave;
+		filtered_noise_1d_description modulating_wave;
 	};
 
 	template<class Form, class T>
@@ -355,7 +355,7 @@ namespace terraformer
 	struct bump_field_description
 	{
 		vertical_amplitude amplitude;
-		filtered_noise_description_2d wave;
+		filtered_noise_2d_description wave;
 	};
 
 	template<class Form, class T>
