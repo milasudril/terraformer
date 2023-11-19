@@ -3,7 +3,7 @@
 
 #include "./domain_size_description.hpp"
 #include "./initial_heightmap_description.hpp"
-#include "lib/common/random_bit_source.hpp"
+#include "lib/rng.hpp"
 
 namespace terraformer
 {
@@ -30,8 +30,8 @@ namespace terraformer
 				},
 				input_button{
 					.binding = std::ref(params.get().rng_seed),
-					.value_generator = [seed_src = random_bit_source{}]() {
-						return seed_src.get<rng_seed_type>();
+					.value_generator = []() {
+						return generate_rng_seed(system_rng_path);
 					},
 					.label = "🂠",
 					.description = "Generate a seed value",

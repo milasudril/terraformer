@@ -27,7 +27,6 @@
 #include "ui/form.hpp"
 #include "lib/modules/simulation_description.hpp"
 #include "lib/modules/heightmap.hpp"
-#include "lib/common/random_bit_source.hpp"
 #include "lib/execution/task_receiver.hpp"
 
 #include <QSplitter>
@@ -36,7 +35,6 @@
 
 int main(int argc, char** argv)
 {
-
 	terraformer::simulation_description sim{};
 	terraformer::random_generator rng{sim.rng_seed};
 	terraformer::heightmap initial_heightmap{

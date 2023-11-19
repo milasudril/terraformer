@@ -1,9 +1,6 @@
-//@	{"target":{"name":"random_bit_source.o"}}
+//@	{"target":{"name":"rng.o"}}
 
-#include "./random_bit_source.hpp"
-
-#include <cerrno>
-#include <cstdlib>
+#include "./rng.hpp"
 
 void terraformer::random_bit_source::read(std::span<std::byte> buffer) const
 {
@@ -18,7 +15,7 @@ void terraformer::random_bit_source::read(std::span<std::byte> buffer) const
 			{ abort(); }
 			continue;
 		}
-		
+
 		bytes_to_read -= n;
 		write_ptr += n;
 	}
