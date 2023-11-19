@@ -159,5 +159,60 @@ namespace terraformer
 			}
 		);
 	}
+
+	class ridge_curve_generator
+	{
+	public:
+		explicit ridge_curve_generator(random_generator rng,
+			size_t point_count,
+			float pixel_size,
+			main_ridge_description const& description):
+			m_ridge_curve_xy{rng, point_count, pixel_size, description.ridge_curve_xy.wave},
+			m_ridge_curve_xz{rng, point_count, pixel_size, description.ridge_curve_xz.wave}
+		{}
+
+		auto& ridge_curve_xy() const { return m_ridge_curve_xy; }
+
+		auto& ridge_curve_xz() const { return m_ridge_curve_xz; }
+
+		size_t point_count() const { return m_ridge_curve_xy.point_count(); }
+
+	private:
+		filtered_noise_1d_generator m_ridge_curve_xy;
+		filtered_noise_1d_generator m_ridge_curve_xz;
+	};
+
+	template<class RenderParamsXY, class RenderParamsXZ>
+	inline std::vector<location> generate(ridge_curve_generator const& src,
+		RenderParamsXY const& render_params_xy,
+		RenderParamsXZ const& render_params_xz,
+		float dx)
+	{
+		return generate(
+			src.ridge_curve_xy(),
+			filtered_noise_1d_render_params{
+				render_params_xy.amplitude,
+				render_params_xy.peak_location,
+				render_params_xy.flip_direction,
+				render_params_xy.invert_displacement
+			},
+			src.ridge_curve_xz(),
+			filtered_noise_1d_render_params{
+				render_params_xz.amplitude,
+				render_params_xz.peak_location,
+				render_params_xz.flip_direction,
+				render_params_xz.invert_displacement
+			},
+			polyline_location_params{
+				.point_count = src.point_count(),
+				.dx = dx,
+				.start_location = terraformer::location{
+					0.0f,
+					static_cast<float>(render_params_xy.initial_value),
+					static_cast<float>(render_params_xz.initial_value)
+				}
+			}
+		);
+	}
 }
 #endif

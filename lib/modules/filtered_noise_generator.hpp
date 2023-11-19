@@ -94,6 +94,18 @@ namespace terraformer
 			apply_filter(std::span{noise.get(), m_signal_length}, m_signal.get(), 2.0*static_cast<double>(point_count)*static_cast<double>(dx), params);
 		}
 
+		filtered_noise_1d_generator(filtered_noise_1d_generator&&) = default;
+
+		filtered_noise_1d_generator& operator=(filtered_noise_1d_generator&&) = default;
+
+		filtered_noise_1d_generator& operator=(filtered_noise_1d_generator const&) = delete;
+
+		filtered_noise_1d_generator(filtered_noise_1d_generator const& src):
+			m_signal_length{src.m_signal_length},
+			m_signal{std::make_unique_for_overwrite<float[]>(m_signal_length)},
+			m_dx{src.m_dx}
+		{ std::copy_n(src.m_signal.get(), m_signal_length, m_signal.get()); }
+
 		float operator()(float x) const
 		{ return interp(std::span{m_signal.get(), m_signal_length}, x/m_dx, wrap_around_at_boundary{}); }
 

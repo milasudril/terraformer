@@ -55,7 +55,9 @@ namespace terraformer
 			pixel_storage{dom_res.width, dom_res.height},
 			pixel_size{dom_res.pixel_size},
 			output_range{hm.output_range.min, hm.output_range.max},
-			ridge_curve{generate(hm.main_ridge, rng, dom_res.width, dom_res.pixel_size)},
+			ridge_curve_rng{generate_rng_seed(rng)},
+			ridge_curve_src{ridge_curve_rng, dom_res.width, dom_res.pixel_size, hm.main_ridge},
+			ridge_curve{generate(ridge_curve_src, hm.main_ridge.ridge_curve_xy, hm.main_ridge.ridge_curve_xz, pixel_size)},
 			u{generate(dom_res.width, dom_res.height, pixel_size, ridge_curve, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value))},
 			v{generate(u.pixels(), pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_distortion, rng)},
 			bump_field{generate(u, v, pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.bump_field, rng)},
@@ -68,14 +70,20 @@ namespace terraformer
 		closed_closed_interval<float> output_range;
 
 		// Cached partial results
+		random_generator ridge_curve_rng;
+		ridge_curve_generator ridge_curve_src;
 		std::vector<location> ridge_curve;
+
 		grayscale_image u;
 		grayscale_image v;
 		grayscale_image bump_field;
 		grayscale_image ns_wave;
 
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
-		{ main_ridge_updated(description, rng); }
+		{
+			ridge_curve_rng = generate_rng_seed(rng);
+			main_ridge_updated(description, rng);
+		}
 
 		void domain_size_updated(domain_size_description const& dom_size,
 			initial_heightmap_description const& hm,
@@ -99,8 +107,11 @@ namespace terraformer
 
 		void main_ridge_updated(initial_heightmap_description const& description, random_generator& rng)
 		{
-			ridge_curve = generate(description.main_ridge, rng, pixel_storage.width(), pixel_size);
-			u = generate(pixel_storage.width(), pixel_storage.height(), pixel_size, ridge_curve, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value));
+			auto const w = pixel_storage.width();
+			auto const h = pixel_storage.height();
+			ridge_curve_src = ridge_curve_generator{ridge_curve_rng, w, pixel_size, description.main_ridge};
+			ridge_curve = generate(ridge_curve_src, description.main_ridge.ridge_curve_xy, description.main_ridge.ridge_curve_xz, pixel_size);
+			u = generate(w, h, pixel_size, ridge_curve, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value));
 			v = generate(u.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_distortion, rng);
 			ns_wave = generate(u, v, pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
 			bump_field = generate(u.pixels(), v.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.bump_field, rng);
