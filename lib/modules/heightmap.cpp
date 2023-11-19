@@ -49,13 +49,12 @@ terraformer::grayscale_image terraformer::generate(span_2d<float const> u,
 	float pixel_size,
 	float ridge_loc,
 	damped_wave_description const& ns_distortion,
-	random_generator& rng)
+	filtered_noise_1d_generator const& wave)
 {
 	auto const width = u.width();
 	auto const height = u.height();
 	grayscale_image v{width, height};
 	{
-		filtered_noise_1d_generator const wave{rng, height, pixel_size, ns_distortion.wave};
 		auto const amplitude = ns_distortion.initial_amplitude;
 		auto const peak_location = ns_distortion.peak_location;
 		auto const half_distance = ns_distortion.half_distance;
