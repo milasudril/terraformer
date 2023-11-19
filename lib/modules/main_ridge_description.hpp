@@ -4,6 +4,7 @@
 #include "./fractal_wave.hpp"
 #include "./calculator.hpp"
 #include "./filtered_noise_generator.hpp"
+#include "lib/rng.hpp"
 
 #include <functional>
 

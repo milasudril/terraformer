@@ -13,8 +13,6 @@
 #include <string>
 #include <ranges>
 
-#include <pcg-cpp/include/pcg_random.hpp>
-
 namespace terraformer
 {
 	template<class T, class U>
@@ -71,9 +69,6 @@ namespace terraformer
 		fprintf(stderr, "(x) %s\n", msg);
 		fflush(stderr);
 	}
-
-	using random_generator = pcg_engines::oneseq_dxsm_128_64;
-	using rng_seed_type = __int128 unsigned;
 
 	inline float round_to_n_digits(float x, int n)
 	{
