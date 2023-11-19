@@ -75,8 +75,6 @@ namespace terraformer
 	using random_generator = pcg_engines::oneseq_dxsm_128_64;
 	using rng_seed_type = __int128 unsigned;
 
-	inline thread_local random_generator per_thread_rng{};
-
 	inline float round_to_n_digits(float x, int n)
 	{
 		auto const scale = std::exp2(static_cast<float>(n) - std::ceil(std::log2(std::abs(x))));
