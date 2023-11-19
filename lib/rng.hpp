@@ -55,7 +55,13 @@ namespace terraformer
 		int m_fd;
 	};
 
-	rng_seed_type generate_rng_seed(random_generator& rng);
+	inline rng_seed_type generate_rng_seed(random_generator& rng)
+	{
+		static_assert(std::is_same_v<random_generator::result_type, size_t>);
+		auto const val_1 = static_cast<rng_seed_type>(rng());
+		auto const val_2 = static_cast<rng_seed_type>(rng());
+		return (val_1 << static_cast<rng_seed_type>(64)) | val_2;
+	}
 
 	inline rng_seed_type generate_rng_seed(std::filesystem::path const& rng_path)
 	{ return random_bit_source{rng_path}.get<rng_seed_type>(); }
