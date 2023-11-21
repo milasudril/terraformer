@@ -112,12 +112,6 @@ int main(int argc, char** argv)
 				goto done;
 			}
 
-			if(field_name.starts_with("simulation_description/initial_heightmap/ns_wave/"))
-			{
-				temp_heightmap.ns_wave_updated(sim.initial_heightmap, rng);
-				goto done;
-			}
-
 			fprintf(stderr, "(x) %s was changed\n", field_name.c_str());
 			done:
 			terraformer.post_event([&output, &initial_heightmap, temp_heightmap]() mutable {

@@ -445,7 +445,6 @@ namespace terraformer
 		main_ridge_description main_ridge;
 		damped_wave_description ns_distortion;
 		bump_field_description bump_field;
-		modulated_damped_wave_description ns_wave;
 	};
 
 	template<class Form, class T>
@@ -503,17 +502,6 @@ namespace terraformer
 				.description = "Controls properties the bump field",
 				.widget = subform{
 					.binding = std::ref(params.get().bump_field)
-				}
-			}
-		);
-
-		form.insert(
-			field{
-				.name = "ns_wave",
-				.display_name = "North-south wave",
-				.description = "Controls properites of the north-south wave",
-				.widget = subform{
-					.binding = std::ref(params.get().ns_wave)
 				}
 			}
 		);

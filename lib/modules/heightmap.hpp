@@ -33,13 +33,6 @@ namespace terraformer
 		span_2d<float const> v,
 		float pixel_size,
 		float ridge_loc,
-		modulated_damped_wave_description const& ns_wave_desc,
-		random_generator& rng);
-
-	grayscale_image generate(span_2d<float const> u,
-		span_2d<float const> v,
-		float pixel_size,
-		float ridge_loc,
 		bump_field_description const& bump_field_desc,
 		random_generator& rng);
 
@@ -62,8 +55,7 @@ namespace terraformer
 			v_rng{generate_rng_seed(rng)},
 			v_wave{random_generator{v_rng}, dom_res.height, dom_res.pixel_size, hm.ns_distortion.wave},
 			v{generate(u.pixels(), pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_distortion, v_wave)},
-			bump_field{generate(u, v, pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.bump_field, rng)},
-			ns_wave{generate(u, v, pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_wave, rng)}
+			bump_field{generate(u, v, pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.bump_field, rng)}
 		{ generate(*this, hm); }
 
 
@@ -83,7 +75,6 @@ namespace terraformer
 		grayscale_image v;
 
 		grayscale_image bump_field;
-		grayscale_image ns_wave;
 
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
 		{
@@ -122,7 +113,6 @@ namespace terraformer
 			v_wave = filtered_noise_1d_generator{random_generator{v_rng}, h, pixel_size, description.ns_distortion.wave};
 			v = generate(u.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_distortion, v_wave);
 
-			ns_wave = generate(u, v, pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
 			bump_field = generate(u.pixels(), v.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.bump_field, rng);
 			generate(*this, description);
 		}
@@ -133,7 +123,6 @@ namespace terraformer
 			v_wave = filtered_noise_1d_generator{random_generator{v_rng}, h, pixel_size, description.ns_distortion.wave};
 			v = generate(u.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_distortion, v_wave);
 
-			ns_wave = generate(u, v, pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
 			bump_field = generate(u.pixels(), v.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.bump_field, rng);
 			generate(*this, description);
 		}
@@ -141,12 +130,6 @@ namespace terraformer
 		void bump_field_updated(initial_heightmap_description const& description, random_generator& rng)
 		{
 			bump_field = generate(u.pixels(), v.pixels(), pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.bump_field, rng);
-			generate(*this, description);
-		}
-
-		void ns_wave_updated(initial_heightmap_description const& description, random_generator& rng)
-		{
-			ns_wave = generate(u, v, pixel_size, static_cast<float>(description.main_ridge.ridge_curve_xy.initial_value), description.ns_wave, rng);
 			generate(*this, description);
 		}
 	};
