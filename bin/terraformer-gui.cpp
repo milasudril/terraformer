@@ -78,37 +78,37 @@ int main(int argc, char** argv)
 
 			if(field_name.starts_with("simulation_description/domain_size/"))
 			{
-				temp_heightmap.domain_size_updated(sim.domain_size, sim.initial_heightmap, rng);
+				temp_heightmap.domain_size_updated(sim.domain_size, sim.initial_heightmap);
 				goto done;
 			}
 
 			if(field_name.starts_with("simulation_description/initial_heightmap/output_range/"))
 			{
-				temp_heightmap.output_range_updated(sim.initial_heightmap, rng);
+				temp_heightmap.output_range_updated(sim.initial_heightmap);
 				goto done;
 			}
 
 			if(field_name.starts_with("simulation_description/initial_heightmap/corners/"))
 			{
-				temp_heightmap.corners_updated(sim.initial_heightmap, rng);
+				temp_heightmap.corners_updated(sim.initial_heightmap);
 				goto done;
 			}
 
 			if(field_name.starts_with("simulation_description/initial_heightmap/main_ridge/"))
 			{
-				temp_heightmap.main_ridge_updated(sim.initial_heightmap, rng);
+				temp_heightmap.main_ridge_updated(sim.initial_heightmap);
 				goto done;
 			}
 
 			if(field_name.starts_with("simulation_description/initial_heightmap/ns_distortion/"))
 			{
-				temp_heightmap.ns_distortion_updated(sim.initial_heightmap, rng);
+				temp_heightmap.ns_distortion_updated(sim.initial_heightmap);
 				goto done;
 			}
 
 			if(field_name.starts_with("simulation_description/initial_heightmap/bump_field/"))
 			{
-				temp_heightmap.bump_field_updated(sim.initial_heightmap, rng);
+				temp_heightmap.bump_field_updated(sim.initial_heightmap);
 				goto done;
 			}
 
