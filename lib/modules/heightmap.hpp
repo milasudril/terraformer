@@ -49,12 +49,14 @@ namespace terraformer
 			pixel_size{dom_res.pixel_size},
 			output_range{hm.output_range.min, hm.output_range.max},
 			ridge_curve_rng{generate_rng_seed(rng)},
-			ridge_curve_src{ridge_curve_rng, dom_res.width, dom_res.pixel_size, hm.main_ridge},
+			ridge_curve_src{ridge_curve_rng, dom_res.width, pixel_size, hm.main_ridge},
 			ridge_curve{generate(ridge_curve_src, hm.main_ridge.ridge_curve_xy, hm.main_ridge.ridge_curve_xz, pixel_size)},
 			u{generate(dom_res.width, dom_res.height, pixel_size, ridge_curve, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value))},
 			v_rng{generate_rng_seed(rng)},
-			v_wave{random_generator{v_rng}, dom_res.height, dom_res.pixel_size, hm.ns_distortion.wave},
+			v_wave{random_generator{v_rng}, dom_res.height, pixel_size, hm.ns_distortion.wave},
 			v{generate(u.pixels(), pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.ns_distortion, v_wave)},
+			bump_field_rng{generate_rng_seed(rng)},
+			bump_field_wave{random_generator{bump_field_rng}, span_2d_extents{dom_res.width, dom_res.height}, pixel_size, hm.bump_field.wave},
 			bump_field{generate(u, v, pixel_size, static_cast<float>(hm.main_ridge.ridge_curve_xy.initial_value), hm.bump_field, rng)}
 		{ generate(*this, hm); }
 
@@ -74,11 +76,15 @@ namespace terraformer
 		filtered_noise_1d_generator v_wave;
 		grayscale_image v;
 
+		random_generator bump_field_rng;
+		filtered_noise_2d_generator bump_field_wave;
 		grayscale_image bump_field;
 
 		void rng_seed_updated(initial_heightmap_description const& description, random_generator& rng)
 		{
 			ridge_curve_rng = generate_rng_seed(rng);
+			v_rng = generate_rng_seed(rng);
+			bump_field_rng = generate_rng_seed(rng);
 			main_ridge_updated(description, rng);
 		}
 
