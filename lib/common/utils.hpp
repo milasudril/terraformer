@@ -28,12 +28,6 @@ namespace terraformer
 		{f(x, y)} -> std::convertible_to<MappedType>;
 	};
 
-	constexpr auto smoothstep(float x)
-	{
-		x = std::clamp(x, -1.0f, 1.0f);
-		return (2.0f - x)*(x + 1.0f)*(x + 1.0f)/4.0f;
-	}
-
 	template<class T>
 	using empty = std::type_identity<T>;
 
