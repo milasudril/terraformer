@@ -141,17 +141,17 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	{ throw std::runtime_error{"Output resolution is too small"}; }
 
 	{
-		auto const u = hm.u.pixels();
+		// auto const u = hm.u.pixels();
 		auto const bump_field_output = hm.bump_field.pixels();
 		auto const bump_field_amplitude = params.bump_field.amplitude;
-		auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
+		// auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
 		auto const& corners = params.corners;
 		auto const nw_elev = corners.nw.z;
 		auto const ne_elev = corners.ne.z;
 		auto const sw_elev = corners.sw.z;
 		auto const se_elev = corners.se.z;
 		auto const ridge_curve = std::span{hm.ridge_curve};
-		auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
+		// auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
 
 		for(uint32_t y = 0; y != h; ++y)
 		{
@@ -163,18 +163,19 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				auto const north = std::lerp(nw_elev, ne_elev, xi);
 				auto const south = std::lerp(sw_elev, se_elev, xi);
 
-				auto const ridge_loc_z = ridge_curve[x][2];
+			//	auto const ridge_loc_z = ridge_curve[x][2];
 
-				auto const yf = static_cast<float>(y)*hm.pixel_size;
-				auto const y_curve = ridge_curve[x][1];
-				auto const side = yf - y_curve;
-				auto const bump_param = side < 0.0f? u(x, y)/ridge_loc :
-					(u(x, y) - y_south)/(ridge_loc - y_south);
+			//	auto const yf = static_cast<float>(y)*hm.pixel_size;
+			//	auto const y_curve = ridge_curve[x][1];
+			//	auto const side = yf - y_curve;
+			//	auto const bump_param = side < 0.0f? u(x, y)/ridge_loc :
+				//	(u(x, y) - y_south)/(ridge_loc - y_south);
 
-				auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
+			//	auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
 
 				auto const base_elevation = std::lerp(north, south, eta);
-				pixels(x, y) = std::lerp(base_elevation, ridge_loc_z, bump)
+				pixels(x, y) = base_elevation
+				//std::lerp(base_elevation, ridge_loc_z, bump)
 					+ bump_field_amplitude*bump_field_output(x, y);
 			}
 		}
