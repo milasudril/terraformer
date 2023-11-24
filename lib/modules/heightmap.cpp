@@ -146,10 +146,31 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		auto const bump_field_amplitude = params.bump_field.amplitude;
 		// auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
 		auto const& corners = params.corners;
-		auto const nw_elev = corners.nw.z;
-		auto const ne_elev = corners.ne.z;
-		auto const sw_elev = corners.sw.z;
-		auto const se_elev = corners.se.z;
+		cubic_spline_control_point const nw_we{
+			.y = corners.nw.z,
+			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.nw.slope_x)*static_cast<float>(w)*hm.pixel_size
+		};
+
+		cubic_spline_control_point const ne_we{
+			.y = corners.ne.z,
+			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.ne.slope_x)*static_cast<float>(w)*hm.pixel_size
+		};
+
+		cubic_spline_control_point const sw_we{
+			.y = corners.sw.z,
+			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.sw.slope_x)*static_cast<float>(w)*hm.pixel_size
+		};
+
+		cubic_spline_control_point const se_we{
+			.y = corners.se.z,
+			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_x)*static_cast<float>(w)*hm.pixel_size
+		};
+
+
+//		auto const nw_elev = corners.nw.z;
+//		auto const ne_elev = corners.ne.z;
+//		auto const sw_elev = corners.sw.z;
+//		auto const se_elev = corners.se.z;
 		auto const ridge_curve = std::span{hm.ridge_curve};
 		// auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
 
@@ -160,8 +181,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				auto const xi = static_cast<float>(x)/static_cast<float>(w - 1);
 				auto const eta = static_cast<float>(y)/static_cast<float>(h - 1);
 
-				auto const north = std::lerp(nw_elev, ne_elev, xi);
-				auto const south = std::lerp(sw_elev, se_elev, xi);
+				auto const north = interp(nw_we, ne_we, xi);
+				auto const south = interp(sw_we, se_we, xi);
 
 			//	auto const ridge_loc_z = ridge_curve[x][2];
 
