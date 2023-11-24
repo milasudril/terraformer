@@ -27,7 +27,7 @@ namespace terraformer
 		auto const B = b.ddx;
 
 		// a=B+A-2*y[1]+2*y[0],b=-B-2*A+3*y[1]-3*y[0],c=A,d=y[0]
-		auto const cubic = B + A - 2.0*(y_1 - y_0);
+		auto const cubic = B + A - 2.0f*(y_1 - y_0);
 		auto const quadratic = -B - 2.0f*A + 3.0f*(y_1-y_0);
 		auto const linear = A;
 		auto const constant = y_0;
