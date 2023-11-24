@@ -166,6 +166,13 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_x)*static_cast<float>(w)*hm.pixel_size
 		};
 
+		auto const nw_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.nw.slope_y)*static_cast<float>(h)*hm.pixel_size;
+
+		auto const ne_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.ne.slope_y)*static_cast<float>(h)*hm.pixel_size;
+
+		auto const sw_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.sw.slope_y)*static_cast<float>(h)*hm.pixel_size;
+
+		auto const se_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_y)*static_cast<float>(h)*hm.pixel_size;
 
 //		auto const nw_elev = corners.nw.z;
 //		auto const ne_elev = corners.ne.z;
@@ -181,8 +188,15 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 				auto const xi = static_cast<float>(x)/static_cast<float>(w - 1);
 				auto const eta = static_cast<float>(y)/static_cast<float>(h - 1);
 
-				auto const north = interp(nw_we, ne_we, xi);
-				auto const south = interp(sw_we, se_we, xi);
+				cubic_spline_control_point const north{
+					.y = interp(nw_we, ne_we, xi),
+					.ddx = std::lerp(nw_ddy, ne_ddy, xi)
+				};
+
+				cubic_spline_control_point const south{
+					.y = interp(sw_we, se_we, xi),
+					.ddx = std::lerp(sw_ddy, se_ddy, xi)
+				};
 
 			//	auto const ridge_loc_z = ridge_curve[x][2];
 
@@ -194,7 +208,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 			//	auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
 
-				auto const base_elevation = std::lerp(north, south, eta);
+				auto const base_elevation = interp(north, south, eta);
 				pixels(x, y) = base_elevation
 				//std::lerp(base_elevation, ridge_loc_z, bump)
 					+ bump_field_amplitude*bump_field_output(x, y);
