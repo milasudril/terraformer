@@ -98,62 +98,109 @@ namespace terraformer
 		});
 	}
 
-	struct corner
+	struct surface_control_point
 	{
 		elevation z;
+		slope_angle slope_x;
+		slope_angle slope_y;
 	};
+
+	template<class Form, class T>
+	requires(std::is_same_v<std::remove_cvref_t<T>, surface_control_point>)
+	void bind(Form& form, std::reference_wrapper<T> params)
+	{
+		form.insert(
+			field{
+				.name = "z",
+				.display_name = "Elevation",
+				.description = "Sets the elevation of the control point",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().z),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "slope_x",
+				.display_name = "Slope X",
+				.description = "Sets the elevation angle in the x direction",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().slope_x),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "slope_y",
+				.display_name = "Slope Y",
+				.description = "Sets the elevation angle in the y direction",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().slope_y),
+					.value_converter = calculator{}
+				}
+			}
+		);
+	}
 
 	struct corners
 	{
-		corner nw;
-		corner ne;
-		corner sw;
-		corner se;
+		surface_control_point nw;
+		surface_control_point ne;
+		surface_control_point sw;
+		surface_control_point se;
 	};
 
 	template<class Form, class T>
 	requires(std::is_same_v<std::remove_cvref_t<T>, corners>)
 	void bind(Form& form, std::reference_wrapper<T> params)
 	{
-		form.insert(field{
-			.name = "nw_elev",
-			.display_name = "NW",
-			.description = "Sets the elevation in north-west",
-			.widget = numeric_input{
-				.binding = std::ref(params.get().nw.z),
-				.value_converter = calculator{}
-			},
-		});
+		form.insert(
+			field{
+				.name = "nw",
+				.display_name = "NW",
+				.description = "Controls the north-west corner",
+				.widget = subform{
+					.binding = std::ref(params.get().nw),
+				}
+			}
+		);
 
-		form.insert(field{
-			.name = "ne_elev",
-			.display_name = "NE",
-			.description = "Sets the elevation in north-east",
-			.widget = numeric_input{
-				.binding = std::ref(params.get().ne.z),
-				.value_converter = calculator{}
-			},
-		});
+		form.insert(
+			field{
+				.name = "ne",
+				.display_name = "NE",
+				.description = "Controls the north-east corner",
+				.widget = subform{
+					.binding = std::ref(params.get().ne),
+				},
+			}
+		);
 
-		form.insert(field{
-			.name = "sw_elev",
-			.display_name = "SW",
-			.description = "Sets the elevation in south-west",
-			.widget = numeric_input{
-				.binding = std::ref(params.get().sw.z),
-				.value_converter = calculator{}
-			},
-		});
+		form.insert(
+			field{
+				.name = "sw",
+				.display_name = "SW",
+				.description = "Controls the south-west corner",
+				.widget = subform{
+					.binding = std::ref(params.get().sw),
+				}
+			}
+		);
 
-		form.insert(field{
-			.name = "se_elev",
-			.display_name = "SE",
-			.description = "Sets the elevation in south-east",
-			.widget = numeric_input{
-				.binding = std::ref(params.get().se.z),
-				.value_converter = calculator{},
-			},
-		});
+		form.insert(
+			field{
+				.name = "se",
+				.display_name = "SE",
+				.description = "Controls the south-east corner",
+				.widget = subform{
+					.binding = std::ref(params.get().se),
+				},
+			}
+		);
 	}
 
 	struct damped_wave_description
@@ -465,8 +512,8 @@ namespace terraformer
 		form.insert(
 			field{
 				.name = "corners",
-				.display_name = "Corner elevations",
-				.description = "Sets elevation at domain corners",
+				.display_name = "Corners",
+				.description = "Controls the elevation and slopes at the corners",
 				.widget = subform{
 					.binding = std::ref(params.get().corners)
 				}

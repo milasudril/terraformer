@@ -21,6 +21,7 @@ namespace terraformer
 	using blend_value = bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f>;
 	using opening_angle = bounded_value<open_open_interval{-0.5f, 0.5f}, 0.25f>;
 	using rotation_angle = bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f>;
+	using slope_angle = bounded_value<open_open_interval{-0.25f, 0.25f}, 0.0f>;
 }
 
 #endif
