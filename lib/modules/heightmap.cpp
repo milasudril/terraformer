@@ -178,6 +178,7 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	auto const se_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_y)*static_cast<float>(h)*hm.pixel_size;
 
 	auto const ridge_curve = std::span{hm.ridge_curve};
+	auto const ridge_slope = std::atan(2.0f*params.main_ridge.slope_y*std::numbers::pi_v<float>);
 	auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
 
 	for(uint32_t y = 0; y != h; ++y)
@@ -201,15 +202,25 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 			auto const yf = static_cast<float>(y)*hm.pixel_size;
 			auto const y_curve = ridge_curve[x][1];
 			auto const side = yf - y_curve;
-			auto const bump_param = side < 0.0f? hm.u(x, y)/ridge_loc :
+			// TODO: Fix divide-by-zero issue
+			auto const bump_param = side < 0.0f? u(x, y)/ridge_loc :
 				(u(x, y) - y_south)/(ridge_loc - y_south);
 
-			auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
+			cubic_spline_control_point const ridge{
+				.y = ridge_loc_z,
+				.ddx = ridge_slope*(side < 0.0f? ridge_loc: y_south - ridge_loc)
+			};
+
+			cubic_spline_control_point const valley{
+				.y = 0.0f,
+				.ddx = 0.0f
+			};
+
+			auto const bump = interp(valley, ridge, bump_param);
 
 			auto const base_elevation = interp(north, south, eta);
 			pixels(x, y) = base_elevation
-				+ ridge_loc_z*bump
-			//std::lerp(base_elevation, ridge_loc_z, bump)
+				+ bump
 				+ bump_field_amplitude*bump_field_output(x, y);
 		}
 	}

@@ -99,6 +99,7 @@ namespace terraformer
 	{
 		ridge_curve_description<horizontal_offset, horizontal_amplitude> ridge_curve_xy;
 		ridge_curve_description<elevation, vertical_amplitude> ridge_curve_xz;
+		slope_angle slope_y;
 	};
 
 	inline std::vector<location> generate(main_ridge_description const& params,
@@ -155,6 +156,18 @@ namespace terraformer
 				.description = "Controls the vertical properties of the main ridge",
 				.widget = subform{
 					.binding = std::ref(params.get().ridge_curve_xz)
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "slope_y",
+				.display_name = "Ridge slope",
+				.description = "Controls the slope along the ridge curve",
+				.widget = numeric_input{
+					.binding = std::ref(params.get().slope_y),
+					.value_converter = calculator{}
 				}
 			}
 		);
