@@ -177,10 +177,6 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 
 	auto const se_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_y)*static_cast<float>(h)*hm.pixel_size;
 
-//		auto const nw_elev = corners.nw.z;
-//		auto const ne_elev = corners.ne.z;
-//		auto const sw_elev = corners.sw.z;
-//		auto const se_elev = corners.se.z;
 	auto const ridge_curve = std::span{hm.ridge_curve};
 	auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
 
