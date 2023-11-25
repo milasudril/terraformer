@@ -140,79 +140,81 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 	if(h < 2 || w < 2)
 	{ throw std::runtime_error{"Output resolution is too small"}; }
 
-	{
-		// auto const u = hm.u.pixels();
-		auto const bump_field_output = hm.bump_field.pixels();
-		auto const bump_field_amplitude = params.bump_field.amplitude;
-		// auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
-		auto const& corners = params.corners;
-		cubic_spline_control_point const nw_we{
-			.y = corners.nw.z,
-			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.nw.slope_x)*static_cast<float>(w)*hm.pixel_size
-		};
+	auto const u = hm.u.pixels();
+	auto const v = hm.v.pixels();
+	auto const pixel_size = hm.pixel_size;
 
-		cubic_spline_control_point const ne_we{
-			.y = corners.ne.z,
-			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.ne.slope_x)*static_cast<float>(w)*hm.pixel_size
-		};
+	auto const bump_field_output = hm.bump_field.pixels();
+	auto const bump_field_amplitude = params.bump_field.amplitude;
+	auto const ridge_loc = static_cast<float>(params.main_ridge.ridge_curve_xy.initial_value);
 
-		cubic_spline_control_point const sw_we{
-			.y = corners.sw.z,
-			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.sw.slope_x)*static_cast<float>(w)*hm.pixel_size
-		};
+	auto const& corners = params.corners;
+	cubic_spline_control_point const nw_we{
+		.y = corners.nw.z,
+		.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.nw.slope_x)*static_cast<float>(w)*hm.pixel_size
+	};
 
-		cubic_spline_control_point const se_we{
-			.y = corners.se.z,
-			.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_x)*static_cast<float>(w)*hm.pixel_size
-		};
+	cubic_spline_control_point const ne_we{
+		.y = corners.ne.z,
+		.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.ne.slope_x)*static_cast<float>(w)*hm.pixel_size
+	};
 
-		auto const nw_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.nw.slope_y)*static_cast<float>(h)*hm.pixel_size;
+	cubic_spline_control_point const sw_we{
+		.y = corners.sw.z,
+		.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.sw.slope_x)*static_cast<float>(w)*hm.pixel_size
+	};
 
-		auto const ne_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.ne.slope_y)*static_cast<float>(h)*hm.pixel_size;
+	cubic_spline_control_point const se_we{
+		.y = corners.se.z,
+		.ddx = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_x)*static_cast<float>(w)*hm.pixel_size
+	};
 
-		auto const sw_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.sw.slope_y)*static_cast<float>(h)*hm.pixel_size;
+	auto const nw_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.nw.slope_y)*static_cast<float>(h)*hm.pixel_size;
 
-		auto const se_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_y)*static_cast<float>(h)*hm.pixel_size;
+	auto const ne_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.ne.slope_y)*static_cast<float>(h)*hm.pixel_size;
+
+	auto const sw_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.sw.slope_y)*static_cast<float>(h)*hm.pixel_size;
+
+	auto const se_ddy = std::atan(2.0f*std::numbers::pi_v<float>*corners.se.slope_y)*static_cast<float>(h)*hm.pixel_size;
 
 //		auto const nw_elev = corners.nw.z;
 //		auto const ne_elev = corners.ne.z;
 //		auto const sw_elev = corners.sw.z;
 //		auto const se_elev = corners.se.z;
-		auto const ridge_curve = std::span{hm.ridge_curve};
-		// auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
+	auto const ridge_curve = std::span{hm.ridge_curve};
+	auto const y_south =static_cast<float>(h - 1)*hm.pixel_size;
 
-		for(uint32_t y = 0; y != h; ++y)
+	for(uint32_t y = 0; y != h; ++y)
+	{
+		for(uint32_t x = 0; x != w; ++x)
 		{
-			for(uint32_t x = 0; x != w; ++x)
-			{
-				auto const xi = static_cast<float>(hm.v(x, y))/(hm.pixel_size*static_cast<float>(w - 1));
-				auto const eta = static_cast<float>(hm.u(x, y))/(hm.pixel_size*static_cast<float>(h - 1));
+			auto const xi = static_cast<float>(v(x, y))/(pixel_size*static_cast<float>(w - 1));
+			auto const eta = static_cast<float>(u(x, y))/(pixel_size*static_cast<float>(h - 1));
 
-				cubic_spline_control_point const north{
-					.y = interp(nw_we, ne_we, xi),
-					.ddx = std::lerp(nw_ddy, ne_ddy, xi)
-				};
+			cubic_spline_control_point const north{
+				.y = interp(nw_we, ne_we, xi),
+				.ddx = std::lerp(nw_ddy, ne_ddy, xi)
+			};
 
-				cubic_spline_control_point const south{
-					.y = interp(sw_we, se_we, xi),
-					.ddx = std::lerp(sw_ddy, se_ddy, xi)
-				};
+			cubic_spline_control_point const south{
+				.y = interp(sw_we, se_we, xi),
+				.ddx = std::lerp(sw_ddy, se_ddy, xi)
+			};
 
-			//	auto const ridge_loc_z = ridge_curve[x][2];
+			auto const ridge_loc_z = ridge_curve[x][2];
+			auto const yf = static_cast<float>(y)*hm.pixel_size;
+			auto const y_curve = ridge_curve[x][1];
+			auto const side = yf - y_curve;
+			auto const bump_param = side < 0.0f? hm.u(x, y)/ridge_loc :
+				(u(x, y) - y_south)/(ridge_loc - y_south);
 
-			//	auto const yf = static_cast<float>(y)*hm.pixel_size;
-			//	auto const y_curve = ridge_curve[x][1];
-			//	auto const side = yf - y_curve;
-			//	auto const bump_param = side < 0.0f? u(x, y)/ridge_loc :
-				//	(u(x, y) - y_south)/(ridge_loc - y_south);
+			auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
 
-			//	auto const bump = smoothstep(2.0f*(bump_param - 0.5f));
-
-				auto const base_elevation = interp(north, south, eta);
-				pixels(x, y) = base_elevation
-				//std::lerp(base_elevation, ridge_loc_z, bump)
-					+ bump_field_amplitude*bump_field_output(x, y);
-			}
+			auto const base_elevation = interp(north, south, eta);
+			pixels(x, y) = base_elevation
+				+ ridge_loc_z*bump
+			//std::lerp(base_elevation, ridge_loc_z, bump)
+				+ bump_field_amplitude*bump_field_output(x, y);
 		}
 	}
 
