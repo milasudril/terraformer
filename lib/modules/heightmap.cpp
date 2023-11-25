@@ -185,8 +185,8 @@ void terraformer::generate(heightmap& hm, initial_heightmap_description const& p
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{
-				auto const xi = static_cast<float>(x)/static_cast<float>(w - 1);
-				auto const eta = static_cast<float>(y)/static_cast<float>(h - 1);
+				auto const xi = static_cast<float>(hm.v(x, y))/(hm.pixel_size*static_cast<float>(w - 1));
+				auto const eta = static_cast<float>(hm.u(x, y))/(hm.pixel_size*static_cast<float>(h - 1));
 
 				cubic_spline_control_point const north{
 					.y = interp(nw_we, ne_we, xi),
