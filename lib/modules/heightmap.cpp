@@ -124,7 +124,22 @@ terraformer::grayscale_image terraformer::generate(
 			auto const sample_at = r - peak_loc;
 			auto const sample_at_x = inner_product(x_hat, sample_at)/det_mat;
 			auto const sample_at_y = inner_product(y_hat, sample_at)/det_mat;
-			bump_field(x, y) = wave(sample_at_x, sample_at_y);
+
+			auto const val = wave(sample_at_x, sample_at_y);
+			auto const bias = 1.0f;
+			auto const val_with_bias = val + bias;
+
+			bump_field(x, y) = interp(
+				cubic_spline_control_point{
+					.y = -1.0f,
+					.ddx = 0.0f
+				},
+				cubic_spline_control_point{
+					.y = 1.0f,
+					.ddx = 2.0f
+				},
+				0.5f*val_with_bias
+			);
 		}
 	}
 
