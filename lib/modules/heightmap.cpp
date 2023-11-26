@@ -111,6 +111,15 @@ terraformer::grayscale_image terraformer::generate(
 	};
 
 	auto const det_mat = x_hat[0]*y_hat[1] - x_hat[1]*y_hat[0];
+	cubic_spline_control_point const min_param{
+		.y = -1.0f,
+		.ddx = bump_field_desc.valley_gradient
+	};
+
+	cubic_spline_control_point const max_param{
+		.y = 1.0f,
+		.ddx = bump_field_desc.peak_gradient
+	};
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -129,17 +138,7 @@ terraformer::grayscale_image terraformer::generate(
 			auto const bias = 1.0f;
 			auto const val_with_bias = val + bias;
 
-			bump_field(x, y) = interp(
-				cubic_spline_control_point{
-					.y = -1.0f,
-					.ddx = 0.0f
-				},
-				cubic_spline_control_point{
-					.y = 1.0f,
-					.ddx = 2.0f
-				},
-				0.5f*val_with_bias
-			);
+			bump_field(x, y) = interp(min_param, max_param, 0.5f*val_with_bias);
 		}
 	}
 

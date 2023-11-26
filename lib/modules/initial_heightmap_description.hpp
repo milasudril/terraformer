@@ -402,6 +402,8 @@ namespace terraformer
 	struct bump_field_description
 	{
 		vertical_amplitude amplitude;
+		spline_gradient valley_gradient;
+		spline_gradient peak_gradient;
 		horizontal_offset peak_loc_x;
 		horizontal_offset peak_loc_y;
 		opening_angle axis_angle;
@@ -420,6 +422,30 @@ namespace terraformer
 				.description = "Sets the amplitude of the generated wave function",
 				.widget = numeric_input_log{
 					.binding = std::ref(params.get().amplitude),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "valley_gradient",
+				.display_name = "Valley gradient",
+				.description = "Sets the gradient used for valleys",
+				.widget = numeric_input_log{
+					.binding = std::ref(params.get().valley_gradient),
+					.value_converter = calculator{}
+				}
+			}
+		);
+
+		form.insert(
+			field{
+				.name = "peak_gradient",
+				.display_name = "Peak gradient",
+				.description = "Sets the gradient used for peak",
+				.widget = numeric_input_log{
+					.binding = std::ref(params.get().peak_gradient),
 					.value_converter = calculator{}
 				}
 			}
