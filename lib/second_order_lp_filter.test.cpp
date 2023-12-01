@@ -28,4 +28,6 @@ TESTCASE(terraformer_second_order_lp_filter_resonant_step_response)
 
 	EXPECT_LT(vals[16], vals[15]);
 	EXPECT_LT(vals[16], vals[17]);
+	EXPECT_GT(vals[255], 0.975f);
+	EXPECT_LT(vals[255], 1.125f);
 }
