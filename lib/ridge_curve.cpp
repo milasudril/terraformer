@@ -29,7 +29,7 @@ std::vector<terraformer::displacement> terraformer::generate(
 		},
 		second_order_lp_filter{
 			second_order_lp_filter_description{
-				.damping = std::sqrt(0.5f),
+				.damping = src.damping,
 				.cutoff_freq = twopi/src.wavelength,
 				.initial_value = 0.0f,
 				.initial_derivative = 0.0f,

@@ -17,6 +17,7 @@ namespace terraformer
 	{
 		horizontal_amplitude amplitude;
 		domain_length wavelength;
+		float damping;  // TODO: Decide on range. Probably ]0, 1]
 		bool flip_direction{};
 		bool invert_displacement{};
 	};
