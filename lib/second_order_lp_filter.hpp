@@ -15,16 +15,16 @@ namespace terraformer
 	class second_order_lp_filter
 	{
 	public:
- 		explicit second_order_lp_filter(second_order_lp_filter_description const& params, float dt):
+ 		constexpr explicit second_order_lp_filter(second_order_lp_filter_description const& params, float dt):
 			m_dt{dt},
 			m_y{params.initial_value},
 			m_v{params.initial_derivative},
-			m_x_prev{params.initial_input},
+			m_x{params.initial_input},
 			m_damping{params.damping},
 			m_cutoff_freq{params.cutoff_freq}
 		{}
 
-		float operator()(float x)
+		constexpr float operator()(float x)
 		{
 			// ÿ + 2ζωẏ + ω²y = xω²
 			//
@@ -42,7 +42,7 @@ namespace terraformer
 			auto const dt = m_dt;
 			auto const v_prev = m_v;
 			auto const y_prev = m_y;
-			auto const x_prev = m_x_prev;
+			auto const x_prev = m_x;
 			auto const ζ = m_damping;
 			auto const ω = m_cutoff_freq;
 
@@ -52,7 +52,7 @@ namespace terraformer
 
 			m_v = v;
 			m_y = y;
-			m_x_prev = x;
+			m_x = x;
 			return y;
 		}
 
@@ -60,7 +60,7 @@ namespace terraformer
 		float m_dt;
 		float m_y;
 		float m_v;
-		float m_x_prev;
+		float m_x;
 		float m_damping;
 		float m_cutoff_freq;
 	};
