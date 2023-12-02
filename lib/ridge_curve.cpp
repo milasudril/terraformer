@@ -45,5 +45,14 @@ std::vector<terraformer::displacement> terraformer::generate(
 		ret[k] = displacement{x, f(U(rng)), 0.0f};
 	}
 
+	auto minmax = std::ranges::minmax_element(ret, [](auto a, auto b) {
+		return a[1] < b[1];
+	});
+
+	auto const gain = 2.0f*src.amplitude/((*minmax.max)[1] - (*minmax.min)[1]);
+
+	for(size_t k = 0; k != seg_count; ++k)
+	{ ret[k].apply(scaling{1.0f, gain, 0.0f}); }
+
 	return ret;
 }
