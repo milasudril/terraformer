@@ -22,7 +22,7 @@ namespace terraformer
 		bool invert_displacement{};
 	};
 
-	std::vector<displacement> generate(
+	std::vector<float> generate(
 		ridge_curve_description const& src,
 		random_generator& rng,
 		size_t seg_count,

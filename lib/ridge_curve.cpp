@@ -8,13 +8,13 @@
 #include <random>
 #include <numbers>
 
-std::vector<terraformer::displacement> terraformer::generate(
+std::vector<float> terraformer::generate(
 	ridge_curve_description const& src,
 	random_generator& rng,
 	size_t seg_count,
 	float dx)
 {
-	std::vector<displacement> ret(seg_count);
+	std::vector<float> ret(seg_count);
 	constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
 	std::uniform_real_distribution U{-1.0f, 1.0f};
 
@@ -40,19 +40,14 @@ std::vector<terraformer::displacement> terraformer::generate(
 	};
 
 	for(size_t k = 0; k != seg_count; ++k)
-	{
-		auto const x = static_cast<float>(k)*dx;
-		ret[k] = displacement{x, f(U(rng)), 0.0f};
-	}
+	{ ret[k] = f(U(rng)); }
 
-	auto minmax = std::ranges::minmax_element(ret, [](auto a, auto b) {
-		return a[1] < b[1];
-	});
+	auto minmax = std::ranges::minmax_element(ret);
 
-	auto const gain = 2.0f*src.amplitude/((*minmax.max)[1] - (*minmax.min)[1]);
+	auto const gain = 2.0f*src.amplitude/(*minmax.max - *minmax.min);
 
 	for(size_t k = 0; k != seg_count; ++k)
-	{ ret[k].apply(scaling{1.0f, gain, 0.0f}); }
+	{ ret[k] *= gain; }
 
 	return ret;
 }

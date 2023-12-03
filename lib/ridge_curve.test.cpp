@@ -21,7 +21,7 @@ TESTCASE(terraformer_ridge_curve_generate)
 
 	std::vector<std::complex<double>> input(std::size(res));
 	std::transform(std::begin(res), std::end(res), std::begin(input), [](auto val){
-		return static_cast<double>(val[1]);
+		return static_cast<double>(val);
 	});
 	std::vector<std::complex<double>> output(std::size(res));
 	get_plan(std::size(res), terraformer::dft_direction::forward).execute(std::data(input), std::data(output));
