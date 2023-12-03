@@ -107,14 +107,14 @@ TESTCASE(terraformer_curve_displace)
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const theta = static_cast<float>(k)*dx;
-		locs[k] = terraformer::location{std::cos(theta), std::sin(theta), 0.0f};
+		locs[k] = terraformer::location{theta, std::sin(theta), 0.0f};
 	}
 
-	std::array<float, num_points> offsets;
+	std::array<float, 2*num_points> offsets;
 	for(size_t k = 0; k != std::size(offsets); ++k)
 	{
 		auto const theta = static_cast<float>(k)*dx;
-		offsets[k] = std::sin(8.0f*theta)/8.0f;
+		offsets[k] = std::sin(8.0f*theta)/4.0f;
 	}
 
 	auto const res = displace(
@@ -127,10 +127,14 @@ TESTCASE(terraformer_curve_displace)
 	);
 
  	REQUIRE_EQ(std::size(res), std::size(locs));
+#if 0
+	// TODO: Fix verdict
+
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const loc = locs[k];
 		auto const loc_ofs = res[k];
 		printf("%.8g %.8g %.8g %.8g\n", loc[0], loc[1], loc_ofs[0], loc_ofs[1]);
 	}
+#endif
 }
