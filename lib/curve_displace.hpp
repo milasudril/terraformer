@@ -9,11 +9,26 @@
 
 namespace terraformer
 {
-	inline direction curve_vertex_normal(location a, location b, location c)
+	inline direction curve_vertex_normal_from_curvature(
+		location a,
+		location b,
+		location c)
 	{
-		displacement const tangent = c - a;
+		auto const tangent = c - a;
 		auto const binormal = cross(tangent, b - a);
 		return direction{cross(binormal, tangent)};
+	}
+
+	inline direction curve_vertex_normal_from_projection(
+		location a,
+		location b,
+		location c,
+		displacement looking_towards)
+	{
+		auto const tangent = c - a;
+		auto const binormal = cross(tangent, b - a);
+		auto const side = inner_product(looking_towards, binormal) > 0.0f ? 1.0f : -1.0f;
+		return direction{side*cross(binormal, tangent)};
 	}
 
 	void displace(std::span<location> c, std::span<displacement const> dx);
