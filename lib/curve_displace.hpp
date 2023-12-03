@@ -5,6 +5,7 @@
 
 #include "lib/common/spaces.hpp"
 
+#include <vector>
 #include <span>
 
 namespace terraformer
@@ -31,7 +32,13 @@ namespace terraformer
 		return direction{side*cross(binormal, tangent)};
 	}
 
-	void displace(std::span<location> c, std::span<displacement const> dx);
+	struct displacement_profile
+	{
+		std::span<float const> offsets;
+		float sample_period;
+	};
+
+	std::vector<location> displace(std::span<location const> c, displacement_profile dy, displacement looking_towards);
 }
 
 #endif

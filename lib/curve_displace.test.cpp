@@ -98,3 +98,39 @@ TESTCASE(terraformer_curve_vertex_normal_from_projection)
 		EXPECT_LT(n[1], 0.0f);
 	}
 }
+
+TESTCASE(terraformer_curve_displace)
+{
+	constexpr auto num_points = 128;
+	std::array<terraformer::location, num_points> locs;
+	auto const dx = 2.0f*std::numbers::pi_v<float>/static_cast<float>(num_points);
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+		auto const theta = static_cast<float>(k)*dx;
+		locs[k] = terraformer::location{std::cos(theta), std::sin(theta), 0.0f};
+	}
+
+	std::array<float, num_points> offsets;
+	for(size_t k = 0; k != std::size(offsets); ++k)
+	{
+		auto const theta = static_cast<float>(k)*dx;
+		offsets[k] = std::sin(8.0f*theta)/8.0f;
+	}
+
+	auto const res = displace(
+		locs,
+		terraformer::displacement_profile{
+			.offsets = offsets,
+			.sample_period = dx
+		},
+		terraformer::displacement{0.0f, 0.0f, -1.0f}
+	);
+
+ 	REQUIRE_EQ(std::size(res), std::size(locs));
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+		auto const loc = locs[k];
+		auto const loc_ofs = res[k];
+		printf("%.8g %.8g %.8g %.8g\n", loc[0], loc[1], loc_ofs[0], loc_ofs[1]);
+	}
+}
