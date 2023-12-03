@@ -12,7 +12,7 @@ namespace terraformer
 	inline direction curve_vertex_normal(location a, location b, location c)
 	{
 		displacement const tangent = c - a;
-		auto const binormal = cross(c - b, tangent);
+		auto const binormal = cross(tangent, b - a);
 		return direction{cross(binormal, tangent)};
 	}
 
