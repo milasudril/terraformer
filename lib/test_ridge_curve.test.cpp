@@ -24,17 +24,18 @@ namespace terraformer
 int main()
 {
 	terraformer::ridge_curve_description curve_desc{
-		.amplitude = terraformer::horizontal_amplitude{3096.0f},
+		.amplitude = terraformer::horizontal_amplitude{2048.0f},
 		.wavelength = terraformer::domain_length{12384.0f},
 		.damping = std::sqrt(0.5f),
 		.flip_direction = false,
 		.invert_displacement = false
 	};
 
-	constexpr auto pixel_size = 12.0f;
+	constexpr auto pixel_size = 48.0f;
 	terraformer::random_generator rng;
 	auto const pixel_count = static_cast<size_t>(49152.0f/pixel_size);
-	auto const offsets = generate(curve_desc, rng, pixel_count, pixel_size);
+	std::uniform_int_distribution warmup{pixel_count, 16*pixel_count};
+	auto const offsets = generate(curve_desc, rng, pixel_count, pixel_size, warmup(rng));
 	auto const ridge_loc = 24576.0f;
 	auto const curve = terraformer::make_point_array(terraformer::location{0.0f, ridge_loc, 0.0f}, pixel_count, pixel_size);
 	auto const points = displace(curve, terraformer::displacement_profile{.offsets = offsets, .sample_period = pixel_size}, terraformer::displacement{0.0f, 0.0f, -1.0f});

@@ -12,7 +12,8 @@ std::vector<float> terraformer::generate(
 	ridge_curve_description const& src,
 	random_generator& rng,
 	size_t seg_count,
-	float dx)
+	float dx,
+	size_t warmup_count)
 {
 	std::vector<float> ret(seg_count);
 	constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
@@ -23,7 +24,7 @@ std::vector<float> terraformer::generate(
 			first_order_hp_filter_description{
 				.cutoff_freq = twopi/src.wavelength,
 				.initial_value = 0.0f,
-				.initial_input = 0.0f
+				.initial_input = 0.f
 			},
 			dx
 		},
@@ -38,6 +39,12 @@ std::vector<float> terraformer::generate(
 			dx
 		}
 	};
+
+	while(warmup_count != 0)
+	{
+		f(U(rng));
+		--warmup_count;
+	}
 
 	for(size_t k = 0; k != seg_count; ++k)
 	{ ret[k] = f(U(rng)); }

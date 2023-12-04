@@ -26,7 +26,8 @@ namespace terraformer
 		ridge_curve_description const& src,
 		random_generator& rng,
 		size_t seg_count,
-		float dx);
+		float dx,
+		size_t warmup_count = 0);
 }
 
 #endif
