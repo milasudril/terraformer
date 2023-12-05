@@ -24,7 +24,7 @@ namespace terraformer
 int main()
 {
 	terraformer::ridge_curve_description curve_desc{
-		.amplitude = terraformer::horizontal_amplitude{2048.0f},
+		.amplitude = terraformer::horizontal_amplitude{2560.0f},
 		.wavelength = terraformer::domain_length{12384.0f},
 		.damping = std::sqrt(0.5f),
 		.flip_direction = false,
@@ -34,11 +34,24 @@ int main()
 	constexpr auto pixel_size = 48.0f;
 	terraformer::random_generator rng;
 	auto const pixel_count = static_cast<size_t>(49152.0f/pixel_size);
-	std::uniform_int_distribution warmup{pixel_count, 16*pixel_count};
-	auto const offsets = generate(curve_desc, rng, pixel_count, pixel_size, warmup(rng));
+	auto const offsets = generate(
+		curve_desc,
+		rng,
+		pixel_count,
+		pixel_size,
+		// TODO: Should use a randomized value here
+		static_cast<size_t>(24.0f*curve_desc.wavelength/(curve_desc.damping*pixel_size)));
 	auto const ridge_loc = 24576.0f;
 	auto const curve = terraformer::make_point_array(terraformer::location{0.0f, ridge_loc, 0.0f}, pixel_count, pixel_size);
 	auto const points = displace(curve, terraformer::displacement_profile{.offsets = offsets, .sample_period = pixel_size}, terraformer::displacement{0.0f, 0.0f, -1.0f});
+
+	for(size_t k = 1; k != std::size(points) - 1; ++k)
+	{
+		auto const dir_1 = terraformer::direction{points[k] - points[k - 1]};
+		auto const dir_2 = terraformer::direction{points[k+1] - points[k]};
+		auto const theta = std::acos(inner_product(dir_1, dir_2));
+		printf("%.8g %.8g %.8g\n", points[k][0], points[k][1], theta);
+	}
 
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
 	for(uint32_t y = 0; y != potential.height(); ++y)
