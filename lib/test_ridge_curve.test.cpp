@@ -61,14 +61,15 @@ int main()
 			++l;
 			side = -side;
 		}
-		auto max_offset = 0.0f;
-		size_t selected_branch_point = 0;
+
+		float max_offset = 0.0f;
+		std::optional<size_t> selected_branch_point;
 		for(size_t k = 1; k != std::size(offsets) - 1;++k)
 		{
 			if(l != std::size(x_intercepts) && k == x_intercepts[l])
 			{
-				if(l != 0)
-				{ branch_at.push_back(selected_branch_point); }
+				if(selected_branch_point.has_value())
+				{ branch_at.push_back(*selected_branch_point); }
 				max_offset = 0.0f;
 				++l;
 				side = -side;
@@ -83,14 +84,29 @@ int main()
 			auto const side_of_curve = inner_product(points_ab, points_normal);
 			auto const visible = (side*y > 0.0f ? 1.0f : 0.0f)*(side*side_of_curve > 0.0f ? 1.0f : 0.0f);
 
-			if(visible && std::abs(y) > max_offset)
+			if(visible && std::abs(y) > max_offset && side*y > side*offsets[k - 1] && side*y < side*offsets[k + 1])
 			{
 				max_offset = std::abs(y);
 				selected_branch_point = k;
 			}
 		}
-		branch_at.push_back(selected_branch_point);
+
+		if(selected_branch_point.has_value())
+		{ branch_at.push_back(*selected_branch_point); }
 	}
+
+#if 0
+	for(size_t k = 0; k != std::size(offsets); ++k)
+	{
+		printf("%zu %.8g\n", 48*k, offsets[k]);
+	}
+#else
+	for(size_t k = 0; k != std::size(branch_at); ++k)
+	{
+		auto const l = branch_at[k];
+		printf("%zu %.8g\n", 48*l, offsets[l]);
+	}
+#endif
 
 #if 0
 
