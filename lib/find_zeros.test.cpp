@@ -149,8 +149,8 @@ TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_sine_cosine)
 
 TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_sine_sine)
 {
-	std::array<float, 256> data_points;
-	auto const dx = 1.0f/128.0f;
+	std::array<float, 512> data_points;
+	auto const dx = 1.0f/256.0f;
 	auto const f1 = 1.0f;
 	auto const f2 = 16.0f;
 	for(size_t k = 0; k != std::size(data_points); ++k)
@@ -162,7 +162,7 @@ TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_sine_sine)
 	}
 
 	auto const zeros = terraformer::find_zeros(data_points);
-	EXPECT_EQ(std::size(zeros), 2*std::size(data_points)/128);
+	EXPECT_EQ(std::size(zeros), 2*std::size(data_points)/256);
 	for(size_t k = 0; k != std::size(zeros); ++k)
 	{
 		auto const index = zeros[k];

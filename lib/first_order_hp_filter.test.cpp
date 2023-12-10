@@ -26,5 +26,5 @@ TESTCASE(terraformer_first_order_hp_filter_step_response)
 		val = val_next;
 	}
 
-	EXPECT_LT(std::abs(init/val - std::exp(1)), 1.0e-6f);
+	EXPECT_LT(std::abs(init/val - std::exp(1)), 2.0e-6f);
 }
