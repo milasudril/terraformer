@@ -61,12 +61,17 @@ int main()
 	}
 	std::vector<float> branch_prob(std::size(points));
 	auto branch_prob_tot = 0.0;
+	size_t range_start = 0;
 	for(size_t k = 1; k != std::size(offsets) - 1;++k)
 	{
 		if(l != std::size(x_intercepts) && k == x_intercepts[l])
 		{
 			++l;
 			side = -side;
+			for(size_t m = range_start; m != k; ++m)
+			{ branch_prob[m] /= static_cast<float>(branch_prob_tot); }
+			branch_prob_tot = 0.0;
+			range_start = k;
 		}
 
 		auto const y = offsets[k];
@@ -82,8 +87,8 @@ int main()
 		branch_prob_tot += static_cast<double>(visible)*static_cast<double>(y)*static_cast<double>(y);
 	}
 
-	for(size_t k = 0; k != std::size(branch_prob); ++k)
-	{ branch_prob[k] *= static_cast<float>(static_cast<double>(1.0)/branch_prob_tot); }
+	for(size_t m = range_start; m != std::size(branch_prob); ++m)
+	{ branch_prob[m] /= static_cast<float>(branch_prob_tot); }
 
 	for(size_t k = 0; k != std::size(points); ++k)
 	{
