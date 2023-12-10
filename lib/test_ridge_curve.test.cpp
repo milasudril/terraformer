@@ -2,8 +2,12 @@
 
 #include "./ridge_curve.hpp"
 #include "./curve_displace.hpp"
+#include "./find_zeros.hpp"
+#include "./boundary_sampling_policies.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
+
+#include <random>
 
 namespace terraformer
 {
@@ -43,14 +47,66 @@ int main()
 		static_cast<size_t>(24.0f*curve_desc.wavelength/(curve_desc.damping*pixel_size)));
 	auto const ridge_loc = 24576.0f;
 	auto const curve = terraformer::make_point_array(terraformer::location{0.0f, ridge_loc, 0.0f}, pixel_count, pixel_size);
-	auto const points = displace(curve, terraformer::displacement_profile{.offsets = offsets, .sample_period = pixel_size}, terraformer::displacement{0.0f, 0.0f, -1.0f});
 
+#if 0
+	auto const x_intercepts = terraformer::find_zeros(offsets);
+	auto value = (offsets[0] >= 0.0f)? 2560.0f: -2560.0f;
+	size_t l = 0;
+	for(size_t k = 0; k != std::size(offsets);++k)
+	{
+		if(l != std::size(x_intercepts))
+		{
+			if(k == x_intercepts[l])
+			{
+	//			printf("%zu\n", x_intercepts[l]);
+				++l;
+				value = -value;
+			}
+		}
+		printf("%zu %.8g %.8g\n", k, offsets[k], value);
+	}
+
+	auto const points = displace(curve, terraformer::displacement_profile{.offsets = offsets, .sample_period = pixel_size}, terraformer::displacement{0.0f, 0.0f, -1.0f});
+	std::vector<float> branch_prob(std::size(points));
 	for(size_t k = 1; k != std::size(points) - 1; ++k)
 	{
-		auto const dir_1 = terraformer::direction{points[k] - points[k - 1]};
-		auto const dir_2 = terraformer::direction{points[k+1] - points[k]};
-		auto const theta = std::acos(inner_product(dir_1, dir_2));
-		printf("%.8g %.8g %.8g\n", points[k][0], points[k][1], theta);
+		auto const x = static_cast<float>(k)*pixel_size;
+		auto const dx_coarse = curve_desc.wavelength/(1.35f*8.0f);
+		auto const a_coarse = interp(points, (x - dx_coarse)/pixel_size, terraformer::clamp_at_boundary{});
+		auto const b_coarse = interp(points, x/pixel_size, terraformer::clamp_at_boundary{});
+		auto const c_coarse = interp(points, (x + dx_coarse)/pixel_size, terraformer::clamp_at_boundary{});
+		terraformer::direction const dir_1_coarse{b_coarse - a_coarse};
+		terraformer::direction const dir_2_coarse{c_coarse - b_coarse};
+		terraformer::direction const tangent_points_coarse{c_coarse - a_coarse};
+//		auto const normal_coarse = terraformer::curve_vertex_normal_from_curvature(a_coarse, b_coarse, c_coarse);
+
+		auto const a_fine = points[k - 1];
+		auto const b_fine = points[k];
+		auto const c_fine = points[k +1 ];
+		terraformer::direction const dir_1_fine{b_fine - a_fine};
+		terraformer::direction const dir_2_fine{c_fine - b_fine};
+		terraformer::direction const tangent_points_fine{c_fine - a_fine};
+		auto const c1_fine = curve[k - 1];
+		auto const c2_fine = curve[k + 1];
+		terraformer::direction const tangent_curve_fine{c2_fine - c1_fine};
+	//	auto const normal_fine = terraformer::curve_vertex_normal_from_curvature(a_fine, b_fine, c_fine);
+
+		branch_prob[k] = std::acos(inner_product(dir_1_coarse, dir_2_coarse)); //std::acos(inner_product(dir_1_fine, dir_2_fine)));
+		//	*(std::abs(inner_product(tangent_points_fine, tangent_curve_fine)) > 0.5f? 1.0f : 0.0f)
+		//	*(std::abs(inner_product(tangent_points_coarse, tangent_curve_fine)) > std::sqrt(0.5f)? 1.0f : 0.0f)
+		//	*(inner_product(normal_fine, b_fine - curve[k]) > 0.0f? 1.0f: 0.0f)
+		//	*(inner_product(normal_coarse, b_fine - curve[k]) > 0.0f ? 1.0f: 0.0f);
+	}
+
+	{
+		auto const maxval = *std::ranges::max_element(branch_prob);
+		for(size_t k = 0; k != std::size(branch_prob); ++k)
+		{	branch_prob[k] /= maxval;}
+	}
+	for(size_t k = 0; k != std::size(points); ++k)
+	{
+		auto const do_branch = branch_prob[k] > 0.5f; //std::bernoulli_distribution{branch_prob[k]}(rng);
+		printf("%.8g %.8g %.8g %d\n", points[k][0], points[k][1], branch_prob[k], do_branch);
 	}
 
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
@@ -70,4 +126,5 @@ int main()
 	}
 
 	store(potential, "test.exr");
+#endif
 }

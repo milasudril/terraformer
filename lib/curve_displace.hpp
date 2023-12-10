@@ -3,6 +3,7 @@
 #ifndef TERRAFORMER_CURVE_DISPLACE_HPP
 #define TERRAFORMER_CURVE_DISPLACE_HPP
 
+#include "./interp.hpp"
 #include "lib/common/spaces.hpp"
 
 #include <vector>

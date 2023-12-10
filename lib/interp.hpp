@@ -4,6 +4,7 @@
 #include "./boundary_sampling_policy.hpp"
 
 #include <ranges>
+#include <cmath>
 
 namespace terraformer
 {
@@ -13,6 +14,12 @@ namespace terraformer
 		{image.width()} -> std::same_as<uint32_t>;
 		{image.height()} -> std::same_as<uint32_t>;
 		{image(x, y)} -> std::convertible_to<U const&>;
+	};
+
+	template<class T>
+	concept has_lerp = requires(T left, T right, float t)
+	{
+		{lerp(left, right, t)} -> std::same_as<T>;
 	};
 
 	template<std::ranges::random_access_range R, boundary_sampling_policy U>
@@ -27,7 +34,11 @@ namespace terraformer
 		auto const right = lut[x_1];
 
 		auto const t = x - static_cast<float>(x_0);
-		return (1.0f - t)*left + right*t;
+
+		if constexpr(has_lerp<std::remove_cvref_t<decltype(left)>>)
+		{ return lerp(left, right, t); }
+		else
+		{ return (1.0f - t)*left + t*right; }
 	}
 
 	template<class T, boundary_sampling_policy U>
