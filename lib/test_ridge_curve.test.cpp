@@ -83,17 +83,14 @@ int main()
 	}
 
 	for(size_t k = 0; k != std::size(branch_prob); ++k)
-	{
-		branch_prob[k] /= static_cast<float>(branch_prob_tot);
-		printf("%zu %.8g\n", k, branch_prob[k]);
-	}
+	{ branch_prob[k] *= static_cast<float>(static_cast<double>(1.0)/branch_prob_tot); }
 
-#if 0
 	for(size_t k = 0; k != std::size(points); ++k)
 	{
-		auto const do_branch = branch_prob[k] > 0.5f; //std::bernoulli_distribution{branch_prob[k]}(rng);
+		auto const do_branch = std::bernoulli_distribution{branch_prob[k]}(rng);
 		printf("%.8g %.8g %.8g %d\n", points[k][0], points[k][1], branch_prob[k], do_branch);
 	}
+#if 0
 
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
 	for(uint32_t y = 0; y != potential.height(); ++y)
