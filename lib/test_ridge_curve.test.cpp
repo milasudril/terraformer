@@ -48,12 +48,29 @@ int main()
 	auto const ridge_loc = 24576.0f;
 	auto const curve = terraformer::make_point_array(terraformer::location{0.0f, ridge_loc, 0.0f}, pixel_count, pixel_size);
 
-	auto const x_intercepts = terraformer::find_zeros(offsets);
 
 	auto const points = displace(curve, terraformer::displacement_profile{.offsets = offsets, .sample_period = pixel_size}, terraformer::displacement{0.0f, 0.0f, -1.0f});
+	terraformer::grayscale_image potential{pixel_count, pixel_count};
+	for(uint32_t y = 0; y != potential.height(); ++y)
+	{
+		for(uint32_t x = 0; x != potential.width(); ++x)
+		{
+			terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
+			auto sum = std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const sum, auto const point) {
+				auto const d = terraformer::distance_xy(loc_xy, point);
+				auto const d_min = 1.0f*pixel_size;
+				return sum + 1.0f*(d<d_min? 1.0f : (d_min*d_min)/(d*d));
+			});
+
+			potential(x, y) = sum;
+		}
+	}
+
+	store(potential, "test.exr");
 
 	std::vector<size_t> branch_at;
 	{
+		auto const x_intercepts = terraformer::find_zeros(offsets);
 		auto side = (offsets[0] >= 0.0f)? 1.0f: -1.0f;
 		size_t l = 0;
 		if(l != std::size(x_intercepts) && x_intercepts[l] == 0)
@@ -94,38 +111,4 @@ int main()
 		if(selected_branch_point.has_value())
 		{ branch_at.push_back(*selected_branch_point); }
 	}
-
-#if 0
-	for(size_t k = 0; k != std::size(offsets); ++k)
-	{
-		printf("%zu %.8g\n", 48*k, offsets[k]);
-	}
-#else
-	for(size_t k = 0; k != std::size(branch_at); ++k)
-	{
-		auto const l = branch_at[k];
-		printf("%zu %.8g\n", 48*l, offsets[l]);
-	}
-#endif
-
-#if 0
-
-	terraformer::grayscale_image potential{pixel_count, pixel_count};
-	for(uint32_t y = 0; y != potential.height(); ++y)
-	{
-		for(uint32_t x = 0; x != potential.width(); ++x)
-		{
-			terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
-			auto sum = std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const sum, auto const point) {
-				auto const d = terraformer::distance_xy(loc_xy, point);
-				auto const d_min = 1.0f*pixel_size;
-				return sum + 1.0f*(d<d_min? 1.0f : (d_min*d_min)/(d*d));
-			});
-
-			potential(x, y) = sum;
-		}
-	}
-
-	store(potential, "test.exr");
-#endif
 }
