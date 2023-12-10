@@ -28,8 +28,8 @@ namespace terraformer
 int main()
 {
 	terraformer::ridge_curve_description curve_desc{
-		.amplitude = terraformer::horizontal_amplitude{2560.0f},
-		.wavelength = terraformer::domain_length{12384.0f},
+		.amplitude = terraformer::horizontal_amplitude{3072.0f},
+		.wavelength = terraformer::domain_length{12384.0f*1.35f},
 		.damping = std::sqrt(0.5f),
 		.flip_direction = false,
 		.invert_displacement = false
@@ -48,25 +48,49 @@ int main()
 	auto const ridge_loc = 24576.0f;
 	auto const curve = terraformer::make_point_array(terraformer::location{0.0f, ridge_loc, 0.0f}, pixel_count, pixel_size);
 
-#if 0
 	auto const x_intercepts = terraformer::find_zeros(offsets);
-	auto value = (offsets[0] >= 0.0f)? 2560.0f: -2560.0f;
-	size_t l = 0;
-	for(size_t k = 0; k != std::size(offsets);++k)
-	{
-		if(l != std::size(x_intercepts))
-		{
-			if(k == x_intercepts[l])
-			{
-	//			printf("%zu\n", x_intercepts[l]);
-				++l;
-				value = -value;
-			}
-		}
-		printf("%zu %.8g %.8g\n", k, offsets[k], value);
-	}
 
 	auto const points = displace(curve, terraformer::displacement_profile{.offsets = offsets, .sample_period = pixel_size}, terraformer::displacement{0.0f, 0.0f, -1.0f});
+
+	auto side = (offsets[0] >= 0.0f)? 1.0f: -1.0f;
+	size_t l = 0;
+	if(l != std::size(x_intercepts) && x_intercepts[l] == 0)
+	{
+		++l;
+		side = -side;
+	}
+	std::vector<float> branch_prob(std::size(points));
+	for(size_t k = 1; k != std::size(offsets) - 1;++k)
+	{
+		if(l != std::size(x_intercepts) && k == x_intercepts[l])
+		{
+			++l;
+			side = -side;
+		}
+
+		auto const y = offsets[k];
+		auto const points_a = points[k - 1];
+		auto const points_b = points[k];
+		auto const points_c = points[k + 1];
+		auto const points_normal = terraformer::curve_vertex_normal_from_projection(points_a, points_b, points_c, terraformer::displacement{0.0f, 0.0f, -1.0f});
+		auto const points_ab = points_b - points_a;
+		auto const side_of_curve = inner_product(points_ab, points_normal);
+		auto const visible = (side*y > 0.0f ? 1.0f : 0.0f)*(side*side_of_curve > 0.0f ? 1.0f : 0.0f);
+
+		printf("%zu %.8g %.8g\n", k, y, 3072.0f*visible*side);
+
+
+
+
+
+
+//		printf("%.8g\n", points_normal[1]);
+
+	}
+#if 0
+	auto const wavelength = 2.0f
+		*pixel_size*static_cast<float>(std::size(offsets))/static_cast<float>(std::size(x_intercepts));
+
 	std::vector<float> branch_prob(std::size(points));
 	for(size_t k = 1; k != std::size(points) - 1; ++k)
 	{
