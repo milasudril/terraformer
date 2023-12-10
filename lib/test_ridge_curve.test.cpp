@@ -52,49 +52,46 @@ int main()
 
 	auto const points = displace(curve, terraformer::displacement_profile{.offsets = offsets, .sample_period = pixel_size}, terraformer::displacement{0.0f, 0.0f, -1.0f});
 
-	auto side = (offsets[0] >= 0.0f)? 1.0f: -1.0f;
-	size_t l = 0;
-	if(l != std::size(x_intercepts) && x_intercepts[l] == 0)
+	std::vector<size_t> branch_at;
 	{
-		++l;
-		side = -side;
-	}
-	std::vector<float> branch_prob(std::size(points));
-	auto branch_prob_tot = 0.0;
-	size_t range_start = 0;
-	for(size_t k = 1; k != std::size(offsets) - 1;++k)
-	{
-		if(l != std::size(x_intercepts) && k == x_intercepts[l])
+		auto side = (offsets[0] >= 0.0f)? 1.0f: -1.0f;
+		size_t l = 0;
+		if(l != std::size(x_intercepts) && x_intercepts[l] == 0)
 		{
 			++l;
 			side = -side;
-			for(size_t m = range_start; m != k; ++m)
-			{ branch_prob[m] /= static_cast<float>(branch_prob_tot); }
-			branch_prob_tot = 0.0;
-			range_start = k;
 		}
+		auto max_offset = 0.0f;
+		size_t selected_branch_point = 0;
+		for(size_t k = 1; k != std::size(offsets) - 1;++k)
+		{
+			if(l != std::size(x_intercepts) && k == x_intercepts[l])
+			{
+				if(l != 0)
+				{ branch_at.push_back(selected_branch_point); }
+				max_offset = 0.0f;
+				++l;
+				side = -side;
+			}
 
-		auto const y = offsets[k];
-		auto const points_a = points[k - 1];
-		auto const points_b = points[k];
-		auto const points_c = points[k + 1];
-		auto const points_normal = terraformer::curve_vertex_normal_from_projection(points_a, points_b, points_c, terraformer::displacement{0.0f, 0.0f, -1.0f});
-		auto const points_ab = points_b - points_a;
-		auto const side_of_curve = inner_product(points_ab, points_normal);
-		auto const visible = (side*y > 0.0f ? 1.0f : 0.0f)*(side*side_of_curve > 0.0f ? 1.0f : 0.0f);
+			auto const y = offsets[k];
+			auto const points_a = points[k - 1];
+			auto const points_b = points[k];
+			auto const points_c = points[k + 1];
+			auto const points_normal = terraformer::curve_vertex_normal_from_projection(points_a, points_b, points_c, terraformer::displacement{0.0f, 0.0f, -1.0f});
+			auto const points_ab = points_b - points_a;
+			auto const side_of_curve = inner_product(points_ab, points_normal);
+			auto const visible = (side*y > 0.0f ? 1.0f : 0.0f)*(side*side_of_curve > 0.0f ? 1.0f : 0.0f);
 
-		branch_prob[k] = visible*y*y;
-		branch_prob_tot += static_cast<double>(visible)*static_cast<double>(y)*static_cast<double>(y);
+			if(visible && std::abs(y) > max_offset)
+			{
+				max_offset = std::abs(y);
+				selected_branch_point = k;
+			}
+		}
+		branch_at.push_back(selected_branch_point);
 	}
 
-	for(size_t m = range_start; m != std::size(branch_prob); ++m)
-	{ branch_prob[m] /= static_cast<float>(branch_prob_tot); }
-
-	for(size_t k = 0; k != std::size(points); ++k)
-	{
-		auto const do_branch = std::bernoulli_distribution{branch_prob[k]}(rng);
-		printf("%.8g %.8g %.8g %d\n", points[k][0], points[k][1], branch_prob[k], do_branch);
-	}
 #if 0
 
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
