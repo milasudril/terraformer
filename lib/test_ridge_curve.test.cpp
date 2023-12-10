@@ -60,6 +60,7 @@ int main()
 		side = -side;
 	}
 	std::vector<float> branch_prob(std::size(points));
+	auto branch_prob_tot = 0.0;
 	for(size_t k = 1; k != std::size(offsets) - 1;++k)
 	{
 		if(l != std::size(x_intercepts) && k == x_intercepts[l])
@@ -77,56 +78,17 @@ int main()
 		auto const side_of_curve = inner_product(points_ab, points_normal);
 		auto const visible = (side*y > 0.0f ? 1.0f : 0.0f)*(side*side_of_curve > 0.0f ? 1.0f : 0.0f);
 
-		printf("%zu %.8g %.8g\n", k, y, 3072.0f*visible*side);
-
-
-
-
-
-
-//		printf("%.8g\n", points_normal[1]);
-
+		branch_prob[k] = visible*y*y;
+		branch_prob_tot += static_cast<double>(visible)*static_cast<double>(y)*static_cast<double>(y);
 	}
+
+	for(size_t k = 0; k != std::size(branch_prob); ++k)
+	{
+		branch_prob[k] /= static_cast<float>(branch_prob_tot);
+		printf("%zu %.8g\n", k, branch_prob[k]);
+	}
+
 #if 0
-	auto const wavelength = 2.0f
-		*pixel_size*static_cast<float>(std::size(offsets))/static_cast<float>(std::size(x_intercepts));
-
-	std::vector<float> branch_prob(std::size(points));
-	for(size_t k = 1; k != std::size(points) - 1; ++k)
-	{
-		auto const x = static_cast<float>(k)*pixel_size;
-		auto const dx_coarse = curve_desc.wavelength/(1.35f*8.0f);
-		auto const a_coarse = interp(points, (x - dx_coarse)/pixel_size, terraformer::clamp_at_boundary{});
-		auto const b_coarse = interp(points, x/pixel_size, terraformer::clamp_at_boundary{});
-		auto const c_coarse = interp(points, (x + dx_coarse)/pixel_size, terraformer::clamp_at_boundary{});
-		terraformer::direction const dir_1_coarse{b_coarse - a_coarse};
-		terraformer::direction const dir_2_coarse{c_coarse - b_coarse};
-		terraformer::direction const tangent_points_coarse{c_coarse - a_coarse};
-//		auto const normal_coarse = terraformer::curve_vertex_normal_from_curvature(a_coarse, b_coarse, c_coarse);
-
-		auto const a_fine = points[k - 1];
-		auto const b_fine = points[k];
-		auto const c_fine = points[k +1 ];
-		terraformer::direction const dir_1_fine{b_fine - a_fine};
-		terraformer::direction const dir_2_fine{c_fine - b_fine};
-		terraformer::direction const tangent_points_fine{c_fine - a_fine};
-		auto const c1_fine = curve[k - 1];
-		auto const c2_fine = curve[k + 1];
-		terraformer::direction const tangent_curve_fine{c2_fine - c1_fine};
-	//	auto const normal_fine = terraformer::curve_vertex_normal_from_curvature(a_fine, b_fine, c_fine);
-
-		branch_prob[k] = std::acos(inner_product(dir_1_coarse, dir_2_coarse)); //std::acos(inner_product(dir_1_fine, dir_2_fine)));
-		//	*(std::abs(inner_product(tangent_points_fine, tangent_curve_fine)) > 0.5f? 1.0f : 0.0f)
-		//	*(std::abs(inner_product(tangent_points_coarse, tangent_curve_fine)) > std::sqrt(0.5f)? 1.0f : 0.0f)
-		//	*(inner_product(normal_fine, b_fine - curve[k]) > 0.0f? 1.0f: 0.0f)
-		//	*(inner_product(normal_coarse, b_fine - curve[k]) > 0.0f ? 1.0f: 0.0f);
-	}
-
-	{
-		auto const maxval = *std::ranges::max_element(branch_prob);
-		for(size_t k = 0; k != std::size(branch_prob); ++k)
-		{	branch_prob[k] /= maxval;}
-	}
 	for(size_t k = 0; k != std::size(points); ++k)
 	{
 		auto const do_branch = branch_prob[k] > 0.5f; //std::bernoulli_distribution{branch_prob[k]}(rng);
