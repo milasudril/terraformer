@@ -4,6 +4,7 @@
 #include "./curve_displace.hpp"
 #include "./find_zeros.hpp"
 #include "./boundary_sampling_policies.hpp"
+#include "./interleave.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
 
@@ -79,12 +80,13 @@ int main()
 
 		float max_offset = 0.0f;
 		std::optional<size_t> selected_branch_point;
+		std::vector<size_t> branch_at_tmp;
 		for(size_t k = 1; k != std::size(offsets) - 1;++k)
 		{
 			if(l != std::size(x_intercepts) && k == x_intercepts[l])
 			{
 				if(selected_branch_point.has_value())
-				{ branch_at.push_back(*selected_branch_point); }
+				{ branch_at_tmp.push_back(*selected_branch_point); }
 				max_offset = 0.0f;
 				++l;
 				side = -side;
@@ -107,7 +109,9 @@ int main()
 		}
 
 		if(selected_branch_point.has_value())
-		{ branch_at.push_back(*selected_branch_point); }
+		{ branch_at_tmp.push_back(*selected_branch_point); }
+
+		branch_at = terraformer::interleave(std::span{std::as_const(branch_at_tmp)});
 	}
 
 	std::vector<std::vector<terraformer::location>> branches;
