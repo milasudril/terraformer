@@ -66,8 +66,6 @@ int main()
 		}
 	}
 
-	store(potential, "test.exr");
-
 	std::vector<size_t> branch_at;
 	{
 		auto const x_intercepts = terraformer::find_zeros(offsets);
@@ -111,4 +109,57 @@ int main()
 		if(selected_branch_point.has_value())
 		{ branch_at.push_back(*selected_branch_point); }
 	}
+
+	std::vector<std::vector<terraformer::location>> branches;
+	for(size_t k = 0; k != std::size(branch_at); ++k)
+	{
+		auto const index = branch_at[k];
+		auto const points_a = points[index - 1];
+		auto const points_b = points[index];
+		auto const points_c = points[index + 1];
+		auto const normal = terraformer::curve_vertex_normal_from_curvature(points_a, points_b, points_c);
+
+		std::vector curve{points_b};
+		auto loc = points_b + pixel_size*normal;
+		for(size_t k = 0; k != 1024; ++k)
+		{
+			curve.push_back(loc);
+			loc -= pixel_size*terraformer::direction{
+				grad(
+					std::as_const(potential).pixels(),
+					loc[0]/pixel_size,
+					loc[1]/pixel_size,
+					1.0f,
+					terraformer::clamp_at_boundary{}
+				)
+			};
+
+			if(loc[0] <= 2.0f
+				|| loc[1] <= 2.0f
+				|| loc[0] >= pixel_size*static_cast<float>(potential.width() - 2)
+				|| loc[1] >= pixel_size*static_cast<float>(potential.height() - 2))
+			{ break; }
+		}
+		branches.push_back(std::move(curve));
+	}
+
+	for(uint32_t y = 0; y != potential.height(); ++y)
+	{
+		for(uint32_t x = 0; x != potential.width(); ++x)
+		{
+			auto sum = 0.0f;
+			for(size_t k = 0; k != std::size(branches); ++k)
+			{
+				auto const& points = branches[k];
+				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
+				sum += std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const sum, auto const point) {
+					auto const d = terraformer::distance_xy(loc_xy, point);
+					auto const d_min = 1.0f*pixel_size;
+					return sum + 1.0f*(d<d_min? 1.0f : (d_min*d_min)/(d*d));
+				});
+			}
+			potential(x, y) += sum;
+		}
+	}
+	store(potential, "test.exr");
 }
