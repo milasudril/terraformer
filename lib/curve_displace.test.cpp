@@ -133,7 +133,7 @@ TESTCASE(terraformer_curve_displace)
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const loc = locs[k];
-		auto const loc_ofs = res[k];
+		auto const loc_ofs = get<0>(res[k]);
 		printf("%.8g %.8g %.8g %.8g\n", loc[0], loc[1], loc_ofs[0], loc_ofs[1]);
 	}
 #endif

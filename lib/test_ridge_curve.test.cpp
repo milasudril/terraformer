@@ -49,8 +49,8 @@ int main()
 	auto const ridge_loc = 24576.0f;
 	auto const curve = terraformer::make_point_array(terraformer::location{0.0f, ridge_loc, 0.0f}, pixel_count, pixel_size);
 
-
 	auto const points = displace(curve, terraformer::displacement_profile{.offsets = offsets, .sample_period = pixel_size}, terraformer::displacement{0.0f, 0.0f, -1.0f});
+
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
 	for(uint32_t y = 0; y != potential.height(); ++y)
 	{
@@ -58,7 +58,7 @@ int main()
 		{
 			terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
 			auto sum = std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const sum, auto const point) {
-				auto const d = terraformer::distance_xy(loc_xy, point);
+				auto const d = terraformer::distance_xy(loc_xy, get<0>(point));
 				auto const d_min = 1.0f*pixel_size;
 				return sum + 1.0f*(d<d_min? 1.0f : (d_min*d_min)/(d*d));
 			});
@@ -68,6 +68,8 @@ int main()
 	}
 
 	std::vector<size_t> branch_at;
+//	auto first_side = 0.0f;
+	size_t up_count = 0;
 	{
 		auto const x_intercepts = terraformer::find_zeros(offsets);
 		auto side = (offsets[0] >= 0.0f)? 1.0f: -1.0f;
@@ -86,16 +88,24 @@ int main()
 			if(l != std::size(x_intercepts) && k == x_intercepts[l])
 			{
 				if(selected_branch_point.has_value())
-				{ branch_at_tmp.push_back(*selected_branch_point); }
+				{
+#if 0
+					if(std::size(branch_at_tmp) == 0)
+					{ first_side = side; }
+#endif
+					if(side >= 0.0f)
+					{ ++up_count; }
+					branch_at_tmp.push_back(*selected_branch_point);
+				}
 				max_offset = 0.0f;
 				++l;
 				side = -side;
 			}
 
-			auto const y = offsets[k];
-			auto const points_a = points[k - 1];
-			auto const points_b = points[k];
-			auto const points_c = points[k + 1];
+			auto const y = get<1>(points[k]);
+			auto const points_a = get<0>(points[k - 1]);
+			auto const points_b = get<0>(points[k]);
+			auto const points_c = get<0>(points[k + 1]);
 			auto const points_normal = terraformer::curve_vertex_normal_from_projection(points_a, points_b, points_c, terraformer::displacement{0.0f, 0.0f, -1.0f});
 			auto const points_ab = points_b - points_a;
 			auto const side_of_curve = inner_product(points_ab, points_normal);
@@ -109,7 +119,15 @@ int main()
 		}
 
 		if(selected_branch_point.has_value())
-		{ branch_at_tmp.push_back(*selected_branch_point); }
+		{
+#if 0
+			if(std::size(branch_at_tmp) == 0)
+			{ first_side = side; }
+#endif
+			if(side >= 0.0f)
+			{ ++up_count; }
+			branch_at_tmp.push_back(*selected_branch_point);
+		}
 
 		branch_at = terraformer::interleave(std::span{std::as_const(branch_at_tmp)});
 	}
@@ -118,9 +136,9 @@ int main()
 	for(size_t k = 0; k != std::size(branch_at); ++k)
 	{
 		auto const index = branch_at[k];
-		auto const points_a = points[index - 1];
-		auto const points_b = points[index];
-		auto const points_c = points[index + 1];
+		auto const points_a = get<0>(points[index - 1]);
+		auto const points_b = get<0>(points[index]);
+		auto const points_c = get<0>(points[index + 1]);
 		auto const normal = terraformer::curve_vertex_normal_from_curvature(points_a, points_b, points_c);
 
 		std::vector curve{points_b};

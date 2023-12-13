@@ -3,11 +3,11 @@
 #ifndef TERRAFORMER_CURVE_DISPLACE_HPP
 #define TERRAFORMER_CURVE_DISPLACE_HPP
 
-#include "./interp.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/array_tuple.hpp"
 
-#include <vector>
 #include <span>
+#include <cassert>
 
 namespace terraformer
 {
@@ -39,7 +39,7 @@ namespace terraformer
 		float sample_period;
 	};
 
-	std::vector<location> displace(std::span<location const> c, displacement_profile dy, displacement looking_towards);
+	array_tuple<location, float> displace(std::span<location const> c, displacement_profile dy, displacement looking_towards);
 }
 
 #endif
