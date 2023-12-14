@@ -32,8 +32,7 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 				auto const loc_a = points[*selected_branch_point - 1];
 				auto const loc_b = points[*selected_branch_point];
 				auto const loc_c = points[*selected_branch_point + 1];
-				auto const normal
-					= curve_vertex_normal_from_projection(loc_a, loc_b, loc_c, displacement{0.0f, 0.0f, -1.0f});
+				auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
 				if(side >= 0.0f)
 				{ m_left_seeds.push_back(tuple{loc_b, normal}); }
 				else
@@ -66,8 +65,7 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 		auto const loc_a = points[*selected_branch_point - 1];
 		auto const loc_b = points[*selected_branch_point];
 		auto const loc_c = points[*selected_branch_point + 1];
-		auto const normal
-			= curve_vertex_normal_from_projection(loc_a, loc_b, loc_c, displacement{0.0f, 0.0f, -1.0f});
+		auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
 		if(side >= 0.0f)
 		{ m_left_seeds.push_back(tuple{loc_b, normal}); }
 		else

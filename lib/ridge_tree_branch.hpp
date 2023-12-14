@@ -21,6 +21,9 @@ namespace terraformer
 		auto const& right_seeds() const
 		{ return m_right_seeds; }
 
+		auto const& curve() const
+		{ return m_points; }
+
 	private:
 		array_tuple<location, float> m_points;
 		array_tuple<location, direction> m_left_seeds;
