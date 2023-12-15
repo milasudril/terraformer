@@ -58,19 +58,37 @@ namespace terraformer
 		return existing_branches;
 	}
 
-#if 0
 	std::vector<std::vector<location>>
 	generate_branches(std::span<ridge_tree_branch const> trees,
 		span_2d<float const> potential,
 		float pixel_size
 	)
 	{
+		auto branches = generate_branches(
+			trees[0].left_seeds(),
+			potential,
+			pixel_size
+		);
 
 		for(size_t k = 1; k != std::size(trees); ++k)
 		{
+			branches = generate_branches(
+				trees[k - 1].right_seeds(),
+				potential,
+				pixel_size,
+				std::move(branches)
+			);
+
+			branches = generate_branches(
+				trees[k].left_seeds(),
+				potential,
+				pixel_size,
+				std::move(branches)
+			);
 		}
+
+		return branches;
 	}
-#endif
 }
 
 int main()
