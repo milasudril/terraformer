@@ -71,4 +71,7 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 		else
 		{ m_right_seeds.push_back(tuple{loc_b, normal}); }
 	}
+
+	std::ranges::reverse(m_right_seeds.get<0>());
+	std::ranges::reverse(m_right_seeds.get<1>());
 }
