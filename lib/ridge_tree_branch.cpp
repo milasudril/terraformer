@@ -34,9 +34,9 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 				auto const loc_c = points[*selected_branch_point + 1];
 				auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
 				if(side >= 0.0f)
-				{ m_left_seeds.push_back(tuple{loc_b, normal}); }
+				{ m_left_seeds.branch_points.push_back(tuple{loc_b, normal}); }
 				else
-				{ m_right_seeds.push_back(tuple{loc_b, normal}); }
+				{ m_right_seeds.branch_points.push_back(tuple{loc_b, normal}); }
 			}
 			max_offset = 0.0f;
 			++l;
@@ -67,11 +67,27 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 		auto const loc_c = points[*selected_branch_point + 1];
 		auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
 		if(side >= 0.0f)
-		{ m_left_seeds.push_back(tuple{loc_b, normal}); }
+		{ m_left_seeds.branch_points.push_back(tuple{loc_b, normal}); }
 		else
-		{ m_right_seeds.push_back(tuple{loc_b, normal}); }
+		{ m_right_seeds.branch_points.push_back(tuple{loc_b, normal}); }
 	}
 
-	std::ranges::reverse(m_right_seeds.get<0>());
-	std::ranges::reverse(m_right_seeds.get<1>());
+	m_left_seeds.delimiter_points = m_right_seeds.branch_points;
+	{
+		auto const normals =m_left_seeds.delimiter_points.get<1>();
+		for(size_t k = 0; k != std::size(normals); ++k)
+		{ normals[k] = -normals[k]; }
+	}
+
+	m_right_seeds.delimiter_points = m_right_seeds.branch_points;
+	{
+		auto const normals =m_right_seeds.delimiter_points.get<1>();
+		for(size_t k = 0; k != std::size(normals); ++k)
+		{ normals[k] = -normals[k]; }
+	}
+
+	std::ranges::reverse(m_right_seeds.branch_points.get<0>());
+	std::ranges::reverse(m_right_seeds.branch_points.get<1>());
+	std::ranges::reverse(m_right_seeds.delimiter_points.get<0>());
+	std::ranges::reverse(m_right_seeds.delimiter_points.get<1>());
 }

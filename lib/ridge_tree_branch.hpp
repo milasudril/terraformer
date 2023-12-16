@@ -15,6 +15,12 @@ namespace terraformer
 	public:
 		explicit ridge_tree_branch(std::span<location const> base_curve, displacement_profile dy);
 
+		struct seed_info
+		{
+			array_tuple<location, direction> branch_points;
+			array_tuple<location, direction> delimiter_points;
+		};
+
 		auto const& left_seeds() const
 		{ return m_left_seeds; }
 
@@ -26,8 +32,8 @@ namespace terraformer
 
 	private:
 		array_tuple<location, float> m_points;
-		array_tuple<location, direction> m_left_seeds;
-		array_tuple<location, direction> m_right_seeds;
+		seed_info m_left_seeds;
+		seed_info m_right_seeds;
 	};
 }
 

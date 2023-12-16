@@ -23,6 +23,7 @@ namespace terraformer
 		return ret;
 	}
 
+
 	std::vector<std::vector<location>>
 	generate_branches(array_tuple<location, direction> const& seeds, span_2d<float const> potential, float pixel_size,
 	std::vector<std::vector<location>>&& existing_branches = std::vector<std::vector<location>>{})
@@ -65,7 +66,7 @@ namespace terraformer
 	)
 	{
 		auto branches = generate_branches(
-			trees[0].left_seeds(),
+			trees[0].left_seeds().branch_points,
 			potential,
 			pixel_size
 		);
@@ -73,14 +74,14 @@ namespace terraformer
 		for(size_t k = 1; k != std::size(trees); ++k)
 		{
 			branches = generate_branches(
-				trees[k - 1].right_seeds(),
+				trees[k - 1].right_seeds().branch_points,
 				potential,
 				pixel_size,
 				std::move(branches)
 			);
 
 			branches = generate_branches(
-				trees[k].left_seeds(),
+				trees[k].left_seeds().branch_points,
 				potential,
 				pixel_size,
 				std::move(branches)
@@ -142,10 +143,10 @@ int main()
 	}
 
 	auto const branches = generate_branches(
-		root.right_seeds(),
+		root.left_seeds().delimiter_points,
 		potential,
 		pixel_size,
-		generate_branches(root.left_seeds(), potential, pixel_size)
+		generate_branches(root.left_seeds().branch_points, potential, pixel_size)
 	);
 
 	for(uint32_t y = 0; y != potential.height(); ++y)
