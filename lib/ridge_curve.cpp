@@ -13,25 +13,28 @@ std::vector<float> terraformer::generate(
 	random_generator& rng,
 	size_t seg_count,
 	float dx,
-	size_t warmup_count)
+	float warmup_periods)
 {
 	std::vector<float> ret(seg_count);
 	constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
 	std::uniform_real_distribution U{-1.0f, 1.0f};
 
-	composite_function f{
+	// TODO: Fix for highpass filter
+	auto const freq_shift = std::sqrt(1.0f - src.damping*src.damping);
+
+	composite_function f{/*
 		first_order_hp_filter{
 			first_order_hp_filter_description{
-				.cutoff_freq = twopi/src.wavelength,
+				.cutoff_freq = twopi*freq_shift/src.wavelength,
 				.initial_value = 0.0f,
 				.initial_input = 0.f
 			},
 			dx
-		},
+		},*/
 		second_order_lp_filter{
 			second_order_lp_filter_description{
 				.damping = src.damping,
-				.cutoff_freq = twopi/src.wavelength,
+				.cutoff_freq = twopi*freq_shift/src.wavelength,
 				.initial_value = 0.0f,
 				.initial_derivative = 0.0f,
 				.initial_input = 0.0f
@@ -40,6 +43,7 @@ std::vector<float> terraformer::generate(
 		}
 	};
 
+	auto warmup_count = static_cast<size_t>(src.wavelength*warmup_periods/freq_shift);
 	while(warmup_count != 0)
 	{
 		f(U(rng));

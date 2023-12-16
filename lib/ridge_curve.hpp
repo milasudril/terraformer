@@ -17,7 +17,7 @@ namespace terraformer
 	{
 		horizontal_amplitude amplitude;
 		domain_length wavelength;
-		float damping;  // TODO: Decide on range. Probably ]0, 1]
+		float damping;  // TODO: Should be within ]0, 1[
 		bool flip_direction{};
 		bool invert_displacement{};
 	};
@@ -27,7 +27,7 @@ namespace terraformer
 		random_generator& rng,
 		size_t seg_count,
 		float dx,
-		size_t warmup_count = 0);
+		float warmup_periods = 0.0f);
 }
 
 #endif

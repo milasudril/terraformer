@@ -8,17 +8,17 @@ $$
 ## Poles
 The charactersitic polynomial for the equation is
 $$
-r^2 + 2\zeta\omega_0r + \omega_0^2 = \left(r + \zeta\omega_0\right)^2 - \zeta^2\omega_0^2 + \omega_0^2 = \left(r + \zeta\omega_0\right)^2 - \omega_0^2\left(\zeta - 1\right)
+r^2 + 2\zeta\omega_0r + \omega_0^2 = \left(r + \zeta\omega_0\right)^2 - \zeta^2\omega_0^2 + \omega_0^2 = \left(r + \zeta\omega_0\right)^2 - \omega_0^2\left(\zeta^2 - 1\right)
 $$
 with zeros given by
 
 $$
-\left(r + \zeta\omega_0\right)^2 = \omega_0^2\left(4\zeta - 1\right)
+\left(r + \zeta\omega_0\right)^2 = \omega_0^2\left(\zeta^2 - 1\right)
 $$
 
 Assume $\zeta < 1$. Then
 $$
-r = -\zeta\omega_0 \pm \mathrm{i}\omega_0\sqrt{1 - \zeta}
+r = -\zeta\omega_0 \pm \mathrm{i}\omega_0\sqrt{1 - \zeta^2}
 $$
 
 ## Driven oscillation
@@ -27,9 +27,9 @@ $$
 \ddot{y} + 2\zeta\omega_0\dot{y} + \omega_0^2 y = \omega_0^2 x
 $$
 
-## Cutoff frequency from eigenfrequency
+## Cutoff frequency from eigen-frequency
 $$
-\omega = \omega_0\sqrt{1 - \zeta} \Leftrightarrow \omega_0 = \frac{\omega}{\sqrt{1 - \zeta}}
+\omega_e = \omega_0\sqrt{1 - \zeta^2} \Leftrightarrow \omega_0 = \frac{\omega_e}{\sqrt{1 - \zeta^2}}
 $$
 
 ## Discretization
