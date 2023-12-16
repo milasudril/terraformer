@@ -19,18 +19,17 @@ std::vector<float> terraformer::generate(
 	constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
 	std::uniform_real_distribution U{-1.0f, 1.0f};
 
-	// TODO: Fix for highpass filter
 	auto const freq_shift = std::sqrt(1.0f - src.damping*src.damping);
 
-	composite_function f{/*
+	composite_function f{
 		first_order_hp_filter{
 			first_order_hp_filter_description{
-				.cutoff_freq = twopi*freq_shift/src.wavelength,
+				.cutoff_freq = twopi/src.wavelength,
 				.initial_value = 0.0f,
 				.initial_input = 0.f
 			},
 			dx
-		},*/
+		},
 		second_order_lp_filter{
 			second_order_lp_filter_description{
 				.damping = src.damping,
