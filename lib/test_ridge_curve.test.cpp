@@ -133,7 +133,12 @@ int main()
 				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
 
 				auto sum = std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const sum, auto const point) {
-					auto const d = terraformer::distance_xy(loc_xy, point);
+					auto const d1 = terraformer::distance_xy(loc_xy, point + terraformer::displacement{-49152.0f,0.0f,0.0f});
+					auto const d2 = terraformer::distance_xy(loc_xy, point);
+					auto const d3 = terraformer::distance_xy(loc_xy, point + terraformer::displacement{49152.0f,0.0f,0.0f});
+
+					auto const d = std::min(std::min(d1, d2), d3);
+
 					auto const d_min = 1.0f*pixel_size;
 					return sum + 1.0f*(d<d_min? 1.0f : (d_min)/(d));
 				});
