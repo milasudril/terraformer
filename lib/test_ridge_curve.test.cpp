@@ -94,7 +94,7 @@ namespace terraformer
 int main()
 {
 	terraformer::ridge_curve_description curve_desc{
-		.amplitude = terraformer::horizontal_amplitude{4096.0f},
+		.amplitude = terraformer::horizontal_amplitude{3096.0f},
 		.wavelength = terraformer::domain_length{12384.0f},
 		.damping = std::sqrt(0.5f),
 		.flip_direction = false,
@@ -109,7 +109,7 @@ int main()
 		rng,
 		pixel_count,
 		pixel_size,
-		24);
+		1024.0f);
 	auto const ridge_loc = 24576.0f;
 	auto const curve = terraformer::make_point_array(terraformer::location{0.0f, ridge_loc, 0.0f}, pixel_count, pixel_size);
 
