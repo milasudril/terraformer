@@ -19,14 +19,10 @@ std::vector<float> terraformer::generate(
 	constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
 	std::uniform_real_distribution U{-1.0f, 1.0f};
 
-	// TODO: Without this factor, the wavelength becomes too short. Need to do measurements with a
-	//       varying damping
-	auto constexpr freq_factor = 1/1.18625f;
-
 	composite_function f{
 		first_order_hp_filter{
 			first_order_hp_filter_description{
-				.cutoff_freq = twopi*freq_factor/src.wavelength,
+				.cutoff_freq = twopi/src.wavelength,
 				.initial_value = 0.0f,
 				.initial_input = 0.f
 			},
@@ -35,7 +31,7 @@ std::vector<float> terraformer::generate(
 		second_order_lp_filter{
 			second_order_lp_filter_description{
 				.damping = src.damping,
-				.cutoff_freq = twopi*freq_factor/src.wavelength,
+				.cutoff_freq = twopi/src.wavelength,
 				.initial_value = 0.0f,
 				.initial_derivative = 0.0f,
 				.initial_input = 0.0f
