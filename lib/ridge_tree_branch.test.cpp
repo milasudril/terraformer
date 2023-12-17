@@ -138,14 +138,39 @@ TESTCASE(terraformer_ridge_tree_plus_minus_plus_minus)
 	{
 		auto const left_seeds = branch.left_seeds();
 		EXPECT_EQ(std::size(left_seeds.branch_points), 2);
+		EXPECT_LT(
+			distance(left_seeds.branch_points.get<0>()[0], (terraformer::location{0.17f, -0.015f, 0.0f})),
+			0.05f
+		);
+		EXPECT_LT(left_seeds.branch_points.get<1>()[0][1], 0.0f);
+
 		EXPECT_EQ(std::size(left_seeds.delimiter_points), 2);
+		EXPECT_LT(
+			distance(left_seeds.delimiter_points.get<0>()[0], (terraformer::location{0.3f, 0.35f, 0.0f})),
+			0.05f
+		);
+		EXPECT_LT(left_seeds.delimiter_points.get<1>()[0][1], 0.0f);
+
 		EXPECT_EQ(left_seeds.first_is_branch, true);
 	}
 
 	{
 		auto const right_seeds = branch.right_seeds();
 		EXPECT_EQ(std::size(right_seeds.branch_points), 2);
+		EXPECT_LT(
+			distance(right_seeds.branch_points.get<0>()[0], (terraformer::location{1.0f, 0.18f, 0.0f})),
+			0.05f
+		);
+		EXPECT_GT(right_seeds.branch_points.get<1>()[0][1], 0.0f);
+
+
 		EXPECT_EQ(std::size(right_seeds.delimiter_points), 2);
+		EXPECT_LT(
+			distance(right_seeds.delimiter_points.get<0>()[0], (terraformer::location{0.62f, 0.1f, 0.0f})),
+			0.05f
+		);
+		EXPECT_GT(right_seeds.delimiter_points.get<1>()[0][1], 0.0f);
+
 		EXPECT_EQ(right_seeds.first_is_branch, true);
 	}
 }

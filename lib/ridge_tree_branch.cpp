@@ -42,6 +42,7 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 			max_offset = 0.0f;
 			++l;
 			side = -side;
+			selected_branch_point.reset();
 		}
 
 		auto const y = offsets[k];
