@@ -13,6 +13,8 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 
 	auto const x_intercepts = terraformer::find_zeros(offsets);
 	auto side = (offsets[0] >= 0.0f)? 1.0f: -1.0f;
+	m_left_seeds.first_is_branch = offsets[0] >= 0.0f;
+	m_right_seeds.first_is_branch = false;  // TODO: Set correct value (notice that right goes backwards)
 	size_t l = 0;
 	if(l != std::size(x_intercepts) && x_intercepts[l] == 0)
 	{
@@ -79,7 +81,7 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 		{ normals[k] = -normals[k]; }
 	}
 
-	m_right_seeds.delimiter_points = m_right_seeds.branch_points;
+	m_right_seeds.delimiter_points = m_left_seeds.branch_points;
 	{
 		auto const normals =m_right_seeds.delimiter_points.get<1>();
 		for(size_t k = 0; k != std::size(normals); ++k)

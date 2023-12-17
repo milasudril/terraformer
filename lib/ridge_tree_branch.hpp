@@ -19,6 +19,7 @@ namespace terraformer
 		{
 			array_tuple<location, direction> branch_points;
 			array_tuple<location, direction> delimiter_points;
+			bool first_is_branch;
 		};
 
 		auto const& left_seeds() const
