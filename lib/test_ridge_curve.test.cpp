@@ -23,42 +23,58 @@ namespace terraformer
 		return ret;
 	}
 
+	template<class BranchStopCondition>
+	std::vector<location> generate_branch_base_curve(
+		terraformer::location loc,
+		terraformer::direction start_dir,
+		span_2d<float const> potential,
+		float pixel_size,
+		BranchStopCondition&& stop)
+	{
+		std::vector<location> base_curve;
+		if(stop(loc) || !inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
+		{ return base_curve; }
+
+		base_curve.push_back(loc);
+
+		loc += pixel_size*start_dir;
+
+		while(!stop(loc) && inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
+		{
+			base_curve.push_back(loc);
+			loc -= pixel_size*direction{
+				grad(
+					potential,
+					loc[0]/pixel_size,
+					loc[1]/pixel_size,
+					1.0f,
+					clamp_at_boundary{}
+				)
+			};
+		}
+		return base_curve;
+	}
 
 	std::vector<std::vector<location>>
-	generate_branches(array_tuple<location, direction> const& seeds, span_2d<float const> potential, float pixel_size,
-	std::vector<std::vector<location>>&& existing_branches = std::vector<std::vector<location>>{})
+	generate_branches(
+		terraformer::ridge_tree_branch::seed_info const& seeds,
+		span_2d<float const> potential,
+		float pixel_size,
+		std::vector<std::vector<location>>&& existing_branches = std::vector<std::vector<location>>{})
 	{
-		auto const points = seeds.get<0>();
-		auto const normals = seeds.get<1>();
-		for(size_t k = 0; k != std::size(seeds); ++k)
+		auto const points = seeds.branch_points.get<0>();
+		auto const normals = seeds.branch_points.get<1>();
+		for(size_t k = 0; k != std::size(seeds.branch_points); ++k)
 		{
-			std::vector curve{points[k]};
-			auto loc = points[k] + pixel_size*normals[k];
-			for(size_t l = 0; l != 1024; ++l)
-			{
-				curve.push_back(loc);
-				loc -= pixel_size*direction{
-					grad(
-						potential,
-						loc[0]/pixel_size,
-						loc[1]/pixel_size,
-						1.0f,
-						clamp_at_boundary{}
-					)
-				};
-
-				if(loc[0] <= 2.0f
-					|| loc[1] <= 2.0f
-					|| loc[0] >= pixel_size*static_cast<float>(potential.width() - 2)
-					|| loc[1] >= pixel_size*static_cast<float>(potential.height() - 2))
-				{ break; }
-			}
-			existing_branches.push_back(std::move(curve));
+			existing_branches.push_back(
+				generate_branch_base_curve(points[k], normals[k], potential, pixel_size, [](auto...){return false;})
+			);
 		}
 
 		return existing_branches;
 	}
 
+#if 0
 	std::vector<std::vector<location>>
 	generate_branches(std::span<ridge_tree_branch const> trees,
 		span_2d<float const> potential,
@@ -90,6 +106,7 @@ namespace terraformer
 
 		return branches;
 	}
+#endif
 }
 
 int main()
@@ -150,10 +167,10 @@ int main()
 	store(potential, "test1.exr");
 
 	auto const branches = generate_branches(
-		root.left_seeds().delimiter_points,
+		root.left_seeds(),
 		potential,
 		pixel_size,
-		generate_branches(root.left_seeds().branch_points, potential, pixel_size)
+		generate_branches(root.right_seeds(), potential, pixel_size)
 	);
 
 	for(uint32_t y = 0; y != potential.height(); ++y)
