@@ -3,6 +3,7 @@
 #include "./ridge_curve.hpp"
 #include "./boundary_sampling_policies.hpp"
 #include "./ridge_tree_branch.hpp"
+#include "./curve_length.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
 
@@ -55,19 +56,38 @@ namespace terraformer
 		return base_curve;
 	}
 
-	std::vector<std::vector<location>>
+	std::vector<ridge_tree_branch>
 	generate_branches(
 		terraformer::ridge_tree_branch::seed_info const& seeds,
 		span_2d<float const> potential,
 		float pixel_size,
-		std::vector<std::vector<location>>&& existing_branches = std::vector<std::vector<location>>{})
+		ridge_curve_description curve_desc,
+		random_generator& rng,
+		std::vector<ridge_tree_branch>&& existing_branches = std::vector<ridge_tree_branch>{})
 	{
 		auto const points = seeds.branch_points.get<0>();
 		auto const normals = seeds.branch_points.get<1>();
 		for(size_t k = 0; k != std::size(seeds.branch_points); ++k)
 		{
+			auto const base_curve = generate_branch_base_curve(
+				points[k],
+				normals[k],
+				potential,
+				pixel_size,
+				[](auto...){return false;}
+			);
+
+			auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
+			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
+
 			existing_branches.push_back(
-				generate_branch_base_curve(points[k], normals[k], potential, pixel_size, [](auto...){return false;})
+				ridge_tree_branch{
+					base_curve,
+					displacement_profile{
+						.offsets = offsets,
+						.sample_period = pixel_size,
+					}
+				}
 			);
 		}
 
@@ -166,11 +186,21 @@ int main()
 	}
 	store(potential, "test1.exr");
 
+	terraformer::ridge_curve_description const curve_desc_2{
+		.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
+		.wavelength = terraformer::domain_length{12384.0f/3.0f},
+		.damping = std::sqrt(0.5f),
+		.flip_direction = false,
+		.invert_displacement = false
+	};
+
 	auto const branches = generate_branches(
 		root.left_seeds(),
 		potential,
 		pixel_size,
-		generate_branches(root.right_seeds(), potential, pixel_size)
+		curve_desc_2,
+		rng,
+		generate_branches(root.right_seeds(), potential, pixel_size, curve_desc_2, rng)
 	);
 
 	for(uint32_t y = 0; y != potential.height(); ++y)
@@ -180,7 +210,7 @@ int main()
 			auto sum = 0.0f;
 			for(size_t k = 0; k != std::size(branches); ++k)
 			{
-				auto const& points = branches[k];
+				auto const points = branches[k].curve().get<0>();
 				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
 				sum += std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const sum, auto const point) {
 					auto const d = terraformer::distance_xy(loc_xy, point);
