@@ -38,7 +38,7 @@ namespace terraformer
 
 		base_curve.push_back(loc);
 
-		loc += pixel_size*start_dir;
+		loc += 512.0f*start_dir;
 
 		while(!stop(loc) && inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
 		{
@@ -63,6 +63,7 @@ namespace terraformer
 		float pixel_size,
 		ridge_curve_description curve_desc,
 		random_generator& rng,
+		float d_max,
 		std::vector<ridge_tree_branch>&& existing_branches = std::vector<ridge_tree_branch>{})
 	{
 		auto const points = branch_points.get<0>();
@@ -74,7 +75,14 @@ namespace terraformer
 				normals[k],
 				potential,
 				pixel_size,
-				[](auto...){return false;}
+				[d = 0.0f, loc_prev = points[k], d_max](auto loc) mutable {
+					auto new_distance = d + distance(loc, loc_prev);
+					if(new_distance > d_max)
+					{ return true; }
+					d = new_distance;
+					loc_prev = loc;
+					return false;
+				}
 			);
 
 			auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
@@ -137,47 +145,48 @@ namespace terraformer
 		return existing_delimiters;
 	}
 
-	std::vector<std::vector<location>>
+	std::vector<ridge_tree_branch>
 	generate_branches(
 		std::span<ridge_tree_branch const> branches,
-		span_2d<float const>,
-		float
+		span_2d<float const> potential,
+		float pixel_size,
+		ridge_curve_description curve_desc,
+		random_generator& rng
 	)
 	{
-		printf("Number of branches is %zu\n", std::size(branches));
-		for(size_t k = 0; k != std::size(branches); ++k)
-		{
-			printf("  %zu %zu\n",
-						 std::size(branches[k].left_seeds().branch_points),
-						 std::size(branches[k].right_seeds().branch_points));
-		}
-#if 0
-		auto branches = generate_branches(
-			trees[0].left_seeds().branch_points,
+		auto output_branches = generate_branches(
+			branches[0].left_seeds().branch_points,
 			potential,
-			pixel_size
+			pixel_size,
+			curve_desc,
+			rng,
+			3072.0f
 		);
 
-		for(size_t k = 1; k != std::size(trees); ++k)
+		for(size_t k = 1; k != std::size(branches); ++k)
 		{
-			branches = generate_branches(
-				trees[k - 1].right_seeds().branch_points,
+			output_branches = generate_branches(
+				branches[k - 1].right_seeds().branch_points,
 				potential,
 				pixel_size,
-				std::move(branches)
+				curve_desc,
+				rng,
+				3072.0f,
+				std::move(output_branches)
 			);
 
-			branches = generate_branches(
-				trees[k].left_seeds().branch_points,
+			output_branches = generate_branches(
+				branches[k].left_seeds().branch_points,
 				potential,
 				pixel_size,
-				std::move(branches)
+				curve_desc,
+				rng,
+				3072.0f,
+				std::move(output_branches)
 			);
 		}
 
-		return branches;
-#endif
-		return std::vector<std::vector<location>>{};
+		return output_branches;
 	}
 }
 
@@ -251,25 +260,20 @@ int main()
 		pixel_size,
 		curve_desc_2,
 		rng,
-		generate_branches(root.right_seeds().branch_points, potential, pixel_size, curve_desc_2, rng)
+		12384.0f,
+		generate_branches(root.right_seeds().branch_points, potential, pixel_size, curve_desc_2, rng, 12384.0f)
 	);
 
-	terraformer::ridge_curve_description const curve_desc_3{
-		.amplitude = terraformer::horizontal_amplitude{3096.0f/6.0f},
-		.wavelength = terraformer::domain_length{12384.0f/3.0f},
-		.damping = 0.125f, //std::sqrt(0.5f),
-		.flip_direction = false,
-		.invert_displacement = false
-	};
-
+/*
 	auto const delimiters = generate_delimiters(
 		root.left_seeds().delimiter_points,
 		potential,
 		pixel_size,
-		curve_desc_3,
+		curve_desc_2,
 		rng,
-		generate_delimiters(root.right_seeds().delimiter_points, potential, pixel_size, curve_desc_3, rng)
+		generate_delimiters(root.right_seeds().delimiter_points, potential, pixel_size, curve_desc_2, rng)
 	);
+*/
 
 	for(uint32_t y = 0; y != potential.height(); ++y)
 	{
@@ -287,26 +291,51 @@ int main()
 				});
 			}
 
-			auto diff = 0.0f;
-			for(size_t k = 0; k != std::size(delimiters); ++k)
-			{
-				auto const points = delimiters[k].get<0>();
-				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
-				diff += std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const diff, auto const point) {
-					auto const d = terraformer::distance_xy(loc_xy, point);
-					auto const d_min = 1.0f*pixel_size;
-					return diff + 1.0f*(d<d_min? 1.0f : (d_min)/(d));
-				});
-			}
-
-			potential(x, y) += sum - diff;
+			potential(x, y) += sum;
 		}
 	}
 
-	auto next_level= generate_branches(branches,
+	terraformer::ridge_curve_description const curve_desc_3{
+		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
+		.wavelength = terraformer::domain_length{12384.0f/9.0f},
+		.damping = std::sqrt(0.5f),
+		.flip_direction = false,
+		.invert_displacement = false
+	};
+
+	auto next_level = generate_branches(branches,
 		potential,
-		pixel_size
+		pixel_size,
+		curve_desc_3,
+		rng
 	);
+
+	for(uint32_t y = 0; y != potential.height(); ++y)
+	{
+		for(uint32_t x = 0; x != potential.width(); ++x)
+		{
+			auto sum = 0.0f;
+			for(size_t k = 0; k != std::size(next_level); ++k)
+			{
+				auto const points = next_level[k].curve().get<0>();
+				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
+				sum += std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const sum, auto const point) {
+					auto const d = terraformer::distance_xy(loc_xy, point);
+					auto const d_min = 1.0f*pixel_size;
+					return sum + 1.0f*(d<d_min? 1.0f : (d_min)/(d));
+				});
+			}
+
+			potential(x, y) += sum;
+		}
+	}
+
+	/*
+	 		std::span<ridge_tree_branch const> branches,
+		span_2d<float const> potential,
+		float pixel_size,
+		ridge_curve_description curve_desc,
+		random_generator& rng*/
 
 	store(potential, "test.exr");
 }
