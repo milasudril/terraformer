@@ -38,7 +38,7 @@ namespace terraformer
 
 		base_curve.push_back(loc);
 
-		loc += 512.0f*start_dir;
+		loc += pixel_size*start_dir;
 
 		while(!stop(loc) && inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
 		{
@@ -84,6 +84,9 @@ namespace terraformer
 					return false;
 				}
 			);
+
+			if(std::size(base_curve) < 3)
+			{ continue; }
 
 			auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
 			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
@@ -154,6 +157,9 @@ namespace terraformer
 		random_generator& rng
 	)
 	{
+		if(std::size(branches) == 0)
+		{	return std::vector<ridge_tree_branch>{}; }
+
 		auto output_branches = generate_branches(
 			branches[0].left_seeds().branch_points,
 			potential,
@@ -200,7 +206,7 @@ int main()
 		.invert_displacement = false
 	};
 
-	constexpr auto pixel_size = 48.0f;
+	constexpr auto pixel_size = 32.0f;
 	terraformer::random_generator rng;
 	auto const pixel_count = static_cast<size_t>(49152.0f/pixel_size);
 	auto const offsets = generate(

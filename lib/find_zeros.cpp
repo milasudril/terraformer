@@ -4,7 +4,11 @@
 
 std::vector<size_t> terraformer::find_zeros(std::span<float const> data_points, double margin_factor)
 {
+	if(std::size(data_points) == 0)
+	{ return std::vector<size_t>{}; }
+
 	std::vector<size_t> intercept_index;
+
 	auto positive = data_points[0] >= 0.0f;
 
 	if(data_points[0] == 0.0f)
@@ -23,6 +27,9 @@ std::vector<size_t> terraformer::find_zeros(std::span<float const> data_points, 
 			positive = true;
 		}
 	}
+
+	if(std::size(intercept_index) == 0)
+	{ return std::vector<size_t>{}; }
 
 	auto const avg_distnace = static_cast<double>(std::size(data_points))
 		/static_cast<double>(std::size(intercept_index));
