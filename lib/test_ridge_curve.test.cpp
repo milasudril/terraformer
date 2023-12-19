@@ -56,6 +56,8 @@ namespace terraformer
 		return base_curve;
 	}
 
+	size_t curve_index = 0;
+
 	std::vector<ridge_tree_branch>
 	generate_branches(
 		array_tuple<location, direction> const& branch_points,
@@ -86,10 +88,24 @@ namespace terraformer
 			);
 
 			if(std::size(base_curve) < 3)
-			{ continue; }
+			{
+				printf("Curve is too short\n");
+				continue;
+			}
 
 			auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
 			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
+
+
+			if(curve_index == 3)
+			{
+				std::string filename{"/dev/shm/slask_"};
+				filename.append(std::to_string(curve_index));
+				auto dump = fopen(filename.c_str(),"wb");
+				static_assert(std::is_same_v<decltype(std::data(offsets)), float const*>);
+				fwrite(std::data(offsets), sizeof(float), std::size(offsets), dump);
+				fclose(dump);
+			}
 
 			existing_branches.push_back(
 				ridge_tree_branch{
@@ -100,6 +116,8 @@ namespace terraformer
 					}
 				}
 			);
+
+			++curve_index;
 		}
 
 		return existing_branches;
@@ -301,6 +319,7 @@ int main()
 		}
 	}
 
+#if 0
 	terraformer::ridge_curve_description const curve_desc_3{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
 		.wavelength = terraformer::domain_length{12384.0f/9.0f},
@@ -309,6 +328,7 @@ int main()
 		.invert_displacement = false
 	};
 
+	printf("Generating level 2\n");
 	auto next_level = generate_branches(branches,
 		potential,
 		pixel_size,
@@ -342,6 +362,6 @@ int main()
 		float pixel_size,
 		ridge_curve_description curve_desc,
 		random_generator& rng*/
-
+#endif
 	store(potential, "test.exr");
 }

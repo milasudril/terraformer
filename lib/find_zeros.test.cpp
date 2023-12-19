@@ -175,3 +175,22 @@ TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_sine_sine)
 		{ EXPECT_GE(val_b, 0.0f); }
 	}
 }
+
+TESTCASE(terraformer_find_zeros_random_curve)
+{
+	std::array<float, 387> data{};
+	auto input_file = fopen("testdata/random_curve.dat", "rb");
+	REQUIRE_NE(input_file, nullptr);
+	auto const res = fread(std::data(data), sizeof(float), std::size(data), input_file);
+	EXPECT_EQ(res, std::size(data));
+	fclose(input_file);
+
+	auto const zeros = terraformer::find_zeros(data);
+	constexpr std::array<size_t, 8> expected_zeros{82, 107, 144, 205, 237, 280, 348, 376};
+
+	REQUIRE_EQ(std::size(zeros), std::size(expected_zeros));
+
+	for(size_t k = 0; k != std::size(zeros); ++k)
+	{ EXPECT_EQ(zeros[k], expected_zeros[k]); }
+
+}
