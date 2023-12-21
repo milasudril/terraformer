@@ -2,9 +2,12 @@
 
 #include "./ridge_tree_branch.hpp"
 
+#include "./rng.hpp"
+#include <random>
+
 #include <testfwk/testfwk.hpp>
 
-TESTCASE(terraformer_ridge_tree_plus_minus_plus)
+TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -53,7 +56,7 @@ TESTCASE(terraformer_ridge_tree_plus_minus_plus)
 	}
 }
 
-TESTCASE(terraformer_ridge_tree_minus_plus_minus)
+TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -102,7 +105,7 @@ TESTCASE(terraformer_ridge_tree_minus_plus_minus)
 	}
 }
 
-TESTCASE(terraformer_ridge_tree_plus_minus_plus_minus)
+TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus_minus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -175,7 +178,7 @@ TESTCASE(terraformer_ridge_tree_plus_minus_plus_minus)
 	}
 }
 
-TESTCASE(terraformer_ridge_tree_minus_plus_minus_plus)
+TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus_plus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -221,4 +224,45 @@ TESTCASE(terraformer_ridge_tree_minus_plus_minus_plus)
 		EXPECT_EQ(std::size(right_seeds.delimiter_points), 2);
 		EXPECT_EQ(right_seeds.first_is_branch, false);
 	}
+}
+
+TESTCASE(terraformer_ridge_tree_branch_random_data)
+{
+	std::array<float, 387> offsets{};
+	{
+		auto input_file = fopen("testdata/random_curve.dat", "rb");
+		REQUIRE_NE(input_file, nullptr);
+		auto const res = fread(std::data(offsets), sizeof(float), std::size(offsets), input_file);
+		EXPECT_EQ(res, std::size(offsets));
+		fclose(input_file);
+	}
+
+	std::array<terraformer::location, 387> base_curve{};
+	{
+		auto input_file = fopen("testdata/basecurve.dat", "rb");
+		REQUIRE_NE(input_file, nullptr);
+		auto const res = fread(std::data(base_curve), sizeof(terraformer::location), std::size(base_curve), input_file);
+		EXPECT_EQ(res, std::size(base_curve));
+		fclose(input_file);
+	}
+
+	terraformer::random_generator rng;
+	std::uniform_real_distribution U{-1.0f/1024.0f, 1.0f/1024.0f};
+
+	for(size_t k = 1; k != std::size(base_curve); ++k)
+	{
+		auto const d = distance(base_curve[k], base_curve[k - 1]);
+		base_curve[k] += d*terraformer::displacement{U(rng), U(rng), U(rng)};
+	}
+
+	constexpr auto pixel_size = 32.0f;
+	terraformer::ridge_tree_branch const branch{
+		base_curve,
+		terraformer::displacement_profile{
+			.offsets = offsets,
+			.sample_period = pixel_size,
+		}
+	};
+
+	printf("%zu %zu\n", std::size(branch.left_seeds().branch_points), std::size(branch.right_seeds().branch_points));
 }

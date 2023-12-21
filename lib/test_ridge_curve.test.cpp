@@ -1,4 +1,4 @@
-//@ {"target":{"name":"test_ridge_curve"}}
+// {"target":{"name":"test_ridge_curve"}}
 
 #include "./ridge_curve.hpp"
 #include "./boundary_sampling_policies.hpp"
@@ -96,17 +96,17 @@ namespace terraformer
 			auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
 			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
-
+#if 0
 			if(curve_index == 3)
 			{
-				std::string filename{"/dev/shm/slask_"};
+				std::string filename{"testdata/basecurve.dat"};
 				filename.append(std::to_string(curve_index));
 				auto dump = fopen(filename.c_str(),"wb");
-				static_assert(std::is_same_v<decltype(std::data(offsets)), float const*>);
-				fwrite(std::data(offsets), sizeof(float), std::size(offsets), dump);
+				static_assert(std::is_same_v<decltype(std::data(base_curve)), location const*>);
+				fwrite(std::data(base_curve), sizeof(location), std::size(base_curve), dump);
 				fclose(dump);
 			}
-
+#endif
 			existing_branches.push_back(
 				ridge_tree_branch{
 					base_curve,
