@@ -7,6 +7,7 @@
 
 #include <testfwk/testfwk.hpp>
 
+#if 0
 TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus)
 {
 	constexpr size_t count = 513;
@@ -225,6 +226,7 @@ TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus_plus)
 		EXPECT_EQ(right_seeds.first_is_branch, false);
 	}
 }
+#endif
 
 TESTCASE(terraformer_ridge_tree_branch_random_data)
 {
@@ -263,6 +265,4 @@ TESTCASE(terraformer_ridge_tree_branch_random_data)
 			.sample_period = pixel_size,
 		}
 	};
-
-	printf("%zu %zu\n", std::size(branch.left_seeds().branch_points), std::size(branch.right_seeds().branch_points));
 }

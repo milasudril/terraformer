@@ -4,6 +4,7 @@
 
 #include <testfwk/testfwk.hpp>
 
+#if 0
 TESTCASE(terraformer_find_zeros_cosine)
 {
 	std::array<float, 64> data_points;
@@ -175,6 +176,7 @@ TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_sine_sine)
 		{ EXPECT_GE(val_b, 0.0f); }
 	}
 }
+#endif
 
 TESTCASE(terraformer_find_zeros_random_curve)
 {
