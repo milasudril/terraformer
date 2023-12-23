@@ -2,7 +2,7 @@
 
 #include "./find_zeros.hpp"
 
-std::vector<size_t> terraformer::find_zeros(std::span<float const> data_points, double margin_factor)
+std::vector<size_t> terraformer::find_zeros(std::span<float const> data_points, double)
 {
 	if(std::size(data_points) == 0)
 	{ return std::vector<size_t>{}; }
@@ -27,7 +27,10 @@ std::vector<size_t> terraformer::find_zeros(std::span<float const> data_points, 
 			positive = true;
 		}
 	}
-
+	
+	return intercept_index;
+	
+#if 0
 	if(std::size(intercept_index) == 0)
 	{ return std::vector<size_t>{}; }
 
@@ -67,4 +70,5 @@ std::vector<size_t> terraformer::find_zeros(std::span<float const> data_points, 
 		}
 	}
 	return intercept_index_filtered;
+#endif
 }
