@@ -4,8 +4,6 @@
 #include "./interp.hpp"
 #include "./boundary_sampling_policies.hpp"
 
-#include <cassert>
-
 terraformer::array_tuple<terraformer::location, float>  terraformer::displace(std::span<location const> c, displacement_profile dy, displacement looking_towards)
 {
 	assert(std::size(c) >= 3);
@@ -18,7 +16,6 @@ terraformer::array_tuple<terraformer::location, float>  terraformer::displace(st
 		auto const k = 1;
 		auto const val = dy.offsets[0];
 		auto const n = curve_vertex_normal_from_projection(c[k - 1], c[k], c[k + 1], looking_towards);
-		assert(!std::isnan(n[0]));
 		points[k - 1] = c[k - 1] + val*n;
 		offsets[k - 1] = val;
 	}
@@ -30,7 +27,6 @@ terraformer::array_tuple<terraformer::location, float>  terraformer::displace(st
 		auto const sample_at = c_distance/dy.sample_period;
 		auto const val = interp(dy.offsets, sample_at, clamp_at_boundary{});
 		auto const n = curve_vertex_normal_from_projection(c[k - 1], c[k], c[k + 1], looking_towards);
-		assert(!std::isnan(n[0]));
 		points[k] = c[k] + val*n;
 		offsets[k] = val;
 	}
@@ -42,7 +38,6 @@ terraformer::array_tuple<terraformer::location, float>  terraformer::displace(st
 		auto const sample_at = c_distance/dy.sample_period;
 		auto const val = interp(dy.offsets, sample_at, clamp_at_boundary{});
 		auto const n = curve_vertex_normal_from_projection(c[k - 1], c[k], c[k + 1], looking_towards);
-		assert(!std::isnan(n[0]));
 		points[k + 1] = c[k + 1] + val*n;
 		offsets[k] = val;
 	}

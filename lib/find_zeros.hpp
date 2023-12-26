@@ -5,5 +5,5 @@
 
 namespace terraformer
 {
-	std::vector<size_t> find_zeros(std::span<float const>, double margin_factor = 0.5);
+	std::vector<size_t> find_zeros(std::span<float const>, float margin_factor = 0.3f);
 }
