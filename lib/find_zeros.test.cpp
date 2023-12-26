@@ -15,13 +15,13 @@ TESTCASE(terraformer_find_zeros_cosine)
 		data_points[k] = std::cos(2.0f*std::numbers::pi_v<float>*x*f);
 	}
 
-	auto const zeros = terraformer::find_zeros(data_points);
-	auto side = 1.0f;
+	auto const intercepts = terraformer::find_zeros(data_points);
+	auto side = intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 
-	EXPECT_EQ(std::size(zeros), 2*std::size(data_points)/16);
-	for(size_t k = 0; k != std::size(zeros); ++k)
+	EXPECT_EQ(std::size(intercepts.zeros), 2*std::size(data_points)/16);
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
 	{
-		auto const index = zeros[k];
+		auto const index = intercepts.zeros[k];
 		REQUIRE_GT(index, 0);
 		auto const val_a = data_points[index - 1];
 		EXPECT_GE(val_a*side, 0.0f);
@@ -46,14 +46,14 @@ TESTCASE(terraformer_find_zeros_sine)
 		data_points[k] = std::sin(2.0f*std::numbers::pi_v<float>*x*f);
 	}
 
-	auto const zeros = terraformer::find_zeros(data_points);
-	auto side = 1.0f;
+	auto const intercepts = terraformer::find_zeros(data_points);
+	auto side = intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 
 	// NOTE: Subtract one since first point cannot be known to be an intercept.
-	EXPECT_EQ(std::size(zeros), 2*std::size(data_points)/16 - 1);
-	for(size_t k = 0; k != std::size(zeros); ++k)
+	EXPECT_EQ(std::size(intercepts.zeros), 2*std::size(data_points)/16 - 1);
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
 	{
-		auto const index = zeros[k];
+		auto const index = intercepts.zeros[k];
 		if(index > 0)
 		{
 			auto const val_a = data_points[index - 1];
@@ -84,15 +84,14 @@ TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_cosine_cosine)
 			+ static_cast<float>(static_cast<int>(wave_val >= 0.0f? wave_val + 0.5f: wave_val - 0.5f));
 	}
 
-	auto const zeros = terraformer::find_zeros(data_points);
+	auto const intercepts = terraformer::find_zeros(data_points);
 
-	EXPECT_EQ(std::size(zeros), 2*std::size(data_points)/128);
+	EXPECT_EQ(std::size(intercepts.zeros), 2*std::size(data_points)/128);
+	auto side = intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 
-	auto side = data_points[0] < 0.0f ? -1.0f : 1.0f;
-
-	for(size_t k = 0; k != std::size(zeros); ++k)
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
 	{
-		auto const index = zeros[k];
+		auto const index = intercepts.zeros[k];
 		REQUIRE_GT(index, 0);
 		auto const val_a = data_points[index - 1];
 		EXPECT_GE(val_a*side, 0.0f);
@@ -119,13 +118,13 @@ TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_cosine_sine)
 			+ static_cast<float>(static_cast<int>(wave_val >= 0.0f? wave_val + 0.5f: wave_val - 0.5f));
 	}
 
-	auto const zeros = terraformer::find_zeros(data_points);
-	auto side = 1.0f;
+	auto const intercepts = terraformer::find_zeros(data_points);
+	auto side = intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 
-	EXPECT_EQ(std::size(zeros), 2*std::size(data_points)/128);
-	for(size_t k = 0; k != std::size(zeros); ++k)
+	EXPECT_EQ(std::size(intercepts.zeros), 2*std::size(data_points)/128);
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
 	{
-		auto const index = zeros[k];
+		auto const index = intercepts.zeros[k];
 		REQUIRE_GT(index, 0);
 		auto const val_a = data_points[index - 1];
 		EXPECT_GE(val_a*side, 0.0f);
@@ -152,13 +151,13 @@ TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_sine_cosine)
 			+ static_cast<float>(static_cast<int>(wave_val >= 0.0f? wave_val + 0.5f: wave_val - 0.5f));
 	}
 
-	auto const zeros = terraformer::find_zeros(data_points);
-	auto side = 1.0f;
+	auto const intercepts = terraformer::find_zeros(data_points);
+	auto side = intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 
-	EXPECT_EQ(std::size(zeros), 2*std::size(data_points)/128);
-	for(size_t k = 0; k != std::size(zeros); ++k)
+	EXPECT_EQ(std::size(intercepts.zeros), 2*std::size(data_points)/128);
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
 	{
-		auto const index = zeros[k];
+		auto const index = intercepts.zeros[k];
 		REQUIRE_GT(index, 0);
 		auto const val_a = data_points[index - 1];
 		EXPECT_GE(val_a*side, 0.0f);
@@ -185,14 +184,14 @@ TESTCASE(terraformer_find_zeros_small_oscillations_on_step_wave_sine_sine)
 			+ static_cast<float>(static_cast<int>(wave_val >= 0.0f? wave_val + 0.5f: wave_val - 0.5f));
 	}
 
-	auto const zeros = terraformer::find_zeros(data_points);
+	auto const intercepts = terraformer::find_zeros(data_points);
+	auto side = intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 
-	auto side = 1.0f;
-	EXPECT_EQ(std::size(zeros), 2*std::size(data_points)/256);
+	EXPECT_EQ(std::size(intercepts.zeros), 2*std::size(data_points)/256);
 
-	for(size_t k = 0; k != std::size(zeros); ++k)
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
 	{
-		auto const index = zeros[k];
+		auto const index = intercepts.zeros[k];
 		REQUIRE_GT(index, 0);
 		auto const val_a = data_points[index - 1];
 		EXPECT_GE(val_a*side, 0.0f);
@@ -215,14 +214,14 @@ TESTCASE(terraformer_find_zeros_random_curve)
 	EXPECT_EQ(res, std::size(data_points));
 	fclose(input_file);
 
-	auto const zeros = terraformer::find_zeros(data_points, 0.3f);
+	auto const intercepts = terraformer::find_zeros(data_points, 0.3f);
+	auto side = intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 
-	auto side = -1.0f;
-	EXPECT_GT(std::size(zeros), 1);
+	EXPECT_GT(std::size(intercepts.zeros), 1);
 
-	for(size_t k = 0; k != std::size(zeros); ++k)
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
 	{
-		auto const index = zeros[k];
+		auto const index = intercepts.zeros[k];
 		REQUIRE_GT(index, 0);
 		auto const val_a = data_points[index - 1];
 		EXPECT_GE(val_a*side, 0.0f);
@@ -235,7 +234,7 @@ TESTCASE(terraformer_find_zeros_random_curve)
 	}
 
 	constexpr std::array<size_t, 7> expected_zeros{107, 144, 205, 237, 280, 348, 376};
-	REQUIRE_EQ(std::size(zeros), std::size(expected_zeros));
-	for(size_t k = 0; k != std::size(zeros); ++k)
-	{ EXPECT_EQ(zeros[k], expected_zeros[k]); }
+	REQUIRE_EQ(std::size(intercepts.zeros), std::size(expected_zeros));
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
+	{ EXPECT_EQ(intercepts.zeros[k], expected_zeros[k]); }
 }

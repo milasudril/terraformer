@@ -12,10 +12,10 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 	auto const offsets = m_points.get<1>();
 
 	auto const x_intercepts = terraformer::find_zeros(offsets);
-	auto side = (offsets[0] >= 0.0f)? 1.0f: -1.0f;
-	m_left_seeds.first_is_branch = offsets[0] >= 0.0f;
+	auto side = x_intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
+	m_left_seeds.first_is_branch = x_intercepts.first_value >= 0.0f;
 	size_t l = 0;
-	if(l != std::size(x_intercepts) && x_intercepts[l] == 0)
+	if(l != std::size(x_intercepts.zeros) && x_intercepts.zeros[l] == 0)
 	{
 		++l;
 		side = -side;
@@ -26,7 +26,7 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 	std::vector<size_t> branch_at_tmp;
 	for(size_t k = 1; k != std::size(offsets) - 1;++k)
 	{
-		if(l != std::size(x_intercepts) && k == x_intercepts[l])
+		if(l != std::size(x_intercepts.zeros) && k == x_intercepts.zeros[l])
 		{
 			if(selected_branch_point.has_value())
 			{
