@@ -1,4 +1,4 @@
-// {"target":{"name":"test_ridge_curve"}}
+//@ {"target":{"name":"test_ridge_curve"}}
 
 #include "./ridge_curve.hpp"
 #include "./boundary_sampling_policies.hpp"
@@ -40,10 +40,13 @@ namespace terraformer
 
 		loc += pixel_size*start_dir;
 
+		random_generator rng;
+		std::uniform_real_distribution U{-1.0f/1024.0f, 1.0f/1024.0f};
+
 		while(!stop(loc) && inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
 		{
 			base_curve.push_back(loc);
-			loc -= pixel_size*direction{
+			auto const g = direction{
 				grad(
 					potential,
 					loc[0]/pixel_size,
@@ -52,6 +55,8 @@ namespace terraformer
 					clamp_at_boundary{}
 				)
 			};
+
+			loc -= pixel_size*g + pixel_size*displacement{U(rng), U(rng), 0.0f};
 		}
 		return base_curve;
 	}
@@ -319,7 +324,6 @@ int main()
 		}
 	}
 
-#if 0
 	terraformer::ridge_curve_description const curve_desc_3{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
 		.wavelength = terraformer::domain_length{12384.0f/9.0f},
@@ -328,7 +332,6 @@ int main()
 		.invert_displacement = false
 	};
 
-	printf("Generating level 2\n");
 	auto next_level = generate_branches(branches,
 		potential,
 		pixel_size,
@@ -356,12 +359,5 @@ int main()
 		}
 	}
 
-	/*
-	 		std::span<ridge_tree_branch const> branches,
-		span_2d<float const> potential,
-		float pixel_size,
-		ridge_curve_description curve_desc,
-		random_generator& rng*/
-#endif
 	store(potential, "test.exr");
 }
