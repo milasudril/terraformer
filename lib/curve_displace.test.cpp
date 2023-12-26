@@ -2,6 +2,9 @@
 
 #include "./curve_displace.hpp"
 
+#include "./rng.hpp"
+#include <random>
+
 #include <testfwk/testfwk.hpp>
 
 TESTCASE(terraformer_curve_vertex_normal_from_curvature_to_circle_in_plane)
@@ -104,10 +107,13 @@ TESTCASE(terraformer_curve_displace)
 	constexpr auto num_points = 128;
 	std::array<terraformer::location, num_points> locs;
 	auto const dx = 2.0f*std::numbers::pi_v<float>/static_cast<float>(num_points);
+	terraformer::random_generator rng;
+	std::uniform_real_distribution U{-1.0f/1024.0f, 1.0f/1024.0f};
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const theta = static_cast<float>(k)*dx;
-		locs[k] = terraformer::location{theta, std::sin(theta), 0.0f};
+		locs[k] = terraformer::location{theta, std::sin(theta), 0.0f}
+			+ terraformer::displacement{U(rng), U(rng), U(rng)};
 	}
 
 	std::array<float, 2*num_points> offsets;
