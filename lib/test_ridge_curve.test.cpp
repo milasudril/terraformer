@@ -102,14 +102,25 @@ namespace terraformer
 			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
 #if 0
-			if(curve_index == 3)
+			if(curve_index == 10)
 			{
-				std::string filename{"testdata/basecurve.dat"};
-				filename.append(std::to_string(curve_index));
-				auto dump = fopen(filename.c_str(),"wb");
-				static_assert(std::is_same_v<decltype(std::data(base_curve)), location const*>);
-				fwrite(std::data(base_curve), sizeof(location), std::size(base_curve), dump);
-				fclose(dump);
+				{
+					std::string filename{"testdata/basecurve_2.dat"};
+					filename.append(std::to_string(curve_index));
+					auto dump = fopen(filename.c_str(),"wb");
+					static_assert(std::is_same_v<decltype(std::data(base_curve)), location const*>);
+					fwrite(std::data(base_curve), sizeof(location), std::size(base_curve), dump);
+					fclose(dump);
+				}
+
+				{
+					std::string filename{"testdata/random_curve_2.dat"};
+					filename.append(std::to_string(curve_index));
+					auto dump = fopen(filename.c_str(),"wb");
+					static_assert(std::is_same_v<decltype(std::data(offsets)), float const*>);
+					fwrite(std::data(offsets), sizeof(float), std::size(offsets), dump);
+					fclose(dump);
+				}
 			}
 #endif
 			existing_branches.push_back(
@@ -304,12 +315,15 @@ int main()
 	);
 */
 
+	printf("Last curve %zu\n", terraformer::curve_index);
+
 	for(uint32_t y = 0; y != potential.height(); ++y)
 	{
 		for(uint32_t x = 0; x != potential.width(); ++x)
 		{
 			auto sum = 0.0f;
-			for(size_t k = 0; k != std::size(branches); ++k)
+			size_t k = std::size(branches) - 1;
+//			for(size_t k = 0; k != std::size(branches); ++k)
 			{
 				auto const points = branches[k].curve().get<0>();
 				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
@@ -323,7 +337,7 @@ int main()
 			potential(x, y) += sum;
 		}
 	}
-
+#if 0
 	terraformer::ridge_curve_description const curve_desc_3{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
 		.wavelength = terraformer::domain_length{12384.0f/9.0f},
@@ -358,6 +372,6 @@ int main()
 			potential(x, y) += sum;
 		}
 	}
-
+#endif
 	store(potential, "test.exr");
 }

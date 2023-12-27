@@ -238,3 +238,37 @@ TESTCASE(terraformer_find_zeros_random_curve)
 	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
 	{ EXPECT_EQ(intercepts.zeros[k], expected_zeros[k]); }
 }
+
+TESTCASE(terraformer_find_zeros_random_curve_2)
+{
+	std::array<float, 387> data_points{};
+	auto input_file = fopen("testdata/random_curve_2.dat", "rb");
+	REQUIRE_NE(input_file, nullptr);
+	auto const res = fread(std::data(data_points), sizeof(float), std::size(data_points), input_file);
+	EXPECT_EQ(res, std::size(data_points));
+	fclose(input_file);
+
+	auto const intercepts = terraformer::find_zeros(data_points, 0.3f);
+	auto side = intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
+
+	EXPECT_GT(std::size(intercepts.zeros), 1);
+
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
+	{
+		auto const index = intercepts.zeros[k];
+		REQUIRE_GT(index, 0);
+		auto const val_a = data_points[index - 1];
+		EXPECT_GE(val_a*side, 0.0f);
+		auto const val_b = data_points[index];
+		if(val_a >= 0.0f)
+		{ EXPECT_LT(val_b, 0); }
+		else
+		{ EXPECT_GE(val_b, 0.0f); }
+		side *= -1.0f;
+	}
+	constexpr std::array<size_t, 6> expected_zeros{90, 151, 196, 240, 307, 354};
+	REQUIRE_EQ(std::size(intercepts.zeros), std::size(expected_zeros));
+
+	for(size_t k = 0; k != std::size(intercepts.zeros); ++k)
+	{ EXPECT_EQ(intercepts.zeros[k], expected_zeros[k]); }
+}
