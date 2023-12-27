@@ -61,8 +61,6 @@ namespace terraformer
 		return base_curve;
 	}
 
-	size_t curve_index = 0;
-
 	std::vector<ridge_tree_branch>
 	generate_branches(
 		array_tuple<location, direction> const& branch_points,
@@ -132,8 +130,6 @@ namespace terraformer
 					}
 				}
 			);
-
-			++curve_index;
 		}
 
 		return existing_branches;
@@ -226,6 +222,16 @@ namespace terraformer
 			);
 		}
 
+		output_branches = generate_branches(
+			branches.back().right_seeds().branch_points,
+			potential,
+			pixel_size,
+			curve_desc,
+			rng,
+			3072.0f,
+			std::move(output_branches)
+		);
+
 		return output_branches;
 	}
 }
@@ -315,15 +321,12 @@ int main()
 	);
 */
 
-	printf("Last curve %zu\n", terraformer::curve_index);
-
 	for(uint32_t y = 0; y != potential.height(); ++y)
 	{
 		for(uint32_t x = 0; x != potential.width(); ++x)
 		{
 			auto sum = 0.0f;
-			size_t k = std::size(branches) - 1;
-//			for(size_t k = 0; k != std::size(branches); ++k)
+			for(size_t k = 0; k != std::size(branches); ++k)
 			{
 				auto const points = branches[k].curve().get<0>();
 				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
@@ -337,7 +340,7 @@ int main()
 			potential(x, y) += sum;
 		}
 	}
-#if 0
+
 	terraformer::ridge_curve_description const curve_desc_3{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
 		.wavelength = terraformer::domain_length{12384.0f/9.0f},
@@ -372,6 +375,6 @@ int main()
 			potential(x, y) += sum;
 		}
 	}
-#endif
+
 	store(potential, "test.exr");
 }
