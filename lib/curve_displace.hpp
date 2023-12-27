@@ -46,7 +46,7 @@ namespace terraformer
 		float sample_period;
 	};
 
- array_tuple<location, float> displace(std::span<location const> c, displacement_profile dy, displacement looking_towards);
+ array_tuple<location, float> displace_xy(std::span<location const> c, displacement_profile dy);
 }
 
 #endif

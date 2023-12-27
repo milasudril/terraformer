@@ -6,7 +6,7 @@
 terraformer::ridge_tree_branch::ridge_tree_branch(
 	std::span<location const> base_curve,
 	displacement_profile dy):
-	m_points{displace(base_curve, dy, displacement{0.0f, 0.0f, -1.0f})}
+	m_points{displace_xy(base_curve, dy)}
 {
 	auto const points = m_points.get<0>();
 	auto const offsets = m_points.get<1>();

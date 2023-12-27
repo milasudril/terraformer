@@ -16,10 +16,8 @@ namespace terraformer
 		std::vector<location> ret(count);
 		for(size_t k = 0; k != count; ++k)
 		{
-			// Note: Add a small disturbance to y coordinate to avoid singular values when computing
-			//       the curve normal
 			ret[k] = start_loc
-				+ displacement{static_cast<float>(k)*dx, (static_cast<float>(k%2) - 0.5f)*dx/1024.0f, 0.0f};
+				+ displacement{static_cast<float>(k)*dx, 0.0f, 0.0f};
 		}
 		return ret;
 	}
@@ -40,9 +38,6 @@ namespace terraformer
 
 		loc += pixel_size*start_dir;
 
-		random_generator rng;
-		std::uniform_real_distribution U{-1.0f/512.0f, 1.0f/512.0f};
-
 		while(!stop(loc) && inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
 		{
 			base_curve.push_back(loc);
@@ -56,7 +51,7 @@ namespace terraformer
 				)
 			};
 
-			loc -= pixel_size*g + pixel_size*displacement{U(rng), U(rng), 0.0f};
+			loc -= pixel_size*g;
 		}
 		return base_curve;
 	}
@@ -160,16 +155,11 @@ namespace terraformer
 			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
 			existing_delimiters.push_back(
-				displace(
+				displace_xy(
 					base_curve,
 					displacement_profile{
 						.offsets = offsets,
 						.sample_period = pixel_size,
-					},
-					displacement{
-						0.0f,
-						0.0f,
-						-1.0f
 					}
 				)
 			);

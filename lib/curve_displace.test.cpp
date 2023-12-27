@@ -102,7 +102,7 @@ TESTCASE(terraformer_curve_vertex_normal_from_projection)
 	}
 }
 
-TESTCASE(terraformer_curve_displace)
+TESTCASE(terraformer_curve_displace_xy)
 {
 	constexpr auto num_points = 128;
 	std::array<terraformer::location, num_points> locs;
@@ -112,8 +112,7 @@ TESTCASE(terraformer_curve_displace)
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const theta = static_cast<float>(k)*dx;
-		locs[k] = terraformer::location{theta, std::sin(theta), 0.0f}
-			+ terraformer::displacement{U(rng), U(rng), U(rng)};
+		locs[k] = terraformer::location{theta, std::sin(theta), 0.0f};
 	}
 
 	std::array<float, 2*num_points> offsets;
@@ -123,13 +122,12 @@ TESTCASE(terraformer_curve_displace)
 		offsets[k] = std::sin(8.0f*theta)/4.0f;
 	}
 
-	auto const res = displace(
+	auto const res = displace_xy(
 		locs,
 		terraformer::displacement_profile{
 			.offsets = offsets,
 			.sample_period = dx
-		},
-		terraformer::displacement{0.0f, 0.0f, -1.0f}
+		}
 	);
 
  	REQUIRE_EQ(std::size(res), std::size(locs));
