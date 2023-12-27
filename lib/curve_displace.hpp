@@ -7,10 +7,17 @@
 #include "lib/common/array_tuple.hpp"
 
 #include <span>
-#include <cassert>
+#include <bit>
 
 namespace terraformer
 {
+	constexpr bool isnan(float f)
+	{
+		auto x = std::bit_cast<uint32_t>(f);
+		auto pattern = 0x7fc0'0000u;
+		return (x&pattern) == pattern ;
+	}
+
 	inline direction curve_vertex_normal_from_curvature(
 		location a,
 		location b,
@@ -39,7 +46,7 @@ namespace terraformer
 		float sample_period;
 	};
 
-	array_tuple<location, float> displace(std::span<location const> c, displacement_profile dy, displacement looking_towards);
+ array_tuple<location, float> displace(std::span<location const> c, displacement_profile dy, displacement looking_towards);
 }
 
 #endif

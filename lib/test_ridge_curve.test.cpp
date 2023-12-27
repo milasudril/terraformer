@@ -41,7 +41,7 @@ namespace terraformer
 		loc += pixel_size*start_dir;
 
 		random_generator rng;
-		std::uniform_real_distribution U{-1.0f/1024.0f, 1.0f/1024.0f};
+		std::uniform_real_distribution U{-1.0f/512.0f, 1.0f/512.0f};
 
 		while(!stop(loc) && inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
 		{
