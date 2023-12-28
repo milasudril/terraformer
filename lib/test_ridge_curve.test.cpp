@@ -225,7 +225,7 @@ int main()
 		.invert_displacement = false
 	};
 
-	constexpr auto pixel_size = 32.0f;
+	constexpr auto pixel_size = 48.0f;
 	terraformer::random_generator rng;
 	auto const pixel_count = static_cast<size_t>(49152.0f/pixel_size);
 	auto const offsets = generate(
