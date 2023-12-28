@@ -22,10 +22,9 @@ terraformer::array_tuple<terraformer::location, float>  terraformer::displace_xy
 		auto const val = dy.offsets[0];
 		auto const t = c[k] - c[k - 1];
 		auto const n = direction{displacement{t[1], -t[0], 0.0f}};
-		points[k] = c[k] + val*n;
-		offsets[k] = val;
+		points[k - 1] = c[k - 1] + val*n;
+		offsets[k - 1] = val;
 	}
-
 
 	for(size_t k = 1; k != std::size(c) - 1; ++k)
 	{

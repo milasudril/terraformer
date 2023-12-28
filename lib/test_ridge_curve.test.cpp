@@ -4,6 +4,7 @@
 #include "./boundary_sampling_policies.hpp"
 #include "./ridge_tree_branch.hpp"
 #include "./curve_length.hpp"
+#include "./tempdir.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
 
@@ -11,6 +12,16 @@
 
 namespace terraformer
 {
+	void dump_curve(std::span<location const> points, std::filesystem::path const& output_name)
+	{
+		std::unique_ptr<FILE, decltype(&fclose)> dest{fopen(output_name.c_str(), "wb"), fclose};
+		for(size_t k = 0; k != std::size(points); ++k)
+		{
+			auto const loc = points[k];
+			fprintf(dest.get(), "%.8g %.8g %.8g\n", loc[0], loc[1], loc[2]);
+		}
+	}
+
 	std::vector<location> make_point_array(location start_loc, size_t count, float dx)
 	{
 		std::vector<location> ret(count);
@@ -94,28 +105,6 @@ namespace terraformer
 			auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
 			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
-#if 0
-			if(curve_index == 10)
-			{
-				{
-					std::string filename{"testdata/basecurve_2.dat"};
-					filename.append(std::to_string(curve_index));
-					auto dump = fopen(filename.c_str(),"wb");
-					static_assert(std::is_same_v<decltype(std::data(base_curve)), location const*>);
-					fwrite(std::data(base_curve), sizeof(location), std::size(base_curve), dump);
-					fclose(dump);
-				}
-
-				{
-					std::string filename{"testdata/random_curve_2.dat"};
-					filename.append(std::to_string(curve_index));
-					auto dump = fopen(filename.c_str(),"wb");
-					static_assert(std::is_same_v<decltype(std::data(offsets)), float const*>);
-					fwrite(std::data(offsets), sizeof(float), std::size(offsets), dump);
-					fclose(dump);
-				}
-			}
-#endif
 			existing_branches.push_back(
 				ridge_tree_branch{
 					base_curve,
@@ -256,6 +245,13 @@ int main()
 		}
 	};
 
+	terraformer::tempdir dir{"/dev/shm/test_ridge_curve_XXXXXX"};
+	auto const dirname = dir.keep_after_scope(true).get_name();
+
+	size_t curve_count = 0;
+	terraformer::dump_curve(root.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+	++curve_count;
+
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
 	{
 		auto const& root_curve = root.curve();
@@ -299,6 +295,12 @@ int main()
 		12384.0f,
 		generate_branches(root.right_seeds().branch_points, potential, pixel_size, curve_desc_2, rng, 12384.0f)
 	);
+
+	for(auto const& branch: branches)
+	{
+		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+		++curve_count;
+	}
 
 /*
 	auto const delimiters = generate_delimiters(
@@ -346,6 +348,13 @@ int main()
 		rng
 	);
 
+	for(auto const& branch: next_level)
+	{
+		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+		++curve_count;
+	}
+
+#if 0
 	for(uint32_t y = 0; y != potential.height(); ++y)
 	{
 		for(uint32_t x = 0; x != potential.width(); ++x)
@@ -365,6 +374,7 @@ int main()
 			potential(x, y) += sum;
 		}
 	}
+#endif
 
 	store(potential, "test.exr");
 }
