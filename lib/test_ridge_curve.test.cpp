@@ -354,27 +354,5 @@ int main()
 		++curve_count;
 	}
 
-#if 0
-	for(uint32_t y = 0; y != potential.height(); ++y)
-	{
-		for(uint32_t x = 0; x != potential.width(); ++x)
-		{
-			auto sum = 0.0f;
-			for(size_t k = 0; k != std::size(next_level); ++k)
-			{
-				auto const points = next_level[k].curve().get<0>();
-				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
-				sum += std::accumulate(std::begin(points), std::end(points), 0.0f, [loc_xy](auto const sum, auto const point) {
-					auto const d = terraformer::distance_xy(loc_xy, point);
-					auto const d_min = 1.0f*pixel_size;
-					return sum + 1.0f*(d<d_min? 1.0f : (d_min)/(d));
-				});
-			}
-
-			potential(x, y) += sum;
-		}
-	}
-#endif
-
 	store(potential, "test.exr");
 }
