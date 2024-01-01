@@ -60,7 +60,13 @@ namespace terraformer
 	class ridge_tree_branch_sequence
 	{
 		public:
-			explicit ridge_tree_branch_sequence(ridge_tree_branch const& parent);
+			explicit ridge_tree_branch_sequence(
+				ridge_tree_branch const& parent,
+				span_2d<float const> potential,
+				float pixel_size,
+				ridge_curve_description curve_desc,
+				random_generator& rng
+			);
 			
 			struct per_side_info
 			{

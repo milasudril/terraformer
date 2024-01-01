@@ -40,46 +40,25 @@ terraformer::generate_delimiters(
 	return existing_delimiters;
 }
 
-#if 0
-terraformer::ridge_tree_branch_sequence::ridge_tree_branch_sequence(ridge_tree_branch const& parent)
+terraformer::ridge_tree_branch_sequence::ridge_tree_branch_sequence(
+	ridge_tree_branch const& parent,
+	span_2d<float const> potential,
+	float pixel_size,
+	ridge_curve_description curve_desc,
+	random_generator& rng
+)
 {
-
+	m_left.delimiters = generate_delimiters(
+		parent.left_seeds().delimiter_points, 
+		potential,
+		pixel_size,
+		curve_desc,
+		rng);
+	
+	m_right.delimiters = generate_delimiters(
+		parent.right_seeds().delimiter_points, 
+		potential,
+		pixel_size,
+		curve_desc,
+		rng);
 }
-
-
-#ifndef TERRAFORMER_RIDGE_TREE_BRANCH_SEQUENCE_HPP
-#define TERRAFORMER_RIDGE_TREE_BRANCH_SEQUENCE_HPP
-
-#include "./ridge_tree_branch.hpp"
-
-namespace terraformer
-{
-	class ridge_tree_branch_sequence
-	{
-		public:
-			explicit ridge_tree_branch_sequence(ridge_tree_branch const& parent);
-			
-			struct per_side_info
-			{
-				std::vector<ridge_tree_branch> branches;
-
-				// TODO: Only location is needed for this one
-				std::vector<array_tuple<location, float>> delimiters;
-				bool first_is_branch;
-			};
-			
-			auto const& left() const
-			{ return m_left; }
-			
-			auto const& right() const
-			{ return m_right; }
-
-		private:
-			per_side_info m_left;
-			per_side_info m_right;
-	};
-
-}
-
-#endif
-#endif
