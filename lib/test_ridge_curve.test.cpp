@@ -199,7 +199,7 @@ int main()
 						auto const d3 = distance(seg, point + terraformer::displacement{49152.0f,0.0f,0.0f});
 						auto const d = std::min(d1, std::min(d2, d3));
 						auto const l = length(seg);
-						auto const d_min = 1.0f*pixel_size;
+						auto const d_min = 0.5f*pixel_size;
 						return (prev + ... + (l*(d<d_min? 1.0f : d_min/d)));
 					},
 					loc_xy
@@ -257,7 +257,7 @@ int main()
 						[loc_xy](auto seg, auto point, auto... prev) {
 					auto const d = distance(seg, point);
 						auto const l = length(seg);
-						auto const d_min = 1.0f*pixel_size;
+						auto const d_min = 0.5f*pixel_size;
 						return (prev + ... + (l*(d<d_min? 1.0f : d_min/d)));
 					},
 					loc_xy
