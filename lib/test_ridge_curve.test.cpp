@@ -93,11 +93,62 @@ namespace terraformer
 
 	std::vector<ridge_tree_branch>
 	generate_branches(
+		array_tuple<location, direction> const& branch_points,
+		std::span<location const> delimiter,
+		span_2d<float const> potential,
+		float pixel_size,
+		ridge_curve_description curve_desc,
+		random_generator& rng,
+		float margin,
+		std::vector<ridge_tree_branch>&& existing_branches = std::vector<ridge_tree_branch>{})
+	{
+		auto const points = branch_points.get<0>();
+		auto const normals = branch_points.get<1>();
+		for(size_t k = 0; k != std::size(branch_points); ++k)
+		{
+			auto const base_curve = generate_branch_base_curve(
+				points[k],
+				normals[k],
+				potential,
+				pixel_size,
+				[delimiter, margin](auto loc) {
+					auto const d = distance(delimiter, loc);
+					return d < margin;
+				}
+			);
+
+			if(std::size(base_curve) < 3)
+			{
+				printf("Curve is too short\n");
+				continue;
+			}
+
+			auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
+			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
+
+			existing_branches.push_back(
+				ridge_tree_branch{
+					base_curve,
+					displacement_profile{
+						.offsets = offsets,
+						.sample_period = pixel_size,
+					}
+				}
+			);
+		}
+
+		return existing_branches;
+	}
+
+	std::vector<ridge_tree_branch>
+	generate_branches(
 		std::span<ridge_tree_branch const> parents,
 		span_2d<float const> potential,
 		float pixel_size,
 		ridge_curve_description curve_desc,
-		random_generator& rng
+		random_generator& rng,
+		float margin,
+		float d_max
 	)
 	{
 		if(std::size(parents) == 0)
@@ -109,7 +160,7 @@ namespace terraformer
 			pixel_size,
 			curve_desc,
 			rng,
-			3072.0f
+			d_max
 		);
 
 		auto const dirname = dir.get_name();
@@ -122,22 +173,24 @@ namespace terraformer
 
 			output_branches = generate_branches(
 				parents[k - 1].right_seeds().branch_points,
+				mean,
 				potential,
 				pixel_size,
 				curve_desc,
 				rng,
-				3072.0f,
+				margin,
 				std::move(output_branches)
 			);
 
 
 			output_branches = generate_branches(
 				parents[k].left_seeds().branch_points,
+				mean,
 				potential,
 				pixel_size,
 				curve_desc,
 				rng,
-				3072.0f,
+				margin,
 				std::move(output_branches)
 			);
 		}
@@ -148,7 +201,7 @@ namespace terraformer
 			pixel_size,
 			curve_desc,
 			rng,
-			3072.0f,
+			d_max,
 			std::move(output_branches)
 		);
 
@@ -318,7 +371,9 @@ int main()
 		potential,
 		pixel_size,
 		curve_desc_3,
-		rng
+		rng,
+		4128.0f/2.0f,
+		4128.0f
 	);
 
 	auto const next_level_right = generate_branches(
@@ -326,7 +381,9 @@ int main()
 		potential,
 		pixel_size,
 		curve_desc_3,
-		rng
+		rng,
+		4128.0f/2.0f,
+		4128.0f
 	);
 
 	for(auto const& branch: next_level_left)
