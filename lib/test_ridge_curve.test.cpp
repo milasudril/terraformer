@@ -324,7 +324,7 @@ int main()
 	auto const next_level_right = generate_branches(
 		right_siblings,
 		potential,
-		pixel_count,
+		pixel_size,
 		curve_desc_3,
 		rng
 	);
