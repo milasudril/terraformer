@@ -88,18 +88,18 @@ namespace terraformer
 
 	std::vector<ridge_tree_branch>
 	generate_branches(
-		std::span<ridge_tree_branch const> branches,
+		std::span<ridge_tree_branch const> parents,
 		span_2d<float const> potential,
 		float pixel_size,
 		ridge_curve_description curve_desc,
 		random_generator& rng
 	)
 	{
-		if(std::size(branches) == 0)
+		if(std::size(parents) == 0)
 		{	return std::vector<ridge_tree_branch>{}; }
 
 		auto output_branches = generate_branches(
-			branches[0].left_seeds().branch_points,
+			parents[0].left_seeds().branch_points,
 			potential,
 			pixel_size,
 			curve_desc,
@@ -107,10 +107,10 @@ namespace terraformer
 			3072.0f
 		);
 
-		for(size_t k = 1; k != std::size(branches); ++k)
+		for(size_t k = 1; k != std::size(parents); ++k)
 		{
 			output_branches = generate_branches(
-				branches[k - 1].right_seeds().branch_points,
+				parents[k - 1].right_seeds().branch_points,
 				potential,
 				pixel_size,
 				curve_desc,
@@ -120,7 +120,7 @@ namespace terraformer
 			);
 
 			output_branches = generate_branches(
-				branches[k].left_seeds().branch_points,
+				parents[k].left_seeds().branch_points,
 				potential,
 				pixel_size,
 				curve_desc,
@@ -131,7 +131,7 @@ namespace terraformer
 		}
 
 		output_branches = generate_branches(
-			branches.back().right_seeds().branch_points,
+			parents.back().right_seeds().branch_points,
 			potential,
 			pixel_size,
 			curve_desc,
@@ -141,6 +141,26 @@ namespace terraformer
 		);
 
 		return output_branches;
+	}
+
+	float compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance)
+	{
+		auto sum = 0.0f;
+		for(size_t k = 0; k != std::size(branches); ++k)
+		{
+			auto const points = branches[k].curve().get<0>();
+			sum += terraformer::fold_over_line_segments(
+				points,
+				[](auto seg, auto point, auto min_distance, auto... prev) {
+					auto const d = distance(seg, point);
+					auto const l = length(seg);
+					return (prev + ... + (l*(d<min_distance? 1.0f : min_distance/d)));
+				},
+				r,
+				min_distance
+			);
+		}
+		return sum;
 	}
 }
 
@@ -216,17 +236,31 @@ int main()
 		.invert_displacement = false
 	};
 
-	auto const branches = generate_branches(
+	auto const left_siblings = generate_branches(
+		root.right_seeds().branch_points,
+		potential,
+		pixel_size,
+		curve_desc_2,
+		rng,
+		12384.0f
+	);
+
+	auto const right_siblings = generate_branches(
 		root.left_seeds().branch_points,
 		potential,
 		pixel_size,
 		curve_desc_2,
 		rng,
-		12384.0f,
-		generate_branches(root.right_seeds().branch_points, potential, pixel_size, curve_desc_2, rng, 12384.0f)
+		12384.0f
 	);
 
-	for(auto const& branch: branches)
+	for(auto const& branch: left_siblings)
+	{
+		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+		++curve_count;
+	}
+
+	for(auto const& branch: right_siblings)
 	{
 		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
 		++curve_count;
@@ -248,21 +282,14 @@ int main()
 		for(uint32_t x = 0; x != potential.width(); ++x)
 		{
 			auto sum = 0.0f;
-			for(size_t k = 0; k != std::size(branches); ++k)
-			{
-				auto const points = branches[k].curve().get<0>();
-				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
-				sum += terraformer::fold_over_line_segments(
-						points,
-						[loc_xy](auto seg, auto point, auto... prev) {
-					auto const d = distance(seg, point);
-						auto const l = length(seg);
-						auto const d_min = 0.5f*pixel_size;
-						return (prev + ... + (l*(d<d_min? 1.0f : d_min/d)));
-					},
-					loc_xy
-				);
-			}
+			terraformer::location const loc_xy{
+				pixel_size*static_cast<float>(x),
+				pixel_size*static_cast<float>(y),
+				0.0f
+			};
+
+			sum += terraformer::compute_potential(left_siblings, loc_xy, 0.5f*pixel_size);
+			sum += terraformer::compute_potential(right_siblings, loc_xy, 0.5f*pixel_size);
 
 			potential(x, y) += sum;
 		}
@@ -276,7 +303,8 @@ int main()
 		.invert_displacement = false
 	};
 
-	auto next_level = generate_branches(branches,
+	auto next_level = generate_branches(
+		left_siblings,
 		potential,
 		pixel_size,
 		curve_desc_3,
