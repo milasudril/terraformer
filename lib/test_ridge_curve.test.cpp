@@ -119,7 +119,7 @@ namespace terraformer
 
 			if(std::size(base_curve) < 3)
 			{
-				printf("Curve is too short\n");
+				printf("%zu Curve is too short\n", k);
 				continue;
 			}
 
@@ -359,13 +359,13 @@ int main()
 	}
 
 	terraformer::ridge_curve_description const curve_desc_3{
-		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
+		.amplitude = terraformer::horizontal_amplitude{1.0f},
 		.wavelength = terraformer::domain_length{12384.0f/9.0f},
 		.damping = std::sqrt(0.5f),
 		.flip_direction = false,
 		.invert_displacement = false
 	};
-
+#if 1
 	auto const next_level_left = generate_branches(
 		left_siblings,
 		potential,
@@ -375,7 +375,7 @@ int main()
 		4128.0f/2.0f,
 		4128.0f
 	);
-
+#endif
 	auto const next_level_right = generate_branches(
 		right_siblings,
 		potential,
@@ -385,12 +385,13 @@ int main()
 		4128.0f/2.0f,
 		4128.0f
 	);
-
+#if 1
 	for(auto const& branch: next_level_left)
 	{
 		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(terraformer::curve_count).append(".txt"));
 		++terraformer::curve_count;
 	}
+#endif
 
 	for(auto const& branch: next_level_right)
 	{

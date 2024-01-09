@@ -11,5 +11,5 @@ namespace terraformer
 		float first_value;
 	};
 
-	find_zeros_result find_zeros(std::span<float const>, float margin_factor = 0.3f);
+	find_zeros_result find_zeros(std::span<float const>, float margin_factor = 0.25f);
 }
