@@ -110,25 +110,31 @@ namespace terraformer
 
 		for(size_t k = 1; k != std::size(parents); ++k)
 		{
-			output_branches = generate_branches(
+			auto right_branches = generate_branches(
 				parents[k - 1].right_seeds().branch_points,
 				potential,
 				pixel_size,
 				curve_desc,
 				rng,
-				max_length,
-				std::move(output_branches)
+				max_length
 			);
 
-			output_branches = generate_branches(
+			auto left_branches = generate_branches(
 				parents[k].left_seeds().branch_points,
 				potential,
 				pixel_size,
 				curve_desc,
 				rng,
-				max_length,
-				std::move(output_branches)
+				max_length
 			);
+
+			std::ranges::transform(std::move(right_branches), std::back_inserter(output_branches), [](auto&& val){
+				return std::move(val);
+			});
+
+			std::ranges::transform(std::move(left_branches), std::back_inserter(output_branches), [](auto&& val){
+				return std::move(val);
+			});
 		}
 
 		output_branches = generate_branches(
