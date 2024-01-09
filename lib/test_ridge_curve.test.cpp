@@ -92,7 +92,8 @@ namespace terraformer
 		span_2d<float const> potential,
 		float pixel_size,
 		ridge_curve_description curve_desc,
-		random_generator& rng
+		random_generator& rng,
+		float max_length
 	)
 	{
 		if(std::size(parents) == 0)
@@ -104,7 +105,7 @@ namespace terraformer
 			pixel_size,
 			curve_desc,
 			rng,
-			3072.0f
+			max_length
 		);
 
 		for(size_t k = 1; k != std::size(parents); ++k)
@@ -115,7 +116,7 @@ namespace terraformer
 				pixel_size,
 				curve_desc,
 				rng,
-				3072.0f,
+				max_length,
 				std::move(output_branches)
 			);
 
@@ -125,7 +126,7 @@ namespace terraformer
 				pixel_size,
 				curve_desc,
 				rng,
-				3072.0f,
+				max_length,
 				std::move(output_branches)
 			);
 		}
@@ -136,7 +137,7 @@ namespace terraformer
 			pixel_size,
 			curve_desc,
 			rng,
-			3072.0f,
+			max_length,
 			std::move(output_branches)
 		);
 
@@ -303,15 +304,31 @@ int main()
 		.invert_displacement = false
 	};
 
-	auto next_level = generate_branches(
+	auto next_level_left = generate_branches(
 		left_siblings,
 		potential,
 		pixel_size,
 		curve_desc_3,
-		rng
+		rng,
+		12384.0f
 	);
 
-	for(auto const& branch: next_level)
+	auto next_level_right = generate_branches(
+		right_siblings,
+		potential,
+		pixel_size,
+		curve_desc_3,
+		rng,
+		12384.0f
+	);
+
+	for(auto const& branch: next_level_left)
+	{
+		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+		++curve_count;
+	}
+
+	for(auto const& branch: next_level_right)
 	{
 		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
 		++curve_count;
