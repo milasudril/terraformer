@@ -6,7 +6,6 @@
 #include "./curve_length.hpp"
 #include "./tempdir.hpp"
 #include "./ridge_tree_branch_sequence.hpp"
-#include "./curve_pairwise_midpoints.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
 
@@ -14,10 +13,6 @@
 
 namespace terraformer
 {
-
-	terraformer::tempdir dir{"/dev/shm/test_ridge_curve_XXXXXX"};
-	size_t curve_count = 0;
-
 	void dump_curve(std::span<location const> points, std::filesystem::path const& output_name)
 	{
 		std::unique_ptr<FILE, decltype(&fclose)> dest{fopen(output_name.c_str(), "wb"), fclose};
@@ -93,62 +88,11 @@ namespace terraformer
 
 	std::vector<ridge_tree_branch>
 	generate_branches(
-		array_tuple<location, direction> const& branch_points,
-		std::span<location const> delimiter,
-		span_2d<float const> potential,
-		float pixel_size,
-		ridge_curve_description curve_desc,
-		random_generator& rng,
-		float margin,
-		std::vector<ridge_tree_branch>&& existing_branches = std::vector<ridge_tree_branch>{})
-	{
-		auto const points = branch_points.get<0>();
-		auto const normals = branch_points.get<1>();
-		for(size_t k = 0; k != std::size(branch_points); ++k)
-		{
-			auto const base_curve = generate_branch_base_curve(
-				points[k],
-				normals[k],
-				potential,
-				pixel_size,
-				[delimiter, margin](auto loc) {
-					auto const d = distance(delimiter, loc);
-					return d < margin;
-				}
-			);
-
-			if(std::size(base_curve) < 3)
-			{
-				printf("%zu Curve is too short\n", k);
-				continue;
-			}
-
-			auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
-			auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
-
-			existing_branches.push_back(
-				ridge_tree_branch{
-					base_curve,
-					displacement_profile{
-						.offsets = offsets,
-						.sample_period = pixel_size,
-					}
-				}
-			);
-		}
-
-		return existing_branches;
-	}
-
-	std::vector<ridge_tree_branch>
-	generate_branches(
 		std::span<ridge_tree_branch const> parents,
 		span_2d<float const> potential,
 		float pixel_size,
 		ridge_curve_description curve_desc,
-		random_generator& rng,
-		float margin,
-		float d_max
+		random_generator& rng
 	)
 	{
 		if(std::size(parents) == 0)
@@ -160,37 +104,28 @@ namespace terraformer
 			pixel_size,
 			curve_desc,
 			rng,
-			d_max
+			3072.0f
 		);
 
-		auto const dirname = dir.get_name();
 		for(size_t k = 1; k != std::size(parents); ++k)
 		{
-			auto const mean = pairwise_midpoints(parents[k - 1].curve().get<0>(), parents[k].curve().get<0>());
-
-			terraformer::dump_curve(mean, dirname / std::to_string(curve_count).append(".txt"));
- 			++curve_count;
-
 			output_branches = generate_branches(
 				parents[k - 1].right_seeds().branch_points,
-				mean,
 				potential,
 				pixel_size,
 				curve_desc,
 				rng,
-				margin,
+				3072.0f,
 				std::move(output_branches)
 			);
 
-
 			output_branches = generate_branches(
 				parents[k].left_seeds().branch_points,
-				mean,
 				potential,
 				pixel_size,
 				curve_desc,
 				rng,
-				margin,
+				3072.0f,
 				std::move(output_branches)
 			);
 		}
@@ -201,7 +136,7 @@ namespace terraformer
 			pixel_size,
 			curve_desc,
 			rng,
-			d_max,
+			3072.0f,
 			std::move(output_branches)
 		);
 
@@ -259,10 +194,12 @@ int main()
 		}
 	};
 
-	auto const dirname = terraformer::dir.keep_after_scope(true).get_name();
+	terraformer::tempdir dir{"/dev/shm/test_ridge_curve_XXXXXX"};
+	auto const dirname = dir.keep_after_scope(true).get_name();
 
-	terraformer::dump_curve(root.curve().get<0>(), dirname / std::to_string(terraformer::curve_count).append(".txt"));
-	++terraformer::curve_count;
+	size_t curve_count = 0;
+	terraformer::dump_curve(root.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+	++curve_count;
 
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
 	{
@@ -319,14 +256,14 @@ int main()
 
 	for(auto const& branch: left_siblings)
 	{
-		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(terraformer::curve_count).append(".txt"));
-		++terraformer::curve_count;
+		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+		++curve_count;
 	}
 
 	for(auto const& branch: right_siblings)
 	{
-		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(terraformer::curve_count).append(".txt"));
-		++terraformer::curve_count;
+		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+		++curve_count;
 	}
 
 /*
@@ -359,44 +296,25 @@ int main()
 	}
 
 	terraformer::ridge_curve_description const curve_desc_3{
-		.amplitude = terraformer::horizontal_amplitude{1.0f},
+		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
 		.wavelength = terraformer::domain_length{12384.0f/9.0f},
 		.damping = std::sqrt(0.5f),
 		.flip_direction = false,
 		.invert_displacement = false
 	};
-#if 1
-	auto const next_level_left = generate_branches(
+
+	auto next_level = generate_branches(
 		left_siblings,
 		potential,
 		pixel_size,
 		curve_desc_3,
-		rng,
-		4128.0f/2.0f,
-		4128.0f
+		rng
 	);
-#endif
-	auto const next_level_right = generate_branches(
-		right_siblings,
-		potential,
-		pixel_size,
-		curve_desc_3,
-		rng,
-		4128.0f/2.0f,
-		4128.0f
-	);
-#if 1
-	for(auto const& branch: next_level_left)
-	{
-		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(terraformer::curve_count).append(".txt"));
-		++terraformer::curve_count;
-	}
-#endif
 
-	for(auto const& branch: next_level_right)
+	for(auto const& branch: next_level)
 	{
-		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(terraformer::curve_count).append(".txt"));
-		++terraformer::curve_count;
+		terraformer::dump_curve(branch.curve().get<0>(), dirname / std::to_string(curve_count).append(".txt"));
+		++curve_count;
 	}
 
 	store(potential, "test.exr");
