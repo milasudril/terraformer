@@ -85,8 +85,8 @@ namespace terraformer
 
 		return existing_branches;
 	}
-#if 0
-	void prune_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b)
+
+	void prune_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold)
 	{
 		auto const outer_count = std::size(a);
 		auto const inner_count = std::size(b);
@@ -95,25 +95,32 @@ namespace terraformer
 		{
 			for(size_t l = 0; l != inner_count; ++l)
 			{
-				// FIXME: Follow line segments in a and b curve and also terminate at point(s) before intersection
-				auto const [a_iter, b_iter] = cartesian_find_if(
+				auto const res = compare_over_line_segments(
 					a[k].curve().get<0>(),
 					b[l].curve().get<0>(),
-					[threshold](auto loc_a, auto loc_b){
-						return distance(loc_a, loc_b) < threshold;
+					[threshold](auto const l1, auto const l2) {
+						if(distance(l1.to, l2.to) < threshold)
+						{ return 1; }
+						// TODO: Check for intersection and return 2 if there is an intersection
+
+						return 0;
 					}
 				);
 
+				if(res.value == 1)
+				{
+					printf("%zu %zu pruned at %zu\n", k, l, res.index);
+
+					a[k].curve().shrink(res.index);
+					b[l].curve().shrink(res.index);
+				}
+
 				// TODO: If we got an intersection, remove all points within a certain radius from the
 				// intersection. Search backwards
-
-				// TODO: If we find points with in threshold, truncate from and including iter
-
-				// TODO: If there is no hit, do nothing
 			}
 		}
 	}
-#endif
+
 	std::vector<ridge_tree_branch>
 	generate_branches(
 		std::span<ridge_tree_branch const> parents,
@@ -156,7 +163,7 @@ namespace terraformer
 				max_length
 			);
 
-		//	prune_at_intersect(right_branches, left_branches);
+			prune_at_intersect(right_branches, left_branches, 1536.0f);
 
 			std::ranges::transform(std::move(right_branches), std::back_inserter(output_branches), [](auto&& val){
 				return std::move(val);

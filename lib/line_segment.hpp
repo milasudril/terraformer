@@ -10,25 +10,25 @@ namespace terraformer
 {
 	struct line_segment
 	{
-		location a;
-		location b;
+		location from;
+		location to;
 	};
 
 	inline auto length(line_segment seg)
-	{ return distance(seg.a, seg.b); }
+	{ return distance(seg.from, seg.to); }
 
 	inline auto length_squared(line_segment seg)
-	{ return distance_squared(seg.a, seg.b); }
+	{ return distance_squared(seg.from, seg.to); }
 
 	inline auto distance(line_segment seg, location loc)
 	{
 		auto const l2 = length_squared(seg);
 
 		if(l2 == 0.0f) [[unlikely]]
-		{ return distance(seg.a, loc); }
+		{ return distance(seg.from, loc); }
 
-		auto const t = std::max(0.0f, std::min(1.0f, inner_product(loc - seg.a, seg.b - seg.a) / l2));
-		auto const proj = seg.a + t*(seg.b - seg.a);
+		auto const t = std::max(0.0f, std::min(1.0f, inner_product(loc - seg.from, seg.to - seg.from) / l2));
+		auto const proj = seg.from + t*(seg.to - seg.from);
 
 		return distance(loc, proj);
 	}
@@ -47,6 +47,46 @@ namespace terraformer
 		{ ret = f(line_segment{locs[k - 1], locs[k]}, args..., std::move(ret)); }
 
 		return ret;
+	}
+
+	template<class Val>
+	struct compare_over_line_segments_result
+	{
+		using status_code = Val;
+		size_t index;
+		status_code value;
+	};
+
+	template<class Func, class ... Args>
+	auto compare_over_line_segments(std::span<location const> a, std::span<location const> b, Func f, Args... args)
+	{
+		using ret_type = std::result_of_t<Func(line_segment, line_segment, Args...)>;
+
+		auto const n = std::min(std::size(a), std::size(b));
+		if(n < 2)
+		{
+			return compare_over_line_segments_result{
+				n,
+				ret_type{}
+			};
+		}
+
+		for(size_t k = 1; k != n; ++k)
+		{
+			auto const res = f(line_segment{a[k - 1], a[k]}, line_segment{b[k - 1], b[k]}, args...);
+			if(res != ret_type{})
+			{
+				return compare_over_line_segments_result{
+					k,
+					res
+				};
+			}
+		}
+
+		return compare_over_line_segments_result{
+			n,
+			ret_type{}
+		};
 	}
 
 	inline auto distance(std::span<location const> locs, location loc)

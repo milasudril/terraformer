@@ -31,6 +31,9 @@ namespace terraformer
 		auto const& curve() const
 		{ return m_points; }
 
+		auto & curve()
+		{ return m_points; }
+
 	private:
 		array_tuple<location, float> m_points;
 		seed_info m_left_seeds;

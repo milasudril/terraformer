@@ -36,10 +36,10 @@ namespace terraformer
 		}
 
 		template <size_t... Is, class Tuple>
-		void destroy(std::index_sequence<Is...>, Tuple const& from, size_t size)
+		void destroy(std::index_sequence<Is...>, Tuple const& from, size_t size, size_t offset = 0)
 		{
 			(...,(
-			std::destroy(get<Is>(from), get<Is>(from) + size)
+			std::destroy(get<Is>(from) + offset, get<Is>(from) + size)
 			));
 		}
 
@@ -315,6 +315,21 @@ namespace terraformer
 
 		[[nodiscard]] size_type capacity() const
 		{ return m_capacity; }
+
+		void shrink(size_t new_size)
+		{
+			if(new_size == m_size) { return; }
+
+			assert(new_size < size());
+
+			array_tuple_detail::destroy(
+				std::make_index_sequence<sizeof...(Types)>{},
+				m_storage,
+				m_size,
+				new_size
+			);
+			m_size = new_size;
+		}
 
 
 
