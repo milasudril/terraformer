@@ -86,6 +86,20 @@ namespace terraformer
 		return existing_branches;
 	}
 
+	template<class A, class B, class Pred>
+	auto cartesian_find_if(std::span<A const> r1, std::span<B const> r2, Pred pred)
+	{
+		for(size_t k = 0; k != std::size(r1); ++k)
+		{
+			for(size_t l = 0; l != std::size(r2); ++l)
+			{
+				if(pred(r1[k], r2[l]))
+				{ return std::pair{k, l}; }
+			}
+		}
+		return std::pair{std::size(r1), std::size(r2)};
+	}
+
 	void prune_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold)
 	{
 		auto const outer_count = std::size(a);
@@ -95,28 +109,21 @@ namespace terraformer
 		{
 			for(size_t l = 0; l != inner_count; ++l)
 			{
-				auto const res = compare_over_line_segments(
-					a[k].curve().get<0>(),
-					b[l].curve().get<0>(),
-					[threshold](auto const l1, auto const l2) {
-						if(distance(l1.to, l2.to) < threshold)
-						{ return 1; }
-						// TODO: Check for intersection and return 2 if there is an intersection
-
-						return 0;
+				auto const res = cartesian_find_if(
+					std::span<location const>(a[k].curve().get<0>()),
+					std::span<location const>(b[l].curve().get<0>()),
+					[threshold](auto const p1, auto const p2) {
+						if(distance(p1, p2) < threshold)
+						{ return true; }
+						return false;
 					}
 				);
 
-				if(res.value == 1)
-				{
-					printf("%zu %zu pruned at %zu\n", k, l, res.index);
+				if(res.first != std::size(a[k].curve().get<0>()))
+				{ a[k].curve().shrink(res.first); }
 
-					a[k].curve().shrink(res.index);
-					b[l].curve().shrink(res.index);
-				}
-
-				// TODO: If we got an intersection, remove all points within a certain radius from the
-				// intersection. Search backwards
+				if(res.second != std::size(b[k].curve().get<0>()))
+				{ b[l].curve().shrink(res.second); }
 			}
 		}
 	}
