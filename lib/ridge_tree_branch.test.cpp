@@ -44,14 +44,12 @@ TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus)
 	{
 		auto const left_seeds = branch.left_seeds();
 		EXPECT_EQ(std::size(left_seeds.branch_points), 2);
-		EXPECT_EQ(std::size(left_seeds.delimiter_points), 1);
 		EXPECT_EQ(left_seeds.first_is_branch, true);
 	}
 
 	{
 		auto const right_seeds = branch.right_seeds();
 		EXPECT_EQ(std::size(right_seeds.branch_points), 1);
-		EXPECT_EQ(std::size(right_seeds.delimiter_points), 2);
 		EXPECT_EQ(right_seeds.first_is_branch, false);
 	}
 }
@@ -93,14 +91,12 @@ TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus)
 	{
 		auto const left_seeds = branch.left_seeds();
 		EXPECT_EQ(std::size(left_seeds.branch_points), 1);
-		EXPECT_EQ(std::size(left_seeds.delimiter_points), 2);
 		EXPECT_EQ(left_seeds.first_is_branch, false);
 	}
 
 	{
 		auto const right_seeds = branch.right_seeds();
 		EXPECT_EQ(std::size(right_seeds.branch_points), 2);
-		EXPECT_EQ(std::size(right_seeds.delimiter_points), 1);
 		EXPECT_EQ(right_seeds.first_is_branch, true);
 	}
 }
@@ -147,13 +143,6 @@ TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus_minus)
 		);
 		EXPECT_LT(left_seeds.branch_points.get<1>()[0][1], 0.0f);
 
-		EXPECT_EQ(std::size(left_seeds.delimiter_points), 2);
-		EXPECT_LT(
-			distance(left_seeds.delimiter_points.get<0>()[0], (terraformer::location{0.3f, 0.35f, 0.0f})),
-			0.05f
-		);
-		EXPECT_LT(left_seeds.delimiter_points.get<1>()[0][1], 0.0f);
-
 		EXPECT_EQ(left_seeds.first_is_branch, true);
 	}
 
@@ -165,14 +154,6 @@ TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus_minus)
 			0.05f
 		);
 		EXPECT_GT(right_seeds.branch_points.get<1>()[0][1], 0.0f);
-
-
-		EXPECT_EQ(std::size(right_seeds.delimiter_points), 2);
-		EXPECT_LT(
-			distance(right_seeds.delimiter_points.get<0>()[0], (terraformer::location{0.62f, 0.1f, 0.0f})),
-			0.05f
-		);
-		EXPECT_GT(right_seeds.delimiter_points.get<1>()[0][1], 0.0f);
 
 		EXPECT_EQ(right_seeds.first_is_branch, true);
 	}
@@ -214,14 +195,12 @@ TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus_plus)
 	{
 		auto const left_seeds = branch.left_seeds();
 		EXPECT_EQ(std::size(left_seeds.branch_points), 2);
-		EXPECT_EQ(std::size(left_seeds.delimiter_points), 2);
 		EXPECT_EQ(left_seeds.first_is_branch, false);
 	}
 
 	{
 		auto const right_seeds = branch.right_seeds();
 		EXPECT_EQ(std::size(right_seeds.branch_points), 2);
-		EXPECT_EQ(std::size(right_seeds.delimiter_points), 2);
 		EXPECT_EQ(right_seeds.first_is_branch, false);
 	}
 }
@@ -265,9 +244,7 @@ TESTCASE(terraformer_ridge_tree_branch_random_data)
 	};
 
 	EXPECT_EQ(std::size(branch.left_seeds().branch_points), 4);
-	EXPECT_EQ(std::size(branch.left_seeds().delimiter_points), 4);
 	EXPECT_EQ(std::size(branch.right_seeds().branch_points), 4);
-	EXPECT_EQ(std::size(branch.right_seeds().delimiter_points), 4);
 }
 
 TESTCASE(terraformer_ridge_tree_branch_random_data_2)
@@ -317,7 +294,5 @@ TESTCASE(terraformer_ridge_tree_branch_random_data_2)
 	}
 
 	EXPECT_EQ(std::size(branch.left_seeds().branch_points), 4);
-	EXPECT_EQ(std::size(branch.left_seeds().delimiter_points), 3);
 	EXPECT_EQ(std::size(branch.right_seeds().branch_points), 3);
-	EXPECT_EQ(std::size(branch.right_seeds().delimiter_points), 4);
 }

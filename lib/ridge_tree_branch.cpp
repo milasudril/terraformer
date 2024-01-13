@@ -74,24 +74,8 @@ terraformer::ridge_tree_branch::ridge_tree_branch(
 		{ m_right_seeds.branch_points.push_back(tuple{loc_b, normal}); }
 	}
 
-	m_left_seeds.delimiter_points = m_right_seeds.branch_points;
-	{
-		auto const normals =m_left_seeds.delimiter_points.get<1>();
-		for(size_t k = 0; k != std::size(normals); ++k)
-		{ normals[k] = -normals[k]; }
-	}
-
-	m_right_seeds.delimiter_points = m_left_seeds.branch_points;
-	{
-		auto const normals =m_right_seeds.delimiter_points.get<1>();
-		for(size_t k = 0; k != std::size(normals); ++k)
-		{ normals[k] = -normals[k]; }
-	}
-
 	std::ranges::reverse(m_right_seeds.branch_points.get<0>());
 	std::ranges::reverse(m_right_seeds.branch_points.get<1>());
-	std::ranges::reverse(m_right_seeds.delimiter_points.get<0>());
-	std::ranges::reverse(m_right_seeds.delimiter_points.get<1>());
 
 	m_right_seeds.first_is_branch =
 		(

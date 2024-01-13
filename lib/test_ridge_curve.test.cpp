@@ -360,15 +360,6 @@ int main()
 		++curve_count;
 	}
 
-	auto const delimiters = generate_delimiters(
-		root.left_seeds().delimiter_points,
-		potential,
-		pixel_size,
-		curve_desc_2,
-		rng,
-		generate_delimiters(root.right_seeds().delimiter_points, potential, pixel_size, curve_desc_2, rng)
-	);
-
 	for(uint32_t y = 0; y != potential.height(); ++y)
 	{
 		for(uint32_t x = 0; x != potential.width(); ++x)

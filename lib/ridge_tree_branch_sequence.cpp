@@ -40,25 +40,3 @@ terraformer::generate_delimiters(
 	return existing_delimiters;
 }
 
-terraformer::ridge_tree_branch_sequence::ridge_tree_branch_sequence(
-	ridge_tree_branch const& parent,
-	span_2d<float const> potential,
-	float pixel_size,
-	ridge_curve_description curve_desc,
-	random_generator& rng
-)
-{
-	m_left.delimiters = generate_delimiters(
-		parent.left_seeds().delimiter_points, 
-		potential,
-		pixel_size,
-		curve_desc,
-		rng);
-	
-	m_right.delimiters = generate_delimiters(
-		parent.right_seeds().delimiter_points, 
-		potential,
-		pixel_size,
-		curve_desc,
-		rng);
-}

@@ -18,7 +18,6 @@ namespace terraformer
 		struct seed_info
 		{
 			array_tuple<location, direction> branch_points;
-			array_tuple<location, direction> delimiter_points;
 			bool first_is_branch;
 		};
 
