@@ -86,20 +86,6 @@ namespace terraformer
 		return existing_branches;
 	}
 
-	template<class A, class B, class Pred>
-	auto cartesian_find_if(std::span<A const> r1, std::span<B const> r2, Pred pred)
-	{
-		for(size_t k = 0; k != std::size(r1); ++k)
-		{
-			for(size_t l = 0; l != std::size(r2); ++l)
-			{
-				if(pred(r1[k], r2[l]))
-				{ return std::pair{k, l}; }
-			}
-		}
-		return std::pair{std::size(r1), std::size(r2)};
-	}
-
 	void trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold)
 	{
 		auto const outer_count = std::size(a);
@@ -128,6 +114,44 @@ namespace terraformer
 				);
 
 				a_trim[k] = std::min(res.first, a_trim[k]);
+				b_trim[l] = std::min(res.second, b_trim[l]);
+			}
+		}
+
+		for(size_t k = 0; k != outer_count; ++k)
+		{
+			for(size_t l = 0; l != k; ++l)
+			{
+				auto const res = cartesian_find_if(
+					std::span<location const>(a[k].curve().get<0>()),
+					std::span<location const>(a[l].curve().get<0>()),
+					[threshold](auto const p1, auto const p2) {
+						if(distance(p1, p2) < threshold)
+						{ return true; }
+						return false;
+					}
+				);
+
+				a_trim[k] = std::min(res.first, b_trim[k]);
+				a_trim[l] = std::min(res.second, b_trim[l]);
+			}
+		}
+
+		for(size_t k = 0; k != inner_count; ++k)
+		{
+			for(size_t l = 0; l != k; ++l)
+			{
+				auto const res = cartesian_find_if(
+					std::span<location const>(b[k].curve().get<0>()),
+					std::span<location const>(b[l].curve().get<0>()),
+					[threshold](auto const p1, auto const p2) {
+						if(distance(p1, p2) < threshold)
+						{ return true; }
+						return false;
+					}
+				);
+
+				b_trim[k] = std::min(res.first, b_trim[k]);
 				b_trim[l] = std::min(res.second, b_trim[l]);
 			}
 		}

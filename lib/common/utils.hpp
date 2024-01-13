@@ -12,6 +12,7 @@
 #include <charconv>
 #include <string>
 #include <ranges>
+#include <span>
 
 namespace terraformer
 {
@@ -73,6 +74,20 @@ namespace terraformer
 	inline uint32_t round_to_odd(float x)
 	{
 		return static_cast<uint32_t>(2.0f*std::floor(0.5f*x) + 1);
+	}
+
+	template<class A, class B, class Pred>
+	auto cartesian_find_if(std::span<A const> r1, std::span<B const> r2, Pred pred)
+	{
+		for(size_t k = 0; k != std::size(r1); ++k)
+		{
+			for(size_t l = 0; l != std::size(r2); ++l)
+			{
+				if(pred(r1[k], r2[l]))
+				{ return std::pair{k, l}; }
+			}
+		}
+		return std::pair{std::size(r1), std::size(r2)};
 	}
 }
 
