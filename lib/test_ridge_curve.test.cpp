@@ -100,10 +100,18 @@ namespace terraformer
 		return std::pair{std::size(r1), std::size(r2)};
 	}
 
-	void prune_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold)
+	void trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold)
 	{
 		auto const outer_count = std::size(a);
 		auto const inner_count = std::size(b);
+
+		std::vector<size_t> a_trim(outer_count);
+		for(size_t k = 0; k != outer_count; ++k)
+		{ a_trim[k] = std::size(a[k].curve()); }
+
+		std::vector<size_t> b_trim(inner_count);
+		for(size_t l = 0; l != inner_count; ++l)
+		{ b_trim[l] = std::size(b[l].curve()); }
 
 		for(size_t k = 0; k != outer_count; ++k)
 		{
@@ -119,12 +127,23 @@ namespace terraformer
 					}
 				);
 
-				if(res.first != std::size(a[k].curve().get<0>()))
-				{ a[k].curve().shrink(res.first); }
-
-				if(res.second != std::size(b[k].curve().get<0>()))
-				{ b[l].curve().shrink(res.second); }
+				a_trim[k] = std::min(res.first, a_trim[k]);
+				b_trim[l] = std::min(res.second, b_trim[l]);
 			}
+		}
+
+		for(size_t k = 0; k != outer_count; ++k)
+		{
+			auto const index = a_trim[k];
+			if(index != std::size(a[k].curve()))
+			{ a[k].curve().shrink(index); }
+		}
+
+		for(size_t l = 0; l != inner_count; ++l)
+		{
+			auto const index = b_trim[l];
+			if(index != std::size(b[l].curve()))
+			{	b[l].curve().shrink(index); }
 		}
 	}
 
@@ -170,7 +189,7 @@ namespace terraformer
 				max_length
 			);
 
-			prune_at_intersect(right_branches, left_branches, 1536.0f);
+			trim_at_intersect(right_branches, left_branches, 1536.0f);
 
 			std::ranges::transform(std::move(right_branches), std::back_inserter(output_branches), [](auto&& val){
 				return std::move(val);
@@ -317,7 +336,6 @@ int main()
 		++curve_count;
 	}
 
-/*
 	auto const delimiters = generate_delimiters(
 		root.left_seeds().delimiter_points,
 		potential,
@@ -326,7 +344,6 @@ int main()
 		rng,
 		generate_delimiters(root.right_seeds().delimiter_points, potential, pixel_size, curve_desc_2, rng)
 	);
-*/
 
 	for(uint32_t y = 0; y != potential.height(); ++y)
 	{
@@ -360,7 +377,7 @@ int main()
 		pixel_size,
 		curve_desc_3,
 		rng,
-		12384.0f
+		24576.0f
 	);
 
 	auto next_level_right = generate_branches(
@@ -369,7 +386,7 @@ int main()
 		pixel_size,
 		curve_desc_3,
 		rng,
-		12384.0f
+		24576.0f
 	);
 
 	for(auto const& branch: next_level_left)
