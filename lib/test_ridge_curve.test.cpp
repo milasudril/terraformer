@@ -1,12 +1,13 @@
 //@ {"target":{"name":"test_ridge_curve"}}
 
 #include "./ridge_curve.hpp"
-#include "./boundary_sampling_policies.hpp"
 #include "./curve_length.hpp"
 #include "./curve_displace.hpp"
 #include "./tempdir.hpp"
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
+#include "lib/math_utils/boundary_sampling_policies.hpp"
+#include "lib/math_utils/differentiation.hpp"
 #include "lib/common/array_tuple.hpp"
 #include "lib/pixel_store/image_io.hpp"
 

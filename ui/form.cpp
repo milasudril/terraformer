@@ -20,9 +20,9 @@
 //@	}
 
 #include "./form.hpp"
-#include "lib/interp.hpp"
+#include "lib/math_utils/interp.hpp"
+#include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/filters/intensity_map_presentation_filters.hpp"
-#include "lib/boundary_sampling_policies.hpp"
 
 #include <QChart>
 #include <QLineSeries>

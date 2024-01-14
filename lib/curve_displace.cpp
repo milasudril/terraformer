@@ -1,8 +1,8 @@
 //@	{"target":{"name":"curve_displace.o"}}
 
 #include "./curve_displace.hpp"
-#include "./interp.hpp"
-#include "./boundary_sampling_policies.hpp"
+#include "lib/math_utils/boundary_sampling_policies.hpp"
+#include "lib/math_utils/interp.hpp"
 
 #include <cassert>
 

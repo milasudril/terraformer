@@ -11,8 +11,8 @@
 #include "lib/filters/dft_engine.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/output_range.hpp"
-#include "lib/interp.hpp"
-#include "lib/boundary_sampling_policies.hpp"
+#include "lib/math_utils/interp.hpp"
+#include "lib/math_utils/boundary_sampling_policies.hpp"
 
 #include <random>
 #include <algorithm>
