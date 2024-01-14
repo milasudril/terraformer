@@ -2,7 +2,7 @@
 #define TERRAFORMER_GENERATE_LIGHTMAP_HPP
 
 #include "./sun_direction.hpp"
-#include "lib/curve_tool/wave_sum.hpp"
+#include "lib/common/math_utils.hpp"
 #include "lib/filters/raycaster.hpp"
 
 namespace terraformer
