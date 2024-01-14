@@ -79,3 +79,16 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 
 	return ret;
 }
+
+std::vector<terraformer::ridge_tree_branch_seed_sequence> terraformer::collect_ridge_tree_branch_seeds(
+	std::span<array_tuple<location, float> const> points
+)
+{
+	std::vector<terraformer::ridge_tree_branch_seed_sequence> ret;
+	ret.reserve(std::size(points));
+	for(size_t k = 0; k != std::size(points); ++k)
+	{
+		ret.push_back(collect_ridge_tree_branch_seeds(points[k]));
+	}
+	return ret;
+}

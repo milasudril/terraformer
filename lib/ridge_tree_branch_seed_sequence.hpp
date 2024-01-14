@@ -17,6 +17,10 @@ namespace terraformer
 	ridge_tree_branch_seed_sequence collect_ridge_tree_branch_seeds(
 		array_tuple<location, float> const& points
 	);
+
+	std::vector<ridge_tree_branch_seed_sequence> collect_ridge_tree_branch_seeds(
+		std::span<array_tuple<location, float> const> points
+	);
 };
 
 #endif
