@@ -2,7 +2,6 @@
 
 #include "./heightmap.hpp"
 #include "lib/pixel_store/image_io.hpp"
-#include "lib/math_utils/smoothstep.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 
 terraformer::grayscale_image terraformer::generate(uint32_t width,

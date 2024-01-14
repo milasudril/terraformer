@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_MATHUTILS_CUBIC_SPLINE_HPP
 #define TERRAFORMER_MATHUTILS_CUBIC_SPLINE_HPP
 
+#include <algorithm>
+
 namespace terraformer
 {
 	struct cubic_spline_control_point
@@ -23,6 +25,12 @@ namespace terraformer
 		auto const constant = y_0;
 
 		return cubic*x*x*x + quadratic*x*x + linear*x + constant;
+	}
+
+	constexpr auto smoothstep(float x)
+	{
+		x = std::clamp(x, -1.0f, 1.0f);
+		return (2.0f - x)*(x + 1.0f)*(x + 1.0f)/4.0f;
 	}
 }
 
