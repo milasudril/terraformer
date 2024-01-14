@@ -1,11 +1,8 @@
 //@	{"target": {"name":"heightmap.o"}}
 
 #include "./heightmap.hpp"
-
-//#include "lib/common/utils.hpp"
-
 #include "lib/pixel_store/image_io.hpp"
-#include "lib/spline.hpp"
+#include "lib/math_utils/smoothstep.hpp"
 
 terraformer::grayscale_image terraformer::generate(uint32_t width,
 	uint32_t height,

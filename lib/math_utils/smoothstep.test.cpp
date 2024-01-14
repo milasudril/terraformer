@@ -1,6 +1,6 @@
-//@	{"target":{"name":"spline.test"}}
+//@	{"target":{"name":"smoothstep.test"}}
 
-#include "./spline.hpp"
+#include "./smoothstep.hpp"
 
 #include <testfwk/testfwk.hpp>
 
