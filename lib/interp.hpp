@@ -17,6 +17,12 @@ namespace terraformer
 	};
 
 	template<class T>
+	concept has_interp = requires(T left, T right, float t)
+	{
+		{interp(left, right, t)} -> std::same_as<T>;
+	};
+
+	template<class T>
 	concept has_lerp = requires(T left, T right, float t)
 	{
 		{lerp(left, right, t)} -> std::same_as<T>;
@@ -35,6 +41,8 @@ namespace terraformer
 
 		auto const t = x - static_cast<float>(x_0);
 
+		if constexpr(has_interp<std::remove_cvref_t<decltype(left)>>)
+		{ return interp(left, right, t); }
 		if constexpr(has_lerp<std::remove_cvref_t<decltype(left)>>)
 		{ return lerp(left, right, t); }
 		else
