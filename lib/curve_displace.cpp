@@ -4,9 +4,6 @@
 #include "./interp.hpp"
 #include "./boundary_sampling_policies.hpp"
 
-#include "./rng.hpp"
-#include <random>
-
 #include <cassert>
 
 terraformer::array_tuple<terraformer::location, float>  terraformer::displace_xy(std::span<location const> c, displacement_profile dy)

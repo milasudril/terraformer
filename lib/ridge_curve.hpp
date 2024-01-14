@@ -3,10 +3,10 @@
 #ifndef TERRAFORMER_RIDGECURVE_HPP
 #define TERRAFORMER_RIDGECURVE_HPP
 
-#include "./rng.hpp"
 #include "./first_order_hp_filter.hpp"
 
 #include "lib/modules/dimensions.hpp"
+#include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
 
 #include <vector>

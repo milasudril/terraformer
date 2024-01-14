@@ -2,7 +2,7 @@
 
 #include "./curve_displace.hpp"
 
-#include "./rng.hpp"
+#include "lib/common/rng.hpp"
 #include <random>
 
 #include <testfwk/testfwk.hpp>

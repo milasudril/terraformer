@@ -3,7 +3,7 @@
 #include "./ridge_tree_branch_seed_sequence.hpp"
 #include "./curve_displace.hpp"
 
-#include "./rng.hpp"
+#include "lib/common/rng.hpp"
 #include <random>
 
 #include <testfwk/testfwk.hpp>
