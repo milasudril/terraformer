@@ -9,7 +9,7 @@
 namespace terraformer
 {
 	template<class T, class U>
-	concept readable_image = requires(T image, uint32_t x, uint32_t y)
+	concept random_access_input_range_2d = requires(T image, uint32_t x, uint32_t y)
 	{
 		{image.width()} -> std::same_as<uint32_t>;
 		{image.height()} -> std::same_as<uint32_t>;
@@ -50,7 +50,7 @@ namespace terraformer
 	}
 
 	template<class T, boundary_sampling_policy U>
-	requires(readable_image<T, float>)
+	requires(random_access_input_range_2d<T, float>)
 	auto interp(T&& image, float x_val, float y_val, U&& bsp)
 	{
 		auto const w = image.width();
