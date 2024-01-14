@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_BOUNDARY_SAMPLING_POLICIES_HPP
 #define TERRAFORMER_BOUNDARY_SAMPLING_POLICIES_HPP
 
-#include "./mod.hpp"
+#include "lib/math_utils/mod.hpp"
 
 #include <algorithm>
 
