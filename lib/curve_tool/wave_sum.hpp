@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_MATHUTILS_HPP
-#define TERRAFORMER_MATHUTILS_HPP
+#ifndef TERRAFORMER_WAVESUM_HPP
+#define TERRAFORMER_WAVESUM_HPP
 
 #include <numbers>
 #include <cmath>
