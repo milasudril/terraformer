@@ -2,20 +2,12 @@
 #define TERRAFORMER_INTERP_HPP
 
 #include "./boundary_sampling_policy.hpp"
+#include "lib/common/ranges.hpp"
 
-#include <ranges>
 #include <cmath>
 
 namespace terraformer
 {
-	template<class T, class U>
-	concept random_access_input_range_2d = requires(T image, uint32_t x, uint32_t y)
-	{
-		{image.width()} -> std::same_as<uint32_t>;
-		{image.height()} -> std::same_as<uint32_t>;
-		{image(x, y)} -> std::convertible_to<U const&>;
-	};
-
 	template<class T>
 	concept has_interp = requires(T left, T right, float t)
 	{
