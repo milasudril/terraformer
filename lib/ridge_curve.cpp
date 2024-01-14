@@ -1,9 +1,9 @@
 //@	{"target":{"name":"ridge_curve.o"}}
 
 #include "./ridge_curve.hpp"
-#include "./composite_function.hpp"
 #include "./first_order_hp_filter.hpp"
 #include "./second_order_lp_filter.hpp"
+#include "lib/math_utils/composite_function.hpp"
 
 #include <random>
 #include <numbers>
