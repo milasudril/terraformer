@@ -1,13 +1,14 @@
-//@	{"target":{"name":"ridge_tree_branch.test"}}
+//@	{"target":{"name":"ridge_tree_branch_seed_sequence.test"}}
 
-#include "./ridge_tree_branch.hpp"
+#include "./ridge_tree_branch_seed_sequence.hpp"
+#include "./curve_displace.hpp"
 
 #include "./rng.hpp"
 #include <random>
 
 #include <testfwk/testfwk.hpp>
 
-TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -33,26 +34,21 @@ TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus)
 	}
 
 	constexpr auto dx = 1.0f/static_cast<float>(count - 1);
-	terraformer::ridge_tree_branch const branch{
-		base_curve,
-		terraformer::displacement_profile{
-			.offsets = offsets,
-			.sample_period = 1.15f*dx
-		}
-	};
+	auto const res = terraformer::collect_ridge_tree_branch_seeds(
+		terraformer::displace_xy(
+			base_curve,
+			terraformer::displacement_profile{
+				.offsets = offsets,
+				.sample_period = 1.15f*dx
+			}
+		)
+	);
 
-	{
-		auto const left_seeds = branch.left_seeds();
-		EXPECT_EQ(std::size(left_seeds.branch_points), 2);
-	}
-
-	{
-		auto const right_seeds = branch.right_seeds();
-		EXPECT_EQ(std::size(right_seeds.branch_points), 1);
-	}
+	EXPECT_EQ(std::size(res.left), 2);
+	EXPECT_EQ(std::size(res.right), 1);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -78,26 +74,22 @@ TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus)
 	}
 
 	constexpr auto dx = 1.0f/static_cast<float>(count - 1);
-	terraformer::ridge_tree_branch const branch{
-		base_curve,
-		terraformer::displacement_profile{
-			.offsets = offsets,
-			.sample_period = 1.15f*dx
-		}
-	};
 
-	{
-		auto const left_seeds = branch.left_seeds();
-		EXPECT_EQ(std::size(left_seeds.branch_points), 1);
-	}
+	auto const res = terraformer::collect_ridge_tree_branch_seeds(
+		terraformer::displace_xy(
+			base_curve,
+			terraformer::displacement_profile{
+				.offsets = offsets,
+				.sample_period = 1.15f*dx
+			}
+		)
+	);
 
-	{
-		auto const right_seeds = branch.right_seeds();
-		EXPECT_EQ(std::size(right_seeds.branch_points), 2);
-	}
+	EXPECT_EQ(std::size(res.left), 1);
+	EXPECT_EQ(std::size(res.right), 2);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus_minus)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus_minus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -122,36 +114,33 @@ TESTCASE(terraformer_ridge_tree_branch_plus_minus_plus_minus)
 		}
 	}
 	constexpr auto dx = 1.0f/static_cast<float>(count - 1);
-	terraformer::ridge_tree_branch const branch{
-		base_curve,
-		terraformer::displacement_profile{
-			.offsets = offsets,
-			.sample_period = 1.15f*dx
-		}
-	};
 
-	{
-		auto const left_seeds = branch.left_seeds();
-		EXPECT_EQ(std::size(left_seeds.branch_points), 2);
-		EXPECT_LT(
-			distance(left_seeds.branch_points.get<0>()[0], (terraformer::location{0.17f, -0.015f, 0.0f})),
-			0.05f
-		);
-		EXPECT_LT(left_seeds.branch_points.get<1>()[0][1], 0.0f);
-	}
+	auto const res = terraformer::collect_ridge_tree_branch_seeds(
+		terraformer::displace_xy(
+			base_curve,
+			terraformer::displacement_profile{
+				.offsets = offsets,
+				.sample_period = 1.15f*dx
+			}
+		)
+	);
 
-	{
-		auto const right_seeds = branch.right_seeds();
-		EXPECT_EQ(std::size(right_seeds.branch_points), 2);
-		EXPECT_LT(
-			distance(right_seeds.branch_points.get<0>()[0], (terraformer::location{1.0f, 0.18f, 0.0f})),
-			0.05f
-		);
-		EXPECT_GT(right_seeds.branch_points.get<1>()[0][1], 0.0f);
-	}
+	EXPECT_EQ(std::size(res.left), 2);
+	EXPECT_LT(
+		distance(res.left.get<0>()[0], (terraformer::location{0.17f, -0.015f, 0.0f})),
+		0.05f
+	);
+	EXPECT_LT(res.left.get<1>()[0][1], 0.0f);
+
+	EXPECT_EQ(std::size(res.right), 2);
+	EXPECT_LT(
+		distance(res.right.get<0>()[0], (terraformer::location{1.0f, 0.18f, 0.0f})),
+		0.05f
+	);
+	EXPECT_GT(res.right.get<1>()[0][1], 0.0f);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus_plus)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus_plus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -176,26 +165,22 @@ TESTCASE(terraformer_ridge_tree_branch_minus_plus_minus_plus)
 		}
 	}
 	constexpr auto dx = 1.0f/static_cast<float>(count - 1);
-	terraformer::ridge_tree_branch const branch{
-		base_curve,
-		terraformer::displacement_profile{
-			.offsets = offsets,
-			.sample_period = 1.15f*dx
-		}
-	};
 
-	{
-		auto const left_seeds = branch.left_seeds();
-		EXPECT_EQ(std::size(left_seeds.branch_points), 2);
-	}
+	auto const res = terraformer::collect_ridge_tree_branch_seeds(
+		terraformer::displace_xy(
+			base_curve,
+			terraformer::displacement_profile{
+				.offsets = offsets,
+				.sample_period = 1.15f*dx
+			}
+		)
+	);
 
-	{
-		auto const right_seeds = branch.right_seeds();
-		EXPECT_EQ(std::size(right_seeds.branch_points), 2);
-	}
+	EXPECT_EQ(std::size(res.left), 2);
+	EXPECT_EQ(std::size(res.right), 2);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_random_data)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data)
 {
 	std::array<float, 387> offsets{};
 	{
@@ -223,21 +208,23 @@ TESTCASE(terraformer_ridge_tree_branch_random_data)
 		auto const d = distance(base_curve[k], base_curve[k - 1]);
 		base_curve[k] += d*terraformer::displacement{U(rng), U(rng), 0.0f*U(rng)};
 	}
-
 	constexpr auto pixel_size = 32.0f;
-	terraformer::ridge_tree_branch const branch{
-		base_curve,
-		terraformer::displacement_profile{
-			.offsets = offsets,
-			.sample_period = pixel_size,
-		}
-	};
 
-	EXPECT_EQ(std::size(branch.left_seeds().branch_points), 4);
-	EXPECT_EQ(std::size(branch.right_seeds().branch_points), 4);
+	auto const res = terraformer::collect_ridge_tree_branch_seeds(
+		terraformer::displace_xy(
+			base_curve,
+			terraformer::displacement_profile{
+				.offsets = offsets,
+				.sample_period = pixel_size
+			}
+		)
+	);
+
+	EXPECT_EQ(std::size(res.left), 4);
+	EXPECT_EQ(std::size(res.right), 4);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_random_data_2)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data_2)
 {
 	std::array<float, 387> offsets{};
 	{
@@ -258,31 +245,32 @@ TESTCASE(terraformer_ridge_tree_branch_random_data_2)
 	}
 
 	constexpr auto pixel_size = 32.0f;
-	terraformer::ridge_tree_branch const branch{
-		base_curve,
-		terraformer::displacement_profile{
-			.offsets = offsets,
-			.sample_period = pixel_size,
-		}
-	};
+	auto const res = terraformer::collect_ridge_tree_branch_seeds(
+		terraformer::displace_xy(
+			base_curve,
+			terraformer::displacement_profile{
+				.offsets = offsets,
+				.sample_period = pixel_size
+			}
+		)
+	);
 
 	{
-		auto const branch_points = branch.left_seeds().branch_points;
-		for(size_t k = 0; k != std::size(branch_points); ++k)
+		for(size_t k = 0; k != std::size(res.left); ++k)
 		{
-			auto const normal = branch_points.get<1>()[k];
+			auto const normal = res.left.get<1>()[k];
 			EXPECT_LT(normal[0], 0.0f);
 		}
 	}
+
 	{
-		auto const branch_points = branch.right_seeds().branch_points;
-		for(size_t k = 0; k != std::size(branch_points); ++k)
+		for(size_t k = 0; k != std::size(res.right); ++k)
 		{
-			auto const normal = branch_points.get<1>()[k];
+			auto const normal = res.right.get<1>()[k];
 			EXPECT_GT(normal[0], 0.0f);
 		}
 	}
 
-	EXPECT_EQ(std::size(branch.left_seeds().branch_points), 4);
-	EXPECT_EQ(std::size(branch.right_seeds().branch_points), 3);
+	EXPECT_EQ(std::size(res.left), 4);
+	EXPECT_EQ(std::size(res.right), 3);
 }
