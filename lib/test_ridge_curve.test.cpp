@@ -5,7 +5,6 @@
 #include "./ridge_tree_branch.hpp"
 #include "./curve_length.hpp"
 #include "./tempdir.hpp"
-#include "./ridge_tree_branch_sequence.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
 
@@ -32,6 +31,40 @@ namespace terraformer
 				+ displacement{static_cast<float>(k)*dx, 0.0f, 0.0f};
 		}
 		return ret;
+	}
+
+	template<class BranchStopCondition>
+	std::vector<location> generate_branch_base_curve(
+		location loc,
+		direction start_dir,
+		span_2d<float const> potential,
+		float pixel_size,
+		BranchStopCondition&& stop)
+	{
+		std::vector<location> base_curve;
+		if(stop(loc) || !inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
+		{ return base_curve; }
+
+		base_curve.push_back(loc);
+
+		loc += pixel_size*start_dir;
+
+		while(!stop(loc) && inside(potential, loc[0]/pixel_size, loc[1]/pixel_size))
+		{
+			base_curve.push_back(loc);
+			auto const g = direction{
+				grad(
+					potential,
+					loc[0]/pixel_size,
+					loc[1]/pixel_size,
+					1.0f,
+					clamp_at_boundary{}
+				)
+			};
+
+			loc -= pixel_size*g;
+		}
+		return base_curve;
 	}
 
 	std::vector<ridge_tree_branch>
