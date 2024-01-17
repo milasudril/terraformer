@@ -2,7 +2,8 @@
 
 #include "./ridge_tree_branch_seed_sequence.hpp"
 #include "./curve_displace.hpp"
-#include "./find_zeros.hpp"
+
+#include "lib/common/find_zeros.hpp"
 
 terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_branch_seeds(
 	array_tuple<location, float> const& displaced_points
