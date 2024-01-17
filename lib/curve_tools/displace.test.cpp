@@ -1,6 +1,6 @@
 //@	{"target":{"name": "curve_displace.test"}}
 
-#include "./curve_displace.hpp"
+#include "./displace.hpp"
 
 #include "lib/common/rng.hpp"
 #include <random>

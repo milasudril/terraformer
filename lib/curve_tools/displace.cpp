@@ -1,6 +1,7 @@
-//@	{"target":{"name":"curve_displace.o"}}
+//@	{"target":{"name":"displace.o"}}
 
-#include "./curve_displace.hpp"
+#include "./displace.hpp"
+
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/math_utils/interp.hpp"
 

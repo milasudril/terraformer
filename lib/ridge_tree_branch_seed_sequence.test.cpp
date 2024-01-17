@@ -1,12 +1,12 @@
 //@	{"target":{"name":"ridge_tree_branch_seed_sequence.test"}}
 
 #include "./ridge_tree_branch_seed_sequence.hpp"
-#include "./curve_displace.hpp"
 
+#include "lib/curve_tools/displace.hpp"
 #include "lib/common/rng.hpp"
-#include <random>
 
 #include <testfwk/testfwk.hpp>
+#include <random>
 
 TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus)
 {

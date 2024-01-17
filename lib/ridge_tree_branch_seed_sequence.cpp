@@ -1,8 +1,8 @@
 //@	{"target":{"name": "./ridge_tree_branch_seed_sequence.o"}}
 
 #include "./ridge_tree_branch_seed_sequence.hpp"
-#include "./curve_displace.hpp"
 
+#include "lib/curve_tools/displace.hpp"
 #include "lib/common/find_zeros.hpp"
 
 terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_branch_seeds(

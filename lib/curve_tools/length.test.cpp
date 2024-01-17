@@ -1,6 +1,6 @@
-//@	{"target":{"name":"curve_length.test"}}
+//@	{"target":{"name":"length.test"}}
 
-#include "./curve_length.hpp"
+#include "./length.hpp"
 
 #include <testfwk/testfwk.hpp>
 

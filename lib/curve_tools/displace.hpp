@@ -1,4 +1,4 @@
-//@	{"dependencies_extra":[{"ref":"./curve_displace.o", "rel":"implementation"}]}
+//@	{"dependencies_extra":[{"ref":"./displace.o", "rel":"implementation"}]}
 
 #ifndef TERRAFORMER_CURVE_DISPLACE_HPP
 #define TERRAFORMER_CURVE_DISPLACE_HPP
