@@ -1,6 +1,6 @@
-//@{"target":{"name":"curve_rasterizer.test"}}
+//@{"target":{"name":"rasterizer.test"}}
 
-#include "./curve_rasterizer.hpp"
+#include "./rasterizer.hpp"
 #include "lib/pixel_store/image.hpp"
 
 #include "testfwk/testfwk.hpp"
