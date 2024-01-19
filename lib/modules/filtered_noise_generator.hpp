@@ -8,7 +8,7 @@
 #include "./polyline.hpp"
 
 #include "lib/formbuilder/formfield.hpp"
-#include "lib/filters/dft_engine.hpp"
+#include "lib/math_utils/dft_engine.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/output_range.hpp"
 #include "lib/math_utils/interp.hpp"

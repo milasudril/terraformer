@@ -1,7 +1,7 @@
 //@	{"target":{"name":"ridge_curve.test"}}
 
 #include "./ridge_curve.hpp"
-#include "lib/filters/dft_engine.hpp"
+#include "lib/math_utils/dft_engine.hpp"
 
 #include <testfwk/testfwk.hpp>
 
