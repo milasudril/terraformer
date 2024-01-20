@@ -1,30 +1,21 @@
 //@ {"target":{"name":"test_ridge_curve"}}
 
 #include "./ridge_curve.hpp"
-#include "./tempdir.hpp"
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
 #include "lib/curve_tools/length.hpp"
 #include "lib/curve_tools/displace.hpp"
+#include "lib/curve_tools/dump.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/math_utils/differentiation.hpp"
 #include "lib/common/array_tuple.hpp"
+#include "lib/common/cfile_owner.hpp"
 #include "lib/pixel_store/image_io.hpp"
 
 #include <random>
 
 namespace terraformer
 {
-	void dump_curve(std::span<location const> points, std::filesystem::path const& output_name)
-	{
-		std::unique_ptr<FILE, decltype(&fclose)> dest{fopen(output_name.c_str(), "wb"), fclose};
-		for(size_t k = 0; k != std::size(points); ++k)
-		{
-			auto const loc = points[k];
-			fprintf(dest.get(), "%.8g %.8g %.8g\n", loc[0], loc[1], loc[2]);
-		}
-	}
-
 	std::vector<location> make_point_array(location start_loc, size_t count, float dx)
 	{
 		std::vector<location> ret(count);
@@ -325,12 +316,9 @@ int main()
 		}
 	);
 
-	terraformer::tempdir dir{"/dev/shm/test_ridge_curve_XXXXXX"};
-	auto const dirname = dir.keep_after_scope(true).get_name();
+	terraformer::curve_set curves;
 
-	size_t curve_count = 0;
-	terraformer::dump_curve(root.get<0>(), dirname / std::to_string(curve_count).append(".txt"));
-	++curve_count;
+	curves.append(root.get<0>());
 
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
 	{
@@ -387,16 +375,10 @@ int main()
 	);
 
 	for(auto const& branch: left_siblings)
-	{
-		terraformer::dump_curve(branch.get<0>(), dirname / std::to_string(curve_count).append(".txt"));
-		++curve_count;
-	}
+	{ curves.append(branch.get<0>()); }
 
 	for(auto const& branch: right_siblings)
-	{
-		terraformer::dump_curve(branch.get<0>(), dirname / std::to_string(curve_count).append(".txt"));
-		++curve_count;
-	}
+ 	{ curves.append(branch.get<0>()); }
 
 	for(uint32_t y = 0; y != potential.height(); ++y)
 	{
@@ -444,17 +426,15 @@ int main()
 		24576.0f
 	);
 
+
 	for(auto const& branch: next_level_left)
-	{
-		terraformer::dump_curve(branch.get<0>(), dirname / std::to_string(curve_count).append(".txt"));
-		++curve_count;
-	}
+	{ curves.append(branch.get<0>()); }
 
 	for(auto const& branch: next_level_right)
-	{
-		terraformer::dump_curve(branch.get<0>(), dirname / std::to_string(curve_count).append(".txt"));
-		++curve_count;
-	}
+	{ curves.append(branch.get<0>()); }
+
+	auto curve_file = terraformer::make_output_file("/dev/shm/slask.json");
+	curves.write_to(curve_file.get());
 
 	store(potential, "test.exr");
 }
