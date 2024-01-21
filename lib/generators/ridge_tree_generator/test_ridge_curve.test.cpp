@@ -120,7 +120,7 @@ int main()
 		pixel_size,
 		curve_desc_3,
 		rng,
-		24576.0f
+		6144.0f
 	);
 
 	auto const next_level_right_seeds = terraformer::collect_ridge_tree_branch_seeds(right_siblings);
@@ -130,7 +130,7 @@ int main()
 		pixel_size,
 		curve_desc_3,
 		rng,
-		24576.0f
+		6144.0f
 	);
 
 	for(auto const& branch: next_level_left)
