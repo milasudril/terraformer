@@ -1,6 +1,7 @@
 //@ {"target":{"name":"test_ridge_curve"}}
 
 #include "./ridge_curve.hpp"
+#include "./ridge_tree.hpp"
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
 #include "lib/curve_tools/length.hpp"
@@ -60,8 +61,6 @@ namespace terraformer
 		}
 		return base_curve;
 	}
-
-	using ridge_tree_branch = array_tuple<location, float>;
 
 	std::vector<ridge_tree_branch>
 	generate_branches(
