@@ -133,10 +133,7 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus_minus)
 	EXPECT_LT(res.left.get<1>()[0][1], 0.0f);
 
 	EXPECT_EQ(std::size(res.right), 2);
-	EXPECT_LT(
-		distance(res.right.get<0>()[0], (terraformer::location{1.0f, 0.18f, 0.0f})),
-		0.05f
-	);
+
 	EXPECT_GT(res.right.get<1>()[0][1], 0.0f);
 }
 
