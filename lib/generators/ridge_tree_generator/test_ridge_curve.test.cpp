@@ -76,34 +76,40 @@ int main()
 
 	auto const root_seeds = terraformer::collect_ridge_tree_branch_seeds(root);
 
-	auto const left_siblings = generate_branches(
-		root_seeds.left,
+	auto const level_1 = generate_branches(
+		std::span{&root_seeds, 1},
 		potential,
 		pixel_size,
 		curve_desc_2,
 		rng,
 		12384.0f
 	);
-
+#if 0
 	auto const right_siblings = generate_branches(
-		root_seeds.right,
+		std::span{&root_seeds.right, 1},
 		potential,
 		pixel_size,
 		curve_desc_2,
 		rng,
 		12384.0f
 	);
+#endif
 
-	for(auto const& branch: left_siblings)
-	{ curves.append(branch.get<0>()); }
+	for(auto const& stem: level_1)
+	{
+		for(auto const& branch: stem.left)
+		{ curves.append(branch.get<0>()); }
 
-	for(auto const& branch: right_siblings)
- 	{ curves.append(branch.get<0>()); }
+		for(auto const& branch: stem.right)
+		{ curves.append(branch.get<0>()); }
+	}
 
 	auto const t0 = std::chrono::steady_clock::now();
-	terraformer::compute_potential(potential, left_siblings, right_siblings, pixel_size);
+	for(auto const& stem: level_1)
+	{
+		terraformer::compute_potential(potential, stem.left, stem.right, pixel_size);
+	}
 	printf("%.8g\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
-
 
 	terraformer::ridge_curve_description const curve_desc_3{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
@@ -113,42 +119,45 @@ int main()
 		.invert_displacement = false
 	};
 
-	auto const next_level_left_seeds = terraformer::collect_ridge_tree_branch_seeds(left_siblings);
-	auto const next_level_left = generate_branches(
-		next_level_left_seeds,
-		potential,
-		pixel_size,
-		curve_desc_3,
-		rng,
-		6144.0f
-	);
-
-	auto const next_level_right_seeds = terraformer::collect_ridge_tree_branch_seeds(right_siblings);
-	auto const next_level_right = generate_branches(
-		next_level_right_seeds,
-		potential,
-		pixel_size,
-		curve_desc_3,
-		rng,
-		6144.0f
-	);
-
-	for(auto const& stem: next_level_left)
+	for(auto const& stem: level_1)
 	{
-		for(auto const& branch: stem.left)
-		{ curves.append(branch.get<0>()); }
+		auto const next_level_left_seeds = terraformer::collect_ridge_tree_branch_seeds(stem.left);
+		auto const next_level_left = generate_branches(
+			next_level_left_seeds,
+			potential,
+			pixel_size,
+			curve_desc_3,
+			rng,
+			6144.0f
+		);
 
-		for(auto const& branch: stem.right)
-		{ curves.append(branch.get<0>()); }
-	}
+		auto const next_level_right_seeds = terraformer::collect_ridge_tree_branch_seeds(stem.right);
+		auto const next_level_right = generate_branches(
+			next_level_right_seeds,
+			potential,
+			pixel_size,
+			curve_desc_3,
+			rng,
+			6144.0f
+		);
 
-	for(auto const& stem: next_level_right)
-	{
-		for(auto const& branch: stem.left)
-		{ curves.append(branch.get<0>()); }
+		for(auto const& stem: next_level_left)
+		{
+			for(auto const& branch: stem.left)
+			{ curves.append(branch.get<0>()); }
 
-		for(auto const& branch: stem.right)
-		{ curves.append(branch.get<0>()); }
+			for(auto const& branch: stem.right)
+			{ curves.append(branch.get<0>()); }
+		}
+
+		for(auto const& stem: next_level_right)
+		{
+			for(auto const& branch: stem.left)
+			{ curves.append(branch.get<0>()); }
+
+			for(auto const& branch: stem.right)
+			{ curves.append(branch.get<0>()); }
+		}
 	}
 
 	auto curve_file = terraformer::make_output_file("/dev/shm/slask.json");
