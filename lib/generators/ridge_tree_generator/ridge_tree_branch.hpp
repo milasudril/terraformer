@@ -73,6 +73,8 @@ namespace terraformer
 		random_generator& rng,
 		float max_length
 	);
+
+	float compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance);
 }
 
 #endif

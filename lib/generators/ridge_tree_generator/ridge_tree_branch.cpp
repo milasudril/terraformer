@@ -54,7 +54,6 @@ terraformer::generate_branches(
 	return existing_branches;
 }
 
-
 void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold)
 {
 	auto const outer_count = std::size(a);
@@ -204,4 +203,24 @@ terraformer::generate_branches(
 	);
 
 	return output_branches;
+}
+
+float terraformer::compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance)
+{
+	auto sum = 0.0f;
+	for(size_t k = 0; k != std::size(branches); ++k)
+	{
+		auto const points = branches[k].get<0>();
+		sum += terraformer::fold_over_line_segments(
+			points,
+			[](auto seg, auto point, auto min_distance, auto... prev) {
+				auto const d = distance(seg, point);
+				auto const l = length(seg);
+				return (prev + ... + (l*(d<min_distance? 1.0f : min_distance/d)));
+			},
+			r,
+			min_distance
+		);
+	}
+	return sum;
 }
