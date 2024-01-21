@@ -75,7 +75,11 @@ namespace terraformer
 			"grid_lines":{}
 		},
 		"y":{
-			"grid_lines":{}
+			"grid_lines":{},
+			"limits":{
+				"min": 49152.0,
+				"max": 0.0
+			}
 		}
 	}
 })");
