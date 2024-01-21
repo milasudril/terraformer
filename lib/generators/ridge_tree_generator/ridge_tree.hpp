@@ -4,6 +4,7 @@
 #define TERRAFORMER_RIDGE_TREE_HPP
 
 #include "./ridge_curve.hpp"
+#include "./ridge_tree_branch_seed_sequence.hpp"
 
 #include "lib/common/array_tuple.hpp"
 #include "lib/common/spaces.hpp"
@@ -51,6 +52,8 @@ namespace terraformer
 		return base_curve;
 	}
 
+	void trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold);
+
 	std::vector<ridge_tree_branch>
 	generate_branches(
 		array_tuple<location, direction> const& branch_points,
@@ -60,6 +63,16 @@ namespace terraformer
 		random_generator& rng,
 		float d_max,
 		std::vector<ridge_tree_branch>&& existing_branches = std::vector<ridge_tree_branch>{});
+
+	std::vector<ridge_tree_branch>
+	generate_branches(
+		std::span<ridge_tree_branch_seed_sequence const> parents,
+		span_2d<float const> potential,
+		float pixel_size,
+		ridge_curve_description curve_desc,
+		random_generator& rng,
+		float max_length
+	);
 
 	struct ridge_tree
 	{
