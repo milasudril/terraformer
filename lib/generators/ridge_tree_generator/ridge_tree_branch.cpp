@@ -139,7 +139,7 @@ void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vect
 	}
 }
 
-std::vector<terraformer::ridge_tree_branch>
+std::vector<terraformer::ridge_tree_stem>
 terraformer::generate_branches(
 	std::span<ridge_tree_branch_seed_sequence const> parents,
 	span_2d<float const> potential,
@@ -150,10 +150,13 @@ terraformer::generate_branches(
 )
 {
 	if(std::size(parents) == 0)
-	{	return std::vector<ridge_tree_branch>{}; }
+	{	return std::vector<ridge_tree_stem>{}; }
 
-	auto output_branches = generate_branches(
-		parents[0].left,
+	std::vector<ridge_tree_stem> ret;
+
+	ridge_tree_stem current_stem;
+	current_stem.left = generate_branches(
+		parents[0].right,
 		potential,
 		pixel_size,
 		curve_desc,
@@ -163,8 +166,10 @@ terraformer::generate_branches(
 
 	for(size_t k = 1; k != std::size(parents); ++k)
 	{
-		auto right_branches = generate_branches(
-			parents[k - 1].right,
+		printf("%.8g  %.8g\n", parents[k - 1].left.get<0>()[0][0], parents[k].right.get<0>()[0][0]);
+
+		current_stem.right = generate_branches(
+			parents[k - 1].left,
 			potential,
 			pixel_size,
 			curve_desc,
@@ -173,7 +178,7 @@ terraformer::generate_branches(
 		);
 
 		auto left_branches = generate_branches(
-			parents[k].left,
+			parents[k].right,
 			potential,
 			pixel_size,
 			curve_desc,
@@ -181,28 +186,22 @@ terraformer::generate_branches(
 			max_length
 		);
 
-		trim_at_intersect(right_branches, left_branches, 1536.0f);
-
-		std::ranges::transform(std::move(right_branches), std::back_inserter(output_branches), [](auto&& val){
-			return std::move(val);
-		});
-
-		std::ranges::transform(std::move(left_branches), std::back_inserter(output_branches), [](auto&& val){
-			return std::move(val);
-		});
+		trim_at_intersect(current_stem.right, left_branches, 1536.0f);  // TODO: Need to pass the min distance
+		ret.push_back(std::move(current_stem));
+		current_stem.left = std::move(left_branches);
 	}
 
-	output_branches = generate_branches(
+	ret.back().right = generate_branches(
 		parents.back().right,
 		potential,
 		pixel_size,
 		curve_desc,
 		rng,
-		max_length,
-		std::move(output_branches)
+		max_length
 	);
 
-	return output_branches;
+	printf("\n");
+	return ret;
 }
 
 float terraformer::compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance)

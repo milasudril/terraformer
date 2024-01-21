@@ -133,11 +133,23 @@ int main()
 		6144.0f
 	);
 
-	for(auto const& branch: next_level_left)
-	{ curves.append(branch.get<0>()); }
+	for(auto const& stem: next_level_left)
+	{
+		for(auto const& branch: stem.left)
+		{ curves.append(branch.get<0>()); }
 
-	for(auto const& branch: next_level_right)
-	{ curves.append(branch.get<0>()); }
+		for(auto const& branch: stem.right)
+		{ curves.append(branch.get<0>()); }
+	}
+
+	for(auto const& stem: next_level_right)
+	{
+		for(auto const& branch: stem.left)
+		{ curves.append(branch.get<0>()); }
+
+		for(auto const& branch: stem.right)
+		{ curves.append(branch.get<0>()); }
+	}
 
 	auto curve_file = terraformer::make_output_file("/dev/shm/slask.json");
 	curves.write_to(curve_file.get());

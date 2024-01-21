@@ -64,7 +64,13 @@ namespace terraformer
 		float d_max,
 		std::vector<ridge_tree_branch>&& existing_branches = std::vector<ridge_tree_branch>{});
 
-	std::vector<ridge_tree_branch>
+	struct ridge_tree_stem
+	{
+		std::vector<terraformer::ridge_tree_branch> left;
+		std::vector<terraformer::ridge_tree_branch> right;
+	};
+
+	std::vector<ridge_tree_stem>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence const> parents,
 		span_2d<float const> potential,
