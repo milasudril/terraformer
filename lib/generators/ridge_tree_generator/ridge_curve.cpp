@@ -5,6 +5,7 @@
 #include "lib/math_utils/first_order_hp_filter.hpp"
 #include "lib/math_utils/second_order_lp_filter.hpp"
 #include "lib/math_utils/composite_function.hpp"
+#include "lib/math_utils/cubic_spline.hpp"
 
 #include <random>
 #include <numbers>
@@ -48,8 +49,27 @@ std::vector<float> terraformer::generate(
 		--warmup_count;
 	}
 
+	auto envelope = [wavelength = src.wavelength](float x){
+		auto const t = x/(wavelength);
+		return t < 1.0f ?
+			interp(
+				cubic_spline_control_point{
+					.y = 0.0f,
+					.ddx = 0.0f
+				},
+				cubic_spline_control_point{
+					.y = 1.0f,
+					.ddx = 0.0f
+				}, t) :
+			1.0f;
+	};
+
 	for(size_t k = 0; k != seg_count; ++k)
-	{ ret[k] = f(U(rng)); }
+	{
+		ret[k] = f(U(rng))
+			*envelope(dx*static_cast<float>(k))
+			*envelope(dx*static_cast<float>(seg_count - k));
+	}
 
 	auto minmax = std::ranges::minmax_element(ret);
 
