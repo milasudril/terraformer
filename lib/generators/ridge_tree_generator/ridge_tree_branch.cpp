@@ -156,7 +156,7 @@ terraformer::generate_branches(
 
 	ridge_tree_stem current_stem;
 	current_stem.left = generate_branches(
-		parents[0].right,
+		parents[0].left,
 		potential,
 		pixel_size,
 		curve_desc,
@@ -166,10 +166,8 @@ terraformer::generate_branches(
 
 	for(size_t k = 1; k != std::size(parents); ++k)
 	{
-		printf("%.8g  %.8g\n", parents[k - 1].left.get<0>()[0][0], parents[k].right.get<0>()[0][0]);
-
 		current_stem.right = generate_branches(
-			parents[k - 1].left,
+			parents[k - 1].right,
 			potential,
 			pixel_size,
 			curve_desc,
@@ -178,7 +176,7 @@ terraformer::generate_branches(
 		);
 
 		auto left_branches = generate_branches(
-			parents[k].right,
+			parents[k].left,
 			potential,
 			pixel_size,
 			curve_desc,
@@ -186,12 +184,13 @@ terraformer::generate_branches(
 			max_length
 		);
 
-		trim_at_intersect(current_stem.right, left_branches, 1536.0f);  // TODO: Need to pass the min distance
+		// TODO: Need to pass the min distance
+		trim_at_intersect(current_stem.right, left_branches, 1536.0f);
 		ret.push_back(std::move(current_stem));
 		current_stem.left = std::move(left_branches);
 	}
 
-	ret.back().right = generate_branches(
+	current_stem.right = generate_branches(
 		parents.back().right,
 		potential,
 		pixel_size,
@@ -200,7 +199,7 @@ terraformer::generate_branches(
 		max_length
 	);
 
-	printf("\n");
+	ret.push_back(std::move(current_stem));
 	return ret;
 }
 
