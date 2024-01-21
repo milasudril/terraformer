@@ -84,16 +84,6 @@ int main()
 		rng,
 		12384.0f
 	);
-#if 0
-	auto const right_siblings = generate_branches(
-		std::span{&root_seeds.right, 1},
-		potential,
-		pixel_size,
-		curve_desc_2,
-		rng,
-		12384.0f
-	);
-#endif
 
 	for(auto const& stem: level_1)
 	{
