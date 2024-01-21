@@ -85,7 +85,6 @@ void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vect
 			b_trim[l] = std::min(res.second, b_trim[l]);
 		}
 	}
-
 	for(size_t k = 0; k != outer_count; ++k)
 	{
 		for(size_t l = 0; l != k; ++l)
@@ -100,8 +99,8 @@ void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vect
 				}
 			);
 
-			a_trim[k] = std::min(res.first, b_trim[k]);
-			a_trim[l] = std::min(res.second, b_trim[l]);
+			a_trim[k] = std::min(res.first, a_trim[k]);
+			a_trim[l] = std::min(res.second, a_trim[l]);
 		}
 	}
 

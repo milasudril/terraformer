@@ -133,7 +133,6 @@ int main()
 		24576.0f
 	);
 
-
 	for(auto const& branch: next_level_left)
 	{ curves.append(branch.get<0>()); }
 
