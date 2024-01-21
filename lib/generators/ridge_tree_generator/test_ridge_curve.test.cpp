@@ -123,23 +123,10 @@ int main()
 	for(auto const& branch: right_siblings)
  	{ curves.append(branch.get<0>()); }
 
-	for(uint32_t y = 0; y != potential.height(); ++y)
-	{
-		for(uint32_t x = 0; x != potential.width(); ++x)
-		{
-			auto sum = 0.0f;
-			terraformer::location const loc_xy{
-				pixel_size*static_cast<float>(x),
-				pixel_size*static_cast<float>(y),
-				0.0f
-			};
+	auto const t0 = std::chrono::steady_clock::now();
+	terraformer::compute_potential(potential, left_siblings, right_siblings, pixel_size);
+	printf("%.8g\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
 
-			sum += terraformer::compute_potential(left_siblings, loc_xy, 0.5f*pixel_size);
-			sum += terraformer::compute_potential(right_siblings, loc_xy, 0.5f*pixel_size);
-
-			potential(x, y) += sum;
-		}
-	}
 
 	terraformer::ridge_curve_description const curve_desc_3{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},

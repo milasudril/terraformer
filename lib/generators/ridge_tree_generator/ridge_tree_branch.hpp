@@ -75,6 +75,12 @@ namespace terraformer
 	);
 
 	float compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance);
+
+	void compute_potential(
+		span_2d<float> output,
+		std::span<ridge_tree_branch const> left_siblings,
+		std::span<ridge_tree_branch const> right_siblings,
+		float pixel_size);
 }
 
 #endif

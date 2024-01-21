@@ -224,3 +224,28 @@ float terraformer::compute_potential(std::span<ridge_tree_branch const> branches
 	}
 	return sum;
 }
+
+void terraformer::compute_potential(
+	span_2d<float> output,
+	std::span<ridge_tree_branch const> left_siblings,
+	std::span<ridge_tree_branch const> right_siblings,
+	float pixel_size)
+{
+	for(uint32_t y = 0; y != output.height(); ++y)
+	{
+		for(uint32_t x = 0; x != output.width(); ++x)
+		{
+			auto sum = 0.0f;
+			terraformer::location const loc_xy{
+				pixel_size*static_cast<float>(x),
+				pixel_size*static_cast<float>(y),
+				0.0f
+			};
+
+			sum += terraformer::compute_potential(left_siblings, loc_xy, 0.5f*pixel_size);
+			sum += terraformer::compute_potential(right_siblings, loc_xy, 0.5f*pixel_size);
+
+			output(x, y) += sum;
+		}
+	}
+}
