@@ -216,7 +216,7 @@ float terraformer::compute_potential(std::span<ridge_tree_branch const> branches
 			[](auto seg, auto point, auto min_distance, auto... prev) {
 				auto const d = distance(seg, point);
 				auto const l = length(seg);
-				return (prev + ... + (l*(d<min_distance? 1.0f : min_distance/d)));
+				return (prev + ... + (l*(d<min_distance? 1.0f : std::pow(min_distance/d, 2.0f))));
 			},
 			r,
 			min_distance

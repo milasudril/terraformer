@@ -64,30 +64,7 @@ int main()
 	curves.append(root.get<0>());
 
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
-	{
-		auto const points = root.get<0>();
-		for(uint32_t y = 0; y != potential.height(); ++y)
-		{
-			for(uint32_t x = 0; x != potential.width(); ++x)
-			{
-				terraformer::location const loc_xy{pixel_size*static_cast<float>(x), pixel_size*static_cast<float>(y), 0.0f};
-
-				potential(x, y) = terraformer::fold_over_line_segments(
-					points,
-					[loc_xy](auto seg, auto point, auto... prev) {
-						auto const d1 = distance(seg, point + terraformer::displacement{-49152.0f,0.0f,0.0f});
-						auto const d2 = distance(seg, point);
-						auto const d3 = distance(seg, point + terraformer::displacement{49152.0f,0.0f,0.0f});
-						auto const d = std::min(d1, std::min(d2, d3));
-						auto const l = length(seg);
-						auto const d_min = 0.5f*pixel_size;
-						return (prev + ... + (l*(d<d_min? 1.0f : d_min/d)));
-					},
-					loc_xy
-				);
-			}
-		}
-	}
+	terraformer::compute_potential(potential, std::span{&root, 1}, std::span<terraformer::ridge_tree_branch const>{}, pixel_size);
 
 	terraformer::ridge_curve_description const curve_desc_2{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
