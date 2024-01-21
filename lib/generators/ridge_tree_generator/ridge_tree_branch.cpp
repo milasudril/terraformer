@@ -54,8 +54,9 @@ terraformer::generate_branches(
 	return existing_branches;
 }
 
-void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold)
+void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float min_distance)
 {
+	auto const md2 = min_distance*min_distance;
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
 
@@ -74,8 +75,8 @@ void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vect
 			auto const res = cartesian_find_if(
 				std::span<location const>(a[k].get<0>()),
 				std::span<location const>(b[l].get<0>()),
-				[threshold](auto const p1, auto const p2) {
-					if(distance(p1, p2) < threshold)
+				[md2](auto const p1, auto const p2) {
+					if(distance_squared(p1, p2) < md2)
 					{ return true; }
 					return false;
 				}
@@ -92,8 +93,8 @@ void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vect
 			auto const res = cartesian_find_if(
 				std::span<location const>(a[k].get<0>()),
 				std::span<location const>(a[l].get<0>()),
-				[threshold](auto const p1, auto const p2) {
-					if(distance(p1, p2) < threshold)
+				[md2](auto const p1, auto const p2) {
+					if(distance_squared(p1, p2) < md2)
 					{ return true; }
 					return false;
 				}
@@ -111,8 +112,8 @@ void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vect
 			auto const res = cartesian_find_if(
 				std::span<location const>(b[k].get<0>()),
 				std::span<location const>(b[l].get<0>()),
-				[threshold](auto const p1, auto const p2) {
-					if(distance(p1, p2) < threshold)
+				[md2](auto const p1, auto const p2) {
+					if(distance_squared(p1, p2) < md2)
 					{ return true; }
 					return false;
 				}
