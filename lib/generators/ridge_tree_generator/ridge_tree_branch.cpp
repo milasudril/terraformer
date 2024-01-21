@@ -213,13 +213,13 @@ float terraformer::compute_potential(std::span<ridge_tree_branch const> branches
 		auto const points = branches[k].get<0>();
 		sum += terraformer::fold_over_line_segments(
 			points,
-			[](auto seg, auto point, auto min_distance, auto... prev) {
-				auto const d = distance(seg, point);
+			[](auto seg, auto point, auto d02, auto... prev) {
+				auto const d2 = distance_squared(seg, point);
 				auto const l = length(seg);
-				return (prev + ... + (l*(d<min_distance? 1.0f : std::pow(min_distance/d, 2.0f))));
+				return (prev + ... + (l*(d2<d02? 1.0f : d02/d2)));
 			},
 			r,
-			min_distance
+			min_distance*min_distance
 		);
 	}
 	return sum;

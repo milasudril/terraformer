@@ -20,7 +20,7 @@ namespace terraformer
 	inline auto length_squared(line_segment seg)
 	{ return distance_squared(seg.from, seg.to); }
 
-	inline auto distance(line_segment seg, location loc)
+	inline auto distance_squared(line_segment seg, location loc)
 	{
 		auto const l2 = length_squared(seg);
 
@@ -30,7 +30,7 @@ namespace terraformer
 		auto const t = std::max(0.0f, std::min(1.0f, inner_product(loc - seg.from, seg.to - seg.from) / l2));
 		auto const proj = seg.from + t*(seg.to - seg.from);
 
-		return distance(loc, proj);
+		return distance_squared(loc, proj);
 	}
 
 	template<class Func, class ... Args>
@@ -89,13 +89,13 @@ namespace terraformer
 		};
 	}
 
-	inline auto distance(std::span<location const> locs, location loc)
+	inline auto distance_squared(std::span<location const> locs, location loc)
 	{
 		return fold_over_line_segments(locs, [](auto seg, auto loc, auto ... old_distance) {
 			if constexpr(sizeof...(old_distance) == 0)
-			{ return distance(seg, loc); }
+			{ return distance_squared(seg, loc); }
 			else
-			{ return std::min(distance(seg, loc), old_distance...); }
+			{ return std::min(distance_squared(seg, loc), old_distance...); }
 		}, loc);
 	}
 }
