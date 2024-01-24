@@ -5,7 +5,7 @@
 
 #include "./ridge_tree_branch.hpp"
 
-#include <deque>
+#include <queue>
 
 namespace terraformer
 {
@@ -17,20 +17,27 @@ namespace terraformer
 	};
 
 	template<class Function, class ... Args>
-	void for_each_bfs(ridge_tree const& tree, Fucntion&& f, Args... args)
+	void for_each_bfs(ridge_tree const& tree, Function&& f, Args... args)
 	{
-		std::queue<std::reference_wrapper<ridge_tree const>> nodes;
-		nodes.push(tree);
+		std::queue<ridge_tree const*> nodes;
+		nodes.push(&tree);
 		while(!nodes.empty())
 		{
 			auto next = nodes.front();
-			f(next.get(), args...);
+			if(next != nullptr)
+			{
+				f(*next, args...);
 
-			for(auto const& child: next.get().left_children)
-			{ nodes.push(child); }
+				for(auto const& child: next->left_children)
+				{ nodes.push(&child); }
 
-			for(auto const& child: next.get().right_children)
-			{ nodes.push(child); }
+				for(auto const& child: next->right_children)
+				{ nodes.push(&child); }
+
+				nodes.push(nullptr);
+			}
+			else
+			{ f(args...); }
 
 			nodes.pop();
 		}
