@@ -80,6 +80,8 @@ namespace terraformer
 		float max_length
 	);
 
+	displacement compute_field(std::span<ridge_tree_branch const> branches, location r, float min_distance);
+
 	float compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance);
 
 	void compute_potential(

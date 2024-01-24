@@ -20,17 +20,20 @@ namespace terraformer
 	inline auto length_squared(line_segment seg)
 	{ return distance_squared(seg.from, seg.to); }
 
-	inline auto distance_squared(line_segment seg, location loc)
+	inline auto closest_point(line_segment seg, location loc)
 	{
 		auto const l2 = length_squared(seg);
 
 		if(l2 == 0.0f) [[unlikely]]
-		{ return distance(seg.from, loc); }
+		{ return seg.from; }
 
 		auto const t = std::max(0.0f, std::min(1.0f, inner_product(loc - seg.from, seg.to - seg.from) / l2));
-		auto const proj = seg.from + t*(seg.to - seg.from);
+		return seg.from + t*(seg.to - seg.from);
+	}
 
-		return distance_squared(loc, proj);
+	inline auto distance_squared(line_segment seg, location loc)
+	{
+		return distance_squared(loc, closest_point(seg, loc));
 	}
 
 	template<class Func, class ... Args>

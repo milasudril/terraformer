@@ -203,6 +203,31 @@ terraformer::generate_branches(
 	return ret;
 }
 
+terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch const> branches, location r, float min_distance)
+{
+	displacement ret{};
+
+	for(size_t k = 0; k != std::size(branches); ++k)
+	{
+		auto const points = branches[k].get<0>();
+		ret += terraformer::fold_over_line_segments(
+			points,
+			[](auto seg, auto point, auto d02, auto... prev) {
+				auto const p = closest_point(seg, point);
+				auto const d2 = distance_squared(p, point);
+				direction const r{p - point};
+				auto const l = length(seg);
+				return (prev + ... + (l*r*(d2<d02? 1.0f : d02/d2)));
+			},
+			r,
+			min_distance*min_distance
+		);
+	}
+
+	return ret;
+}
+
+
 float terraformer::compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance)
 {
 	auto sum = 0.0f;
