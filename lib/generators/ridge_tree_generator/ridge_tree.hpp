@@ -1,49 +1,42 @@
-//@	{"dependencies_extra":[{"ref":"./ridge_tree_branch.o", "rel":"implementation"}]}
+//@	{"dependencies_extra":[{"ref":"./ridge_tree.o", "rel":"implementation"}]}
 
 #ifndef TERRAFORMER_RIDGE_TREE_HPP
 #define TERRAFORMER_RIDGE_TREE_HPP
 
-#include "./ridge_tree_branch.hpp"
-
-#include <queue>
+#include "lib/common/array_tuple.hpp"
+#include "lib/common/spaces.hpp"
 
 namespace terraformer
 {
-	struct ridge_tree
+	enum class ridge_tree_branch_side{left, right};
+
+	constexpr auto ridge_tree_locations = 0;
+	constexpr auto ridge_tree_normals = 1;
+	constexpr auto ridge_tree_levels = 2;
+	constexpr auto ridge_tree_sides = 3;
+	using ridge_tree = array_tuple<location, direction, size_t, ridge_tree_branch_side>;
+
+	struct ridge_tree_node
 	{
-		ridge_tree_branch stem;
-		std::vector<ridge_tree> left_children;
-		std::vector<ridge_tree> right_children;
+		size_t level;
 	};
 
-	template<class Function, class ... Args>
-	void for_each_bfs(ridge_tree const& tree, Function&& f, Args... args)
+	class ridge_tree_builder
 	{
-		std::queue<ridge_tree const*> nodes;
-		nodes.push(&tree);
-		while(!nodes.empty())
-		{
-			auto next = nodes.front();
-			if(next != nullptr)
-			{
-				f(*next, args...);
+	public:
+		explicit ridge_tree_builder(ridge_tree& output):m_output{output}{}
 
-				for(auto const& child: next->left_children)
-				{ nodes.push(&child); }
+		std::optional<ridge_tree_node> make_node();
 
-				for(auto const& child: next->right_children)
-				{ nodes.push(&child); }
+		std::optional<ridge_tree_node> make_node(ridge_tree_node const&);
 
-				nodes.push(nullptr);
-			}
-			else
-			{ f(args...); }
+		void save_node(ridge_tree_node&& node);
 
-			nodes.pop();
-		}
-	}
+	private:
+		std::reference_wrapper<ridge_tree> m_output;
+	};
 
-	ridge_tree generate(size_t max_depth);
+	ridge_tree generate_tree();
 }
 
 #endif
