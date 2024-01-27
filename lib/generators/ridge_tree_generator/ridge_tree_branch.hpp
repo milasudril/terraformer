@@ -16,8 +16,6 @@
 
 namespace terraformer
 {
-	using ridge_tree_branch = array_tuple<location, float>;
-
 	template<class BranchStopCondition>
 	std::vector<location> generate_branch_base_curve(
 		location loc,
