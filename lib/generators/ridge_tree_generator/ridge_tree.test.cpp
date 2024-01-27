@@ -43,6 +43,16 @@ TESTCASE(terraformer_ridge_tree_generate)
 				},
 				.max_length = terraformer::domain_length{6144.0f}
 			},
+			terraformer::ridge_tree_branch_description{
+				.displacement_profile {
+					.amplitude = terraformer::horizontal_amplitude{3096.0f/27.0f},
+					.wavelength = terraformer::domain_length{12384.0f/27.0f},
+					.damping = std::sqrt(0.5f),
+					.flip_direction = false,
+					.invert_displacement = false,
+				},
+				.max_length = terraformer::domain_length{3072.0f}
+			}
 		}
 	};
 

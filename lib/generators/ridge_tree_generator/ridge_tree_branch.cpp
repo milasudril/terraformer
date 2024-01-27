@@ -57,7 +57,6 @@ terraformer::generate_branches(
 void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector<displaced_curve>& b, float min_distance)
 {
 	auto const md2 = min_distance*min_distance;
-	printf("Trim distance: %.8g\n", min_distance);
 
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
@@ -79,10 +78,7 @@ void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector
 				std::span<location const>(b[l].get<0>()),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
-					{
-						printf("Trim a and b\n");
-						return true;
-					}
+					{ return true; }
 					return false;
 				}
 			);
@@ -100,10 +96,7 @@ void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector
 				std::span<location const>(a[l].get<0>()),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
-					{
-						printf("Trim a\n");
-						return true;
-					}
+					{ return true; }
 					return false;
 				}
 			);
@@ -122,10 +115,7 @@ void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector
 				std::span<location const>(b[l].get<0>()),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
-					{
-						printf("Trim b\n");
-						return true;
-					}
+					{ return true; }
 					return false;
 				}
 			);
@@ -160,8 +150,8 @@ terraformer::generate_branches(
 	float max_length
 )
 {
-	printf("Generating branches num parents: %zu\n", std::size(parents));
-
+	// TODO: Need to pass the min distance
+	auto const min_distance = 1536.0f;
 	std::vector<ridge_tree_stem_collection> ret;
 
 	if(std::size(parents) == 0)
@@ -176,6 +166,8 @@ terraformer::generate_branches(
 		rng,
 		max_length
 	);
+	std::vector<displaced_curve> dummy{};
+	trim_at_intersect(current_stem_collection.left, dummy, min_distance);
 
 	for(size_t k = 1; k != std::size(parents); ++k)
 	{
@@ -197,8 +189,7 @@ terraformer::generate_branches(
 			max_length
 		);
 
-		// TODO: Need to pass the min distance
-		trim_at_intersect(current_stem_collection.right, left_branches, 1536.0f);
+		trim_at_intersect(current_stem_collection.right, left_branches, min_distance);
 		ret.push_back(std::move(current_stem_collection));
 		current_stem_collection.left = std::move(left_branches);
 	}
@@ -211,6 +202,8 @@ terraformer::generate_branches(
 		rng,
 		max_length
 	);
+	trim_at_intersect(current_stem_collection.right, dummy, min_distance);
+
 
 	ret.push_back(std::move(current_stem_collection));
 	return ret;

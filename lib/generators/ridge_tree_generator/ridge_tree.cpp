@@ -92,15 +92,13 @@ terraformer::ridge_tree terraformer::generate(
 
 		for(auto const& stem: next_level)
 		{
-			printf("Pushing left side\n");
 			ret.push_back(
 				ridge_tree_branch_collection{
-					.level =next_level_index,
+					.level = next_level_index,
 					.curves = stem.left
 				}
 			);
 
-			printf("Pushing right side\n");
 			ret.push_back(
 				ridge_tree_branch_collection{
 					.level = next_level_index,
