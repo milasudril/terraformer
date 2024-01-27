@@ -85,7 +85,7 @@ terraformer::ridge_tree terraformer::generate(
 		compute_potential(potential, stem, std::span<displaced_curve const>{}, pixel_size);
 
 		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
-		auto const next_level = generate_branches(
+		auto next_level = generate_branches(
 			next_level_seeds,
 			potential,
 			pixel_size,
@@ -94,20 +94,13 @@ terraformer::ridge_tree terraformer::generate(
 			curve_levels[next_level_index].max_length
 		);
 
-		for(auto const& stem: next_level)
+		for(auto& stem: next_level)
 		{
+			std::ranges::copy(stem.right, std::back_inserter(stem.left));
 			ret.push_back(
 				ridge_tree_branch_collection{
 					.level = next_level_index,
-					.curves = stem.left,
-					.parent = current_trunk_index
-				}
-			);
-
-			ret.push_back(
-				ridge_tree_branch_collection{
-					.level = next_level_index,
-					.curves = stem.right,
+					.curves = std::move(stem.left),
 					.parent = current_trunk_index
 				}
 			);
