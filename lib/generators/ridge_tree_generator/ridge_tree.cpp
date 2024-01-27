@@ -4,6 +4,9 @@
 #include "./ridge_tree_branch.hpp"
 
 #include "lib/pixel_store/image.hpp"
+
+#include "lib/pixel_store/image_io.hpp"
+
 #include <queue>
 
 namespace terraformer
@@ -62,14 +65,19 @@ terraformer::ridge_tree terraformer::generate(
 	);
 
 	auto const pixel_count = static_cast<uint32_t>(49152.0f/pixel_size);
-	terraformer::grayscale_image potential{pixel_count, pixel_count};;
+	terraformer::grayscale_image potential{pixel_count, pixel_count};
+	compute_potential(potential, ret.back().curves, std::span<displaced_curve const>{}, pixel_size);
 
 	size_t current_trunk_index = 0;
+	size_t current_level_index = 0;
 
 	while(true)
 	{
 		if(current_trunk_index == std::size(ret))
-		{ return ret; }
+		{
+			store(potential, "ridge_tree_test_output.exr");
+			return ret;
+		}
 
 		auto const& current_trunk = ret[current_trunk_index];
 		printf("Generating trunk index = %zu,  level = %zu, std::size(ret) =  %zu\n", current_trunk_index, current_trunk.level, std::size(ret));
@@ -77,12 +85,17 @@ terraformer::ridge_tree terraformer::generate(
 		auto const next_level_index = current_trunk.level  + 1;
 		if(next_level_index == std::size(curve_levels))
 		{
+			printf("No more elements to process\n");
 			++current_trunk_index;
 			continue;
 		}
 
 		std::span<displaced_curve const> stem{current_trunk.curves};
-		compute_potential(potential, stem, std::span<displaced_curve const>{}, pixel_size);
+		if(current_level_index != next_level_index)
+		{
+			printf("Changing level from %zu to %zu (number of new curves = %zu)\n", current_level_index, next_level_index, std::size(stem));
+			current_level_index = next_level_index;
+		}
 
 		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
 		auto next_level = generate_branches(
@@ -104,6 +117,8 @@ terraformer::ridge_tree terraformer::generate(
 					.parent = current_trunk_index
 				}
 			);
+			if(next_level_index + 1 != std::size(curve_levels))
+			{ compute_potential(potential, ret.back().curves, std::span<displaced_curve const>{}, pixel_size); }
 		}
 		++current_trunk_index;
 	}
