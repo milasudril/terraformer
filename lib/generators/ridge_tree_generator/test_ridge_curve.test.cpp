@@ -1,7 +1,6 @@
 //@ {"target":{"name":"test_ridge_curve"}}
 
 #include "./ridge_curve.hpp"
-#include "./ridge_tree.hpp"
 #include "./ridge_tree_branch_seed_sequence.hpp"
 #include "./ridge_tree_branch.hpp"
 
