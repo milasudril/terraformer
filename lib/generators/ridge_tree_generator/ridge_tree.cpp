@@ -56,7 +56,8 @@ terraformer::ridge_tree terraformer::generate(
 						.sample_period = pixel_size
 					}
 				)
-			}
+			},
+			.parent = ridge_tree_branch_collection::no_parent
 		}
 	);
 
@@ -71,11 +72,14 @@ terraformer::ridge_tree terraformer::generate(
 		{ return ret; }
 
 		auto const& current_trunk = ret[current_trunk_index];
-		++current_trunk_index;
+		printf("Generating trunk index = %zu,  level = %zu, std::size(ret) =  %zu\n", current_trunk_index, current_trunk.level, std::size(ret));
 
 		auto const next_level_index = current_trunk.level  + 1;
 		if(next_level_index == std::size(curve_levels))
-		{ continue; }
+		{
+			++current_trunk_index;
+			continue;
+		}
 
 		std::span<displaced_curve const> stem{current_trunk.curves};
 		compute_potential(potential, stem, std::span<displaced_curve const>{}, pixel_size);
@@ -95,17 +99,20 @@ terraformer::ridge_tree terraformer::generate(
 			ret.push_back(
 				ridge_tree_branch_collection{
 					.level = next_level_index,
-					.curves = stem.left
+					.curves = stem.left,
+					.parent = current_trunk_index
 				}
 			);
 
 			ret.push_back(
 				ridge_tree_branch_collection{
 					.level = next_level_index,
-					.curves = stem.right
+					.curves = stem.right,
+					.parent = current_trunk_index
 				}
 			);
 		}
+		++current_trunk_index;
 	}
 
 	return ret;
