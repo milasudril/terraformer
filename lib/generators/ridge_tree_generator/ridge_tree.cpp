@@ -61,21 +61,21 @@ terraformer::ridge_tree terraformer::generate(
 	auto const pixel_count = static_cast<uint32_t>(49152.0f/pixel_size);
 	terraformer::grayscale_image potential{pixel_count, pixel_count};;
 
-	size_t current_branch_index = 0;
+	size_t current_trunk_index = 0;
 
 	while(true)
 	{
-		if(current_branch_index == std::size(ret))
+		if(current_trunk_index == std::size(ret))
 		{ return ret; }
 
-		auto const& current_branch = ret[current_branch_index];
-		++current_branch_index;
+		auto const& current_trunk = ret[current_trunk_index];
+		++current_trunk_index;
 
-		auto const next_level_index = current_branch.level  + 1;
+		auto const next_level_index = current_trunk.level  + 1;
 		if(next_level_index == std::size(curve_levels))
 		{ continue; }
 
-		std::span<displaced_curve const> stem{&current_branch.curve, 1};
+		std::span<displaced_curve const> stem{&current_trunk.curve, 1};
 		compute_potential(potential, stem, std::span<displaced_curve const>{}, pixel_size);
 
 		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
@@ -90,6 +90,7 @@ terraformer::ridge_tree terraformer::generate(
 
 		for(auto const& stem: next_level)
 		{
+			printf("Pushing left side\n");
 			for(auto const& branch: stem.left)
 			{
 				ret.push_back(
@@ -100,6 +101,7 @@ terraformer::ridge_tree terraformer::generate(
 				);
 			}
 
+			printf("Pushing right side\n");
 			for(auto const& branch: stem.right)
 			{
 				ret.push_back(

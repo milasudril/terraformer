@@ -57,6 +57,8 @@ terraformer::generate_branches(
 void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector<displaced_curve>& b, float min_distance)
 {
 	auto const md2 = min_distance*min_distance;
+	printf("Trim distance: %.8g\n", min_distance);
+
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
 
@@ -77,7 +79,10 @@ void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector
 				std::span<location const>(b[l].get<0>()),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
-					{ return true; }
+					{
+						printf("Trim a and b\n");
+						return true;
+					}
 					return false;
 				}
 			);
@@ -95,7 +100,10 @@ void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector
 				std::span<location const>(a[l].get<0>()),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
-					{ return true; }
+					{
+						printf("Trim a\n");
+						return true;
+					}
 					return false;
 				}
 			);
@@ -114,7 +122,10 @@ void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector
 				std::span<location const>(b[l].get<0>()),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
-					{ return true; }
+					{
+						printf("Trim b\n");
+						return true;
+					}
 					return false;
 				}
 			);
@@ -149,6 +160,8 @@ terraformer::generate_branches(
 	float max_length
 )
 {
+	printf("Generating branches num parents: %zu\n", std::size(parents));
+
 	std::vector<ridge_tree_stem_collection> ret;
 
 	if(std::size(parents) == 0)
