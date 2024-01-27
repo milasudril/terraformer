@@ -69,33 +69,21 @@ terraformer::ridge_tree terraformer::generate(
 	compute_potential(potential, ret.back().curves, std::span<displaced_curve const>{}, pixel_size);
 
 	size_t current_trunk_index = 0;
-	size_t current_level_index = 0;
 
 	while(true)
 	{
 		if(current_trunk_index == std::size(ret))
-		{
-			store(potential, "ridge_tree_test_output.exr");
-			return ret;
-		}
+		{ return ret; }
 
 		auto const& current_trunk = ret[current_trunk_index];
-		printf("Generating trunk index = %zu,  level = %zu, std::size(ret) =  %zu\n", current_trunk_index, current_trunk.level, std::size(ret));
-
 		auto const next_level_index = current_trunk.level  + 1;
 		if(next_level_index == std::size(curve_levels))
 		{
-			printf("No more elements to process\n");
 			++current_trunk_index;
 			continue;
 		}
 
 		std::span<displaced_curve const> stem{current_trunk.curves};
-		if(current_level_index != next_level_index)
-		{
-			printf("Changing level from %zu to %zu (number of new curves = %zu)\n", current_level_index, next_level_index, std::size(stem));
-			current_level_index = next_level_index;
-		}
 
 		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
 		auto next_level = generate_branches(
@@ -109,7 +97,9 @@ terraformer::ridge_tree terraformer::generate(
 
 		for(auto& stem: next_level)
 		{
-			std::ranges::copy(stem.right, std::back_inserter(stem.left));
+			if(next_level_index + 1 != std::size(curve_levels))
+			{ compute_potential(potential, stem.left, stem.right, pixel_size); }
+
 			ret.push_back(
 				ridge_tree_branch_collection{
 					.level = next_level_index,
@@ -117,8 +107,14 @@ terraformer::ridge_tree terraformer::generate(
 					.parent = current_trunk_index
 				}
 			);
-			if(next_level_index + 1 != std::size(curve_levels))
-			{ compute_potential(potential, ret.back().curves, std::span<displaced_curve const>{}, pixel_size); }
+
+			ret.push_back(
+				ridge_tree_branch_collection{
+					.level = next_level_index,
+					.curves = std::move(stem.right),
+					.parent = current_trunk_index
+				}
+			);
 		}
 		++current_trunk_index;
 	}
