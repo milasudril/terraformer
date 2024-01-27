@@ -65,7 +65,7 @@ terraformer::ridge_tree terraformer::generate_tree(
 	std::span<displaced_curve const> left_stem{&trunk, 1};
 	std::span<displaced_curve const> right_stem{};
 
-	std::queue<ridge_tree_stem> stems_to_visit;
+	std::queue<ridge_tree_stem_collection> stems_to_visit;
 /*	stems_to_visit.push(ridge_tree_stem{
 		.left = trunk,
 		.right = std::vector<displaced_curve>{}
