@@ -60,7 +60,8 @@ terraformer::ridge_tree terraformer::generate(
 					}
 				)
 			},
-			.parent = ridge_tree_branch_collection::no_parent
+			.parent = ridge_tree_branch_collection::no_parent,
+			.side = ridge_tree_branch_collection::side::left
 		}
 	);
 
@@ -104,7 +105,8 @@ terraformer::ridge_tree terraformer::generate(
 				ridge_tree_branch_collection{
 					.level = next_level_index,
 					.curves = std::move(stem.left),
-					.parent = current_trunk_index
+					.parent = current_trunk_index,
+					.side = ridge_tree_branch_collection::side::left
 				}
 			);
 
@@ -112,7 +114,8 @@ terraformer::ridge_tree terraformer::generate(
 				ridge_tree_branch_collection{
 					.level = next_level_index,
 					.curves = std::move(stem.right),
-					.parent = current_trunk_index
+					.parent = current_trunk_index,
+					.side = ridge_tree_branch_collection::side::right
 				}
 			);
 		}
