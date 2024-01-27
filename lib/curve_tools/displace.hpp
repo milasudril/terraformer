@@ -46,6 +46,24 @@ namespace terraformer
 		float sample_period;
 	};
 
+	class displaced_curve : public array_tuple<location, float>
+	{
+	public:
+		using array_tuple<location, float>::array_tuple;
+
+		decltype(auto) scalar_displacements() const
+		{ return get<1>(); }
+
+		decltype(auto) scalar_displacements()
+		{ return get<1>(); }
+
+		decltype(auto) points() const
+		{ return get<0>(); }
+
+		decltype(auto) points()
+		{ return get<0>(); }
+	};
+
  array_tuple<location, float> displace_xy(std::span<location const> c, displacement_profile dy);
 }
 
