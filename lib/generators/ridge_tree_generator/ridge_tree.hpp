@@ -12,15 +12,15 @@
 
 namespace terraformer
 {
-	struct ridge_tree_branch
+	struct ridge_tree_branch_collection
 	{
 		size_t level;
-		displaced_curve curve;
+		std::vector<displaced_curve> curves;
 	};
 
-	struct ridge_tree : std::vector<ridge_tree_branch>
+	struct ridge_tree : std::vector<ridge_tree_branch_collection>
 	{
-		using std::vector<ridge_tree_branch>::vector;
+		using std::vector<ridge_tree_branch_collection>::vector;
 	};
 
 	struct ridge_tree_branch_description

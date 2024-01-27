@@ -57,7 +57,10 @@ TESTCASE(terraformer_ridge_tree_generate)
 	terraformer::curve_set curves;
 	for(size_t k = 0; k != std::size(res); ++k)
 	{
-		curves.append(res[k].curve.points());
+		for(auto const& curve : res[k].curves)
+		{
+			curves.append(curve.points());
+		}
 	}
 
 	auto curve_file = terraformer::make_output_file("/dev/shm/slask2.json");

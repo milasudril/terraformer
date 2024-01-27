@@ -46,15 +46,17 @@ terraformer::ridge_tree terraformer::generate(
 		(description.root_location, description.trunk_direction, trunk_pixel_count, pixel_size);
 
 	ret.push_back(
-		ridge_tree_branch{
+		ridge_tree_branch_collection{
 			.level = 0,
-			.curve = displace_xy(
-				trunk_base_curve,
-				terraformer::displacement_profile{
-					.offsets = trunk_offsets,
-					.sample_period = pixel_size
-				}
-			)
+			.curves = std::vector{
+				displace_xy(
+					trunk_base_curve,
+					terraformer::displacement_profile{
+						.offsets = trunk_offsets,
+						.sample_period = pixel_size
+					}
+				)
+			}
 		}
 	);
 
@@ -75,7 +77,7 @@ terraformer::ridge_tree terraformer::generate(
 		if(next_level_index == std::size(curve_levels))
 		{ continue; }
 
-		std::span<displaced_curve const> stem{&current_trunk.curve, 1};
+		std::span<displaced_curve const> stem{current_trunk.curves};
 		compute_potential(potential, stem, std::span<displaced_curve const>{}, pixel_size);
 
 		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
@@ -91,26 +93,20 @@ terraformer::ridge_tree terraformer::generate(
 		for(auto const& stem: next_level)
 		{
 			printf("Pushing left side\n");
-			for(auto const& branch: stem.left)
-			{
-				ret.push_back(
-					ridge_tree_branch{
-						.level = next_level_index,
-						.curve = branch
-					}
-				);
-			}
+			ret.push_back(
+				ridge_tree_branch_collection{
+					.level =next_level_index,
+					.curves = stem.left
+				}
+			);
 
 			printf("Pushing right side\n");
-			for(auto const& branch: stem.right)
-			{
-				ret.push_back(
-					ridge_tree_branch{
-						.level = next_level_index,
-						.curve = branch
-					}
-				);
-			}
+			ret.push_back(
+				ridge_tree_branch_collection{
+					.level = next_level_index,
+					.curves = stem.right
+				}
+			);
 		}
 	}
 
