@@ -57,33 +57,31 @@ terraformer::ridge_tree terraformer::generate_tree(
 			)
 		}
 	);
-	auto const& trunk = std::as_const(ret).back().curve;
 
 	auto const pixel_count = static_cast<uint32_t>(49152.0f/pixel_size);
-	terraformer::grayscale_image potential{pixel_count, pixel_count};
+	terraformer::grayscale_image potential{pixel_count, pixel_count};;
 
-	std::span<displaced_curve const> left_stem{&trunk, 1};
-	std::span<displaced_curve const> right_stem{};
-
-	std::queue<ridge_tree_stem_collection> stems_to_visit;
-/*	stems_to_visit.push(ridge_tree_stem{
-		.left = trunk,
-		.right = std::vector<displaced_curve>{}
-	});*/
-
-	size_t current_level = 1;
+	size_t current_branch_index = 0;
 
 	while(true)
 	{
-		if(current_level == std::size(curve_levels) || stems_to_visit.empty())
+		if(current_branch_index == std::size(ret))
 		{ return ret; }
 
+		auto const& current_branch = ret[current_branch_index];
+		++current_branch_index;
 
+		auto const current_level = current_branch.level;
 
-		compute_potential(potential, left_stem, right_stem, pixel_size);
-		auto const next_level_left_seeds = terraformer::collect_ridge_tree_branch_seeds(left_stem);
-		auto const next_level_left = generate_branches(
-			next_level_left_seeds,
+		if(current_level == std::size(curve_levels))
+		{ return ret; }
+
+		std::span<displaced_curve const> stem{&current_branch.curve, 1};
+		compute_potential(potential, stem, std::span<displaced_curve const>{}, pixel_size);
+
+		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
+		auto const next_level = generate_branches(
+			next_level_seeds,
 			potential,
 			pixel_size,
 			curve_levels[current_level],
@@ -91,23 +89,28 @@ terraformer::ridge_tree terraformer::generate_tree(
 			curve_levels[current_level].max_length
 		);
 
-		auto const next_level_right_seeds = terraformer::collect_ridge_tree_branch_seeds(right_stem);
-		auto const next_level_right = generate_branches(
-			next_level_right_seeds,
-			potential,
-			pixel_size,
-			curve_levels[current_level],
-			rng,
-			curve_levels[current_level].max_length
-		);
+		for(auto const& stem: next_level)
+		{
+			for(auto const& branch: stem.left)
+			{
+				ret.push_back(
+					ridge_tree_branch{
+						.level = current_level + 1,
+						.curve = branch
+					}
+				);
+			}
 
-		for(size_t k = 0; k != std::size(next_level_left); ++k)
-		{ stems_to_visit.push(next_level_left[k]); }
-
-		for(size_t k = 0; k != std::size(next_level_right); ++k)
-		{ stems_to_visit.push(next_level_right[k]); }
-
-		++current_level;
+			for(auto const& branch: stem.right)
+			{
+				ret.push_back(
+					ridge_tree_branch{
+						.level = current_level + 1,
+						.curve = branch
+					}
+				);
+			}
+		}
 	}
 
 	return ret;
