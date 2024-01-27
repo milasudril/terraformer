@@ -24,7 +24,7 @@ namespace terraformer
 	};
 
 	ridge_tree generate_tree(
-		std::span<ridge_curve_description const> curve_levels,
+		std::span<ridge_tree_branch_displacement_description const> curve_levels,
 		random_generator rng
 	);
 }

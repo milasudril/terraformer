@@ -11,7 +11,7 @@
 #include <numbers>
 
 std::vector<float> terraformer::generate(
-	ridge_curve_description const& src,
+	ridge_tree_branch_displacement_description const& src,
 	random_generator& rng,
 	size_t seg_count,
 	float dx,

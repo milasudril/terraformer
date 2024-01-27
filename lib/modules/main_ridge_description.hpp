@@ -11,7 +11,7 @@
 namespace terraformer
 {
 	template<class OffsetType, class AmplitudeType>
-	struct ridge_curve_description
+	struct ridge_tree_branch_displacement_description
 	{
 		OffsetType initial_value;
 		AmplitudeType amplitude;
@@ -23,7 +23,7 @@ namespace terraformer
 
 	template<class Form, class OffsetType, class AmplitudeType>
 	void bind(Form& form,
-		std::reference_wrapper<ridge_curve_description<OffsetType, AmplitudeType>> params)
+		std::reference_wrapper<ridge_tree_branch_displacement_description<OffsetType, AmplitudeType>> params)
 	{
 		form.insert(
 			field{
@@ -97,8 +97,8 @@ namespace terraformer
 
 	struct main_ridge_description
 	{
-		ridge_curve_description<horizontal_offset, horizontal_amplitude> ridge_curve_xy;
-		ridge_curve_description<elevation, vertical_amplitude> ridge_curve_xz;
+		ridge_tree_branch_displacement_description<horizontal_offset, horizontal_amplitude> ridge_curve_xy;
+		ridge_tree_branch_displacement_description<elevation, vertical_amplitude> ridge_curve_xz;
 		slope_angle slope_y;
 	};
 

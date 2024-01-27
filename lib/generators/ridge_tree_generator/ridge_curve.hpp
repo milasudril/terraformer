@@ -11,7 +11,7 @@
 
 namespace terraformer
 {
-	struct ridge_curve_description
+	struct ridge_tree_branch_displacement_description
 	{
 		horizontal_amplitude amplitude;
 		domain_length wavelength;
@@ -21,7 +21,7 @@ namespace terraformer
 	};
 
 	std::vector<float> generate(
-		ridge_curve_description const& src,
+		ridge_tree_branch_displacement_description const& src,
 		random_generator& rng,
 		size_t seg_count,
 		float dx,

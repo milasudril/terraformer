@@ -57,7 +57,7 @@ namespace terraformer
 		array_tuple<location, direction> const& branch_points,
 		span_2d<float const> potential,
 		float pixel_size,
-		ridge_curve_description curve_desc,
+		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,
 		float d_max,
 		std::vector<displaced_curve>&& existing_branches = std::vector<displaced_curve>{});
@@ -73,7 +73,7 @@ namespace terraformer
 		std::span<ridge_tree_branch_seed_sequence const> parents,
 		span_2d<float const> potential,
 		float pixel_size,
-		ridge_curve_description curve_desc,
+		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,
 		float max_length
 	);

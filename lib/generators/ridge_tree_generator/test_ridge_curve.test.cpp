@@ -32,7 +32,7 @@ namespace terraformer
 
 int main()
 {
-	terraformer::ridge_curve_description curve_desc{
+	terraformer::ridge_tree_branch_displacement_description curve_desc{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f},
 		.wavelength = terraformer::domain_length{12384.0f},
 		.damping = std::sqrt(0.5f),
@@ -67,7 +67,7 @@ int main()
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
 	terraformer::compute_potential(potential, std::span{&root, 1}, std::span<terraformer::displaced_curve const>{}, pixel_size);
 
-	terraformer::ridge_curve_description const curve_desc_2{
+	terraformer::ridge_tree_branch_displacement_description const curve_desc_2{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
 		.wavelength = terraformer::domain_length{12384.0f/3.0f},
 		.damping = std::sqrt(0.5f),
@@ -102,7 +102,7 @@ int main()
 	}
 	printf("%.8g\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - t0).count());
 
-	terraformer::ridge_curve_description const curve_desc_3{
+	terraformer::ridge_tree_branch_displacement_description const curve_desc_3{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
 		.wavelength = terraformer::domain_length{12384.0f/9.0f},
 		.damping = std::sqrt(0.5f),

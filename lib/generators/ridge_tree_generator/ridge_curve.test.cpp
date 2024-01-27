@@ -7,7 +7,7 @@
 
 TESTCASE(terraformer_ridge_curve_generate)
 {
-	terraformer::ridge_curve_description const curve{
+	terraformer::ridge_tree_branch_displacement_description const curve{
 		.amplitude = terraformer::horizontal_amplitude{1536.0f},
 		.wavelength = terraformer::domain_length{6144.0f},
 		.damping = 1.0f/128.0f,
