@@ -22,7 +22,7 @@ namespace terraformer
 	}
 }
 
-terraformer::ridge_tree terraformer::generate_tree(
+terraformer::ridge_tree terraformer::generate(
 	ridge_tree_description const& description,
 	random_generator rng,
 	float pixel_size
@@ -36,7 +36,7 @@ terraformer::ridge_tree terraformer::generate_tree(
 
 	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].max_length/pixel_size);
 	auto const trunk_offsets = generate(
-		curve_levels[0],
+		curve_levels[0].displacement_profile,
 		rng,
 		trunk_pixel_count,
 		pixel_size,
@@ -71,10 +71,9 @@ terraformer::ridge_tree terraformer::generate_tree(
 		auto const& current_branch = ret[current_branch_index];
 		++current_branch_index;
 
-		auto const current_level = current_branch.level;
-
-		if(current_level == std::size(curve_levels))
-		{ return ret; }
+		auto const next_level_index = current_branch.level  + 1;
+		if(next_level_index == std::size(curve_levels))
+		{ continue; }
 
 		std::span<displaced_curve const> stem{&current_branch.curve, 1};
 		compute_potential(potential, stem, std::span<displaced_curve const>{}, pixel_size);
@@ -84,9 +83,9 @@ terraformer::ridge_tree terraformer::generate_tree(
 			next_level_seeds,
 			potential,
 			pixel_size,
-			curve_levels[current_level],
+			curve_levels[next_level_index].displacement_profile,
 			rng,
-			curve_levels[current_level].max_length
+			curve_levels[next_level_index].max_length
 		);
 
 		for(auto const& stem: next_level)
@@ -95,7 +94,7 @@ terraformer::ridge_tree terraformer::generate_tree(
 			{
 				ret.push_back(
 					ridge_tree_branch{
-						.level = current_level + 1,
+						.level = next_level_index,
 						.curve = branch
 					}
 				);
@@ -105,7 +104,7 @@ terraformer::ridge_tree terraformer::generate_tree(
 			{
 				ret.push_back(
 					ridge_tree_branch{
-						.level = current_level + 1,
+						.level = next_level_index,
 						.curve = branch
 					}
 				);

@@ -23,8 +23,9 @@ namespace terraformer
 		using std::vector<ridge_tree_branch>::vector;
 	};
 
-	struct ridge_tree_branch_description : ridge_tree_branch_displacement_description
+	struct ridge_tree_branch_description
 	{
+		ridge_tree_branch_displacement_description displacement_profile;
 		domain_length max_length;
 	};
 
@@ -35,7 +36,7 @@ namespace terraformer
 		std::vector<ridge_tree_branch_description> curve_levels;
 	};
 
-	ridge_tree generate_tree(
+	ridge_tree generate(
 		ridge_tree_description const& description,
 		random_generator rng,
 		float pixel_size
