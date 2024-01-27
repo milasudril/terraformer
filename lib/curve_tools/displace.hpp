@@ -64,7 +64,7 @@ namespace terraformer
 		{ return get<0>(); }
 	};
 
- array_tuple<location, float> displace_xy(std::span<location const> c, displacement_profile dy);
+	displaced_curve displace_xy(std::span<location const> c, displacement_profile dy);
 }
 
 #endif

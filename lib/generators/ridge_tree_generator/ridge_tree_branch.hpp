@@ -52,9 +52,9 @@ namespace terraformer
 		return base_curve;
 	}
 
-	void trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float threshold);
+	void trim_at_intersect(std::vector<displaced_curve>& a, std::vector<displaced_curve>& b, float threshold);
 
-	std::vector<ridge_tree_branch>
+	std::vector<displaced_curve>
 	generate_branches(
 		array_tuple<location, direction> const& branch_points,
 		span_2d<float const> potential,
@@ -62,12 +62,12 @@ namespace terraformer
 		ridge_curve_description curve_desc,
 		random_generator& rng,
 		float d_max,
-		std::vector<ridge_tree_branch>&& existing_branches = std::vector<ridge_tree_branch>{});
+		std::vector<displaced_curve>&& existing_branches = std::vector<displaced_curve>{});
 
 	struct ridge_tree_stem
 	{
-		std::vector<terraformer::ridge_tree_branch> left;
-		std::vector<terraformer::ridge_tree_branch> right;
+		std::vector<displaced_curve> left;
+		std::vector<displaced_curve> right;
 	};
 
 	std::vector<ridge_tree_stem>
@@ -80,14 +80,14 @@ namespace terraformer
 		float max_length
 	);
 
-	displacement compute_field(std::span<ridge_tree_branch const> branches, location r, float min_distance);
+	displacement compute_field(std::span<displaced_curve const> branches, location r, float min_distance);
 
-	float compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance);
+	float compute_potential(std::span<displaced_curve const> branches, location r, float min_distance);
 
 	void compute_potential(
 		span_2d<float> output,
-		std::span<ridge_tree_branch const> left_siblings,
-		std::span<ridge_tree_branch const> right_siblings,
+		std::span<displaced_curve const> left_siblings,
+		std::span<displaced_curve const> right_siblings,
 		float pixel_size);
 }
 

@@ -6,7 +6,7 @@
 #include "lib/common/find_zeros.hpp"
 
 terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_branch_seeds(
-	array_tuple<location, float> const& displaced_points
+	displaced_curve const& displaced_points
 )
 {
 	auto const points = displaced_points.get<0>();
@@ -82,7 +82,7 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 }
 
 std::vector<terraformer::ridge_tree_branch_seed_sequence> terraformer::collect_ridge_tree_branch_seeds(
-	std::span<array_tuple<location, float> const> points
+	std::span<displaced_curve const> points
 )
 {
 	std::vector<terraformer::ridge_tree_branch_seed_sequence> ret;

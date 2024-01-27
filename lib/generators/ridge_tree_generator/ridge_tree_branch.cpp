@@ -2,7 +2,7 @@
 
 #include "./ridge_tree_branch.hpp"
 
-std::vector<terraformer::ridge_tree_branch>
+std::vector<terraformer::displaced_curve>
 terraformer::generate_branches(
 	array_tuple<location, direction> const& branch_points,
 	span_2d<float const> potential,
@@ -10,7 +10,7 @@ terraformer::generate_branches(
 	ridge_curve_description curve_desc,
 	random_generator& rng,
 	float d_max,
-	std::vector<ridge_tree_branch>&& existing_branches)
+	std::vector<displaced_curve>&& existing_branches)
 {
 	auto const points = branch_points.get<0>();
 	auto const normals = branch_points.get<1>();
@@ -54,7 +54,7 @@ terraformer::generate_branches(
 	return existing_branches;
 }
 
-void terraformer::trim_at_intersect(std::vector<ridge_tree_branch>& a, std::vector<ridge_tree_branch>& b, float min_distance)
+void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector<displaced_curve>& b, float min_distance)
 {
 	auto const md2 = min_distance*min_distance;
 	auto const outer_count = std::size(a);
@@ -203,7 +203,7 @@ terraformer::generate_branches(
 	return ret;
 }
 
-terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch const> branches, location r, float min_distance)
+terraformer::displacement terraformer::compute_field(std::span<displaced_curve const> branches, location r, float min_distance)
 {
 	displacement ret{};
 
@@ -228,12 +228,12 @@ terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch
 }
 
 
-float terraformer::compute_potential(std::span<ridge_tree_branch const> branches, location r, float min_distance)
+float terraformer::compute_potential(std::span<displaced_curve const> branches, location r, float min_distance)
 {
 	auto sum = 0.0f;
 	for(size_t k = 0; k != std::size(branches); ++k)
 	{
-		auto const points = branches[k].get<0>();
+		auto const points = branches[k].points();
 		sum += terraformer::fold_over_line_segments(
 			points,
 			[](auto seg, auto point, auto d02, auto... prev) {
@@ -250,8 +250,8 @@ float terraformer::compute_potential(std::span<ridge_tree_branch const> branches
 
 void terraformer::compute_potential(
 	span_2d<float> output,
-	std::span<ridge_tree_branch const> left_siblings,
-	std::span<ridge_tree_branch const> right_siblings,
+	std::span<displaced_curve const> left_siblings,
+	std::span<displaced_curve const> right_siblings,
 	float pixel_size)
 {
 	for(uint32_t y = 0; y != output.height(); ++y)

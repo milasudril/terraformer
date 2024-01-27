@@ -7,11 +7,11 @@
 
 #include <cassert>
 
-terraformer::array_tuple<terraformer::location, float>  terraformer::displace_xy(std::span<location const> c, displacement_profile dy)
+terraformer::displaced_curve terraformer::displace_xy(std::span<location const> c, displacement_profile dy)
 {
 	assert(std::size(c) >= 3);
 	auto c_distance = 0.0f;
-	terraformer::array_tuple<terraformer::location, float>  ret(std::size(c));
+	displaced_curve ret(std::size(c));
 	auto points = ret.get<0>();
 	auto offsets = ret.get<1>();
 

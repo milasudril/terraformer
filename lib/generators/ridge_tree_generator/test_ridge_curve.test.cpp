@@ -65,7 +65,7 @@ int main()
 	curves.append(root.get<0>());
 
 	terraformer::grayscale_image potential{pixel_count, pixel_count};
-	terraformer::compute_potential(potential, std::span{&root, 1}, std::span<terraformer::ridge_tree_branch const>{}, pixel_size);
+	terraformer::compute_potential(potential, std::span{&root, 1}, std::span<terraformer::displaced_curve const>{}, pixel_size);
 
 	terraformer::ridge_curve_description const curve_desc_2{
 		.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
