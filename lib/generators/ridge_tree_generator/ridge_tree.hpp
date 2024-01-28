@@ -4,6 +4,7 @@
 #define TERRAFORMER_RIDGE_TREE_HPP
 
 #include "./ridge_curve.hpp"
+#include "./ridge_tree_branch.hpp"
 
 #include "lib/curve_tools/displace.hpp"
 #include "lib/common/rng.hpp"
@@ -12,17 +13,6 @@
 
 namespace terraformer
 {
-	struct ridge_tree_branch_collection
-	{
-		static constexpr auto no_parent = static_cast<size_t>(-1);
-		enum class side:int{left, right};
-
-		size_t level;
-		std::vector<displaced_curve> curves;
-		size_t parent;
-		enum side side;
-	};
-
 	struct ridge_tree : std::vector<ridge_tree_branch_collection>
 	{
 		using std::vector<ridge_tree_branch_collection>::vector;

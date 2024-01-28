@@ -42,7 +42,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 					.invert_displacement = false,
 				},
 				.max_length = terraformer::domain_length{6144.0f}
-			},
+			}/*,
 			terraformer::ridge_tree_branch_description{
 				.displacement_profile {
 					.amplitude = terraformer::horizontal_amplitude{3096.0f/27.0f},
@@ -52,17 +52,18 @@ TESTCASE(terraformer_ridge_tree_generate)
 					.invert_displacement = false,
 				},
 				.max_length = terraformer::domain_length{3072.0f}
-			}
+			}*/
 		}
 	};
 
+	auto const t_0 = std::chrono::steady_clock::now();
 	auto const res = generate(
 		desc,
 		rng,
 		48.0f
 	);
-
-	printf("%zu\n", std::size(res));
+	auto const t = std::chrono::steady_clock::now();
+	printf("Elapsed time %.8g s\n", std::chrono::duration<double>(t - t_0).count());
 
 	terraformer::curve_set curves;
 	for(size_t k = 0; k != std::size(res); ++k)

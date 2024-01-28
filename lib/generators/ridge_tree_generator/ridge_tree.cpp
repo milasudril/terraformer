@@ -3,12 +3,6 @@
 #include "./ridge_tree.hpp"
 #include "./ridge_tree_branch.hpp"
 
-#include "lib/pixel_store/image.hpp"
-
-#include "lib/pixel_store/image_io.hpp"
-
-#include <queue>
-
 namespace terraformer
 {
 	namespace
@@ -65,10 +59,6 @@ terraformer::ridge_tree terraformer::generate(
 		}
 	);
 
-	auto const pixel_count = static_cast<uint32_t>(49152.0f/pixel_size);
-	terraformer::grayscale_image potential{pixel_count, pixel_count};
-	compute_potential(potential, ret.back().curves, std::span<displaced_curve const>{}, pixel_size);
-
 	size_t current_trunk_index = 0;
 
 	while(true)
@@ -89,7 +79,7 @@ terraformer::ridge_tree terraformer::generate(
 		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
 		auto next_level = generate_branches(
 			next_level_seeds,
-			potential,
+			ret,
 			pixel_size,
 			curve_levels[next_level_index].displacement_profile,
 			rng,
@@ -98,9 +88,6 @@ terraformer::ridge_tree terraformer::generate(
 
 		for(auto& stem: next_level)
 		{
-			if(next_level_index + 1 != std::size(curve_levels))
-			{ compute_potential(potential, stem.left, stem.right, pixel_size); }
-
 			ret.push_back(
 				ridge_tree_branch_collection{
 					.level = next_level_index,
