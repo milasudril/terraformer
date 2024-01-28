@@ -4,6 +4,8 @@
 
 #include "lib/curve_tools/dump.hpp"
 #include "lib/common/cfile_owner.hpp"
+#include "lib/pixel_store/image.hpp"
+#include "lib/pixel_store/image_io.hpp"
 #include <testfwk/testfwk.hpp>
 
 TESTCASE(terraformer_ridge_tree_generate)
@@ -60,11 +62,12 @@ TESTCASE(terraformer_ridge_tree_generate)
 		}
 	};
 
+	constexpr auto pixel_size = 48.0f;
 	auto const t_0 = std::chrono::steady_clock::now();
 	auto const res = generate(
 		desc,
 		rng,
-		48.0f
+		pixel_size
 	);
 	auto const t = std::chrono::steady_clock::now();
 	printf("Elapsed time %.8g s\n", std::chrono::duration<double>(t - t_0).count());
@@ -78,6 +81,34 @@ TESTCASE(terraformer_ridge_tree_generate)
 		}
 	}
 
-	auto curve_file = terraformer::make_output_file("/dev/shm/slask2.json");
+	auto curve_file = terraformer::make_output_file("/dev/shm/slask.json");
 	curves.write_to(curve_file.get());
+
+	terraformer::grayscale_image img{1024, 1024};
+	render(
+		res,
+		img,
+		terraformer::ridge_tree_render_description{
+			.curve_levels = std::vector{
+				terraformer::ridge_tree_branch_render_description{
+					.peak_elevation = 3500.0f,
+					.peak_radius = 3500.0f,
+				},
+				terraformer::ridge_tree_branch_render_description{
+					.peak_elevation = 2000.0f,
+					.peak_radius = 2000.0f,
+				},
+				terraformer::ridge_tree_branch_render_description{
+					.peak_elevation = 1000.0f,
+					.peak_radius = 1000.0f,
+				},
+				terraformer::ridge_tree_branch_render_description{
+					.peak_elevation = 1000.0f,
+					.peak_radius = 300.0f,
+				},
+			}
+		},
+		pixel_size
+	);
+	store(img, "/dev/shm/slask.exr");
 }

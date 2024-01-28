@@ -3,6 +3,8 @@
 #include "./ridge_tree.hpp"
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/curve_tools/rasterizer.hpp"
+
 namespace terraformer
 {
 	namespace
@@ -113,5 +115,44 @@ terraformer::ridge_tree::ridge_tree(
 			}
 		}
 		++current_trunk_index;
+	}
+}
+
+void terraformer::render(
+	ridge_tree const& tree,
+	span_2d<float> output,
+	ridge_tree_render_description const& params,
+	float pixel_size
+)
+{
+	for(auto const& branch_collection: tree)
+	{
+		auto const level = branch_collection.level;
+		if(level >= std::size(params.curve_levels))
+		{ continue; }
+
+		auto const peak_elevation = params.curve_levels[level].peak_elevation;
+		auto const scaled_peak_diameter = 2.0f*params.curve_levels[level].peak_radius/pixel_size;
+
+		for(auto const& curve: branch_collection.curves)
+		{
+			draw(
+				output,
+				curve.points(),
+				line_segment_draw_params{
+					.value = peak_elevation,
+					.blend_function = [](float old_val, float new_val, float strength){
+						return std::max(old_val, new_val*strength);
+					},
+					.scale = pixel_size,
+					.brush = [](float xi, float eta) {
+						return std::max(1.0f - std::sqrt(xi*xi + eta*eta), 0.0f);
+					},
+					.brush_diameter = [scaled_peak_diameter](float, float){
+						return scaled_peak_diameter;
+					}
+				}
+			);
+		}
 	}
 }

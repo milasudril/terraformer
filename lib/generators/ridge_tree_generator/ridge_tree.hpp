@@ -8,6 +8,7 @@
 
 #include "lib/curve_tools/displace.hpp"
 #include "lib/common/rng.hpp"
+#include "lib/common/span_2d.hpp"
 
 #include <vector>
 
@@ -59,6 +60,22 @@ namespace terraformer
 		float pixel_size
 	)
 	{ return ridge_tree{description, rng, pixel_size}; }
+
+	struct ridge_tree_branch_render_description
+	{
+		float peak_elevation;
+		float peak_radius;
+	};
+
+	struct ridge_tree_render_description
+	{
+		std::vector<ridge_tree_branch_render_description> curve_levels;
+	};
+
+	void render(ridge_tree const& tree,
+		span_2d<float> output,
+		ridge_tree_render_description const& params,
+		float pixel_size);
 }
 
 #endif
