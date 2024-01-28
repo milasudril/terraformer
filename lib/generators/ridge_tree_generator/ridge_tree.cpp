@@ -19,17 +19,17 @@ namespace terraformer
 	}
 }
 
-terraformer::ridge_tree terraformer::generate(
+terraformer::ridge_tree::ridge_tree(
 	ridge_tree_description const& description,
 	random_generator rng,
 	float pixel_size
 )
 {
-	ridge_tree ret{};
+	auto& ret = m_value;
 	std::span curve_levels{description.curve_levels};
 
 	if(std::size(curve_levels) == 0)
-	{ return ret; }
+	{ return; }
 
 	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].growth_params.max_length/pixel_size);
 	auto const trunk_offsets = generate(
@@ -64,7 +64,7 @@ terraformer::ridge_tree terraformer::generate(
 	while(true)
 	{
 		if(current_trunk_index == std::size(ret))
-		{ return ret; }
+		{ return; }
 
 		auto const& current_trunk = ret[current_trunk_index];
 		auto const next_level_index = current_trunk.level  + 1;
@@ -114,6 +114,4 @@ terraformer::ridge_tree terraformer::generate(
 		}
 		++current_trunk_index;
 	}
-
-	return ret;
 }
