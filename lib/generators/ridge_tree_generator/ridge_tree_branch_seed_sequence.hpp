@@ -10,8 +10,8 @@ namespace terraformer
 {
 	struct ridge_tree_branch_seed_sequence
 	{
-		array_tuple<location, direction> left;
-		array_tuple<location, direction> right;
+		array_tuple<location, direction, size_t> left;
+		array_tuple<location, direction, size_t> right;
 	};
 
 	ridge_tree_branch_seed_sequence collect_ridge_tree_branch_seeds(
