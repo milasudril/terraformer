@@ -16,8 +16,6 @@ namespace terraformer
 		horizontal_amplitude amplitude;
 		domain_length wavelength;
 		float damping;  // TODO: Should be within ]0, 1[
-		bool flip_direction{};
-		bool invert_displacement{};
 	};
 
 	std::vector<float> generate(

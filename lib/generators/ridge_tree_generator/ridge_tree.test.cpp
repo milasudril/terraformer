@@ -17,9 +17,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 				.displacement_profile {
 					.amplitude = terraformer::horizontal_amplitude{3096.0f},
 					.wavelength = terraformer::domain_length{12384.0f},
-					.damping = std::sqrt(0.5f),
-					.flip_direction = false,
-					.invert_displacement = false,
+					.damping = std::sqrt(0.5f)
 				},
 				.growth_params{
 					.max_length = terraformer::domain_length{49152.0f},
@@ -30,9 +28,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 				.displacement_profile {
 					.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
 					.wavelength = terraformer::domain_length{12384.0f/3.0f},
-					.damping = std::sqrt(0.5f),
-					.flip_direction = false,
-					.invert_displacement = false,
+					.damping = std::sqrt(0.5f)
 				},
 				.growth_params{
 					.max_length = terraformer::domain_length{12384.0f},
@@ -43,9 +39,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 				.displacement_profile {
 					.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
 					.wavelength = terraformer::domain_length{12384.0f/9.0f},
-					.damping = std::sqrt(0.5f),
-					.flip_direction = false,
-					.invert_displacement = false,
+					.damping = std::sqrt(0.5f)
 				},
 				.growth_params{
 					.max_length = terraformer::domain_length{12384.0f/3.0f},
@@ -56,9 +50,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 				.displacement_profile {
 					.amplitude = terraformer::horizontal_amplitude{3096.0f/27.0f},
 					.wavelength = terraformer::domain_length{12384.0f/27.0f},
-					.damping = std::sqrt(0.5f),
-					.flip_direction = false,
-					.invert_displacement = false,
+					.damping = std::sqrt(0.5f)
 				},
 				.growth_params {
 					.max_length = terraformer::domain_length{12384.0f/9.0f},
