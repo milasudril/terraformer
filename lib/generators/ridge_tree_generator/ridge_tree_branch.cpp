@@ -181,11 +181,9 @@ terraformer::generate_branches(
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,
-	float max_length
+	ridge_tree_branch_growth_description growth_params
 )
 {
-	// TODO: Need to pass the min distance
-	auto const min_distance = 1536.0f;
 	std::vector<ridge_tree_stem_collection> ret;
 
 	if(std::size(parents) == 0)
@@ -198,10 +196,10 @@ terraformer::generate_branches(
 		pixel_size,
 		curve_desc,
 		rng,
-		max_length
+		growth_params.max_length
 	);
 	std::vector<displaced_curve> dummy{};
-	trim_at_intersect(current_stem_collection.left, dummy, min_distance);
+	trim_at_intersect(current_stem_collection.left, dummy, growth_params.min_neighbour_distance);
 
 	for(size_t k = 1; k != std::size(parents); ++k)
 	{
@@ -211,7 +209,7 @@ terraformer::generate_branches(
 			pixel_size,
 			curve_desc,
 			rng,
-			max_length
+			growth_params.max_length
 		);
 
 		auto left_branches = generate_branches(
@@ -220,10 +218,10 @@ terraformer::generate_branches(
 			pixel_size,
 			curve_desc,
 			rng,
-			max_length
+			growth_params.max_length
 		);
 
-		trim_at_intersect(current_stem_collection.right, left_branches, min_distance);
+		trim_at_intersect(current_stem_collection.right, left_branches, growth_params.min_neighbour_distance);
 		ret.push_back(std::move(current_stem_collection));
 		current_stem_collection.left = std::move(left_branches);
 	}
@@ -234,9 +232,9 @@ terraformer::generate_branches(
 		pixel_size,
 		curve_desc,
 		rng,
-		max_length
+		growth_params.max_length
 	);
-	trim_at_intersect(current_stem_collection.right, dummy, min_distance);
+	trim_at_intersect(current_stem_collection.right, dummy, growth_params.min_neighbour_distance);
 
 
 	ret.push_back(std::move(current_stem_collection));

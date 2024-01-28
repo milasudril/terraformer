@@ -31,7 +31,7 @@ terraformer::ridge_tree terraformer::generate(
 	if(std::size(curve_levels) == 0)
 	{ return ret; }
 
-	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].max_length/pixel_size);
+	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].growth_params.max_length/pixel_size);
 	auto const trunk_offsets = generate(
 		curve_levels[0].displacement_profile,
 		rng,
@@ -83,7 +83,7 @@ terraformer::ridge_tree terraformer::generate(
 			pixel_size,
 			curve_levels[next_level_index].displacement_profile,
 			rng,
-			curve_levels[next_level_index].max_length
+			curve_levels[next_level_index].growth_params
 		);
 
 		for(auto& stem: next_level)

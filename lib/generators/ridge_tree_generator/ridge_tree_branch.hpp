@@ -73,6 +73,12 @@ namespace terraformer
 		std::vector<displaced_curve> right;
 	};
 
+	struct ridge_tree_branch_growth_description
+	{
+		domain_length max_length;
+		domain_length min_neighbour_distance;
+	};
+
 	std::vector<ridge_tree_stem_collection>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence const> parents,
@@ -80,7 +86,7 @@ namespace terraformer
 		float pixel_size,
 		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,
-		float max_length
+		ridge_tree_branch_growth_description growth_params
 	);
 }
 

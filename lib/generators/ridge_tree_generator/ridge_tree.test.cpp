@@ -21,7 +21,10 @@ TESTCASE(terraformer_ridge_tree_generate)
 					.flip_direction = false,
 					.invert_displacement = false,
 				},
-				.max_length = terraformer::domain_length{49152.0f}
+				.growth_params{
+					.max_length = terraformer::domain_length{49152.0f},
+					.min_neighbour_distance = terraformer::domain_length{49152.0f}
+				}
 			},
 			terraformer::ridge_tree_branch_description{
 				.displacement_profile {
@@ -31,7 +34,10 @@ TESTCASE(terraformer_ridge_tree_generate)
 					.flip_direction = false,
 					.invert_displacement = false,
 				},
-				.max_length = terraformer::domain_length{12384.0f}
+				.growth_params{
+					.max_length = terraformer::domain_length{12384.0f},
+					.min_neighbour_distance = terraformer::domain_length{6144.0f}
+				}
 			},
 			terraformer::ridge_tree_branch_description{
 				.displacement_profile {
@@ -41,8 +47,11 @@ TESTCASE(terraformer_ridge_tree_generate)
 					.flip_direction = false,
 					.invert_displacement = false,
 				},
-				.max_length = terraformer::domain_length{6144.0f}
-			}/*,
+				.growth_params{
+					.max_length = terraformer::domain_length{12384.0f/3.0f},
+					.min_neighbour_distance = terraformer::domain_length{1536.0f}
+				}
+			},
 			terraformer::ridge_tree_branch_description{
 				.displacement_profile {
 					.amplitude = terraformer::horizontal_amplitude{3096.0f/27.0f},
@@ -51,8 +60,11 @@ TESTCASE(terraformer_ridge_tree_generate)
 					.flip_direction = false,
 					.invert_displacement = false,
 				},
-				.max_length = terraformer::domain_length{3072.0f}
-			}*/
+				.growth_params {
+					.max_length = terraformer::domain_length{12384.0f/9.0f},
+					.min_neighbour_distance = terraformer::domain_length{384.0f}
+				}
+			}
 		}
 	};
 

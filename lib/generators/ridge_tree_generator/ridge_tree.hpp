@@ -21,7 +21,7 @@ namespace terraformer
 	struct ridge_tree_branch_description
 	{
 		ridge_tree_branch_displacement_description displacement_profile;
-		domain_length max_length;
+		ridge_tree_branch_growth_description growth_params;
 	};
 
 	struct ridge_tree_description
