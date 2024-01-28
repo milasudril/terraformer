@@ -24,7 +24,6 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 	ridge_tree_branch_seed_sequence ret;
 	float max_offset = 0.0f;
 	std::optional<size_t> selected_branch_point;
-	std::vector<size_t> branch_at_tmp;
 	for(size_t k = 1; k != std::size(offsets) - 1;++k)
 	{
 		if(l != std::size(x_intercepts.zeros) && k == x_intercepts.zeros[l])
