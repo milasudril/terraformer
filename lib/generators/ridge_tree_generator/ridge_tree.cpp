@@ -88,23 +88,29 @@ terraformer::ridge_tree terraformer::generate(
 
 		for(auto& stem: next_level)
 		{
-			ret.push_back(
-				ridge_tree_branch_collection{
-					.level = next_level_index,
-					.curves = std::move(stem.left),
-					.parent = current_trunk_index,
-					.side = ridge_tree_branch_collection::side::left
-				}
-			);
+			if(std::size(stem.left) != 0)
+			{
+				ret.push_back(
+					ridge_tree_branch_collection{
+						.level = next_level_index,
+						.curves = std::move(stem.left),
+						.parent = current_trunk_index,
+						.side = ridge_tree_branch_collection::side::left
+					}
+				);
+			}
 
-			ret.push_back(
-				ridge_tree_branch_collection{
-					.level = next_level_index,
-					.curves = std::move(stem.right),
-					.parent = current_trunk_index,
-					.side = ridge_tree_branch_collection::side::right
-				}
-			);
+			if(std::size(stem.right) != 0)
+			{
+				ret.push_back(
+					ridge_tree_branch_collection{
+						.level = next_level_index,
+						.curves = std::move(stem.right),
+						.parent = current_trunk_index,
+						.side = ridge_tree_branch_collection::side::right
+					}
+				);
+			}
 		}
 		++current_trunk_index;
 	}

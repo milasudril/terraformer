@@ -58,7 +58,10 @@ namespace terraformer
 	public:
 		curve_set& append(std::span<location const> curve_to_store)
 		{
-			m_curves.push_back(curve{std::begin(curve_to_store), std::end(curve_to_store)});
+			if(std::size(curve_to_store) != 0)
+			{
+				m_curves.push_back(curve{std::begin(curve_to_store), std::end(curve_to_store)});
+			}
 			return *this;
 		}
 

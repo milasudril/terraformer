@@ -236,7 +236,6 @@ terraformer::generate_branches(
 	);
 	trim_at_intersect(current_stem_collection.right, dummy, growth_params.min_neighbour_distance);
 
-
 	ret.push_back(std::move(current_stem_collection));
 	return ret;
 }
