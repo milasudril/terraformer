@@ -38,7 +38,7 @@ terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch
 
 std::vector<terraformer::displaced_curve>
 terraformer::generate_branches(
-	array_tuple<location, direction, size_t> const& branch_points,
+	array_tuple<location, direction> const& branch_points,
 	std::span<ridge_tree_branch_collection const> existing_branches,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,

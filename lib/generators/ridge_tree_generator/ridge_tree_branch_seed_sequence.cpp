@@ -35,9 +35,9 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 				auto const loc_c = points[*selected_branch_point + 1];
 				auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
 				if(side >= 0.0f)
-				{ ret.left.push_back(tuple{loc_b, normal, *selected_branch_point}); }
+				{ ret.left.push_back(tuple{loc_b, normal}); }
 				else
-				{ ret.right.push_back(tuple{loc_b, normal, *selected_branch_point}); }
+				{ ret.right.push_back(tuple{loc_b, normal}); }
 			}
 			max_offset = 0.0f;
 			++l;
@@ -69,14 +69,13 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 		auto const loc_c = points[*selected_branch_point + 1];
 		auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
 		if(side >= 0.0f)
-		{ ret.left.push_back(tuple{loc_b, normal, *selected_branch_point}); }
+		{ ret.left.push_back(tuple{loc_b, normal}); }
 		else
-		{ ret.right.push_back(tuple{loc_b, normal, *selected_branch_point}); }
+		{ ret.right.push_back(tuple{loc_b, normal}); }
 	}
 
 	std::ranges::reverse(ret.right.get<0>());
 	std::ranges::reverse(ret.right.get<1>());
-	std::ranges::reverse(ret.right.get<2>());
 
 	return ret;
 }
