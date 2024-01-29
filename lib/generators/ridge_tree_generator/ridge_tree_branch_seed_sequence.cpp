@@ -34,6 +34,7 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 				auto const loc_b = points[*selected_branch_point];
 				auto const loc_c = points[*selected_branch_point + 1];
 				auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
+				ret.branch_index.push_back(*selected_branch_point);
 				if(side >= 0.0f)
 				{ ret.left.push_back(tuple{loc_b, normal}); }
 				else
@@ -68,6 +69,7 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 		auto const loc_b = points[*selected_branch_point];
 		auto const loc_c = points[*selected_branch_point + 1];
 		auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
+		ret.branch_index.push_back(*selected_branch_point);
 		if(side >= 0.0f)
 		{ ret.left.push_back(tuple{loc_b, normal}); }
 		else
