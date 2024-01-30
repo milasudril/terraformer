@@ -57,7 +57,8 @@ terraformer::ridge_tree::ridge_tree(
 				)
 			},
 			.parent = ridge_tree_branch_collection::no_parent,
-			.side = ridge_tree_branch_collection::side::left
+			.side = ridge_tree_branch_collection::side::left,
+			.branch_at = std::vector<std::vector<size_t>>{}
 		}
 	);
 
@@ -68,7 +69,7 @@ terraformer::ridge_tree::ridge_tree(
 		if(current_trunk_index == std::size(ret))
 		{ return; }
 
-		auto const& current_trunk = ret[current_trunk_index];
+		auto& current_trunk = ret[current_trunk_index];
 		auto const next_level_index = current_trunk.level  + 1;
 		if(next_level_index == std::size(curve_levels))
 		{
@@ -78,7 +79,7 @@ terraformer::ridge_tree::ridge_tree(
 
 		std::span<displaced_curve const> stem{current_trunk.curves};
 
-		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
+		auto next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret,
@@ -87,6 +88,8 @@ terraformer::ridge_tree::ridge_tree(
 			rng,
 			curve_levels[next_level_index].growth_params
 		);
+		for(auto& item : next_level_seeds)
+		{ current_trunk.branch_at.push_back(std::move(item.branch_index)); }
 
 		for(auto& stem: next_level)
 		{
@@ -97,7 +100,8 @@ terraformer::ridge_tree::ridge_tree(
 						.level = next_level_index,
 						.curves = std::move(stem.left),
 						.parent = current_trunk_index,
-						.side = ridge_tree_branch_collection::side::left
+						.side = ridge_tree_branch_collection::side::left,
+						.branch_at = std::vector<std::vector<size_t>>{}
 					}
 				);
 			}
@@ -109,7 +113,8 @@ terraformer::ridge_tree::ridge_tree(
 						.level = next_level_index,
 						.curves = std::move(stem.right),
 						.parent = current_trunk_index,
-						.side = ridge_tree_branch_collection::side::right
+						.side = ridge_tree_branch_collection::side::right,
+						.branch_at = std::vector<std::vector<size_t>>{}
 					}
 				);
 			}

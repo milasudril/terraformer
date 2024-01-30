@@ -24,6 +24,7 @@ namespace terraformer
 		std::vector<displaced_curve> curves;
 		size_t parent;
 		enum side side;
+		std::vector<std::vector<size_t>> branch_at;
 	};
 
 	displacement compute_field(std::span<displaced_curve const> branches, location r, float min_distance);
