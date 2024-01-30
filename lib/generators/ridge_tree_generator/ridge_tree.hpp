@@ -29,27 +29,26 @@ namespace terraformer
 
 	struct ridge_tree_elevation_noise
 	{
+
 		vertical_amplitude amplitude;
 		domain_length wavelength;
 		float damping;  // TODO: Should be within ]0, 1[
 	};
 
-	struct ridge_tree_trunk_elevation_profile
-	{
-		elevation expected_elevation;
-		vertical_amplitude peak_displacement;
-		ridge_tree_elevation_noise noise;
-	};
-
 	struct ridge_tree_branch_elevation_profile
 	{
+		// envelope
 		slope_angle starting_slope;
-		vertical_amplitude starting_peak_displacement;
-
 		elevation final_elevation;
 		slope_angle final_slope;
-		vertical_amplitude final_peak_displacement;
 
+		// noise based on peaks
+		vertical_amplitude starting_peak_displacement;
+		vertical_amplitude final_peak_displacement;
+		slope_angle min_peak_angle;
+		slope_angle max_peak_angle;
+
+		// continuos noise
 		ridge_tree_elevation_noise noise;
 	};
 
@@ -77,8 +76,10 @@ namespace terraformer
 		{ return m_value[index]; }
 
 		void update_elevations(
-			ridge_tree_trunk_elevation_profile const&,
-			std::span<ridge_tree_branch_elevation_profile const>
+			elevation initial_elevation,
+			std::span<ridge_tree_branch_elevation_profile const>,
+			random_generator,
+			float pixel_size
 		);
 
 	private:
