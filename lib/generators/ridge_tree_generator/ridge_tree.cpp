@@ -44,23 +44,31 @@ terraformer::ridge_tree::ridge_tree(
 	auto const trunk_base_curve = terraformer::make_point_array
 		(description.root_location, description.trunk_direction, trunk_pixel_count, pixel_size);
 
-	ret.push_back(
-		ridge_tree_branch_collection{
-			.level = 0,
-			.curves = std::vector{
+	{
+		array_tuple<displaced_curve, size_t> root;
+		root.push_back(
+			tuple{
 				displace_xy(
-					trunk_base_curve,
-					terraformer::displacement_profile{
-						.offsets = trunk_offsets,
-						.sample_period = pixel_size
-					}
-				)
-			},
-			.parent = ridge_tree_branch_collection::no_parent,
-			.side = ridge_tree_branch_collection::side::left,
-			.branch_at = std::vector<std::vector<size_t>>{}
-		}
-	);
+						trunk_base_curve,
+						terraformer::displacement_profile{
+							.offsets = trunk_offsets,
+							.sample_period = pixel_size
+						}
+					),
+				ridge_tree_branch_collection::no_parent
+			}
+		);
+
+		ret.push_back(
+			ridge_tree_branch_collection{
+				.level = 0,
+				.curves = std::move(root),
+				.parent = ridge_tree_branch_collection::no_parent,
+				.side = ridge_tree_branch_collection::side::left,
+				.branch_at = std::vector<std::vector<size_t>>{}
+			}
+		);
+	}
 
 	size_t current_trunk_index = 0;
 
@@ -77,9 +85,9 @@ terraformer::ridge_tree::ridge_tree(
 			continue;
 		}
 
-		std::span<displaced_curve const> stem{current_trunk.curves};
+//		std::span<displaced_curve const> stem{current_trunk.curves};
 
-		auto next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(stem);
+		auto next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(current_trunk.curves.get<0>());
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret,
@@ -143,7 +151,7 @@ void terraformer::render(
 		{
 			draw(
 				output,
-				curve.points(),
+				curve.get<0>().points(),
 				line_segment_draw_params{
 					.value = peak_elevation,
 					.blend_function = [](float old_val, float new_val, float strength){

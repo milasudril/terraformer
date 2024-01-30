@@ -31,23 +31,24 @@ terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch
 	displacement ret{};
 
 	for(size_t k = 0; k != std::size(branches); ++k)
-	{ ret += compute_field(branches[k].curves, r, min_distance); }
+	{ ret += compute_field(branches[k].curves.get<0>(), r, min_distance); }
 
 	return ret;
 }
 
-std::vector<terraformer::displaced_curve>
+terraformer::array_tuple<terraformer::displaced_curve, size_t>
 terraformer::generate_branches(
-	array_tuple<location, direction> const& branch_points,
+	array_tuple<location, direction, size_t> const& branch_points,
 	std::span<ridge_tree_branch_collection const> existing_branches,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,
 	float d_max,
-	std::vector<displaced_curve>&& gen_branches)
+	array_tuple<displaced_curve, size_t>&& gen_branches)
 {
 	auto const points = branch_points.get<0>();
 	auto const normals = branch_points.get<1>();
+	auto const branch_index = branch_points.get<2>();
 	for(size_t k = 0; k != std::size(branch_points); ++k)
 	{
 		auto const base_curve = generate_branch_base_curve(
@@ -75,20 +76,23 @@ terraformer::generate_branches(
 		auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
 		gen_branches.push_back(
-			displace_xy(
-				base_curve,
-				displacement_profile{
-					.offsets = offsets,
-					.sample_period = pixel_size,
-				}
-			)
+			tuple{
+				displace_xy(
+					base_curve,
+					displacement_profile{
+						.offsets = offsets,
+						.sample_period = pixel_size,
+					}
+				),
+				branch_index[k]
+			}
 		);
 	}
 
 	return gen_branches;
 }
 
-void terraformer::trim_at_intersect(std::vector<displaced_curve>& a, std::vector<displaced_curve>& b, float min_distance)
+void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<displaced_curve> b, float min_distance)
 {
 	auto const md2 = min_distance*min_distance;
 
@@ -198,8 +202,8 @@ terraformer::generate_branches(
 		rng,
 		growth_params.max_length
 	);
-	std::vector<displaced_curve> dummy{};
-	trim_at_intersect(current_stem_collection.left, dummy, growth_params.min_neighbour_distance);
+	std::span<displaced_curve> dummy{};
+	trim_at_intersect(current_stem_collection.left.get<0>(), dummy, growth_params.min_neighbour_distance);
 
 	for(size_t k = 1; k != std::size(parents); ++k)
 	{
@@ -221,7 +225,7 @@ terraformer::generate_branches(
 			growth_params.max_length
 		);
 
-		trim_at_intersect(current_stem_collection.right, left_branches, growth_params.min_neighbour_distance);
+		trim_at_intersect(current_stem_collection.right.get<0>(), left_branches.get<0>(), growth_params.min_neighbour_distance);
 		ret.push_back(std::move(current_stem_collection));
 		current_stem_collection.left = std::move(left_branches);
 	}
@@ -234,7 +238,7 @@ terraformer::generate_branches(
 		rng,
 		growth_params.max_length
 	);
-	trim_at_intersect(current_stem_collection.right, dummy, growth_params.min_neighbour_distance);
+	trim_at_intersect(current_stem_collection.right.get<0>(), dummy, growth_params.min_neighbour_distance);
 
 	ret.push_back(std::move(current_stem_collection));
 	return ret;

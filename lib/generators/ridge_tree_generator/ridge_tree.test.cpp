@@ -77,7 +77,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 	{
 		for(auto const& curve : res[k].curves)
 		{
-			curves.append(curve.points());
+			curves.append(curve.get<0>().points());
 		}
 	}
 

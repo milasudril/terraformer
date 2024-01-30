@@ -21,7 +21,7 @@ namespace terraformer
 		enum class side:int{left, right};
 
 		size_t level;
-		std::vector<displaced_curve> curves;
+		array_tuple<displaced_curve, size_t> curves;
 		size_t parent;
 		enum side side;
 		std::vector<std::vector<size_t>> branch_at;
@@ -56,22 +56,22 @@ namespace terraformer
 		return base_curve;
 	}
 
-	std::vector<displaced_curve>
+	array_tuple<displaced_curve, size_t>
 	generate_branches(
-		array_tuple<location, direction> const& branch_points,
+		array_tuple<location, direction, size_t> const& branch_points,
 		std::span<ridge_tree_branch_collection const> existing_branches,
 		float pixel_size,
 		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,
 		float d_max,
-		std::vector<displaced_curve>&& gen_branches = std::vector<displaced_curve>{});
+		array_tuple<displaced_curve, size_t>&& gen_branches = array_tuple<displaced_curve, size_t>{});
 
-	void trim_at_intersect(std::vector<displaced_curve>& a, std::vector<displaced_curve>& b, float threshold);
+	void trim_at_intersect(std::span<displaced_curve> a, std::span<displaced_curve> b, float threshold);
 
 	struct ridge_tree_stem_collection
 	{
-		std::vector<displaced_curve> left;
-		std::vector<displaced_curve> right;
+		array_tuple<displaced_curve, size_t> left;
+		array_tuple<displaced_curve, size_t> right;
 	};
 
 	struct ridge_tree_branch_growth_description
