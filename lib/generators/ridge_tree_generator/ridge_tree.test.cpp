@@ -64,7 +64,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 
 	constexpr auto pixel_size = 48.0f;
 	auto const t_0 = std::chrono::steady_clock::now();
-	auto const res = generate(
+	auto res = generate(
 		desc,
 		rng,
 		pixel_size
@@ -83,6 +83,73 @@ TESTCASE(terraformer_ridge_tree_generate)
 
 	auto curve_file = terraformer::make_output_file("/dev/shm/slask.json");
 	curves.write_to(curve_file.get());
+
+	std::vector elevation_profiles{
+		terraformer::ridge_tree_branch_elevation_profile{
+			.starting_slope = terraformer::slope_angle{0.0f},
+			.final_elevation = terraformer::elevation{3072.0f},
+			.final_slope = terraformer::slope_angle{0.0f},
+			.starting_peak_displacement = terraformer::vertical_amplitude{512.0f},
+			.final_peak_displacement = terraformer::vertical_amplitude{512.0f},
+			.min_peak_angle = terraformer::slope_angle{0.0f},
+			.max_peak_angle = terraformer::slope_angle{0.0f},
+			.noise = terraformer::ridge_tree_elevation_noise{
+				.amplitude = terraformer::vertical_amplitude{64.0f},
+				.wavelength = terraformer::domain_length{256.0f},
+				.damping = std::sqrt(0.5f)
+			}
+		},
+		terraformer::ridge_tree_branch_elevation_profile{
+			.starting_slope = terraformer::slope_angle{0.0f},
+			.final_elevation = terraformer::elevation{256.0f},
+			.final_slope = terraformer::slope_angle{0.0f},
+			.starting_peak_displacement = terraformer::vertical_amplitude{512.0f},
+			.final_peak_displacement = terraformer::vertical_amplitude{43.0f},
+			.min_peak_angle = terraformer::slope_angle{0.0f},
+			.max_peak_angle = terraformer::slope_angle{0.0f},
+			.noise = terraformer::ridge_tree_elevation_noise{
+				.amplitude = terraformer::vertical_amplitude{16.0f},
+				.wavelength = terraformer::domain_length{256.0f},
+				.damping = std::sqrt(0.5f)
+			}
+		},
+		terraformer::ridge_tree_branch_elevation_profile{
+			.starting_slope = terraformer::slope_angle{0.0f},
+			.final_elevation = terraformer::elevation{128.0f},
+			.final_slope = terraformer::slope_angle{0.0f},
+			.starting_peak_displacement = terraformer::vertical_amplitude{64.0f},
+			.final_peak_displacement = terraformer::vertical_amplitude{16.0f},
+			.min_peak_angle = terraformer::slope_angle{0.0f},
+			.max_peak_angle = terraformer::slope_angle{0.0f},
+			.noise = terraformer::ridge_tree_elevation_noise{
+				.amplitude = terraformer::vertical_amplitude{16.0f},
+				.wavelength = terraformer::domain_length{256.0f},
+				.damping = std::sqrt(0.5f)
+			}
+		},
+		terraformer::ridge_tree_branch_elevation_profile{
+			.starting_slope = terraformer::slope_angle{0.0f},
+			.final_elevation = terraformer::elevation{64.0f},
+			.final_slope = terraformer::slope_angle{0.0f},
+			.starting_peak_displacement = terraformer::vertical_amplitude{16.0f},
+			.final_peak_displacement = terraformer::vertical_amplitude{8.0f},
+			.min_peak_angle = terraformer::slope_angle{0.0f},
+			.max_peak_angle = terraformer::slope_angle{0.0f},
+			.noise = terraformer::ridge_tree_elevation_noise{
+				.amplitude = terraformer::vertical_amplitude{16.0f},
+				.wavelength = terraformer::domain_length{256.0f},
+				.damping = std::sqrt(0.5f)
+			}
+		}
+	};
+
+	res.update_elevations(
+ 		terraformer::elevation{2048.0f},
+		elevation_profiles,
+		rng,
+		pixel_size
+	);
+
 
 	terraformer::grayscale_image img{1024, 1024};
 	render(

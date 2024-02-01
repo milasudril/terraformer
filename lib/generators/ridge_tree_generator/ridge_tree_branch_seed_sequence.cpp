@@ -82,15 +82,15 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 	return ret;
 }
 
-std::vector<terraformer::ridge_tree_branch_seed_sequence> terraformer::collect_ridge_tree_branch_seeds(
+terraformer::array_tuple<terraformer::ridge_tree_branch_seed_sequence, size_t> terraformer::collect_ridge_tree_branch_seeds(
 	std::span<displaced_curve const> points
 )
 {
-	std::vector<terraformer::ridge_tree_branch_seed_sequence> ret;
+	terraformer::array_tuple<terraformer::ridge_tree_branch_seed_sequence, size_t> ret;
 	ret.reserve(std::size(points));
 	for(size_t k = 0; k != std::size(points); ++k)
 	{
-		ret.push_back(collect_ridge_tree_branch_seeds(points[k]));
+		ret.push_back(tuple{collect_ridge_tree_branch_seeds(points[k]), k});
 	}
 	return ret;
 }

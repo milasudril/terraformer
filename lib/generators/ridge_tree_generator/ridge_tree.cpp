@@ -89,14 +89,14 @@ terraformer::ridge_tree::ridge_tree(
 
 		auto next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(current_trunk.curves.get<0>());
 		auto next_level = generate_branches(
-			next_level_seeds,
+			next_level_seeds.get<0>(),
 			ret,
 			pixel_size,
 			curve_levels[next_level_index].displacement_profile,
 			rng,
 			curve_levels[next_level_index].growth_params
 		);
-		for(auto& item : next_level_seeds)
+		for(auto& item : next_level_seeds.get<0>())
 		{ current_trunk.branch_at.push_back(std::move(item.branch_index)); }
 
 		for(auto& stem: next_level)
@@ -128,6 +128,37 @@ terraformer::ridge_tree::ridge_tree(
 			}
 		}
 		++current_trunk_index;
+	}
+}
+
+void terraformer::ridge_tree::update_elevations(
+	elevation,
+	std::span<ridge_tree_branch_elevation_profile const> elevation_profiles,
+	random_generator,
+	float
+)
+{
+	std::span<ridge_tree_branch_collection> branches{m_value};
+	for(auto& current_collection : branches)
+	{
+		auto const level = current_collection.level;
+
+		if(level >= std::size(elevation_profiles))
+		{ return; }
+
+		auto const parent = current_collection.parent;
+		auto const side = current_collection.side == ridge_tree_branch_collection::side::left? "left":"right";
+
+		printf("level: %zu, parent: %zu, side: %s\n", level, parent, side);
+
+#if 0
+		for(size_t k = 0; k != std::size(current_collection.curves); ++k)
+		{
+			auto z_0 = parent == ridge_tree_branch_collection::no_parent?
+				  initial_elevation
+				: branches[parent].curves;
+		}
+#endif
 	}
 }
 

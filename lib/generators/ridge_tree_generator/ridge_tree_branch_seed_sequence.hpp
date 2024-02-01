@@ -19,7 +19,7 @@ namespace terraformer
 		displaced_curve const& points
 	);
 
-	std::vector<ridge_tree_branch_seed_sequence> collect_ridge_tree_branch_seeds(
+	array_tuple<ridge_tree_branch_seed_sequence, size_t> collect_ridge_tree_branch_seeds(
 		std::span<displaced_curve const> points
 	);
 };
