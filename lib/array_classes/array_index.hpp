@@ -7,6 +7,20 @@
 namespace terraformer
 {
 	template<class T, class Rep = size_t>
+	class array_size
+	{
+	public:
+		explicit array_size(Rep value): m_value{value}{}
+
+		constexpr auto get() const { return m_value; }
+
+		constexpr auto operator<=>(array_size const&) const = default;
+
+	private:
+		Rep m_value;
+	};
+
+	template<class T, class Rep = size_t>
 	class array_index
 	{
 	public:
@@ -77,6 +91,14 @@ namespace terraformer
 	template<class T, class Rep>
 	constexpr auto& deref(T const* ptr, array_index<T, Rep> index)
 	{ return ptr[index.get()]; }
-}
 
+	template<class T, class Rep>
+	constexpr auto operator<(array_index<T, Rep> index, array_size<T, Rep> size)
+	{ return index.get() < size.get(); }
+
+	template<class T, class Rep>
+	constexpr auto operator!=(array_index<T, Rep> index, array_size<T, Rep> size)
+	{ return index.get() != size.get(); }
+
+}
 #endif
