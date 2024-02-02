@@ -77,3 +77,19 @@ TESTCASE(terraformer_array_index_deref)
 	std::array<int, 4> vals{1, 2, 3, 4};
 	EXPECT_EQ(deref(std::data(vals), terraformer::array_index<int>{3}), 4);
 }
+
+TESTCASE(terraformer_array_index_compare)
+{
+	EXPECT_EQ(terraformer::array_index<int>{34}, terraformer::array_index<int>{34});
+
+	EXPECT_LT(terraformer::array_index<int>{33}, terraformer::array_index<int>{34});
+
+	EXPECT_NE(terraformer::array_index<int>{35}, terraformer::array_index<int>{34});
+}
+
+TESTCASE(terraformer_array_index_compare_to_size)
+{
+	EXPECT_LE(terraformer::array_index<int>{34}, terraformer::array_index<int>{35});
+
+	EXPECT_NE(terraformer::array_index<int>{34}, terraformer::array_index<int>{35});
+}
