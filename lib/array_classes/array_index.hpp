@@ -47,6 +47,13 @@ namespace terraformer
 		Rep m_value{};
 	};
 	
+	template<class Rep = size_t>
+	using byte_size = array_size<std::byte, Rep>;
+	
+	template<class T, class Rep>
+	constexpr auto make_byte_size(array_size<T, Rep> size)
+	{ return byte_size{(sizeof(T)*size).get()}; }
+	
 	template<class T, class Rep>
 	constexpr auto operator+(array_size<T, Rep> a, array_size<T, Rep> b)
 	{ return a += b; }

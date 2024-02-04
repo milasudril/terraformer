@@ -79,6 +79,20 @@ TESTCASE(terraformer_array_size_mul)
 	EXPECT_EQ(val.get(), 2852);
 }
 
+TESTCASE(terraformer_make_byte_size)
+{
+	auto const val = make_byte_size(terraformer::array_size<int>{1243});
+	EXPECT_EQ(val.get(), sizeof(int)*1243);
+	
+	try
+	{
+		(void)make_byte_size(terraformer::array_size<size_t>{0xffff'ffff'ffff'ffff});
+		abort();
+	}
+	catch(...)
+	{}
+}
+
 
 
 TESTCASE(terraformer_array_index_default_constructed)
