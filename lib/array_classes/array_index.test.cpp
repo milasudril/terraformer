@@ -4,6 +4,97 @@
 
 #include <testfwk/testfwk.hpp>
 
+TESTCASE(terraformer_array_size_default_constructed)
+{
+	terraformer::array_size<int> val;
+	EXPECT_EQ(val.get(), 0);
+}
+
+TESTCASE(terraformer_array_size_constructed_from_value)
+{
+	terraformer::array_size<int> val{1243};
+	EXPECT_EQ(val.get(), 1243);
+}
+
+TESTCASE(terraformer_array_size_add_assign)
+{
+	terraformer::array_size<int> val{124};
+	val += terraformer::array_size<int>{23};
+	EXPECT_EQ(val.get(), 147);
+	
+	try
+	{
+		val += terraformer::array_size<int>{static_cast<size_t>(-1)};
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+TESTCASE(terraformer_array_size_sub_assign)
+{
+	terraformer::array_size<int> val{124};
+	val -= terraformer::array_size<int>{23};
+	EXPECT_EQ(val.get(), 101);
+	
+	try
+	{
+		val -= terraformer::array_size<int>{static_cast<size_t>(125)};
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+TESTCASE(terraformer_array_size_mul_assign)
+{
+	terraformer::array_size<int> val{124};
+	val *= 23;
+	EXPECT_EQ(val.get(), 2852);
+	
+	try
+	{
+		val *= static_cast<size_t>(-1);
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+TESTCASE(terraformer_array_size_add)
+{
+	auto const val = terraformer::array_size<int>{124} + terraformer::array_size<int>{23};
+	EXPECT_EQ(val.get(), 147);
+}
+
+TESTCASE(terraformer_array_size_sub)
+{
+	auto const val = terraformer::array_size<int>{124} - terraformer::array_size<int>{23};
+	EXPECT_EQ(val.get(), 101);
+}
+
+TESTCASE(terraformer_array_size_mul)
+{
+	auto const val = static_cast<size_t>(23)*terraformer::array_size<int>{124};
+	EXPECT_EQ(val.get(), 2852);
+}
+
+TESTCASE(terraformer_make_byte_size)
+{
+	auto const val = make_byte_size(terraformer::array_size<int>{1243});
+	EXPECT_EQ(val.get(), sizeof(int)*1243);
+	
+	try
+	{
+		(void)make_byte_size(terraformer::array_size<size_t>{0xffff'ffff'ffff'ffff});
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+
+
 TESTCASE(terraformer_array_index_default_constructed)
 {
 	terraformer::array_index<int> val;
@@ -36,6 +127,7 @@ TESTCASE(terraformer_array_index_pre_increment)
 	EXPECT_EQ((++val).get(), 35);
 	EXPECT_EQ(val.get(), 35);
 }
+
 
 TESTCASE(terraformer_array_index_post_increment)
 {
