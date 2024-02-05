@@ -11,13 +11,13 @@ namespace terraformer
 	{
 	public:
 		single_array() = default;
-		
+
 		~single_array()
 		{ clear(); }
 
 		constexpr auto first_element_index() const
 		{ return array_index<T>{}; }
-		
+
 		auto size() const
 		{ return m_size; }
 
@@ -62,24 +62,44 @@ namespace terraformer
 			std::construct_at(m_storage.interpret_as<T>() + m_size.get(), std::move(elem));
 			m_size = new_size;
 		}
-		
+
 		void clear()
-		{ 
+		{
 			std::destroy(begin(), end());
 			m_size = array_size<T>{};
 		}
-		
-		void resize(array_size<T> new_size);
-		
+
+		void resize(array_size<T> new_size)
+		{
+			if(new_size < m_size)
+			{
+				truncate_from(array_index<T>{new_size.get()});
+				m_size = new_size;
+				return;
+			}
+
+			if(new_size > m_size)
+			{
+				if(new_size > m_capacity)
+				{ reserve(new_size); }
+				std::uninitialized_default_construct_n(end(), (new_size - m_size).get());
+				m_size = new_size;
+				return;
+			}
+		}
+
+		void truncate_from(array_index<T> index)
+		{ std::destroy(begin() + index.get(), end()); }
+
 		auto& operator[](array_index<T> index)
 		{ return deref(data(), index); }
-			
+
 		auto& operator[](array_index<T> index) const
 		{ return deref(data(), index); }
-		
+
 		operator span<T>()
 		{ return span{begin(), end()}; }
-		
+
 		operator span<T const>()
 		{ return span{end(), end()}; }
 
