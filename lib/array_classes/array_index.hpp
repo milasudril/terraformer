@@ -12,26 +12,26 @@ namespace terraformer
 	{
 	public:
 		constexpr array_size() = default;
-				
+
 		constexpr explicit array_size(Rep value): m_value{value}{}
 
 		constexpr auto get() const { return m_value; }
 
 		constexpr auto operator<=>(array_size const&) const = default;
-		
+
 		constexpr array_size& operator+=(array_size other)
 		{
 			if(__builtin_add_overflow(m_value, other.get(), &m_value))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
-			
+
 			return *this;
 		}
-		
+
 		constexpr array_size& operator-=(array_size other)
 		{
 			if(__builtin_sub_overflow(m_value, other.get(), &m_value))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
-			
+
 			return *this;
 		}
 
@@ -39,21 +39,25 @@ namespace terraformer
 		{
 			if(__builtin_mul_overflow(m_value, factor, &m_value))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
-			
+
 			return *this;
 		}
+
+		template<class Other>
+		explicit operator array_size<Other, Rep>() const
+		{ return array_size<Other>{m_value}; }
 
 	private:
 		Rep m_value{};
 	};
-	
+
 	template<class Rep = size_t>
 	using byte_size = array_size<std::byte, Rep>;
-	
+
 	template<class T, class Rep>
 	constexpr auto make_byte_size(array_size<T, Rep> size)
 	{ return byte_size{(sizeof(T)*size).get()}; }
-	
+
 	template<class T, class Rep>
 	constexpr auto operator+(array_size<T, Rep> a, array_size<T, Rep> b)
 	{ return a += b; }
@@ -61,7 +65,7 @@ namespace terraformer
 	template<class T, class Rep>
 	constexpr auto operator-(array_size<T, Rep> a, array_size<T, Rep> b)
 	{ return a -= b; }
-	
+
 	template<class T, class Rep>
 	constexpr auto operator*(Rep c, array_size<T, Rep> a)
 	{ return a *= c; }

@@ -4,6 +4,7 @@
 #define TERRAFORMER_RIDGECURVE_HPP
 
 #include "lib/modules/dimensions.hpp"
+#include "lib/array_classes/single_array.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
 
@@ -18,10 +19,10 @@ namespace terraformer
 		float damping;  // TODO: Should be within ]0, 1[
 	};
 
-	std::vector<float> generate(
+	single_array<float> generate(
 		ridge_tree_branch_displacement_description const& src,
 		random_generator& rng,
-		size_t seg_count,
+		array_size<float> seg_count,
 		float dx,
 		float warmup_periods = 0.0f);
 }

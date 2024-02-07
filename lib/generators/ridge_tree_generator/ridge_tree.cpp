@@ -37,7 +37,7 @@ terraformer::ridge_tree::ridge_tree(
 	auto const trunk_offsets = generate(
 		curve_levels[0].displacement_profile,
 		rng,
-		trunk_pixel_count,
+		array_size<float>{trunk_pixel_count},
 		pixel_size,
 		1024.0f);
 

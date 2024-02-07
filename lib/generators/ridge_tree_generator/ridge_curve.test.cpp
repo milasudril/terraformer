@@ -13,19 +13,19 @@ TESTCASE(terraformer_ridge_curve_generate)
 		.damping = 1.0f/128.0f
 	};
 	terraformer::random_generator rng;
-	auto const res = generate(curve, rng, 49152, 1.0f);
-	EXPECT_EQ(std::size(res), 49152);
+	auto const res = generate(curve, rng, terraformer::array_size<float>{49152}, 1.0f);
+	EXPECT_EQ(std::size(res).get(), 49152);
 
-	std::vector<std::complex<double>> input(std::size(res));
+	terraformer::single_array input{terraformer::array_size<std::complex<double>>{std::size(res)}};
 	std::transform(std::begin(res), std::end(res), std::begin(input), [](auto val){
 		return static_cast<double>(val);
 	});
-	std::vector<std::complex<double>> output(std::size(res));
-	get_plan(std::size(res), terraformer::dft_direction::forward).execute(std::data(input), std::data(output));
+	terraformer::single_array output(std::size(input));
+	get_plan(std::size(res).get(), terraformer::dft_direction::forward).execute(std::data(input), std::data(output));
 
 	auto max_iter = std::max_element(
 		std::begin(output),
-		std::begin(output) + std::size(output)/2,
+		std::begin(output) + std::size(output).get()/2,
 		[](auto a, auto b) {
 			return std::abs(a) < std::abs(b);
 		}

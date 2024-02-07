@@ -10,14 +10,15 @@
 #include <random>
 #include <numbers>
 
-std::vector<float> terraformer::generate(
+terraformer::single_array<float> terraformer::generate(
 	ridge_tree_branch_displacement_description const& src,
 	random_generator& rng,
-	size_t seg_count,
+	array_size<float> seg_count,
 	float dx,
 	float warmup_periods)
 {
-	std::vector<float> ret(seg_count);
+	single_array<float> ret;
+	ret.resize(seg_count);
 	constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
 	std::uniform_real_distribution U{-1.0f, 1.0f};
 
@@ -64,18 +65,18 @@ std::vector<float> terraformer::generate(
 			1.0f;
 	};
 
-	for(size_t k = 0; k != seg_count; ++k)
+	for(auto k = ret.first_element_index(); k != seg_count; ++k)
 	{
 		ret[k] = f(U(rng))
-			*envelope(dx*static_cast<float>(k))
-			*envelope(dx*static_cast<float>(seg_count - k));
+			*envelope(dx*static_cast<float>(k.get()))
+			*envelope(dx*static_cast<float>(seg_count.get() - k.get()));
 	}
 
 	auto minmax = std::ranges::minmax_element(ret);
 
 	auto const gain = 2.0f*src.amplitude/(*minmax.max - *minmax.min);
 
-	for(size_t k = 0; k != seg_count; ++k)
+	for(auto k = ret.first_element_index(); k != seg_count; ++k)
 	{ ret[k] *= gain; }
 
 	return ret;

@@ -72,7 +72,7 @@ terraformer::generate_branches(
 			continue;
 		}
 
-		auto const base_curve_length = static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1;
+		array_size<float> const base_curve_length{static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1};
 		auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
 		gen_branches.push_back(

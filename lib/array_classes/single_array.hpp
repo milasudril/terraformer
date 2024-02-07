@@ -12,6 +12,9 @@ namespace terraformer
 	public:
 		single_array() = default;
 
+		explicit single_array(array_size<T> size)
+		{ resize(size); }
+
 		single_array(single_array&& other) noexcept:
 			m_storage{std::exchange(other.m_storage, memory_block{})},
 			m_size{std::exchange(other.m_size, array_size<T>{})},
@@ -127,9 +130,9 @@ namespace terraformer
 		{ return span{end(), end()}; }
 
 	private:
-		memory_block m_storage;
-		array_size<T> m_size;
-		array_size<T> m_capacity;
+		memory_block m_storage{};
+		array_size<T> m_size{};
+ 		array_size<T> m_capacity{};
 	};
 }
 
