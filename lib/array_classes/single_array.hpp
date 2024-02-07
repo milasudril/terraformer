@@ -12,6 +12,29 @@ namespace terraformer
 	public:
 		single_array() = default;
 
+		single_array(single_array&& other) noexcept:
+			m_storage{std::exchange(other.m_storage, memory_block{})},
+			m_size{std::exchange(other.m_size, array_size<T>{})},
+			m_capacity{std::exchange(other.m_capacity, array_size<T>{})}
+		{ }
+
+		single_array(single_array const& other):
+			m_storage{make_byte_size(other.capacity())},
+			m_size{other.m_size},
+			m_capacity{other.m_capacity}
+		{ std::uninitialized_copy_n(other.begin(), m_size.get(), m_storage.template interpret_as<T>()); }
+
+		single_array& operator=(single_array&& other) noexcept
+		{
+			clear();
+			m_storage = std::exchange(other.m_storage, memory_block{});
+			m_size = std::exchange(other.m_size, array_size<T>{});
+			m_capacity = std::exchange(other.m_capacity, array_size<T>{});
+			return *this;
+		}
+
+		single_array& operator=(single_array const& other) = delete;
+
 		~single_array()
 		{ clear(); }
 
@@ -63,7 +86,7 @@ namespace terraformer
 			m_size = new_size;
 		}
 
-		void clear()
+		void clear() noexcept
 		{
 			std::destroy(begin(), end());
 			m_size = array_size<T>{};

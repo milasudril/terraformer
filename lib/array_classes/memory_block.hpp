@@ -12,24 +12,24 @@ namespace terraformer
 	{
 	public:
 		memory_block() = default;
-		
+
 		explicit memory_block(byte_size<size_t> capacity):
 			m_pointer{malloc(capacity.get())}
 		{
 			if(m_pointer == nullptr)
 			{ throw std::runtime_error{"Failed to allocate memory"}; }
 		}
-		
+
 		[[nodiscard]] void* get() const
 		{ return m_pointer.get(); }
-		
+
 		template<class T>
-		[[nodiscard]] T* interpret_as()
+		[[nodiscard]] T* interpret_as() const
 		{ return reinterpret_cast<T*>(m_pointer.get()); }
-		
+
 		[[nodiscard]] operator bool() const
 		{ return m_pointer != nullptr; }
-		
+
 	private:
 		struct deleter
 		{
