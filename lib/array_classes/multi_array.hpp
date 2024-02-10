@@ -159,7 +159,7 @@ namespace terraformer
 		{
 			if(new_capacity > m_capacity)
 			{
-				memory_block new_storage{make_byte_size(new_capacity)};
+				auto new_storage = generate_mem_blocks(new_capacity);
 				uninitialized_move(m_storage, new_storage, m_size);
 				destroy(m_storage, first_element_index(), m_size);
 				m_storage = std::move(new_storage);

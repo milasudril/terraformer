@@ -60,20 +60,21 @@ TESTCASE(terraformer_mulite_array_uninitialized_copy)
 	std::destroy_n(new_blocks[0].interpret_as<default_constructible_type<double>>(), 3);
 }
 
-#if 0
 TESTCASE(terraformer_multi_array_reseve_on_empty)
 {
 	terraformer::multi_array<no_default_constructible_type> array;
-	REQUIRE_EQ(array.size(), terraformer::array_size<no_default_constructible_type>{});
-	REQUIRE_EQ(array.capacity(), terraformer::array_size<no_default_constructible_type>{});
-	REQUIRE_EQ(array.begin(), array.end());
+	using size_type = decltype(array)::size_type;
+	REQUIRE_EQ(array.size(), size_type{});
+	REQUIRE_EQ(array.capacity(), size_type{});
+//	REQUIRE_EQ(array.begin(), array.end());
 
-	array.reserve(terraformer::array_size<no_default_constructible_type>(5));
+	array.reserve(size_type{5});
 
-	EXPECT_EQ(array.size(), terraformer::array_size<no_default_constructible_type>{});
-	EXPECT_EQ(array.capacity(), terraformer::array_size<no_default_constructible_type>{5});
-	EXPECT_EQ(array.begin(), array.end());
+	EXPECT_EQ(array.size(), size_type{});
+	EXPECT_EQ(array.capacity(), size_type{5});
+//	EXPECT_EQ(array.begin(), array.end());
 }
+#if 0
 
 TESTCASE(terraformer_multi_array_push_back)
 {
