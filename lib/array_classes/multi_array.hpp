@@ -35,27 +35,31 @@ namespace terraformer
 		);
 	}
 
-	template<class T>
+	template<class ... T>
 	class multi_array
 	{
 	public:
+		using storage_type = std::array<memory_block, sizeof...(T)>;
+		using size_type = array_size<tuple<T...>>;
+
 		multi_array() = default;
 
-		explicit multi_array(array_size<T> size)
+		explicit multi_array(size_type size)
 		{ resize(size); }
 
 		multi_array(multi_array&& other) noexcept:
-			m_storage{std::exchange(other.m_storage, memory_block{})},
-			m_size{std::exchange(other.m_size, array_size<T>{})},
-			m_capacity{std::exchange(other.m_capacity, array_size<T>{})}
+			m_storage{std::exchange(other.m_storage, storage_type{})},
+			m_size{std::exchange(other.m_size, size_type{})},
+			m_capacity{std::exchange(other.m_capacity, size_type{})}
 		{ }
 
 		multi_array(multi_array const& other):
 			m_storage{make_byte_size(other.capacity())},
 			m_size{other.m_size},
 			m_capacity{other.m_capacity}
-		{ std::uninitialized_copy_n(other.begin(), m_size.get(), m_storage.template interpret_as<T>()); }
+		{ uninitialized_copy(other.m_storage, m_storage, m_size); }
 
+#if 0
 		multi_array& operator=(multi_array&& other) noexcept
 		{
 			clear();
@@ -157,11 +161,11 @@ namespace terraformer
 
 		operator span<T const>()
 		{ return span{end(), end()}; }
-
+#endif
 	private:
-		memory_block m_storage{};
-		array_size<T> m_size{};
- 		array_size<T> m_capacity{};
+		storage_type m_storage{};
+		size_type m_size{};
+ 		size_type m_capacity{};
 	};
 }
 
