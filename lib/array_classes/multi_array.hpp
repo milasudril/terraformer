@@ -36,11 +36,70 @@ namespace terraformer
 	}
 
 	template<class ... T>
+	void uninitialized_move(
+		std::array<memory_block, sizeof...(T)> const& src,
+		std::array<memory_block, sizeof...(T)> const& dest,
+		array_size<tuple<T...>> n
+	)
+	{
+		size_t index = 0;
+		(
+			(
+				std::uninitialized_move_n(
+					src[index].template interpret_as<T>(),
+					n.get(),
+					dest[index].template interpret_as<T>()
+				),
+				++index
+			),...
+		);
+	}
+
+	template<class ... T>
+	void destroy(
+		std::array<memory_block, sizeof...(T)> const& src,
+		array_index<tuple<T...>> offset,
+		array_size<tuple<T...>> n
+	)
+	{
+		size_t index = 0;
+		(
+			(
+				std::destroy_n(
+					src[index].template interpret_as<T>() + offset.get(),
+					n.get()
+				),
+				++index
+			),...
+		);
+	}
+
+	template<class ... T>
+	void uninitialized_default_construct(
+		std::array<memory_block, sizeof...(T)> const& dest,
+		array_index<tuple<T...>> offset,
+		array_size<tuple<T...>> n
+	)
+	{
+		size_t index = 0;
+		(
+			(
+				std::uninitialized_default_construct(
+					dest[index].template interpret_as<T>() + offset.get(),
+					n.get()
+				),
+				++index
+			),...
+		);
+	}
+
+	template<class ... T>
 	class multi_array
 	{
 	public:
 		using storage_type = std::array<memory_block, sizeof...(T)>;
 		using size_type = array_size<tuple<T...>>;
+		using index_type = array_index<tuple<T...>>;
 
 		multi_array() = default;
 
@@ -59,13 +118,12 @@ namespace terraformer
 			m_capacity{other.m_capacity}
 		{ uninitialized_copy(other.m_storage, m_storage, m_size); }
 
-#if 0
 		multi_array& operator=(multi_array&& other) noexcept
 		{
 			clear();
 			m_storage = std::exchange(other.m_storage, memory_block{});
-			m_size = std::exchange(other.m_size, array_size<T>{});
-			m_capacity = std::exchange(other.m_capacity, array_size<T>{});
+			m_size = std::exchange(other.m_size, size_type{});
+			m_capacity = std::exchange(other.m_capacity, size_type{});
 			return *this;
 		}
 
@@ -75,7 +133,7 @@ namespace terraformer
 		{ clear(); }
 
 		constexpr auto first_element_index() const
-		{ return array_index<T>{}; }
+		{ return index_type{}; }
 
 		auto size() const
 		{ return m_size; }
@@ -83,12 +141,7 @@ namespace terraformer
 		auto capacity() const
 		{ return m_capacity; }
 
-		auto data()
-		{ return m_storage.interpret_as<T>(); }
-
-		auto data() const
-		{ return m_storage.interpret_as<T const>(); }
-
+#if 0
 		auto begin()
 		{ return data(); }
 
@@ -100,39 +153,40 @@ namespace terraformer
 
 		auto end() const
 		{ return begin() + size().get(); }
+#endif
 
-		void reserve(array_size<T> new_capacity)
+		void reserve(size_type new_capacity)
 		{
 			if(new_capacity > m_capacity)
 			{
 				memory_block new_storage{make_byte_size(new_capacity)};
-				std::uninitialized_move(begin(), end(), new_storage.interpret_as<T>());
-				std::destroy(begin(), end());
+				uninitialized_move(m_storage, new_storage, m_size);
+				destroy(m_storage, first_element_index(), m_size);
 				m_storage = std::move(new_storage);
 				m_capacity = new_capacity;
 			}
 		}
 
-		void push_back(T&& elem)
+		void push_back(T&&... elems)
 		{
-			auto new_size = m_size + terraformer::array_size<T>{1};
+			auto new_size = m_size + size_type{1};
 			if(new_size > m_capacity)
-			{ reserve(std::max(terraformer::array_size<T>{8}, static_cast<size_t>(2)*capacity())); }
-			std::construct_at(m_storage.interpret_as<T>() + m_size.get(), std::move(elem));
+			{ reserve(std::max(size_type{8}, static_cast<size_t>(2)*capacity())); }
+			construct(m_storage, index_type{m_size.get()}, std::move(elems)...);
 			m_size = new_size;
 		}
 
 		void clear() noexcept
 		{
-			std::destroy(begin(), end());
-			m_size = array_size<T>{};
+			destroy(m_storage, first_element_index(), m_size);
+			m_size = size_type{};
 		}
 
-		void resize(array_size<T> new_size)
+		void resize(size_type new_size)
 		{
 			if(new_size < m_size)
 			{
-				truncate_from(array_index<T>{new_size.get()});
+				truncate_from(index_type{m_size.get()});
 				m_size = new_size;
 				return;
 			}
@@ -141,12 +195,13 @@ namespace terraformer
 			{
 				if(new_size > m_capacity)
 				{ reserve(new_size); }
-				std::uninitialized_default_construct_n(end(), (new_size - m_size).get());
+
+				uninitialized_default_construct(m_storage, (new_size - m_size).get());
 				m_size = new_size;
 				return;
 			}
 		}
-
+#if 0
 		void truncate_from(array_index<T> index)
 		{ std::destroy(begin() + index.get(), end()); }
 
@@ -162,6 +217,7 @@ namespace terraformer
 		operator span<T const>()
 		{ return span{end(), end()}; }
 #endif
+
 	private:
 		storage_type m_storage{};
 		size_type m_size{};
