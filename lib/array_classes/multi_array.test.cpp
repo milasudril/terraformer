@@ -8,7 +8,8 @@
 
 namespace
 {
-	using default_constructible_type = testfwk::lifetime_checker<int>;
+	template<class T>
+	using default_constructible_type = testfwk::lifetime_checker<T>;
 
 	class holder
 	{
@@ -32,6 +33,31 @@ TESTCASE(terraformer_multi_array_generate_mem_blocks)
 	EXPECT_EQ(std::size(blocks), 2);
 	EXPECT_NE(blocks[0].get(), nullptr);
 	EXPECT_NE(blocks[1].get(), nullptr);
+}
+
+TESTCASE(terraformer_mulite_array_uninitialized_copy)
+{
+	using size_type = terraformer::array_size<terraformer::tuple<default_constructible_type<int>, default_constructible_type<double>>>;
+
+	auto blocks = generate_mem_blocks(size_type{3});
+
+	EXPECT_EQ(std::size(blocks), 2);
+	default_constructible_type<int>::expect_ctor(3);
+	std::uninitialized_value_construct_n(blocks[0].interpret_as<default_constructible_type<int>>(), 3);
+
+	default_constructible_type<double>::expect_ctor(3);
+	std::uninitialized_value_construct_n(blocks[1].interpret_as<default_constructible_type<double>>(), 3);
+
+	auto new_blocks = generate_mem_blocks(size_type{3});
+
+	default_constructible_type<int>::expect_ctor(3);
+	default_constructible_type<double>::expect_ctor(3);
+	uninitialized_copy(blocks, new_blocks, size_type{3});
+
+	std::destroy_n(blocks[0].interpret_as<default_constructible_type<int>>(), 3); std::destroy_n(blocks[1].interpret_as<default_constructible_type<double>>(), 3);
+
+	std::destroy_n(new_blocks[0].interpret_as<default_constructible_type<int>>(), 3);
+	std::destroy_n(new_blocks[0].interpret_as<default_constructible_type<double>>(), 3);
 }
 
 #if 0

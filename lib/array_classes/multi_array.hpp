@@ -15,6 +15,26 @@ namespace terraformer
 		};
 	}
 
+	template<class ... T>
+	void uninitialized_copy(
+		std::array<memory_block, sizeof...(T)> const& src,
+		std::array<memory_block, sizeof...(T)> const& dest,
+		array_size<tuple<T...>> n
+	)
+	{
+		size_t index = 0;
+		(
+			(
+				std::uninitialized_copy_n(
+					src[index].template interpret_as<T>(),
+					n.get(),
+					dest[index].template interpret_as<T>()
+				),
+				++index
+			),...
+		);
+	}
+
 	template<class T>
 	class multi_array
 	{
