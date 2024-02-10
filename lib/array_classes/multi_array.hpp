@@ -7,6 +7,14 @@
 
 namespace terraformer
 {
+	template<class ... T>
+	auto generate_mem_blocks(array_size<tuple<T...>> size)
+	{
+		return std::array<memory_block, sizeof...(T)>{
+			memory_block{make_byte_size(array_size<T>(size))}...
+		};
+	}
+
 	template<class T>
 	class multi_array
 	{

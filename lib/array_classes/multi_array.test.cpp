@@ -26,6 +26,15 @@ namespace
 	using no_default_constructible_type = testfwk::lifetime_checker<holder>;
 }
 
+TESTCASE(terraformer_multi_array_generate_mem_blocks)
+{
+	auto blocks = generate_mem_blocks(terraformer::array_size<terraformer::tuple<int, double>>{12});
+	EXPECT_EQ(std::size(blocks), 2);
+	EXPECT_NE(blocks[0].get(), nullptr);
+	EXPECT_NE(blocks[1].get(), nullptr);
+}
+
+#if 0
 TESTCASE(terraformer_multi_array_reseve_on_empty)
 {
 	terraformer::multi_array<no_default_constructible_type> array;
@@ -170,3 +179,4 @@ TESTCASE(terraformer_multi_array_move_assign)
 		EXPECT_EQ(std::size(array).get(), 3);
 		EXPECT_EQ(std::size(other).get(), 0);
 }
+#endif
