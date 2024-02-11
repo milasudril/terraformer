@@ -49,6 +49,9 @@ namespace terraformer
 		explicit operator array_size<Other, Rep>() const
 		{ return array_size<Other>{m_value}; }
 
+		explicit operator Rep() const
+		{ return m_value; }
+
 	private:
 		Rep m_value{};
 	};

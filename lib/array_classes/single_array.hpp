@@ -10,6 +10,9 @@ namespace terraformer
 	class single_array
 	{
 	public:
+		using size_type = array_size<T>;
+		using index_type = array_index<T>;
+
 		single_array() = default;
 
 		explicit single_array(array_size<T> size)
@@ -42,7 +45,10 @@ namespace terraformer
 		{ clear(); }
 
 		constexpr auto first_element_index() const
-		{ return array_index<T>{}; }
+		{ return index_type{}; }
+
+		constexpr auto last_element_index() const
+		{ return index_type{(m_size - size_type{1}).get()}; }
 
 		auto size() const
 		{ return m_size; }
@@ -68,7 +74,7 @@ namespace terraformer
 		auto end() const
 		{ return begin() + size().get(); }
 
-		void reserve(array_size<T> new_capacity)
+		void reserve(size_type new_capacity)
 		{
 			if(new_capacity > m_capacity)
 			{
@@ -82,9 +88,9 @@ namespace terraformer
 
 		void push_back(T&& elem)
 		{
-			auto new_size = m_size + terraformer::array_size<T>{1};
+			auto new_size = m_size + size_type{1};
 			if(new_size > m_capacity)
-			{ reserve(std::max(terraformer::array_size<T>{8}, static_cast<size_t>(2)*capacity())); }
+			{ reserve(std::max(size_type{8}, static_cast<size_t>(2)*capacity())); }
 			std::construct_at(m_storage.interpret_as<T>() + m_size.get(), std::move(elem));
 			m_size = new_size;
 		}
@@ -92,10 +98,10 @@ namespace terraformer
 		void clear() noexcept
 		{
 			std::destroy(begin(), end());
-			m_size = array_size<T>{};
+			m_size = size_type{};
 		}
 
-		void resize(array_size<T> new_size)
+		void resize(size_type new_size)
 		{
 			if(new_size < m_size)
 			{
@@ -114,25 +120,25 @@ namespace terraformer
 			}
 		}
 
-		void truncate_from(array_index<T> index)
+		void truncate_from(index_type index)
 		{ std::destroy(begin() + index.get(), end()); }
 
-		auto& operator[](array_index<T> index)
+		auto& operator[](index_type index)
 		{ return deref(data(), index); }
 
-		auto& operator[](array_index<T> index) const
+		auto& operator[](index_type index) const
 		{ return deref(data(), index); }
 
 		operator span<T>()
 		{ return span{begin(), end()}; }
 
-		operator span<T const>()
+		operator span<T const>() const
 		{ return span{end(), end()}; }
 
 	private:
 		memory_block m_storage{};
-		array_size<T> m_size{};
- 		array_size<T> m_capacity{};
+		size_type m_size{};
+ 		size_type m_capacity{};
 	};
 }
 

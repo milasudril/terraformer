@@ -160,6 +160,9 @@ namespace terraformer
 		constexpr auto first_element_index() const
 		{ return index_type{}; }
 
+		constexpr auto last_element_index() const
+		{ return index_type{(m_size - size_type{1}).get()}; }
+
 		auto size() const
 		{ return m_size; }
 

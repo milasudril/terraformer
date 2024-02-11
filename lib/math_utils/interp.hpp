@@ -20,15 +20,41 @@ namespace terraformer
 		{lerp(left, right, t)} -> std::same_as<T>;
 	};
 
+	template<class T>
+	concept has_index_type = requires {
+		typename T::index_type;
+	};
+
+	template<class T>
+	struct select_index_type
+	{
+		using type = size_t;
+	};
+
+	template<class T>
+	requires has_index_type<T>
+	struct select_index_type<T>
+	{
+		using type = typename T::index_type;
+	};
+
 	template<std::ranges::random_access_range R, boundary_sampling_policy U>
 	constexpr auto interp(R&& lut, float value, U&& bsp)
 	{
-		auto const n = static_cast<uint32_t>(std::size(lut));
-		auto const x = bsp(value, n);
-		auto const x_0 = static_cast<uint32_t>(x);;
-		auto const x_1 = bsp(x_0 + 1, n);
+		using array_type = std::remove_cvref_t<R>;
 
-		auto const left = lut[x_0];
+		using index_type = typename select_index_type<array_type>::type;
+
+		// HACK: Need a way to find the representation of std::size(lut)
+		using size_rep = size_t;
+
+		// HACK: Do not force conversion to uint32_t. bsp must accept any integral type
+		auto const n = static_cast<uint32_t>(static_cast<size_rep>(std::size(lut)));
+		auto const x = bsp(value, n);
+		auto const x_0 = static_cast<uint32_t>(x);
+		auto const x_1 = static_cast<index_type>(bsp(x_0 + 1, n));
+
+		auto const left = lut[static_cast<index_type>(x_0)];
 		auto const right = lut[x_1];
 
 		auto const t = x - static_cast<float>(x_0);

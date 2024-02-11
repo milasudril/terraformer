@@ -24,6 +24,9 @@ namespace terraformer
 		constexpr auto first_element_index() const
 		{ return index_type{}; }
 
+		constexpr auto last_element_index() const
+		{ return index_type{(size() - size_type{1}).get()}; }
+
 		constexpr auto size() const
 		{ return size_type{static_cast<size_t>(m_end - m_begin)}; }
 
@@ -34,7 +37,7 @@ namespace terraformer
 		{ return m_begin; }
 
 		constexpr operator span<T, array_index<T>, array_size<T>>() const
-		{ return span{m_begin, m_end}; }
+		{ return span<T, array_index<T>, array_size<T>>{m_begin, m_end}; }
 
 	private:
 		T* m_begin;
