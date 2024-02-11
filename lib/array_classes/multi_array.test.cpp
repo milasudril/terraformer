@@ -100,7 +100,6 @@ TESTCASE(terraformer_multi_array_push_back)
 
 	for(int k = 0; k != 16; ++k)
 	{
-	//	no_default_constructible_type::expect_ctor();
 		if(static_cast<size_t>(k) == array.capacity().get())
 		{
 			no_default_constructible_type<int>::expect_move_ctor(array.capacity().get());
