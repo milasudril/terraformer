@@ -178,27 +178,42 @@ TESTCASE(terraformer_multi_array_resize_grow_and_shrink)
 	array.resize(size_type{8});
 	EXPECT_EQ(array.size().get(), 8);
 }
-#if 0
 
 TESTCASE(terraformer_multi_array_move)
 {
-	terraformer::multi_array<no_default_constructible_type> array;
+	terraformer::multi_array<
+		default_constructible_type<int>,
+		default_constructible_type<double>
+	> array;
 
-	no_default_constructible_type::expect_ctor(4);
-	no_default_constructible_type::expect_move_ctor(4);
-	array.push_back(1);
-	array.push_back(2);
-	array.push_back(3);
-	array.push_back(4);
+	default_constructible_type<int>::expect_ctor(4);
+	default_constructible_type<double>::expect_ctor(4);
+	default_constructible_type<int>::expect_move_ctor(4);
+	default_constructible_type<double>::expect_move_ctor(4);
+	array.push_back(1, 0.5);
+	array.push_back(2, 1.0);
+	array.push_back(3, 1.5);
+	array.push_back(4, 2.0);
 
-	auto const old_ptr = std::data(array);
+	auto const first_array_old = array.get<0>();
+	auto const second_array_old = array.get<1>();
+
 	auto other = std::move(array);
-
 	EXPECT_EQ(std::size(array).get(), 0);
 	EXPECT_EQ(std::size(other).get(), 4);
-	EXPECT_EQ(std::data(other), old_ptr);
-	EXPECT_EQ(std::data(array), nullptr);
+
+	auto const first_array_new = other.get<0>();
+	auto const second_array_new = other.get<1>();
+	EXPECT_EQ(std::data(first_array_new), std::data(first_array_old));
+	EXPECT_EQ(std::data(second_array_new), std::data(second_array_old));
+
+	auto const first_array_old_after_move = array.get<0>();
+	auto const second_array_old_after_move = array.get<1>();
+	EXPECT_EQ(std::data(first_array_old_after_move), nullptr);
+	EXPECT_EQ(std::data(second_array_old_after_move), nullptr);
+
 }
+#if 0
 
 TESTCASE(terraformer_multi_array_copy)
 {
