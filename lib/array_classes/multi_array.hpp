@@ -146,7 +146,7 @@ namespace terraformer
 		multi_array& operator=(multi_array&& other) noexcept
 		{
 			clear();
-			m_storage = std::exchange(other.m_storage, memory_block{});
+			m_storage = std::exchange(other.m_storage, storage_type{});
 			m_size = std::exchange(other.m_size, size_type{});
 			m_capacity = std::exchange(other.m_capacity, size_type{});
 			return *this;

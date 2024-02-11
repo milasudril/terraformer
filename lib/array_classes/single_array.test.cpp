@@ -144,27 +144,27 @@ TESTCASE(terraformer_single_array_copy)
 
 TESTCASE(terraformer_single_array_move_assign)
 {
-		terraformer::single_array<no_default_constructible_type> array;
+	terraformer::single_array<no_default_constructible_type> array;
 
-		no_default_constructible_type::expect_ctor(4);
-		no_default_constructible_type::expect_move_ctor(4);
-		array.push_back(1);
-		array.push_back(2);
-		array.push_back(3);
-		array.push_back(4);
+	no_default_constructible_type::expect_ctor(4);
+	no_default_constructible_type::expect_move_ctor(4);
+	array.push_back(1);
+	array.push_back(2);
+	array.push_back(3);
+	array.push_back(4);
 
-		terraformer::single_array<no_default_constructible_type> other;
-		no_default_constructible_type::expect_ctor(3);
-		no_default_constructible_type::expect_move_ctor(3);
-		other.push_back(5);
-		other.push_back(6);
-		other.push_back(7);
+	terraformer::single_array<no_default_constructible_type> other;
+	no_default_constructible_type::expect_ctor(3);
+	no_default_constructible_type::expect_move_ctor(3);
+	other.push_back(5);
+	other.push_back(6);
+	other.push_back(7);
 
-		auto new_ptr = std::data(other);
+	auto new_ptr = std::data(other);
 
-		array = std::move(other);
-		EXPECT_EQ(std::data(array), new_ptr);
-		EXPECT_EQ(std::data(other), nullptr);
-		EXPECT_EQ(std::size(array).get(), 3);
-		EXPECT_EQ(std::size(other).get(), 0);
+	array = std::move(other);
+	EXPECT_EQ(std::data(array), new_ptr);
+	EXPECT_EQ(std::data(other), nullptr);
+	EXPECT_EQ(std::size(array).get(), 3);
+	EXPECT_EQ(std::size(other).get(), 0);
 }
