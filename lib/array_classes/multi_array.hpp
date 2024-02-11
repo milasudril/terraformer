@@ -8,17 +8,20 @@
 namespace terraformer
 {
 	template<class ... T>
-	auto generate_mem_blocks(array_size<tuple<T...>> size)
+	struct multi_array_tag{};
+
+	template<class ... T>
+	auto generate_mem_blocks(array_size<multi_array_tag<T...>> size)
 	{
 		return std::array<memory_block, sizeof...(T)>{
-			memory_block{make_byte_size(array_size<T>(size))}...
+			memory_block{make_byte_size(array_size<T>{size})}...
 		};
 	}
 
 	template<class ... T>
 	void construct(
 		std::array<memory_block, sizeof...(T)> const& storage,
-		array_index<tuple<T...>> offset,
+		array_index<multi_array_tag<T...>> offset,
 		T&&... values
 	)
 	{
@@ -38,7 +41,7 @@ namespace terraformer
 	void uninitialized_copy(
 		std::array<memory_block, sizeof...(T)> const& src,
 		std::array<memory_block, sizeof...(T)> const& dest,
-		array_size<tuple<T...>> n
+		array_size<multi_array_tag<T...>> n
 	)
 	{
 		size_t index = 0;
@@ -58,7 +61,7 @@ namespace terraformer
 	void uninitialized_move(
 		std::array<memory_block, sizeof...(T)> const& src,
 		std::array<memory_block, sizeof...(T)> const& dest,
-		array_size<tuple<T...>> n
+		array_size<multi_array_tag<T...>> n
 	)
 	{
 		size_t index = 0;
@@ -77,8 +80,8 @@ namespace terraformer
 	template<class ... T>
 	void destroy(
 		std::array<memory_block, sizeof...(T)> const& src,
-		array_index<tuple<T...>> offset,
-		array_size<tuple<T...>> n
+		array_index<multi_array_tag<T...>> offset,
+		array_size<multi_array_tag<T...>> n
 	)
 	{
 		size_t index = 0;
@@ -96,8 +99,8 @@ namespace terraformer
 	template<class ... T>
 	void uninitialized_default_construct(
 		std::array<memory_block, sizeof...(T)> const& dest,
-		array_index<tuple<T...>> offset,
-		array_size<tuple<T...>> n
+		array_index<multi_array_tag<T...>> offset,
+		array_size<multi_array_tag<T...>> n
 	)
 	{
 		size_t index = 0;
@@ -117,8 +120,8 @@ namespace terraformer
 	{
 	public:
 		using storage_type = std::array<memory_block, sizeof...(T)>;
-		using size_type = array_size<tuple<T...>>;
-		using index_type = array_index<tuple<T...>>;
+		using size_type = array_size<multi_array_tag<T...>>;
+		using index_type = array_index<multi_array_tag<T...>>;
 
 		template<size_t Index>
 		using attribute_type = std::tuple_element_t<Index, tuple<T...>>;

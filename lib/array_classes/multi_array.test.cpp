@@ -31,7 +31,7 @@ namespace
 
 TESTCASE(terraformer_multi_array_generate_mem_blocks)
 {
-	auto blocks = generate_mem_blocks(terraformer::array_size<terraformer::tuple<int, double>>{12});
+	auto blocks = generate_mem_blocks(terraformer::array_size<terraformer::multi_array_tag<int, double>>{12});
 	EXPECT_EQ(std::size(blocks), 2);
 	EXPECT_NE(blocks[0].get(), nullptr);
 	EXPECT_NE(blocks[1].get(), nullptr);
@@ -39,7 +39,12 @@ TESTCASE(terraformer_multi_array_generate_mem_blocks)
 
 TESTCASE(terraformer_mulite_array_uninitialized_copy)
 {
-	using size_type = terraformer::array_size<terraformer::tuple<default_constructible_type<int>, default_constructible_type<double>>>;
+	using size_type = terraformer::array_size<
+		terraformer::multi_array_tag<
+			default_constructible_type<int>,
+			default_constructible_type<double>
+		>
+	>;
 
 	auto blocks = generate_mem_blocks(size_type{3});
 
@@ -51,15 +56,15 @@ TESTCASE(terraformer_mulite_array_uninitialized_copy)
 	std::uninitialized_value_construct_n(blocks[1].interpret_as<default_constructible_type<double>>(), 3);
 
 	auto new_blocks = generate_mem_blocks(size_type{3});
-
-	default_constructible_type<int>::expect_ctor(3);
-	default_constructible_type<double>::expect_ctor(3);
+	default_constructible_type<int>::expect_copy_ctor(3);
+	default_constructible_type<double>::expect_copy_ctor(3);
 	uninitialized_copy(blocks, new_blocks, size_type{3});
 
-	std::destroy_n(blocks[0].interpret_as<default_constructible_type<int>>(), 3); std::destroy_n(blocks[1].interpret_as<default_constructible_type<double>>(), 3);
+	std::destroy_n(blocks[0].interpret_as<default_constructible_type<int>>(), 3);
+	std::destroy_n(blocks[1].interpret_as<default_constructible_type<double>>(), 3);
 
 	std::destroy_n(new_blocks[0].interpret_as<default_constructible_type<int>>(), 3);
-	std::destroy_n(new_blocks[0].interpret_as<default_constructible_type<double>>(), 3);
+	std::destroy_n(new_blocks[1].interpret_as<default_constructible_type<double>>(), 3);
 }
 
 TESTCASE(terraformer_multi_array_reseve_on_empty)
@@ -98,6 +103,7 @@ TESTCASE(terraformer_multi_array_push_back)
 		no_default_constructible_type<double>
 	> array;
 
+
 	for(int k = 0; k != 16; ++k)
 	{
 		if(static_cast<size_t>(k) == array.capacity().get())
@@ -126,12 +132,14 @@ TESTCASE(terraformer_multi_array_push_back)
 		EXPECT_EQ(static_cast<holder<double>>(second_array[k]).value(), 0.5*static_cast<double>(k.get()));
 	}
 
-	using value_type = terraformer::tuple<no_default_constructible_type<int>, no_default_constructible_type<double>>;
-
-	EXPECT_EQ(std::size(array), terraformer::array_size<value_type>{16});
+	using size_type = terraformer::multi_array<
+		no_default_constructible_type<int>,
+		no_default_constructible_type<double>
+	>::size_type;
+	EXPECT_EQ(std::size(array), size_type{16});
 }
-
 #if 0
+
 TESTCASE(terraformer_multi_array_resize_grow_and_shrink)
 {
 	terraformer::multi_array<default_constructible_type> array;
