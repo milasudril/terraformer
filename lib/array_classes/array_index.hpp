@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_ARRAY_INDEX_HPP
 #define TERRAFORMER_ARRAY_INDEX_HPP
 
+#include "lib/common/tuple.hpp"
+
 #include <type_traits>
 #include <cstddef>
 #include <stdexcept>
@@ -121,6 +123,12 @@ namespace terraformer
 		}
 
 		constexpr auto operator<=>(array_index const&) const = default;
+
+		template<class Other>
+		constexpr operator array_index<Other, Rep>() const
+		{
+			return array_index<Other, Rep>{m_value};
+		}
 
 	private:
 		Rep m_value{};

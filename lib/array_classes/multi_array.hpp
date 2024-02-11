@@ -16,6 +16,25 @@ namespace terraformer
 	}
 
 	template<class ... T>
+	void construct(
+		std::array<memory_block, sizeof...(T)> const& storage,
+		array_index<tuple<T...>> offset,
+		T&&... values
+	)
+	{
+		size_t index = 0;
+		(
+			(
+				std::construct_at(
+					storage[index].template interpret_as<T>() + offset.get(),
+					std::forward<T>(values)
+				),
+				++index
+			),...
+		);
+	}
+
+	template<class ... T>
 	void uninitialized_copy(
 		std::array<memory_block, sizeof...(T)> const& src,
 		std::array<memory_block, sizeof...(T)> const& dest,
@@ -101,6 +120,9 @@ namespace terraformer
 		using size_type = array_size<tuple<T...>>;
 		using index_type = array_index<tuple<T...>>;
 
+		template<size_t Index>
+		using attribute_type = std::tuple_element_t<Index, tuple<T...>>;
+
 		multi_array() = default;
 
 		explicit multi_array(size_type size)
@@ -140,20 +162,6 @@ namespace terraformer
 
 		auto capacity() const
 		{ return m_capacity; }
-
-#if 0
-		auto begin()
-		{ return data(); }
-
-		auto begin() const
-		{ return data(); }
-
-		auto end()
-		{ return begin() + size().get(); }
-
-		auto end() const
-		{ return begin() + size().get(); }
-#endif
 
 		void reserve(size_type new_capacity)
 		{
@@ -201,6 +209,21 @@ namespace terraformer
 				return;
 			}
 		}
+
+		template<size_t AttributeIndex>
+		auto get() const
+		{
+			auto const ptr = m_storage[AttributeIndex].template interpret_as<attribute_type<AttributeIndex> const>();
+			return span{ptr, ptr + m_size.get()};
+		}
+
+		template<size_t AttributeIndex>
+		auto get()
+		{
+			auto const ptr = m_storage[AttributeIndex].template interpret_as<attribute_type<AttributeIndex>>();
+			return span{ptr, ptr + m_size.get()};
+		}
+
 #if 0
 		void truncate_from(array_index<T> index)
 		{ std::destroy(begin() + index.get(), end()); }
