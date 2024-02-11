@@ -138,7 +138,7 @@ namespace terraformer
 		{ }
 
 		multi_array(multi_array const& other):
-			m_storage{make_byte_size(other.capacity())},
+			m_storage{generate_mem_blocks(other.capacity())},
 			m_size{other.m_size},
 			m_capacity{other.m_capacity}
 		{ uninitialized_copy(other.m_storage, m_storage, m_size); }
@@ -216,8 +216,8 @@ namespace terraformer
 		template<size_t AttributeIndex>
 		auto get() const
 		{
-			using sel_attribute_type = attribute_type<AttributeIndex>;
-			auto const ptr = m_storage[AttributeIndex].template interpret_as<sel_attribute_type const>();
+			using sel_attribute_type = attribute_type<AttributeIndex> const;
+			auto const ptr = m_storage[AttributeIndex].template interpret_as<sel_attribute_type>();
 			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
 		}
 
