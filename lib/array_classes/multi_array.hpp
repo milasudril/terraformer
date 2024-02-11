@@ -213,15 +213,17 @@ namespace terraformer
 		template<size_t AttributeIndex>
 		auto get() const
 		{
-			auto const ptr = m_storage[AttributeIndex].template interpret_as<attribute_type<AttributeIndex> const>();
-			return span{ptr, ptr + m_size.get()};
+			using sel_attribute_type = attribute_type<AttributeIndex>;
+			auto const ptr = m_storage[AttributeIndex].template interpret_as<sel_attribute_type const>();
+			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
 		}
 
 		template<size_t AttributeIndex>
 		auto get()
 		{
-			auto const ptr = m_storage[AttributeIndex].template interpret_as<attribute_type<AttributeIndex>>();
-			return span{ptr, ptr + m_size.get()};
+			using sel_attribute_type = attribute_type<AttributeIndex>;
+			auto const ptr = m_storage[AttributeIndex].template interpret_as<sel_attribute_type>();
+			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
 		}
 
 #if 0

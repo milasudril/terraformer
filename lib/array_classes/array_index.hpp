@@ -124,12 +124,6 @@ namespace terraformer
 
 		constexpr auto operator<=>(array_index const&) const = default;
 
-		template<class Other>
-		constexpr operator array_index<Other, Rep>() const
-		{
-			return array_index<Other, Rep>{m_value};
-		}
-
 	private:
 		Rep m_value{};
 	};
