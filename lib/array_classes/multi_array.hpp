@@ -106,7 +106,7 @@ namespace terraformer
 		size_t index = 0;
 		(
 			(
-				std::uninitialized_default_construct(
+				std::uninitialized_default_construct_n(
 					dest[index].template interpret_as<T>() + offset.get(),
 					n.get()
 				),
@@ -197,7 +197,7 @@ namespace terraformer
 		{
 			if(new_size < m_size)
 			{
-				truncate_from(index_type{m_size.get()});
+				truncate_from(index_type{new_size.get()});
 				m_size = new_size;
 				return;
 			}
@@ -207,7 +207,7 @@ namespace terraformer
 				if(new_size > m_capacity)
 				{ reserve(new_size); }
 
-				uninitialized_default_construct(m_storage, (new_size - m_size).get());
+				uninitialized_default_construct(m_storage, index_type{m_size.get()}, new_size - m_size);
 				m_size = new_size;
 				return;
 			}
@@ -229,22 +229,8 @@ namespace terraformer
 			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
 		}
 
-#if 0
-		void truncate_from(array_index<T> index)
-		{ std::destroy(begin() + index.get(), end()); }
-
-		auto& operator[](array_index<T> index)
-		{ return deref(data(), index); }
-
-		auto& operator[](array_index<T> index) const
-		{ return deref(data(), index); }
-
-		operator span<T>()
-		{ return span{begin(), end()}; }
-
-		operator span<T const>()
-		{ return span{end(), end()}; }
-#endif
+		void truncate_from(index_type index)
+		{ destroy(m_storage, index, size_type{m_size.get() - index.get()}); }
 
 	private:
 		storage_type m_storage{};

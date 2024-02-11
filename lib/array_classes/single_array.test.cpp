@@ -86,10 +86,8 @@ TESTCASE(terraformer_single_array_resize_grow_and_shrink)
 		array.push_back(default_constructible_type{k});
 	}
 
-	for(int k = 0; k != 4; ++k)
-	{ default_constructible_type::expect_move_ctor(); }
-	for(int k = 0; k != 12; ++k)
-	{ default_constructible_type::expect_ctor(); }
+default_constructible_type::expect_move_ctor(4);
+	default_constructible_type::expect_ctor(12);
 	array.resize(terraformer::array_size<default_constructible_type>{16});
 
 	EXPECT_EQ(array.capacity().get(), 16);

@@ -103,7 +103,6 @@ TESTCASE(terraformer_multi_array_push_back)
 		no_default_constructible_type<double>
 	> array;
 
-
 	for(int k = 0; k != 16; ++k)
 	{
 		if(static_cast<size_t>(k) == array.capacity().get())
@@ -138,33 +137,48 @@ TESTCASE(terraformer_multi_array_push_back)
 	>::size_type;
 	EXPECT_EQ(std::size(array), size_type{16});
 }
-#if 0
 
 TESTCASE(terraformer_multi_array_resize_grow_and_shrink)
 {
-	terraformer::multi_array<default_constructible_type> array;
+	terraformer::multi_array<
+		default_constructible_type<int>,
+		default_constructible_type<double>
+	> array;
 
 	for(int k = 0; k != 4; ++k)
 	{
-		default_constructible_type::expect_ctor();
-		default_constructible_type::expect_move_ctor();
-		array.push_back(default_constructible_type{k});
+		default_constructible_type<int>::expect_ctor();
+		default_constructible_type<int>::expect_move_ctor();
+		default_constructible_type<double>::expect_ctor();
+		default_constructible_type<double>::expect_move_ctor();
+		array.push_back(
+			default_constructible_type<int>{k},
+			default_constructible_type<double>{static_cast<double>(k)/2.0}
+		);
 	}
 
-	for(int k = 0; k != 4; ++k)
-	{ default_constructible_type::expect_move_ctor(); }
-	for(int k = 0; k != 12; ++k)
-	{ default_constructible_type::expect_ctor(); }
-	array.resize(terraformer::array_size<default_constructible_type>{16});
+	default_constructible_type<int>::expect_move_ctor(4);
+	default_constructible_type<double>::expect_move_ctor(4);
+	default_constructible_type<int>::expect_ctor(12);
+	default_constructible_type<double>::expect_ctor(12);
+
+	using size_type = decltype(array)::size_type;
+	array.resize(size_type{16});
 
 	EXPECT_EQ(array.capacity().get(), 16);
 	EXPECT_EQ(array.size().get(), 16);
+	auto const first_array = array.get<0>();
+	auto const second_array = array.get<1>();
 	for(auto k = array.first_element_index() + 4; k != std::size(array); ++k)
-	{ EXPECT_EQ(static_cast<int>(array[k]), 0); }
+	{
+		EXPECT_EQ(static_cast<size_t>(static_cast<holder<int>>(first_array[k]).value()), 0);
+		EXPECT_EQ(static_cast<holder<double>>(second_array[k]).value(), 0.0);
+	}
 
-	array.resize(terraformer::array_size<default_constructible_type>{8});
+	array.resize(size_type{8});
 	EXPECT_EQ(array.size().get(), 8);
 }
+#if 0
 
 TESTCASE(terraformer_multi_array_move)
 {
