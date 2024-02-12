@@ -169,6 +169,9 @@ namespace terraformer
 		auto capacity() const
 		{ return m_capacity; }
 
+		auto empty() const
+		{ return m_size.get() == 0; }
+
 		void reserve(size_type new_capacity)
 		{
 			if(new_capacity > m_capacity)

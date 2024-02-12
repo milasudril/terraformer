@@ -155,5 +155,9 @@ namespace terraformer
 	constexpr auto operator!=(array_index<T, Rep> index, array_size<T, Rep> size)
 	{ return index.get() != size.get(); }
 
+	template<class T, class Rep>
+	constexpr auto operator==(array_index<T, Rep> index, array_size<T, Rep> size)
+	{ return index.get() == size.get(); }
+
 }
 #endif

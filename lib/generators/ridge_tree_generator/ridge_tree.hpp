@@ -6,6 +6,7 @@
 #include "./ridge_curve.hpp"
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/array_classes/single_array.hpp"
 #include "lib/curve_tools/displace.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/span_2d.hpp"
@@ -60,7 +61,10 @@ namespace terraformer
 		operator std::span<ridge_tree_branch_collection const>() const
 		{ return m_value; }
 
-		size_t size() const
+		constexpr auto first_element_index()
+		{ return m_value.first_element_index(); }
+
+		auto size() const
 		{ return std::size(m_value);  }
 
 		auto begin() const
@@ -72,7 +76,7 @@ namespace terraformer
 		auto data() const
 		{ return std::data(m_value); }
 
-		auto const& operator[](size_t index) const
+		auto const& operator[](array_index<ridge_tree_branch_collection> index) const
 		{ return m_value[index]; }
 
 		void update_elevations(
@@ -83,7 +87,7 @@ namespace terraformer
 		);
 
 	private:
-		std::vector<ridge_tree_branch_collection> m_value;
+		single_array<ridge_tree_branch_collection> m_value;
 	};
 
 	inline ridge_tree generate(

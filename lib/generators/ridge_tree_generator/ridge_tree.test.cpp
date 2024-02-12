@@ -73,11 +73,11 @@ TESTCASE(terraformer_ridge_tree_generate)
 	printf("Elapsed time %.8g s\n", std::chrono::duration<double>(t - t_0).count());
 
 	terraformer::curve_set curves;
-	for(size_t k = 0; k != std::size(res); ++k)
+	for(auto k = res.first_element_index(); k != std::size(res); ++k)
 	{
 		for(auto const& curve : res[k].curves)
 		{
-			curves.append(curve.get<0>().points());
+			curves.append(curve.points());
 		}
 	}
 

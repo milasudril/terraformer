@@ -53,6 +53,9 @@ namespace terraformer
 		auto size() const
 		{ return m_size; }
 
+		auto empty() const
+		{ return m_size.get() == 0; }
+
 		auto capacity() const
 		{ return m_capacity; }
 
