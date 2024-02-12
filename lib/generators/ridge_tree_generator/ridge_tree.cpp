@@ -96,8 +96,6 @@ terraformer::ridge_tree::ridge_tree(
 			rng,
 			curve_levels[next_level_index].growth_params
 		);
-		for(auto& item : next_level_seeds.get<0>())
-		{ current_trunk.branch_at.push_back(std::move(item.branch_index)); }
 
 		for(auto& stem: next_level)
 		{

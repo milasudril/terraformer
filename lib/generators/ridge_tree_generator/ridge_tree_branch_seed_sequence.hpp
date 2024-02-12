@@ -12,7 +12,6 @@ namespace terraformer
 	{
 		array_tuple<location, direction, size_t> left;
 		array_tuple<location, direction, size_t> right;
-		std::vector<size_t> branch_index;
 	};
 
 	ridge_tree_branch_seed_sequence collect_ridge_tree_branch_seeds(
