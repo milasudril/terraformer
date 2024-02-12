@@ -89,12 +89,14 @@ namespace terraformer
 			}
 		}
 
-		void push_back(T&& elem)
+		template<class Arg>
+		requires (std::is_same_v<std::remove_cvref_t<Arg>, T> || std::is_convertible_v<Arg, T>)
+		void push_back(Arg&& elem)
 		{
 			auto new_size = m_size + size_type{1};
 			if(new_size > m_capacity)
 			{ reserve(std::max(size_type{8}, static_cast<size_t>(2)*capacity())); }
-			std::construct_at(m_storage.interpret_as<T>() + m_size.get(), std::move(elem));
+			std::construct_at(m_storage.interpret_as<T>() + m_size.get(), std::forward<Arg>(elem));
 			m_size = new_size;
 		}
 
