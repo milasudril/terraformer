@@ -31,18 +31,20 @@ namespace terraformer
 	displacement compute_field(std::span<ridge_tree_branch_collection const> branches, location r, float min_distance);
 
 	template<class BranchStopCondition>
-	std::vector<location> generate_branch_base_curve(
+	single_array<location> generate_branch_base_curve(
 		location loc,
 		direction start_dir,
 		std::span<ridge_tree_branch_collection const> existing_branches,
 		float pixel_size,
 		BranchStopCondition&& stop)
 	{
-		std::vector<location> base_curve;
+		single_array<location> base_curve;
 		if(stop(loc))
 		{ return base_curve; }
 
 		base_curve.push_back(loc);
+
+		base_curve.reserve(array_size<location>{128});
 
 		loc += pixel_size*start_dir;
 

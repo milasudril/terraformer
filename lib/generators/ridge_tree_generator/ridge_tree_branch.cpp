@@ -66,7 +66,7 @@ terraformer::generate_branches(
 			}
 		);
 
-		if(std::size(base_curve) < 3)
+		if(std::size(base_curve).get() < 3)
 		{
 			fprintf(stderr, "Curve %zu is to short\n", k);
 			continue;
