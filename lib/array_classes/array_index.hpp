@@ -78,6 +78,8 @@ namespace terraformer
 
 		constexpr array_index() = default;
 
+		constexpr explicit array_index(array_size<T, Rep> value):m_value{value.get()}{}
+
 		constexpr explicit array_index(Rep value): m_value{value}{}
 
 		constexpr auto get() const { return m_value; }
