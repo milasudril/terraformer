@@ -44,8 +44,8 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus)
 		)
 	);
 
-	EXPECT_EQ(std::size(res.left), 2);
-	EXPECT_EQ(std::size(res.right), 1);
+	EXPECT_EQ(std::size(res.left).get(), 2);
+	EXPECT_EQ(std::size(res.right).get(), 1);
 }
 
 TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus)
@@ -85,8 +85,8 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus)
 		)
 	);
 
-	EXPECT_EQ(std::size(res.left), 1);
-	EXPECT_EQ(std::size(res.right), 2);
+	EXPECT_EQ(std::size(res.left).get(), 1);
+	EXPECT_EQ(std::size(res.right).get(), 2);
 }
 
 TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus_minus)
@@ -125,19 +125,19 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus_minus)
 		)
 	);
 
-	EXPECT_EQ(std::size(res.left), 2);
+	EXPECT_EQ(std::size(res.left).get(), 2);
 	EXPECT_LT(
-		distance(res.left.get<0>()[0], (terraformer::location{0.17f, -0.015f, 0.0f})),
+		distance(res.left.get<0>().front(), (terraformer::location{0.17f, -0.015f, 0.0f})),
 		0.05f
 	);
-	EXPECT_LT(res.left.get<1>()[0][1], 0.0f);
+	EXPECT_LT(res.left.get<1>().front()[1], 0.0f);
 
-	EXPECT_EQ(std::size(res.right), 2);
+	EXPECT_EQ(std::size(res.right).get(), 2);
 	EXPECT_LT(
-		distance(res.right.get<0>()[0], (terraformer::location{1.0f, 0.18f, 0.0f})),
+		distance(res.right.get<0>().front(), (terraformer::location{1.0f, 0.18f, 0.0f})),
 		0.05f
 	);
-	EXPECT_GT(res.right.get<1>()[0][1], 0.0f);
+	EXPECT_GT(res.right.get<1>().front()[1], 0.0f);
 }
 
 TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus_plus)
@@ -176,8 +176,8 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus_plus)
 		)
 	);
 
-	EXPECT_EQ(std::size(res.left), 2);
-	EXPECT_EQ(std::size(res.right), 2);
+	EXPECT_EQ(std::size(res.left).get(), 2);
+	EXPECT_EQ(std::size(res.right).get(), 2);
 }
 
 TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data)
@@ -220,8 +220,8 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data)
 		)
 	);
 
-	EXPECT_EQ(std::size(res.left), 4);
-	EXPECT_EQ(std::size(res.right), 4);
+	EXPECT_EQ(std::size(res.left).get(), 4);
+	EXPECT_EQ(std::size(res.right).get(), 4);
 }
 
 TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data_2)
@@ -256,21 +256,17 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data_2)
 	);
 
 	{
-		for(size_t k = 0; k != std::size(res.left); ++k)
-		{
-			auto const normal = res.left.get<1>()[k];
-			EXPECT_LT(normal[0], 0.0f);
-		}
+		auto const normals = res.left.get<1>();
+		for(auto k = normals.first_element_index(); k != std::size(normals); ++k)
+		{	EXPECT_LT(normals[k][0], 0.0f); }
 	}
 
 	{
-		for(size_t k = 0; k != std::size(res.right); ++k)
-		{
-			auto const normal = res.right.get<1>()[k];
-			EXPECT_GT(normal[0], 0.0f);
-		}
+		auto const normals = res.right.get<1>();
+		for(auto k = normals.first_element_index(); k != std::size(normals); ++k)
+		{	EXPECT_GT(normals[k][0], 0.0f); }
 	}
 
-	EXPECT_EQ(std::size(res.left), 4);
-	EXPECT_EQ(std::size(res.right), 3);
+	EXPECT_EQ(std::size(res.left).get(), 4);
+	EXPECT_EQ(std::size(res.right).get(), 3);
 }

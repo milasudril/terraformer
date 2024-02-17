@@ -16,6 +16,8 @@ namespace terraformer
 		requires std::disjunction_v<std::is_same<U, T>...>
 		static consteval auto match_tag()
 		{ return std::type_identity<U>{}; }
+
+		static consteval void convert(T const&...){}
 	};
 
 	template<class ... T>
@@ -26,11 +28,11 @@ namespace terraformer
 		};
 	}
 
-	template<class ... T>
+	template<class ... T, class ... Args>
 	void construct(
 		std::array<memory_block, sizeof...(T)> const& storage,
 		array_index<multi_array_tag<T...>> offset,
-		T&&... values
+		Args&&... values
 	)
 	{
 		size_t index = 0;
@@ -38,7 +40,7 @@ namespace terraformer
 			(
 				std::construct_at(
 					storage[index].template interpret_as<T>() + offset.get(),
-					std::forward<T>(values)
+					std::forward<Args>(values)
 				),
 				++index
 			),...
@@ -192,12 +194,18 @@ namespace terraformer
 			}
 		}
 
-		void push_back(T&&... elems)
+		template<class ... Arg>
+		requires std::is_same_v<multi_array_tag<std::remove_cvref_t<Arg>...>, multi_array_tag<T...>>
+		|| requires (Arg const&... args)
+		{
+			{multi_array_tag<T...>::convert(args...)};
+		}
+		void push_back(Arg&&... elems)
 		{
 			auto new_size = m_size + size_type{1};
 			if(new_size > m_capacity)
 			{ reserve(std::max(size_type{8}, static_cast<size_t>(2)*capacity())); }
-			construct(m_storage, index_type{m_size.get()}, std::move(elems)...);
+			construct(m_storage, index_type{m_size.get()}, std::forward<Arg>(elems)...);
 			m_size = new_size;
 		}
 

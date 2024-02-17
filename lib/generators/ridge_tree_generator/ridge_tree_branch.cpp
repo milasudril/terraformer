@@ -38,7 +38,7 @@ terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch
 
 terraformer::single_array<terraformer::displaced_curve>
 terraformer::generate_branches(
-	array_tuple<location, direction, displaced_curve::index_type> const& branch_points,
+	multi_array<location, direction, displaced_curve::index_type> const& branch_points,
 	std::span<ridge_tree_branch_collection const> existing_branches,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
@@ -48,8 +48,8 @@ terraformer::generate_branches(
 {
 	auto const points = branch_points.get<0>();
 	auto const normals = branch_points.get<1>();
-	auto const branch_index = branch_points.get<2>();
-	for(size_t k = 0; k != std::size(branch_points); ++k)
+
+	for(auto k = branch_points.first_element_index(); k != std::size(branch_points); ++k)
 	{
 		auto const base_curve = generate_branch_base_curve(
 			points[k],
@@ -68,7 +68,7 @@ terraformer::generate_branches(
 
 		if(std::size(base_curve).get() < 3)
 		{
-			fprintf(stderr, "Curve %zu is to short\n", k);
+			fprintf(stderr, "Curve %zu is to short\n", k.get());
 			continue;
 		}
 

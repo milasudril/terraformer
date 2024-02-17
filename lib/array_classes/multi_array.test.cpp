@@ -188,8 +188,6 @@ TESTCASE(terraformer_multi_array_move)
 
 	default_constructible_type<int>::expect_ctor(4);
 	default_constructible_type<double>::expect_ctor(4);
-	default_constructible_type<int>::expect_move_ctor(4);
-	default_constructible_type<double>::expect_move_ctor(4);
 	array.push_back(1, 0.5);
 	array.push_back(2, 1.0);
 	array.push_back(3, 1.5);
@@ -222,8 +220,6 @@ TESTCASE(terraformer_multi_array_copy)
 
 	no_default_constructible_type<int>::expect_ctor(4);
 	no_default_constructible_type<double>::expect_ctor(4);
-	no_default_constructible_type<int>::expect_move_ctor(4);
-	no_default_constructible_type<double>::expect_move_ctor(4);
 	array.push_back(1, 0.5);
 	array.push_back(2, 1.0);
 	array.push_back(3, 1.5);
@@ -261,8 +257,6 @@ TESTCASE(terraformer_multi_array_move_assign)
 
 	no_default_constructible_type<int>::expect_ctor(4);
 	no_default_constructible_type<double>::expect_ctor(4);
-	no_default_constructible_type<int>::expect_move_ctor(4);
-	no_default_constructible_type<double>::expect_move_ctor(4);
 	array.push_back(1, 0.5);
 	array.push_back(2, 1.0);
 	array.push_back(3, 1.5);
@@ -271,8 +265,6 @@ TESTCASE(terraformer_multi_array_move_assign)
 	my_array_type other;
 	no_default_constructible_type<int>::expect_ctor(3);
 	no_default_constructible_type<double>::expect_ctor(3);
-	no_default_constructible_type<int>::expect_move_ctor(3);
-	no_default_constructible_type<double>::expect_move_ctor(3);
 	other.push_back(5, 2.5);
 	other.push_back(6, 3.0);
 	other.push_back(7, 3.5);

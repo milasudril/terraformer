@@ -23,7 +23,10 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 
 	ridge_tree_branch_seed_sequence ret;
 	float max_offset = 0.0f;
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 	std::optional<displaced_curve::index_type> selected_branch_point;
+#pragma GCC diagnostic pop
 	for(auto k = displaced_points.first_element_index();
 			k != displaced_points.last_element_index();
 			++k)
@@ -37,9 +40,9 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 				auto const loc_c = points[*selected_branch_point + 1];
 				auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
 				if(side >= 0.0f)
-				{ ret.left.push_back(tuple{loc_b, normal, *selected_branch_point}); }
+				{ ret.left.push_back(loc_b, normal, *selected_branch_point); }
 				else
-				{ ret.right.push_back(tuple{loc_b, normal, *selected_branch_point}); }
+				{ ret.right.push_back(loc_b, normal, *selected_branch_point); }
 			}
 			max_offset = 0.0f;
 			++l;
@@ -71,9 +74,9 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 		auto const loc_c = points[*selected_branch_point + 1];
 		auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
 		if(side >= 0.0f)
-		{ ret.left.push_back(tuple{loc_b, normal, *selected_branch_point}); }
+		{ ret.left.push_back(loc_b, normal, *selected_branch_point); }
 		else
-		{ ret.right.push_back(tuple{loc_b, normal, *selected_branch_point}); }
+		{ ret.right.push_back(loc_b, normal, *selected_branch_point); }
 	}
 
 	std::ranges::reverse(ret.right.get<0>());
