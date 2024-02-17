@@ -133,8 +133,11 @@ namespace terraformer
 
 		template<class Other>
 		requires requires { {Other::template match_tag<T>()}; }
-		explicit operator array_index<Other, Rep>() const
+		constexpr explicit operator array_index<Other, Rep>() const
 		{ return array_index<Other>{m_value}; }
+
+		constexpr explicit operator array_size<T, Rep>() const
+		{ return array_size<T, Rep>{m_value}; }
 
 	private:
 		Rep m_value{};

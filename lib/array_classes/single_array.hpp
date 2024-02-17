@@ -111,7 +111,6 @@ namespace terraformer
 			if(new_size < m_size)
 			{
 				truncate_from(array_index<T>{new_size.get()});
-				m_size = new_size;
 				return;
 			}
 
@@ -126,7 +125,10 @@ namespace terraformer
 		}
 
 		void truncate_from(index_type index)
-		{ std::destroy(begin() + index.get(), end()); }
+		{
+			std::destroy(begin() + index.get(), end());
+			m_size = size_type{index};
+		}
 
 		auto& operator[](index_type index)
 		{ return deref(data(), index); }

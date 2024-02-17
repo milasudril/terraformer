@@ -12,7 +12,7 @@
 #include <charconv>
 #include <string>
 #include <ranges>
-#include <span>
+#include <cstdio>
 
 namespace terraformer
 {
@@ -79,18 +79,17 @@ namespace terraformer
 	template<std::ranges::forward_range R1, std::ranges::forward_range R2, class Pred>
 	auto find_matching_pair(R1&& r_1, R2&& r_2, Pred pred)
 	{
-		auto i_1 = std::begin(r_1);
 		auto const end_1 = std::end(r_1);
-
-		auto i_2 = std::begin(r_2);
 		auto const end_2 = std::end(r_2);
 
+		auto i_1 = std::begin(r_1);
 		while(i_1 != end_1)
 		{
+			auto i_2 = std::begin(r_2);
 			while(i_2 != end_2)
 			{
 				if(pred(*i_1, *i_2))
-				{ return std::pair{i_2, i_2}; }
+				{ return std::pair{i_1, i_2}; }
 				++i_2;
 			}
 			++i_1;

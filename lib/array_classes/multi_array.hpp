@@ -252,7 +252,10 @@ namespace terraformer
 		}
 
 		void truncate_from(index_type index)
-		{ destroy(m_storage, index, size_type{m_size.get() - index.get()}); }
+		{
+			destroy(m_storage, index, size_type{m_size.get() - index.get()});
+			m_size = size_type{index};
+		}
 
 	private:
 		storage_type m_storage{};

@@ -83,7 +83,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 
 	auto curve_file = terraformer::make_output_file("/dev/shm/slask.json");
 	curves.write_to(curve_file.get());
-
+#if 0
 	std::vector elevation_profiles{
 		terraformer::ridge_tree_branch_elevation_profile{
 			.starting_slope = terraformer::slope_angle{0.0f},
@@ -150,7 +150,6 @@ TESTCASE(terraformer_ridge_tree_generate)
 		pixel_size
 	);
 
-#if 0
 	terraformer::grayscale_image img{1024, 1024};
 	render(
 		res,

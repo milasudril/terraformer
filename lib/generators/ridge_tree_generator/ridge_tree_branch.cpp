@@ -112,8 +112,9 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 				a[k].get<0>(),
 				b[l].get<0>(),
 				[md2](auto const p1, auto const p2) {
-					if(distance_squared(p1, p2) < md2)
-					{ return true; }
+					auto const d2 = distance_squared(p1, p2);
+					if(d2 < md2)
+					{	return true; }
 					return false;
 				}
 			);
@@ -190,7 +191,7 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 	{
 		auto const index = b_trim[l];
 		if(index != std::size(b[l]))
-		{	b[l].truncate_from(index); }
+		{ b[l].truncate_from(index); }
 	}
 }
 
