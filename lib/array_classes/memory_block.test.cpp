@@ -14,7 +14,7 @@ TESTCASE(terraformer_memory_block_default_construct)
 
 TESTCASE(terraformer_memory_block_construct_with_size)
 {
-	terraformer::memory_block obj{make_byte_size(terraformer::array_size<int>{12})};
+	terraformer::memory_block obj{make_byte_size<int>(terraformer::array_size<int>{12})};
 	EXPECT_EQ(static_cast<bool>(obj), true);
 	EXPECT_NE(obj.get(), nullptr);
 	EXPECT_NE(obj.interpret_as<int>(), nullptr);

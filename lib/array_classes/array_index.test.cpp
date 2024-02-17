@@ -21,7 +21,7 @@ TESTCASE(terraformer_array_size_add_assign)
 	terraformer::array_size<int> val{124};
 	val += terraformer::array_size<int>{23};
 	EXPECT_EQ(val.get(), 147);
-	
+
 	try
 	{
 		val += terraformer::array_size<int>{static_cast<size_t>(-1)};
@@ -36,7 +36,7 @@ TESTCASE(terraformer_array_size_sub_assign)
 	terraformer::array_size<int> val{124};
 	val -= terraformer::array_size<int>{23};
 	EXPECT_EQ(val.get(), 101);
-	
+
 	try
 	{
 		val -= terraformer::array_size<int>{static_cast<size_t>(125)};
@@ -51,7 +51,7 @@ TESTCASE(terraformer_array_size_mul_assign)
 	terraformer::array_size<int> val{124};
 	val *= 23;
 	EXPECT_EQ(val.get(), 2852);
-	
+
 	try
 	{
 		val *= static_cast<size_t>(-1);
@@ -81,12 +81,12 @@ TESTCASE(terraformer_array_size_mul)
 
 TESTCASE(terraformer_make_byte_size)
 {
-	auto const val = make_byte_size(terraformer::array_size<int>{1243});
+	auto const val = make_byte_size<int>(terraformer::array_size<int>{1243});
 	EXPECT_EQ(val.get(), sizeof(int)*1243);
-	
+
 	try
 	{
-		(void)make_byte_size(terraformer::array_size<size_t>{0xffff'ffff'ffff'ffff});
+		(void)make_byte_size<size_t>(terraformer::array_size<size_t>{0xffff'ffff'ffff'ffff});
 		abort();
 	}
 	catch(...)

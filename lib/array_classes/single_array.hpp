@@ -22,7 +22,7 @@ namespace terraformer
 		{ }
 
 		single_array(single_array const& other):
-			m_storage{make_byte_size(other.capacity())},
+			m_storage{make_byte_size<T>(other.capacity())},
 			m_size{other.m_size},
 			m_capacity{other.m_capacity}
 		{ std::uninitialized_copy_n(other.begin(), m_size.get(), m_storage.template interpret_as<T>()); }
@@ -72,7 +72,7 @@ namespace terraformer
 		{
 			if(new_capacity > m_capacity)
 			{
-				memory_block new_storage{make_byte_size(new_capacity)};
+				memory_block new_storage{make_byte_size<T>(new_capacity)};
 				std::uninitialized_move(begin(), end(), new_storage.interpret_as<T>());
 				std::destroy(begin(), end());
 				m_storage = std::move(new_storage);

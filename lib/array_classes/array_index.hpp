@@ -7,7 +7,7 @@
 
 namespace terraformer
 {
-	template<class T, class Rep = size_t>
+	template<class Tag, class Rep = size_t>
 	class array_size
 	{
 	public:
@@ -54,23 +54,23 @@ namespace terraformer
 	template<class Rep = size_t>
 	using byte_size = array_size<std::byte, Rep>;
 
-	template<class T, class Rep>
-	constexpr auto make_byte_size(array_size<T, Rep> size)
-	{ return byte_size{(sizeof(T)*size).get()}; }
+	template<class Type, class Tag, class Rep>
+	constexpr auto make_byte_size(array_size<Tag, Rep> size)
+	{ return byte_size{(sizeof(Type)*size).get()}; }
 
-	template<class T, class Rep>
-	constexpr auto operator+(array_size<T, Rep> a, array_size<T, Rep> b)
+	template<class Tag, class Rep>
+	constexpr auto operator+(array_size<Tag, Rep> a, array_size<Tag, Rep> b)
 	{ return a += b; }
 
-	template<class T, class Rep>
-	constexpr auto operator-(array_size<T, Rep> a, array_size<T, Rep> b)
+	template<class Tag, class Rep>
+	constexpr auto operator-(array_size<Tag, Rep> a, array_size<Tag, Rep> b)
 	{ return a -= b; }
 
-	template<class T, class Rep>
-	constexpr auto operator*(Rep c, array_size<T, Rep> a)
+	template<class Tag, class Rep>
+	constexpr auto operator*(Rep c, array_size<Tag, Rep> a)
 	{ return a *= c; }
 
-	template<class T, class Rep = size_t>
+	template<class Tag, class Rep = size_t>
 	class array_index
 	{
 	public:
@@ -78,7 +78,7 @@ namespace terraformer
 
 		constexpr array_index() = default;
 
-		constexpr explicit array_index(array_size<T, Rep> value):m_value{value.get()}{}
+		constexpr explicit array_index(array_size<Tag, Rep> value):m_value{value.get()}{}
 
 		constexpr explicit array_index(Rep value): m_value{value}{}
 
@@ -128,28 +128,28 @@ namespace terraformer
 		Rep m_value{};
 	};
 
-	template<class T, class Rep>
-	constexpr auto operator+(array_index<T, Rep> base, typename array_index<T, Rep>::offset_type offset)
+	template<class Tag, class Rep>
+	constexpr auto operator+(array_index<Tag, Rep> base, typename array_index<Tag, Rep>::offset_type offset)
 	{ return base += offset; }
 
-	template<class T, class Rep>
-	constexpr auto operator-(array_index<T, Rep> base, typename array_index<T, Rep>::offset_type offset)
+	template<class Tag, class Rep>
+	constexpr auto operator-(array_index<Tag, Rep> base, typename array_index<Tag, Rep>::offset_type offset)
 	{ return base -= offset; }
 
-	template<class T, class Rep>
-	constexpr auto& deref(T* ptr, array_index<T, Rep> index)
+	template<class Tag, class Rep>
+	constexpr auto& deref(Tag* ptr, array_index<Tag, Rep> index)
 	{ return ptr[index.get()]; }
 
-	template<class T, class Rep>
-	constexpr auto& deref(T const* ptr, array_index<T, Rep> index)
+	template<class Tag, class Rep>
+	constexpr auto& deref(Tag const* ptr, array_index<Tag, Rep> index)
 	{ return ptr[index.get()]; }
 
-	template<class T, class Rep>
-	constexpr auto operator<(array_index<T, Rep> index, array_size<T, Rep> size)
+	template<class Tag, class Rep>
+	constexpr auto operator<(array_index<Tag, Rep> index, array_size<Tag, Rep> size)
 	{ return index.get() < size.get(); }
 
-	template<class T, class Rep>
-	constexpr auto operator!=(array_index<T, Rep> index, array_size<T, Rep> size)
+	template<class Tag, class Rep>
+	constexpr auto operator!=(array_index<Tag, Rep> index, array_size<Tag, Rep> size)
 	{ return index.get() != size.get(); }
 
 }
