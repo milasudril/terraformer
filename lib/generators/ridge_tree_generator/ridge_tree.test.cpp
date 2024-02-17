@@ -150,7 +150,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 		pixel_size
 	);
 
-
+#if 0
 	terraformer::grayscale_image img{1024, 1024};
 	render(
 		res,
@@ -178,4 +178,5 @@ TESTCASE(terraformer_ridge_tree_generate)
 		pixel_size
 	);
 	store(img, "/dev/shm/slask.exr");
+#endif
 }
