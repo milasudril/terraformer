@@ -28,8 +28,8 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 	std::optional<displaced_curve::index_type> selected_branch_point;
 #pragma GCC diagnostic pop
 	for(auto k = displaced_points.first_element_index() + 1;
-			k != displaced_points.last_element_index();
-			++k
+		k != displaced_points.last_element_index();
+		++k
 	)
 	{
 		if(l != std::size(x_intercepts.zeros) && k == displaced_curve::index_type{x_intercepts.zeros[l]})
