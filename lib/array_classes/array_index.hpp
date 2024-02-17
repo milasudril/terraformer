@@ -7,7 +7,7 @@
 
 namespace terraformer
 {
-	template<class T, class Rep = size_t>
+	template<class Tag, class Rep = size_t>
 	class array_size
 	{
 	public:
@@ -54,23 +54,23 @@ namespace terraformer
 	template<class Rep = size_t>
 	using byte_size = array_size<std::byte, Rep>;
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto make_byte_size(array_size<T, Rep> size)
 	{ return byte_size{(sizeof(T)*size).get()}; }
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto operator+(array_size<T, Rep> a, array_size<T, Rep> b)
 	{ return a += b; }
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto operator-(array_size<T, Rep> a, array_size<T, Rep> b)
 	{ return a -= b; }
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto operator*(Rep c, array_size<T, Rep> a)
 	{ return a *= c; }
 
-	template<class T, class Rep = size_t>
+	template<class Tag, class Rep = size_t>
 	class array_index
 	{
 	public:
@@ -128,27 +128,27 @@ namespace terraformer
 		Rep m_value{};
 	};
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto operator+(array_index<T, Rep> base, typename array_index<T, Rep>::offset_type offset)
 	{ return base += offset; }
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto operator-(array_index<T, Rep> base, typename array_index<T, Rep>::offset_type offset)
 	{ return base -= offset; }
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto& deref(T* ptr, array_index<T, Rep> index)
 	{ return ptr[index.get()]; }
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto& deref(T const* ptr, array_index<T, Rep> index)
 	{ return ptr[index.get()]; }
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto operator<(array_index<T, Rep> index, array_size<T, Rep> size)
 	{ return index.get() < size.get(); }
 
-	template<class T, class Rep>
+	template<class Tag, class Rep>
 	constexpr auto operator!=(array_index<T, Rep> index, array_size<T, Rep> size)
 	{ return index.get() != size.get(); }
 
