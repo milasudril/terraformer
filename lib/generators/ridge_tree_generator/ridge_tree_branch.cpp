@@ -38,7 +38,7 @@ terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch
 
 terraformer::single_array<terraformer::displaced_curve>
 terraformer::generate_branches(
-	array_tuple<location, direction, size_t> const& branch_points,
+	array_tuple<location, direction, displaced_curve::index_type> const& branch_points,
 	std::span<ridge_tree_branch_collection const> existing_branches,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
@@ -96,21 +96,21 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
 
-	std::vector<size_t> a_trim(outer_count);
+	std::vector<displaced_curve::index_type> a_trim(outer_count);
 	for(size_t k = 0; k != outer_count; ++k)
-	{ a_trim[k] = std::size(a[k]); }
+	{ a_trim[k] = displaced_curve::index_type{std::size(a[k])}; }
 
-	std::vector<size_t> b_trim(inner_count);
+	std::vector<displaced_curve::index_type> b_trim(inner_count);
 	for(size_t l = 0; l != inner_count; ++l)
-	{ b_trim[l] = std::size(b[l]); }
+	{ b_trim[l] = displaced_curve::index_type{std::size(b[l])}; }
 
 	for(size_t k = 0; k != outer_count; ++k)
 	{
 		for(size_t l = 0; l != inner_count; ++l)
 		{
-			auto const res = cartesian_find_if(
-				std::span<location const>(a[k].get<0>()),
-				std::span<location const>(b[l].get<0>()),
+			auto const res = find_matching_pair(
+				a[k].get<0>(),
+				b[l].get<0>(),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
 					{ return true; }
@@ -118,17 +118,24 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 				}
 			);
 
-			a_trim[k] = std::min(res.first, a_trim[k]);
-			b_trim[l] = std::min(res.second, b_trim[l]);
+			a_trim[k] = std::min(
+				static_cast<displaced_curve::index_type>(as_index(std::begin(a[k].get<0>()), res.first)),
+				a_trim[k]
+			);
+			b_trim[l] = std::min(
+				static_cast<displaced_curve::index_type>(as_index(std::begin(b[l].get<0>()), res.second)),
+				b_trim[l]
+			);
 		}
 	}
+
 	for(size_t k = 0; k != outer_count; ++k)
 	{
 		for(size_t l = 0; l != k; ++l)
 		{
-			auto const res = cartesian_find_if(
-				std::span<location const>(a[k].get<0>()),
-				std::span<location const>(a[l].get<0>()),
+			auto const res = find_matching_pair(
+				a[k].get<0>(),
+				a[l].get<0>(),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
 					{ return true; }
@@ -136,8 +143,15 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 				}
 			);
 
-			a_trim[k] = std::min(res.first, a_trim[k]);
-			a_trim[l] = std::min(res.second, a_trim[l]);
+			a_trim[k] = std::min(
+				static_cast<displaced_curve::index_type>(as_index(std::begin(a[k].get<0>()), res.first)),
+				a_trim[k]
+			);
+
+			a_trim[l] = std::min(
+				static_cast<displaced_curve::index_type>(as_index(std::begin(a[l].get<0>()), res.second)),
+				a_trim[l]
+			);
 		}
 	}
 
@@ -145,9 +159,9 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 	{
 		for(size_t l = 0; l != k; ++l)
 		{
-			auto const res = cartesian_find_if(
-				std::span<location const>(b[k].get<0>()),
-				std::span<location const>(b[l].get<0>()),
+			auto const res = find_matching_pair(
+				b[k].get<0>(),
+				b[l].get<0>(),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
 					{ return true; }
@@ -155,23 +169,28 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 				}
 			);
 
-			b_trim[k] = std::min(res.first, b_trim[k]);
-			b_trim[l] = std::min(res.second, b_trim[l]);
+			b_trim[k] = std::min(
+				static_cast<displaced_curve::index_type>(as_index(std::begin(b[k].get<0>()), res.first)),
+				b_trim[k]
+			);
+			b_trim[l] = std::min(
+				static_cast<displaced_curve::index_type>(as_index(std::begin(b[l].get<0>()), res.second)),
+				b_trim[l]
+			);
 		}
 	}
-
 	for(size_t k = 0; k != outer_count; ++k)
 	{
 		auto const index = a_trim[k];
 		if(index != std::size(a[k]))
-		{ a[k].shrink(index); }
+		{ a[k].truncate_from(index); }
 	}
 
 	for(size_t l = 0; l != inner_count; ++l)
 	{
 		auto const index = b_trim[l];
 		if(index != std::size(b[l]))
-		{	b[l].shrink(index); }
+		{	b[l].truncate_from(index); }
 	}
 }
 

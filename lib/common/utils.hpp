@@ -76,18 +76,26 @@ namespace terraformer
 		return static_cast<uint32_t>(2.0f*std::floor(0.5f*x) + 1);
 	}
 
-	template<class A, class B, class Pred>
-	auto cartesian_find_if(std::span<A const> r1, std::span<B const> r2, Pred pred)
+	template<std::ranges::forward_range R1, std::ranges::forward_range R2, class Pred>
+	auto find_matching_pair(R1&& r_1, R2&& r_2, Pred pred)
 	{
-		for(size_t k = 0; k != std::size(r1); ++k)
+		auto i_1 = std::begin(r_1);
+		auto const end_1 = std::end(r_1);
+
+		auto i_2 = std::begin(r_2);
+		auto const end_2 = std::end(r_2);
+
+		while(i_1 != end_1)
 		{
-			for(size_t l = 0; l != std::size(r2); ++l)
+			while(i_2 != end_2)
 			{
-				if(pred(r1[k], r2[l]))
-				{ return std::pair{k, l}; }
+				if(pred(*i_1, *i_2))
+				{ return std::pair{i_2, i_2}; }
+				++i_2;
 			}
+			++i_1;
 		}
-		return std::pair{std::size(r1), std::size(r2)};
+		return std::pair{end_1, end_2};
 	}
 }
 

@@ -130,7 +130,7 @@ TESTCASE(terraformer_curve_displace_xy)
 		}
 	);
 
- 	REQUIRE_EQ(std::size(res), std::size(locs));
+ 	REQUIRE_EQ(std::size(res).get(), std::size(locs));
 #if 0
 	// TODO: Fix verdict
 

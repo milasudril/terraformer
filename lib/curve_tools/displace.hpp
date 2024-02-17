@@ -4,7 +4,7 @@
 #define TERRAFORMER_CURVE_DISPLACE_HPP
 
 #include "lib/common/spaces.hpp"
-#include "lib/common/array_tuple.hpp"
+#include "lib/array_classes/multi_array.hpp"
 
 #include <span>
 #include <bit>
@@ -46,10 +46,10 @@ namespace terraformer
 		float sample_period;
 	};
 
-	class displaced_curve : public array_tuple<location, float>
+	class displaced_curve : public multi_array<location, float>
 	{
 	public:
-		using array_tuple<location, float>::array_tuple;
+		using multi_array<location, float>::multi_array;
 
 		decltype(auto) scalar_displacements() const
 		{ return get<1>(); }

@@ -46,10 +46,10 @@ namespace terraformer
 		}
 
 		template<class Other>
-		explicit operator array_size<Other, Rep>() const
+		constexpr explicit operator array_size<Other, Rep>() const
 		{ return array_size<Other>{m_value}; }
 
-		explicit operator Rep() const
+		constexpr explicit operator Rep() const
 		{ return m_value; }
 
 	private:
@@ -80,8 +80,12 @@ namespace terraformer
 	{
 	public:
 		using offset_type = std::make_signed_t<Rep>;
+		using rep = Rep;
+		using tag = T;
 
 		constexpr array_index() = default;
+
+		constexpr explicit array_index(array_size<T, Rep> value): m_value{value}{}
 
 		constexpr explicit array_index(Rep value): m_value{value}{}
 
@@ -127,6 +131,11 @@ namespace terraformer
 
 		constexpr auto operator<=>(array_index const&) const = default;
 
+		template<class Other>
+		requires requires { {Other::template match_tag<T>()}; }
+		explicit operator array_index<Other, Rep>() const
+		{ return array_index<Other>{m_value}; }
+
 	private:
 		Rep m_value{};
 	};
@@ -159,5 +168,17 @@ namespace terraformer
 	constexpr auto operator==(array_index<T, Rep> index, array_size<T, Rep> size)
 	{ return index.get() == size.get(); }
 
+	template<class T, class Rep = size_t>
+	constexpr auto as_index(T* base, T* offset)
+	{ return array_index<T, Rep>{static_cast<Rep>(std::distance(base, offset))}; }
+
+	template<class Pointer>
+	requires requires { typename Pointer::index_type; }
+	constexpr auto as_index(Pointer base, Pointer offset)
+	{
+		using Rep = typename Pointer::index_type::rep;
+		return typename Pointer::index_type{static_cast<Rep>(std::distance(base, offset))};
+
+	}
 }
 #endif

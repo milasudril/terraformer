@@ -5,10 +5,18 @@
 #include "./span.hpp"
 #include "lib/common/tuple.hpp"
 
+#include <type_traits>
+
 namespace terraformer
 {
 	template<class ... T>
-	struct multi_array_tag{};
+	struct multi_array_tag
+	{
+		template<class U>
+		requires std::disjunction_v<std::is_same<U, T>...>
+		static consteval auto match_tag()
+		{ return std::type_identity<U>{}; }
+	};
 
 	template<class ... T>
 	auto generate_mem_blocks(array_size<multi_array_tag<T...>> size)

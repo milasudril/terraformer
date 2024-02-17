@@ -21,7 +21,8 @@ namespace terraformer
 	};
 
 	template<class T>
-	concept has_index_type = requires {
+	concept has_index_type = requires
+	{
 		typename T::index_type;
 	};
 

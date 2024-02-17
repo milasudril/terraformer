@@ -23,10 +23,12 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 
 	ridge_tree_branch_seed_sequence ret;
 	float max_offset = 0.0f;
-	std::optional<size_t> selected_branch_point;
-	for(size_t k = 1; k != std::size(offsets) - 1;++k)
+	std::optional<displaced_curve::index_type> selected_branch_point;
+	for(auto k = displaced_points.first_element_index();
+			k != displaced_points.last_element_index();
+			++k)
 	{
-		if(l != std::size(x_intercepts.zeros) && k == x_intercepts.zeros[l])
+		if(l != std::size(x_intercepts.zeros) && k == displaced_curve::index_type{x_intercepts.zeros[l]})
 		{
 			if(selected_branch_point.has_value())
 			{

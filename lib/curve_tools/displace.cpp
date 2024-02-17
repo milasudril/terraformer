@@ -11,7 +11,7 @@ terraformer::displaced_curve terraformer::displace_xy(std::span<location const> 
 {
 	assert(std::size(c) >= 3);
 	auto c_distance = 0.0f;
-	displaced_curve ret(std::size(c));
+	displaced_curve ret(displaced_curve::size_type{std::size(c)});
 	auto points = ret.get<0>();
 	auto offsets = ret.get<1>();
 
@@ -20,8 +20,9 @@ terraformer::displaced_curve terraformer::displace_xy(std::span<location const> 
 		auto const val = dy.offsets[0];
 		auto const t = c[k] - c[k - 1];
 		auto const n = direction{displacement{t[1], -t[0], 0.0f}};
-		points[k - 1] = c[k - 1] + val*n;
-		offsets[k - 1] = val;
+		displaced_curve::index_type const output_index{k - 1};
+		points[output_index] = c[k - 1] + val*n;
+		offsets[output_index] = val;
 	}
 
 	for(size_t k = 1; k != std::size(c) - 1; ++k)
@@ -32,8 +33,9 @@ terraformer::displaced_curve terraformer::displace_xy(std::span<location const> 
 		auto const val = interp(dy.offsets, sample_at, clamp_at_boundary{});
 		auto const t = c[k + 1] - c[k - 1];
 		auto const n = direction{displacement{t[1], -t[0], 0.0f}};
-		points[k] = c[k] + val*n;
-		offsets[k] = val;
+		displaced_curve::index_type const output_index{k};
+		points[output_index] = c[k] + val*n;
+		offsets[output_index] = val;
 	}
 
 	{
@@ -44,8 +46,9 @@ terraformer::displaced_curve terraformer::displace_xy(std::span<location const> 
 		auto const val = interp(dy.offsets, sample_at, clamp_at_boundary{});
 		auto const t = c[k] - c[k - 1];
 		auto const n = direction{displacement{t[1], -t[0], 0.0f}};
-		points[k] = c[k] + val*n;
-		offsets[k] = val;
+		displaced_curve::index_type const output_index{k};
+		points[output_index] = c[k] + val*n;
+		offsets[output_index] = val;
 	}
 
 	return ret;
