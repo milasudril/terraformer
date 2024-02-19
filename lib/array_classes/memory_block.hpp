@@ -20,14 +20,14 @@ namespace terraformer
 			{ throw std::runtime_error{"Failed to allocate memory"}; }
 		}
 
-		[[nodiscard]] void* get() const
+		[[nodiscard]] void* get() const noexcept
 		{ return m_pointer.get(); }
 
 		template<class T>
-		[[nodiscard]] T* interpret_as() const
+		[[nodiscard]] T* interpret_as() const noexcept
 		{ return reinterpret_cast<T*>(m_pointer.get()); }
 
-		[[nodiscard]] operator bool() const
+		[[nodiscard]] operator bool() const noexcept
 		{ return m_pointer != nullptr; }
 
 	private:

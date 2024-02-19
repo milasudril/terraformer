@@ -13,7 +13,7 @@ namespace terraformer
 		using size_type = array_size<T>;
 		using index_type = array_index<T>;
 
-		single_array() = default;
+		single_array() noexcept= default;
 
 		explicit single_array(array_size<T> size)
 		{ resize(size); }
@@ -41,40 +41,40 @@ namespace terraformer
 
 		single_array& operator=(single_array const& other) = delete;
 
-		~single_array()
+		~single_array() noexcept
 		{ clear(); }
 
-		constexpr auto first_element_index() const
+		constexpr auto first_element_index() const noexcept
 		{ return index_type{}; }
 
-		constexpr auto last_element_index() const
+		constexpr auto last_element_index() const noexcept
 		{ return index_type{(m_size - size_type{1}).get()}; }
 
-		auto size() const
+		auto size() const noexcept
 		{ return m_size; }
 
-		auto empty() const
+		auto empty() const noexcept
 		{ return m_size.get() == 0; }
 
-		auto capacity() const
+		auto capacity() const noexcept
 		{ return m_capacity; }
 
-		auto data()
+		auto data() noexcept
 		{ return m_storage.interpret_as<T>(); }
 
-		auto data() const
+		auto data() const noexcept
 		{ return m_storage.interpret_as<T const>(); }
 
-		auto begin()
+		auto begin() noexcept
 		{ return data(); }
 
-		auto begin() const
+		auto begin() const noexcept
 		{ return data(); }
 
-		auto end()
+		auto end() noexcept
 		{ return begin() + size().get(); }
 
-		auto end() const
+		auto end() const noexcept
 		{ return begin() + size().get(); }
 
 		void reserve(size_type new_capacity)
@@ -124,22 +124,22 @@ namespace terraformer
 			}
 		}
 
-		void truncate_from(index_type index)
+		void truncate_from(index_type index) noexcept
 		{
 			std::destroy(begin() + index.get(), end());
 			m_size = size_type{index};
 		}
 
-		auto& operator[](index_type index)
+		auto& operator[](index_type index) noexcept
 		{ return deref(data(), index); }
 
-		auto& operator[](index_type index) const
+		auto& operator[](index_type index) const noexcept
 		{ return deref(data(), index); }
 
-		operator span<T>()
+		operator span<T>() noexcept
 		{ return span{begin(), end()}; }
 
-		operator span<T const>() const
+		operator span<T const>() const noexcept
 		{ return span{end(), end()}; }
 
 	private:

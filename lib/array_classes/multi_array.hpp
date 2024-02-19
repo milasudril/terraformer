@@ -72,7 +72,7 @@ namespace terraformer
 		std::array<memory_block, sizeof...(T)> const& src,
 		std::array<memory_block, sizeof...(T)> const& dest,
 		array_size<multi_array_tag<T...>> n
-	)
+	) noexcept
 	{
 		size_t index = 0;
 		(
@@ -92,7 +92,7 @@ namespace terraformer
 		std::array<memory_block, sizeof...(T)> const& src,
 		array_index<multi_array_tag<T...>> offset,
 		array_size<multi_array_tag<T...>> n
-	)
+	) noexcept
 	{
 		size_t index = 0;
 		(
@@ -136,9 +136,9 @@ namespace terraformer
 		template<size_t Index>
 		using attribute_type = std::tuple_element_t<Index, tuple<T...>>;
 
-		multi_array() = default;
+		multi_array() noexcept = default;
 
-		explicit multi_array(size_type size)
+		explicit multi_array(size_type size) noexcept
 		{ resize(size); }
 
 		multi_array(multi_array&& other) noexcept:
@@ -164,22 +164,22 @@ namespace terraformer
 
 		multi_array& operator=(multi_array const& other) = delete;
 
-		~multi_array()
+		~multi_array() noexcept
 		{ clear(); }
 
-		constexpr auto first_element_index() const
+		constexpr auto first_element_index() const noexcept
 		{ return index_type{}; }
 
-		constexpr auto last_element_index() const
+		constexpr auto last_element_index() const noexcept
 		{ return index_type{(m_size - size_type{1}).get()}; }
 
-		auto size() const
+		auto size() const noexcept
 		{ return m_size; }
 
-		auto capacity() const
+		auto capacity() const noexcept
 		{ return m_capacity; }
 
-		auto empty() const
+		auto empty() const noexcept
 		{ return m_size.get() == 0; }
 
 		void reserve(size_type new_capacity)
@@ -236,7 +236,7 @@ namespace terraformer
 		}
 
 		template<size_t AttributeIndex>
-		auto get() const
+		auto get() const noexcept
 		{
 			using sel_attribute_type = attribute_type<AttributeIndex> const;
 			auto const ptr = m_storage[AttributeIndex].template interpret_as<sel_attribute_type>();
@@ -244,14 +244,14 @@ namespace terraformer
 		}
 
 		template<size_t AttributeIndex>
-		auto get()
+		auto get() noexcept
 		{
 			using sel_attribute_type = attribute_type<AttributeIndex>;
 			auto const ptr = m_storage[AttributeIndex].template interpret_as<sel_attribute_type>();
 			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
 		}
 
-		void truncate_from(index_type index)
+		void truncate_from(index_type index) noexcept
 		{
 			destroy(m_storage, index, size_type{m_size.get() - index.get()});
 			m_size = size_type{index};
