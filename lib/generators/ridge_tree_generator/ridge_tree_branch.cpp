@@ -26,11 +26,11 @@ terraformer::displacement terraformer::compute_field(span<displaced_curve const>
 	return ret;
 }
 
-terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch_collection const> branches, location r, float min_distance)
+terraformer::displacement terraformer::compute_field(span<ridge_tree_branch_collection const> branches, location r, float min_distance)
 {
 	displacement ret{};
 
-	for(size_t k = 0; k != std::size(branches); ++k)
+	for(auto k = branches.first_element_index(); k != std::size(branches); ++k)
 	{ ret += compute_field(branches[k].curves, r, min_distance); }
 
 	return ret;
@@ -39,7 +39,7 @@ terraformer::displacement terraformer::compute_field(std::span<ridge_tree_branch
 terraformer::single_array<terraformer::displaced_curve>
 terraformer::generate_branches(
 	multi_array<location, direction, displaced_curve::index_type> const& branch_points,
-	std::span<ridge_tree_branch_collection const> existing_branches,
+	span<ridge_tree_branch_collection const> existing_branches,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,
@@ -198,7 +198,7 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 std::vector<terraformer::ridge_tree_stem_collection>
 terraformer::generate_branches(
 	std::span<ridge_tree_branch_seed_sequence const> parents,
-	std::span<ridge_tree_branch_collection const> existing_branches,
+	span<ridge_tree_branch_collection const> existing_branches,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,

@@ -27,13 +27,13 @@ namespace terraformer
 
 	displacement compute_field(span<displaced_curve const> branches, location r, float min_distance);
 
-	displacement compute_field(std::span<ridge_tree_branch_collection const> branches, location r, float min_distance);
+	displacement compute_field(span<ridge_tree_branch_collection const> branches, location r, float min_distance);
 
 	template<class BranchStopCondition>
 	single_array<location> generate_branch_base_curve(
 		location loc,
 		direction start_dir,
-		std::span<ridge_tree_branch_collection const> existing_branches,
+		span<ridge_tree_branch_collection const> existing_branches,
 		float pixel_size,
 		BranchStopCondition&& stop)
 	{
@@ -59,7 +59,7 @@ namespace terraformer
 	single_array<displaced_curve>
 	generate_branches(
 		multi_array<location, direction, displaced_curve::index_type> const& branch_points,
-		std::span<ridge_tree_branch_collection const> existing_branches,
+		span<ridge_tree_branch_collection const> existing_branches,
 		float pixel_size,
 		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,
@@ -83,7 +83,7 @@ namespace terraformer
 	std::vector<ridge_tree_stem_collection>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence const> parents,
-		std::span<ridge_tree_branch_collection const> existing_branches,
+		span<ridge_tree_branch_collection const> existing_branches,
 		float pixel_size,
 		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,
