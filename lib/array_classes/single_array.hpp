@@ -140,7 +140,7 @@ namespace terraformer
 		{ return span{begin(), end()}; }
 
 		operator span<T const>() const noexcept
-		{ return span{end(), end()}; }
+		{ return span{begin(), end()}; }
 
 	private:
 		memory_block m_storage{};
