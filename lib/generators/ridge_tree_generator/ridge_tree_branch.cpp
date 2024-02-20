@@ -96,21 +96,21 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
 
-	std::vector<displaced_curve::index_type> a_trim(outer_count);
-	for(size_t k = 0; k != outer_count; ++k)
-	{ a_trim[k] = displaced_curve::index_type{std::size(a[k])}; }
+	single_array<displaced_curve::index_type> a_trim(array_size<displaced_curve::index_type>{outer_count});
+	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
+	{ a_trim[k] = displaced_curve::index_type{std::size(a[k.get()])}; }
 
-	std::vector<displaced_curve::index_type> b_trim(inner_count);
-	for(size_t l = 0; l != inner_count; ++l)
-	{ b_trim[l] = displaced_curve::index_type{std::size(b[l])}; }
+	single_array<displaced_curve::index_type> b_trim(array_size<displaced_curve::index_type>{inner_count});
+	for(auto l = b_trim.first_element_index(); l != std::size(b_trim); ++l)
+	{ b_trim[l] = displaced_curve::index_type{std::size(b[l.get()])}; }
 
-	for(size_t k = 0; k != outer_count; ++k)
+	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
 	{
-		for(size_t l = 0; l != inner_count; ++l)
+		for(auto l = b_trim.first_element_index(); l != std::size(b_trim); ++l)
 		{
 			auto const res = find_matching_pair(
-				a[k].get<0>(),
-				b[l].get<0>(),
+				a[k.get()].get<0>(),
+				b[l.get()].get<0>(),
 				[md2](auto const p1, auto const p2) {
 					auto const d2 = distance_squared(p1, p2);
 					if(d2 < md2)
@@ -120,23 +120,23 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 			);
 
 			a_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[k].get<0>()), res.first)),
+				static_cast<displaced_curve::index_type>(as_index(std::begin(a[k.get()].get<0>()), res.first)),
 				a_trim[k]
 			);
 			b_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[l].get<0>()), res.second)),
+				static_cast<displaced_curve::index_type>(as_index(std::begin(b[l.get()].get<0>()), res.second)),
 				b_trim[l]
 			);
 		}
 	}
 
-	for(size_t k = 0; k != outer_count; ++k)
+	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
 	{
-		for(size_t l = 0; l != k; ++l)
+		for(auto l = a_trim.first_element_index(); l != k; ++l)
 		{
 			auto const res = find_matching_pair(
-				a[k].get<0>(),
-				a[l].get<0>(),
+				a[k.get()].get<0>(),
+				a[l.get()].get<0>(),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
 					{ return true; }
@@ -145,24 +145,24 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 			);
 
 			a_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[k].get<0>()), res.first)),
+				static_cast<displaced_curve::index_type>(as_index(std::begin(a[k.get()].get<0>()), res.first)),
 				a_trim[k]
 			);
 
 			a_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[l].get<0>()), res.second)),
+				static_cast<displaced_curve::index_type>(as_index(std::begin(a[l.get()].get<0>()), res.second)),
 				a_trim[l]
 			);
 		}
 	}
 
-	for(size_t k = 0; k != inner_count; ++k)
+	for(auto k = b_trim.first_element_index(); k != std::size(b_trim); ++k)
 	{
-		for(size_t l = 0; l != k; ++l)
+		for(auto l = b_trim.first_element_index(); l != k; ++l)
 		{
 			auto const res = find_matching_pair(
-				b[k].get<0>(),
-				b[l].get<0>(),
+				b[k.get()].get<0>(),
+				b[l.get()].get<0>(),
 				[md2](auto const p1, auto const p2) {
 					if(distance_squared(p1, p2) < md2)
 					{ return true; }
@@ -171,27 +171,27 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 			);
 
 			b_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[k].get<0>()), res.first)),
+				static_cast<displaced_curve::index_type>(as_index(std::begin(b[k.get()].get<0>()), res.first)),
 				b_trim[k]
 			);
 			b_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[l].get<0>()), res.second)),
+				static_cast<displaced_curve::index_type>(as_index(std::begin(b[l.get()].get<0>()), res.second)),
 				b_trim[l]
 			);
 		}
 	}
-	for(size_t k = 0; k != outer_count; ++k)
+	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
 	{
 		auto const index = a_trim[k];
-		if(index != std::size(a[k]))
-		{ a[k].truncate_from(index); }
+		if(index != std::size(a[k.get()]))
+		{ a[k.get()].truncate_from(index); }
 	}
 
-	for(size_t l = 0; l != inner_count; ++l)
+	for(auto l = b_trim.first_element_index(); l != std::size(b_trim); ++l)
 	{
 		auto const index = b_trim[l];
-		if(index != std::size(b[l]))
-		{ b[l].truncate_from(index); }
+		if(index != std::size(b[l.get()]))
+		{ b[l.get()].truncate_from(index); }
 	}
 }
 
