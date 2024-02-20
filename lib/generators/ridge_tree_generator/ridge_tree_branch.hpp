@@ -6,7 +6,6 @@
 #include "./ridge_curve.hpp"
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
-#include "lib/common/array_tuple.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/math_utils/differentiation.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
