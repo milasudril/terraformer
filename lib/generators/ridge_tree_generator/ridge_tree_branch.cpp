@@ -96,6 +96,7 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
 
+	// TODO: It would be nice to have different types for a_trim and b_trim
 	single_array<displaced_curve::index_type> a_trim(array_size<displaced_curve::index_type>{outer_count});
 	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
 	{ a_trim[k] = displaced_curve::index_type{std::size(a[k.get()])}; }
