@@ -25,7 +25,7 @@ namespace terraformer
 		enum side side;
 	};
 
-	displacement compute_field(std::span<displaced_curve const> branches, location r, float min_distance);
+	displacement compute_field(span<displaced_curve const> branches, location r, float min_distance);
 
 	displacement compute_field(std::span<ridge_tree_branch_collection const> branches, location r, float min_distance);
 

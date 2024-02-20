@@ -2,11 +2,11 @@
 
 #include "./ridge_tree_branch.hpp"
 
-terraformer::displacement terraformer::compute_field(std::span<displaced_curve const> branches, location r, float min_distance)
+terraformer::displacement terraformer::compute_field(span<displaced_curve const> branches, location r, float min_distance)
 {
 	displacement ret{};
 
-	for(size_t k = 0; k != std::size(branches); ++k)
+	for(auto k = branches.first_element_index(); k != std::size(branches); ++k)
 	{
 		auto const points = branches[k].get<0>();
 		ret += terraformer::fold_over_line_segments(
