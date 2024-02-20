@@ -5,7 +5,6 @@
 
 #include "lib/curve_tools/displace.hpp"
 #include "lib/common/spaces.hpp"
-#include "lib/common/array_tuple.hpp"
 
 namespace terraformer
 {
@@ -19,7 +18,7 @@ namespace terraformer
 		displaced_curve const& points
 	);
 
-	array_tuple<ridge_tree_branch_seed_sequence, size_t> collect_ridge_tree_branch_seeds(
+	multi_array<ridge_tree_branch_seed_sequence, size_t> collect_ridge_tree_branch_seeds(
 		std::span<displaced_curve const> points
 	);
 };
