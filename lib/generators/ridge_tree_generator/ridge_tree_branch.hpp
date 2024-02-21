@@ -80,7 +80,7 @@ namespace terraformer
 		domain_length min_neighbour_distance;
 	};
 
-	std::vector<ridge_tree_stem_collection>
+	single_array<ridge_tree_stem_collection>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence const> parents,
 		span<ridge_tree_branch_collection const> existing_branches,

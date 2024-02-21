@@ -196,7 +196,7 @@ void terraformer::trim_at_intersect(std::span<displaced_curve> a, std::span<disp
 	}
 }
 
-std::vector<terraformer::ridge_tree_stem_collection>
+terraformer::single_array<terraformer::ridge_tree_stem_collection>
 terraformer::generate_branches(
 	std::span<ridge_tree_branch_seed_sequence const> parents,
 	span<ridge_tree_branch_collection const> existing_branches,
@@ -206,7 +206,7 @@ terraformer::generate_branches(
 	ridge_tree_branch_growth_description growth_params
 )
 {
-	std::vector<ridge_tree_stem_collection> ret;
+	single_array<ridge_tree_stem_collection> ret;
 
 	if(std::size(parents) == 0)
 	{	return ret; }
