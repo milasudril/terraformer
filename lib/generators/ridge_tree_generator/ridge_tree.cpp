@@ -47,13 +47,13 @@ terraformer::ridge_tree::ridge_tree(
 	{
 		single_array<displaced_curve> root;
 		root.push_back(
-				displace_xy(
-						trunk_base_curve,
-						terraformer::displacement_profile{
-							.offsets = trunk_offsets,
-							.sample_period = pixel_size
-						}
-					)
+			displace_xy(
+				trunk_base_curve,
+				terraformer::displacement_profile{
+					.offsets = trunk_offsets,
+					.sample_period = pixel_size
+				}
+			)
 		);
 
 		ret.push_back(
