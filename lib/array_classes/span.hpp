@@ -12,6 +12,8 @@ namespace terraformer
 		using index_type = IndexType;
 		using size_type = SizeType;
 
+		explicit span() = default;
+
 		explicit span(T* begin, T* end):m_begin{begin}, m_end{end}
 		{}
 
@@ -46,8 +48,8 @@ namespace terraformer
 		{ return *m_begin; }
 
 	private:
-		T* m_begin;
-		T* m_end;
+		T* m_begin = nullptr;
+		T* m_end = nullptr;
 	};
 }
 

@@ -45,7 +45,7 @@ terraformer::ridge_tree::ridge_tree(
 		(description.root_location, description.trunk_direction, trunk_pixel_count, pixel_size);
 
 	{
-		single_array<displaced_curve> root;
+		multi_array<displaced_curve, displaced_curve::index_type> root;
 		root.push_back(
 			displace_xy(
 				trunk_base_curve,
@@ -53,7 +53,8 @@ terraformer::ridge_tree::ridge_tree(
 					.offsets = trunk_offsets,
 					.sample_period = pixel_size
 				}
-			)
+			),
+			displaced_curve::index_type{}
 		);
 
 		ret.push_back(
@@ -81,7 +82,9 @@ terraformer::ridge_tree::ridge_tree(
 			continue;
 		}
 
-		auto next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(current_trunk.curves);
+		auto next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(
+			std::as_const(current_trunk.curves).get<0>()
+		);
 		auto next_level = generate_branches(
 			next_level_seeds.get<0>(),
 			ret,
@@ -141,14 +144,13 @@ void terraformer::ridge_tree::update_elevations(
 
 		printf("level: %zu, parent: %zu, side: %s\n", level, parent.get(), side);
 
-#if 0
-		for(size_t k = 0; k != std::size(current_collection.curves); ++k)
+		for(auto k = current_collection.curves.first_element_index();
+			k != std::size(current_collection.curves);
+			++k
+		)
 		{
-			auto z_0 = parent == ridge_tree_branch_collection::no_parent?
-				  initial_elevation
-				: branches[parent].curves;
+			printf("   %zu\n", k.get());
 		}
-#endif
 	}
 }
 
@@ -168,7 +170,7 @@ void terraformer::render(
 		auto const peak_elevation = params.curve_levels[level].peak_elevation;
 		auto const scaled_peak_diameter = 2.0f*params.curve_levels[level].peak_radius/pixel_size;
 
-		for(auto const& curve: branch_collection.curves)
+		for(auto const& curve: branch_collection.curves.get<0>())
 		{
 			draw(
 				output,
