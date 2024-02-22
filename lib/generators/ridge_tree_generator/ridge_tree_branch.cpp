@@ -229,7 +229,7 @@ terraformer::generate_branches(
 	if(std::size(parents) == 0)
 	{	return ret; }
 
-	ridge_tree_stem_collection current_stem_collection;
+	ridge_tree_stem_collection current_stem_collection{array_index<displaced_curve>{0}};
 	current_stem_collection.left = generate_branches(
 		parents[0].left,
 		existing_branches,
@@ -263,6 +263,8 @@ terraformer::generate_branches(
 
 		trim_at_intersect(current_stem_collection.right.get<0>(), left_branches.get<0>(), growth_params.min_neighbour_distance);
 		ret.push_back(std::move(current_stem_collection));
+
+		current_stem_collection = ridge_tree_stem_collection{array_index<displaced_curve>{k}};
 		current_stem_collection.left = std::move(left_branches);
 	}
 

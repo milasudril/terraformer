@@ -22,6 +22,7 @@ namespace terraformer
 		size_t level;
 		multi_array<displaced_curve, displaced_curve::index_type> curves;
 		array_index<ridge_tree_branch_collection> parent;
+		array_index<displaced_curve> parent_curve_index;
 		enum side side;
 	};
 
@@ -70,6 +71,11 @@ namespace terraformer
 
 	struct ridge_tree_stem_collection
 	{
+		ridge_tree_stem_collection(array_index<displaced_curve> _parent_curve_index)
+			:parent_curve_index{_parent_curve_index}
+		{}
+
+		array_index<displaced_curve> parent_curve_index;
 		multi_array<displaced_curve, displaced_curve::index_type> left;
 		multi_array<displaced_curve, displaced_curve::index_type> right;
 	};
