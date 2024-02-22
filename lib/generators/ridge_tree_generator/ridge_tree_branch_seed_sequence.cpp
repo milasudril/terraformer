@@ -86,20 +86,14 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 	return ret;
 }
 
-terraformer::multi_array<
-	terraformer::ridge_tree_branch_seed_sequence,
-	terraformer::array_index<terraformer::displaced_curve const>
->
+terraformer::single_array<terraformer::ridge_tree_branch_seed_sequence>
 terraformer::collect_ridge_tree_branch_seeds(span<displaced_curve const> points)
 {
-	terraformer::multi_array<
-		terraformer::ridge_tree_branch_seed_sequence,
-		terraformer::array_index<terraformer::displaced_curve const>
-	> ret;
+	single_array<terraformer::ridge_tree_branch_seed_sequence> ret;
 	ret.reserve(static_cast<decltype(ret)::size_type>(std::size(points)));
 	for(auto k = points.first_element_index(); k != std::size(points); ++k)
 	{
-		ret.push_back(collect_ridge_tree_branch_seeds(points[k]), k);
+		ret.push_back(collect_ridge_tree_branch_seeds(points[k]));
 	}
 	return ret;
 }

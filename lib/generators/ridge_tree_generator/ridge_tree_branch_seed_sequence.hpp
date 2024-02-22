@@ -4,6 +4,7 @@
 #define TERRAFORMER_RIDGE_TREE_BRANCH_SEED_SEQUENCE_HPP
 
 #include "lib/curve_tools/displace.hpp"
+#include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
 
 namespace terraformer
@@ -18,10 +19,7 @@ namespace terraformer
 		displaced_curve const& points
 	);
 
-	terraformer::multi_array<
-		terraformer::ridge_tree_branch_seed_sequence,
-		terraformer::array_index<terraformer::displaced_curve const>
-	>
+	single_array<ridge_tree_branch_seed_sequence>
 	collect_ridge_tree_branch_seeds(span<displaced_curve const> points);
 };
 

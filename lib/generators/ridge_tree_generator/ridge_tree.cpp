@@ -86,7 +86,7 @@ terraformer::ridge_tree::ridge_tree(
 			std::as_const(current_trunk.curves).get<0>()
 		);
 		auto next_level = generate_branches(
-			next_level_seeds.get<0>(),
+			next_level_seeds,
 			ret,
 			pixel_size,
 			curve_levels[next_level_index].displacement_profile,
