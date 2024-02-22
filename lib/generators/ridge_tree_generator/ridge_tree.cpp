@@ -134,7 +134,7 @@ void terraformer::ridge_tree::update_elevations(
 	float
 )
 {
-	std::span<ridge_tree_branch_collection> branches{m_value};
+	span<ridge_tree_branch_collection> branches{m_value};
 	for(auto& current_collection : branches)
 	{
 		auto const level = current_collection.level;
@@ -143,18 +143,29 @@ void terraformer::ridge_tree::update_elevations(
 		{ return; }
 
 		auto const parent = current_collection.parent;
+		if(parent == ridge_tree_branch_collection::no_parent)
+		{ continue; }
+
 		auto const parent_curve_index = current_collection.parent_curve_index;
 		auto const side = current_collection.side == ridge_tree_branch_collection::side::left? "left":"right";
 
 		printf("level: %zu, parent: %zu, parent_curve_index: %zu, side: %s\n", level, parent.get(), parent_curve_index.get(), side);
 
+		span<displaced_curve> parent_curves{branches[parent].curves.get<0>()};
+		auto const my_curves = current_collection.curves.get<0>();
 		auto const start_index = current_collection.curves.get<1>();
+
 		for(auto k = current_collection.curves.first_element_index();
 			k != std::size(current_collection.curves);
 			++k
 		)
 		{
-			printf("   %zu  starts at %zu\n", k.get(), start_index[k].get());
+			printf("%zu starts at %zu %s %s\n",
+				k.get(),
+				start_index[k].get(),
+				to_string(parent_curves[parent_curve_index].points()[start_index[k]]).c_str(),
+				to_string(my_curves[k].points()[displaced_curve::index_type{}]).c_str()
+			);
 		}
 	}
 }
