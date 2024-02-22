@@ -252,6 +252,7 @@ terraformer::generate_branches(
 			growth_params.max_length
 		);
 
+
 		auto left_branches = generate_branches(
 			parents[k].left,
 			existing_branches,
