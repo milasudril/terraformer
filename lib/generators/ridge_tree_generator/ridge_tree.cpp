@@ -74,6 +74,8 @@ terraformer::ridge_tree::ridge_tree(
 	{
 		if(current_trunk_index == std::size(ret))
 		{
+			// For practical reasons "right" indices are reversed. Reverse them again to get things
+			// correct.
 			for(auto& current_collection: ret)
 			{
 				if(current_collection.side == ridge_tree_branch_collection::side::right)
