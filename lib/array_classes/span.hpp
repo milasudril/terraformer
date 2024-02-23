@@ -44,6 +44,9 @@ namespace terraformer
 		constexpr operator span<T, array_index<T>, array_size<T>>() const
 		{ return span<T, array_index<T>, array_size<T>>{m_begin, m_end}; }
 
+		constexpr auto decay() const
+		{ return span<T, array_index<T>, array_size<T>>{m_begin, m_end}; }
+
 		constexpr auto& front() const
 		{ return *m_begin; }
 

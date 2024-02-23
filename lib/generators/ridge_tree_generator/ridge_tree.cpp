@@ -158,7 +158,7 @@ void terraformer::ridge_tree::update_elevations(
 
 		printf("level: %zu, parent: %zu, parent_curve_index: %zu, side: %s\n", level, parent.get(), parent_curve_index.get(), side);
 
-		span<displaced_curve> parent_curves{branches[parent].curves.get<0>()};
+		auto const parent_curves = branches[parent].curves.get<0>().decay();
 		auto const my_curves = current_collection.curves.get<0>();
 		auto const start_index = current_collection.curves.get<1>();
 
