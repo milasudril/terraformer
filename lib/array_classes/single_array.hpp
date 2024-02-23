@@ -15,13 +15,13 @@ namespace terraformer
 
 		single_array() noexcept= default;
 
-		explicit single_array(array_size<T> size)
+		explicit single_array(size_type size)
 		{ resize(size); }
 
 		single_array(single_array&& other) noexcept:
 			m_storage{std::exchange(other.m_storage, memory_block{})},
-			m_size{std::exchange(other.m_size, array_size<T>{})},
-			m_capacity{std::exchange(other.m_capacity, array_size<T>{})}
+			m_size{std::exchange(other.m_size, size_type{})},
+			m_capacity{std::exchange(other.m_capacity, size_type{})}
 		{ }
 
 		single_array(single_array const& other):
@@ -34,8 +34,8 @@ namespace terraformer
 		{
 			clear();
 			m_storage = std::exchange(other.m_storage, memory_block{});
-			m_size = std::exchange(other.m_size, array_size<T>{});
-			m_capacity = std::exchange(other.m_capacity, array_size<T>{});
+			m_size = std::exchange(other.m_size, size_type{});
+			m_capacity = std::exchange(other.m_capacity, size_type{});
 			return *this;
 		}
 
@@ -110,7 +110,7 @@ namespace terraformer
 		{
 			if(new_size < m_size)
 			{
-				truncate_from(array_index<T>{new_size.get()});
+				truncate_from(index_type{new_size.get()});
 				return;
 			}
 
