@@ -80,6 +80,9 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 		{ ret.right.push_back(loc_b, normal, *selected_branch_point); }
 	}
 
+	// Reverse the order of branch points on the right hand side. This way, all branches will be
+	// located to the left of the trunk, which makes it easier to do collision detection in a
+	// later step.
 	std::ranges::reverse(ret.right.get<0>());
 	std::ranges::reverse(ret.right.get<1>());
 	std::ranges::reverse(ret.right.get<2>());
