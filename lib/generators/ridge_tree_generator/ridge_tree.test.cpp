@@ -72,6 +72,38 @@ TESTCASE(terraformer_ridge_tree_generate)
 	auto const t = std::chrono::steady_clock::now();
 	printf("Elapsed time %.8g s\n", std::chrono::duration<double>(t - t_0).count());
 
+	for(auto& current_collection : res)
+	{
+		auto const level = current_collection.level;
+
+		auto const parent = current_collection.parent;
+		if(parent == terraformer::ridge_tree_branch_collection::no_parent)
+		{ continue; }
+
+		auto const parent_curve_index = current_collection.parent_curve_index;
+		auto const side =
+			current_collection.side == terraformer::ridge_tree_branch_collection::side::left?
+			"left":"right";
+
+		printf("level: %zu, parent: %zu, parent_curve_index: %zu, side: %s\n", level, parent.get(), parent_curve_index.get(), side);
+
+		auto const parent_curves = res[parent].curves.get<0>().decay();
+		auto const my_curves = current_collection.curves.get<0>();
+		auto const start_index = current_collection.curves.get<1>();
+
+		for(auto k = current_collection.curves.first_element_index();
+			k != std::size(current_collection.curves);
+			++k
+		)
+		{
+			printf("%zu starts at %zu %s %s\n",
+				k.get(),
+				start_index[k].get(),
+				to_string(parent_curves[parent_curve_index].points()[start_index[k]]).c_str(),
+				to_string(my_curves[k].points()[terraformer::displaced_curve::index_type{}]).c_str()
+			);
+		}
+	}
 	terraformer::curve_set curves;
 	for(auto k = res.first_element_index(); k != std::size(res); ++k)
 	{
@@ -83,6 +115,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 
 	auto curve_file = terraformer::make_output_file("/dev/shm/slask.json");
 	curves.write_to(curve_file.get());
+#if 0
 
 	std::vector elevation_profiles{
 		terraformer::ridge_tree_branch_elevation_profile{
@@ -149,6 +182,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 		rng,
 		pixel_size
 	);
+#endif
 #if 0
 	terraformer::grayscale_image img{1024, 1024};
 	render(

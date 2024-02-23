@@ -42,10 +42,17 @@ namespace terraformer
 		{ return m_begin; }
 
 		constexpr operator span<T, array_index<T>, array_size<T>>() const
-		{ return span<T, array_index<T>, array_size<T>>{m_begin, m_end}; }
+		{	return span<T, array_index<T>, array_size<T>>{m_begin, m_end}; }
+
+		template<class Dummy = void>
+		requires std::is_const_v<T>
+		constexpr operator span<T, array_index<std::remove_const_t<T>>, array_size<std::remove_const_t<T>>>() const
+		{ return decay(); }
 
 		constexpr auto decay() const
-		{ return span<T, array_index<T>, array_size<T>>{m_begin, m_end}; }
+		{
+			return span<T, array_index<std::remove_const_t<T>>, array_size<std::remove_const_t<T>>>{m_begin, m_end};
+		}
 
 		constexpr auto& front() const
 		{ return *m_begin; }
