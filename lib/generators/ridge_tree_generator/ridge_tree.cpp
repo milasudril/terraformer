@@ -73,16 +73,7 @@ terraformer::ridge_tree::ridge_tree(
 	while(true)
 	{
 		if(current_trunk_index == std::size(ret))
-		{
-			// For practical reasons "right" indices are reversed. Reverse them again to get things
-			// correct.
-			for(auto& current_collection: ret)
-			{
-				if(current_collection.side == ridge_tree_branch_collection::side::right)
-				{ std::ranges::reverse(current_collection.curves.get<1>()); }
-			}
-			return;
-		}
+		{ return; }
 
 		auto& current_trunk = ret[current_trunk_index];
 		auto const next_level_index = current_trunk.level  + 1;

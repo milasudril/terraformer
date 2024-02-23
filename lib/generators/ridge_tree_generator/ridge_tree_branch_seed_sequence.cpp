@@ -82,6 +82,7 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 
 	std::ranges::reverse(ret.right.get<0>());
 	std::ranges::reverse(ret.right.get<1>());
+	std::ranges::reverse(ret.right.get<2>());
 
 	return ret;
 }
