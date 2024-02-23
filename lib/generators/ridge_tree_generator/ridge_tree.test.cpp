@@ -78,14 +78,12 @@ TESTCASE(terraformer_ridge_tree_generate)
 
 		auto const parent = current_collection.parent;
 		if(parent == terraformer::ridge_tree_branch_collection::no_parent)
-		{ continue; }
+		{
+			EXPECT_EQ(level, 0);
+			continue;
+		}
 
 		auto const parent_curve_index = current_collection.parent_curve_index;
-		auto const side =
-			current_collection.side == terraformer::ridge_tree_branch_collection::side::left?
-			"left":"right";
-
-		printf("level: %zu, parent: %zu, parent_curve_index: %zu, side: %s\n", level, parent.get(), parent_curve_index.get(), side);
 
 		auto const parent_curves = res[parent].curves.get<0>().decay();
 		auto const my_curves = current_collection.curves.get<0>();
@@ -96,12 +94,9 @@ TESTCASE(terraformer_ridge_tree_generate)
 			++k
 		)
 		{
-			printf("%zu starts at %zu %s %s\n",
-				k.get(),
-				start_index[k].get(),
-				to_string(parent_curves[parent_curve_index].points()[start_index[k]]).c_str(),
-				to_string(my_curves[k].points()[terraformer::displaced_curve::index_type{}]).c_str()
-			);
+			auto const point_on_parent = parent_curves[parent_curve_index].points()[start_index[k]];
+			auto const point_on_current_curve = my_curves[k].points().front();
+			EXPECT_EQ(point_on_parent, point_on_current_curve);
 		}
 	}
 	terraformer::curve_set curves;
