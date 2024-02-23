@@ -136,11 +136,11 @@ namespace terraformer
 		auto& operator[](index_type index) const noexcept
 		{ return deref(data(), index); }
 
-		operator span<T>() noexcept
-		{ return span{begin(), end()}; }
+		operator span<T, index_type, size_type>() noexcept
+		{ return span<T, index_type, size_type>{begin(), end()}; }
 
 		operator span<T const>() const noexcept
-		{ return span{begin(), end()}; }
+		{ return span<T const, index_type, size_type>{begin(), end()}; }
 
 	private:
 		memory_block m_storage{};
