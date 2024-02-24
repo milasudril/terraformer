@@ -93,14 +93,14 @@ namespace terraformer
 	}
 
 	template<class T>
-	concept brush_size_modulator = requires(T f, float x, float y)
+	concept brush_size_modulator = requires(T f, float x, float y, float z)
 	{
-		{f(x, y)} -> std::same_as<float>;
+		{f(x, y, z)} -> std::same_as<float>;
 	};
 
 	struct constant_brush_size
 	{
-		constexpr auto operator()(float, float) const
+		constexpr auto operator()(float, float, float) const
 		{ return value; }
 
 		float value{1.0f};
@@ -152,7 +152,7 @@ namespace terraformer
 					.x = x/params.scale,
 		  		.y = y/params.scale,
 		  		.value = params.intensity_modulator(z, params.value),
-		  		.brush_diameter = params.brush_diameter(x, y),
+		  		.brush_diameter = params.brush_diameter(x, y, z),
 					.brush = params.brush,
 					.blend_function = params.blend_function
 				});
@@ -175,7 +175,7 @@ namespace terraformer
 					.x = x/params.scale,
 		  			.y = y/params.scale,
 		  			.value = params.intensity_modulator(z, params.value),
-		  			.brush_diameter = params.brush_diameter(x, y),
+		  			.brush_diameter = params.brush_diameter(x, y, z),
 					.brush = params.brush,
 					.blend_function =params.blend_function
 				});

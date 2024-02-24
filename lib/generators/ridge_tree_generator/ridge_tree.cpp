@@ -211,7 +211,7 @@ void terraformer::render(
 		{ continue; }
 
 	//	auto const peak_elevation = params.curve_levels[level].peak_elevation;
-		auto const scaled_peak_diameter = 2.0f*params.curve_levels[level].peak_radius/pixel_size;
+		auto const peak_diameter = 2.0f/pixel_size;
 
 		for(auto const& curve: branch_collection.curves.get<0>())
 		{
@@ -227,8 +227,8 @@ void terraformer::render(
 					.brush = [](float xi, float eta) {
 						return std::max(1.0f - std::sqrt(xi*xi + eta*eta), 0.0f);
 					},
-					.brush_diameter = [scaled_peak_diameter](float, float){
-						return scaled_peak_diameter;
+					.brush_diameter = [peak_diameter](float, float, float z){
+						return z*peak_diameter;
 					}
 				}
 			);
