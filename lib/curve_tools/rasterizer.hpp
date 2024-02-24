@@ -93,9 +93,9 @@ namespace terraformer
 	}
 
 	template<class T>
-	concept brush_size_modulator = requires(T f, float z, float value_in)
+	concept brush_size_modulator = requires(T f, float x, float y)
 	{
-		{f(z, value_in)} -> std::same_as<float>;
+		{f(x, y)} -> std::same_as<float>;
 	};
 
 	struct constant_brush_size
@@ -138,8 +138,7 @@ namespace terraformer
 		if(std::abs(dr[0]) > std::abs(dr[1]))
 		{
 			auto const a = dr[1]/dr[0];
-		// TODO: This is temporarily disabled (curve must have z values in order for this modulation to work)
-		// auto const b = dr[2]/dr[0];
+			auto const b = dr[2]/dr[0];
 			auto const dx = dr[0] >= 0.0f ? 1 : -1;
 			for(auto l = static_cast<int32_t>(seg.p1[0]);
 				l != static_cast<int32_t>(seg.p2[0]) + dx;
@@ -148,11 +147,11 @@ namespace terraformer
 				auto const x = static_cast<float>(l);
 				auto const y = a*static_cast<float>(l - static_cast<int32_t>(seg.p1[0]))
 					+ seg.p1[1];
-			//	auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
+				auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
 				paint(target_surface, paint_params{
 					.x = x/params.scale,
 		  		.y = y/params.scale,
-		  		.value = params.value,
+		  		.value = params.intensity_modulator(z, params.value),
 		  		.brush_diameter = params.brush_diameter(x, y),
 					.brush = params.brush,
 					.blend_function = params.blend_function
@@ -162,8 +161,7 @@ namespace terraformer
 		else
 		{
 			auto const a = dr[0]/dr[1];
-		// TODO: This is temporarily disabled (curve must have z values in order for this modulation to work)
-		//	auto const b = dr[2]/dr[1];
+			auto const b = dr[2]/dr[1];
 			auto const dy = dr[1] >= 0.0f ? 1 : -1;
 			for(auto k = static_cast<int32_t>(seg.p1[1]);
 				k != static_cast<int32_t>(seg.p2[1]) + dy;
@@ -172,12 +170,12 @@ namespace terraformer
 				auto const y = static_cast<float>(k);
 				auto const x = a*static_cast<float>(k - static_cast<int32_t>(seg.p1[1]))
 					+ seg.p1[0];
-			//	auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
+				auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
 				paint(target_surface, paint_params{
 					.x = x/params.scale,
-					.y = y/params.scale,
-		  		.value = params.value,
-		  		.brush_diameter = params.brush_diameter(x, y),
+		  			.y = y/params.scale,
+		  			.value = params.intensity_modulator(z, params.value),
+		  			.brush_diameter = params.brush_diameter(x, y),
 					.brush = params.brush,
 					.blend_function =params.blend_function
 				});
