@@ -4,7 +4,7 @@ This is intended to be a simulator that can be used to generate heightmaps and o
 for use in computer graphics.
 
 
-![A rendering of a heightmap produced by Terraformer](experiments/nw_loog_se.jpg)
+![A rendering of a heightmap produced by Terraformer](experiments/nw_look_se.jpg)
 
 ![A rendering of a heightmap produced by Terraformer](experiments/ne_look_sw.jpg)
 
