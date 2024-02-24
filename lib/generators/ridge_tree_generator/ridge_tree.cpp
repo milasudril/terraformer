@@ -210,7 +210,7 @@ void terraformer::render(
 		if(level >= std::size(params.curve_levels))
 		{ continue; }
 
-		auto const peak_elevation = params.curve_levels[level].peak_elevation;
+	//	auto const peak_elevation = params.curve_levels[level].peak_elevation;
 		auto const scaled_peak_diameter = 2.0f*params.curve_levels[level].peak_radius/pixel_size;
 
 		for(auto const& curve: branch_collection.curves.get<0>())
@@ -219,7 +219,7 @@ void terraformer::render(
 				output,
 				curve.points(),
 				line_segment_draw_params{
-					.value = peak_elevation,
+					.value = 1.0f,
 					.blend_function = [](float old_val, float new_val, float strength){
 						return std::max(old_val, new_val*strength);
 					},
