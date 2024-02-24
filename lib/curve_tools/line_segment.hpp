@@ -17,6 +17,9 @@ namespace terraformer
 	inline auto length(line_segment seg)
 	{ return distance(seg.from, seg.to); }
 
+	inline auto length_xy(line_segment seg)
+	{ return distance_xy(seg.from, seg.to); }
+
 	inline auto length_squared(line_segment seg)
 	{ return distance_squared(seg.from, seg.to); }
 

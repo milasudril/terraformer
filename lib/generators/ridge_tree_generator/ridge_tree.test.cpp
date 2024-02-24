@@ -84,7 +84,6 @@ TESTCASE(terraformer_ridge_tree_generate)
 		}
 
 		auto const parent_curve_index = current_collection.parent_curve_index;
-
 		auto const parent_curves = res[parent].curves.get<0>().decay();
 		auto const parent_curve = parent_curves[parent_curve_index].points();
 		auto const my_curves = current_collection.curves.get<0>();
@@ -111,7 +110,6 @@ TESTCASE(terraformer_ridge_tree_generate)
 
 	auto curve_file = terraformer::make_output_file("/dev/shm/slask.json");
 	curves.write_to(curve_file.get());
-#if 0
 
 	std::vector elevation_profiles{
 		terraformer::ridge_tree_branch_elevation_profile{
@@ -178,6 +176,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 		rng,
 		pixel_size
 	);
+#if 0
 #endif
 #if 0
 	terraformer::grayscale_image img{1024, 1024};

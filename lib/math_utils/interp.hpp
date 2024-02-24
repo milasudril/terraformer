@@ -11,13 +11,13 @@ namespace terraformer
 	template<class T>
 	concept has_interp = requires(T left, T right, float t)
 	{
-		{interp(left, right, t)} -> std::same_as<T>;
+		{interp(left, right, t)};
 	};
 
 	template<class T>
 	concept has_lerp = requires(T left, T right, float t)
 	{
-		{lerp(left, right, t)} -> std::same_as<T>;
+		{lerp(left, right, t)};
 	};
 
 	template<class T>
@@ -38,6 +38,30 @@ namespace terraformer
 	{
 		using type = typename T::index_type;
 	};
+
+	template<class T>
+	auto make_interpolator(T&& a, T&& b)
+	{
+		if constexpr(has_interp<std::remove_cvref_t<decltype(a)>>)
+		{
+			return [a = std::forward<T>(a), b = std::forward<T>(b)](float t){
+				return interp(a, b, t);
+			};
+		}
+		else
+		if constexpr(has_lerp<std::remove_cvref_t<decltype(a)>>)
+		{
+			return [a = std::forward<T>(a), b = std::forward<T>(b)](float t){
+				return lerp(a, b, t);
+			};
+		}
+		else
+		{
+			return [a = std::forward<T>(a), b = std::forward<T>(b)](float t){
+				return (1.0f - t)*a + t*b;
+			};
+		}
+	}
 
 	template<std::ranges::random_access_range R, boundary_sampling_policy U>
 	constexpr auto interp(R&& lut, float value, U&& bsp)
@@ -62,6 +86,7 @@ namespace terraformer
 
 		if constexpr(has_interp<std::remove_cvref_t<decltype(left)>>)
 		{ return interp(left, right, t); }
+		else
 		if constexpr(has_lerp<std::remove_cvref_t<decltype(left)>>)
 		{ return lerp(left, right, t); }
 		else

@@ -226,7 +226,7 @@ terraformer::generate_branches(
 {
 	single_array<ridge_tree_stem_collection> ret;
 
-	if(std::size(parents) == 0)
+	if(parents.empty())
 	{	return ret; }
 
 	ridge_tree_stem_collection current_stem_collection{array_index<displaced_curve>{0}};

@@ -30,7 +30,6 @@ namespace terraformer
 
 	struct ridge_tree_elevation_noise
 	{
-
 		vertical_amplitude amplitude;
 		domain_length wavelength;
 		float damping;  // TODO: Should be within ]0, 1[

@@ -3,7 +3,10 @@
 #include "./ridge_tree.hpp"
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/curve_tools/length.hpp"
 #include "lib/curve_tools/rasterizer.hpp"
+#include "lib/math_utils/interp.hpp"
+#include "lib/math_utils/cubic_spline.hpp"
 
 namespace terraformer
 {
@@ -30,7 +33,7 @@ terraformer::ridge_tree::ridge_tree(
 	auto& ret = m_value;
 	std::span curve_levels{description.curve_levels};
 
-	if(std::size(curve_levels) == 0)
+	if(curve_levels.empty())
 	{ return; }
 
 	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].growth_params.max_length/pixel_size);
@@ -128,7 +131,7 @@ terraformer::ridge_tree::ridge_tree(
 }
 
 void terraformer::ridge_tree::update_elevations(
-	elevation,
+	elevation initial_elevation,
 	std::span<ridge_tree_branch_elevation_profile const> elevation_profiles,
 	random_generator,
 	float
@@ -142,29 +145,53 @@ void terraformer::ridge_tree::update_elevations(
 		if(level >= std::size(elevation_profiles))
 		{ return; }
 
-		auto const parent = current_collection.parent;
-		if(parent == ridge_tree_branch_collection::no_parent)
-		{ continue; }
-
-		auto const parent_curve_index = current_collection.parent_curve_index;
-		auto const side = current_collection.side == ridge_tree_branch_collection::side::left? "left":"right";
-
-		printf("level: %zu, parent: %zu, parent_curve_index: %zu, side: %s\n", level, parent.get(), parent_curve_index.get(), side);
-
-		auto const parent_curves = branches[parent].curves.get<0>().decay();
 		auto const my_curves = current_collection.curves.get<0>();
 		auto const start_index = current_collection.curves.get<1>();
+		auto const parent = current_collection.parent;
+		if(parent == ridge_tree_branch_collection::no_parent)
+		{
+			for(auto& curve : my_curves)
+			{
+				replace_z_inplace(
+					curve.points(),
+					make_interpolator(
+						cubic_spline_control_point{
+							.y = initial_elevation,
+							.ddx = std::tan(2.0f*std::numbers::pi_v<float>*elevation_profiles[level].starting_slope)
+						},
+						cubic_spline_control_point{
+							.y = elevation_profiles[level].final_elevation,
+							.ddx = std::tan(2.0f*std::numbers::pi_v<float>*elevation_profiles[level].final_slope)
+						}
+					)
+				);
+			}
+			continue;
+		}
+
+		auto const parent_curves = branches[parent].curves.get<0>().decay();
+		auto const parent_curve_index = current_collection.parent_curve_index;
+		auto const parent_curve = parent_curves[parent_curve_index].points();
 
 		for(auto k = current_collection.curves.first_element_index();
 			k != std::size(current_collection.curves);
 			++k
 		)
 		{
-			printf("%zu starts at %zu %s %s\n",
-				k.get(),
-				start_index[k].get(),
-				to_string(parent_curves[parent_curve_index].points()[start_index[k]]).c_str(),
-				to_string(my_curves[k].points()[displaced_curve::index_type{}]).c_str()
+			auto const point_on_parent = parent_curve[start_index[k]];
+			auto const z_0 = point_on_parent[2];
+			replace_z_inplace(
+				my_curves[k].points(),
+				make_interpolator(
+					cubic_spline_control_point{
+						.y = z_0,
+						.ddx = std::tan(2.0f*std::numbers::pi_v<float>*elevation_profiles[level].starting_slope)
+					},
+					cubic_spline_control_point{
+						.y = elevation_profiles[level].final_elevation,
+						.ddx = std::tan(2.0f*std::numbers::pi_v<float>*elevation_profiles[level].final_slope)
+					}
+				)
 			);
 		}
 	}
