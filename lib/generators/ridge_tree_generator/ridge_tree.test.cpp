@@ -86,6 +86,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 		auto const parent_curve_index = current_collection.parent_curve_index;
 
 		auto const parent_curves = res[parent].curves.get<0>().decay();
+		auto const parent_curve = parent_curves[parent_curve_index].points();
 		auto const my_curves = current_collection.curves.get<0>();
 		auto const start_index = current_collection.curves.get<1>();
 
@@ -94,7 +95,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 			++k
 		)
 		{
-			auto const point_on_parent = parent_curves[parent_curve_index].points()[start_index[k]];
+			auto const point_on_parent = parent_curve[start_index[k]];
 			auto const point_on_current_curve = my_curves[k].points().front();
 			EXPECT_EQ(point_on_parent, point_on_current_curve);
 		}
