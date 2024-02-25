@@ -33,7 +33,7 @@ namespace terraformer
 		{ return size_type{static_cast<size_t>(m_end - m_begin)}; }
 
 		auto empty() const
-		{ return size() == 0; }
+		{ return begin() == end(); }
 
 		constexpr auto& operator[](index_type index) const
 		{ return m_begin[index.get()]; }

@@ -25,8 +25,9 @@ namespace terraformer
 	};
 
 	single_array<cubic_spline_control_point> gen_per_branch_point_control_points(
-		span<location const> locations,
-		span<displaced_curve::index_type const> branch_points,
+		span<location const, array_index<location>, array_size<location>> locations,
+		span<array_index<location> const> branch_points,
+		per_branch_point_elevation_profile const& params,
 		random_generator& rng
 	);
 

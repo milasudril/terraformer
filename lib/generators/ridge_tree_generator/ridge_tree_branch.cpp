@@ -2,6 +2,74 @@
 
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/curve_tools/length.hpp"
+
+#include <random>
+
+terraformer::single_array<terraformer::cubic_spline_control_point> terraformer::gen_per_branch_point_control_points(
+	span<location const, array_index<location>, array_size<location>> locations,
+	span<array_index<location> const> branch_points,
+	per_branch_point_elevation_profile const& params,
+	random_generator& rng
+)
+{
+	single_array<terraformer::cubic_spline_control_point> ret;
+	if(branch_points.empty())
+	{ return ret; }
+
+	auto const L = curve_length_xy(locations);
+
+	if(L == 0.0f)
+	{ return ret; }
+
+	std::uniform_real_distribution peak_elevation_distribution{
+		0.0f,
+		static_cast<float>(params.peak_modulation_depth)
+	};
+
+	std::uniform_real_distribution peak_angle_distribution{
+		static_cast<float>(params.min_peak_angle),
+		static_cast<float>(params.max_peak_angle)
+	};
+
+	auto next_branch_point = branch_points.first_element_index();
+	auto l = 0.0f;
+
+	for(auto k = locations.first_element_index() + 1; k!= std::size(locations); ++k)
+	{
+		if(next_branch_point == std::size(branch_points))
+		{ return ret; }
+
+		l += distance_xy(locations[k], locations[k - 1]);
+
+		if(k == branch_points[next_branch_point] )
+		{
+			constexpr auto two_pi = 2.0f*std::numbers::pi_v<float>;
+			auto const value = peak_elevation_distribution(rng);
+
+			ret.push_back(
+				cubic_spline_control_point{
+					.y = value,
+					.ddx = std::tan(two_pi*peak_angle_distribution(rng))*l
+				}
+			);
+
+			ret.push_back(
+				cubic_spline_control_point{
+					.y = value,
+					.ddx = -std::tan(two_pi*peak_angle_distribution(rng))*l
+				}
+			);
+
+			l = 0.0f;
+			++next_branch_point;
+		}
+	}
+
+
+	return ret;
+}
+
 terraformer::displacement terraformer::compute_field(span<displaced_curve const> branches, location r, float min_distance)
 {
 	displacement ret{};
