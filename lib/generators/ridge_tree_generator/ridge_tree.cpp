@@ -147,16 +147,16 @@ void terraformer::ridge_tree::update_elevations(
 )
 {
 	span<ridge_tree_trunk> branches{m_value};
-	for(auto& current_collection : branches)
+	for(auto& current_trunk : branches)
 	{
-		auto const level = current_collection.level;
+		auto const level = current_trunk.level;
 
 		if(level >= std::size(elevation_profiles))
 		{ return; }
 
-		auto const my_curves = current_collection.branches.get<0>();
-		auto const start_index = current_collection.branches.get<1>();
-		auto const parent = current_collection.parent;
+		auto const my_curves = current_trunk.branches.get<0>();
+		auto const start_index = current_trunk.branches.get<1>();
+		auto const parent = current_trunk.parent;
 		if(parent == ridge_tree_trunk::no_parent)
 		{
 			for(auto& curve : my_curves)
@@ -179,11 +179,11 @@ void terraformer::ridge_tree::update_elevations(
 		}
 
 		auto const parent_curves = branches[parent].branches.get<0>().decay();
-		auto const parent_curve_index = current_collection.parent_curve_index;
+		auto const parent_curve_index = current_trunk.parent_curve_index;
 		auto const parent_curve = parent_curves[parent_curve_index].points();
 
-		for(auto k = current_collection.branches.first_element_index();
-			k != std::size(current_collection.branches);
+		for(auto k = current_trunk.branches.first_element_index();
+			k != std::size(current_trunk.branches);
 			++k
 		)
 		{
