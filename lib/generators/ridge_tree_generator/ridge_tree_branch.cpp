@@ -6,20 +6,18 @@
 
 #include <random>
 
-terraformer::single_array<terraformer::cubic_spline_control_point> terraformer::gen_per_branch_point_control_points(
+terraformer::single_array<float> terraformer::gen_per_branch_point_control_points(
 	span<location const, array_index<location>, array_size<location>> locations,
 	span<array_index<location> const> branch_points,
 	per_branch_point_elevation_profile const& params,
 	random_generator& rng
 )
 {
-	single_array<terraformer::cubic_spline_control_point> ret;
+	single_array<float> ret;
 	if(branch_points.empty())
 	{ return ret; }
 
-	auto const L = curve_length_xy(locations);
-
-	if(L == 0.0f)
+	if(locations.empty())
 	{ return ret; }
 
 	std::uniform_real_distribution peak_elevation_distribution{
@@ -32,37 +30,45 @@ terraformer::single_array<terraformer::cubic_spline_control_point> terraformer::
 		static_cast<float>(params.max_peak_angle)
 	};
 
-	auto next_branch_point = branch_points.first_element_index();
-	auto l = 0.0f;
+	auto last_value = 0.0f;
+	auto last_branch_point = locations.first_element_index();
+	auto seg_length = 0.0f;
+	auto next_branch_point_index = branch_points.first_element_index();
 
 	for(auto k = locations.first_element_index() + 1; k!= std::size(locations); ++k)
 	{
-		if(next_branch_point == std::size(branch_points))
+		if(next_branch_point_index == std::size(branch_points))
 		{ return ret; }
 
-		l += distance_xy(locations[k], locations[k - 1]);
+		seg_length += distance_xy(locations[k], locations[k - 1]);
 
-		if(k == branch_points[next_branch_point] )
+		if(k == branch_points[next_branch_point_index])
 		{
 			constexpr auto two_pi = 2.0f*std::numbers::pi_v<float>;
+			cubic_spline_control_point const seg_begin{
+				.y = last_value,
+				.ddx = -std::tan(two_pi*peak_angle_distribution(rng))*seg_length
+			};
+
 			auto const value = peak_elevation_distribution(rng);
+			cubic_spline_control_point const seg_end{
+				.y = value,
+				.ddx = std::tan(two_pi*peak_angle_distribution(rng))*seg_length
+			};
 
-			ret.push_back(
-				cubic_spline_control_point{
-					.y = value,
-					.ddx = std::tan(two_pi*peak_angle_distribution(rng))*l
-				}
-			);
+			last_value = value;
 
-			ret.push_back(
-				cubic_spline_control_point{
-					.y = value,
-					.ddx = -std::tan(two_pi*peak_angle_distribution(rng))*l
-				}
-			);
+			auto t = 0.0f;
+			ret.push_back(interp(seg_begin, seg_end, t));
+			for(auto l = last_branch_point + 1; l < std::min(array_index{std::size(locations)}, k); ++l)
+			{
+				t += distance_xy(locations[l], locations[l - 1]);
+				ret.push_back(interp(seg_begin, seg_end, t));
+			}
 
-			l = 0.0f;
-			++next_branch_point;
+			seg_length = 0.0f;
+			last_branch_point = k;
+			++next_branch_point_index;
 		}
 	}
 
