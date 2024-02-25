@@ -5,7 +5,7 @@
 #include "lib/curve_tools/displace.hpp"
 #include "lib/common/find_zeros.hpp"
 
-terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_branch_seeds(
+terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tree_branch_seeds(
 	displaced_curve const& displaced_points
 )
 {
@@ -21,7 +21,7 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 		side = -side;
 	}
 
-	ridge_tree_branch_seed_sequence ret;
+	ridge_tree_branch_seed_sequence_pair ret;
 	float max_offset = 0.0f;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
@@ -90,10 +90,10 @@ terraformer::ridge_tree_branch_seed_sequence terraformer::collect_ridge_tree_bra
 	return ret;
 }
 
-terraformer::single_array<terraformer::ridge_tree_branch_seed_sequence>
+terraformer::single_array<terraformer::ridge_tree_branch_seed_sequence_pair>
 terraformer::collect_ridge_tree_branch_seeds(span<displaced_curve const> points)
 {
-	single_array<terraformer::ridge_tree_branch_seed_sequence> ret;
+	single_array<terraformer::ridge_tree_branch_seed_sequence_pair> ret;
 	ret.reserve(static_cast<decltype(ret)::size_type>(std::size(points)));
 	for(auto k = points.first_element_index(); k != std::size(points); ++k)
 	{

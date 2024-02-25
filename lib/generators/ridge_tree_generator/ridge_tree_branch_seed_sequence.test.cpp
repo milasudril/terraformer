@@ -8,7 +8,7 @@
 #include <testfwk/testfwk.hpp>
 #include <random>
 
-TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_plus_minus_plus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -48,7 +48,7 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus)
 	EXPECT_EQ(std::size(res.right).get(), 1);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_minus_plus_minus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -89,7 +89,7 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus)
 	EXPECT_EQ(std::size(res.right).get(), 2);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus_minus)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_plus_minus_plus_minus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -140,7 +140,7 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_plus_minus_plus_minus)
 	EXPECT_GT(res.right.get<1>().front()[1], 0.0f);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus_plus)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_minus_plus_minus_plus)
 {
 	constexpr size_t count = 513;
 	std::array<terraformer::location, count> base_curve;
@@ -180,7 +180,7 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_minus_plus_minus_plus)
 	EXPECT_EQ(std::size(res.right).get(), 2);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_random_data)
 {
 	std::array<float, 387> offsets{};
 	{
@@ -224,7 +224,7 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data)
 	EXPECT_EQ(std::size(res.right).get(), 4);
 }
 
-TESTCASE(terraformer_ridge_tree_branch_seed_sequence_random_data_2)
+TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_random_data_2)
 {
 	std::array<float, 387> offsets{};
 	{

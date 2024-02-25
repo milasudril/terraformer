@@ -88,7 +88,7 @@ namespace terraformer
 
 	single_array<ridge_tree_stem_collection>
 	generate_branches(
-		std::span<ridge_tree_branch_seed_sequence const> parents,
+		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
 		span<ridge_tree_branch_collection const> existing_branches,
 		float pixel_size,
 		ridge_tree_branch_displacement_description curve_desc,
