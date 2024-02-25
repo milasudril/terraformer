@@ -77,7 +77,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 		auto const level = current_collection.level;
 
 		auto const parent = current_collection.parent;
-		if(parent == terraformer::ridge_tree_branch_collection::no_parent)
+		if(parent == terraformer::ridge_tree_branch_sequence_info::no_parent)
 		{
 			EXPECT_EQ(level, 0);
 			continue;

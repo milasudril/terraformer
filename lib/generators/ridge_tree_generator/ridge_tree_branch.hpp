@@ -14,27 +14,27 @@
 
 namespace terraformer
 {
-	struct ridge_tree_branch_collection
+	struct ridge_tree_branch_sequence_info
 	{
-		static constexpr auto no_parent = array_index<ridge_tree_branch_collection>{static_cast<size_t>(-1)};
+		static constexpr auto no_parent = array_index<ridge_tree_branch_sequence_info>{static_cast<size_t>(-1)};
 		enum class side:int{left, right};
 
 		size_t level;
 		multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence> curves;
-		array_index<ridge_tree_branch_collection> parent;
+		array_index<ridge_tree_branch_sequence_info> parent;
 		array_index<displaced_curve> parent_curve_index;
 		enum side side;
 	};
 
 	displacement compute_field(span<displaced_curve const> branches, location r, float min_distance);
 
-	displacement compute_field(span<ridge_tree_branch_collection const> branches, location r, float min_distance);
+	displacement compute_field(span<ridge_tree_branch_sequence_info const> branches, location r, float min_distance);
 
 	template<class BranchStopCondition>
 	single_array<location> generate_branch_base_curve(
 		location loc,
 		direction start_dir,
-		span<ridge_tree_branch_collection const> existing_branches,
+		span<ridge_tree_branch_sequence_info const> existing_branches,
 		float pixel_size,
 		BranchStopCondition&& stop)
 	{
@@ -64,7 +64,7 @@ namespace terraformer
 	>
 	generate_branches(
 		ridge_tree_branch_seed_sequence const& branch_points,
-		span<ridge_tree_branch_collection const> existing_branches,
+		span<ridge_tree_branch_sequence_info const> existing_branches,
 		float pixel_size,
 		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,
@@ -93,7 +93,7 @@ namespace terraformer
 	single_array<ridge_tree_stem_collection>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
-		span<ridge_tree_branch_collection const> existing_branches,
+		span<ridge_tree_branch_sequence_info const> existing_branches,
 		float pixel_size,
 		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,

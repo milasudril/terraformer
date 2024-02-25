@@ -57,7 +57,7 @@ namespace terraformer
 	public:
 	  explicit ridge_tree(ridge_tree_description const& description, random_generator rng, float pixel_size);
 
-		operator std::span<ridge_tree_branch_collection const>() const
+		operator std::span<ridge_tree_branch_sequence_info const>() const
 		{ return m_value; }
 
 		constexpr auto first_element_index()
@@ -75,7 +75,7 @@ namespace terraformer
 		auto data() const
 		{ return std::data(m_value); }
 
-		auto const& operator[](array_index<ridge_tree_branch_collection> index) const
+		auto const& operator[](array_index<ridge_tree_branch_sequence_info> index) const
 		{ return m_value[index]; }
 
 		void update_elevations(
@@ -86,7 +86,7 @@ namespace terraformer
 		);
 
 	private:
-		single_array<ridge_tree_branch_collection> m_value;
+		single_array<ridge_tree_branch_sequence_info> m_value;
 	};
 
 	inline ridge_tree generate(

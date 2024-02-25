@@ -26,7 +26,7 @@ terraformer::displacement terraformer::compute_field(span<displaced_curve const>
 	return ret;
 }
 
-terraformer::displacement terraformer::compute_field(span<ridge_tree_branch_collection const> branches, location r, float min_distance)
+terraformer::displacement terraformer::compute_field(span<ridge_tree_branch_sequence_info const> branches, location r, float min_distance)
 {
 	displacement ret{};
 
@@ -43,7 +43,7 @@ terraformer::multi_array<
 >
 terraformer::generate_branches(
 	ridge_tree_branch_seed_sequence const& branch_points,
-	span<ridge_tree_branch_collection const> existing_branches,
+	span<ridge_tree_branch_sequence_info const> existing_branches,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,
@@ -222,7 +222,7 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 terraformer::single_array<terraformer::ridge_tree_stem_collection>
 terraformer::generate_branches(
 	std::span<ridge_tree_branch_seed_sequence_pair const> parents,
-	span<ridge_tree_branch_collection const> existing_branches,
+	span<ridge_tree_branch_sequence_info const> existing_branches,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,
