@@ -87,7 +87,7 @@ terraformer::ridge_tree::ridge_tree(
 			continue;
 		}
 
-		auto next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(
+		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(
 			std::as_const(current_trunk.curves).get<0>()
 		);
 		auto next_level = generate_branches(
