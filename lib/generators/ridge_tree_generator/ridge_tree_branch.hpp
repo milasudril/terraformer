@@ -7,13 +7,29 @@
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
 #include "lib/common/spaces.hpp"
+#include "lib/modules/dimensions.hpp"
+#include "lib/common/rng.hpp"
 #include "lib/math_utils/differentiation.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
+#include "lib/math_utils/cubic_spline.hpp"
 #include "lib/curve_tools/length.hpp"
 #include "lib/curve_tools/displace.hpp"
 
 namespace terraformer
 {
+	struct per_branch_point_elevation_profile
+	{
+		modulation_depth peak_modulation_depth;
+		slope_angle min_peak_angle;
+		slope_angle max_peak_angle;
+	};
+
+	single_array<cubic_spline_control_point> gen_per_branch_point_control_points(
+		span<location const> locations,
+		span<displaced_curve::index_type const> branch_points,
+		random_generator& rng
+	);
+
 	struct ridge_tree_branch_sequence :
 		multi_array<displaced_curve, displaced_curve::index_type, single_array<displaced_curve::index_type>>
 	{
