@@ -27,7 +27,7 @@ terraformer::displacement terraformer::compute_field(span<displaced_curve const>
 }
 
 terraformer::displacement terraformer::compute_field(
-	span<ridge_tree_branch_sequence_info const> branch_infos,
+	span<ridge_tree_trunk const> branch_infos,
 	location r,
 	float min_distance
 )
@@ -42,7 +42,7 @@ terraformer::displacement terraformer::compute_field(
 
 terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	ridge_tree_branch_seed_sequence const& branch_points,
-	span<ridge_tree_branch_sequence_info const> existing_branches,
+	span<ridge_tree_trunk const> trunks,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,
@@ -58,7 +58,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 		auto const base_curve = generate_branch_base_curve(
 			points[k],
 			normals[k],
-			existing_branches,
+			trunks,
 			pixel_size,
 			[d = 0.0f, loc_prev = points[k], d_max](auto loc) mutable {
 				auto new_distance = d + distance(loc, loc_prev);
@@ -221,7 +221,7 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 terraformer::single_array<terraformer::ridge_tree_stem_collection>
 terraformer::generate_branches(
 	std::span<ridge_tree_branch_seed_sequence_pair const> parents,
-	span<ridge_tree_branch_sequence_info const> existing_branches,
+	span<ridge_tree_trunk const> trunks,
 	float pixel_size,
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,
@@ -236,7 +236,7 @@ terraformer::generate_branches(
 	ridge_tree_stem_collection current_stem_collection{array_index<displaced_curve>{0}};
 	current_stem_collection.left = generate_branches(
 		parents[0].left,
-		existing_branches,
+		trunks,
 		pixel_size,
 		curve_desc,
 		rng,
@@ -249,7 +249,7 @@ terraformer::generate_branches(
 	{
 		current_stem_collection.right = generate_branches(
 			parents[k - 1].right,
-			existing_branches,
+			trunks,
 			pixel_size,
 			curve_desc,
 			rng,
@@ -259,7 +259,7 @@ terraformer::generate_branches(
 
 		auto left_branches = generate_branches(
 			parents[k].left,
-			existing_branches,
+			trunks,
 			pixel_size,
 			curve_desc,
 			rng,
@@ -275,7 +275,7 @@ terraformer::generate_branches(
 
 	current_stem_collection.right = generate_branches(
 		parents.back().right,
-		existing_branches,
+		trunks,
 		pixel_size,
 		curve_desc,
 		rng,

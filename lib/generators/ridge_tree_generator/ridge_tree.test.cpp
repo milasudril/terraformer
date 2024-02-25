@@ -72,30 +72,30 @@ TESTCASE(terraformer_ridge_tree_generate)
 	auto const t = std::chrono::steady_clock::now();
 	printf("Elapsed time %.8g s\n", std::chrono::duration<double>(t - t_0).count());
 
-	for(auto& current_collection : res)
+	for(auto& current_trunk : res)
 	{
-		auto const level = current_collection.level;
+		auto const level = current_trunk.level;
 
-		auto const parent = current_collection.parent;
-		if(parent == terraformer::ridge_tree_branch_sequence_info::no_parent)
+		auto const parent = current_trunk.parent;
+		if(parent == terraformer::ridge_tree_trunk::no_parent)
 		{
 			EXPECT_EQ(level, 0);
 			continue;
 		}
 
-		auto const parent_curve_index = current_collection.parent_curve_index;
+		auto const parent_curve_index = current_trunk.parent_curve_index;
 		auto const parent_curves = res[parent].branches.get<0>().decay();
 		auto const parent_curve = parent_curves[parent_curve_index].points();
-		auto const my_curves = current_collection.branches.get<0>();
-		auto const start_index = current_collection.branches.get<1>();
+		auto const branches = current_trunk.branches.get<0>();
+		auto const start_index = current_trunk.branches.get<1>();
 
-		for(auto k = current_collection.branches.first_element_index();
-			k != std::size(current_collection.branches);
+		for(auto k = current_trunk.branches.first_element_index();
+			k != std::size(current_trunk.branches);
 			++k
 		)
 		{
 			auto const point_on_parent = parent_curve[start_index[k]];
-			auto const point_on_current_curve = my_curves[k].points().front();
+			auto const point_on_current_curve = branches[k].points().front();
 			EXPECT_EQ(point_on_parent, point_on_current_curve);
 		}
 	}

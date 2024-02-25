@@ -62,12 +62,12 @@ terraformer::ridge_tree::ridge_tree(
 		);
 
 		ret.push_back(
-			ridge_tree_branch_sequence_info{
+			ridge_tree_trunk{
 				.level = 0,
 				.branches = std::move(root),
-				.parent = ridge_tree_branch_sequence_info::no_parent,
+				.parent = ridge_tree_trunk::no_parent,
 				.parent_curve_index = array_index<displaced_curve>{0},
-				.side = ridge_tree_branch_sequence_info::side::left
+				.side = ridge_tree_trunk::side::left
 			}
 		);
 	}
@@ -104,12 +104,12 @@ terraformer::ridge_tree::ridge_tree(
 			if(!stem.left.empty())
 			{
 				ret.push_back(
-					ridge_tree_branch_sequence_info{
+					ridge_tree_trunk{
 						.level = next_level_index,
 						.branches = std::move(stem.left),
 						.parent = current_trunk_index,
 						.parent_curve_index = stem.parent_curve_index,
-						.side = ridge_tree_branch_sequence_info::side::left
+						.side = ridge_tree_trunk::side::left
 					}
 				);
 			}
@@ -117,12 +117,12 @@ terraformer::ridge_tree::ridge_tree(
 			if(!stem.right.empty())
 			{
 				ret.push_back(
-					ridge_tree_branch_sequence_info{
+					ridge_tree_trunk{
 						.level = next_level_index,
 						.branches = std::move(stem.right),
 						.parent = current_trunk_index,
 						.parent_curve_index = stem.parent_curve_index,
-						.side = ridge_tree_branch_sequence_info::side::right
+						.side = ridge_tree_trunk::side::right
 					}
 				);
 			}
@@ -138,7 +138,7 @@ void terraformer::ridge_tree::update_elevations(
 	float
 )
 {
-	span<ridge_tree_branch_sequence_info> branches{m_value};
+	span<ridge_tree_trunk> branches{m_value};
 	for(auto& current_collection : branches)
 	{
 		auto const level = current_collection.level;
@@ -149,7 +149,7 @@ void terraformer::ridge_tree::update_elevations(
 		auto const my_curves = current_collection.branches.get<0>();
 		auto const start_index = current_collection.branches.get<1>();
 		auto const parent = current_collection.parent;
-		if(parent == ridge_tree_branch_sequence_info::no_parent)
+		if(parent == ridge_tree_trunk::no_parent)
 		{
 			for(auto& curve : my_curves)
 			{
