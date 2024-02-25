@@ -101,3 +101,15 @@ terraformer::collect_ridge_tree_branch_seeds(span<displaced_curve const> points)
 	}
 	return ret;
 }
+
+terraformer::single_array<terraformer::displaced_curve::index_type>
+terraformer::collect_branch_indices(ridge_tree_branch_seed_sequence_pair const& seq_pair)
+{
+	single_array<displaced_curve::index_type> ret;
+	decltype(ret)::size_type const total_size{std::size(seq_pair.left) + std::size(seq_pair.right)};
+	ret.reserve(total_size);
+	std::ranges::copy(seq_pair.left.get<2>(), std::back_inserter(ret));
+	std::ranges::copy(seq_pair.right.get<2>(), std::back_inserter(ret));
+	std::ranges::sort(ret);
+	return ret;
+}

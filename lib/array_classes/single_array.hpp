@@ -12,6 +12,7 @@ namespace terraformer
 	public:
 		using size_type = array_size<T>;
 		using index_type = array_index<T>;
+		using value_type = T;
 
 		single_array() noexcept= default;
 

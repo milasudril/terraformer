@@ -27,6 +27,8 @@ namespace terraformer
 
 	single_array<ridge_tree_branch_seed_sequence_pair>
 	collect_ridge_tree_branch_seeds(span<displaced_curve const> points);
+
+	single_array<displaced_curve::index_type> collect_branch_indices(ridge_tree_branch_seed_sequence_pair const& seq_pair);
 };
 
 #endif
