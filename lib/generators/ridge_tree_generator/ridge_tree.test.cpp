@@ -88,14 +88,27 @@ TESTCASE(terraformer_ridge_tree_generate)
 		auto const parent_curve = parent_curves[parent_curve_index].points();
 		auto const branches = current_trunk.branches.get<0>();
 		auto const start_index = current_trunk.branches.get<1>();
+		auto const seed_indices = current_trunk.branches.get<2>();
 
 		for(auto k = current_trunk.branches.first_element_index();
 			k != std::size(current_trunk.branches);
 			++k
 		)
 		{
+			EXPECT_LT(start_index[k].get(), std::size(parent_curve).get());
 			auto const point_on_parent = parent_curve[start_index[k]];
 			auto const point_on_current_curve = branches[k].points().front();
+
+			{
+				terraformer::displaced_curve::index_type prev_index{0};
+				for(auto index : seed_indices[k])
+				{
+					EXPECT_GE(index.get(), prev_index.get());
+					EXPECT_LT(index.get(), std::size(branches[k]).get());
+					prev_index = index;
+				}
+			}
+
 			EXPECT_EQ(point_on_parent, point_on_current_curve);
 		}
 	}

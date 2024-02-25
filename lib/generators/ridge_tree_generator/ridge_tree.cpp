@@ -90,6 +90,14 @@ terraformer::ridge_tree::ridge_tree(
 		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(
 			std::as_const(current_trunk.branches).get<0>()
 		);
+
+		auto k = next_level_seeds.first_element_index();
+		for(auto& index_array : current_trunk.branches.get<2>())
+		{
+			index_array = collect_branch_indices(next_level_seeds[k]);
+			++k;
+		}
+
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret,
