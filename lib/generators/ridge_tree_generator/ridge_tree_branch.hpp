@@ -20,7 +20,7 @@ namespace terraformer
 		enum class side:int{left, right};
 
 		size_t level;
-		multi_array<displaced_curve, displaced_curve::index_type> curves;
+		multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence> curves;
 		array_index<ridge_tree_branch_collection> parent;
 		array_index<displaced_curve> parent_curve_index;
 		enum side side;
@@ -57,7 +57,11 @@ namespace terraformer
 		return base_curve;
 	}
 
-	multi_array<displaced_curve, displaced_curve::index_type>
+	multi_array<
+		displaced_curve,
+		displaced_curve::index_type,
+		ridge_tree_branch_seed_sequence
+	>
 	generate_branches(
 		ridge_tree_branch_seed_sequence const& branch_points,
 		span<ridge_tree_branch_collection const> existing_branches,
@@ -65,7 +69,7 @@ namespace terraformer
 		ridge_tree_branch_displacement_description curve_desc,
 		random_generator& rng,
 		float d_max,
-		multi_array<displaced_curve, displaced_curve::index_type>&& gen_branches = multi_array<displaced_curve, displaced_curve::index_type>{});
+		multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence>&& gen_branches = multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence>{});
 
 	void trim_at_intersect(span<displaced_curve> a, span<displaced_curve> b, float threshold);
 
@@ -76,8 +80,8 @@ namespace terraformer
 		{}
 
 		array_index<displaced_curve> parent_curve_index;
-		multi_array<displaced_curve, displaced_curve::index_type> left;
-		multi_array<displaced_curve, displaced_curve::index_type> right;
+		multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence> left;
+		multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence> right;
 	};
 
 	struct ridge_tree_branch_growth_description

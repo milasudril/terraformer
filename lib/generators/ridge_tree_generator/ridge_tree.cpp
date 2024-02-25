@@ -48,7 +48,7 @@ terraformer::ridge_tree::ridge_tree(
 		(description.root_location, description.trunk_direction, trunk_pixel_count, pixel_size);
 
 	{
-		multi_array<displaced_curve, displaced_curve::index_type> root;
+		multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence> root;
 		root.push_back(
 			displace_xy(
 				trunk_base_curve,
@@ -57,7 +57,8 @@ terraformer::ridge_tree::ridge_tree(
 					.sample_period = pixel_size
 				}
 			),
-			displaced_curve::index_type{}
+			displaced_curve::index_type{},
+			ridge_tree_branch_seed_sequence{}
 		);
 
 		ret.push_back(

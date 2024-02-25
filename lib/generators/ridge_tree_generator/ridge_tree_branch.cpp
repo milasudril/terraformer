@@ -36,7 +36,11 @@ terraformer::displacement terraformer::compute_field(span<ridge_tree_branch_coll
 	return ret;
 }
 
-terraformer::multi_array<terraformer::displaced_curve, terraformer::displaced_curve::index_type>
+terraformer::multi_array<
+	terraformer::displaced_curve,
+	terraformer::displaced_curve::index_type,
+	terraformer::ridge_tree_branch_seed_sequence
+>
 terraformer::generate_branches(
 	ridge_tree_branch_seed_sequence const& branch_points,
 	span<ridge_tree_branch_collection const> existing_branches,
@@ -44,7 +48,7 @@ terraformer::generate_branches(
 	ridge_tree_branch_displacement_description curve_desc,
 	random_generator& rng,
 	float d_max,
-	multi_array<displaced_curve, displaced_curve::index_type>&& gen_branches)
+	multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence>&& gen_branches)
 {
 	auto const points = branch_points.get<0>();
 	auto const normals = branch_points.get<1>();
@@ -84,7 +88,8 @@ terraformer::generate_branches(
 					.sample_period = pixel_size,
 				}
 			),
-			vertex_index[k]
+			vertex_index[k],
+			ridge_tree_branch_seed_sequence{}
 		);
 	}
 
