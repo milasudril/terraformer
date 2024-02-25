@@ -59,7 +59,7 @@ namespace terraformer
 
 	multi_array<displaced_curve, displaced_curve::index_type>
 	generate_branches(
-		multi_array<location, direction, displaced_curve::index_type> const& branch_points,
+		ridge_tree_branch_seed_sequence const& branch_points,
 		span<ridge_tree_branch_collection const> existing_branches,
 		float pixel_size,
 		ridge_tree_branch_displacement_description curve_desc,
