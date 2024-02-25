@@ -66,7 +66,6 @@ terraformer::single_array<terraformer::cubic_spline_control_point> terraformer::
 		}
 	}
 
-
 	return ret;
 }
 
