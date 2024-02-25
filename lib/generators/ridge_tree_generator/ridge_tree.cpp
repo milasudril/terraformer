@@ -48,7 +48,7 @@ terraformer::ridge_tree::ridge_tree(
 		(description.root_location, description.trunk_direction, trunk_pixel_count, pixel_size);
 
 	{
-		multi_array<displaced_curve, displaced_curve::index_type, ridge_tree_branch_seed_sequence> root;
+		ridge_tree_branch_sequence root;
 		root.push_back(
 			displace_xy(
 				trunk_base_curve,
@@ -64,7 +64,7 @@ terraformer::ridge_tree::ridge_tree(
 		ret.push_back(
 			ridge_tree_branch_sequence_info{
 				.level = 0,
-				.curves = std::move(root),
+				.branches = std::move(root),
 				.parent = ridge_tree_branch_sequence_info::no_parent,
 				.parent_curve_index = array_index<displaced_curve>{0},
 				.side = ridge_tree_branch_sequence_info::side::left
@@ -88,7 +88,7 @@ terraformer::ridge_tree::ridge_tree(
 		}
 
 		auto const next_level_seeds = terraformer::collect_ridge_tree_branch_seeds(
-			std::as_const(current_trunk.curves).get<0>()
+			std::as_const(current_trunk.branches).get<0>()
 		);
 		auto next_level = generate_branches(
 			next_level_seeds,
@@ -106,7 +106,7 @@ terraformer::ridge_tree::ridge_tree(
 				ret.push_back(
 					ridge_tree_branch_sequence_info{
 						.level = next_level_index,
-						.curves = std::move(stem.left),
+						.branches = std::move(stem.left),
 						.parent = current_trunk_index,
 						.parent_curve_index = stem.parent_curve_index,
 						.side = ridge_tree_branch_sequence_info::side::left
@@ -119,7 +119,7 @@ terraformer::ridge_tree::ridge_tree(
 				ret.push_back(
 					ridge_tree_branch_sequence_info{
 						.level = next_level_index,
-						.curves = std::move(stem.right),
+						.branches = std::move(stem.right),
 						.parent = current_trunk_index,
 						.parent_curve_index = stem.parent_curve_index,
 						.side = ridge_tree_branch_sequence_info::side::right
@@ -146,8 +146,8 @@ void terraformer::ridge_tree::update_elevations(
 		if(level >= std::size(elevation_profiles))
 		{ return; }
 
-		auto const my_curves = current_collection.curves.get<0>();
-		auto const start_index = current_collection.curves.get<1>();
+		auto const my_curves = current_collection.branches.get<0>();
+		auto const start_index = current_collection.branches.get<1>();
 		auto const parent = current_collection.parent;
 		if(parent == ridge_tree_branch_sequence_info::no_parent)
 		{
@@ -170,12 +170,12 @@ void terraformer::ridge_tree::update_elevations(
 			continue;
 		}
 
-		auto const parent_curves = branches[parent].curves.get<0>().decay();
+		auto const parent_curves = branches[parent].branches.get<0>().decay();
 		auto const parent_curve_index = current_collection.parent_curve_index;
 		auto const parent_curve = parent_curves[parent_curve_index].points();
 
-		for(auto k = current_collection.curves.first_element_index();
-			k != std::size(current_collection.curves);
+		for(auto k = current_collection.branches.first_element_index();
+			k != std::size(current_collection.branches);
 			++k
 		)
 		{
@@ -214,11 +214,11 @@ void terraformer::render(
 	//	auto const peak_elevation = params.curve_levels[level].peak_elevation;
 		auto const peak_diameter = 2.0f/pixel_size;
 
-		for(auto const& curve: branch_collection.curves.get<0>())
+		for(auto const& branch: branch_collection.branches.get<0>())
 		{
 			draw(
 				output,
-				curve.points(),
+				branch.points(),
 				line_segment_draw_params{
 					.value = 1.0f,
 					.blend_function = [](float old_val, float new_val, float strength){

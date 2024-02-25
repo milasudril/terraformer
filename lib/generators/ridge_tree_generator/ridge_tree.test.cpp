@@ -84,13 +84,13 @@ TESTCASE(terraformer_ridge_tree_generate)
 		}
 
 		auto const parent_curve_index = current_collection.parent_curve_index;
-		auto const parent_curves = res[parent].curves.get<0>().decay();
+		auto const parent_curves = res[parent].branches.get<0>().decay();
 		auto const parent_curve = parent_curves[parent_curve_index].points();
-		auto const my_curves = current_collection.curves.get<0>();
-		auto const start_index = current_collection.curves.get<1>();
+		auto const my_curves = current_collection.branches.get<0>();
+		auto const start_index = current_collection.branches.get<1>();
 
-		for(auto k = current_collection.curves.first_element_index();
-			k != std::size(current_collection.curves);
+		for(auto k = current_collection.branches.first_element_index();
+			k != std::size(current_collection.branches);
 			++k
 		)
 		{
@@ -102,7 +102,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 	terraformer::curve_set curves;
 	for(auto k = res.first_element_index(); k != std::size(res); ++k)
 	{
-		for(auto const& curve : res[k].curves.get<0>())
+		for(auto const& curve : res[k].branches.get<0>())
 		{
 			curves.append(curve.points());
 		}
