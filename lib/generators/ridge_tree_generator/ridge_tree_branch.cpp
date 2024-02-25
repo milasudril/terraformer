@@ -88,7 +88,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 				}
 			),
 			vertex_index[k],
-			ridge_tree_branch_seed_sequence{}
+			single_array<displaced_curve::index_type>{}
 		);
 	}
 

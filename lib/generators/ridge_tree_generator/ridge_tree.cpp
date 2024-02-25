@@ -58,7 +58,7 @@ terraformer::ridge_tree::ridge_tree(
 				}
 			),
 			displaced_curve::index_type{},
-			ridge_tree_branch_seed_sequence{}
+			single_array<displaced_curve::index_type>{}
 		);
 
 		ret.push_back(
