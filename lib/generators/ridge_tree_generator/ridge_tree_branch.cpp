@@ -60,7 +60,7 @@ terraformer::single_array<float> terraformer::gen_per_branch_point_control_point
 
 			auto t = 0.0f;
 			ret.push_back(interp(seg_begin, seg_end, t));
-			for(auto l = last_branch_point + 1; l < std::min(array_index{std::size(locations)}, k); ++l)
+			for(auto l = last_branch_point + 1; l != k; ++l)
 			{
 				t += distance_xy(locations[l], locations[l - 1]);
 				ret.push_back(interp(seg_begin, seg_end, t));
