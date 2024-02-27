@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_MATHUTILS_CUBIC_SPLINE_HPP
 #define TERRAFORMER_MATHUTILS_CUBIC_SPLINE_HPP
 
+#include "./polynomial.hpp"
+
 #include <algorithm>
 
 namespace terraformer
@@ -11,7 +13,7 @@ namespace terraformer
 		float ddx;
 	};
 
-	constexpr auto interp(cubic_spline_control_point a, cubic_spline_control_point b, float x)
+	constexpr auto make_polynomial(cubic_spline_control_point a, cubic_spline_control_point b)
 	{
 		auto const y_0 = a.y;
 		auto const y_1 = b.y;
@@ -24,8 +26,11 @@ namespace terraformer
 		auto const linear = A;
 		auto const constant = y_0;
 
-		return cubic*x*x*x + quadratic*x*x + linear*x + constant;
+		return polynomial{constant, linear, quadratic, cubic};
 	}
+
+	constexpr auto interp(cubic_spline_control_point a, cubic_spline_control_point b, float x)
+	{	return make_polynomial(a, b)(x); }
 
 	constexpr auto smoothstep(float x)
 	{
