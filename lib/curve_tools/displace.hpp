@@ -67,22 +67,12 @@ namespace terraformer
 
 	displaced_curve displace_xy(std::span<location const> c, displacement_profile dy);
 
-	template<class Interpolator>
-	void replace_z_inplace(span<location> c, Interpolator&& interp)
+	inline void replace_z_inplace(span<location> c, span<float const> z_vals)
 	{
-		auto const L = curve_length(c);
-		if(L == 0.0f)
-		{ return; }
-
-		auto l = 0.0f;
-		c.front()[2] = interp(0.0f);
-
-		for(auto k = c.first_element_index() + 1; k != std::size(c); ++k)
+		for(auto k = c.first_element_index() ; k != std::size(c); ++k)
 		{
-			auto const dl = distance_xy(c[k], c[k - 1]);
-			l += dl;
-			auto const t  = l/L;
-			c[k][2] = interp(t);
+			array_index<float const> src_index{k.get()};
+			c[k][2] = z_vals[src_index];
 		}
 	}
 }

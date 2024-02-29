@@ -155,29 +155,22 @@ void terraformer::ridge_tree::update_elevations(
 		{ return; }
 
 		auto const my_curves = current_trunk.branches.get<0>();
-		auto const start_index = current_trunk.branches.get<1>();
 		auto const parent = current_trunk.parent;
 		if(parent == ridge_tree_trunk::no_parent)
 		{
 			for(auto& curve : my_curves)
 			{
-				replace_z_inplace(
-					curve.points(),
-					make_interpolator(
-						cubic_spline_control_point{
-							.y = initial_elevation,
-							.ddx = std::tan(2.0f*std::numbers::pi_v<float>*elevation_profiles[level].starting_slope)
-						},
-						cubic_spline_control_point{
-							.y = elevation_profiles[level].final_elevation,
-							.ddx = std::tan(2.0f*std::numbers::pi_v<float>*elevation_profiles[level].final_slope)
-						}
-					)
+				auto const elevation_profile = generate_elevation_profile(
+					std::as_const(curve).points(),
+					initial_elevation,
+					elevation_profiles[level].ridge
 				);
+				replace_z_inplace(curve.points(), elevation_profile);
 			}
 			continue;
 		}
 
+		auto const start_index = current_trunk.branches.get<1>();
 		auto const parent_curves = branches[parent].branches.get<0>().decay();
 		auto const parent_curve_index = current_trunk.parent_curve_index;
 		auto const parent_curve = parent_curves[parent_curve_index].points();
@@ -189,19 +182,12 @@ void terraformer::ridge_tree::update_elevations(
 		{
 			auto const point_on_parent = parent_curve[start_index[k]];
 			auto const z_0 = point_on_parent[2];
-			replace_z_inplace(
-				my_curves[k].points(),
-				make_interpolator(
-					cubic_spline_control_point{
-						.y = z_0,
-						.ddx = std::tan(2.0f*std::numbers::pi_v<float>*elevation_profiles[level].starting_slope)
-					},
-					cubic_spline_control_point{
-						.y = elevation_profiles[level].final_elevation,
-						.ddx = std::tan(2.0f*std::numbers::pi_v<float>*elevation_profiles[level].final_slope)
-					}
-				)
+			auto const elevation_profile = generate_elevation_profile(
+				std::as_const(my_curves[k]).points(),
+				z_0,
+				elevation_profiles[level].ridge
 			);
+			replace_z_inplace(my_curves[k].points(), elevation_profile);
 		}
 	}
 }
@@ -217,9 +203,8 @@ void terraformer::render(
 	{
 		auto const level = branch_collection.level;
 		if(level >= std::size(params.curve_levels))
-		{ continue; }
+		{	continue; }
 
-	//	auto const peak_elevation = params.curve_levels[level].peak_elevation;
 		auto const peak_diameter = 2.0f/pixel_size;
 
 		for(auto const& branch: branch_collection.branches.get<0>())

@@ -17,18 +17,29 @@
 
 namespace terraformer
 {
-	struct per_branch_point_elevation_profile
+	struct ridge_elevation_profile_description
+	{
+		slope_angle starting_slope;
+		elevation final_elevation;
+		slope_angle final_slope;
+	};
+
+	struct peak_elevation_description
 	{
 		modulation_depth peak_modulation_depth;
 		slope_angle min_peak_angle;
 		slope_angle max_peak_angle;
 	};
 
-	single_array<float> gen_per_branch_point_control_points(
-		span<location const, array_index<location>, array_size<location>> locations,
+	single_array<float> generate_elevation_profile(
+		span<location const> branch_curve,
+		float initial_elevation,
+		ridge_elevation_profile_description const& ridge_elevation_profile
+#if 0
 		span<array_index<location> const> branch_points,
-		per_branch_point_elevation_profile const& params,
+		peak_elevation_description const& peak_elvation_profile,
 		random_generator& rng
+#endif
 	);
 
 	struct ridge_tree_branch_sequence :

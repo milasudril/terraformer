@@ -6,6 +6,52 @@
 
 #include <random>
 
+
+terraformer::single_array<float> terraformer::generate_elevation_profile(
+	span<location const> branch_curve,
+	float initial_elevation,
+	ridge_elevation_profile_description const& ridge_elevation_profile
+#if 0
+	span<array_index<location> const> branch_points,
+	peak_elevation_description const& peak_elvation_profile,
+	random_generator& rng
+#endif
+)
+{
+	auto const running_length = curve_running_length_xy(branch_curve);
+	if(running_length.empty())
+	{ return running_length; }
+
+	auto const L = running_length.back();
+
+	constexpr auto two_pi = std::numbers::pi_v<float>;
+
+	auto const p_ridge = make_polynomial(
+		cubic_spline_control_point{
+			.y = initial_elevation,
+			.ddx = L*std::tan(two_pi*ridge_elevation_profile.starting_slope)
+		},
+		cubic_spline_control_point{
+			.y = ridge_elevation_profile.final_elevation,
+			.ddx = L*std::tan(two_pi*ridge_elevation_profile.final_slope)
+		}
+	);
+
+	single_array ret{std::size(running_length)};
+	for(auto k = ret.first_element_index(); k != std::size(ret); ++k)
+	{	ret[k] = p_ridge(running_length[k]/L);	}
+
+#if 0
+	auto const p_ridge_deriv = p_ridge.derivative();
+	auto const ridge_elevation_deriv = p_ridge_deriv(l/L)/L;
+#endif
+
+	return ret;
+}
+
+
+#if 0
+
 terraformer::single_array<float> terraformer::gen_per_branch_point_control_points(
 	span<location const, array_index<location>, array_size<location>> locations,
 	span<array_index<location> const> branch_points,
@@ -74,6 +120,7 @@ terraformer::single_array<float> terraformer::gen_per_branch_point_control_point
 
 	return ret;
 }
+#endif
 
 terraformer::displacement terraformer::compute_field(span<displaced_curve const> branches, location r, float min_distance)
 {

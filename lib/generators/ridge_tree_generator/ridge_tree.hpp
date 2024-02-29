@@ -38,18 +38,7 @@ namespace terraformer
 	struct ridge_tree_branch_elevation_profile
 	{
 		// envelope
-		slope_angle starting_slope;
-		elevation final_elevation;
-		slope_angle final_slope;
-
-		// noise based on peaks
-		vertical_amplitude starting_peak_displacement;
-		vertical_amplitude final_peak_displacement;
-		slope_angle min_peak_angle;
-		slope_angle max_peak_angle;
-
-		// continuos noise
-		ridge_tree_elevation_noise noise;
+		ridge_elevation_profile_description ridge;
 	};
 
 	class ridge_tree

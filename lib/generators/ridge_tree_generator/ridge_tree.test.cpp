@@ -126,59 +126,31 @@ TESTCASE(terraformer_ridge_tree_generate)
 
 	std::vector elevation_profiles{
 		terraformer::ridge_tree_branch_elevation_profile{
-			.starting_slope = terraformer::slope_angle{0.0f},
-			.final_elevation = terraformer::elevation{3072.0f},
-			.final_slope = terraformer::slope_angle{0.0f},
-			.starting_peak_displacement = terraformer::vertical_amplitude{512.0f},
-			.final_peak_displacement = terraformer::vertical_amplitude{512.0f},
-			.min_peak_angle = terraformer::slope_angle{0.0f},
-			.max_peak_angle = terraformer::slope_angle{0.0f},
-			.noise = terraformer::ridge_tree_elevation_noise{
-				.amplitude = terraformer::vertical_amplitude{64.0f},
-				.wavelength = terraformer::domain_length{256.0f},
-				.damping = std::sqrt(0.5f)
+			.ridge{
+				.starting_slope = terraformer::slope_angle{0.0f},
+				.final_elevation = terraformer::elevation{3072.0f},
+				.final_slope = terraformer::slope_angle{0.0f}
 			}
 		},
 		terraformer::ridge_tree_branch_elevation_profile{
-			.starting_slope = terraformer::slope_angle{0.0f},
-			.final_elevation = terraformer::elevation{256.0f},
-			.final_slope = terraformer::slope_angle{0.0f},
-			.starting_peak_displacement = terraformer::vertical_amplitude{512.0f},
-			.final_peak_displacement = terraformer::vertical_amplitude{43.0f},
-			.min_peak_angle = terraformer::slope_angle{0.0f},
-			.max_peak_angle = terraformer::slope_angle{0.0f},
-			.noise = terraformer::ridge_tree_elevation_noise{
-				.amplitude = terraformer::vertical_amplitude{16.0f},
-				.wavelength = terraformer::domain_length{256.0f},
-				.damping = std::sqrt(0.5f)
+			.ridge{
+				.starting_slope = terraformer::slope_angle{0.0f},
+				.final_elevation = terraformer::elevation{256.0f},
+				.final_slope = terraformer::slope_angle{0.0f}
 			}
 		},
 		terraformer::ridge_tree_branch_elevation_profile{
-			.starting_slope = terraformer::slope_angle{0.0f},
-			.final_elevation = terraformer::elevation{128.0f},
-			.final_slope = terraformer::slope_angle{0.0f},
-			.starting_peak_displacement = terraformer::vertical_amplitude{64.0f},
-			.final_peak_displacement = terraformer::vertical_amplitude{16.0f},
-			.min_peak_angle = terraformer::slope_angle{0.0f},
-			.max_peak_angle = terraformer::slope_angle{0.0f},
-			.noise = terraformer::ridge_tree_elevation_noise{
-				.amplitude = terraformer::vertical_amplitude{16.0f},
-				.wavelength = terraformer::domain_length{256.0f},
-				.damping = std::sqrt(0.5f)
+			.ridge{
+				.starting_slope = terraformer::slope_angle{0.0f},
+				.final_elevation = terraformer::elevation{128.0f},
+				.final_slope = terraformer::slope_angle{0.0f}
 			}
 		},
 		terraformer::ridge_tree_branch_elevation_profile{
-			.starting_slope = terraformer::slope_angle{0.0f},
-			.final_elevation = terraformer::elevation{64.0f},
-			.final_slope = terraformer::slope_angle{0.0f},
-			.starting_peak_displacement = terraformer::vertical_amplitude{16.0f},
-			.final_peak_displacement = terraformer::vertical_amplitude{8.0f},
-			.min_peak_angle = terraformer::slope_angle{0.0f},
-			.max_peak_angle = terraformer::slope_angle{0.0f},
-			.noise = terraformer::ridge_tree_elevation_noise{
-				.amplitude = terraformer::vertical_amplitude{16.0f},
-				.wavelength = terraformer::domain_length{256.0f},
-				.damping = std::sqrt(0.5f)
+			.ridge{
+				.starting_slope = terraformer::slope_angle{0.0f},
+				.final_elevation = terraformer::elevation{64.0f},
+				.final_slope = terraformer::slope_angle{0.0f},
 			}
 		}
 	};
@@ -198,7 +170,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 			.curve_levels = std::vector{
 				terraformer::ridge_tree_branch_render_description{
 					.peak_elevation = 3500.0f,
-					.peak_radius = 3500.0f,
+					.peak_radius = 3500.0f
 				},
 				terraformer::ridge_tree_branch_render_description{
 					.peak_elevation = 2000.0f,

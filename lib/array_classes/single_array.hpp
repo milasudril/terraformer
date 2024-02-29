@@ -143,6 +143,18 @@ namespace terraformer
 		operator span<T const>() const noexcept
 		{ return span<T const, index_type, size_type>{begin(), end()}; }
 
+		auto& front() noexcept
+		{ return *begin(); }
+
+		auto const& front() const noexcept
+		{ return *begin(); }
+
+		auto& back() noexcept
+		{ return *(end() - 1); }
+
+		auto const& back() const noexcept
+		{ return *(end() - 1);}
+
 	private:
 		memory_block m_storage{};
 		size_type m_size{};
