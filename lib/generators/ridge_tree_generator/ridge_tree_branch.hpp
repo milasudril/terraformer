@@ -61,6 +61,12 @@ namespace terraformer
 		>::multi_array;
 	};
 
+	struct ridge_tree_branch_elevation_data:
+		multi_array<single_array<float>, polynomial<3>>
+	{
+		using multi_array<single_array<float>, polynomial<3>>::multi_array;
+	};
+
 	struct ridge_tree_trunk
 	{
 		static constexpr auto no_parent = array_index<ridge_tree_trunk>{static_cast<size_t>(-1)};
@@ -71,6 +77,8 @@ namespace terraformer
 		array_index<ridge_tree_trunk> parent;
 		array_index<displaced_curve> parent_curve_index;
 		enum side side;
+
+		ridge_tree_branch_elevation_data elevation_data;
 	};
 
 	displacement compute_field(span<displaced_curve const> branches, location r, float min_distance);
