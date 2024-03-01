@@ -142,8 +142,7 @@ terraformer::ridge_tree::ridge_tree(
 void terraformer::ridge_tree::update_elevations(
 	elevation initial_elevation,
 	std::span<ridge_tree_branch_elevation_profile const> elevation_profiles,
-	random_generator,
-	float
+	random_generator rng
 )
 {
 	span<ridge_tree_trunk> branches{m_value};
@@ -155,17 +154,24 @@ void terraformer::ridge_tree::update_elevations(
 		{ return; }
 
 		auto const my_curves = current_trunk.branches.get<0>();
+		auto const branches_at = std::as_const(current_trunk.branches).get<2>();
 		auto const parent = current_trunk.parent;
 		if(parent == ridge_tree_trunk::no_parent)
 		{
-			for(auto& curve : my_curves)
+			for(auto k = current_trunk.branches.first_element_index();
+				k != std::size(current_trunk.branches);
+				++k
+			)
 			{
 				auto const elevation_profile = generate_elevation_profile(
-					std::as_const(curve).points(),
+					std::as_const(my_curves[k]).points(),
 					initial_elevation,
-					elevation_profiles[level].ridge
+					elevation_profiles[level].ridge,
+					branches_at[k],
+					elevation_profiles[level].peaks,
+					rng
 				);
-				replace_z_inplace(curve.points(), elevation_profile);
+				replace_z_inplace(my_curves[k].points(), elevation_profile);
 			}
 			continue;
 		}
@@ -185,7 +191,10 @@ void terraformer::ridge_tree::update_elevations(
 			auto const elevation_profile = generate_elevation_profile(
 				std::as_const(my_curves[k]).points(),
 				z_0,
-				elevation_profiles[level].ridge
+				elevation_profiles[level].ridge,
+				branches_at[k],
+				elevation_profiles[level].peaks,
+				rng
 			);
 			replace_z_inplace(my_curves[k].points(), elevation_profile);
 		}

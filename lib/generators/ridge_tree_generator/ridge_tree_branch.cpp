@@ -10,12 +10,10 @@
 terraformer::single_array<float> terraformer::generate_elevation_profile(
 	span<location const> branch_curve,
 	float initial_elevation,
-	ridge_elevation_profile_description const& ridge_elevation_profile
-#if 0
-	span<array_index<location> const> branch_points,
-	peak_elevation_description const& peak_elvation_profile,
+	ridge_elevation_profile_description const& ridge_elevation_profile,
+	span<displaced_curve::index_type const> branch_points,
+	peak_elevation_description const& peak_elevation_profile,
 	random_generator& rng
-#endif
 )
 {
 	auto const running_length = curve_running_length_xy(branch_curve);
@@ -41,11 +39,38 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	for(auto k = ret.first_element_index(); k != std::size(ret); ++k)
 	{	ret[k] = p_ridge(running_length[k]/L);	}
 
-#if 0
-	auto const p_ridge_deriv = p_ridge.derivative();
-	auto const ridge_elevation_deriv = p_ridge_deriv(l/L)/L;
-#endif
+	auto start_elevation = 0.0f;
+	auto const mod_depth = peak_elevation_profile.mod_depth;
+	array_index<float> start_index{branch_curve.first_element_index().get()};
+	std::uniform_real_distribution peak_elevation_distribution{0.0f, 1.0f};
+	for(auto k = branch_points.first_element_index();
+		k != std::size(branch_points);
+		++k
+	)
+	{
+		array_index<float> const end_index{branch_points[k].get()};
+		auto const dl = running_length[end_index] - running_length[start_index];
+		auto const end_elevation = peak_elevation_distribution(rng);
+		auto const p_peak = make_polynomial(
+			cubic_spline_control_point{
+				.y = start_elevation,
+				.ddx = 0.0  // TODO
+			},
+			cubic_spline_control_point{
+				.y = end_elevation,
+				.ddx = 0.0f  // TODO
+			}
+		);
 
+		for(auto l = start_index; l != end_index; ++l)
+		{
+			auto const x = running_length[l] - running_length[start_index];
+			ret[l] = ret[l]*(1.0f + mod_depth*p_peak(x/dl));
+		}
+
+		start_elevation = end_elevation;
+		start_index = end_index;
+	}
 	return ret;
 }
 

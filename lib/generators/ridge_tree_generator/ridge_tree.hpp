@@ -37,8 +37,8 @@ namespace terraformer
 
 	struct ridge_tree_branch_elevation_profile
 	{
-		// envelope
 		ridge_elevation_profile_description ridge;
+		peak_elevation_description peaks;
 	};
 
 	class ridge_tree
@@ -69,9 +69,8 @@ namespace terraformer
 
 		void update_elevations(
 			elevation initial_elevation,
-			std::span<ridge_tree_branch_elevation_profile const>,
-			random_generator,
-			float pixel_size
+			std::span<ridge_tree_branch_elevation_profile const> elevation_profiles,
+			random_generator rng
 		);
 
 	private:

@@ -26,20 +26,18 @@ namespace terraformer
 
 	struct peak_elevation_description
 	{
-		modulation_depth peak_modulation_depth;
-		slope_angle min_peak_angle;
-		slope_angle max_peak_angle;
+		modulation_depth mod_depth;
+	// TODO	slope_angle min_peak_angle;
+	// TODO	slope_angle max_peak_angle;
 	};
 
 	single_array<float> generate_elevation_profile(
 		span<location const> branch_curve,
 		float initial_elevation,
-		ridge_elevation_profile_description const& ridge_elevation_profile
-#if 0
-		span<array_index<location> const> branch_points,
-		peak_elevation_description const& peak_elvation_profile,
+		ridge_elevation_profile_description const& ridge_elevation_profile,
+		span<displaced_curve::index_type const> branch_points,
+		peak_elevation_description const& peak_elevation_profile,
 		random_generator& rng
-#endif
 	);
 
 	struct ridge_tree_branch_sequence :

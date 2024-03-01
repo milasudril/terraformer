@@ -130,20 +130,31 @@ TESTCASE(terraformer_ridge_tree_generate)
 				.starting_slope = terraformer::slope_angle{0.0f},
 				.final_elevation = terraformer::elevation{3072.0f},
 				.final_slope = terraformer::slope_angle{0.0f}
+			},
+			.peaks{
+				.mod_depth = terraformer::modulation_depth{1.0f/6.0f}
 			}
-		},
+		}
+		,
 		terraformer::ridge_tree_branch_elevation_profile{
 			.ridge{
 				.starting_slope = terraformer::slope_angle{0.0f},
 				.final_elevation = terraformer::elevation{256.0f},
 				.final_slope = terraformer::slope_angle{0.0f}
+			},
+			.peaks{
+				.mod_depth = terraformer::modulation_depth{1.0f/6.0f}
 			}
-		},
+		}
+		,
 		terraformer::ridge_tree_branch_elevation_profile{
 			.ridge{
 				.starting_slope = terraformer::slope_angle{0.0f},
 				.final_elevation = terraformer::elevation{128.0f},
 				.final_slope = terraformer::slope_angle{0.0f}
+			},
+			.peaks{
+				.mod_depth = terraformer::modulation_depth{1.0f/6.0f}
 			}
 		},
 		terraformer::ridge_tree_branch_elevation_profile{
@@ -151,15 +162,17 @@ TESTCASE(terraformer_ridge_tree_generate)
 				.starting_slope = terraformer::slope_angle{0.0f},
 				.final_elevation = terraformer::elevation{64.0f},
 				.final_slope = terraformer::slope_angle{0.0f},
+			},
+			.peaks{
+				.mod_depth = terraformer::modulation_depth{1.0f/6.0f}
 			}
 		}
 	};
 
 	res.update_elevations(
- 		terraformer::elevation{2048.0f},
+ 		terraformer::elevation{3072.0f},
 		elevation_profiles,
-		rng,
-		pixel_size
+		rng
 	);
 
 	terraformer::grayscale_image img{1024, 1024};
