@@ -24,6 +24,12 @@ namespace terraformer
 		slope_angle final_slope;
 	};
 
+	polynomial<3> create_polynomial(
+		float curve_length,
+		elevation z_0,
+		ridge_elevation_profile_description const& elevation_profile
+	);
+
 	single_array<float> generate_elevation_profile(
 		span<float const, array_index<float>, array_size<float>> integrated_curve_length,
 		polynomial<3> const& ridge_polynomial

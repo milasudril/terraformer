@@ -6,6 +6,25 @@
 
 #include <random>
 
+terraformer::polynomial<3> terraformer::create_polynomial(
+	float curve_length,
+	elevation z_0,
+	ridge_elevation_profile_description const& elevation_profile
+)
+{
+	constexpr auto two_pi = std::numbers::pi_v<float>;
+	return make_polynomial(
+		cubic_spline_control_point{
+			.y = z_0,
+			.ddx = curve_length*std::tan(two_pi*elevation_profile.starting_slope)
+		},
+		cubic_spline_control_point{
+			.y = elevation_profile.final_elevation,
+			.ddx = curve_length*std::tan(two_pi*elevation_profile.final_slope)
+		}
+	);
+}
+
 terraformer::single_array<float> terraformer::generate_elevation_profile(
 	span<float const, array_index<float>, array_size<float>> integrated_curve_length,
 	polynomial<3> const& ridge_polynomial
