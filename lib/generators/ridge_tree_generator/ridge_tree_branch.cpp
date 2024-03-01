@@ -6,6 +6,22 @@
 
 #include <random>
 
+terraformer::single_array<float> terraformer::generate_elevation_profile(
+	span<float const, array_index<float>, array_size<float>> integrated_curve_length,
+	polynomial<3> const& ridge_polynomial
+)
+{
+	if(integrated_curve_length.empty())
+	{ return terraformer::single_array<float>{}; }
+
+	auto const L = integrated_curve_length.back();
+
+	single_array ret{std::size(integrated_curve_length)};
+	for(auto k = ret.first_element_index(); k != std::size(ret); ++k)
+	{ ret[k] = ridge_polynomial(integrated_curve_length[k]/L); }
+
+	return ret;
+}
 
 terraformer::single_array<float> terraformer::generate_elevation_profile(
 	span<location const> branch_curve,

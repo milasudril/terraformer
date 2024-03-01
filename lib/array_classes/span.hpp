@@ -57,6 +57,9 @@ namespace terraformer
 		constexpr auto& front() const
 		{ return *m_begin; }
 
+		constexpr auto& back() const
+		{ return *(m_end - 1); }
+
 	private:
 		T* m_begin = nullptr;
 		T* m_end = nullptr;

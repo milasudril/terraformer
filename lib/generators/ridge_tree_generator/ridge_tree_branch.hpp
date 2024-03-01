@@ -24,6 +24,11 @@ namespace terraformer
 		slope_angle final_slope;
 	};
 
+	single_array<float> generate_elevation_profile(
+		span<float const, array_index<float>, array_size<float>> integrated_curve_length,
+		polynomial<3> const& ridge_polynomial
+	);
+
 	struct peak_elevation_description
 	{
 		modulation_depth mod_depth;
