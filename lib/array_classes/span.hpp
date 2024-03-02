@@ -5,7 +5,7 @@
 
 namespace terraformer
 {
-	template<class T, class IndexType = array_index<T>, class SizeType = array_size<T>>
+	template<class T, class IndexType = array_index<std::remove_const_t<T>>, class SizeType = array_size<std::remove_const_t<T>>>
 	class span
 	{
 	public:

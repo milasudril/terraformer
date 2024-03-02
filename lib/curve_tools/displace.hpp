@@ -71,7 +71,7 @@ namespace terraformer
 	{
 		for(auto k = c.first_element_index() ; k != std::size(c); ++k)
 		{
-			array_index<float const> src_index{k.get()};
+			array_index<float> src_index{k.get()};
 			c[k][2] = z_vals[src_index];
 		}
 	}

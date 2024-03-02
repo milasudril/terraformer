@@ -88,7 +88,8 @@ namespace terraformer
 		direction start_dir,
 		span<ridge_tree_trunk const> trunks,
 		float pixel_size,
-		BranchStopCondition&& stop)
+		BranchStopCondition&& stop
+	)
 	{
 		single_array<location> base_curve;
 		if(stop(loc))
