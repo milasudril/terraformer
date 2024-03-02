@@ -186,16 +186,21 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 		array_size<float> const base_curve_length{static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1};
 		auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
+		auto displaced_curve = displace_xy(
+			base_curve,
+			displacement_profile{
+				.offsets = offsets,
+				.sample_period = pixel_size,
+			}
+		);
+
+		auto integrated_curve_length = curve_running_length_xy(std::as_const(displaced_curve).points());
+
 		gen_branches.push_back(
-			displace_xy(
-				base_curve,
-				displacement_profile{
-					.offsets = offsets,
-					.sample_period = pixel_size,
-				}
-			),
+			std::move(displaced_curve),
 			vertex_index[k],
-			single_array<displaced_curve::index_type>{}
+			single_array<displaced_curve::index_type>{},
+			std::move(integrated_curve_length)
 		);
 	}
 

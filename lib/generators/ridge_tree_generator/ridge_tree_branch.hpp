@@ -52,20 +52,17 @@ namespace terraformer
 	);
 
 	struct ridge_tree_branch_sequence :
-		multi_array<displaced_curve, displaced_curve::index_type, single_array<displaced_curve::index_type>>
+		multi_array<displaced_curve, displaced_curve::index_type, single_array<displaced_curve::index_type>, single_array<float>>
 	{
 		using multi_array<
 			displaced_curve,
 			displaced_curve::index_type,
-			single_array<displaced_curve::index_type>
+			single_array<displaced_curve::index_type>,
+			single_array<float>
 		>::multi_array;
 	};
 
-	struct ridge_tree_branch_elevation_data:
-		multi_array<single_array<float>, polynomial<3>>
-	{
-		using multi_array<single_array<float>, polynomial<3>>::multi_array;
-	};
+	using ridge_tree_branch_elevation_data = single_array<polynomial<3>>;
 
 	struct ridge_tree_trunk
 	{

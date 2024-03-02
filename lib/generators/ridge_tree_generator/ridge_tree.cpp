@@ -46,19 +46,23 @@ terraformer::ridge_tree::ridge_tree(
 
 	auto const trunk_base_curve = terraformer::make_point_array
 		(description.root_location, description.trunk_direction, trunk_pixel_count, pixel_size);
-
 	{
+		auto curve = displace_xy(
+			trunk_base_curve,
+			terraformer::displacement_profile{
+				.offsets = trunk_offsets,
+				.sample_period = pixel_size
+			}
+		);
+
+		auto integrated_curve_length = curve_running_length_xy(std::as_const(curve).points());
+
 		ridge_tree_branch_sequence root;
 		root.push_back(
-			displace_xy(
-				trunk_base_curve,
-				terraformer::displacement_profile{
-					.offsets = trunk_offsets,
-					.sample_period = pixel_size
-				}
-			),
+			std::move(curve),
 			displaced_curve::index_type{},
-			single_array<displaced_curve::index_type>{}
+			single_array<displaced_curve::index_type>{},
+			std::move(integrated_curve_length)
 		);
 
 		ret.push_back(
