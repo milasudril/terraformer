@@ -43,11 +43,10 @@ namespace terraformer
 	};
 
 	single_array<float> generate_elevation_profile(
-		span<location const> branch_curve,
-		float initial_elevation,
-		ridge_elevation_profile_description const& ridge_elevation_profile,
+		span<float const> integrated_curve_length,
 		span<displaced_curve::index_type const> branch_points,
-		peak_elevation_description const& peak_elevation_profile,
+		polynomial<3> const& initial_curve,
+		peak_elevation_description const& elevation_profile,
 		random_generator& rng
 	);
 

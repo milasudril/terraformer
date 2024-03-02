@@ -149,19 +149,20 @@ terraformer::ridge_tree::ridge_tree(
 void terraformer::ridge_tree::update_elevations(
 	elevation initial_elevation,
 	std::span<ridge_tree_branch_elevation_profile const> elevation_profiles,
-	random_generator /*rng*/
+	random_generator rng
 )
 {
 	span<ridge_tree_trunk> branches{m_value};
 	for(auto& current_trunk : branches)
 	{
+		current_trunk.elevation_data.clear();
 		auto const level = current_trunk.level;
 
 		if(level >= std::size(elevation_profiles))
 		{ return; }
 
 		auto const my_curves = current_trunk.branches.get<0>();
-		auto const& curve_lengths = std::as_const(current_trunk.branches).get<3>();
+		auto const curve_lengths = std::as_const(current_trunk.branches).get<3>();
 		auto const parent = current_trunk.parent;
 		if(parent == ridge_tree_trunk::no_parent)
 		{
@@ -199,19 +200,46 @@ void terraformer::ridge_tree::update_elevations(
 		{
 			auto const point_on_parent = parent_curve[start_index[k]];
 			elevation const z_0{point_on_parent[2]};
-			auto const polynomial = create_polynomial(
+			auto const elev_function = create_polynomial(
 				curve_lengths[k].back(),
 				z_0,
 				elevation_profiles[level].ridge
 			);
 
-			auto const elevation_profile = generate_elevation_profile(curve_lengths[k], polynomial);
+			auto const elevation_profile = generate_elevation_profile(curve_lengths[k], elev_function);
 			replace_z_inplace(my_curves[k].points(), elevation_profile);
-			current_trunk.elevation_data.push_back(polynomial);
+			current_trunk.elevation_data.push_back(elev_function);
 		}
 	}
 
-//	auto const& branches_at = std::as_const(current_trunk.branches).get<2>();
+	for(auto& current_trunk : branches)
+	{
+		auto const level = current_trunk.level;
+		if(level >= std::size(elevation_profiles))
+		{ return; }
+
+
+		auto const my_curves = current_trunk.branches.get<0>();
+		auto const branches_at = std::as_const(current_trunk.branches).get<2>();
+		auto const curve_lengths = std::as_const(current_trunk.branches).get<3>();
+
+		for(auto k = current_trunk.branches.first_element_index();
+			k != std::size(current_trunk.branches);
+			++k
+		)
+		{
+			auto const elevation_profile = generate_elevation_profile(
+				curve_lengths[k],
+				branches_at[k],
+				current_trunk.elevation_data[array_index<polynomial<3>>{k.get()}],
+				elevation_profiles[level].peaks,
+				rng
+			);
+
+			replace_z_inplace(my_curves[k].points(), elevation_profile);
+		}
+	}
+
 }
 
 void terraformer::render(
