@@ -68,23 +68,39 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 		array_index<float> const end_index{branch_points[k].get()};
 		auto const dl = integrated_curve_length[end_index] - integrated_curve_length[begin_index];
 		auto const end_elevation = peak_elevation_distribution(rng);
-		auto const p_peak = make_polynomial(
+		auto const col_elvation = -peak_elevation_distribution(rng);
+		auto const p_peak_begin = make_polynomial(
 			cubic_spline_control_point{
 				.y = begin_elevation,
 				.ddx = 0.0  // TODO
 			},
 			cubic_spline_control_point{
-				.y = end_elevation,
-				.ddx = 0.0f  // TODO
+				.y = col_elvation,
+				.ddx = 0.0f
 			}
 		);
+
+		auto const p_peak_end = make_polynomial(
+			cubic_spline_control_point{
+				.y = col_elvation,
+				.ddx = 0.0f
+			},
+			cubic_spline_control_point{
+				.y = end_elevation,
+				.ddx = 0.0f // TODO
+			}
+		);
+
+		auto const mod_func = [p_peak_begin, p_peak_end](auto x) {
+			return x < 0.5f? p_peak_begin(2.0f*x) : p_peak_end(2.0f*(x - 0.5f));
+		};
 
 		auto const mod_depth = elevation_profile.mod_depth;
 		for(auto l = begin_index; l != end_index; ++l)
 		{
 			auto const t = integrated_curve_length[l];
 			auto const x = t - integrated_curve_length[begin_index];
-			ret[l] = initial_curve(t/L)*(1.0f + mod_depth*p_peak(x/dl));
+			ret[l] = initial_curve(t/L)*(1.0f + mod_depth*mod_func(x/dl));
 		}
 
 		begin_elevation = end_elevation;
