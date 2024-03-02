@@ -17,17 +17,24 @@
 
 namespace terraformer
 {
+	struct slope_range
+	{
+		slope_angle min;
+		slope_angle max;
+	};
+
 	struct ridge_elevation_profile_description
 	{
-		slope_angle starting_slope;
+		slope_range starting_slope;
 		elevation final_elevation;
-		slope_angle final_slope;
+		slope_range final_slope;
 	};
 
 	polynomial<3> create_polynomial(
 		float curve_length,
 		elevation z_0,
-		ridge_elevation_profile_description const& elevation_profile
+		ridge_elevation_profile_description const& elevation_profile,
+		random_generator& rng
 	);
 
 	single_array<float> generate_elevation_profile(

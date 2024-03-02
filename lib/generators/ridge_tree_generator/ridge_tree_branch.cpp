@@ -9,18 +9,29 @@
 terraformer::polynomial<3> terraformer::create_polynomial(
 	float curve_length,
 	elevation z_0,
-	ridge_elevation_profile_description const& elevation_profile
+	ridge_elevation_profile_description const& elevation_profile,
+	random_generator& rng
 )
 {
+	std::uniform_real_distribution starting_slope_distribution{
+		static_cast<float>(elevation_profile.starting_slope.min),
+		static_cast<float>(elevation_profile.starting_slope.max)
+	};
+
+	std::uniform_real_distribution final_slope_distribution{
+		static_cast<float>(elevation_profile.final_slope.min),
+		static_cast<float>(elevation_profile.final_slope.max)
+	};
+
 	constexpr auto two_pi = std::numbers::pi_v<float>;
 	return make_polynomial(
 		cubic_spline_control_point{
 			.y = z_0,
-			.ddx = curve_length*std::tan(two_pi*elevation_profile.starting_slope)
+			.ddx = -curve_length*std::tan(two_pi*starting_slope_distribution(rng))
 		},
 		cubic_spline_control_point{
 			.y = elevation_profile.final_elevation,
-			.ddx = curve_length*std::tan(two_pi*elevation_profile.final_slope)
+			.ddx = -curve_length*std::tan(two_pi*final_slope_distribution(rng))
 		}
 	);
 }
