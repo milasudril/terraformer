@@ -15,19 +15,29 @@
 #include "lib/curve_tools/length.hpp"
 #include "lib/curve_tools/displace.hpp"
 
+#include <random>
+
 namespace terraformer
 {
-	struct slope_range
+	struct slope_angle_range
 	{
 		slope_angle min;
 		slope_angle max;
 	};
 
+	inline auto pick(slope_angle_range range, random_generator& rng)
+	{
+		std::uniform_real_distribution slope_distribution{0.0f, 1.0f};
+		auto const delta = range.max - range.min;
+		auto const t = slope_distribution(rng);
+		return range.min + t*delta;
+	}
+
 	struct ridge_elevation_profile_description
 	{
-		slope_range starting_slope;
+		slope_angle_range starting_slope;
 		elevation final_elevation;
-		slope_range final_slope;
+		slope_angle_range final_slope;
 	};
 
 	polynomial<3> create_polynomial(
@@ -45,8 +55,7 @@ namespace terraformer
 	struct peak_elevation_description
 	{
 		modulation_depth mod_depth;
-	// TODO	slope_angle min_peak_angle;
-	// TODO	slope_angle max_peak_angle;
+		slope_angle_range slope;
 	};
 
 	single_array<float> generate_elevation_profile(

@@ -241,7 +241,6 @@ void terraformer::ridge_tree::update_elevations(
 			replace_z_inplace(my_curves[k].points(), elevation_profile);
 		}
 	}
-
 }
 
 void terraformer::render(

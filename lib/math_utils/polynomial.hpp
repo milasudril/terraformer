@@ -38,6 +38,9 @@ namespace terraformer
 			{ return polynomial<0>{}; }
 		}
 
+		constexpr auto derivative(float x) const
+		{ return derivative()(x); }
+
 		constexpr bool operator==(polynomial const& other) const = default;
 
 		constexpr bool operator!=(polynomial const& other) const = default;
