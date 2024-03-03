@@ -13,25 +13,24 @@ terraformer::polynomial<3> terraformer::create_polynomial(
 	random_generator& rng
 )
 {
-	std::uniform_real_distribution starting_slope_distribution{
-		static_cast<float>(elevation_profile.starting_slope.min),
-		static_cast<float>(elevation_profile.starting_slope.max)
-	};
+	std::uniform_real_distribution slope_distribution{0.0f, 1.0f};
+	auto const t_begin = slope_distribution(rng);
+	auto const begin_range = elevation_profile.starting_slope.max
+		- elevation_profile.starting_slope.min;
 
-	std::uniform_real_distribution final_slope_distribution{
-		static_cast<float>(elevation_profile.final_slope.min),
-		static_cast<float>(elevation_profile.final_slope.max)
-	};
+	auto const t_end = slope_distribution(rng);
+	auto const end_range = elevation_profile.final_slope.max
+		- elevation_profile.final_slope.min;
 
 	constexpr auto two_pi = std::numbers::pi_v<float>;
 	return make_polynomial(
 		cubic_spline_control_point{
 			.y = z_0,
-			.ddx = -curve_length*std::tan(two_pi*starting_slope_distribution(rng))
+			.ddx = -curve_length*std::tan(two_pi*(elevation_profile.starting_slope.min + t_begin*begin_range))
 		},
 		cubic_spline_control_point{
 			.y = elevation_profile.final_elevation,
-			.ddx = -curve_length*std::tan(two_pi*final_slope_distribution(rng))
+			.ddx = -curve_length*std::tan(two_pi*(elevation_profile.final_slope.min + t_end*end_range))
 		}
 	);
 }
@@ -83,7 +82,7 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 		auto const p_peak_begin = make_polynomial(
 			cubic_spline_control_point{
 				.y = begin_elevation,
-				.ddx = 0.0  // TODO
+				.ddx = 0.0f  // TODO
 			},
 			cubic_spline_control_point{
 				.y = col_elvation,

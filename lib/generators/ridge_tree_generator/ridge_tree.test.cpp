@@ -129,12 +129,12 @@ TESTCASE(terraformer_ridge_tree_generate)
 			.ridge{
 				.starting_slope{
 					.min = terraformer::slope_angle{0.0f},
-					.max = terraformer::slope_angle{1.0f/1024.0f}
+					.max = terraformer::slope_angle{0.0f}
 				},
 				.final_elevation = terraformer::elevation{3072.0f},
 				.final_slope{
 					.min = terraformer::slope_angle{0.0f},
-					.max = terraformer::slope_angle{1.0f/1024.0f}
+					.max = terraformer::slope_angle{0.0f}
 				}
 			},
 			.peaks{
