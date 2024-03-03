@@ -7,7 +7,7 @@
 terraformer::polynomial<3> terraformer::create_polynomial(
 	float curve_length,
 	elevation z_0,
-	ridge_elevation_profile_description const& elevation_profile,
+	ridge_tree_ridge_elevation_profile_description const& elevation_profile,
 	random_generator& rng
 )
 {
@@ -67,7 +67,7 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	span<float const> integrated_curve_length,
 	span<displaced_curve::index_type const> branch_points,
 	polynomial<3> const& initial_elevation,
-	peak_elevation_description const& elevation_profile,
+	ridge_tree_peak_elevation_description const& elevation_profile,
 	random_generator& rng
 )
 {

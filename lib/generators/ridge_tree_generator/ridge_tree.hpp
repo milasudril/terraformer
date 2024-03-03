@@ -37,8 +37,8 @@ namespace terraformer
 
 	struct ridge_tree_branch_elevation_profile
 	{
-		ridge_elevation_profile_description ridge;
-		peak_elevation_description peaks;
+		ridge_tree_ridge_elevation_profile_description ridge;
+		ridge_tree_peak_elevation_description peaks;
 	};
 
 	class ridge_tree

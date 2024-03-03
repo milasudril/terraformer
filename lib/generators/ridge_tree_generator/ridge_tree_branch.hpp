@@ -19,13 +19,13 @@
 
 namespace terraformer
 {
-	struct slope_angle_range
+	struct ridge_tree_slope_angle_range
 	{
 		slope_angle min;
 		slope_angle max;
 	};
 
-	inline auto pick(slope_angle_range range, random_generator& rng)
+	inline auto pick(ridge_tree_slope_angle_range range, random_generator& rng)
 	{
 		std::uniform_real_distribution slope_distribution{0.0f, 1.0f};
 		auto const delta = range.max - range.min;
@@ -33,17 +33,17 @@ namespace terraformer
 		return range.min + t*delta;
 	}
 
-	struct ridge_elevation_profile_description
+	struct ridge_tree_ridge_elevation_profile_description
 	{
-		slope_angle_range starting_slope;
+		ridge_tree_slope_angle_range starting_slope;
 		elevation final_elevation;
-		slope_angle_range final_slope;
+		ridge_tree_slope_angle_range final_slope;
 	};
 
 	polynomial<3> create_polynomial(
 		float curve_length,
 		elevation z_0,
-		ridge_elevation_profile_description const& elevation_profile,
+		ridge_tree_ridge_elevation_profile_description const& elevation_profile,
 		random_generator& rng
 	);
 
@@ -52,17 +52,17 @@ namespace terraformer
 		polynomial<3> const& ridge_polynomial
 	);
 
-	struct peak_elevation_description
+	struct ridge_tree_peak_elevation_description
 	{
 		modulation_depth mod_depth;
-		slope_angle_range slope;
+		ridge_tree_slope_angle_range slope;
 	};
 
 	single_array<float> generate_elevation_profile(
 		span<float const> integrated_curve_length,
 		span<displaced_curve::index_type const> branch_points,
 		polynomial<3> const& initial_curve,
-		peak_elevation_description const& elevation_profile,
+		ridge_tree_peak_elevation_description const& elevation_profile,
 		random_generator& rng
 	);
 
