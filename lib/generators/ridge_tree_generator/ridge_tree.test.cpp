@@ -11,7 +11,7 @@
 TESTCASE(terraformer_ridge_tree_generate)
 {
 	terraformer::random_generator const rng;
-	terraformer::ridge_tree_description const desc{
+	terraformer::ridge_tree_xy_description const desc{
 		.root_location = terraformer::location{0.0f, 24576.0f, 0.0f},
 		.trunk_direction = terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}},
 		.curve_levels = std::vector{

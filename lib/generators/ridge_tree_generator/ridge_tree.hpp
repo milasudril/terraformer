@@ -21,7 +21,7 @@ namespace terraformer
 		ridge_tree_branch_growth_description growth_params;
 	};
 
-	struct ridge_tree_description
+	struct ridge_tree_xy_description
 	{
 		location root_location;
 		direction trunk_direction;
@@ -44,7 +44,7 @@ namespace terraformer
 	class ridge_tree
 	{
 	public:
-	  explicit ridge_tree(ridge_tree_description const& description, random_generator rng, float pixel_size);
+	  explicit ridge_tree(ridge_tree_xy_description const& description, random_generator rng, float pixel_size);
 
 		operator std::span<ridge_tree_trunk const>() const
 		{ return m_value; }
@@ -78,7 +78,7 @@ namespace terraformer
 	};
 
 	inline ridge_tree generate(
-		ridge_tree_description const& description,
+		ridge_tree_xy_description const& description,
 		random_generator rng,
 		float pixel_size
 	)

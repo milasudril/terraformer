@@ -25,7 +25,7 @@ namespace terraformer
 }
 
 terraformer::ridge_tree::ridge_tree(
-	ridge_tree_description const& description,
+	ridge_tree_xy_description const& description,
 	random_generator rng,
 	float pixel_size
 )
