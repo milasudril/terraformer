@@ -130,7 +130,7 @@ namespace terraformer
 		ridge_tree_branch_seed_sequence const& branch_points,
 		span<ridge_tree_trunk const> trunks,
 		float pixel_size,
-		ridge_tree_branch_displacement_description curve_desc,
+		ridge_tree_branch_displacement_description const& curve_desc,
 		random_generator& rng,
 		float d_max,
 		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{});
@@ -159,7 +159,7 @@ namespace terraformer
 		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
 		span<ridge_tree_trunk const> trunks,
 		float pixel_size,
-		ridge_tree_branch_displacement_description curve_desc,
+		ridge_tree_branch_displacement_description const &curve_desc,
 		random_generator& rng,
 		ridge_tree_branch_growth_description growth_params
 	);
