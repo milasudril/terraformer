@@ -159,7 +159,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 				}
 			},
 			.peaks{
-				.mod_depth = terraformer::modulation_depth{1.0f/5.0f},
+				.mod_depth = terraformer::modulation_depth{3.0f/10.0f},
 				.slope{
 					.min = terraformer::slope_angle{1.0f/24.0f},
 					.max = terraformer::slope_angle{1.0f/8.0f}
@@ -171,16 +171,16 @@ TESTCASE(terraformer_ridge_tree_generate)
 			.ridge{
 				.starting_slope{
 					.min = terraformer::slope_angle{0.0f},
-					.max = terraformer::slope_angle{1.0f/12.0f}
+					.max = terraformer::slope_angle{1.0f/48.0f}
 				},
-				.final_elevation = terraformer::elevation{256.0f},
+				.final_elevation = terraformer::elevation{341.0f},
 				.final_slope{
 					.min = terraformer::slope_angle{0.0f},
 					.max = terraformer::slope_angle{1.0f/24.0f}
 				}
 			},
 			.peaks{
-				.mod_depth = terraformer::modulation_depth{2.0f/25.0f},
+				.mod_depth = terraformer::modulation_depth{2.0f/15.0f},
 				.slope{
 					.min = terraformer::slope_angle{1.0f/24.0f},
 					.max = terraformer::slope_angle{1.0f/8.0f}
@@ -191,16 +191,16 @@ TESTCASE(terraformer_ridge_tree_generate)
 			.ridge{
 				.starting_slope{
 					.min = terraformer::slope_angle{0.0f},
-					.max = terraformer::slope_angle{1.0f/24.0f}
+					.max = terraformer::slope_angle{1.0f/12.0f}
 				},
-				.final_elevation = terraformer::elevation{160.0f},
+				.final_elevation = terraformer::elevation{204.0f},
 				.final_slope{
 					.min = terraformer::slope_angle{0.0f},
 					.max = terraformer::slope_angle{0.0f}
 				}
 			},
 			.peaks{
-				.mod_depth = terraformer::modulation_depth{2.0f/40.0f},
+				.mod_depth = terraformer::modulation_depth{2.0f/25.0f},
 				.slope{
 					.min = terraformer::slope_angle{1.0f/24.0f},
 					.max = terraformer::slope_angle{1.0f/8.0f}
