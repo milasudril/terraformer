@@ -174,7 +174,7 @@ void terraformer::ridge_tree::update_elevations(
 				auto const polynomial = create_polynomial(
 					curve_lengths[k].back(),
 					initial_elevation,
-					elevation_profiles[level].ridge,
+					elevation_profiles[level].base_elevation,
 					rng
 				);
 
@@ -204,7 +204,7 @@ void terraformer::ridge_tree::update_elevations(
 			auto const elev_function = create_polynomial(
 				curve_lengths[k].back(),
 				z_0,
-				elevation_profiles[level].ridge,
+				elevation_profiles[level].base_elevation,
 				rng
 			);
 
@@ -234,7 +234,7 @@ void terraformer::ridge_tree::update_elevations(
 				curve_lengths[k],
 				branches_at[k],
 				current_trunk.elevation_data[array_index<polynomial<3>>{k.get()}],
-				elevation_profiles[level].peaks,
+				elevation_profiles[level].modulation,
 				rng
 			);
 
