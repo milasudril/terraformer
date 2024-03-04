@@ -28,13 +28,6 @@ namespace terraformer
 		std::vector<ridge_tree_branch_description> curve_levels;
 	};
 
-	struct ridge_tree_elevation_noise
-	{
-		vertical_amplitude amplitude;
-		domain_length wavelength;
-		float damping;  // TODO: Should be within ]0, 1[
-	};
-
 	struct ridge_tree_branch_elevation_profile
 	{
 		ridge_tree_ridge_elevation_profile_description ridge;

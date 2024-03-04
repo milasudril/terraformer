@@ -66,6 +66,13 @@ namespace terraformer
 		random_generator& rng
 	);
 
+	struct ridge_tree_elevation_noise
+	{
+		vertical_amplitude amplitude;
+		domain_length wavelength;
+		float damping;  // TODO: Should be within ]0, 1[
+	};
+
 	struct ridge_tree_branch_sequence :
 		multi_array<displaced_curve, displaced_curve::index_type, single_array<displaced_curve::index_type>, single_array<float>>
 	{
