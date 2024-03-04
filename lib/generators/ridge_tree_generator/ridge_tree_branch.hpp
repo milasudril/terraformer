@@ -52,26 +52,42 @@ namespace terraformer
 		polynomial<3> const& ridge_polynomial
 	);
 
+	struct ridge_tree_elevation_noise
+	{
+		modulation_depth strength;
+		domain_length wavelength;
+		float damping;  // TODO: Should be within ]0, 1[
+	};
+
 	struct ridge_tree_peak_elevation_description
 	{
 		modulation_depth mod_depth;
 		ridge_tree_slope_angle_range slope;
 	};
 
+	struct ridge_tree_elevation_modulation_description
+	{
+		ridge_tree_peak_elevation_description per_peak_modulation;
+		ridge_tree_elevation_noise elevation_noise;
+	};
+
 	single_array<float> generate_elevation_profile(
 		span<float const> integrated_curve_length,
 		span<displaced_curve::index_type const> branch_points,
-		polynomial<3> const& initial_curve,
+		polynomial<3> const& initial_elevation,
 		ridge_tree_peak_elevation_description const& elevation_profile,
 		random_generator& rng
 	);
 
-	struct ridge_tree_elevation_noise
-	{
-		vertical_amplitude amplitude;
-		domain_length wavelength;
-		float damping;  // TODO: Should be within ]0, 1[
-	};
+	single_array<float> generate_elevation_profile(
+		span<float const> integrated_curve_length,
+		span<displaced_curve::index_type const> branch_points,
+		polynomial<3> const& initial_elevation,
+		ridge_tree_elevation_modulation_description const& elevation_profile,
+		random_generator& rng
+	);
+
+
 
 	struct ridge_tree_branch_sequence :
 		multi_array<displaced_curve, displaced_curve::index_type, single_array<displaced_curve::index_type>, single_array<float>>

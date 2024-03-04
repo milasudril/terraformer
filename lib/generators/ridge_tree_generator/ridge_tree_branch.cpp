@@ -184,6 +184,126 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	return ret;
 }
 
+terraformer::single_array<float> terraformer::generate_elevation_profile(
+	span<float const> integrated_curve_length,
+	span<displaced_curve::index_type const> branch_points,
+	polynomial<3> const& initial_elevation,
+	ridge_tree_elevation_modulation_description const& elevation_profile,
+	random_generator& rng
+)
+{
+		// TODO: first element should probably use the post-modulated value from the parent as begin_elevation
+
+	if(integrated_curve_length.empty())
+	{ return terraformer::single_array<float>{}; }
+
+	constexpr auto two_pi = 2.0f*std::numbers::pi_v<float>;
+	auto const L = integrated_curve_length.back();
+	auto const mod_depth = elevation_profile.per_peak_modulation.mod_depth;
+
+	single_array ret{std::size(integrated_curve_length)};
+	auto begin_elevation = 0.0f;
+	auto begin_index = integrated_curve_length.first_element_index();
+	std::uniform_real_distribution peak_elevation_distribution{0.0f, 1.0f};
+	for(auto k = branch_points.first_element_index();
+		k != std::size(branch_points);
+		++k
+	)
+	{
+		array_index<float> const end_index{branch_points[k].get()};
+		auto const dl = integrated_curve_length[end_index] - integrated_curve_length[begin_index];
+		auto const end_elevation = peak_elevation_distribution(rng);
+		auto const col_elvation = -peak_elevation_distribution(rng);
+
+		auto const begin_ddx = wrap_derivative(
+			std::tan(two_pi*pick(elevation_profile.per_peak_modulation.slope, rng)),
+			begin_elevation,
+			initial_elevation,
+			integrated_curve_length[begin_index],
+			L,
+			mod_depth
+		);
+
+		auto const end_ddx = wrap_derivative(
+			std::tan(two_pi*pick(elevation_profile.per_peak_modulation.slope, rng)),
+			begin_elevation,
+			initial_elevation,
+			integrated_curve_length[begin_index],
+			L,
+			mod_depth
+		);
+
+		auto const p_peak_begin = make_polynomial(
+			cubic_spline_control_point{
+				.y = begin_elevation,
+				.ddx = -0.5f*dl*begin_ddx  // Divide by two to compensate for spline being compressed
+			},
+			cubic_spline_control_point{
+				.y = col_elvation,
+				.ddx = 0.0f
+			}
+		);
+
+		auto const p_peak_end = make_polynomial(
+			cubic_spline_control_point{
+				.y = col_elvation,
+				.ddx = 0.0f
+			},
+			cubic_spline_control_point{
+				.y = end_elevation,
+				.ddx = 0.5f*dl*end_ddx  // Divide by two to compensate for spline being compressed
+			}
+		);
+
+		auto const mod_func = [p_peak_begin, p_peak_end, col_elvation](auto x) {
+			return std::max(x < 0.5f? p_peak_begin(2.0f*x) : p_peak_end(2.0f*(x - 0.5f)), col_elvation);
+		};
+
+		for(auto l = begin_index; l != end_index; ++l)
+		{
+			auto const t = integrated_curve_length[l];
+			auto const x = t - integrated_curve_length[begin_index];
+			ret[l] = std::max(initial_elevation(t/L), 0.0f)*(1.0f + mod_depth*mod_func(x/dl));
+		}
+
+		begin_elevation = end_elevation;
+		begin_index = end_index;
+	}
+
+	auto const dl = L - integrated_curve_length[begin_index];
+
+	auto const begin_ddx = wrap_derivative(
+		std::tan(two_pi*pick(elevation_profile.per_peak_modulation.slope, rng)),
+		begin_elevation,
+		initial_elevation,
+		integrated_curve_length[begin_index],
+		L,
+		mod_depth
+	);
+
+	auto const col_elvation = -peak_elevation_distribution(rng);
+
+	auto const p_peak_final = make_polynomial(
+		cubic_spline_control_point{
+			.y = begin_elevation,
+			.ddx = -dl*begin_ddx  // Divide by two to compensate for spline being compressed
+		},
+		cubic_spline_control_point{
+			.y = col_elvation,
+			.ddx = 0.0f
+		}
+	);
+
+	for(auto l = begin_index; l != std::size(integrated_curve_length); ++l)
+	{
+		auto const t = integrated_curve_length[l];
+		auto const x = t - integrated_curve_length[begin_index];
+		ret[l] = std::max(initial_elevation(t/L), 0.0f)*(1.0f + mod_depth*p_peak_final(x/dl));
+	}
+
+	return ret;
+}
+
 terraformer::displacement terraformer::compute_field(span<displaced_curve const> branches, location r, float min_distance)
 {
 	displacement ret{};
