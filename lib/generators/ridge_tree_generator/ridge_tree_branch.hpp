@@ -75,14 +75,6 @@ namespace terraformer
 		span<float const> integrated_curve_length,
 		span<displaced_curve::index_type const> branch_points,
 		polynomial<3> const& initial_elevation,
-		ridge_tree_peak_elevation_description const& elevation_profile,
-		random_generator& rng
-	);
-
-	single_array<float> generate_elevation_profile(
-		span<float const> integrated_curve_length,
-		span<displaced_curve::index_type const> branch_points,
-		polynomial<3> const& initial_elevation,
 		ridge_tree_elevation_modulation_description const& elevation_profile,
 		random_generator& rng
 	);
