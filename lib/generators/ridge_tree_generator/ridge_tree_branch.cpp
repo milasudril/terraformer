@@ -78,7 +78,9 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 
 	constexpr auto two_pi = 2.0f*std::numbers::pi_v<float>;
 	auto const L = integrated_curve_length.back();
-	auto const mod_depth = elevation_profile.per_peak_modulation.mod_depth;
+	auto const mod_depth = elevation_profile.mod_depth;
+	auto const peak_noise_mix = elevation_profile.peak_noise_mix;
+	auto const peak_gain = (1.0f - peak_noise_mix)*mod_depth;
 
 	single_array ret{std::size(integrated_curve_length)};
 	auto begin_elevation = 0.0f;
@@ -100,7 +102,7 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 			initial_elevation,
 			integrated_curve_length[begin_index],
 			L,
-			mod_depth
+			peak_gain
 		);
 
 		auto const end_ddx = wrap_derivative(
@@ -109,7 +111,7 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 			initial_elevation,
 			integrated_curve_length[begin_index],
 			L,
-			mod_depth
+			peak_gain
 		);
 
 		auto const p_peak_begin = make_polynomial(
@@ -142,7 +144,8 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 		{
 			auto const t = integrated_curve_length[l];
 			auto const x = t - integrated_curve_length[begin_index];
-			ret[l] = std::max(initial_elevation(t/L), 0.0f)*(1.0f + mod_depth*mod_func(x/dl));
+			ret[l] = std::max(initial_elevation(t/L), 0.0f)
+				*(1.0f + mod_depth*std::lerp(mod_func(x/dl), 1.0f, peak_noise_mix));
 		}
 
 		begin_elevation = end_elevation;
@@ -157,7 +160,7 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 		initial_elevation,
 		integrated_curve_length[begin_index],
 		L,
-		mod_depth
+		peak_gain
 	);
 
 	auto const col_elvation = -peak_elevation_distribution(rng);
@@ -177,7 +180,8 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	{
 		auto const t = integrated_curve_length[l];
 		auto const x = t - integrated_curve_length[begin_index];
-		ret[l] = std::max(initial_elevation(t/L), 0.0f)*(1.0f + mod_depth*p_peak_final(x/dl));
+		ret[l] = std::max(initial_elevation(t/L), 0.0f)
+			*(1.0f + mod_depth*std::lerp(p_peak_final(x/dl), 1.0f, peak_noise_mix));
 	}
 
 	return ret;

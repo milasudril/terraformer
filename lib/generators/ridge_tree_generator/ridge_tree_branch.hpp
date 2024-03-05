@@ -54,19 +54,19 @@ namespace terraformer
 
 	struct ridge_tree_elevation_noise
 	{
-		modulation_depth strength;
 		domain_length wavelength;
 		float damping;  // TODO: Should be within ]0, 1[
 	};
 
 	struct ridge_tree_peak_elevation_description
 	{
-		modulation_depth mod_depth;
 		ridge_tree_slope_angle_range slope;
 	};
 
 	struct ridge_tree_elevation_modulation_description
 	{
+		modulation_depth mod_depth;
+		blend_value peak_noise_mix;
 		ridge_tree_peak_elevation_description per_peak_modulation;
 		ridge_tree_elevation_noise elevation_noise;
 	};

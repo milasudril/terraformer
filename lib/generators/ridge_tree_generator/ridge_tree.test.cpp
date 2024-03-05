@@ -138,8 +138,9 @@ TESTCASE(terraformer_ridge_tree_generate)
 				}
 			},
 			.modulation{
+				.mod_depth = terraformer::modulation_depth{2.0f/5.0f},
+				.peak_noise_mix = terraformer::blend_value{0.0f},
 				.per_peak_modulation{
-					.mod_depth = terraformer::modulation_depth{2.0f/5.0f},
 					.slope{
 						.min = terraformer::slope_angle{1.0f/24.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
@@ -162,8 +163,9 @@ TESTCASE(terraformer_ridge_tree_generate)
 				}
 			},
 			.modulation{
+				.mod_depth = terraformer::modulation_depth{1.0f/5.0f},
+				.peak_noise_mix = terraformer::blend_value{0.0f},
 				.per_peak_modulation{
-					.mod_depth = terraformer::modulation_depth{1.0f/5.0f},
 					.slope{
 						.min = terraformer::slope_angle{1.0f/24.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
@@ -186,8 +188,9 @@ TESTCASE(terraformer_ridge_tree_generate)
 				}
 			},
 			.modulation{
+				.mod_depth = terraformer::modulation_depth{2.0f/15.0f},
+				.peak_noise_mix = terraformer::blend_value{0.0f},
 				.per_peak_modulation{
-					.mod_depth = terraformer::modulation_depth{2.0f/15.0f},
 					.slope{
 						.min = terraformer::slope_angle{1.0f/24.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
@@ -209,8 +212,9 @@ TESTCASE(terraformer_ridge_tree_generate)
 				}
 			},
 			.modulation{
+				.mod_depth = terraformer::modulation_depth{2.0f/25.0f},
+				.peak_noise_mix = terraformer::blend_value{0.0f},
 				.per_peak_modulation{
-					.mod_depth = terraformer::modulation_depth{2.0f/25.0f},
 					.slope{
 						.min = terraformer::slope_angle{1.0f/24.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
