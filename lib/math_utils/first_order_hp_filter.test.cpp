@@ -14,14 +14,13 @@ TESTCASE(terraformer_first_order_hp_filter_step_response)
 			.initial_value = 0.0f,
 			.initial_input = 0.0f
 		},
-		1.0f/1024.0f
 	};
 
-	auto const init = f(1.0f);
+	auto const init = f(1.0f, 1.0f/1024.0f);
 	auto val = init;
 	for(size_t k = 0; k != 1024; ++k)
 	{
-		auto const val_next = f(1.0f);
+		auto const val_next = f(1.0f, 1.0f/1024.0f);
 		EXPECT_LT(val_next, val);
 		val = val_next;
 	}

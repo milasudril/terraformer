@@ -13,20 +13,18 @@ namespace terraformer
 	class first_order_hp_filter
 	{
 	public:
- 		constexpr explicit first_order_hp_filter(first_order_hp_filter_description const& params, float dt):
-			m_dt{dt},
+ 		constexpr explicit first_order_hp_filter(first_order_hp_filter_description const& params):
 			m_y{params.initial_value},
 			m_x{params.initial_input},
 			m_cutoff_freq{params.cutoff_freq}
 		{}
 
-		constexpr float operator()(float x)
+		constexpr float operator()(float x, float dt)
 		{
 			// ẏ + ωy = ẋ
 			// ẏ = -ωy + ẋ
 			// y[n] = y[n - 1] + c(-ωy[n] + 2ẋ - ωy[n - 1])/2
 
-			auto const dt = m_dt;
 			auto const ω = m_cutoff_freq;
 			auto const y_prev = m_y;
 			auto const x_prev = m_x;
@@ -38,7 +36,6 @@ namespace terraformer
 		}
 
 	private:
-		float m_dt;
 		float m_y;
 		float m_x;
 		float m_cutoff_freq;

@@ -23,13 +23,17 @@ terraformer::single_array<float> terraformer::generate(
 	std::uniform_real_distribution U{-1.0f, 1.0f};
 
 	composite_function f{
-		first_order_hp_filter{
-			first_order_hp_filter_description{
-				.cutoff_freq = twopi/src.wavelength,
-				.initial_value = 0.0f,
-				.initial_input = 0.f
+		[
+			filter = first_order_hp_filter{
+				first_order_hp_filter_description{
+					.cutoff_freq = twopi/src.wavelength,
+					.initial_value = 0.0f,
+					.initial_input = 0.f
+				}
 			},
 			dx
+		](float x) mutable {
+			return filter(x, dx);
 		},
 		second_order_lp_filter{
 			second_order_lp_filter_description{
