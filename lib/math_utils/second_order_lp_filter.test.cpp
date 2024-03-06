@@ -13,14 +13,13 @@ TESTCASE(terraformer_second_order_lp_filter_resonant_step_response)
 			.initial_value = 0.0f,
 			.initial_derivative = 0.0f,
 			.initial_input = 0.0f
-		},
-		1.0f/16.0f
+		}
 	};
 
 	std::array<float, 256> vals{};
 	for(size_t k = 0; k != 256; ++k)
 	{
-		vals[k] = f(1.0f);
+		vals[k] = f(1.0f, 1.0f/16.0f);
 	}
 
 	EXPECT_GT(vals[8], vals[7]);

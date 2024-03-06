@@ -35,15 +35,19 @@ terraformer::single_array<float> terraformer::generate(
 		](float x) mutable {
 			return filter(x, dx);
 		},
-		second_order_lp_filter{
-			second_order_lp_filter_description{
-				.damping = src.damping,
-				.cutoff_freq = twopi/src.wavelength,
-				.initial_value = 0.0f,
-				.initial_derivative = 0.0f,
-				.initial_input = 0.0f
+		[
+			filter = second_order_lp_filter{
+				second_order_lp_filter_description{
+					.damping = src.damping,
+					.cutoff_freq = twopi/src.wavelength,
+					.initial_value = 0.0f,
+					.initial_derivative = 0.0f,
+					.initial_input = 0.0f
+				}
 			},
 			dx
+		](float x) mutable{
+			return filter(x, dx);
 		}
 	};
 
