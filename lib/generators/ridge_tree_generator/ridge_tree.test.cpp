@@ -139,14 +139,17 @@ TESTCASE(terraformer_ridge_tree_generate)
 			},
 			.modulation{
 				.mod_depth = terraformer::modulation_depth{2.0f/5.0f},
-				.peak_noise_mix = terraformer::blend_value{1.0f/8.0f},
+				.peak_noise_mix = terraformer::blend_value{1.0f/6.0f},
 				.per_peak_modulation{
 					.slope{
 						.min = terraformer::slope_angle{1.0f/24.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
 					}
 				},
-				.elevation_noise{}
+				.elevation_noise{
+					.wavelength = terraformer::domain_length{2064.0f},
+					.damping = std::sqrt(0.5f)
+				}
 			}
 		}
 		,
@@ -164,14 +167,17 @@ TESTCASE(terraformer_ridge_tree_generate)
 			},
 			.modulation{
 				.mod_depth = terraformer::modulation_depth{1.0f/5.0f},
-				.peak_noise_mix = terraformer::blend_value{1.0f/8.0f},
+				.peak_noise_mix = terraformer::blend_value{1.0f/6.0f},
 				.per_peak_modulation{
 					.slope{
 						.min = terraformer::slope_angle{1.0f/24.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
 					}
 				},
-				.elevation_noise{}
+				.elevation_noise{
+					.wavelength = terraformer::domain_length{688.0f},
+					.damping = std::sqrt(0.5f)
+				}
 			}
 		}
 		,
@@ -181,7 +187,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 					.min = terraformer::slope_angle{0.0f},
 					.max = terraformer::slope_angle{1.0f/48.0f}
 				},
-				.final_elevation = terraformer::elevation{341.0f},
+				.final_elevation = terraformer::elevation{229.0f},
 				.final_slope{
 					.min = terraformer::slope_angle{0.0f},
 					.max = terraformer::slope_angle{1.0f/24.0f}
@@ -189,14 +195,17 @@ TESTCASE(terraformer_ridge_tree_generate)
 			},
 			.modulation{
 				.mod_depth = terraformer::modulation_depth{2.0f/15.0f},
-				.peak_noise_mix = terraformer::blend_value{1.0f/8.0f},
+				.peak_noise_mix = terraformer::blend_value{1.0f/6.0f},
 				.per_peak_modulation{
 					.slope{
 						.min = terraformer::slope_angle{1.0f/24.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
 					}
 				},
-				.elevation_noise{}
+				.elevation_noise{
+					.wavelength = terraformer::domain_length{229.0f},
+					.damping = std::sqrt(0.5f)
+				}
 			}
 		},
 		terraformer::ridge_tree_branch_elevation_profile{
@@ -213,14 +222,17 @@ TESTCASE(terraformer_ridge_tree_generate)
 			},
 			.modulation{
 				.mod_depth = terraformer::modulation_depth{2.0f/25.0f},
-				.peak_noise_mix = terraformer::blend_value{1.0f/8.0f},
+				.peak_noise_mix = terraformer::blend_value{1.0f/6.0f},
 				.per_peak_modulation{
 					.slope{
 						.min = terraformer::slope_angle{1.0f/24.0f},
 						.max = terraformer::slope_angle{1.0f/25.0f}
 					}
 				},
-				.elevation_noise{}
+				.elevation_noise{
+					.wavelength = terraformer::domain_length{76.0f},
+					.damping = std::sqrt(0.5f)
+				}
 			}
 		}
 	};

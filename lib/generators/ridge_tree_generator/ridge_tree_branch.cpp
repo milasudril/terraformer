@@ -3,6 +3,8 @@
 #include "./ridge_tree_branch.hpp"
 
 #include "lib/curve_tools/length.hpp"
+#include "lib/math_utils/first_order_hp_filter.hpp"
+#include "lib/math_utils/second_order_lp_filter.hpp"
 
 terraformer::polynomial<3> terraformer::create_polynomial(
 	float curve_length,
@@ -85,7 +87,26 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	single_array noise_array{std::size(integrated_curve_length)};
 	{
 		std::uniform_real_distribution U{-1.0f, 1.0f};
-		auto const noise_gen = [](float x, float){ return x; };
+		auto noise_gen = [
+			hp = first_order_hp_filter{
+				first_order_hp_filter_description{
+					.cutoff_freq = two_pi/elevation_profile.elevation_noise.wavelength,
+					.initial_value = 0.0f,
+					.initial_input = 0.0f
+				}
+			},
+			lp = second_order_lp_filter{
+				second_order_lp_filter_description{
+					.damping = elevation_profile.elevation_noise.damping,
+					.cutoff_freq = two_pi/elevation_profile.elevation_noise.wavelength,
+					.initial_value = 0.0f,
+					.initial_derivative = 0.0f,
+					.initial_input = 0.0f
+				}
+			}
+		](float x, float dt) mutable {
+			return lp(hp(x, dt), dt);
+		};
 		noise_array.front() = 0.0f;
 		auto min_val = 2.0f;
 		auto max_val = - min_val;
