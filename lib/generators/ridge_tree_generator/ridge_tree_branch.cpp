@@ -85,11 +85,7 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	single_array ret{std::size(integrated_curve_length)};
 	auto begin_elevation = 0.0f;
 	auto begin_index = integrated_curve_length.first_element_index();
-	auto t_prev = 0.0f;
 	std::uniform_real_distribution peak_elevation_distribution{0.0f, 1.0f};
-
-	auto const noise_gen = [](float){ return 0.0f; };
-
 	for(auto k = branch_points.first_element_index();
 		k != std::size(branch_points);
 		++k
@@ -148,12 +144,8 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 		{
 			auto const t = integrated_curve_length[l];
 			auto const x = t - integrated_curve_length[begin_index];
-			auto const dt = t - t_prev;
-
-			auto const noise = dt != 0.0f? noise_gen(dt) : 0.0f;
 			ret[l] = std::max(initial_elevation(t/L), 0.0f)
-				*(1.0f + mod_depth*std::lerp(mod_func(x/dl), noise, peak_noise_mix));
-			t_prev = t;
+				*(1.0f + mod_depth*std::lerp(mod_func(x/dl), 1.0f, peak_noise_mix));
 		}
 
 		begin_elevation = end_elevation;
@@ -188,11 +180,8 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	{
 		auto const t = integrated_curve_length[l];
 		auto const x = t - integrated_curve_length[begin_index];
-		auto const dt = t - t_prev;
-
-		auto const noise = dt != 0.0f? noise_gen(dt) : 0.0f;
 		ret[l] = std::max(initial_elevation(t/L), 0.0f)
-			*(1.0f + mod_depth*std::lerp(p_peak_final(x/dl), noise, peak_noise_mix));
+			*(1.0f + mod_depth*std::lerp(p_peak_final(x/dl), 1.0f, peak_noise_mix));
 	}
 
 	return ret;
