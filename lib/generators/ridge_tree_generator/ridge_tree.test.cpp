@@ -250,20 +250,48 @@ TESTCASE(terraformer_ridge_tree_generate)
 		terraformer::ridge_tree_render_description{
 			.curve_levels = std::vector{
 				terraformer::ridge_tree_branch_render_description{
-					.peak_elevation = 3500.0f,
-					.peak_radius = 3500.0f
+					.half_peak_angle{
+						.min = terraformer::slope_angle{5.0f/48.0f},
+						.max = terraformer::slope_angle{1.0f/6.0f}
+					},
+					.foot_angle{
+						.min = terraformer::slope_angle{0.0f},
+						.max = terraformer::slope_angle{1.0f/8.0f}
+					},
+					.peak_radius = 1.0f
 				},
 				terraformer::ridge_tree_branch_render_description{
-					.peak_elevation = 2000.0f,
-					.peak_radius = 2000.0f,
+					.half_peak_angle{
+						.min = terraformer::slope_angle{5.0f/48.0f},
+						.max = terraformer::slope_angle{1.0f/6.0f}
+					},
+					.foot_angle{
+						.min = terraformer::slope_angle{0.0f},
+						.max = terraformer::slope_angle{1.0f/8.0f}
+					},
+					.peak_radius = 1.0f,
 				},
 				terraformer::ridge_tree_branch_render_description{
-					.peak_elevation = 1000.0f,
-					.peak_radius = 1000.0f,
+					.half_peak_angle{
+						.min = terraformer::slope_angle{5.0f/48.0f},
+						.max = terraformer::slope_angle{1.0f/6.0f}
+					},
+					.foot_angle{
+						.min = terraformer::slope_angle{0.0f},
+						.max = terraformer::slope_angle{1.0f/8.0f}
+					},
+					.peak_radius = 1.0f,
 				},
 				terraformer::ridge_tree_branch_render_description{
-					.peak_elevation = 1000.0f,
-					.peak_radius = 300.0f,
+					.half_peak_angle{
+						.min = terraformer::slope_angle{5.0f/48.0f},
+						.max = terraformer::slope_angle{1.0f/6.0f}
+					},
+					.foot_angle{
+						.min = terraformer::slope_angle{0.0f},
+						.max = terraformer::slope_angle{1.0f/8.0f}
+					},
+					.peak_radius = 1.0f,
 				},
 			}
 		},

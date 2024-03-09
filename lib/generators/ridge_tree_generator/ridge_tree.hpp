@@ -79,7 +79,8 @@ namespace terraformer
 
 	struct ridge_tree_branch_render_description
 	{
-		float peak_elevation;
+		ridge_tree_slope_angle_range half_peak_angle;
+		ridge_tree_slope_angle_range foot_angle;
 		float peak_radius;
 	};
 
