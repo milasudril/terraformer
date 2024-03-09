@@ -82,19 +82,101 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	auto const peak_noise_mix = elevation_profile.peak_noise_mix;
 	auto const peak_gain = (1.0f - peak_noise_mix)*mod_depth;
 
-	single_array ret{std::size(integrated_curve_length)};
-	auto begin_elevation = 0.0f;
-	auto begin_index = integrated_curve_length.first_element_index();
-	std::uniform_real_distribution peak_elevation_distribution{0.0f, 1.0f};
-	for(auto k = branch_points.first_element_index();
-		k != std::size(branch_points);
-		++k
-	)
+	single_array noise_array{std::size(integrated_curve_length)};
 	{
-		array_index<float> const end_index{branch_points[k].get()};
-		auto const dl = integrated_curve_length[end_index] - integrated_curve_length[begin_index];
-		auto const end_elevation = peak_elevation_distribution(rng);
-		auto const col_elvation = -peak_elevation_distribution(rng);
+		std::uniform_real_distribution U{-1.0f, 1.0f};
+		auto const noise_gen = [](float x, float){ return x; };
+		noise_array.front() = 0.0f;
+		auto min_val = 2.0f;
+		auto max_val = - min_val;
+		for(auto k = noise_array.first_element_index() + 1; k != std::size(noise_array); ++k)
+		{
+			auto const dt = integrated_curve_length[k] - integrated_curve_length[k - 1];
+			auto const val = noise_gen(U(rng), dt);
+			min_val = std::min(min_val, val);
+			max_val = std::max(max_val, val);
+			noise_array[k] = val;
+		}
+
+		auto const offset_in = 0.5f*(max_val + min_val);
+		auto const amp_in = 0.5f*(max_val - min_val);
+
+		for(auto k = noise_array.first_element_index(); k != std::size(noise_array); ++k)
+		{ noise_array[k] = (noise_array[k] - offset_in)/amp_in; }
+	}
+
+	single_array ret{std::size(integrated_curve_length)};
+	{
+		auto begin_elevation = 0.0f;
+		auto begin_index = integrated_curve_length.first_element_index();
+		std::uniform_real_distribution peak_elevation_distribution{0.0f, 1.0f};
+		for(auto k = branch_points.first_element_index();
+			k != std::size(branch_points);
+			++k
+		)
+		{
+			array_index<float> const end_index{branch_points[k].get()};
+			auto const dl = integrated_curve_length[end_index] - integrated_curve_length[begin_index];
+			auto const end_elevation = peak_elevation_distribution(rng);
+			auto const col_elvation = -peak_elevation_distribution(rng);
+
+			auto const begin_ddx = wrap_derivative(
+				std::tan(two_pi*pick(elevation_profile.per_peak_modulation.slope, rng)),
+				begin_elevation,
+				initial_elevation,
+				integrated_curve_length[begin_index],
+				L,
+				peak_gain
+			);
+
+			auto const end_ddx = wrap_derivative(
+				std::tan(two_pi*pick(elevation_profile.per_peak_modulation.slope, rng)),
+				begin_elevation,
+				initial_elevation,
+				integrated_curve_length[begin_index],
+				L,
+				peak_gain
+			);
+
+			auto const p_peak_begin = make_polynomial(
+				cubic_spline_control_point{
+					.y = begin_elevation,
+					.ddx = -0.5f*dl*begin_ddx  // Divide by two to compensate for spline being compressed
+				},
+				cubic_spline_control_point{
+					.y = col_elvation,
+					.ddx = 0.0f
+				}
+			);
+
+			auto const p_peak_end = make_polynomial(
+				cubic_spline_control_point{
+					.y = col_elvation,
+					.ddx = 0.0f
+				},
+				cubic_spline_control_point{
+					.y = end_elevation,
+					.ddx = 0.5f*dl*end_ddx  // Divide by two to compensate for spline being compressed
+				}
+			);
+
+			auto const mod_func = [p_peak_begin, p_peak_end, col_elvation](auto x) {
+				return std::max(x < 0.5f? p_peak_begin(2.0f*x) : p_peak_end(2.0f*(x - 0.5f)), col_elvation);
+			};
+
+			for(auto l = begin_index; l != end_index; ++l)
+			{
+				auto const t = integrated_curve_length[l];
+				auto const x = t - integrated_curve_length[begin_index];
+				ret[l] = std::max(initial_elevation(t/L), 0.0f)
+					*(1.0f + mod_depth*std::lerp(mod_func(x/dl), noise_array[l], peak_noise_mix));
+			}
+
+			begin_elevation = end_elevation;
+			begin_index = end_index;
+		}
+
+		auto const dl = L - integrated_curve_length[begin_index];
 
 		auto const begin_ddx = wrap_derivative(
 			std::tan(two_pi*pick(elevation_profile.per_peak_modulation.slope, rng)),
@@ -105,19 +187,12 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 			peak_gain
 		);
 
-		auto const end_ddx = wrap_derivative(
-			std::tan(two_pi*pick(elevation_profile.per_peak_modulation.slope, rng)),
-			begin_elevation,
-			initial_elevation,
-			integrated_curve_length[begin_index],
-			L,
-			peak_gain
-		);
+		auto const col_elvation = -peak_elevation_distribution(rng);
 
-		auto const p_peak_begin = make_polynomial(
+		auto const p_peak_final = make_polynomial(
 			cubic_spline_control_point{
 				.y = begin_elevation,
-				.ddx = -0.5f*dl*begin_ddx  // Divide by two to compensate for spline being compressed
+				.ddx = -dl*begin_ddx  // Divide by two to compensate for spline being compressed
 			},
 			cubic_spline_control_point{
 				.y = col_elvation,
@@ -125,65 +200,14 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 			}
 		);
 
-		auto const p_peak_end = make_polynomial(
-			cubic_spline_control_point{
-				.y = col_elvation,
-				.ddx = 0.0f
-			},
-			cubic_spline_control_point{
-				.y = end_elevation,
-				.ddx = 0.5f*dl*end_ddx  // Divide by two to compensate for spline being compressed
-			}
-		);
-
-		auto const mod_func = [p_peak_begin, p_peak_end, col_elvation](auto x) {
-			return std::max(x < 0.5f? p_peak_begin(2.0f*x) : p_peak_end(2.0f*(x - 0.5f)), col_elvation);
-		};
-
-		for(auto l = begin_index; l != end_index; ++l)
+		for(auto l = begin_index; l != std::size(integrated_curve_length); ++l)
 		{
 			auto const t = integrated_curve_length[l];
 			auto const x = t - integrated_curve_length[begin_index];
 			ret[l] = std::max(initial_elevation(t/L), 0.0f)
-				*(1.0f + mod_depth*std::lerp(mod_func(x/dl), 1.0f, peak_noise_mix));
+				*(1.0f + mod_depth*std::lerp(p_peak_final(x/dl), noise_array[l], peak_noise_mix));
 		}
-
-		begin_elevation = end_elevation;
-		begin_index = end_index;
 	}
-
-	auto const dl = L - integrated_curve_length[begin_index];
-
-	auto const begin_ddx = wrap_derivative(
-		std::tan(two_pi*pick(elevation_profile.per_peak_modulation.slope, rng)),
-		begin_elevation,
-		initial_elevation,
-		integrated_curve_length[begin_index],
-		L,
-		peak_gain
-	);
-
-	auto const col_elvation = -peak_elevation_distribution(rng);
-
-	auto const p_peak_final = make_polynomial(
-		cubic_spline_control_point{
-			.y = begin_elevation,
-			.ddx = -dl*begin_ddx  // Divide by two to compensate for spline being compressed
-		},
-		cubic_spline_control_point{
-			.y = col_elvation,
-			.ddx = 0.0f
-		}
-	);
-
-	for(auto l = begin_index; l != std::size(integrated_curve_length); ++l)
-	{
-		auto const t = integrated_curve_length[l];
-		auto const x = t - integrated_curve_length[begin_index];
-		ret[l] = std::max(initial_elevation(t/L), 0.0f)
-			*(1.0f + mod_depth*std::lerp(p_peak_final(x/dl), 1.0f, peak_noise_mix));
-	}
-
 	return ret;
 }
 
