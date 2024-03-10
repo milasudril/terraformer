@@ -256,7 +256,8 @@ void terraformer::render(
 		if(level >= std::size(params.curve_levels))
 		{	continue; }
 
-		auto const peak_diameter = 2.0f*params.curve_levels[level].peak_radius/pixel_size;
+		auto const peak_radius = params.curve_levels[level].peak_radius;
+		auto const peak_diameter = 2.0f*peak_radius/pixel_size;
 
 		for(auto const& branch: branch_collection.branches.get<0>())
 		{
@@ -273,11 +274,11 @@ void terraformer::render(
 						p = make_polynomial(
 							cubic_spline_control_point{
 								.y = 1.0f,
-								.ddx = -1.0f
+								.ddx = -1.0f/peak_radius
 							},
 							cubic_spline_control_point{
 								.y = 0.0f,
-								.ddx = 0.0f
+								.ddx = 0.0f/peak_radius
 							}
 						)
 					](float xi, float eta) {
