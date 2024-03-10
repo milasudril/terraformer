@@ -256,7 +256,7 @@ void terraformer::render(
 		if(level >= std::size(params.curve_levels))
 		{	continue; }
 
-		auto const peak_radius = params.curve_levels[level].peak_radius;
+		auto const peak_radius = params.curve_levels[level].peak_radius.min;
 		auto const peak_diameter = 2.0f*peak_radius/pixel_size;
 
 		for(auto const& branch: branch_collection.branches.get<0>())

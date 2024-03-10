@@ -258,7 +258,10 @@ TESTCASE(terraformer_ridge_tree_generate)
 						.min = terraformer::slope_angle{0.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
 					},
-					.peak_radius = 1.0f
+					.peak_radius{
+						.min = 1.0f,
+						.max = 1.0f
+					}
 				},
 				terraformer::ridge_tree_branch_render_description{
 					.half_peak_angle{
@@ -269,7 +272,10 @@ TESTCASE(terraformer_ridge_tree_generate)
 						.min = terraformer::slope_angle{0.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
 					},
-					.peak_radius = 1.0f,
+					.peak_radius{
+						.min = 1.0f,
+						.max = 1.0f
+					}
 				},
 				terraformer::ridge_tree_branch_render_description{
 					.half_peak_angle{
@@ -280,7 +286,10 @@ TESTCASE(terraformer_ridge_tree_generate)
 						.min = terraformer::slope_angle{0.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
 					},
-					.peak_radius = 1.0f,
+					.peak_radius{
+						.min = 1.0f,
+						.max = 1.0f
+					}
 				},
 				terraformer::ridge_tree_branch_render_description{
 					.half_peak_angle{
@@ -291,8 +300,11 @@ TESTCASE(terraformer_ridge_tree_generate)
 						.min = terraformer::slope_angle{0.0f},
 						.max = terraformer::slope_angle{1.0f/8.0f}
 					},
-					.peak_radius = 1.0f,
-				},
+					.peak_radius{
+						.min = 1.0f,
+						.max = 1.0f
+					}
+				}
 			}
 		},
 		pixel_size

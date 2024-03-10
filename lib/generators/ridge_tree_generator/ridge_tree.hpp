@@ -77,11 +77,17 @@ namespace terraformer
 	)
 	{ return ridge_tree{description, rng, pixel_size}; }
 
+	struct ridge_tree_peak_radius_range
+	{
+		float min;
+		float max;
+	};
+
 	struct ridge_tree_branch_render_description
 	{
 		ridge_tree_slope_angle_range half_peak_angle;
 		ridge_tree_slope_angle_range foot_angle;
-		float peak_radius;
+		ridge_tree_peak_radius_range peak_radius;
 	};
 
 	struct ridge_tree_render_description
