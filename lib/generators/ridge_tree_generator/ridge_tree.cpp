@@ -269,8 +269,20 @@ void terraformer::render(
 						return std::max(old_val, new_val*strength);
 					},
 					.scale = pixel_size,
-					.brush = [](float xi, float eta) {
-						return std::max(1.0f - std::sqrt(xi*xi + eta*eta), 0.0f);
+					.brush = [
+						p = make_polynomial(
+							cubic_spline_control_point{
+								.y = 1.0f,
+								.ddx = -1.0f
+							},
+							cubic_spline_control_point{
+								.y = 0.0f,
+								.ddx = 0.0f
+							}
+						)
+					](float xi, float eta) {
+						auto const r = std::min(std::sqrt(xi*xi + eta*eta), 1.0f);
+						return std::max(p(r), 0.0f);
 					},
 					.brush_diameter = [peak_diameter](float, float, float z){
 						return z*peak_diameter;
