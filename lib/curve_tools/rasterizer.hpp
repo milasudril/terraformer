@@ -16,6 +16,14 @@ namespace terraformer
 		{f(xi, eta)} -> std::same_as<float>;
 	};
 
+	template<class T>
+	concept brush2 = requires(T obj, float x, float y, float z, float xi, float eta)
+	{
+		{ obj.begin_pixel(x, y, z) } -> std::same_as<void>;
+		{ std::as_const(obj).get_radius() } -> std::same_as<float>;
+		{ std::as_const(obj).get_pixel_value(xi, eta) } -> std::same_as<float>;
+	};
+
 	template<class T, class PixelType>
 	concept blend_function = requires(T f, PixelType old_val, PixelType new_val, float brush_strength)
 	{

@@ -243,6 +243,47 @@ void terraformer::ridge_tree::update_elevations(
 	}
 }
 
+namespace
+{
+	class ridge_tree_brush
+	{
+	public:
+		explicit ridge_tree_brush(float peak_radius):
+			m_intensity_profile{
+				make_polynomial(
+					terraformer::cubic_spline_control_point{
+						.y = 1.0f,
+						.ddx = -1.0f/peak_radius
+					},
+					terraformer::cubic_spline_control_point{
+						.y = 0.0f,
+						.ddx = 0.0f/peak_radius
+					}
+				)
+			},
+			m_peak_radius{peak_radius}
+		{}
+
+		void begin_pixel(float, float, float z)
+		{ m_current_radius = z*m_peak_radius; }
+
+		auto get_radius() const
+		{ return m_peak_radius; }
+
+		auto get_pixel_value(float old_val, float xi, float eta) const
+		{
+			auto const r = std::min(std::sqrt(xi*xi + eta*eta), 1.0f);
+			auto const new_val = std::max(m_intensity_profile(r), 0.0f);
+			return std::max(old_val, new_val);
+		}
+
+	private:
+		terraformer::polynomial<3> m_intensity_profile;
+		float m_peak_radius;
+		float m_current_radius;
+	};
+}
+
 void terraformer::render(
 	ridge_tree const& tree,
 	span_2d<float> output,
