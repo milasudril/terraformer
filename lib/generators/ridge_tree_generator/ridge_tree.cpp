@@ -249,32 +249,33 @@ namespace
 	{
 	public:
 		explicit ridge_tree_brush(float peak_radius):
-			m_intensity_profile{
-				make_polynomial(
-					terraformer::cubic_spline_control_point{
-						.y = 1.0f,
-						.ddx = -1.0f/peak_radius
-					},
-					terraformer::cubic_spline_control_point{
-						.y = 0.0f,
-						.ddx = 0.0f/peak_radius
-					}
-				)
-			},
+			m_intensity_profile{},
 			m_peak_radius{peak_radius}
 		{}
 
 		void begin_pixel(float, float, float z)
-		{ m_current_radius = z*m_peak_radius; }
+		{
+			m_current_radius = z*m_peak_radius;
+			m_intensity_profile = make_polynomial(
+				terraformer::cubic_spline_control_point{
+					.y = 1.0f,
+					.ddx = -1.0f
+				},
+				terraformer::cubic_spline_control_point{
+					.y = 0.0f,
+					.ddx = 0.0f
+				}
+			);
+		}
 
 		auto get_radius() const
-		{ return m_peak_radius; }
+		{ return m_current_radius; }
 
-		auto get_pixel_value(float old_val, float xi, float eta) const
+		auto get_pixel_value(float old_val, float new_val, float xi, float eta) const
 		{
 			auto const r = std::min(std::sqrt(xi*xi + eta*eta), 1.0f);
-			auto const new_val = std::max(m_intensity_profile(r), 0.0f);
-			return std::max(old_val, new_val);
+			auto const z = new_val*std::max(m_intensity_profile(r), 0.0f);
+			return std::max(old_val, z);
 		}
 
 	private:
@@ -298,36 +299,17 @@ void terraformer::render(
 		{	continue; }
 
 		auto const peak_radius = params.curve_levels[level].peak_radius.min;
-		auto const peak_diameter = 2.0f*peak_radius/pixel_size;
 
 		for(auto const& branch: branch_collection.branches.get<0>())
 		{
 			draw(
 				output,
 				branch.points(),
-				line_segment_draw_params{
+				line_segment_draw_params_2{
 					.value = 1.0f,
-					.blend_function = [](float old_val, float new_val, float strength){
-						return std::max(old_val, new_val*strength);
-					},
 					.scale = pixel_size,
-					.brush = [
-						p = make_polynomial(
-							cubic_spline_control_point{
-								.y = 1.0f,
-								.ddx = -1.0f/peak_radius
-							},
-							cubic_spline_control_point{
-								.y = 0.0f,
-								.ddx = 0.0f/peak_radius
-							}
-						)
-					](float xi, float eta) {
-						auto const r = std::min(std::sqrt(xi*xi + eta*eta), 1.0f);
-						return std::max(p(r), 0.0f);
-					},
-					.brush_diameter = [peak_diameter](float, float, float z){
-						return z*peak_diameter;
+					.brush = ridge_tree_brush{
+						peak_radius/pixel_size
 					}
 				}
 			);
