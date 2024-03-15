@@ -305,7 +305,7 @@ void terraformer::render(
 			draw(
 				output,
 				branch.points(),
-				line_segment_draw_params_2{
+				line_segment_draw_params{
 					.value = 1.0f,
 					.scale = pixel_size,
 					.brush = ridge_tree_brush{
