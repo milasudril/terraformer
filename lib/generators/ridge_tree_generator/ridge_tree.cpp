@@ -248,13 +248,25 @@ namespace
 	class ridge_tree_brush
 	{
 	public:
-		explicit ridge_tree_brush(float peak_radius):
+		explicit ridge_tree_brush(float peak_radius, terraformer::span<terraformer::location const> locations):
 			m_intensity_profile{},
-			m_peak_radius{peak_radius}
+			m_peak_radius{peak_radius},
+			m_locations{locations},
+			m_tangent{terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}}},
+			m_normal{terraformer::direction{terraformer::displacement{0.0f, 1.0f, 0.0f}}}
 		{}
 
-		void begin_pixel(float, float, float z)
+		void begin_pixel(float, float, float z, terraformer::array_index<terraformer::location> starting_at)
 		{
+			if(starting_at < std::size(m_locations) - terraformer::array_size<terraformer::location>{1})
+			{
+				auto t = m_locations[starting_at + 1] - m_locations[starting_at - 1];
+				t -= terraformer::displacement{0.0f, 0.0f, t[2]};
+				m_tangent = terraformer::direction{t};
+				// TODO: This operation should be optimized in geosimd
+				m_normal = terraformer::direction{terraformer::displacement{m_tangent[1], -m_tangent[0], 0.0f}};
+			}
+
 			m_current_radius = z*m_peak_radius;
 			m_intensity_profile = make_polynomial(
 				terraformer::cubic_spline_control_point{
@@ -273,7 +285,10 @@ namespace
 
 		auto get_pixel_value(float old_val, float new_val, float xi, float eta) const
 		{
-			auto const r = std::min(std::sqrt(xi*xi + eta*eta), 1.0f);
+			terraformer::displacement const v{xi, eta, 0.0f};
+			auto const v_tangent = 3.0f*inner_product(v, m_tangent);
+			auto const v_normal = inner_product(v, m_normal);
+			auto const r = std::min(std::sqrt(v_tangent*v_tangent + v_normal*v_normal), 1.0f);
 			auto const z = new_val*std::max(m_intensity_profile(r), 0.0f);
 			return std::max(old_val, z);
 		}
@@ -282,6 +297,9 @@ namespace
 		terraformer::polynomial<3> m_intensity_profile;
 		float m_peak_radius;
 		float m_current_radius;
+		terraformer::span<terraformer::location const> m_locations;
+		terraformer::direction m_tangent;
+		terraformer::direction m_normal;
 	};
 }
 
@@ -309,7 +327,8 @@ void terraformer::render(
 					.value = 1.0f,
 					.scale = pixel_size,
 					.brush = ridge_tree_brush{
-						peak_radius/pixel_size
+						peak_radius/pixel_size,
+						branch.points()
 					}
 				}
 			);

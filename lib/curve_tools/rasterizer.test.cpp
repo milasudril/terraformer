@@ -11,7 +11,7 @@ namespace
 	{
 		float radius;
 
-		void begin_pixel(float, float, float){}
+		void begin_pixel(float, float, float, terraformer::array_index<terraformer::location>){}
 
 		float get_radius() const
 		{ return radius; }

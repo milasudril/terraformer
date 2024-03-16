@@ -3,6 +3,7 @@
 
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/array_classes/span.hpp"
 
 #include <geosimd/line.hpp>
 
@@ -11,9 +12,9 @@
 namespace terraformer
 {
 	template<class T, class PixelType>
-	concept brush = requires(T obj, PixelType old_val, PixelType new_val, float x, float y, float z, float xi, float eta)
+	concept brush = requires(T obj, PixelType old_val, PixelType new_val, float x, float y, float z, array_index<location> starting_at, float xi, float eta)
 	{
-		{ obj.begin_pixel(x, y, z) } -> std::same_as<void>;
+		{ obj.begin_pixel(x, y, z, starting_at) } -> std::same_as<void>;
 		{ std::as_const(obj).get_radius() } -> std::same_as<float>;
 		{ std::as_const(obj).get_pixel_value(old_val, new_val, xi, eta) } -> std::same_as<PixelType>;
 	};
@@ -64,6 +65,7 @@ namespace terraformer
 
 	template<class PixelType, brush<PixelType> Brush>
 	void draw(span_2d<PixelType> target_surface,
+		array_index<location> starting_at,
 		geosimd::line_segment<geom_space> seg,
 		line_segment_draw_params<PixelType, Brush>& params)
 	{
@@ -81,7 +83,7 @@ namespace terraformer
 				auto const y = a*static_cast<float>(l - static_cast<int32_t>(seg.p1[0]))
 					+ seg.p1[1];
 				auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
-				params.brush.begin_pixel(x, y, z);
+				params.brush.begin_pixel(x, y, z, starting_at);
 				paint(target_surface,
 					paint_params<PixelType, Brush>{
 						.x = x/params.scale,
@@ -105,7 +107,7 @@ namespace terraformer
 				auto const x = a*static_cast<float>(k - static_cast<int32_t>(seg.p1[1]))
 					+ seg.p1[0];
 				auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
-				params.brush.begin_pixel(x, y, z);
+				params.brush.begin_pixel(x, y, z, starting_at);
 				paint(target_surface,
 					paint_params<PixelType, Brush>{
 						.x = x/params.scale,
@@ -118,20 +120,19 @@ namespace terraformer
 		}
 	}
 
-
 	template<class PixelType, brush<PixelType> Brush>
 	void draw(span_2d<PixelType> target_surface,
-		std::span<location const> curve,
+		span<location const> curve,
 		line_segment_draw_params<PixelType, Brush>&& params)
 	{
-		if(std::size(curve) == 0)
+		if(curve.empty())
 		{ return; }
 
-		auto prev = curve[0];
-		for(size_t k = 1; k!=std::size(curve); ++k)
+		auto prev = curve.front();
+		for(auto k = curve.first_element_index() + 1; k!=std::size(curve); ++k)
 		{
 			auto const current = curve[k];
-			draw(target_surface, geosimd::line_segment{.p1 = prev, .p2 = current}, params);
+			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params);
 			prev = current;
 		}
 	}

@@ -19,6 +19,7 @@ terraformer::displaced_curve terraformer::displace_xy(std::span<location const> 
 		auto const k = 1;
 		auto const val = dy.offsets[0];
 		auto const t = c[k] - c[k - 1];
+		// TODO: This operation should be optimized in geosimd
 		auto const n = direction{displacement{t[1], -t[0], 0.0f}};
 		displaced_curve::index_type const output_index{k - 1};
 		points[output_index] = c[k - 1] + val*n;
