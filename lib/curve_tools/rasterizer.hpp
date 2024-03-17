@@ -4,6 +4,7 @@
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/array_classes/span.hpp"
+#include "lib/pixel_store/image.hpp"
 
 #include <geosimd/line.hpp>
 
@@ -67,31 +68,41 @@ namespace terraformer
 	void draw(span_2d<PixelType> target_surface,
 		array_index<location> starting_at,
 		geosimd::line_segment<geom_space> seg,
-		line_segment_draw_params<PixelType, Brush>& params)
+		line_segment_draw_params<PixelType, Brush>& params,
+		span_2d<uint8_t> visited_mask
+	)
 	{
-		auto dr = seg.p2 - seg.p1;
+		auto const dr = seg.p2 - seg.p1;
+		auto const w = visited_mask.width();
+		auto const h = visited_mask.height();
+
 		if(std::abs(dr[0]) > std::abs(dr[1]))
 		{
 			auto const a = dr[1]/dr[0];
 			auto const b = dr[2]/dr[0];
 			auto const dx = dr[0] >= 0.0f ? 1 : -1;
 			for(auto l = static_cast<int32_t>(seg.p1[0]);
-				l != static_cast<int32_t>(seg.p2[0]) + dx;
+				l != static_cast<int32_t>(seg.p2[0]) + dx - 1;
 				l += dx)
 			{
-				auto const x = static_cast<float>(l);
 				auto const y = a*static_cast<float>(l - static_cast<int32_t>(seg.p1[0]))
 					+ seg.p1[1];
-				auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
-				params.brush.begin_pixel(x, y, z, starting_at);
-				paint(target_surface,
-					paint_params<PixelType, Brush>{
-						.x = x/params.scale,
-						.y = y/params.scale,
-						.value = z*params.value,
-						.brush = params.brush
-					}
-				);
+				auto const k = static_cast<uint32_t>(y/params.scale);
+				if(visited_mask((l + w)%w, (k + h)%h) != 1)
+				{
+					auto const x = static_cast<float>(l);
+					auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
+					params.brush.begin_pixel(x, y, z, starting_at);
+					paint(target_surface,
+						paint_params<PixelType, Brush>{
+							.x = x/params.scale,
+							.y = y/params.scale,
+							.value = z*params.value,
+							.brush = params.brush
+						}
+					);
+					visited_mask((l + w)%w, (k + h)%h) = 1;
+				}
 			}
 		}
 		else
@@ -100,22 +111,27 @@ namespace terraformer
 			auto const b = dr[2]/dr[1];
 			auto const dy = dr[1] >= 0.0f ? 1 : -1;
 			for(auto k = static_cast<int32_t>(seg.p1[1]);
-				k != static_cast<int32_t>(seg.p2[1]) + dy;
+				k != static_cast<int32_t>(seg.p2[1]) + dy - 1;
 				k += dy)
 			{
-				auto const y = static_cast<float>(k);
 				auto const x = a*static_cast<float>(k - static_cast<int32_t>(seg.p1[1]))
 					+ seg.p1[0];
-				auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
-				params.brush.begin_pixel(x, y, z, starting_at);
-				paint(target_surface,
-					paint_params<PixelType, Brush>{
-						.x = x/params.scale,
-						.y = y/params.scale,
-						.value = z*params.value,
-						.brush = params.brush
-					}
-				);
+				auto const l = static_cast<uint32_t>(x/params.scale);
+				if(visited_mask((l + w)%w, (k + h)%h) != 1)
+				{
+					auto const y = static_cast<float>(k);
+					auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
+					params.brush.begin_pixel(x, y, z, starting_at);
+					paint(target_surface,
+						paint_params<PixelType, Brush>{
+							.x = x/params.scale,
+							.y = y/params.scale,
+							.value = z*params.value,
+							.brush = params.brush
+						}
+					);
+					visited_mask((l + w)%w, (k + h)%h) = 1;
+				}
 			}
 		}
 	}
@@ -128,11 +144,12 @@ namespace terraformer
 		if(curve.empty())
 		{ return; }
 
+		basic_image<uint8_t> visited_mask(target_surface.width(), target_surface.height());
 		auto prev = curve.front();
 		for(auto k = curve.first_element_index() + 1; k!=std::size(curve); ++k)
 		{
 			auto const current = curve[k];
-			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params);
+			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params, visited_mask.pixels());
 			prev = current;
 		}
 	}

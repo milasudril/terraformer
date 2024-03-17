@@ -230,6 +230,75 @@ TESTCASE(terraformer_draw_curve_thickness_5)
 	}
 }
 
+namespace
+{
+	struct pixel_counter
+	{
+		void begin_pixel(float, float, float, terraformer::array_index<terraformer::location>){}
+
+		float get_radius() const
+		{ return 0.5f; }
+
+		template<class Ignore>
+		float get_pixel_value(float old_val, Ignore&&...) const
+		{
+			return old_val + 1.0f;
+		}
+	};
+}
+
+TESTCASE(terraformer_draw_curve_thickness_1_pixels_visited_ones_only_int_coords)
+{
+	terraformer::grayscale_image img{8, 8};
+
+	constexpr std::array<terraformer::location, 3> loc{
+		terraformer::location{0.0f, 0.0f, 1.0f},
+		terraformer::location{7.0f, 0.0f, 1.0f},
+		terraformer::location{0.0f, 3.5f, 1.0f}
+	};
+
+	draw(
+		img.pixels(),
+		terraformer::span{std::begin(loc), std::end(loc)},
+		terraformer::line_segment_draw_params{
+			.value = 1.0f,
+			.scale = 1.0f,
+			.brush = pixel_counter{}
+		}
+	);
+
+	for(uint32_t k = 0; k != img.height(); ++k)
+	{
+		for(uint32_t l = 0; l != img.width(); ++l)
+		{
+			EXPECT_LE(img(l, k), 1.0f)
+			printf("%.8g ", img(l, k));
+#if 0
+			if(k == 1 || k == 5)
+			{
+				if(l >= 3 && l <= 5)
+				{ EXPECT_EQ(img(l, k), 1.0f); }
+				else
+				{ EXPECT_EQ(img(l, k), 0.0f); }
+			}
+			else
+			if(k >= 2 && k <= 4)
+			{
+				if(l >= 2 && l <= 6)
+				{ EXPECT_EQ(img(l, k), 1.0f); }
+				else
+				{ EXPECT_EQ(img(l, k), 0.0f); }
+			}
+			else
+			{
+				EXPECT_EQ(img(l, k), 0.0f);
+			}
+#endif
+		}
+		putchar('\n');
+	}
+}
+
 #if 0
 //TODO
 TESTCASE(terraformer_draw_point_thickness_4_at_corner)
