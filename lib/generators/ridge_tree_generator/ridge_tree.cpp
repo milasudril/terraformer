@@ -248,16 +248,19 @@ namespace
 	class ridge_tree_brush
 	{
 	public:
-		explicit ridge_tree_brush(float peak_radius, terraformer::span<terraformer::location const> locations):
+		explicit ridge_tree_brush(float peak_radius, terraformer::span<terraformer::location const> locations, std::reference_wrapper<size_t> pixel_count):
 			m_intensity_profile{},
 			m_peak_radius{peak_radius},
 			m_locations{locations},
 			m_tangent{terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}}},
-			m_normal{terraformer::direction{terraformer::displacement{0.0f, 1.0f, 0.0f}}}
+			m_normal{terraformer::direction{terraformer::displacement{0.0f, 1.0f, 0.0f}}},
+			m_pixel_count{pixel_count}
 		{}
 
 		void begin_pixel(float, float, float z, terraformer::array_index<terraformer::location> starting_at)
 		{
+			++m_pixel_count.get();
+
 			if(starting_at < std::size(m_locations) - terraformer::array_size<terraformer::location>{1})
 			{
 				auto t = m_locations[starting_at + 1] - m_locations[starting_at - 1];
@@ -300,6 +303,8 @@ namespace
 		terraformer::span<terraformer::location const> m_locations;
 		terraformer::direction m_tangent;
 		terraformer::direction m_normal;
+
+		std::reference_wrapper<size_t> m_pixel_count;
 	};
 }
 
@@ -320,6 +325,8 @@ void terraformer::render(
 
 		for(auto const& branch: branch_collection.branches.get<0>())
 		{
+			size_t pixel_count = 0;
+
 			draw(
 				output,
 				branch.points(),
@@ -328,10 +335,13 @@ void terraformer::render(
 					.scale = pixel_size,
 					.brush = ridge_tree_brush{
 						peak_radius/pixel_size,
-						branch.points()
+						branch.points(),
+						std::ref(pixel_count)
 					}
 				}
 			);
+			printf("%zu\n", pixel_count);
+			fflush(stdout);
 		}
 	}
 }

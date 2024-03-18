@@ -9,6 +9,7 @@
 #include <geosimd/line.hpp>
 
 #include <optional>
+#include <cassert>
 
 namespace terraformer
 {
@@ -27,6 +28,7 @@ namespace terraformer
 		float y;
 		PixelType value;
 		Brush brush;
+		float scale;
 	};
 
 	template<class PixelType, brush<PixelType> Brush>
@@ -36,6 +38,7 @@ namespace terraformer
 		auto const w = target_surface.height();
 
 		auto const r = params.brush.get_radius();
+		assert(r > 0.0f);
 		auto const d = 2.0f*r;
 		auto const brush_size = static_cast<uint32_t>(d);
 		auto const k_min = static_cast<int32_t>(params.y - r + 0.5f);
@@ -72,7 +75,11 @@ namespace terraformer
 		span_2d<uint8_t> visited_mask
 	)
 	{
-		auto const dr = seg.p2 - seg.p1;
+		auto const scale = params.scale;
+		auto const p1 = (seg.p1 - location{0.0f, 0.0f, 0.0f})/scale;
+		auto const p2 = (seg.p2 - location{0.0f, 0.0f, 0.0f})/scale;
+
+		auto const dr = p2 - p1;
 		auto const w = visited_mask.width();
 		auto const h = visited_mask.height();
 
@@ -81,24 +88,25 @@ namespace terraformer
 			auto const a = dr[1]/dr[0];
 			auto const b = dr[2]/dr[0];
 			auto const dx = dr[0] >= 0.0f ? 1 : -1;
-			for(auto l = static_cast<int32_t>(seg.p1[0]);
-				l != static_cast<int32_t>(seg.p2[0]) + dx - 1;
+			for(auto l = static_cast<int32_t>(p1[0]);
+				l != static_cast<int32_t>(p2[0]) + dx;
 				l += dx)
 			{
-				auto const y = a*static_cast<float>(l - static_cast<int32_t>(seg.p1[0]))
-					+ seg.p1[1];
-				auto const k = static_cast<uint32_t>(y/params.scale);
+				auto const y = a*static_cast<float>(l - static_cast<int32_t>(p1[0]))
+					+ p1[1];
+				auto const k = static_cast<uint32_t>(y);
 				if(visited_mask((l + w)%w, (k + h)%h) != 1)
 				{
 					auto const x = static_cast<float>(l);
-					auto const z = b*static_cast<float>(l - static_cast<int32_t>(seg.p1[0])) + seg.p1[2];
+					auto const z = scale*(b*static_cast<float>(l - static_cast<int32_t>(p1[0])) + p1[2]);
 					params.brush.begin_pixel(x, y, z, starting_at);
 					paint(target_surface,
 						paint_params<PixelType, Brush>{
-							.x = x/params.scale,
-							.y = y/params.scale,
+							.x = x,
+							.y = y,
 							.value = z*params.value,
-							.brush = params.brush
+							.brush = params.brush,
+							.scale = scale
 						}
 					);
 					visited_mask((l + w)%w, (k + h)%h) = 1;
@@ -110,24 +118,25 @@ namespace terraformer
 			auto const a = dr[0]/dr[1];
 			auto const b = dr[2]/dr[1];
 			auto const dy = dr[1] >= 0.0f ? 1 : -1;
-			for(auto k = static_cast<int32_t>(seg.p1[1]);
-				k != static_cast<int32_t>(seg.p2[1]) + dy - 1;
+			for(auto k = static_cast<int32_t>(p1[1]);
+				k != static_cast<int32_t>(p2[1]) + dy;
 				k += dy)
 			{
-				auto const x = a*static_cast<float>(k - static_cast<int32_t>(seg.p1[1]))
-					+ seg.p1[0];
-				auto const l = static_cast<uint32_t>(x/params.scale);
+				auto const x = a*static_cast<float>(k - static_cast<int32_t>(p1[1]))
+					+ p1[0];
+				auto const l = static_cast<uint32_t>(x);
 				if(visited_mask((l + w)%w, (k + h)%h) != 1)
 				{
 					auto const y = static_cast<float>(k);
-					auto const z = b*static_cast<float>(k - static_cast<int32_t>(seg.p1[1])) + seg.p1[2];
+					auto const z = scale*(b*static_cast<float>(k - static_cast<int32_t>(p1[1])) + p1[2]);
 					params.brush.begin_pixel(x, y, z, starting_at);
 					paint(target_surface,
 						paint_params<PixelType, Brush>{
-							.x = x/params.scale,
-							.y = y/params.scale,
+							.x = x,
+							.y = y,
 							.value = z*params.value,
-							.brush = params.brush
+							.brush = params.brush,
+							.scale = scale
 						}
 					);
 					visited_mask((l + w)%w, (k + h)%h) = 1;
