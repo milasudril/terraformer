@@ -55,7 +55,7 @@ namespace
 	)
 	{
 		auto const x_scaled = x/x_scale_factor;
-		if(f(x_scaled) <= 0.0f)
+		if(f(x_scaled) <= 0.0f || mod_depth <= 0.0f)
 		{ return 0.0f; }
 
 		return (

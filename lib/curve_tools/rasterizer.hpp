@@ -37,7 +37,7 @@ namespace terraformer
 		auto const w = target_surface.height();
 
 		auto const r = params.brush.get_radius();
-		assert(r > 0.0f);
+		assert(r >= 0.0f);
 		auto const d = 2.0f*r;
 		auto const brush_size = static_cast<uint32_t>(d);
 		auto const k_min = static_cast<int32_t>(params.y - r + 0.5f);
