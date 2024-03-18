@@ -72,7 +72,7 @@ namespace terraformer
 		array_index<location> starting_at,
 		geosimd::line_segment<geom_space> seg,
 		line_segment_draw_params<PixelType, Brush>& params,
-		span_2d<uint8_t> visited_mask
+		span_2d<uint8_t> paint_mask
 	)
 	{
 		auto const scale = params.scale;
@@ -80,8 +80,8 @@ namespace terraformer
 		auto const p2 = (seg.p2 - location{0.0f, 0.0f, 0.0f})/scale;
 
 		auto const dr = p2 - p1;
-		auto const w = visited_mask.width();
-		auto const h = visited_mask.height();
+		auto const w = paint_mask.width();
+		auto const h = paint_mask.height();
 
 		if(std::abs(dr[0]) > std::abs(dr[1]))
 		{
@@ -95,7 +95,7 @@ namespace terraformer
 				auto const y = a*static_cast<float>(l - static_cast<int32_t>(p1[0]))
 					+ p1[1];
 				auto const k = static_cast<uint32_t>(y);
-				if(visited_mask((l + w)%w, (k + h)%h) != 1)
+				if(paint_mask((l + w)%w, (k + h)%h) != 1)
 				{
 					auto const x = static_cast<float>(l);
 					auto const z = scale*(b*static_cast<float>(l - static_cast<int32_t>(p1[0])) + p1[2]);
@@ -109,7 +109,7 @@ namespace terraformer
 							.scale = scale
 						}
 					);
-					visited_mask((l + w)%w, (k + h)%h) = 1;
+					paint_mask((l + w)%w, (k + h)%h) = 1;
 				}
 			}
 		}
@@ -125,7 +125,7 @@ namespace terraformer
 				auto const x = a*static_cast<float>(k - static_cast<int32_t>(p1[1]))
 					+ p1[0];
 				auto const l = static_cast<uint32_t>(x);
-				if(visited_mask((l + w)%w, (k + h)%h) != 1)
+				if(paint_mask((l + w)%w, (k + h)%h) != 1)
 				{
 					auto const y = static_cast<float>(k);
 					auto const z = scale*(b*static_cast<float>(k - static_cast<int32_t>(p1[1])) + p1[2]);
@@ -139,7 +139,7 @@ namespace terraformer
 							.scale = scale
 						}
 					);
-					visited_mask((l + w)%w, (k + h)%h) = 1;
+					paint_mask((l + w)%w, (k + h)%h) = 1;
 				}
 			}
 		}
@@ -153,12 +153,12 @@ namespace terraformer
 		if(curve.empty())
 		{ return; }
 
-		basic_image<uint8_t> visited_mask(target_surface.width(), target_surface.height());
+		basic_image<uint8_t> paint_mask(target_surface.width(), target_surface.height());
 		auto prev = curve.front();
 		for(auto k = curve.first_element_index() + 1; k!=std::size(curve); ++k)
 		{
 			auto const current = curve[k];
-			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params, visited_mask.pixels());
+			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params, paint_mask.pixels());
 			prev = current;
 		}
 	}
