@@ -28,7 +28,6 @@ namespace terraformer
 		float y;
 		PixelType value;
 		Brush brush;
-		float scale;
 	};
 
 	template<class PixelType, brush<PixelType> Brush>
@@ -105,8 +104,7 @@ namespace terraformer
 							.x = x,
 							.y = y,
 							.value = z*params.value,
-							.brush = params.brush,
-							.scale = scale
+							.brush = params.brush
 						}
 					);
 					paint_mask((l + w)%w, (k + h)%h) = 1;
@@ -136,7 +134,6 @@ namespace terraformer
 							.y = y,
 							.value = z*params.value,
 							.brush = params.brush,
-							.scale = scale
 						}
 					);
 					paint_mask((l + w)%w, (k + h)%h) = 1;

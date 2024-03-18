@@ -37,8 +37,7 @@ TESTCASE(terraformer_draw_curve_thickness_1)
 			.value = loc[2],
 			.brush = my_brush{
 				.radius = 0.5f
-			},
-			.scale = 1.0f
+			}
 		}
 	);
 
@@ -67,8 +66,7 @@ TESTCASE(terraformer_draw_curve_thickness_2)
 			.value = loc[2],
 			.brush = my_brush{
 				.radius = 1.0f
-			},
-			.scale = 1.0f
+			}
 		}
 	);
 
@@ -99,8 +97,7 @@ TESTCASE(terraformer_draw_curve_thickness_2_at_half_pixel)
 			.value = loc[2],
 			.brush = my_brush{
 				.radius = 1.0f
-			},
-			.scale = 1.0f
+			}
 		}
 	);
 
@@ -129,8 +126,7 @@ TESTCASE(terraformer_draw_curve_thickness_3)
 			.value = loc[2],
 			.brush = my_brush{
 				.radius = 1.5f
-			},
-			.scale = 1.0f
+			}
 		}
 	);
 
@@ -159,8 +155,7 @@ TESTCASE(terraformer_draw_curve_thickness_4)
 			.value = loc[2],
 			.brush = my_brush{
  				.radius = 2.0f
-			},
-			.scale = 1.0f
+			}
 		}
 	);
 
@@ -204,8 +199,7 @@ TESTCASE(terraformer_draw_curve_thickness_5)
 			.value = loc[2],
 			.brush = my_brush{
  				.radius = 2.5f
-			},
-			.scale = 1.0f
+			}
 		}
 	);
 
