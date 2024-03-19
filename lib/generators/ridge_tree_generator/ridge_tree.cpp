@@ -286,14 +286,14 @@ namespace
 		auto get_radius() const
 		{ return m_current_radius; }
 
-		auto get_pixel_value(float old_val, float new_val, float xi, float eta) const
+		void get_pixel_value(float& old_val, float new_val, float xi, float eta) const
 		{
 			terraformer::displacement const v{xi, eta, 0.0f};
 			auto const v_tangent = 3.0f*inner_product(v, m_tangent);
 			auto const v_normal = inner_product(v, m_normal);
 			auto const r = std::min(std::sqrt(v_tangent*v_tangent + v_normal*v_normal), 1.0f);
 			auto const z = new_val*std::max(m_intensity_profile(r), 0.0f);
-			return std::max(old_val, z);
+			old_val = std::max(old_val, z);
 		}
 
 	private:
@@ -334,12 +334,12 @@ void terraformer::render(
 				branch.points(),
 				line_segment_draw_params{
 					.value = 1.0f,
-					.scale = pixel_size,
-					.brush = ridge_tree_brush{
-						peak_radius/pixel_size,
-						branch.points(),
-						std::ref(pixel_count)
-					}
+					.scale = pixel_size
+				},
+				ridge_tree_brush{
+					peak_radius/pixel_size,
+					branch.points(),
+					std::ref(pixel_count)
 				},
 				paint_mask.pixels()
 			);

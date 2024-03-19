@@ -16,10 +16,10 @@ namespace
 		float get_radius() const
 		{ return radius; }
 
-		float get_pixel_value(float, float new_val, float xi, float eta) const
+		void get_pixel_value(float& old_val, float new_val, float xi, float eta) const
 		{
 			auto const r = std::sqrt(xi*xi + eta*eta);
-			return r < 1.0f ? new_val : 0.0f;
+			old_val = r < 1.0f ? new_val : 0.0f;
 		}
 	};
 }
@@ -31,13 +31,13 @@ TESTCASE(terraformer_draw_curve_thickness_1)
 	terraformer::location loc{4.0f, 3.0f, 1.0f};
 
 	paint(img.pixels(),
-		 terraformer::paint_params{
+		terraformer::paint_params{
 			.x = loc[0],
 			.y = loc[1],
-			.value = loc[2],
-			.brush = my_brush{
-				.radius = 0.5f
-			}
+			.value = loc[2]
+		},
+		my_brush{
+			.radius = 0.5f
 		}
 	);
 
@@ -63,10 +63,10 @@ TESTCASE(terraformer_draw_curve_thickness_2)
 		terraformer::paint_params{
 			.x = loc[0],
 			.y = loc[1],
-			.value = loc[2],
-			.brush = my_brush{
-				.radius = 1.0f
-			}
+			.value = loc[2]
+		},
+		my_brush{
+			.radius = 1.0f
 		}
 	);
 
@@ -94,10 +94,10 @@ TESTCASE(terraformer_draw_curve_thickness_2_at_half_pixel)
 		terraformer::paint_params{
 			.x = loc[0],
 			.y = loc[1],
-			.value = loc[2],
-			.brush = my_brush{
-				.radius = 1.0f
-			}
+			.value = loc[2]
+		},
+		my_brush{
+			.radius = 1.0f
 		}
 	);
 
@@ -123,10 +123,10 @@ TESTCASE(terraformer_draw_curve_thickness_3)
 		terraformer::paint_params{
 			.x = loc[0],
 			.y = loc[1],
-			.value = loc[2],
-			.brush = my_brush{
-				.radius = 1.5f
-			}
+			.value = loc[2]
+		},
+		my_brush{
+			.radius = 1.5f
 		}
 	);
 
@@ -152,10 +152,10 @@ TESTCASE(terraformer_draw_curve_thickness_4)
 		terraformer::paint_params{
 			.x = loc[0],
 			.y = loc[1],
-			.value = loc[2],
-			.brush = my_brush{
- 				.radius = 2.0f
-			}
+			.value = loc[2]
+		},
+		my_brush{
+ 			.radius = 2.0f
 		}
 	);
 
@@ -196,10 +196,10 @@ TESTCASE(terraformer_draw_curve_thickness_5)
 		terraformer::paint_params{
 			.x = loc[0],
 			.y = loc[1],
-			.value = loc[2],
-			.brush = my_brush{
- 				.radius = 2.5f
-			}
+			.value = loc[2]
+		},
+		my_brush{
+			.radius = 2.5f
 		}
 	);
 
@@ -240,10 +240,8 @@ namespace
 		{ return 0.5f; }
 
 		template<class Ignore>
-		float get_pixel_value(float old_val, Ignore&&...) const
-		{
-			return old_val + 1.0f;
-		}
+		void get_pixel_value(float& old_val, Ignore&&...) const
+		{ old_val+=1.0f; }
 	};
 }
 
@@ -263,8 +261,8 @@ TESTCASE(terraformer_draw_curve_thickness_1_pixels_visited_once)
 		terraformer::line_segment_draw_params{
 			.value = 1.0f,
 			.scale = 1.0f,
-			.brush = pixel_counter{}
-		}
+		},
+		pixel_counter{}
 	);
 
 	for(uint32_t k = 0; k != img.height(); ++k)
@@ -291,9 +289,9 @@ TESTCASE(terraformer_draw_curve_thickness_1_pixels_visited_once_scaled)
 		terraformer::span{std::begin(loc), std::end(loc)},
 		terraformer::line_segment_draw_params{
 			.value = 1.0f,
-			.scale = 2.0f,
-			.brush = pixel_counter{}
-		}
+			.scale = 2.0f
+		},
+		pixel_counter{}
 	);
 
 	for(uint32_t k = 0; k != img.height(); ++k)

@@ -13,30 +13,29 @@
 
 namespace terraformer
 {
-	template<class T, class PixelType>
-	concept brush = requires(T obj, PixelType old_val, PixelType new_val, float x, float y, float z, array_index<location> starting_at, float xi, float eta)
+	template<class T, class PixelType, class PixelTypeOut>
+	concept brush = requires(T obj, PixelType new_val, PixelTypeOut& old_val, float x, float y, float z, array_index<location> starting_at, float xi, float eta)
 	{
 		{ obj.begin_pixel(x, y, z, starting_at) } -> std::same_as<void>;
 		{ std::as_const(obj).get_radius() } -> std::same_as<float>;
-		{ std::as_const(obj).get_pixel_value(old_val, new_val, xi, eta) } -> std::same_as<PixelType>;
+		{ std::as_const(obj).get_pixel_value(old_val, new_val, xi, eta) } -> std::same_as<void>;
 	};
 
-	template<class PixelType, brush<PixelType> Brush>
+	template<class PixelType>
 	struct paint_params
 	{
 		float x;
 		float y;
 		PixelType value;
-		Brush brush;
 	};
 
-	template<class PixelType, brush<PixelType> Brush>
-	void paint(span_2d<PixelType> target_surface, paint_params<PixelType, Brush> const& params)
+	template<class PixelTypeOut, class PixelType, brush<PixelType, PixelTypeOut> Brush>
+	void paint(span_2d<PixelTypeOut> target_surface, paint_params<PixelType> const& params, Brush const& brush)
 	{
 		auto const h = target_surface.width();
 		auto const w = target_surface.height();
 
-		auto const r = params.brush.get_radius();
+		auto const r = brush.get_radius();
 		assert(r >= 0.0f);
 		auto const d = 2.0f*r;
 		auto const brush_size = static_cast<uint32_t>(d);
@@ -50,27 +49,24 @@ namespace terraformer
 			{
 				auto const xi = std::lerp(-1.0f, 1.0f, (static_cast<float>(l) + 0.5f)/d);
 				auto const eta = std::lerp(-1.0f, 1.0f, (static_cast<float>(k) + 0.5f)/d);
-				auto const src_val = target_surface((l + l_min + w)%w, (k + k_min + h)%h);
-				static_assert(std::is_same_v<decltype(l + l_min), uint32_t>);
-				target_surface((l + l_min + w)%w, (k + k_min + h)%h ) =
-					params.brush.get_pixel_value(src_val, new_val, xi, eta);
+				brush.get_pixel_value(target_surface((l + l_min + w)%w, (k + k_min + h)%h), new_val, xi, eta);
 			}
 		}
 	}
 
-	template<class PixelType, brush<PixelType> Brush>
+	template<class PixelType>
 	struct line_segment_draw_params
 	{
 		PixelType value;
 		float scale;
-		Brush brush{};
 	};
 
-	template<class PixelType, brush<PixelType> Brush>
-	void draw(span_2d<PixelType> target_surface,
+	template<class PixelTypeOut, class PixelType, brush<PixelType, PixelTypeOut> Brush>
+	void draw(span_2d<PixelTypeOut> target_surface,
 		array_index<location> starting_at,
 		geosimd::line_segment<geom_space> seg,
-		line_segment_draw_params<PixelType, Brush>& params,
+		line_segment_draw_params<PixelType> const& params,
+		Brush& brush,
 		span_2d<uint8_t> paint_mask
 	)
 	{
@@ -98,14 +94,14 @@ namespace terraformer
 				{
 					auto const x = static_cast<float>(l);
 					auto const z = scale*(b*static_cast<float>(l - static_cast<int32_t>(p1[0])) + p1[2]);
-					params.brush.begin_pixel(x, y, z, starting_at);
+					brush.begin_pixel(x, y, z, starting_at);
 					paint(target_surface,
-						paint_params<PixelType, Brush>{
+						paint_params{
 							.x = x,
 							.y = y,
-							.value = z*params.value,
-							.brush = params.brush
-						}
+							.value = z*params.value
+						},
+						brush
 					);
 					paint_mask((l + w)%w, (k + h)%h) = 1;
 				}
@@ -127,14 +123,14 @@ namespace terraformer
 				{
 					auto const y = static_cast<float>(k);
 					auto const z = scale*(b*static_cast<float>(k - static_cast<int32_t>(p1[1])) + p1[2]);
-					params.brush.begin_pixel(x, y, z, starting_at);
+					brush.begin_pixel(x, y, z, starting_at);
 					paint(target_surface,
-						paint_params<PixelType, Brush>{
+						paint_params{
 							.x = x,
 							.y = y,
-							.value = z*params.value,
-							.brush = params.brush,
-						}
+							.value = z*params.value
+						},
+						brush
 					);
 					paint_mask((l + w)%w, (k + h)%h) = 1;
 				}
@@ -142,10 +138,11 @@ namespace terraformer
 		}
 	}
 
-	template<class PixelType, brush<PixelType> Brush>
-	void draw(span_2d<PixelType> target_surface,
+	template<class PixelTypeOut, class PixelType, brush<PixelType, PixelTypeOut> Brush>
+	void draw(span_2d<PixelTypeOut> target_surface,
 		span<location const> curve,
-		line_segment_draw_params<PixelType, Brush>&& params,
+		line_segment_draw_params<PixelType> const& params,
+		Brush&& brush,
 		span_2d<uint8_t> paint_mask
 	)
 	{
@@ -156,15 +153,16 @@ namespace terraformer
 		for(auto k = curve.first_element_index() + 1; k!=std::size(curve); ++k)
 		{
 			auto const current = curve[k];
-			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params, paint_mask);
+			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params, brush, paint_mask);
 			prev = current;
 		}
 	}
 
-	template<class PixelType, brush<PixelType> Brush>
-	void draw(span_2d<PixelType> target_surface,
+	template<class PixelTypeOut, class PixelType, brush<PixelType, PixelTypeOut> Brush>
+	void draw(span_2d<PixelTypeOut> target_surface,
 		span<location const> curve,
-		line_segment_draw_params<PixelType, Brush>&& params)
+		line_segment_draw_params<PixelType> const& params,
+		Brush&& brush)
 	{
 		if(curve.empty())
 		{ return; }
@@ -173,10 +171,10 @@ namespace terraformer
 		draw(
 			target_surface,
 			curve,
-			std::forward<line_segment_draw_params<PixelType, Brush>>(params),
+			params,
+			std::forward<Brush>(brush),
 			paint_mask
 		);
 	}
 }
-
 #endif
