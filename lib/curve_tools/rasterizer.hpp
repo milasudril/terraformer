@@ -145,19 +145,37 @@ namespace terraformer
 	template<class PixelType, brush<PixelType> Brush>
 	void draw(span_2d<PixelType> target_surface,
 		span<location const> curve,
+		line_segment_draw_params<PixelType, Brush>&& params,
+		span_2d<uint8_t> paint_mask
+	)
+	{
+		if(curve.empty())
+		{ return; }
+
+		auto prev = curve.front();
+		for(auto k = curve.first_element_index() + 1; k!=std::size(curve); ++k)
+		{
+			auto const current = curve[k];
+			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params, paint_mask);
+			prev = current;
+		}
+	}
+
+	template<class PixelType, brush<PixelType> Brush>
+	void draw(span_2d<PixelType> target_surface,
+		span<location const> curve,
 		line_segment_draw_params<PixelType, Brush>&& params)
 	{
 		if(curve.empty())
 		{ return; }
 
-		basic_image<uint8_t> paint_mask(target_surface.width(), target_surface.height());
-		auto prev = curve.front();
-		for(auto k = curve.first_element_index() + 1; k!=std::size(curve); ++k)
-		{
-			auto const current = curve[k];
-			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params, paint_mask.pixels());
-			prev = current;
-		}
+		auto paint_mask = create_with_same_size<uint8_t>(target_surface);
+		draw(
+			target_surface,
+			curve,
+			std::forward<line_segment_draw_params<PixelType, Brush>>(params),
+			paint_mask
+		);
 	}
 }
 

@@ -315,6 +315,8 @@ void terraformer::render(
 	float pixel_size
 )
 {
+	auto paint_mask = create_with_same_size<uint8_t>(output);
+
 	for(auto const& branch_collection: tree)
 	{
 		auto const level = branch_collection.level;
@@ -338,7 +340,8 @@ void terraformer::render(
 						branch.points(),
 						std::ref(pixel_count)
 					}
-				}
+				},
+				paint_mask.pixels()
 			);
 			printf("%zu\n", pixel_count);
 			fflush(stdout);
