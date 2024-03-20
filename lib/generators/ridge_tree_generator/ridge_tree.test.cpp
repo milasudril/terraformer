@@ -263,7 +263,6 @@ TESTCASE(terraformer_ridge_tree_generate)
 						.max = 1.0f
 					}
 				},
-#if 0
 				terraformer::ridge_tree_branch_render_description{
 					.half_peak_angle{
 						.min = terraformer::slope_angle{5.0f/48.0f},
@@ -306,7 +305,6 @@ TESTCASE(terraformer_ridge_tree_generate)
 						.max = 1.0f
 					}
 				}
-#endif
 			}
 		},
 		pixel_size
