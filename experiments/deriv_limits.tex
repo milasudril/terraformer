@@ -61,9 +61,17 @@ Now solve
 \]
 
 \paragraph{Case $A=B=0$}
-If $A = B = 0$, the curve is a straight line, and thus always monotonic. To satisfy boundary conditions, $a = b = -1$. This is also consistent, since $-2 - 2 + 2 = 0$, and $1 + 3 - 3 = 0$. To conclude, $a = b = -1$ is a valid solution.
+If $A = B = 0$, the curve is a straight line, and thus always monotonic. To satisfy boundary conditions, $a = b = -1$. This is also consistent with the equations for $A$ and $B$, since $-2 - 2 + 2 = 0$, and $1 + 3 - 3 = 0$. To conclude, $a = b = -1$ is a valid solution.
 
 \paragraph{Case $A=0\land B\neq 0$}
+In this case $2Bx + C = -2\left(b + 2a + 3\right)x + a < 0$, since $A = 0$, $b = -(2 + a)$, which implies that $-2\left(b + 2a + 3\right)x + a = -2\left(a + 1\right)x + a < 0$.
+
+First, assume that $a < -1$. In this case, the range of $x$ requires that $2k + a < 0$, where $k = -(a + 1) > 0$. This is true if and only if $a < -2k = 2(a + 1)$, which is false for all $a$. Thus $a < -1$ is invalid.
+
+Now, assume that $a > -1$. In this case, the range of $x$ requires that $a < 0$, which is trivial.
+
+To conclude, $a\in[-1, 0] \iff b\in[-2, -1]$.
+
 
 \paragraph{The general case}
 
