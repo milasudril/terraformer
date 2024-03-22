@@ -39,7 +39,7 @@ namespace terraformer
 	public:
 	  explicit ridge_tree(ridge_tree_xy_description const& description, random_generator rng, float pixel_size);
 
-		operator std::span<ridge_tree_trunk const>() const
+		operator span<ridge_tree_trunk const>() const
 		{ return m_value; }
 
 		constexpr auto first_element_index()

@@ -14,6 +14,7 @@
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/curve_tools/length.hpp"
 #include "lib/curve_tools/displace.hpp"
+#include "lib/curve_tools/distance.hpp"
 
 #include <random>
 
@@ -92,6 +93,32 @@ namespace terraformer
 		>::multi_array;
 	};
 
+	inline auto closest_point_xy(span<displaced_curve const> curves, location loc)
+	{
+		if(curves.empty())
+		{
+			return curve_distance_result{
+				.loc = location{0.0f, 0.0f, 0.0f},
+				.distance = -1.0f
+			};
+		}
+
+		auto result = curve_closest_point_xy(curves.front().points(), loc);
+		for(auto k = curves.first_element_index() + 1; k != std::size(curves); ++k)
+		{
+			auto new_res = curve_closest_point_xy(curves[k].points(), loc);
+			if(new_res.distance == -1.0f)
+			{ continue; }
+
+			if(new_res.distance < result.distance)
+			{ result = new_res; }
+		}
+		return result;
+	}
+
+	inline auto closest_point_xy(ridge_tree_branch_sequence const& seed_seq, location loc)
+	{	return closest_point_xy(seed_seq.get<0>(), loc); }
+
 	using ridge_tree_branch_elevation_data = single_array<polynomial<3>>;
 
 	struct ridge_tree_trunk
@@ -111,6 +138,49 @@ namespace terraformer
 	displacement compute_field(span<displaced_curve const> branches, location r, float min_distance);
 
 	displacement compute_field(span<ridge_tree_trunk const> branches, location r, float min_distance);
+
+	inline auto closest_point_xy(ridge_tree_trunk const& trunk, location loc)
+	{	return closest_point_xy(trunk.branches, loc); }
+
+	struct ridge_tree_closest_point_info
+	{
+		curve_distance_result distance_result;
+		size_t level;
+	};
+
+	inline ridge_tree_closest_point_info closest_point_xy(span<ridge_tree_trunk const> branches, location loc)
+	{
+		if(branches.empty())
+		{
+			return ridge_tree_closest_point_info{
+				.distance_result{
+					.loc = loc,
+					.distance = -1.0f
+				},
+				.level = static_cast<size_t>(-1)
+			};
+		}
+
+		ridge_tree_closest_point_info ret{
+			.distance_result = closest_point_xy(branches.front(), loc),
+			.level = branches.front().level
+		};
+
+		for(auto k = branches.first_element_index() + 1; k != std::size(branches); ++k)
+		{
+			auto const res = closest_point_xy(branches[k], loc);
+			if(res.distance == -1.0f)
+			{ continue; }
+
+			if(res.distance < ret.distance_result.distance)
+			{
+				ret.distance_result = res;
+				ret.level = branches[k].level;
+			}
+		}
+
+		return ret;
+	}
 
 	template<class BranchStopCondition>
 	single_array<location> generate_branch_base_curve(

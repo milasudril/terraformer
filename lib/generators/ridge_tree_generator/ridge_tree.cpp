@@ -308,6 +308,7 @@ namespace
 	};
 }
 
+#if 0
 void terraformer::render(
 	ridge_tree const& tree,
 	span_2d<float> output,
@@ -345,6 +346,35 @@ void terraformer::render(
 			);
 			printf("%zu\n", pixel_count);
 			fflush(stdout);
+		}
+	}
+}
+#endif
+
+void terraformer::render(
+	ridge_tree const& tree,
+	span_2d<float> output,
+	ridge_tree_render_description const&,
+	float pixel_size
+)
+{
+	auto const branches = static_cast<span<ridge_tree_trunk const>>(tree);
+	for(uint32_t k = 0; k != output.height(); ++k)
+	{
+		for(uint32_t l = 0; l != output.width(); ++l)
+		{
+			location const loc_scaled{static_cast<float>(l)*pixel_size, static_cast<float>(k)*pixel_size, 0.0f};
+			auto const distance_result = closest_point_xy(branches, loc_scaled);
+			if(distance_result.level == static_cast<size_t>(-1))
+			{ abort(); }
+#if 0
+			printf("%s vs %s\n",
+				to_string(distance_result.distance_result.loc).c_str(),
+				to_string(loc_scaled).c_str()
+			);
+#endif
+			auto const d_max = distance_result.distance_result.loc[2];
+			output(l, k) = std::max(d_max - distance_result.distance_result.distance, 0.0f);
 		}
 	}
 }
