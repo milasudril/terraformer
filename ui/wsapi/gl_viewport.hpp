@@ -46,7 +46,7 @@ namespace terraformer
 			while(true)
 			{
 				glfwPollEvents();
-				if(!f(args...))
+				if(f(args...))
 				{ return; }
 			}
 		}
@@ -114,6 +114,8 @@ namespace terraformer
 
 		void set_window_title(char const* title)
 		{	glfwSetWindowTitle(m_window.get(), title); }
+
+		auto handle() const { return m_window.get(); }
 
 	private:
 		window_handle m_window;
