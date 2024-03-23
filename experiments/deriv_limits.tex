@@ -80,25 +80,26 @@ x^2 +\frac{2B}{3A}x + \frac{C}{3A} < 0
 \]
 By completing the square,
 \[
- \left(x - \frac{B}{3A}\right)^2 - \left(\frac{B}{3A}\right)^2 + \frac{C}{3A} < 0 \iff \left(x - \frac{B}{3A}\right)^2  < \left(\frac{B}{3A}\right)^2 - \frac{C}{3A}
+ \left(x - \frac{B}{3A}\right)^2 - \left(\frac{B}{3A}\right)^2 + \frac{C}{3A} < 0
 \]
-with
+Since LHS should be less than zero, its value should be maximized. This happens at $x = 1$. This directly gives that $b < 0$. The solution is only valid when $A = b+a+2 > 0$, which gives $0 > a > -b - 2$. The upper bound comes from the fact that the derivative must be negative also in $x = 0$. The upper bound implies that $b > -2$.
+
+\paragraph{Case $A < 0$} If $A < 0$,
 \[
-\left(\frac{B}{3A}\right)^2 - \frac{C}{3A} > 0
+x^2 +\frac{2B}{3A}x + \frac{C}{3A} > 0
 \]
-Another option is that
+By completing the square,
 \[
-\left(\frac{B}{3A}\right)^2 - \frac{C}{3A} < 0 \land \forall x\in[0, 1]\;x^2 +\frac{2B}{3A}x + \frac{C}{3A} < 0
+ \left(x - \frac{B}{3A}\right)^2 - \left(\frac{B}{3A}\right)^2 + \frac{C}{3A} > 0
+\]
+Now LHS should instead be minimized, which happens for $x = \frac{B}{3A}$. Substituting this back into the derivative, gives
+\[
+ 3A\left(\frac{B}{3A}\right)^2 + 2B\left(\frac{B}{3A}\right) + C < 0 \iff B^2 + 2B^2 + 3AC = 3B^2 + 3AC > 0
+\]
+Then
+\[
+(b+2a+3)^2 + (b+a+2)a > 0
 \]
 
-First, assume that $\frac{B}{3A} > 0$. Then, the range of $x$ requires that
-\[
-3A + 2B + C < 0
-\]
 
-Now, assume that $\frac{B}{3A} < 0$. Then, the range of $x$ requires that
-\[
- C = a < 0
-\]
-
-\end{document}$
+\end{document}
