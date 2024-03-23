@@ -365,16 +365,16 @@ void terraformer::render(
 		{
 			location const loc_scaled{static_cast<float>(l)*pixel_size, static_cast<float>(k)*pixel_size, 0.0f};
 			auto const distance_result = closest_point_xy(branches, loc_scaled);
-			if(distance_result.level == static_cast<size_t>(-1))
+			if(distance_result.branch == ridge_tree_trunk::no_parent)
 			{ abort(); }
 #if 0
 			printf("%s vs %s\n",
 				to_string(distance_result.distance_result.loc).c_str(),
 				to_string(loc_scaled).c_str()
 			);
-#endif
 			auto const d_max = distance_result.distance_result.loc[2];
-			output(l, k) = std::max(d_max - distance_result.distance_result.distance, 0.0f);
+#endif
+			output(l, k) = static_cast<float>(distance_result.branch.get());
 		}
 	}
 }

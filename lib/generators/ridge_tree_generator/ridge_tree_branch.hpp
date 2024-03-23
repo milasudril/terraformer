@@ -145,7 +145,7 @@ namespace terraformer
 	struct ridge_tree_closest_point_info
 	{
 		curve_distance_result distance_result;
-		size_t level;
+		array_index<ridge_tree_trunk> branch;
 	};
 
 	inline ridge_tree_closest_point_info closest_point_xy(span<ridge_tree_trunk const> branches, location loc)
@@ -157,13 +157,13 @@ namespace terraformer
 					.loc = loc,
 					.distance = -1.0f
 				},
-				.level = static_cast<size_t>(-1)
+				.branch = ridge_tree_trunk::no_parent
 			};
 		}
 
 		ridge_tree_closest_point_info ret{
 			.distance_result = closest_point_xy(branches.front(), loc),
-			.level = branches.front().level
+			.branch = branches.first_element_index()
 		};
 
 		for(auto k = branches.first_element_index() + 1; k != std::size(branches); ++k)
@@ -175,7 +175,7 @@ namespace terraformer
 			if(res.distance < ret.distance_result.distance)
 			{
 				ret.distance_result = res;
-				ret.level = branches[k].level;
+				ret.branch = k;
 			}
 		}
 
