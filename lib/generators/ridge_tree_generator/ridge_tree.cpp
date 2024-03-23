@@ -289,7 +289,7 @@ namespace
 		void get_pixel_value(float& old_val, float new_val, float xi, float eta) const
 		{
 			terraformer::displacement const v{xi, eta, 0.0f};
-			auto const v_tangent = 3.0f*inner_product(v, m_tangent);
+			auto const v_tangent = inner_product(v, m_tangent);
 			auto const v_normal = inner_product(v, m_normal);
 			auto const r = std::min(std::sqrt(v_tangent*v_tangent + v_normal*v_normal), 1.0f);
 			auto const z = new_val*std::max(m_intensity_profile(r), 0.0f);
@@ -308,7 +308,7 @@ namespace
 	};
 }
 
-#if 0
+#if 1
 void terraformer::render(
 	ridge_tree const& tree,
 	span_2d<float> output,
@@ -344,12 +344,11 @@ void terraformer::render(
 				},
 				paint_mask.pixels()
 			);
-			printf("%zu\n", pixel_count);
 			fflush(stdout);
 		}
 	}
 }
-#endif
+#else
 
 void terraformer::render(
 	ridge_tree const& tree,
@@ -378,8 +377,8 @@ void terraformer::render(
 			auto const z_0 = std::max(distance_result[0].loc[2] - distance_result[0].distance, 0.0f);
 			auto const z_1 = std::max(distance_result[1].loc[2] - distance_result[1].distance, 0.0f);
 #endif
-
 			output(l, k) = std::max(3072.0f - distance_result[0].distance, 0.0f);
 		}
 	}
 }
+#endif
