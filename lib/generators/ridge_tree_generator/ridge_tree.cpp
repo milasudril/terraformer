@@ -364,17 +364,22 @@ void terraformer::render(
 		for(uint32_t l = 0; l != output.width(); ++l)
 		{
 			location const loc_scaled{static_cast<float>(l)*pixel_size, static_cast<float>(k)*pixel_size, 0.0f};
-			auto const distance_result = closest_point_xy(branches, loc_scaled);
-			if(distance_result.branch == ridge_tree_trunk::no_parent)
+			auto const distance_result = curve_closest_point_xy_2(branches.front().branches.get<0>().front().points(), loc_scaled);
+			if(distance_result[0].distance < 0.0f || distance_result[1].distance < 0.0f)
 			{ abort(); }
+
 #if 0
-			printf("%s vs %s\n",
-				to_string(distance_result.distance_result.loc).c_str(),
-				to_string(loc_scaled).c_str()
-			);
-			auto const d_max = distance_result.distance_result.loc[2];
+			location const a_xy{distance_result[0].loc[0], distance_result[0].loc[1], 0.0f};
+			location const b_xy{distance_result[1].loc[0], distance_result[1].loc[1], 0.0f};
+			auto const ab_xy = b_xy - a_xy;
+			auto const d2_ab_xy = norm_squared(ab_xy);
+			auto const t = inner_product(loc_scaled - a_xy, ab_xy/d2_ab_xy);
+
+			auto const z_0 = std::max(distance_result[0].loc[2] - distance_result[0].distance, 0.0f);
+			auto const z_1 = std::max(distance_result[1].loc[2] - distance_result[1].distance, 0.0f);
 #endif
-			output(l, k) = static_cast<float>(distance_result.branch.get());
+
+			output(l, k) = std::max(3072.0f - distance_result[0].distance, 0.0f);
 		}
 	}
 }
