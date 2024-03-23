@@ -3,7 +3,7 @@
 
 #include "./domain_size_description.hpp"
 #include "./initial_heightmap_description.hpp"
-#include "lib/rng.hpp"
+#include "lib/common/rng.hpp"
 
 namespace terraformer
 {

@@ -3,6 +3,7 @@
 #include "./array_index.hpp"
 
 #include <testfwk/testfwk.hpp>
+#include <optional>
 
 TESTCASE(terraformer_array_size_default_constructed)
 {
@@ -184,4 +185,9 @@ TESTCASE(terraformer_array_index_compare_to_size)
 	EXPECT_LE(terraformer::array_index<int>{34}, terraformer::array_index<int>{35});
 
 	EXPECT_NE(terraformer::array_index<int>{34}, terraformer::array_index<int>{35});
+}
+
+TESTCASE(terraformer_array_index_in_optional)
+{
+	std::optional<terraformer::array_index<int>> foobar;
 }

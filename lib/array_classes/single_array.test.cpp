@@ -49,8 +49,7 @@ TESTCASE(terraformer_single_array_push_back)
 		no_default_constructible_type::expect_ctor();
 		if(static_cast<size_t>(k) == array.capacity().get())
 		{ no_default_constructible_type::expect_move_ctor(array.capacity().get()); }
-		no_default_constructible_type::expect_move_ctor();
-		array.push_back(no_default_constructible_type{k});
+		array.push_back(k);
 	}
 
 	for(auto k = array.first_element_index(); k != std::size(array); ++k)
@@ -82,14 +81,11 @@ TESTCASE(terraformer_single_array_resize_grow_and_shrink)
 	for(int k = 0; k != 4; ++k)
 	{
 		default_constructible_type::expect_ctor();
-		default_constructible_type::expect_move_ctor();
-		array.push_back(default_constructible_type{k});
+		array.push_back(k);
 	}
 
-	for(int k = 0; k != 4; ++k)
-	{ default_constructible_type::expect_move_ctor(); }
-	for(int k = 0; k != 12; ++k)
-	{ default_constructible_type::expect_ctor(); }
+	default_constructible_type::expect_move_ctor(4);
+	default_constructible_type::expect_ctor(12);
 	array.resize(terraformer::array_size<default_constructible_type>{16});
 
 	EXPECT_EQ(array.capacity().get(), 16);
@@ -106,7 +102,6 @@ TESTCASE(terraformer_single_array_move)
 	terraformer::single_array<no_default_constructible_type> array;
 
 	no_default_constructible_type::expect_ctor(4);
-	no_default_constructible_type::expect_move_ctor(4);
 	array.push_back(1);
 	array.push_back(2);
 	array.push_back(3);
@@ -126,7 +121,6 @@ TESTCASE(terraformer_single_array_copy)
 	terraformer::single_array<no_default_constructible_type> array;
 
 	no_default_constructible_type::expect_ctor(4);
-	no_default_constructible_type::expect_move_ctor(4);
 	array.push_back(1);
 	array.push_back(2);
 	array.push_back(3);
@@ -146,27 +140,25 @@ TESTCASE(terraformer_single_array_copy)
 
 TESTCASE(terraformer_single_array_move_assign)
 {
-		terraformer::single_array<no_default_constructible_type> array;
+	terraformer::single_array<no_default_constructible_type> array;
 
-		no_default_constructible_type::expect_ctor(4);
-		no_default_constructible_type::expect_move_ctor(4);
-		array.push_back(1);
-		array.push_back(2);
-		array.push_back(3);
-		array.push_back(4);
+	no_default_constructible_type::expect_ctor(4);
+	array.push_back(1);
+	array.push_back(2);
+	array.push_back(3);
+	array.push_back(4);
 
-		terraformer::single_array<no_default_constructible_type> other;
-		no_default_constructible_type::expect_ctor(3);
-		no_default_constructible_type::expect_move_ctor(3);
-		other.push_back(5);
-		other.push_back(6);
-		other.push_back(7);
+	terraformer::single_array<no_default_constructible_type> other;
+	no_default_constructible_type::expect_ctor(3);
+	other.push_back(5);
+	other.push_back(6);
+	other.push_back(7);
 
-		auto new_ptr = std::data(other);
+	auto new_ptr = std::data(other);
 
-		array = std::move(other);
-		EXPECT_EQ(std::data(array), new_ptr);
-		EXPECT_EQ(std::data(other), nullptr);
-		EXPECT_EQ(std::size(array).get(), 3);
-		EXPECT_EQ(std::size(other).get(), 0);
+	array = std::move(other);
+	EXPECT_EQ(std::data(array), new_ptr);
+	EXPECT_EQ(std::data(other), nullptr);
+	EXPECT_EQ(std::size(array).get(), 3);
+	EXPECT_EQ(std::size(other).get(), 0);
 }

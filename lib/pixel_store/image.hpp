@@ -82,6 +82,10 @@ namespace terraformer
 		}
 	};
 
+	template<class T, class PixelType>
+	auto create_with_same_size(span_2d<PixelType> span)
+	{	return basic_image<T>{span.width(), span.height()};	}
+
 	using image = basic_image<rgba_pixel>;
 
 	using grayscale_image = basic_image<float>;

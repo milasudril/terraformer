@@ -1,23 +1,25 @@
 #ifndef TERRAFORMER_ARRAY_INDEX_HPP
 #define TERRAFORMER_ARRAY_INDEX_HPP
 
+#include "lib/common/tuple.hpp"
+
 #include <type_traits>
 #include <cstddef>
 #include <stdexcept>
 
 namespace terraformer
 {
-	template<class Tag, class Rep = size_t>
+	template<class T, class Rep = size_t>
 	class array_size
 	{
 	public:
-		constexpr array_size() = default;
+		constexpr array_size() noexcept = default;
 
-		constexpr explicit array_size(Rep value): m_value{value}{}
+		constexpr explicit array_size(Rep value) noexcept: m_value{value}{}
 
-		constexpr auto get() const { return m_value; }
+		constexpr auto get() const noexcept { return m_value; }
 
-		constexpr auto operator<=>(array_size const&) const = default;
+		constexpr auto operator<=>(array_size const&) const noexcept = default;
 
 		constexpr array_size& operator+=(array_size other)
 		{
@@ -44,8 +46,11 @@ namespace terraformer
 		}
 
 		template<class Other>
-		explicit operator array_size<Other, Rep>() const
+		constexpr explicit operator array_size<Other, Rep>() const noexcept
 		{ return array_size<Other>{m_value}; }
+
+		constexpr explicit operator Rep() const
+		{ return m_value; }
 
 	private:
 		Rep m_value{};
@@ -54,103 +59,129 @@ namespace terraformer
 	template<class Rep = size_t>
 	using byte_size = array_size<std::byte, Rep>;
 
-	template<class Type, class Tag, class Rep>
-	constexpr auto make_byte_size(array_size<Tag, Rep> size)
-	{ return byte_size{(sizeof(Type)*size).get()}; }
+	template<class T, class Rep>
+	constexpr auto make_byte_size(array_size<T, Rep> size)
+	{ return byte_size{(sizeof(T)*size).get()}; }
 
-	template<class Tag, class Rep>
-	constexpr auto operator+(array_size<Tag, Rep> a, array_size<Tag, Rep> b)
+	template<class T, class Rep>
+	constexpr auto operator+(array_size<T, Rep> a, array_size<T, Rep> b)
 	{ return a += b; }
 
-	template<class Tag, class Rep>
-	constexpr auto operator-(array_size<Tag, Rep> a, array_size<Tag, Rep> b)
+	template<class T, class Rep>
+	constexpr auto operator-(array_size<T, Rep> a, array_size<T, Rep> b)
 	{ return a -= b; }
 
-	template<class Tag, class Rep>
-	constexpr auto operator*(Rep c, array_size<Tag, Rep> a)
+	template<class T, class Rep>
+	constexpr auto operator*(Rep c, array_size<T, Rep> a)
 	{ return a *= c; }
 
-	template<class Tag, class Rep = size_t>
+	template<class T, class Rep = size_t>
 	class array_index
 	{
 	public:
 		using offset_type = std::make_signed_t<Rep>;
+		using rep = Rep;
+		using tag = T;
 
-		constexpr array_index() = default;
+		constexpr array_index() noexcept = default;
 
-		constexpr explicit array_index(array_size<Tag, Rep> value):m_value{value.get()}{}
+		constexpr explicit array_index(array_size<T, Rep> value) noexcept: m_value{value}{}
 
-		constexpr explicit array_index(Rep value): m_value{value}{}
+		constexpr explicit array_index(Rep value) noexcept: m_value{value}{}
 
-		constexpr auto get() const { return m_value; }
+		constexpr auto get() const noexcept { return m_value; }
 
-		constexpr auto& operator+=(offset_type other)
+		constexpr auto& operator+=(offset_type other) noexcept
 		{
 			m_value += other;
 			return *this;
 		}
 
-		constexpr auto& operator-=(offset_type other)
+		constexpr auto& operator-=(offset_type other) noexcept
 		{
 			m_value -= other;
 			return *this;
 		}
 
-		constexpr auto& operator++()
+		constexpr auto& operator++() noexcept
 		{
 			++m_value;
 			return *this;
 		}
 
-		constexpr auto operator++(int)
+		constexpr auto operator++(int) noexcept
 		{
 			auto const tmp = *this;
 			++m_value;
 			return tmp;
 		}
 
-		constexpr auto& operator--()
+		constexpr auto& operator--() noexcept
 		{
 			--m_value;
 			return *this;
 		}
 
-		constexpr auto operator--(int)
+		constexpr auto operator--(int) noexcept
 		{
 			auto const tmp = *this;
 			--m_value;
 			return tmp;
 		}
 
-		constexpr auto operator<=>(array_index const&) const = default;
+		constexpr auto operator<=>(array_index const&) const noexcept = default;
+
+		template<class Other>
+		requires requires { {Other::template match_tag<T>()}; }
+		constexpr explicit operator array_index<Other, Rep>() const noexcept
+		{ return array_index<Other>{m_value}; }
+
+		constexpr explicit operator array_size<T, Rep>() const noexcept
+		{ return array_size<T, Rep>{m_value}; }
 
 	private:
 		Rep m_value{};
 	};
 
-	template<class Tag, class Rep>
-	constexpr auto operator+(array_index<Tag, Rep> base, typename array_index<Tag, Rep>::offset_type offset)
+	template<class T, class Rep>
+	constexpr auto operator+(array_index<T, Rep> base, typename array_index<T, Rep>::offset_type offset) noexcept
 	{ return base += offset; }
 
-	template<class Tag, class Rep>
-	constexpr auto operator-(array_index<Tag, Rep> base, typename array_index<Tag, Rep>::offset_type offset)
+	template<class T, class Rep>
+	constexpr auto operator-(array_index<T, Rep> base, typename array_index<T, Rep>::offset_type offset) noexcept
 	{ return base -= offset; }
 
-	template<class Tag, class Rep>
-	constexpr auto& deref(Tag* ptr, array_index<Tag, Rep> index)
+	template<class T, class Rep>
+	constexpr auto& deref(T* ptr, array_index<T, Rep> index) noexcept
 	{ return ptr[index.get()]; }
 
-	template<class Tag, class Rep>
-	constexpr auto& deref(Tag const* ptr, array_index<Tag, Rep> index)
+	template<class T, class Rep>
+	constexpr auto& deref(T const* ptr, array_index<T, Rep> index) noexcept
 	{ return ptr[index.get()]; }
 
-	template<class Tag, class Rep>
-	constexpr auto operator<(array_index<Tag, Rep> index, array_size<Tag, Rep> size)
+	template<class T, class Rep>
+	constexpr auto operator<(array_index<T, Rep> index, array_size<T, Rep> size) noexcept
 	{ return index.get() < size.get(); }
 
-	template<class Tag, class Rep>
-	constexpr auto operator!=(array_index<Tag, Rep> index, array_size<Tag, Rep> size)
+	template<class T, class Rep>
+	constexpr auto operator!=(array_index<T, Rep> index, array_size<T, Rep> size) noexcept
 	{ return index.get() != size.get(); }
 
+	template<class T, class Rep>
+	constexpr auto operator==(array_index<T, Rep> index, array_size<T, Rep> size) noexcept
+	{ return index.get() == size.get(); }
+
+	template<class T, class Rep = size_t>
+	constexpr auto as_index(T* base, T* offset) noexcept
+	{ return array_index<T, Rep>{static_cast<Rep>(std::distance(base, offset))}; }
+
+	template<class Pointer>
+	requires requires { typename Pointer::index_type; }
+	constexpr auto as_index(Pointer base, Pointer offset) noexcept
+	{
+		using Rep = typename Pointer::index_type::rep;
+		return typename Pointer::index_type{static_cast<Rep>(std::distance(base, offset))};
+
+	}
 }
 #endif

@@ -36,10 +36,10 @@ namespace terraformer
 		}
 
 		template <size_t... Is, class Tuple>
-		void destroy(std::index_sequence<Is...>, Tuple const& from, size_t size)
+		void destroy(std::index_sequence<Is...>, Tuple const& from, size_t size, size_t offset = 0)
 		{
 			(...,(
-			std::destroy(get<Is>(from), get<Is>(from) + size)
+			std::destroy(get<Is>(from) + offset, get<Is>(from) + size)
 			));
 		}
 
@@ -88,13 +88,14 @@ namespace terraformer
 		using temp_storage = tuple<ptr_to_buffer_holder<Types>...>;
 
 		template<class ... Types>
-		auto make_temp_storage(uint32_t elem_count)
+		auto make_temp_storage(size_t elem_count)
 		{
 			return temp_storage
 			{
 				// Do not care about the possibility of nullptr for now. Let it crash if
 				// a pointer is nullptr
-				ptr_to_buffer_holder<Types>{malloc(static_cast<size_t>(elem_count)*sizeof(Types))}...
+				// FIXME: Potential arithmetic overflow!
+				ptr_to_buffer_holder<Types>{malloc(elem_count*sizeof(Types))}...
 			};
 		}
 	}
@@ -104,7 +105,7 @@ namespace terraformer
 	{
 		using storage_type = tuple<Types*...>;
 	public:
-		using size_type = uint32_t;
+		using size_type = size_t;
 		using value_type = tuple<Types...>;
 		using cref_value_type = tuple<Types const&...>;
 
@@ -224,6 +225,19 @@ namespace terraformer
 		array_tuple():m_size{0},m_capacity{0},m_storage{}
 		{}
 
+		explicit array_tuple(size_type n):m_size{n}, m_capacity{n}, m_storage{create_storage(n)}
+		{
+			for(size_type k = 0; k != n; ++k)
+			{
+				array_tuple_detail::construct_at(
+					std::make_index_sequence<sizeof...(Types)>{},
+					m_storage,
+					k,
+					std::tuple<Types...>{}
+				);
+			}
+		}
+
 		~array_tuple()
 		{ free(); }
 
@@ -301,6 +315,21 @@ namespace terraformer
 
 		[[nodiscard]] size_type capacity() const
 		{ return m_capacity; }
+
+		void shrink(size_t new_size)
+		{
+			if(new_size == m_size) { return; }
+
+			assert(new_size < size());
+
+			array_tuple_detail::destroy(
+				std::make_index_sequence<sizeof...(Types)>{},
+				m_storage,
+				m_size,
+				new_size
+			);
+			m_size = new_size;
+		}
 
 
 

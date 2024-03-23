@@ -10,15 +10,19 @@ namespace terraformer
 	class single_array
 	{
 	public:
-		single_array() = default;
+		using size_type = array_size<T>;
+		using index_type = array_index<T>;
+		using value_type = T;
 
-		explicit single_array(array_size<T> size)
+		single_array() noexcept= default;
+
+		explicit single_array(size_type size)
 		{ resize(size); }
 
 		single_array(single_array&& other) noexcept:
 			m_storage{std::exchange(other.m_storage, memory_block{})},
-			m_size{std::exchange(other.m_size, array_size<T>{})},
-			m_capacity{std::exchange(other.m_capacity, array_size<T>{})}
+			m_size{std::exchange(other.m_size, size_type{})},
+			m_capacity{std::exchange(other.m_capacity, size_type{})}
 		{ }
 
 		single_array(single_array const& other):
@@ -31,44 +35,50 @@ namespace terraformer
 		{
 			clear();
 			m_storage = std::exchange(other.m_storage, memory_block{});
-			m_size = std::exchange(other.m_size, array_size<T>{});
-			m_capacity = std::exchange(other.m_capacity, array_size<T>{});
+			m_size = std::exchange(other.m_size, size_type{});
+			m_capacity = std::exchange(other.m_capacity, size_type{});
 			return *this;
 		}
 
 		single_array& operator=(single_array const& other) = delete;
 
-		~single_array()
+		~single_array() noexcept
 		{ clear(); }
 
-		constexpr auto first_element_index() const
-		{ return array_index<T>{}; }
+		constexpr auto first_element_index() const noexcept
+		{ return index_type{}; }
 
-		auto size() const
+		constexpr auto last_element_index() const noexcept
+		{ return index_type{(m_size - size_type{1}).get()}; }
+
+		auto size() const noexcept
 		{ return m_size; }
 
-		auto capacity() const
+		auto empty() const noexcept
+		{ return m_size.get() == 0; }
+
+		auto capacity() const noexcept
 		{ return m_capacity; }
 
-		auto data()
+		auto data() noexcept
 		{ return m_storage.interpret_as<T>(); }
 
-		auto data() const
+		auto data() const noexcept
 		{ return m_storage.interpret_as<T const>(); }
 
-		auto begin()
+		auto begin() noexcept
 		{ return data(); }
 
-		auto begin() const
+		auto begin() const noexcept
 		{ return data(); }
 
-		auto end()
+		auto end() noexcept
 		{ return begin() + size().get(); }
 
-		auto end() const
+		auto end() const noexcept
 		{ return begin() + size().get(); }
 
-		void reserve(array_size<T> new_capacity)
+		void reserve(size_type new_capacity)
 		{
 			if(new_capacity > m_capacity)
 			{
@@ -80,27 +90,28 @@ namespace terraformer
 			}
 		}
 
-		void push_back(T&& elem)
+		template<class Arg>
+		requires (std::is_same_v<std::remove_cvref_t<Arg>, T> || std::is_convertible_v<Arg, T>)
+		void push_back(Arg&& elem)
 		{
-			auto new_size = m_size + terraformer::array_size<T>{1};
+			auto new_size = m_size + size_type{1};
 			if(new_size > m_capacity)
-			{ reserve(std::max(terraformer::array_size<T>{8}, static_cast<size_t>(2)*capacity())); }
-			std::construct_at(m_storage.interpret_as<T>() + m_size.get(), std::move(elem));
+			{ reserve(std::max(size_type{8}, static_cast<size_t>(2)*capacity())); }
+			std::construct_at(m_storage.interpret_as<T>() + m_size.get(), std::forward<Arg>(elem));
 			m_size = new_size;
 		}
 
 		void clear() noexcept
 		{
 			std::destroy(begin(), end());
-			m_size = array_size<T>{};
+			m_size = size_type{};
 		}
 
-		void resize(array_size<T> new_size)
+		void resize(size_type new_size)
 		{
 			if(new_size < m_size)
 			{
-				truncate_from(array_index<T>{new_size.get()});
-				m_size = new_size;
+				truncate_from(index_type{new_size.get()});
 				return;
 			}
 
@@ -114,25 +125,40 @@ namespace terraformer
 			}
 		}
 
-		void truncate_from(array_index<T> index)
-		{ std::destroy(begin() + index.get(), end()); }
+		void truncate_from(index_type index) noexcept
+		{
+			std::destroy(begin() + index.get(), end());
+			m_size = size_type{index};
+		}
 
-		auto& operator[](array_index<T> index)
+		auto& operator[](index_type index) noexcept
 		{ return deref(data(), index); }
 
-		auto& operator[](array_index<T> index) const
+		auto& operator[](index_type index) const noexcept
 		{ return deref(data(), index); }
 
-		operator span<T>()
-		{ return span{begin(), end()}; }
+		operator span<T, index_type, size_type>() noexcept
+		{ return span<T, index_type, size_type>{begin(), end()}; }
 
-		operator span<T const>()
-		{ return span{end(), end()}; }
+		operator span<T const>() const noexcept
+		{ return span<T const, index_type, size_type>{begin(), end()}; }
+
+		auto& front() noexcept
+		{ return *begin(); }
+
+		auto const& front() const noexcept
+		{ return *begin(); }
+
+		auto& back() noexcept
+		{ return *(end() - 1); }
+
+		auto const& back() const noexcept
+		{ return *(end() - 1);}
 
 	private:
 		memory_block m_storage{};
-		array_size<T> m_size{};
- 		array_size<T> m_capacity{};
+		size_type m_size{};
+ 		size_type m_capacity{};
 	};
 }
 

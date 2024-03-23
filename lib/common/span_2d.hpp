@@ -1,9 +1,7 @@
 #ifndef TERRAFORMER_SPAN2D_HPP
 #define TERRAFORMER_SPAN2D_HPP
 
-#include "lib/boundary_sampling_policy.hpp"
 #include "./spaces.hpp"
-#include "lib/interp.hpp"
 
 #include <functional>
 #include <cstdint>
@@ -227,48 +225,6 @@ namespace terraformer
 			}
 		}
 		return ret;
-	}
-
-	template<class T, boundary_sampling_policy U>
-	inline auto grad(span_2d<T const> span, float x, float y, float scale, U&& bsp)
-	{
-		auto const x0 = x - 1.0f;
-		auto const x1 = x + 1.0f;
-		auto const y0 = y - 1.0f;
-		auto const y1 = y + 1.0f;
-
-		auto const z_x1_y = interp(span, x1, y, bsp);
-		auto const z_x0_y = interp(span, x0, y, bsp);
-		auto const z_x_y1 = interp(span, x, y1, bsp);
-		auto const z_x_y0 = interp(span, x, y0, bsp);
-
-		return 0.5f*scale*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
-	}
-
-	template<class T, boundary_sampling_policy U>
-	inline auto grad(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U&& bsp)
-	{
-		auto const w = span.width();
-		auto const h = span.height();
-
-		auto const x0 = bsp(static_cast<int32_t>(x) - 1, w);
-		auto const x1 = bsp(static_cast<int32_t>(x) + 1, w);
-		auto const y0 = bsp(static_cast<int32_t>(y) - 1, h);
-		auto const y1 = bsp(static_cast<int32_t>(y) + 1, h);
-
-		auto const z_x1_y = span(x1, y);
-		auto const z_x0_y = span(x0, y);
-		auto const z_x_y1 = span(x, y1);
-		auto const z_x_y0 = span(x, y0);
-
-		return 0.5f*scale*displacement{z_x1_y - z_x0_y, z_x_y1 - z_x_y0, 0.0f};
-	}
-
-	template<class T, boundary_sampling_policy U>
-	inline auto normal(span_2d<T const> span, uint32_t x, uint32_t y, float scale, U&& bsp)
-	{
-		auto const g = grad(span, x, y, scale, bsp);
-		return direction{displacement{-g[0], -g[1], 1.0f}};
 	}
 
 	inline auto to_location(span_2d<float const> span, uint32_t x, uint32_t y)

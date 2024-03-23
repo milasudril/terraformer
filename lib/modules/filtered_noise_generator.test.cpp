@@ -2,7 +2,7 @@
 
 #include "./filtered_noise_generator.hpp"
 #include "lib/pixel_store/image.hpp"
-#include "lib/rng.hpp"
+#include "lib/common/rng.hpp"
 
 #include <testfwk/testfwk.hpp>
 

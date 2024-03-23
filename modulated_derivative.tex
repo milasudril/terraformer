@@ -1,0 +1,25 @@
+\documentclass[a4paper, 12pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{amsmath}
+\newcommand{\deriv}[1]{\ensuremath{\frac{\mathrm{d}}}{\mathrm{d}{#1}}}
+
+\begin{document}
+
+\[
+ y^\prime(x) = \deriv{x}\left(f(x)(1 + kg(x))\right) = (1 + kg(x))\deriv{x}f(x) + f(x) k\deriv{x}g(x)
+\]
+
+
+\[
+ y^\prime(x) - (1 + kg(x))\deriv{x}f(x) = f(x) k\deriv{x}g(x)
+\]
+
+\[
+ \frac{y^\prime(x) - (1 + kg(x))\deriv{x}f(x)}{f(x) k} =\deriv{x}g(x)
+\]
+
+To be computed in $x=x_0$ and $x=x_1$.
+
+\end{document}
