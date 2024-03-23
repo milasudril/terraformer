@@ -43,9 +43,11 @@ namespace terraformer
 		template<class Callable, class ... Args>
 		void read_events(Callable&& f, Args&&... args)
 		{
-			while(!f(args...))
+			while(true)
 			{
 				glfwPollEvents();
+				if(!f(args...))
+				{ return; }
 			}
 		}
 
