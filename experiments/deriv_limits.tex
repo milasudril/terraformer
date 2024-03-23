@@ -4,6 +4,7 @@
 \usepackage{lmodern}
 \usepackage[intlimits]{amsmath}
 \usepackage{fixme}
+\usepackage{amssymb}
 
 
 \title{Limits of spline derivatives}
@@ -100,6 +101,15 @@ Then
 \[
 (b+2a+3)^2 + (b+a+2)a = {{b}^{2}}+ 5 ab + 6b + 5 {{a}^{2}}+14 a+9 > 0
 \]
+which means that $b$ must be outside the range, unless $a\in[-\frac{4}{5}, 0]$,
+\[
+ \left[\frac{-\sqrt{5 {{a}^{2}}+4 a}-(5a+6)}{2}, \frac{\sqrt{5 {{a}^{2}}+4 a}-(5a+6)}{2}\right]
+\]
+Since $A < 0$, it must also hold that $b+a+2 < 0 \iff b < -(a + 2)$. Moreover, since $x\in[0, 1]$, $B = -b-2a-3$ has the same sign as $A$, and $B=-b-2a-3 < 0 \iff b > -(3 + 2a)$. Then $b$ is within the set
+\[
+ \complement\left[\frac{-\sqrt{5 {{a}^{2}}+4 a}-(5a+6)}{2}, \frac{\sqrt{5 {{a}^{2}}+4 a}-(5a+6)}{2}\right] \cap \left[-(3 + 2a), -(2 + a)\right]
+\], with $a < 0$.
+
 
 
 \end{document}
