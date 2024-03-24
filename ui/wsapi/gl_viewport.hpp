@@ -15,6 +15,7 @@
 #include <memory>
 #include <stdexcept>
 #include <cstdio>
+#include <optional>
 
 namespace terraformer::ui::wsapi
 {
@@ -135,21 +136,98 @@ namespace terraformer::ui::wsapi
 		{	return activate_render_context(std::forward<Args>(args)...);	}
 	}
 
+	struct window_geometry_configuration
+	{
+		int width{800};
+		int height{500};
+	};
+
+	enum class window_features:uint32_t{
+		decorated = 0x1,
+		initially_focused = 0x2,
+		focus_on_show = 0x4,
+		user_resizable = 0x8,
+		initially_maximized = 0x10,
+	};
+
+	constexpr window_features operator~(window_features value)
+	{ return static_cast<window_features>(~static_cast<uint32_t>(value)); }
+
+	constexpr window_features operator|(window_features a, window_features b)
+	{ return static_cast<window_features>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b)); }
+
+	constexpr window_features& operator|=(window_features& a, window_features b)
+	{ return a = a | b; }
+
+	constexpr window_features operator&(window_features a, window_features b)
+	{ return static_cast<window_features>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)); }
+
+	constexpr window_features& operator&=(window_features& a, window_features b)
+	{ return a = a & b; }
+
+	constexpr window_features operator^(window_features a, window_features b)
+	{ return static_cast<window_features>(static_cast<uint32_t>(a) ^ static_cast<uint32_t>(b)); }
+
+	constexpr auto is_set(window_features a, window_features feature)
+	{ return static_cast<bool>(a & feature); }
+
+	struct window_configuration
+	{
+		window_geometry_configuration geometry;
+		window_features features{
+			 window_features::user_resizable
+			|window_features::decorated
+			|window_features::focus_on_show
+		};
+	};
+
+	inline void enable(context&, window_configuration const& cfg)
+	{
+		glfwWindowHint(
+			GLFW_DECORATED,
+			is_set(cfg.features, window_features::decorated) ? GLFW_TRUE:GLFW_FALSE
+		);
+		glfwWindowHint(
+			GLFW_FOCUSED,
+			is_set(cfg.features, window_features::initially_focused) ? GLFW_TRUE:GLFW_FALSE
+		);
+		glfwWindowHint(
+			GLFW_FOCUS_ON_SHOW,
+			is_set(cfg.features, window_features::focus_on_show) ? GLFW_TRUE:GLFW_FALSE
+		);
+		glfwWindowHint(
+			GLFW_RESIZABLE,
+			is_set(cfg.features, window_features::user_resizable) ? GLFW_TRUE:GLFW_FALSE
+		);
+		glfwWindowHint(
+			GLFW_MAXIMIZED,
+			is_set(cfg.features, window_features::initially_maximized) ? GLFW_TRUE:GLFW_FALSE
+		);
+	}
+
 	template<class RenderContextConfiguration = no_api_config>
 	class native_window
 	{
 	public:
 		explicit native_window(
 			context& ctxt,
-			uint32_t width,
-			uint32_t height,
 			char const* title,
-			RenderContextConfiguration&& cfg = RenderContextConfiguration{}
-		):
-			m_ctxt_cfg{std::move(cfg)}
+			RenderContextConfiguration&& ctxt_cfg = RenderContextConfiguration{},
+			window_configuration const& wincfg = window_configuration{}):
+			m_ctxt_cfg{std::move(ctxt_cfg)}
 		{
-			prepare_surface(ctxt, cfg);
-			m_window.reset(glfwCreateWindow(width, height, title, nullptr, nullptr));
+			enable(ctxt, wincfg);
+			prepare_surface(ctxt, m_ctxt_cfg);
+			m_window.reset(
+				glfwCreateWindow(
+					wincfg.geometry.width,
+					wincfg.geometry.height,
+					title,
+					nullptr,
+					nullptr
+				)
+			);
+
 			if(m_window == nullptr)
 			{ throw std::runtime_error{"Failed to create a window"}; }
 			activate_render_context();

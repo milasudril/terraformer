@@ -64,8 +64,6 @@ int main(int, char**)
 	auto& gui_ctxt = terraformer::ui::wsapi::context::get();
 	terraformer::ui::wsapi::native_window mainwin{
 		gui_ctxt,
-		800,
-		500,
 		"Terraformer",
 		terraformer::ui::wsapi::gl_surface_configuration{
 			.api_version{
