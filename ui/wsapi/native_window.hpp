@@ -43,17 +43,6 @@ namespace terraformer::ui::wsapi
 		int height;
 	};
 
-	namespace detail
-	{
-		template<class ... Args>
-		decltype(auto) do_swap_buffers(Args&&... args)
-		{	return swap_buffers(std::forward<Args>(args)...);	}
-
-		template<class ... Args>
-		decltype(auto) do_activate_render_context(Args&&... args)
-		{	return activate_render_context(std::forward<Args>(args)...);	}
-	}
-
 	struct window_geometry_configuration
 	{
 		int width{800};
@@ -152,10 +141,16 @@ namespace terraformer::ui::wsapi
 		}
 
 		void activate_render_context()
-		{ detail::do_activate_render_context(m_window.get(), m_ctxt_cfg); }
+		{
+			using wsapi::activate_render_context;
+			activate_render_context(m_window.get(), m_ctxt_cfg);
+		}
 
 		void swap_buffers()
-		{ detail::do_swap_buffers(m_window.get(), m_ctxt_cfg); }
+		{
+			using wsapi::swap_buffers;
+			swap_buffers(m_window.get(), m_ctxt_cfg);
+		}
 
 		template<class EventHandler>
 		void set_event_handler(std::reference_wrapper<EventHandler> eh)
