@@ -16,7 +16,7 @@
 #include <stdexcept>
 #include <cstdio>
 
-namespace terraformer
+namespace terraformer::ui::wsapi
 {
 	struct window_handle_deleter
 	{

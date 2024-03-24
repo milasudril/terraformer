@@ -16,10 +16,10 @@ namespace
 		void window_is_closing()
 		{ should_close = true; }
 
-		void framebuffer_size_changed(terraformer::gl_viewport::fb_size size)
+		void framebuffer_size_changed(terraformer::ui::wsapi::gl_viewport::fb_size size)
 		{fb_size = size;}
 
-		bool operator()(terraformer::gl_viewport& viewport)
+		bool operator()(terraformer::ui::wsapi::gl_viewport& viewport)
 		{
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
@@ -37,6 +37,7 @@ namespace
 				,ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
 				|ImGuiWindowFlags_::ImGuiWindowFlags_NoResize
 				|ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar
+				|ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar
 			);
 
 			for(size_t k = 0; k != 10; ++k)
@@ -54,14 +55,14 @@ namespace
 		}
 
 		bool should_close{false};
-		terraformer::gl_viewport::fb_size fb_size;
+		terraformer::ui::wsapi::gl_viewport::fb_size fb_size;
 	};
 }
 
 int main(int, char**)
 {
-	auto& gui_ctxt = terraformer::glfw_context::get();
-	terraformer::gl_viewport mainwin{gui_ctxt, 800, 500, "Terraformer"};
+	auto& gui_ctxt = terraformer::ui::wsapi::glfw_context::get();
+	terraformer::ui::wsapi::gl_viewport mainwin{gui_ctxt, 800, 500, "Terraformer"};
 
 	my_event_handler eh;
 	mainwin.set_event_handler(std::ref(eh));
