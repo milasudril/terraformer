@@ -31,12 +31,12 @@ namespace terraformer::ui::wsapi
 
 	using window_handle = std::unique_ptr<GLFWwindow, window_handle_deleter>;
 
-	class glfw_context
+	class context
 	{
 	public:
-		static glfw_context& get()
+		static context& get()
 		{
-			static glfw_context ctxt;
+			static context ctxt;
 			return ctxt;
 		}
 
@@ -52,12 +52,12 @@ namespace terraformer::ui::wsapi
 		}
 
 	private:
-		glfw_context()
+		context()
 		{
 			glfwInit();
 		}
 
-		~glfw_context()
+		~context()
 		{
 			glfwTerminate();
 		}
@@ -72,7 +72,7 @@ namespace terraformer::ui::wsapi
 			int height;
 		};
 
-		explicit gl_viewport(glfw_context const&,
+		explicit gl_viewport(context const&,
 			uint32_t width, uint32_t height, char const* title)
 		{
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);

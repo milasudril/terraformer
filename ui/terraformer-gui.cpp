@@ -61,7 +61,7 @@ namespace
 
 int main(int, char**)
 {
-	auto& gui_ctxt = terraformer::ui::wsapi::glfw_context::get();
+	auto& gui_ctxt = terraformer::ui::wsapi::context::get();
 	terraformer::ui::wsapi::gl_viewport mainwin{gui_ctxt, 800, 500, "Terraformer"};
 
 	my_event_handler eh;
