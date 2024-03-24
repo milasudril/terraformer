@@ -17,11 +17,12 @@ namespace
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{fb_size = size;}
 
-		bool operator()(terraformer::ui::wsapi::native_window<terraformer::ui::renderer::gl_surface_configuration>& viewport)
+		bool operator()(
+			terraformer::ui::wsapi::native_window<terraformer::ui::renderer::gl_surface_configuration>& viewport,
+			terraformer::ui::widgets::toolkit_instance& tk
+		)
 		{
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
-			ImGui::NewFrame();
+			tk.prepare_frame();
 
 			ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
 			ImGui::SetNextWindowSize(
@@ -45,8 +46,7 @@ namespace
 
 			ImGui::End();
 			glClear(GL_COLOR_BUFFER_BIT);
-			ImGui::Render();
-			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			tk.finalize_frame();
 
 			viewport.swap_buffers();
 			return should_close;
@@ -75,5 +75,5 @@ int main(int, char**)
 
 	my_event_handler eh;
 	mainwin.set_event_handler(std::ref(eh));
-	gui_ctxt.wait_events(std::ref(eh), std::ref(mainwin));
+	gui_ctxt.wait_events(std::ref(eh), std::ref(mainwin), std::ref(toolkit));
 }

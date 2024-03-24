@@ -27,6 +27,19 @@ namespace terraformer::ui::widgets
 			ImGui_ImplGlfw_InitForOpenGL(window, true);
 		}
 
+		void prepare_frame()
+		{
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+		}
+
+		void finalize_frame()
+		{
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+		}
+
 		~toolkit_instance()
 		{
 			ImGui_ImplOpenGL3_Shutdown();
