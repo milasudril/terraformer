@@ -3,7 +3,8 @@
 //@		"dependencies":[{"ref": "imgui", "origin":"pkg-config"}]
 //@	}
 
-#include "./wsapi/gl_viewport.hpp"
+#include "./renderer/gl_surface_configuration.hpp"
+#include "./wsapi/native_window.hpp"
 
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
@@ -19,7 +20,7 @@ namespace
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{fb_size = size;}
 
-		bool operator()(terraformer::ui::wsapi::native_window<terraformer::ui::wsapi::gl_surface_configuration>& viewport)
+		bool operator()(terraformer::ui::wsapi::native_window<terraformer::ui::renderer::gl_surface_configuration>& viewport)
 		{
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
@@ -65,7 +66,7 @@ int main(int, char**)
 	terraformer::ui::wsapi::native_window mainwin{
 		gui_ctxt,
 		"Terraformer",
-		terraformer::ui::wsapi::gl_surface_configuration{
+		terraformer::ui::renderer::gl_surface_configuration{
 			.api_version{
 				.major = 4,
 				.minor = 6
