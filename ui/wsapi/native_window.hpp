@@ -16,7 +16,7 @@
 
 namespace terraformer::ui::wsapi
 {
-	struct window_handle_deleter
+	struct native_window_handle_deleter
 	{
 		void operator()(GLFWwindow* window) const
 		{
@@ -27,7 +27,7 @@ namespace terraformer::ui::wsapi
 		}
 	};
 
-	using window_handle = std::unique_ptr<GLFWwindow, window_handle_deleter>;
+	using window_handle = std::unique_ptr<GLFWwindow, native_window_handle_deleter>;
 
 	struct no_api_config{};
 
