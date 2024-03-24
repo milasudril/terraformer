@@ -4,8 +4,7 @@
 
 #include "./renderer/gl_surface_configuration.hpp"
 #include "./wsapi/native_window.hpp"
-#include "./font_handling/font_mapper.hpp"
-#include "./widgets/toolkit_instance.hpp"
+#include "./widgets/client_window.hpp"
 
 namespace
 {
@@ -23,28 +22,26 @@ namespace
 		)
 		{
 			tk.prepare_frame();
-
-			ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
-			ImGui::SetNextWindowSize(
-				ImVec2{
-					static_cast<float>(fb_size.width),
-					static_cast<float>(fb_size.height)
-				}
-			);
-			ImGui::Begin("##mainwin"
-				,nullptr
-				,ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
-				|ImGuiWindowFlags_::ImGuiWindowFlags_NoResize
-				|ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar
-				|ImGuiWindowFlags_::ImGuiWindowFlags_MenuBar
-			);
-
-			for(size_t k = 0; k != 10; ++k)
 			{
-				ImGui::Button(std::to_string(k).append(" A Button sdajkflase foeisaj pseaifj espaof jesapf ").c_str());
+				terraformer::ui::widgets::client_window window{
+					tk,
+					nullptr,
+					terraformer::ui::widgets::window_configuration{
+						.geometry{
+							.loc_x = 0.0f,
+							.loc_y = 0.0f,
+							.width = static_cast<float>(fb_size.width),
+							.height = static_cast<float>(fb_size.height)
+						}
+					}
+				};
+
+				for(size_t k = 0; k != 10; ++k)
+				{
+					ImGui::Button(std::to_string(k).append(" A Button sdajkflase foeisaj pseaifj espaof jesapf ").c_str());
+				}
 			}
 
-			ImGui::End();
 			glClear(GL_COLOR_BUFFER_BIT);
 			tk.finalize_frame();
 

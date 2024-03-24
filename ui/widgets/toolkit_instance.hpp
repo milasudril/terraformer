@@ -40,6 +40,21 @@ namespace terraformer::ui::widgets
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 		}
 
+		uint64_t create_widget_id()
+		{
+			auto ret = m_current_widget_id;
+		//	++m_current_widget_id;
+			return ret;
+		}
+
+		static std::string make_name(char const* title, uint64_t id)
+		{
+			if(title == nullptr)
+			{ return std::string{"##"}.append(std::to_string(id)); }
+
+			return std::string{title}.append("##").append(std::to_string(id));
+		}
+
 		~toolkit_instance()
 		{
 			ImGui_ImplOpenGL3_Shutdown();
@@ -48,6 +63,7 @@ namespace terraformer::ui::widgets
 		}
 
 	private:
+		uint64_t m_current_widget_id{0};
 	};
 }
 
