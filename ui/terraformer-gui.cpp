@@ -5,6 +5,7 @@
 
 #include "./renderer/gl_surface_configuration.hpp"
 #include "./wsapi/native_window.hpp"
+#include "./font_handling/font_mapper.hpp"
 
 #include <imgui/imgui.h>
 #include <imgui/backends/imgui_impl_glfw.h>
@@ -81,6 +82,7 @@ int main(int, char**)
 	ImGui::CreateContext();
 	auto io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+	io.Fonts->AddFontFromFileTTF(terraformer::ui::font_handling::font_mapper{}.get_path("sans-serif").c_str(), 16);
 	ImGui_ImplGlfw_InitForOpenGL(mainwin.handle(), true);
 	ImGui_ImplOpenGL3_Init();
 
