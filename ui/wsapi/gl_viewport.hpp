@@ -99,17 +99,22 @@ namespace terraformer
 		{ glfwSwapBuffers(m_window.get()); }
 
 		template<class EventHandler>
-		void set_event_handler(EventHandler& eh)
+		void set_event_handler(std::reference_wrapper<EventHandler> eh)
 		{
-			glfwSetWindowUserPointer(m_window.get(), &eh);
-			glfwSetWindowCloseCallback(m_window.get(), [](GLFWwindow* window){
-				auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-				eh->window_is_closing();
-			});
+			glfwSetWindowUserPointer(m_window.get(), &eh.get());
+			if constexpr (requires{{eh.get().window_is_closing()}->std::same_as<void>;})
+			{
+				glfwSetWindowCloseCallback(m_window.get(), [](GLFWwindow* window) -> void {
+					auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+					eh->window_is_closing();
+				});
+			}
+#if 0
 			glfwSetFramebufferSizeCallback(m_window.get(), [](GLFWwindow* window, int w, int h){
 				auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 				eh->framebuffer_size_changed(w, h);
 			});
+#endif
 		}
 
 		void set_window_title(char const* title)

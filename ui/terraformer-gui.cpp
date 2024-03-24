@@ -11,41 +11,52 @@
 
 namespace
 {
-	bool do_main_iteration(terraformer::gl_viewport& viewport)
+	struct my_event_handler
 	{
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui_ImplGlfw_NewFrame();
-		ImGui::NewFrame();
+		void window_is_closing()
+		{ should_close = true; }
 
-		ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
-//		ImGui::SetNextWindowSize(ImVec2{0.0f, 0.0f});
-		ImGui::Begin("##mainwin"
-			,nullptr
-			,ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
-			|ImGuiWindowFlags_::ImGuiWindowFlags_NoResize
-			|ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar
-		);
-
-		for(size_t k = 0; k != 10; ++k)
+		bool operator()(terraformer::gl_viewport& viewport)
 		{
-			ImGui::Button(std::to_string(k).append(" A Button sdajkflase foeisaj pseaifj espaof jesapf ").c_str());
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+			ImGui::NewFrame();
+
+			ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
+	//		ImGui::SetNextWindowSize(ImVec2{0.0f, 0.0f});
+			ImGui::Begin("##mainwin"
+				,nullptr
+				,ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
+				|ImGuiWindowFlags_::ImGuiWindowFlags_NoResize
+				|ImGuiWindowFlags_::ImGuiWindowFlags_HorizontalScrollbar
+			);
+
+			for(size_t k = 0; k != 10; ++k)
+			{
+				ImGui::Button(std::to_string(k).append(" A Button sdajkflase foeisaj pseaifj espaof jesapf ").c_str());
+			}
+
+			// ImGui::ShowDemoWindow(); // Show demo window! :)
+			ImGui::End();
+			glClear(GL_COLOR_BUFFER_BIT);
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+			viewport.swap_buffers();
+			return should_close;
 		}
 
-		// ImGui::ShowDemoWindow(); // Show demo window! :)
-		ImGui::End();
-		glClear(GL_COLOR_BUFFER_BIT);
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-		viewport.swap_buffers();
-		return false;
-	}
+		bool should_close{false};
+	};
 }
 
 int main(int, char**)
 {
 	auto& gui_ctxt = terraformer::glfw_context::get();
 	terraformer::gl_viewport mainwin{gui_ctxt, 800, 500, "Terraformer"};
+
+	my_event_handler eh;
+	mainwin.set_event_handler(std::ref(eh));
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -54,7 +65,7 @@ int main(int, char**)
 	ImGui_ImplGlfw_InitForOpenGL(mainwin.handle(), true);
 	ImGui_ImplOpenGL3_Init();
 
-	gui_ctxt.read_events(do_main_iteration, std::ref(mainwin));
+	gui_ctxt.read_events(std::ref(eh), std::ref(mainwin));
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();
