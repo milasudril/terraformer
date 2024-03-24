@@ -84,7 +84,7 @@ int main(int, char**)
 	ImGui_ImplGlfw_InitForOpenGL(mainwin.handle(), true);
 	ImGui_ImplOpenGL3_Init();
 
-	gui_ctxt.read_events(std::ref(eh), std::ref(mainwin));
+	gui_ctxt.wait_events(std::ref(eh), std::ref(mainwin));
 
 	ImGui_ImplOpenGL3_Shutdown();
 	ImGui_ImplGlfw_Shutdown();

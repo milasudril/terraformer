@@ -23,7 +23,7 @@ namespace terraformer::ui::wsapi
 		}
 
 		template<class Callable, class ... Args>
-		void read_events(Callable&& f, Args&&... args)
+		void poll_events(Callable&& f, Args&&... args)
 		{
 			while(true)
 			{
@@ -33,16 +33,26 @@ namespace terraformer::ui::wsapi
 			}
 		}
 
-	private:
-		context()
+		template<class Callable, class ... Args>
+		void wait_events(Callable&& f, Args&&... args)
 		{
-			glfwInit();
+			while(true)
+			{
+				glfwWaitEvents();
+				if(f(args...))
+				{ return; }
+			}
 		}
 
+		void notify_main_loop()
+		{ glfwPostEmptyEvent(); }
+
+	private:
+		context()
+		{ glfwInit(); }
+
 		~context()
-		{
-			glfwTerminate();
-		}
+		{ glfwTerminate(); }
 	};
 }
 
