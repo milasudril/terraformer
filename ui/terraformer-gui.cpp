@@ -1,15 +1,11 @@
 //@	{
-//@		"target":{"name":"terraformer-gui.o"},
-//@		"dependencies":[{"ref": "imgui", "origin":"pkg-config"}]
+//@		"target":{"name":"terraformer-gui.o"}
 //@	}
 
 #include "./renderer/gl_surface_configuration.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./font_handling/font_mapper.hpp"
-
-#include <imgui/imgui.h>
-#include <imgui/backends/imgui_impl_glfw.h>
-#include <imgui/backends/imgui_impl_opengl3.h>
+#include "./widgets/toolkit_instance.hpp"
 
 namespace
 {
@@ -75,20 +71,9 @@ int main(int, char**)
 		}
 	};
 
+	terraformer::ui::widgets::toolkit_instance toolkit{mainwin.handle()};
+
 	my_event_handler eh;
 	mainwin.set_event_handler(std::ref(eh));
-
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	auto io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-	io.Fonts->AddFontFromFileTTF(terraformer::ui::font_handling::font_mapper{}.get_path("sans-serif").c_str(), 16);
-	ImGui_ImplGlfw_InitForOpenGL(mainwin.handle(), true);
-	ImGui_ImplOpenGL3_Init();
-
 	gui_ctxt.wait_events(std::ref(eh), std::ref(mainwin));
-
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
 }
