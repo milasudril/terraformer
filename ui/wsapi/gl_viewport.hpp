@@ -1,10 +1,11 @@
 //@	{
-//@	 "dependencies":[{"ref": "glfw3", "origin":"pkg-config"},
-//@		{"ref": "glew", "origin":"pkg-config"}]
+//@	 "dependencies":[{"ref": "glew", "origin":"pkg-config"}]
 //@	}
 
 #ifndef TERRAFORMER_GLVIEWPORT_HPP
 #define TERRAFORMER_GLVIEWPORT_HPP
+
+#include "./context.hpp"
 
 #define GLFW_INCLUDE_NONE
 
@@ -31,38 +32,6 @@ namespace terraformer::ui::wsapi
 	};
 
 	using window_handle = std::unique_ptr<GLFWwindow, window_handle_deleter>;
-
-	class context
-	{
-	public:
-		static context& get()
-		{
-			static context ctxt;
-			return ctxt;
-		}
-
-		template<class Callable, class ... Args>
-		void read_events(Callable&& f, Args&&... args)
-		{
-			while(true)
-			{
-				glfwPollEvents();
-				if(f(args...))
-				{ return; }
-			}
-		}
-
-	private:
-		context()
-		{
-			glfwInit();
-		}
-
-		~context()
-		{
-			glfwTerminate();
-		}
-	};
 
 	struct drawing_api_version
 	{
