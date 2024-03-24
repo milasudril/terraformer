@@ -109,12 +109,14 @@ namespace terraformer
 					eh->window_is_closing();
 				});
 			}
-#if 0
-			glfwSetFramebufferSizeCallback(m_window.get(), [](GLFWwindow* window, int w, int h){
-				auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-				eh->framebuffer_size_changed(w, h);
-			});
-#endif
+
+			if constexpr (requires(int w, int h){{eh.get().framebuffer_size_changed(w, h)}->std::same_as<void>;})
+			{
+				glfwSetFramebufferSizeCallback(m_window.get(), [](GLFWwindow* window, int w, int h){
+					auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+					eh->framebuffer_size_changed(w, h);
+				});
+			}
 		}
 
 		void set_window_title(char const* title)

@@ -16,6 +16,12 @@ namespace
 		void window_is_closing()
 		{ should_close = true; }
 
+		void framebuffer_size_changed(int w, int h)
+		{
+			fb_width = w;
+			fb_height = h;
+		}
+
 		bool operator()(terraformer::gl_viewport& viewport)
 		{
 			ImGui_ImplOpenGL3_NewFrame();
@@ -23,7 +29,7 @@ namespace
 			ImGui::NewFrame();
 
 			ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
-	//		ImGui::SetNextWindowSize(ImVec2{0.0f, 0.0f});
+			ImGui::SetNextWindowSize(ImVec2{static_cast<float>(fb_width), static_cast<float>(fb_height)});
 			ImGui::Begin("##mainwin"
 				,nullptr
 				,ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
@@ -47,6 +53,8 @@ namespace
 		}
 
 		bool should_close{false};
+		int fb_width{0};
+		int fb_height{0};
 	};
 }
 
