@@ -63,7 +63,7 @@ namespace terraformer::ui::wsapi
 		}
 	};
 
-	class gl_viewport
+	class native_window
 	{
 	public:
 		struct fb_size
@@ -72,7 +72,7 @@ namespace terraformer::ui::wsapi
 			int height;
 		};
 
-		explicit gl_viewport(context const&,
+		explicit native_window(context const&,
 			uint32_t width, uint32_t height, char const* title)
 		{
 			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
