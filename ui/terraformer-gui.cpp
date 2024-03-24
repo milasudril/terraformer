@@ -16,10 +16,10 @@ namespace
 		void window_is_closing()
 		{ should_close = true; }
 
-		void framebuffer_size_changed(terraformer::ui::wsapi::native_window::fb_size size)
+		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{fb_size = size;}
 
-		bool operator()(terraformer::ui::wsapi::native_window& viewport)
+		bool operator()(terraformer::ui::wsapi::native_window<terraformer::ui::wsapi::gl_surface_configuration>& viewport)
 		{
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui_ImplGlfw_NewFrame();
@@ -55,14 +55,25 @@ namespace
 		}
 
 		bool should_close{false};
-		terraformer::ui::wsapi::native_window::fb_size fb_size;
+		terraformer::ui::wsapi::fb_size fb_size;
 	};
 }
 
 int main(int, char**)
 {
 	auto& gui_ctxt = terraformer::ui::wsapi::context::get();
-	terraformer::ui::wsapi::native_window mainwin{gui_ctxt, 800, 500, "Terraformer"};
+	terraformer::ui::wsapi::native_window mainwin{
+		gui_ctxt,
+		800,
+		500,
+		"Terraformer",
+		terraformer::ui::wsapi::gl_surface_configuration{
+			.api_version{
+				.major = 4,
+				.minor = 6
+			}
+		}
+	};
 
 	my_event_handler eh;
 	mainwin.set_event_handler(std::ref(eh));

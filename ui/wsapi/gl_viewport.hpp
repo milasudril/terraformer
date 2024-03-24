@@ -63,46 +63,103 @@ namespace terraformer::ui::wsapi
 		}
 	};
 
+	struct drawing_api_version
+	{
+		int major;
+		int minor;
+	};
+
+	struct gl_surface_configuration
+	{
+		drawing_api_version api_version{3, 3};
+		int depth_buffer_bits{GLFW_DONT_CARE};
+		int multisampling{4};
+		int buffer_swap_interval{1};
+		bool use_srgb{GLFW_TRUE};
+	};
+
+	void prepare_surface(context&, gl_surface_configuration const& cfg)
+	{
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, cfg.api_version.major);
+		glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, cfg.api_version.minor);
+		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+		glfwWindowHint(GLFW_CLIENT_API, GLFW_OPENGL_API);
+		glfwWindowHint(GLFW_DEPTH_BITS, cfg.depth_buffer_bits);
+		glfwWindowHint(GLFW_SRGB_CAPABLE, cfg.use_srgb? GLFW_TRUE : GLFW_FALSE);
+		glfwWindowHint(GLFW_SAMPLES, cfg.multisampling);
+		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+	}
+
+	void activate_render_context(GLFWwindow* window, gl_surface_configuration const& cfg)
+	{
+		glfwMakeContextCurrent(window);
+		static bool glew_initialized = false;
+		if(glew_initialized == false)
+		{
+			GLenum err = glewInit();
+			if (GLEW_OK != err)
+			{ throw std::runtime_error{"Failed to load OpenGL extensions"}; }
+			glew_initialized = true;
+			glfwSwapInterval(cfg.buffer_swap_interval);
+		}
+		if(cfg.multisampling != 0)
+		{ glEnable(GL_MULTISAMPLE); }
+		fprintf(stderr, "(i) Initialized OpenGL reporting version %s\n", glGetString(GL_VERSION));
+	}
+
+	void swap_buffers(GLFWwindow* window, gl_surface_configuration const&)
+	{ glfwSwapBuffers(window); }
+
+	struct no_api_config{};
+
+	void prepare_surface(context&, no_api_config){}
+
+	void activate_render_context(GLFWwindow*, no_api_config){}
+
+	void swap_buffers(GLFWwindow*, no_api_config){}
+
+	struct fb_size
+	{
+		int width;
+		int height;
+	};
+
+	namespace detail
+	{
+		template<class ... Args>
+		decltype(auto) do_swap_buffers(Args&&... args)
+		{	return swap_buffers(std::forward<Args>(args)...);	}
+
+		template<class ... Args>
+		decltype(auto) do_activate_render_context(Args&&... args)
+		{	return activate_render_context(std::forward<Args>(args)...);	}
+	}
+
+	template<class RenderContextConfiguration = no_api_config>
 	class native_window
 	{
 	public:
-		struct fb_size
+		explicit native_window(
+			context& ctxt,
+			uint32_t width,
+			uint32_t height,
+			char const* title,
+			RenderContextConfiguration&& cfg = RenderContextConfiguration{}
+		):
+			m_ctxt_cfg{std::move(cfg)}
 		{
-			int width;
-			int height;
-		};
-
-		explicit native_window(context const&,
-			uint32_t width, uint32_t height, char const* title)
-		{
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-			glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
-			glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
-			glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+			prepare_surface(ctxt, cfg);
 			m_window.reset(glfwCreateWindow(width, height, title, nullptr, nullptr));
 			if(m_window == nullptr)
 			{ throw std::runtime_error{"Failed to create a window"}; }
-
-			activate_gl_context();
-			fprintf(stderr, "(i) Initialized OpenGL reporting version %s\n", glGetString(GL_VERSION));
+			activate_render_context();
 		}
 
-		void activate_gl_context()
-		{
-			glfwMakeContextCurrent(m_window.get());
-			static bool glew_initialized = false;
-			if(glew_initialized == false)
-			{
-				GLenum err = glewInit();
-				if (GLEW_OK != err)
-				{ throw std::runtime_error{"Failed to load OpenGL extensions"}; }
-				glew_initialized = true;
-			}
-			glfwSwapInterval(1);
-		}
+		void activate_render_context()
+		{ detail::do_activate_render_context(m_window.get(), m_ctxt_cfg); }
 
 		void swap_buffers()
-		{ glfwSwapBuffers(m_window.get()); }
+		{ detail::do_swap_buffers(m_window.get(), m_ctxt_cfg); }
 
 		template<class EventHandler>
 		void set_event_handler(std::reference_wrapper<EventHandler> eh)
@@ -148,6 +205,7 @@ namespace terraformer::ui::wsapi
 
 	private:
 		window_handle m_window;
+		RenderContextConfiguration m_ctxt_cfg;
 	};
 }
 
