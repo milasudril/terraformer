@@ -66,6 +66,12 @@ namespace terraformer
 	class gl_viewport
 	{
 	public:
+		struct fb_size
+		{
+			int width;
+			int height;
+		};
+
 		explicit gl_viewport(glfw_context const&,
 			uint32_t width, uint32_t height, char const* title)
 		{
@@ -110,17 +116,33 @@ namespace terraformer
 				});
 			}
 
-			if constexpr (requires(int w, int h){{eh.get().framebuffer_size_changed(w, h)}->std::same_as<void>;})
+			if constexpr (requires(fb_size size){{eh.get().framebuffer_size_changed(size)}->std::same_as<void>;})
 			{
-				glfwSetFramebufferSizeCallback(m_window.get(), [](GLFWwindow* window, int w, int h){
-					auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-					eh->framebuffer_size_changed(w, h);
-				});
+				glfwSetFramebufferSizeCallback(
+					m_window.get(),
+					[](GLFWwindow* window, int w, int h){
+						auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+						eh->framebuffer_size_changed(
+							fb_size{
+								.width = w,
+								.height = h
+							}
+						);
+					}
+				);
+				eh.get().framebuffer_size_changed(get_fb_size());
 			}
 		}
 
 		void set_window_title(char const* title)
 		{	glfwSetWindowTitle(m_window.get(), title); }
+
+		auto get_fb_size() const
+		{
+			fb_size ret{};
+			glfwGetFramebufferSize(m_window.get(), &ret.width, &ret.height);
+			return ret;
+		}
 
 		auto handle() const { return m_window.get(); }
 

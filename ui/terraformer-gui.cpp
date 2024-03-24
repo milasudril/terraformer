@@ -16,11 +16,8 @@ namespace
 		void window_is_closing()
 		{ should_close = true; }
 
-		void framebuffer_size_changed(int w, int h)
-		{
-			fb_width = w;
-			fb_height = h;
-		}
+		void framebuffer_size_changed(terraformer::gl_viewport::fb_size size)
+		{fb_size = size;}
 
 		bool operator()(terraformer::gl_viewport& viewport)
 		{
@@ -29,7 +26,12 @@ namespace
 			ImGui::NewFrame();
 
 			ImGui::SetNextWindowPos(ImVec2{0.0f, 0.0f});
-			ImGui::SetNextWindowSize(ImVec2{static_cast<float>(fb_width), static_cast<float>(fb_height)});
+			ImGui::SetNextWindowSize(
+				ImVec2{
+					static_cast<float>(fb_size.width),
+					static_cast<float>(fb_size.height)
+				}
+			);
 			ImGui::Begin("##mainwin"
 				,nullptr
 				,ImGuiWindowFlags_::ImGuiWindowFlags_NoTitleBar
@@ -42,7 +44,6 @@ namespace
 				ImGui::Button(std::to_string(k).append(" A Button sdajkflase foeisaj pseaifj espaof jesapf ").c_str());
 			}
 
-			// ImGui::ShowDemoWindow(); // Show demo window! :)
 			ImGui::End();
 			glClear(GL_COLOR_BUFFER_BIT);
 			ImGui::Render();
@@ -53,8 +54,7 @@ namespace
 		}
 
 		bool should_close{false};
-		int fb_width{0};
-		int fb_height{0};
+		terraformer::gl_viewport::fb_size fb_size;
 	};
 }
 
