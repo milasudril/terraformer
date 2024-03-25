@@ -4,12 +4,25 @@
 
 #include "./renderer/gl_surface_configuration.hpp"
 #include "./renderer/gl_texture.hpp"
+#include "./renderer/gl_mesh.hpp"
 #include "./wsapi/native_window.hpp"
 
 namespace
 {
 	struct my_event_handler
 	{
+		terraformer::ui::renderer::gl_mesh<unsigned int, terraformer::location> the_mesh{
+			std::array<unsigned int, 6>{
+				0, 1, 2, 0, 2, 3
+			},
+			std::array<terraformer::location, 4>{
+				terraformer::location{-0.5f, -0.5f, 0.0f},
+				terraformer::location{0.5f, -0.5f, 0.0f},
+				terraformer::location{0.5f, 0.5f, 0.0f},
+				terraformer::location{-0.5f, 0.5f, 0.0f},
+			}
+		};
+
 		void window_is_closing()
 		{ should_close = true; }
 
@@ -21,6 +34,7 @@ namespace
 		)
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
+			the_mesh.bind();
 			viewport.swap_buffers();
 			return should_close;
 		}
