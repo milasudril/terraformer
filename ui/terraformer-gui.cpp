@@ -35,6 +35,7 @@ namespace
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
 			the_mesh.bind();
+			terraformer::ui::renderer::gl_bindings::draw_triangles();
 			viewport.swap_buffers();
 			return should_close;
 		}

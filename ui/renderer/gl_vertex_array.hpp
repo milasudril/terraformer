@@ -24,7 +24,13 @@ namespace terraformer::ui::renderer
 	public:
 		static auto vertex_index_type() { return s_bound_index_type; }
 
+		static auto get_index_count() { return s_bound_elem_count; }
+
+		static void draw_triangles()
+		{ glDrawElements(GL_TRIANGLES, s_bound_elem_count, s_bound_index_type, nullptr); }
+
 	protected:
+		thread_local static inline GLsizei s_bound_elem_count;
 		thread_local static inline GLenum s_bound_index_type;
 	};
 
@@ -52,18 +58,21 @@ namespace terraformer::ui::renderer
 		void set_buffer(gl_index_buffer<T> const& buffer)
 		{
 			glVertexArrayElementBuffer(m_handle.get(), buffer.get());
+			m_elem_count = static_cast<GLsizei>(std::size(buffer));
 			m_index_type = to_gl_type_id_v<T>;
 		}
 
 		void bind() const
 		{
 			glBindVertexArray(m_handle.get());
+			s_bound_elem_count = m_elem_count;
 			s_bound_index_type = m_index_type;
 		}
 
 
 	private:
 		gl_vertex_array_handle m_handle;
+		GLsizei m_elem_count;
 		GLenum m_index_type;
 	};
 }
