@@ -3,6 +3,7 @@
 //@	}
 
 #include "./renderer/gl_surface_configuration.hpp"
+#include "./renderer/gl_texture.hpp"
 #include "./wsapi/native_window.hpp"
 
 namespace
