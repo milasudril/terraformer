@@ -43,6 +43,21 @@ namespace terraformer::ui::wsapi
 		int height;
 	};
 
+	struct cursor_position
+	{
+		double x;
+		double y;
+	};
+
+	enum class button_state_change:int{press, release};
+
+	struct mouse_button_event
+	{
+		cursor_position where;
+		int button;
+		button_state_change state_change;
+	};
+
 	struct window_geometry_configuration
 	{
 		int width{800};
