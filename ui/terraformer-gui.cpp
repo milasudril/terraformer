@@ -2,17 +2,18 @@
 //@		"target":{"name":"terraformer-gui.o"}
 //@	}
 
-#include "./renderer/gl_surface_configuration.hpp"
-#include "./renderer/gl_texture.hpp"
-#include "./renderer/gl_mesh.hpp"
-#include "./renderer/gl_shader.hpp"
+#include "./drawing_api/gl_surface_configuration.hpp"
+#include "./drawing_api/gl_texture.hpp"
+#include "./drawing_api/gl_mesh.hpp"
+#include "./drawing_api/gl_shader.hpp"
+#include "./layout_handling/layout_controller_entry.hpp"
 #include "./wsapi/native_window.hpp"
 
 namespace
 {
 	struct my_event_handler
 	{
-		terraformer::ui::renderer::gl_mesh<unsigned int, terraformer::location> the_mesh{
+		terraformer::ui::drawing_api::gl_mesh<unsigned int, terraformer::location> the_mesh{
 			std::array<unsigned int, 6>{
 				0, 1, 2, 0, 2, 3
 			},
@@ -24,8 +25,8 @@ namespace
 			}
 		};
 
-		terraformer::ui::renderer::gl_program the_program{
-			terraformer::ui::renderer::gl_shader<GL_VERTEX_SHADER>{
+		terraformer::ui::drawing_api::gl_program the_program{
+			terraformer::ui::drawing_api::gl_shader<GL_VERTEX_SHADER>{
 				R"(#version 460 core
 layout (location = 0) in vec4 input_location;
 
@@ -37,7 +38,7 @@ void main()
 	vertex_color = vec4(0.5, 0.5, 0.5, 1.0);
 })"
 			},
-			terraformer::ui::renderer::gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
+			terraformer::ui::drawing_api::gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
 out vec4 fragment_color;
 in vec4 vertex_color;
 
@@ -54,13 +55,13 @@ void main()
 		{fb_size = size;}
 
 		bool operator()(
-			terraformer::ui::wsapi::native_window<terraformer::ui::renderer::gl_surface_configuration>& viewport
+			terraformer::ui::wsapi::native_window<terraformer::ui::drawing_api::gl_surface_configuration>& viewport
 		)
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
 			the_program.bind();
 			the_mesh.bind();
-			terraformer::ui::renderer::gl_bindings::draw_triangles();
+			terraformer::ui::drawing_api::gl_bindings::draw_triangles();
 			viewport.swap_buffers();
 			return should_close;
 		}
@@ -76,7 +77,7 @@ int main(int, char**)
 	terraformer::ui::wsapi::native_window mainwin{
 		gui_ctxt,
 		"Terraformer",
-		terraformer::ui::renderer::gl_surface_configuration{
+		terraformer::ui::drawing_api::gl_surface_configuration{
 			.api_version{
 				.major = 4,
 				.minor = 6

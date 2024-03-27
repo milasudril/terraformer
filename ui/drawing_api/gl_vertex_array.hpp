@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_UI_RENDERER_GL_VERTEX_ARRAY_HPP
-#define TERRAFORMER_UI_RENDERER_GL_VERTEX_ARRAY_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GL_VERTEX_ARRAY_HPP
+#define TERRAFORMER_UI_DRAWING_API_GL_VERTEX_ARRAY_HPP
 
 #include "./gl_resource.hpp"
 #include "./gl_buffer.hpp"
@@ -7,7 +7,7 @@
 
 #include <memory>
 
-namespace terraformer::ui::renderer
+namespace terraformer::ui::drawing_api
 {
 	struct gl_vertex_array_deleter
 	{

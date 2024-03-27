@@ -4,15 +4,15 @@
 //@		]
 //@	}
 
-#ifndef TERRAFORMER_UI_RENDERER_GL_RESOURCE_HPP
-#define TERRAFORMER_UI_RENDERER_GL_RESOURCE_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GL_RESOURCE_HPP
+#define TERRAFORMER_UI_DRAWING_API_GL_RESOURCE_HPP
 
 #include <GL/glew.h>
 #include <GL/gl.h>
 
 #include <memory>
 
-namespace terraformer::ui::renderer
+namespace terraformer::ui::drawing_api
 {
 	template<class Int>
 	struct nullable

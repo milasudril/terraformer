@@ -1,11 +1,11 @@
-#ifndef TERRAFORMER_UI_RENDERER_GLSHADER_HPP
-#define TERRAFORMER_UI_RENDERER_GLSHADER_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GLSHADER_HPP
+#define TERRAFORMER_UI_DRAWING_API_GLSHADER_HPP
 
 #include "./gl_resource.hpp"
 
 #include <memory>
 
-namespace terraformer::ui::renderer
+namespace terraformer::ui::drawing_api
 {
 	struct gl_shader_deleter
 	{

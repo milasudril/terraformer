@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_UI_RENDERER_GL_BUFFER_HPP
-#define TERRAFORMER_UI_RENDERER_GL_BUFFER_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GL_BUFFER_HPP
+#define TERRAFORMER_UI_DRAWING_API_GL_BUFFER_HPP
 
 #include "./gl_resource.hpp"
 
@@ -8,7 +8,7 @@
 #include <array>
 #include <span>
 
-namespace terraformer::ui::renderer
+namespace terraformer::ui::drawing_api
 {
 	struct gl_buffer_deleter
 	{

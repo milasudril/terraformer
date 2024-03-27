@@ -1,12 +1,12 @@
-#ifndef TERRAFORMER_UI_RENDERER_GL_TEXTURE_HPP
-#define TERRAFORMER_UI_RENDERER_GL_TEXTURE_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GL_TEXTURE_HPP
+#define TERRAFORMER_UI_DRAWING_API_GL_TEXTURE_HPP
 
 #include "./gl_resource.hpp"
 #include "./gl_types.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 
-namespace terraformer::ui::renderer
+namespace terraformer::ui::drawing_api
 {
 	struct gl_texture_deleter
 	{

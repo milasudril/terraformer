@@ -4,8 +4,8 @@
 //@		]
 //@	}
 
-#ifndef TERRAFORMER_UI_RENDERER_GL_SURFACE_CONFIGURATION_HPP
-#define TERRAFORMER_UI_RENDERER_GL_SURFACE_CONFIGURATION_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GL_SURFACE_CONFIGURATION_HPP
+#define TERRAFORMER_UI_DRAWING_API_GL_SURFACE_CONFIGURATION_HPP
 
 #include "ui/wsapi/context.hpp"
 
@@ -14,7 +14,7 @@
 #include <cstdio>
 #include <stdexcept>
 
-namespace terraformer::ui::renderer
+namespace terraformer::ui::drawing_api
 {
 	struct drawing_api_version
 	{

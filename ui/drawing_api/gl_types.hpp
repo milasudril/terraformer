@@ -4,13 +4,13 @@
 //@		]
 //@	}
 
-#ifndef TERRAFORMER_UI_RENDERER_GL_TYPES_HPP
-#define TERRAFORMER_UI_RENDERER_GL_TYPES_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GL_TYPES_HPP
+#define TERRAFORMER_UI_DRAWING_API_GL_TYPES_HPP
 
 #include <GL/glew.h>
 #include <GL/gl.h>
 
-namespace terraformer::ui::renderer
+namespace terraformer::ui::drawing_api
 {
 	template<class T>
 	struct to_gl_type_id

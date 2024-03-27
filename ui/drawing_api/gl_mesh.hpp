@@ -1,12 +1,12 @@
-#ifndef TERRAFORMER_UI_RENDERER_GL_MESH_HPP
-#define TERRAFORMER_UI_RENDERER_GL_MESH_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GL_MESH_HPP
+#define TERRAFORMER_UI_DRAWING_API_GL_MESH_HPP
 
 #include "./gl_buffer.hpp"
 #include "./gl_vertex_array.hpp"
 
 #include "lib/common/tuple.hpp"
 
-namespace terraformer::ui::renderer
+namespace terraformer::ui::drawing_api
 {
 	template<class IndexType, class ... VertexAttributeTypes>
 	class gl_mesh
