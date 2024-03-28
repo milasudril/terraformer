@@ -16,10 +16,10 @@ namespace terraformer::ui::main
 		drawing_api::gl_texture& texture
 	)
 	{
-		{ obj.render(texture) } -> std::same_as<void>;
+		{ std::as_const(obj).render_to(texture) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(pos)) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
-		{ std::as_const(obj).handle_event(std::as_const(size)) } -> std::same_as<void>;
+		{ std::as_const(obj).handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
 	};
 
 	template<class T>
@@ -44,10 +44,18 @@ namespace terraformer::ui::main
 				std::in_place_t{},
 				&w,
 				drawing_api::gl_texture{},
-				[](){},
-				[](){},
-				[](){},
-				[](){}
+				[](void const* obj, drawing_api::gl_texture& texture){
+					return static_cast<Widget const*>(obj)->render_to(texture);
+				},
+				[](void* obj, wsapi::cursor_position pos){
+					return static_cast<Widget*>(obj)->handle_event(pos);
+				},
+				[](void* obj, wsapi::mouse_button_event const& mbe){
+					return static_cast<Widget*>(obj)->handle_event(mbe);
+				},
+				[](void const* obj, wsapi::fb_size size){
+					return static_cast<Widget const*>(obj)->handle_event(size);
+				}
 			);
 
 			return *this;
