@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
-#define TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
+#ifndef TERRAFORMER_UI_MAIN_WIDGET_HPP
+#define TERRAFORMER_UI_MAIN_WIDGET_HPP
 
 #include "ui/drawing_api/gl_texture.hpp"
 #include "ui/wsapi/native_window.hpp"
@@ -8,7 +8,7 @@
 namespace terraformer::ui::main
 {
 	template<class T>
-	concept event_dispatcher = requires(
+	concept widget = requires(
 		T& obj,
 		wsapi::fb_size size,
 		wsapi::cursor_position pos,
@@ -17,9 +17,9 @@ namespace terraformer::ui::main
 	)
 	{
 		{ obj.render(texture) } -> std::same_as<void>;
-		{ obj.dispatch(std::as_const(pos)) } -> std::same_as<bool>;
-		{ obj.dispatch(mbe) } -> std::same_as<bool>;
-		{ std::as_const(obj).dispatch(std::as_const(size)) } -> std::same_as<void>;
+		{ obj.handle_event(std::as_const(pos)) } -> std::same_as<bool>;
+		{ obj.handle_event(mbe) } -> std::same_as<bool>;
+		{ std::as_const(obj).handle_event(std::as_const(size)) } -> std::same_as<void>;
 	};
 
 	template<class T>
@@ -28,10 +28,32 @@ namespace terraformer::ui::main
 		{ obj(std::as_const(k), std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
 	};
 
-	class entity_list
+	template<class T>
+	concept widget_hit_policy = requires(T const& obj, size_t k, wsapi::cursor_position pos)
+	{
+		{ obj(std::as_const(k), std::as_const(pos)) } -> std::same_as<bool>;
+	};
+
+	class event_dispatcher
 	{
 	public:
-		void render()
+		template<widget Widget>
+		event_dispatcher& append(std::reference_wrapper<Widget> w)
+		{
+			m_objects.push_back(
+				std::in_place_t{},
+				&w,
+				drawing_api::gl_texture{},
+				[](){},
+				[](){},
+				[](){},
+				[](){}
+			);
+
+			return *this;
+		}
+
+		void render_widgets()
 		{
 			auto const objects = m_objects.get<0>();
 			auto const textures = m_objects.get<1>();
@@ -44,7 +66,8 @@ namespace terraformer::ui::main
 			{ dispatchers[k](std::as_const(objects[k]), textures[k]); }
 		}
 
-		bool dispatch(wsapi::cursor_position pos) const
+		template<widget_hit_policy WidgetHitPolicy>
+		bool dispatch(wsapi::cursor_position pos, WidgetHitPolicy&& hit) const
 		{
 			auto const objects = m_objects.get<0>();
 			auto const dispatchers = m_objects.get<3>();
@@ -54,7 +77,7 @@ namespace terraformer::ui::main
 				++k
 			)
 			{
-				if(dispatchers[k](objects[k], pos))
+				if(hit(k, pos) && dispatchers[k](objects[k], pos))
 				{ return true; }
 			}
 			return false;
