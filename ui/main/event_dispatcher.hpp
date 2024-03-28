@@ -36,8 +36,9 @@ namespace terraformer::ui::main
 			auto const objects = m_objects.get<0>();
 			auto const textures = m_objects.get<1>();
 			auto const dispatchers = m_objects.get<2>();
+			auto const n_objects = std::size(m_objects);
 			for(auto k = m_objects.first_element_index();
-				k != std::size(m_objects);
+				k != n_objects;
 				++k
 			)
 			{ dispatchers[k](std::as_const(objects[k]), textures[k]); }
@@ -47,8 +48,9 @@ namespace terraformer::ui::main
 		{
 			auto const objects = m_objects.get<0>();
 			auto const dispatchers = m_objects.get<3>();
+			auto const n_objects = std::size(m_objects);
 			for(auto k = m_objects.first_element_index();
-				k != std::size(m_objects);
+				k != n_objects;
 				++k
 			)
 			{
@@ -62,8 +64,9 @@ namespace terraformer::ui::main
 		{
 			auto const objects = m_objects.get<0>();
 			auto const dispatchers = m_objects.get<4>();
+			auto const n_objects = std::size(m_objects);
 			for(auto k = m_objects.first_element_index();
-				k != std::size(m_objects);
+				k != n_objects;
 				++k
 			)
 			{
@@ -79,8 +82,9 @@ namespace terraformer::ui::main
 			auto const objects = m_objects.get<0>();
 			auto const textures = m_objects.get<1>();
 			auto const dispatchers = m_objects.get<5>();
+			auto const n_objects = std::size(m_objects);
 			for(auto k = m_objects.first_element_index();
-				k != std::size(m_objects);
+				k != n_objects;
 				++k
 			)
 			{
