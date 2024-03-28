@@ -91,7 +91,8 @@ namespace terraformer::ui::main
 			return false;
 		}
 
-		bool dispatch(wsapi::mouse_button_event const& mbe)
+		template<widget_hit_policy WidgetHitPolicy>
+		bool dispatch(wsapi::mouse_button_event const& mbe, WidgetHitPolicy&& hit)
 		{
 			auto const objects = m_objects.get<0>();
 			auto const dispatchers = m_objects.get<4>();
@@ -101,7 +102,7 @@ namespace terraformer::ui::main
 				++k
 			)
 			{
-				if(dispatchers[k](objects[k], mbe))
+				if(hit(k, mbe.where) && dispatchers[k](objects[k], mbe))
 				{ return true; }
 			}
 			return false;
