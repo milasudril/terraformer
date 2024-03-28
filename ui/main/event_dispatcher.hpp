@@ -22,6 +22,12 @@ namespace terraformer::ui::main
 		{ std::as_const(obj).dispatch(std::as_const(size)) } -> std::same_as<void>;
 	};
 
+	template<class T>
+	concept widget_size_policy = requires(T const& obj, size_t k, wsapi::fb_size size)
+	{
+		{ obj(std::as_const(k), std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
+	};
+
 	class entity_list
 	{
 	public:
@@ -67,7 +73,8 @@ namespace terraformer::ui::main
 			return false;
 		}
 
-		void dispatch(wsapi::fb_size size)
+		template<widget_size_policy SizePolicy>
+		void dispatch(wsapi::fb_size size, SizePolicy&& widget_size)
 		{
 			auto const objects = m_objects.get<0>();
 			auto const textures = m_objects.get<1>();
@@ -77,7 +84,7 @@ namespace terraformer::ui::main
 				++k
 			)
 			{
-				auto const new_size = dispatchers[k](objects[k], size);
+				auto const new_size = widget_size(k, dispatchers[k](objects[k], size));
 				auto texture_descriptor = textures[k].descriptor();
 				texture_descriptor.width = new_size.width;
 				texture_descriptor.height = new_size.height;
