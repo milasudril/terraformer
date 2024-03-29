@@ -14,21 +14,20 @@ namespace terraformer::ui::main
 		widget_list& append(std::reference_wrapper<Widget> w, widget_visibility visibility = Widget::default_visibility)
 		{
 			m_objects.push_back(
-				std::in_place_t{},
 				&w,
 				visibility,
 				widget_geometry{},
 				RenderSurface{},
-				[](void const* obj, RenderSurface& surface){
+				[](void const* obj, RenderSurface& surface) -> void{
 					return static_cast<Widget const*>(obj)->render_to(surface);
 				},
-				[](void* obj, wsapi::cursor_position pos){
+				[](void* obj, wsapi::cursor_position pos) -> bool {
 					return static_cast<Widget*>(obj)->handle_event(pos);
 				},
-				[](void* obj, wsapi::mouse_button_event const& mbe){
+				[](void* obj, wsapi::mouse_button_event const& mbe) ->bool {
 					return static_cast<Widget*>(obj)->handle_event(mbe);
 				},
-				[](void* obj, wsapi::fb_size size){
+				[](void* obj, wsapi::fb_size size)-> wsapi::fb_size {
 					return static_cast<Widget*>(obj)->handle_event(size);
 				}
 			);

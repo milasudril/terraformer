@@ -38,7 +38,7 @@
                             "-Wno-psabi",
                             "-Wsuggest-override",
                             "-I.",
-                            "-fconcepts-diagnostics-depth=2"
+                            "-fconcepts-diagnostics-depth=3"
                         ],
                         "iquote": [
                             "."
@@ -67,7 +67,7 @@
                             "-Wsuggest-override",
                             "-Wno-psabi",
                             "-Werror",
-                            "-fconcepts-diagnostics-depth=2"
+                            "-fconcepts-diagnostics-depth=3"
                         ],
                         "iquote": [
                             "."
