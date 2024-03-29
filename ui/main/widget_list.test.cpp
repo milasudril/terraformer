@@ -95,4 +95,36 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 			}
 		}
 	}
+	
+	// Call render_to
+	{
+		auto const widget_ptrs = widgets.widget_pointers();
+		auto const render_callbacks = widgets.render_callbacks();
+		dummy_surface surface{};
+		
+		for(auto k =  widgets.first_element_index();
+			k != std::size(widgets);
+			++k
+		)
+		{
+			render_callbacks[k](widget_ptrs[k], surface);
+			EXPECT_EQ(surface.update_count, k.get() + 1);
+			
+			EXPECT_EQ(widget_0.cursor_position_count, 0);
+			EXPECT_EQ(widget_0.mbe_count, 0);
+			EXPECT_EQ(widget_0.size_count, 0);
+			
+			EXPECT_EQ(widget_1.cursor_position_count, 0);
+			EXPECT_EQ(widget_1.mbe_count, 0);
+			EXPECT_EQ(widget_1.size_count, 0);
+			
+			EXPECT_EQ(widget_2.cursor_position_count, 0);
+			EXPECT_EQ(widget_2.mbe_count, 0);
+			EXPECT_EQ(widget_2.size_count, 0);
+
+			EXPECT_EQ(widget_3.cursor_position_count, 0);
+			EXPECT_EQ(widget_3.mbe_count, 0);
+			EXPECT_EQ(widget_3.size_count, 0);
+		}
+	}
 }
