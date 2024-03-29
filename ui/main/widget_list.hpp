@@ -6,16 +6,6 @@
 
 namespace terraformer::ui::main
 {
-	struct widget_geometry
-	{
-		float x;
-		float y;
-		float width;
-		float height;
-	};
-	
-	enum class widget_visibility:int{visible, hidden, skipped};
-
 	template<class RenderSurface>
 	class widget_list
 	{

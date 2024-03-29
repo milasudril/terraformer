@@ -5,6 +5,16 @@
 
 namespace terraformer::ui::main
 {
+	struct widget_geometry
+	{
+		float x;
+		float y;
+		float width;
+		float height;
+	};
+	
+	enum class widget_visibility:int{visible, hidden, skipped};
+		
 	template<class T, class RenderSurface>
 	concept widget = requires(
 		T& obj,
@@ -23,6 +33,9 @@ namespace terraformer::ui::main
 	template<class RenderSurface>
 	struct widget_with_default_actions
 	{
+			
+			
+		
 		void render_to(RenderSurface&) const {}
 		bool handle_event(wsapi::cursor_position) const { return false; }
 		bool handle_event(wsapi::mouse_button_event const&) const { return false; }
