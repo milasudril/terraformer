@@ -1,36 +1,18 @@
 #ifndef TERRAFORMER_UI_MAIN_WIDGET_LIST_HPP
 #define TERRAFORMER_UI_MAIN_WIDGET_LIST_HPP
 
-#include "ui/wsapi/native_window.hpp"
+#include "./widget.hpp"
 #include "lib/array_classes/multi_array.hpp"
 
 namespace terraformer::ui::main
 {
-	template<class T, class RenderSurface>
-	concept widget = requires(
-		T& obj,
-		wsapi::fb_size size,
-		wsapi::cursor_position pos,
-		wsapi::mouse_button_event const& mbe,
-		RenderSurface& surface
-	)
+	struct widget_geometry
 	{
-		{ std::as_const(obj).render_to(surface) } -> std::same_as<void>;
-		{ obj.handle_event(std::as_const(pos)) } -> std::same_as<bool>;
-		{ obj.handle_event(mbe) } -> std::same_as<bool>;
-		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
+		float x;
+		float y;
+		float width;
+		float height;
 	};
-
-	template<class RenderSurface>
-	struct widget_with_default_actions
-	{
-		void render_to(RenderSurface&) const {}
-		bool handle_event(wsapi::cursor_position) const { return false; }
-		bool handle_event(wsapi::mouse_button_event const&) const { return false; }
-		wsapi::fb_size handle_event(wsapi::fb_size size) const { return size; }
-	};
-
-	static_assert(widget<widget_with_default_actions<int>, int>);
 
 	template<class RenderSurface>
 	class widget_list
@@ -42,6 +24,7 @@ namespace terraformer::ui::main
 			m_objects.push_back(
 				std::in_place_t{},
 				&w,
+				widget_geometry{},
 				RenderSurface{},
 				[](void const* obj, RenderSurface& surface){
 					return static_cast<Widget const*>(obj)->render_to(surface);
@@ -66,20 +49,26 @@ namespace terraformer::ui::main
 		auto widgets() const
 		{ return m_objects.template get<0>(); }
 
-		auto surfaces() const
+		auto widget_geometries() const
 		{ return m_objects.template get<1>(); }
 
-		auto render_callbacks() const
+		auto widget_geometries()
+		{ return m_objects.template get<1>(); }
+
+		auto surfaces() const
 		{ return m_objects.template get<2>(); }
 
-		auto cursor_position_callbacks() const
+		auto render_callbacks() const
 		{ return m_objects.template get<3>(); }
 
-		auto mouse_button_callbacks() const
+		auto cursor_position_callbacks() const
 		{ return m_objects.template get<4>(); }
 
-		auto size_callbacks() const
+		auto mouse_button_callbacks() const
 		{ return m_objects.template get<5>(); }
+
+		auto size_callbacks() const
+		{ return m_objects.template get<6>(); }
 
 	private:
 		using render_callback = void (*)(void const*, RenderSurface& surface);
@@ -89,6 +78,7 @@ namespace terraformer::ui::main
 
 		multi_array<
 			void*,
+			widget_geometry,
 			RenderSurface,
 			render_callback,
 			cursor_position_callback,

@@ -7,7 +7,7 @@
 #include "./drawing_api/gl_mesh.hpp"
 #include "./drawing_api/gl_shader.hpp"
 #include "./main/widget_list.hpp"
-#include "./layout_handling/layout_controller_entry.hpp"
+#include "./layouts/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 
 namespace
