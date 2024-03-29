@@ -19,12 +19,12 @@ namespace terraformer::ui::main
 	{
 	public:
 		template<widget<RenderSurface> Widget>
-		widget_list& append(std::reference_wrapper<Widget> w, widget_geometry const& initial_geometry)
+		widget_list& append(std::reference_wrapper<Widget> w)
 		{
 			m_objects.push_back(
 				std::in_place_t{},
 				&w,
-				initial_geometry,
+				widget_geometry{},
 				RenderSurface{},
 				[](void const* obj, RenderSurface& surface){
 					return static_cast<Widget const*>(obj)->render_to(surface);
