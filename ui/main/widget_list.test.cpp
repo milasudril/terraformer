@@ -54,8 +54,10 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 	dummy_widget<0> widget_0;
 	dummy_widget<1> widget_1;
 	dummy_widget<2> widget_2;
+	dummy_widget_no_default_visibility<3> widget_3;
 	
 	widgets.append(std::ref(widget_0))
 		.append(std::ref(widget_1))
-		.append(std::ref(widget_2));
+		.append(std::ref(widget_2))
+		.append(std::ref(widget_3), terraformer::ui::main::widget_visibility::visible);
 }
