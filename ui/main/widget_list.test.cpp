@@ -12,37 +12,39 @@ namespace
 	};
 	
 	template<size_t N>
-	struct dummy_widget
+	struct dummy_widget_no_default_visibility
 	{
-		static constexpr auto default_visibility = terraformer::ui::main::widget_visibility::hidden;
+		size_t cursor_position_count{0};
+		size_t mbe_count{0};
+		size_t size_count{0};
 		
 		void render_to(dummy_surface& surface) const
 		{ ++surface.update_count; }
 		
 		bool handle_event(terraformer::ui::wsapi::cursor_position)
-		{ return true; }
+		{ 
+			++cursor_position_count;
+			return true; 
+		}
 		
 		bool handle_event(terraformer::ui::wsapi::mouse_button_event const&)
-		{ return true; }
-	
+		{ 
+			++mbe_count;
+			return true;
+			
+		}
+
 		auto handle_event(terraformer::ui::wsapi::fb_size size)
-		{ return size; }
+		{
+			++size_count;
+			return size;
+		}
 	};
 	
 	template<size_t N>
-	struct dummy_widget_no_default_visibility
+	struct dummy_widget:dummy_widget_no_default_visibility<N>
 	{		
-		void render_to(dummy_surface& surface) const
-		{ ++surface.update_count; }
-		
-		bool handle_event(terraformer::ui::wsapi::cursor_position)
-		{ return true; }
-		
-		bool handle_event(terraformer::ui::wsapi::mouse_button_event const&)
-		{ return true; }
-	
-		auto handle_event(terraformer::ui::wsapi::fb_size size)
-		{ return size; }
+		static constexpr auto default_visibility = terraformer::ui::main::widget_visibility::hidden;
 	};
 }
 
@@ -58,6 +60,39 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 	
 	widgets.append(std::ref(widget_0))
 		.append(std::ref(widget_1))
-		.append(std::ref(widget_2))
+		.append(std::ref(widget_2), terraformer::ui::main::widget_visibility::skipped)
 		.append(std::ref(widget_3), terraformer::ui::main::widget_visibility::visible);
+		
+	EXPECT_EQ(std::size(widgets).get(), 4);
+	
+	// Check pointers and visibilities
+	{
+		auto const widget_ptrs = widgets.widget_pointers();
+		auto const visibilities = widgets.widget_visibilities();
+		for(auto k = widgets.first_element_index();
+			k != std::size(widgets);
+			++k
+		)
+		{
+			switch(k.get())
+			{
+				case 0:
+					EXPECT_EQ(widget_ptrs[k], &widget_0);
+					EXPECT_EQ(visibilities[k], dummy_widget<0>::default_visibility);
+					break;
+				case 1:
+					EXPECT_EQ(widget_ptrs[k], &widget_1);
+					EXPECT_EQ(visibilities[k], dummy_widget<0>::default_visibility);
+					break;
+				case 2:
+					EXPECT_EQ(widget_ptrs[k], &widget_2);
+					EXPECT_EQ(visibilities[k], terraformer::ui::main::widget_visibility::skipped);
+					break;
+				case 3:
+					EXPECT_EQ(widget_ptrs[k], &widget_3);
+					EXPECT_EQ(visibilities[k], terraformer::ui::main::widget_visibility::visible);
+					break;
+			}
+		}
+	}
 }

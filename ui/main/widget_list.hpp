@@ -14,7 +14,7 @@ namespace terraformer::ui::main
 		widget_list& append(std::reference_wrapper<Widget> w, widget_visibility visibility = Widget::default_visibility)
 		{
 			m_objects.push_back(
-				&w,
+				&w.get(),
 				visibility,
 				widget_geometry{},
 				RenderSurface{},
@@ -34,11 +34,14 @@ namespace terraformer::ui::main
 
 			return *this;
 		}
+		
+		constexpr auto first_element_index() const
+		{ return m_objects.first_element_index(); }
 
 		auto size() const
 		{ return std::size(m_objects); }
 
-		auto widgets() const
+		auto widget_pointers() const
 		{ return m_objects.template get<0>(); }
 		
 		auto widget_visibilities() const
