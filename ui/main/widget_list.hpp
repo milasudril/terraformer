@@ -13,17 +13,20 @@ namespace terraformer::ui::main
 		float width;
 		float height;
 	};
+	
+	enum class widget_visibility:int{visible, hidden, skipped};
 
 	template<class RenderSurface>
 	class widget_list
 	{
 	public:
 		template<widget<RenderSurface> Widget>
-		widget_list& append(std::reference_wrapper<Widget> w)
+		widget_list& append(std::reference_wrapper<Widget> w, widget_visibility visibility = Widget::default_visibility)
 		{
 			m_objects.push_back(
 				std::in_place_t{},
 				&w,
+				visibility,
 				widget_geometry{},
 				RenderSurface{},
 				[](void const* obj, RenderSurface& surface){
@@ -48,27 +51,33 @@ namespace terraformer::ui::main
 
 		auto widgets() const
 		{ return m_objects.template get<0>(); }
+		
+		auto widget_visibilities() const
+		{ return m_objects.template get<1>(); }
+		
+		auto widget_visibilities()
+		{ return m_objects.template get<1>(); }
 
 		auto widget_geometries() const
-		{ return m_objects.template get<1>(); }
-
-		auto widget_geometries()
-		{ return m_objects.template get<1>(); }
-
-		auto surfaces() const
 		{ return m_objects.template get<2>(); }
 
-		auto render_callbacks() const
+		auto widget_geometries()
+		{ return m_objects.template get<2>(); }
+
+		auto surfaces() const
 		{ return m_objects.template get<3>(); }
 
-		auto cursor_position_callbacks() const
+		auto render_callbacks() const
 		{ return m_objects.template get<4>(); }
 
-		auto mouse_button_callbacks() const
+		auto cursor_position_callbacks() const
 		{ return m_objects.template get<5>(); }
 
-		auto size_callbacks() const
+		auto mouse_button_callbacks() const
 		{ return m_objects.template get<6>(); }
+
+		auto size_callbacks() const
+		{ return m_objects.template get<7>(); }
 
 	private:
 		using render_callback = void (*)(void const*, RenderSurface& surface);
@@ -78,6 +87,7 @@ namespace terraformer::ui::main
 
 		multi_array<
 			void*,
+			widget_visibility,
 			widget_geometry,
 			RenderSurface,
 			render_callback,
