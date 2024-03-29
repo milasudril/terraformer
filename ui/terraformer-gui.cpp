@@ -6,7 +6,7 @@
 #include "./drawing_api/gl_texture.hpp"
 #include "./drawing_api/gl_mesh.hpp"
 #include "./drawing_api/gl_shader.hpp"
-#include "./main/event_dispatcher.hpp"
+#include "./main/widget_list.hpp"
 #include "./layout_handling/layout_controller_entry.hpp"
 #include "./wsapi/native_window.hpp"
 
