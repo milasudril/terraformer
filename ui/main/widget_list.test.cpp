@@ -235,4 +235,58 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 			EXPECT_EQ(widget_3.size_count, 0);
 		}
 	}
+	
+	// Call handle_event fb_size
+	{
+		auto const widget_ptrs = widgets.widget_pointers();
+		auto const size_callbacks = widgets.size_callbacks();
+		dummy_surface surface{};
+		
+		for(auto k =  widgets.first_element_index();
+			k != std::size(widgets);
+			++k
+		)
+		{
+			size_callbacks[k](widget_ptrs[k], terraformer::ui::wsapi::fb_size{});
+			EXPECT_EQ(surface.update_count, 0);
+			
+			switch(k.get())
+			{
+				case 0:
+					EXPECT_EQ(widget_0.size_count, 1);
+					EXPECT_EQ(widget_1.size_count, 0);
+					EXPECT_EQ(widget_2.size_count, 0);
+					EXPECT_EQ(widget_3.size_count, 0);
+					break;
+				case 1:
+					EXPECT_EQ(widget_0.size_count, 1);
+					EXPECT_EQ(widget_1.size_count, 1);
+					EXPECT_EQ(widget_2.size_count, 0);
+					EXPECT_EQ(widget_3.size_count, 0);
+					break;
+				case 2:
+					EXPECT_EQ(widget_0.size_count, 1);
+					EXPECT_EQ(widget_1.size_count, 1);
+					EXPECT_EQ(widget_2.size_count, 1);
+					EXPECT_EQ(widget_3.size_count, 0);
+					break;
+				case 3:
+					EXPECT_EQ(widget_0.size_count, 1);
+					EXPECT_EQ(widget_1.size_count, 1);
+					EXPECT_EQ(widget_2.size_count, 1);
+					EXPECT_EQ(widget_3.size_count, 1);
+					break;
+			}
+
+			EXPECT_EQ(widget_0.cursor_position_count, 1);
+			EXPECT_EQ(widget_1.cursor_position_count, 1);
+			EXPECT_EQ(widget_2.cursor_position_count, 1);
+			EXPECT_EQ(widget_3.cursor_position_count, 1);
+			
+			EXPECT_EQ(widget_0.mbe_count, 1);
+			EXPECT_EQ(widget_1.mbe_count, 1);
+			EXPECT_EQ(widget_2.mbe_count, 1);
+			EXPECT_EQ(widget_3.mbe_count, 1);
+		}
+	}
 }
