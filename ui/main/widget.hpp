@@ -13,7 +13,7 @@ namespace terraformer::ui::main
 		float height;
 	};
 	
-	enum class widget_visibility:int{visible, hidden, skipped};
+	enum class widget_visibility:int{visible, not_rendered, collapsed};
 		
 	template<class T, class RenderSurface>
 	concept widget = requires(

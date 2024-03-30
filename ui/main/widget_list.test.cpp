@@ -44,7 +44,7 @@ namespace
 	template<size_t N>
 	struct dummy_widget:dummy_widget_no_default_visibility<N>
 	{		
-		static constexpr auto default_visibility = terraformer::ui::main::widget_visibility::hidden;
+		static constexpr auto default_visibility = terraformer::ui::main::widget_visibility::not_rendered;
 	};
 }
 
@@ -60,7 +60,7 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 	
 	widgets.append(std::ref(widget_0))
 		.append(std::ref(widget_1))
-		.append(std::ref(widget_2), terraformer::ui::main::widget_visibility::skipped)
+		.append(std::ref(widget_2), terraformer::ui::main::widget_visibility::collapsed)
 		.append(std::ref(widget_3), terraformer::ui::main::widget_visibility::visible);
 		
 	EXPECT_EQ(std::size(widgets).get(), 4);
@@ -86,7 +86,7 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 					break;
 				case 2:
 					EXPECT_EQ(widget_ptrs[k], &widget_2);
-					EXPECT_EQ(visibilities[k], terraformer::ui::main::widget_visibility::skipped);
+					EXPECT_EQ(visibilities[k], terraformer::ui::main::widget_visibility::collapsed);
 					break;
 				case 3:
 					EXPECT_EQ(widget_ptrs[k], &widget_3);
