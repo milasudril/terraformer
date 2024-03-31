@@ -6,11 +6,11 @@
 
 namespace terraformer::ui::main
 {
-	template<class RenderSurface>
+	template<class DrawingSurface>
 	class widget_list
 	{
 	public:
-		template<widget<RenderSurface> Widget>
+		template<widget<DrawingSurface> Widget>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -21,8 +21,8 @@ namespace terraformer::ui::main
 				&w.get(),
 				initial_visibility,
 				initial_geometry,
-				RenderSurface{initial_geometry.width, initial_geometry.height},
-				[](void const* obj, RenderSurface& surface) -> void {
+				DrawingSurface{initial_geometry.width, initial_geometry.height},
+				[](void const* obj, DrawingSurface& surface) -> void {
 					return static_cast<Widget const*>(obj)->render_to(surface);
 				},
 				[](void* obj, wsapi::cursor_position pos) -> bool {
@@ -79,7 +79,7 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<7>(); }
 
 	private:
-		using render_callback = void (*)(void const*, RenderSurface& surface);
+		using render_callback = void (*)(void const*, DrawingSurface& surface);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_position);
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const& mbe);
 		using size_callback = wsapi::fb_size (*)(void*, wsapi::fb_size);
@@ -88,7 +88,7 @@ namespace terraformer::ui::main
 			void*,
 			widget_visibility,
 			widget_geometry,
-			RenderSurface,
+			DrawingSurface,
 			render_callback,
 			cursor_position_callback,
 			mouse_button_callback,
@@ -96,8 +96,8 @@ namespace terraformer::ui::main
 		> m_objects;
 	};
 	
-	template<class RenderSurface>
-	void update_surfaces(widget_list<RenderSurface>& widgets)
+	template<class DrawingSurface>
+	void update_widget_surfaces(widget_list<DrawingSurface>& widgets)
 	{
 		auto const render_callbacks = widgets.render_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
@@ -106,8 +106,22 @@ namespace terraformer::ui::main
 		auto const n = std::size(widgets);
 		for(auto k = widgets.first_element_index(); k != n; ++k)
 		{
-			if(widget_visibilities[k] == widget_visibility::visible)
+			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
 			{ render_callbacks[k](widget_pointers[k], widget_surfaces[k]); }
+		}
+	}
+	
+	template<class Renderer, class DrawingSurface>
+	void show_widgets(Renderer&& renderer, widget_list<DrawingSurface> const& widgets)
+	{
+		auto const widget_surfaces = widgets.widget_surfaces();
+		auto const widget_geometries = widgets.widget_geometries();
+		auto const widget_visibilities = widgets.widget_visibilities();
+		auto const n = std::size(widgets);
+		for(auto k  = widgets.first_element_index(); k != n; ++k)
+		{
+			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
+			{ renderer.render_surface(widget_surfaces[k], widget_geometries[k]); }
 		}
 	}
 }

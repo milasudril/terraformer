@@ -18,13 +18,13 @@ namespace terraformer::ui::main
 	
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 		
-	template<class T, class RenderSurface>
+	template<class T, class DrawingSurface>
 	concept widget = requires(
 		T& obj,
 		wsapi::fb_size size,
 		wsapi::cursor_position pos,
 		wsapi::mouse_button_event const& mbe,
-		RenderSurface& surface
+		DrawingSurface& surface
 	)
 	{
 		{ std::as_const(obj).render_to(surface) } -> std::same_as<void>;

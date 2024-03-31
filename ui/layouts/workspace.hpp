@@ -5,7 +5,7 @@
 
 namespace terraformer::ui::layout_handling
 {
-	template<class RenderSurface>
+	template<class DrawingSurface>
 	class workspace
 	{
 	public:
@@ -17,7 +17,7 @@ namespace terraformer::ui::layout_handling
 		}
 
 	private:
-		main::widget_list<RenderSurface> m_widgets;
+		main::widget_list<DrawingSurface> m_widgets;
 	};
 }
 
