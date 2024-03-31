@@ -16,6 +16,12 @@ namespace terraformer::ui::main
 		constexpr bool operator!=(widget_geometry const&) const = default;
 	};
 	
+	inline bool inside(wsapi::cursor_position pos, widget_geometry const& box)
+	{		
+		return (pos.x >= box.x && pos.x < box.x + box.width)
+			&& (pos.y >= box.y && pos.y < box.y + box.height);
+	}
+	
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 		
 	template<class T, class DrawingSurface>

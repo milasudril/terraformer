@@ -10,6 +10,26 @@ namespace terraformer::ui::main
 	class widget_list
 	{
 	public:
+		using render_callback = void (*)(void const*, DrawingSurface& surface);
+		using cursor_position_callback = bool (*)(void*, wsapi::cursor_position);
+		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const& mbe);
+		using size_callback = wsapi::fb_size (*)(void*, wsapi::fb_size);
+
+		using widget_array = multi_array<
+			void*,
+			widget_visibility,
+			widget_geometry,
+			DrawingSurface,
+			render_callback,
+			cursor_position_callback,
+			mouse_button_callback,
+			size_callback
+		>;
+		
+		using index_type = typename widget_array::index_type;
+
+		static constexpr index_type npos{static_cast<size_t>(-1)};
+		
 		template<widget<DrawingSurface> Widget>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
@@ -78,22 +98,8 @@ namespace terraformer::ui::main
 		auto size_callbacks() const
 		{ return m_objects.template get<7>(); }
 
-	private:
-		using render_callback = void (*)(void const*, DrawingSurface& surface);
-		using cursor_position_callback = bool (*)(void*, wsapi::cursor_position);
-		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const& mbe);
-		using size_callback = wsapi::fb_size (*)(void*, wsapi::fb_size);
-
-		multi_array<
-			void*,
-			widget_visibility,
-			widget_geometry,
-			DrawingSurface,
-			render_callback,
-			cursor_position_callback,
-			mouse_button_callback,
-			size_callback
-		> m_objects;
+	private:		
+		widget_array m_objects;
 	};
 	
 	template<class DrawingSurface>
@@ -123,6 +129,28 @@ namespace terraformer::ui::main
 			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
 			{ renderer.render_surface(widget_surfaces[k], widget_geometries[k]); }
 		}
+	}
+	
+	inline auto find(wsapi::cursor_position pos, span<widget_geometry const> geoms)
+	{
+		return std::ranges::find_if(
+			geoms,
+			[pos](auto const& obj) {
+				return inside(pos, obj);
+			}
+		);
+	}
+	
+	template<class DrawingSurface>
+	auto find(wsapi::cursor_position pos, widget_list<DrawingSurface> const& widgets)
+	{
+		auto const i = find(pos, widgets.widget_geometries());
+		if(i == std::end(widgets.widget_geometries()))
+		{ return widget_list<DrawingSurface>::npos; }
+		
+		return typename widget_list<DrawingSurface>::index_type{
+			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
+		};
 	}
 }
 
