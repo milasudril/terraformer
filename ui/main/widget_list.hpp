@@ -11,13 +11,17 @@ namespace terraformer::ui::main
 	{
 	public:
 		template<widget<RenderSurface> Widget>
-		widget_list& append(std::reference_wrapper<Widget> w, widget_visibility visibility = Widget::default_visibility)
+		widget_list& append(
+			std::reference_wrapper<Widget> w,
+			widget_geometry const& initial_geometry,
+			widget_visibility initial_visibility = widget_visibility::visible
+		)
 		{
 			m_objects.push_back(
 				&w.get(),
-				visibility,
-				widget_geometry{},
-				RenderSurface{},
+				initial_visibility,
+				initial_geometry,
+				RenderSurface{initial_geometry.width, initial_geometry.height},
 				[](void const* obj, RenderSurface& surface) -> void{
 					return static_cast<Widget const*>(obj)->render_to(surface);
 				},
@@ -53,10 +57,13 @@ namespace terraformer::ui::main
 		auto widget_geometries() const
 		{ return m_objects.template get<2>(); }
 
-		auto widget_geometries()
+		auto widget_geometries()		
 		{ return m_objects.template get<2>(); }
+		
+		auto widget_surfaces()
+		{ return m_objects.template get<3>(); }
 
-		auto surfaces() const
+		auto widget_surfaces() const
 		{ return m_objects.template get<3>(); }
 
 		auto render_callbacks() const
