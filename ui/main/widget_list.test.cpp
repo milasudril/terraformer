@@ -304,3 +304,47 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 		}
 	}
 }
+
+TESTCASE(terraformer_ui_main_widget_list_update_surfaces)
+{
+	terraformer::ui::main::widget_list<dummy_surface> widgets;
+	
+	dummy_widget<0> widget_0;
+	dummy_widget<1> widget_1;
+	dummy_widget<2> widget_2;
+	dummy_widget<3> widget_3;
+	
+	std::array<terraformer::ui::main::widget_geometry, 4> const initial_geometries{
+		terraformer::ui::main::widget_geometry{1, 2, 3, 4},
+		terraformer::ui::main::widget_geometry{5, 6, 7, 8},
+		terraformer::ui::main::widget_geometry{9, 10, 11, 12},
+		terraformer::ui::main::widget_geometry{13, 14, 15, 16}
+	};
+
+	std::array<terraformer::ui::main::widget_visibility, 4> const initial_visibilities{
+		terraformer::ui::main::widget_visibility::visible,
+		terraformer::ui::main::widget_visibility::visible,
+		terraformer::ui::main::widget_visibility::not_rendered,
+		terraformer::ui::main::widget_visibility::collapsed,
+	};
+	
+	widgets.append(std::ref(widget_0), initial_geometries[0])
+		.append(std::ref(widget_1), initial_geometries[1], initial_visibilities[1])
+		.append(std::ref(widget_2), initial_geometries[2], initial_visibilities[2])
+		.append(std::ref(widget_3), initial_geometries[3], initial_visibilities[3]);
+
+	update_surfaces(widgets);
+	
+	auto const widget_surfaces = widgets.widget_surfaces();
+	auto const widget_visibilities = widgets.widget_visibilities();
+	for(auto k =  widgets.first_element_index();
+		k != std::size(widgets);
+		++k
+	)
+	{
+		if(widget_visibilities[k] == terraformer::ui::main::widget_visibility::visible)
+		{ EXPECT_EQ(widget_surfaces[k].update_count, 1); }
+		else
+		{ EXPECT_EQ(widget_surfaces[k].update_count, 0); }
+	}
+}

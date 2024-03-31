@@ -9,7 +9,12 @@ namespace terraformer::ui::layout_handling
 	class workspace
 	{
 	public:
-
+		template<class ... Args>
+		workspace& append(Args&&... args)
+		{ 
+			m_widgets.append(std::forward<Args>(args)...);
+			return *this;
+		}
 
 	private:
 		main::widget_list<RenderSurface> m_widgets;

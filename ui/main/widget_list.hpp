@@ -22,7 +22,7 @@ namespace terraformer::ui::main
 				initial_visibility,
 				initial_geometry,
 				RenderSurface{initial_geometry.width, initial_geometry.height},
-				[](void const* obj, RenderSurface& surface) -> void{
+				[](void const* obj, RenderSurface& surface) -> void {
 					return static_cast<Widget const*>(obj)->render_to(surface);
 				},
 				[](void* obj, wsapi::cursor_position pos) -> bool {
@@ -95,6 +95,21 @@ namespace terraformer::ui::main
 			size_callback
 		> m_objects;
 	};
+	
+	template<class RenderSurface>
+	void update_surfaces(widget_list<RenderSurface>& widgets)
+	{
+		auto const render_callbacks = widgets.render_callbacks();
+		auto const widget_pointers = widgets.widget_pointers();
+		auto const widget_surfaces = widgets.widget_surfaces();
+		auto const widget_visibilities = widgets.widget_visibilities();
+		auto const n = std::size(widgets);
+		for(auto k = widgets.first_element_index(); k != n; ++k)
+		{
+			if(widget_visibilities[k] == widget_visibility::visible)
+			{ render_callbacks[k](widget_pointers[k], widget_surfaces[k]); }
+		}
+	}
 }
 
 #endif
