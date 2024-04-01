@@ -4,8 +4,7 @@
 
 #include "./drawing_api/gl_surface_configuration.hpp"
 #include "./drawing_api/gl_texture.hpp"
-#include "./drawing_api/gl_mesh.hpp"
-#include "./drawing_api/gl_shader.hpp"
+#include "./drawing_api/single_quad_renderer.hpp"
 #include "./main/widget_list.hpp"
 #include "./layouts/workspace.hpp"
 #include "./wsapi/native_window.hpp"
@@ -14,40 +13,7 @@ namespace
 {
 	struct my_event_handler
 	{
-		terraformer::ui::drawing_api::gl_mesh<unsigned int, terraformer::location> the_mesh{
-			std::array<unsigned int, 6>{
-				0, 1, 2, 0, 2, 3
-			},
-			std::array<terraformer::location, 4>{
-				terraformer::location{-0.5f, -0.5f, 0.0f},
-				terraformer::location{0.5f, -0.5f, 0.0f},
-				terraformer::location{0.5f, 0.5f, 0.0f},
-				terraformer::location{-0.5f, 0.5f, 0.0f},
-			}
-		};
-
-		terraformer::ui::drawing_api::gl_program the_program{
-			terraformer::ui::drawing_api::gl_shader<GL_VERTEX_SHADER>{
-				R"(#version 460 core
-layout (location = 0) in vec4 input_location;
-
-out vec4 vertex_color;
-
-void main()
-{
-	gl_Position = input_location;
-	vertex_color = vec4(0.5, 0.5, 0.5, 1.0);
-})"
-			},
-			terraformer::ui::drawing_api::gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
-out vec4 fragment_color;
-in vec4 vertex_color;
-
-void main()
-{
-	fragment_color = vertex_color;
-})"}
-		};
+		terraformer::ui::drawing_api::single_quad_renderer m_quad;
 
 		void window_is_closing()
 		{ should_close = true; }
@@ -60,9 +26,7 @@ void main()
 		)
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
-			the_program.bind();
-			the_mesh.bind();
-			terraformer::ui::drawing_api::gl_bindings::draw_triangles();
+			m_quad.render();
 			viewport.swap_buffers();
 			return should_close;
 		}
@@ -86,6 +50,7 @@ int main(int, char**)
 		}
 	};
 
+	glEnable(GL_CULL_FACE);
 	my_event_handler eh;
 	mainwin.set_event_handler(std::ref(eh));
 	gui_ctxt.wait_events(std::ref(eh), std::ref(mainwin));
