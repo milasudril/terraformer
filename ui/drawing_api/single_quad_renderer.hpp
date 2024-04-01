@@ -29,15 +29,15 @@ namespace terraformer::ui::drawing_api
 		}
 
 	private:
-		gl_mesh<unsigned int, displacement> m_mesh{
+		gl_mesh<unsigned int, location> m_mesh{
 			std::array<unsigned int, 6>{
 				0, 1, 2, 0, 2, 3
 			},			
-			std::array<displacement, 4>{
-				displacement{-1.0f, -1.0f, 0.0f},
-				displacement{1.0f, -1.0f, 0.0f},
-				displacement{1.0f, 1.0f, 0.0f},
-				displacement{-1.0f,1.0f, 0.0f},
+			std::array<location, 4>{
+				location{-1.0f, -1.0f, 0.0f},
+				location{1.0f, -1.0f, 0.0f},
+				location{1.0f, 1.0f, 0.0f},
+				location{-1.0f,1.0f, 0.0f},
 			}
 		};
 		
@@ -45,6 +45,7 @@ namespace terraformer::ui::drawing_api
 			gl_shader<GL_VERTEX_SHADER>{
 				R"(#version 460 core
 layout (location = 0) in vec4 input_offset;
+
 layout (location = 0) uniform vec4 location;
 layout (location = 1) uniform vec4 model_origin;
 layout (location = 2) uniform vec4 model_scale;
@@ -56,9 +57,8 @@ out vec4 vertex_color;
 void main()
 {
 	gl_Position =
-		  world_origin
-		+(location - model_origin)
-		+model_scale*world_scale*input_offset;
+		 world_origin
+		+model_scale*world_scale*(input_offset - model_origin);
 	vertex_color = vec4(0.5, 0.5, 0.5, 1.0);
 })"
 			},
