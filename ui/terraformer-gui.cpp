@@ -19,7 +19,10 @@ namespace
 		{ should_close = true; }
 
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
-		{fb_size = size;}
+		{
+			fb_size = size;
+			glViewport(0, 0, size.width, size.height);
+		}
 
 		bool operator()(
 			terraformer::ui::wsapi::native_window<terraformer::ui::drawing_api::gl_surface_configuration>& viewport
