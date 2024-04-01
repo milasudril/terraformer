@@ -48,7 +48,7 @@ layout (location = 0) in vec4 input_offset;
 
 layout (location = 0) uniform vec4 location;
 layout (location = 1) uniform vec4 model_origin;
-layout (location = 2) uniform vec4 model_scale;
+layout (location = 2) uniform vec4 model_size;
 layout (location = 3) uniform vec4 world_origin;
 layout (location = 4) uniform vec4 world_scale;
 
@@ -58,7 +58,7 @@ void main()
 {
 	gl_Position =
 		 world_origin
-		+model_scale*world_scale*(input_offset - model_origin);
+		+model_size*world_scale*(input_offset - model_origin);
 	vertex_color = vec4(0.5, 0.5, 0.5, 1.0);
 })"
 			},
