@@ -10,11 +10,12 @@ namespace terraformer::ui::drawing_api
 	class single_quad_renderer
 	{
 	public:
-		void set_world_transform(wsapi::fb_size size)
+		void set_world_transform(/*location origin, */wsapi::fb_size size)
 		{
-			scaling const s{2.0f/static_cast<float>(size.width), 2.0f/static_cast<float>(size.height), 1.0f};
+			scaling const s{1.0f/static_cast<float>(size.width), 1.0f/static_cast<float>(size.height), 1.0f};
 			m_program.bind();
-			glUniform4f(2, s[0], s[1], s[2], 1.0f);
+			glUniform4f(2, origin[0], origin[1], origin[2], 1.0f);
+			glUniform4f(2, s[0], s[1], s[2], 0.0f);
 		}
 		
 		void render(location where, scaling scale)
@@ -32,10 +33,10 @@ namespace terraformer::ui::drawing_api
 				0, 1, 2, 0, 2, 3
 			},			
 			std::array<displacement, 4>{
-				displacement{-0.5f, -0.5f, 0.0f},
-				displacement{0.5f, -0.5f, 0.0f},
-				displacement{0.5f, 0.5f, 0.0f},
-				displacement{-0.5f, 0.5f, 0.0f},
+				displacement{-1.0f, -1.0f, 0.0f},
+				displacement{1.0f, -1.0f, 0.0f},
+				displacement{1.0f, 1.0f, 0.0f},
+				displacement{-1.0f,1.0f, 0.0f},
 			}
 		};
 		
