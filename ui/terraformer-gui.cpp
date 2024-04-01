@@ -22,7 +22,7 @@ namespace
 		{
 			fb_size = size;
 			glViewport(0, 0, size.width, size.height);
-			m_quad.set_world_transform(size);
+			m_quad.set_world_transform(terraformer::location{-1.0f, -1.0f, 0.0f}, size);
 		}
 
 		bool operator()(
@@ -30,7 +30,11 @@ namespace
 		)
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
-			m_quad.render(terraformer::location{0.0f, 0.0f, 0.0f}, terraformer::scaling{400.0f, 250.0f, 1.0f});
+			m_quad.render(
+				terraformer::location{1.0f, 1.0f, 0.0f},
+				terraformer::location{0.0f, 0.0f, 0.0f},
+				terraformer::scaling{400.0f, 250.0f, 1.0f}
+			);
 			viewport.swap_buffers();
 			return should_close;
 		}

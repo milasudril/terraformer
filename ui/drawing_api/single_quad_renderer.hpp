@@ -10,20 +10,21 @@ namespace terraformer::ui::drawing_api
 	class single_quad_renderer
 	{
 	public:
-		void set_world_transform(/*location origin, */wsapi::fb_size size)
+		void set_world_transform(location origin, wsapi::fb_size size)
 		{
 			scaling const s{1.0f/static_cast<float>(size.width), 1.0f/static_cast<float>(size.height), 1.0f};
 			m_program.bind();
-			glUniform4f(2, origin[0], origin[1], origin[2], 1.0f);
-			glUniform4f(2, s[0], s[1], s[2], 0.0f);
+			glUniform4f(3, origin[0], origin[1], origin[2], 1.0f);
+			glUniform4f(4, s[0], s[1], s[2], 0.0f);
 		}
 		
-		void render(location where, scaling scale)
+		void render(location where, location origin, scaling scale)
 		{
 			m_program.bind();
 			m_mesh.bind();
 			glUniform4f(0, where[0], where[1], where[2], 1.0f);
-			glUniform4f(1, scale[0], scale[1], scale[2], 0.0f);
+			glUniform4f(1, origin[0], origin[1], origin[2], 1.0f);
+			glUniform4f(2, scale[0], scale[1], scale[2], 0.0f);
 			gl_bindings::draw_triangles();
 		}
 
@@ -45,14 +46,19 @@ namespace terraformer::ui::drawing_api
 				R"(#version 460 core
 layout (location = 0) in vec4 input_offset;
 layout (location = 0) uniform vec4 location;
-layout (location = 1) uniform vec4 model_scale;
-layout (location = 2) uniform vec4 world_scale;
+layout (location = 1) uniform vec4 model_origin;
+layout (location = 2) uniform vec4 model_scale;
+layout (location = 3) uniform vec4 world_origin;
+layout (location = 4) uniform vec4 world_scale;
 
 out vec4 vertex_color;
 
 void main()
 {
-	gl_Position = location + model_scale*world_scale*input_offset;
+	gl_Position =
+		  world_origin
+		+(location - model_origin)
+		+model_scale*world_scale*input_offset;
 	vertex_color = vec4(0.5, 0.5, 0.5, 1.0);
 })"
 			},
