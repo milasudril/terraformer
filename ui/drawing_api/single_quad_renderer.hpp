@@ -57,8 +57,8 @@ out vec4 vertex_color;
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	vec4 loc = model_location + model_size*(input_offset - model_origin);
-	gl_Position = world_location + world_scale*(loc - world_origin);
+	vec4 loc = model_location + 0.5*model_size*(input_offset - model_origin);
+	gl_Position = world_location + 2.0*world_scale*(loc - world_origin);
 
 	vertex_color = vec4(0.5, 0.5, 0.5, 1.0);
 })"
