@@ -12,7 +12,7 @@ namespace terraformer::ui::drawing_api
 	public:
 		void set_world_transform(location where, wsapi::fb_size size)
 		{
-			scaling const s{1.0f/static_cast<float>(size.width), 1.0f/static_cast<float>(size.height), 1.0f};
+			scaling const s{2.0f/static_cast<float>(size.width), 2.0f/static_cast<float>(size.height), 1.0f};
 			m_program.bind();
 			glUniform4f(3, where[0], where[1], where[2], 1.0f);
 			glUniform4f(4, s[0], s[1], s[2], 0.0f);
@@ -34,10 +34,10 @@ namespace terraformer::ui::drawing_api
 				0, 1, 2, 0, 2, 3
 			},
 			std::array<location, 4>{
-				location{-1.0f, -1.0f, 0.0f},
-				location{1.0f, -1.0f, 0.0f},
-				location{1.0f, 1.0f, 0.0f},
-				location{-1.0f,1.0f, 0.0f},
+				location{-0.5f, -0.5f, 0.0f},
+				location{0.5f, -0.5f, 0.0f},
+				location{0.5f, 0.5f, 0.0f},
+				location{-0.5f,0.5f, 0.0f},
 			}
 		};
 
@@ -57,8 +57,8 @@ out vec4 vertex_color;
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	vec4 loc = model_location + 0.5*model_size*(input_offset - model_origin);
-	gl_Position = world_location + 2.0*world_scale*(loc - world_origin);
+	vec4 loc = model_location + model_size*(input_offset - model_origin);
+	gl_Position = world_location + world_scale*(loc - world_origin);
 
 	vertex_color = vec4(0.5, 0.5, 0.5, 1.0);
 })"
