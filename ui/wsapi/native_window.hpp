@@ -207,7 +207,15 @@ namespace terraformer::ui::wsapi
 			return ret;
 		}
 
+		cursor_position get_cursor_position() const
+		{
+			cursor_position ret{};
+			glfwGetCursorPos(m_window.get(), &ret.x, &ret.y);
+			return ret;
+		}
+
 		auto handle() const { return m_window.get(); }
+
 
 	private:
 		window_handle m_window;
