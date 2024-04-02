@@ -23,7 +23,8 @@ namespace terraformer::ui::drawing_api
 			m_program.bind();
 			m_mesh.bind();
 			glUniform4f(0, where[0], where[1], where[2], 1.0f);
-			glUniform4f(1, origin[0], origin[1], origin[2], 1.0f);
+			auto const v = 0.5f*origin.get();
+			glUniform4f(1, v[0], v[1], v[2], 1.0f);
 			glUniform4f(2, scale[0], scale[1], scale[2], 0.0f);
 			gl_bindings::draw_triangles();
 		}

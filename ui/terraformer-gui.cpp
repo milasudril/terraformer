@@ -34,7 +34,7 @@ namespace
 
 			m_quad.render(
 				terraformer::location{static_cast<float>(loc.x), -static_cast<float>(loc.y), 0.0f},
-				terraformer::location{0.0f, 0.0f, 0.0f},
+				terraformer::location{-1.0f, 1.0f, 0.0f},
 				terraformer::scaling{200.0f, 125.0f, 1.0f}
 			);
 			viewport.swap_buffers();
