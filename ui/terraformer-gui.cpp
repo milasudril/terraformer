@@ -15,8 +15,17 @@ namespace
 	{
 		terraformer::ui::drawing_api::single_quad_renderer m_quad;
 
+		template<class Exception>
+		void handle_exception(Exception const& error) noexcept
+		{
+			fprintf(stderr, "%s\n", error.what());
+		}
+
 		void window_is_closing()
-		{ should_close = true; }
+		{
+			should_close = true;
+			throw std::runtime_error{"Foo"};
+		}
 
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{

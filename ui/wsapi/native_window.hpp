@@ -154,8 +154,14 @@ namespace terraformer::ui::wsapi
 			if constexpr (requires{{eh.get().window_is_closing()}->std::same_as<void>;})
 			{
 				glfwSetWindowCloseCallback(m_window.get(), [](GLFWwindow* window) -> void {
-					auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-					eh->window_is_closing();
+					auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+					call_and_catch(
+						*event_handler,
+						[](EventHandler* event_handler) {
+							event_handler->window_is_closing();
+						},
+						event_handler
+					);
 				});
 			}
 
@@ -164,13 +170,20 @@ namespace terraformer::ui::wsapi
 				glfwSetFramebufferSizeCallback(
 					m_window.get(),
 					[](GLFWwindow* window, int w, int h){
-						auto eh = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-						eh->framebuffer_size_changed(
-							fb_size{
-								.width = w,
-								.height = h
-							}
-						);
+						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+						call_and_catch(
+							*event_handler,
+							[](EventHandler* event_handler, int w, int h) {
+							event_handler->framebuffer_size_changed(
+								fb_size{
+									.width = w,
+									.height = h
+								}
+							);
+						},
+						event_handler,
+						w,
+						h);
 					}
 				);
 				eh.get().framebuffer_size_changed(get_fb_size());
@@ -200,6 +213,18 @@ namespace terraformer::ui::wsapi
 	private:
 		window_handle m_window;
 		RenderContextConfiguration m_ctxt_cfg;
+
+
+		template<class ExceptionHandler, class Function, class ... Args>
+		static void call_and_catch(ExceptionHandler&& eh, Function&& f, Args&&... args)
+		{
+			try
+			{ std::forward<Function>(f)(std::forward<Args>(args)...); }
+			catch(std::exception const& e)
+			{ eh.handle_exception(e); }
+			catch(...)
+			{ fprintf(stderr, "Caught unknown exception"); }
+		}
 	};
 }
 
