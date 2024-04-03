@@ -13,19 +13,20 @@ namespace terraformer::ui::drawing_api
 		void set_world_transform(location where, wsapi::fb_size size)
 		{
 			scaling const s{2.0f/static_cast<float>(size.width), 2.0f/static_cast<float>(size.height), 1.0f};
-			m_program.bind();
-			glUniform4f(3, where[0], where[1], where[2], 1.0f);
-			glUniform4f(4, s[0], s[1], s[2], 0.0f);
+			m_program.set_uniform(3, where[0], where[1], where[2], 1.0f)
+				.set_uniform(4, s[0], s[1], s[2], 0.0f);
 		}
 
 		void render(location where, location origin, scaling scale)
 		{
-			m_program.bind();
-			m_mesh.bind();
-			glUniform4f(0, where[0], where[1], where[2], 1.0f);
 			auto const v = 0.5f*origin.get();
-			glUniform4f(1, v[0], v[1], v[2], 1.0f);
-			glUniform4f(2, scale[0], scale[1], scale[2], 0.0f);
+			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
+				.set_uniform(1, v[0], v[1], v[2], 1.0f)
+				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
+				.bind();
+
+			m_mesh.bind();
+
 			gl_bindings::draw_triangles();
 		}
 
