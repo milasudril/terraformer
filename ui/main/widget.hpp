@@ -1,7 +1,10 @@
 #ifndef TERRAFORMER_UI_MAIN_WIDGET_HPP
 #define TERRAFORMER_UI_MAIN_WIDGET_HPP
 
-#include "ui/wsapi/native_window.hpp"
+#include "ui/wsapi/events.hpp"
+
+#include <utility>
+#include <type_traits>
 
 namespace terraformer::ui::main
 {
@@ -11,19 +14,19 @@ namespace terraformer::ui::main
 		int y;
 		int width;
 		int height;
-		
+
 		constexpr bool operator==(widget_geometry const&) const = default;
 		constexpr bool operator!=(widget_geometry const&) const = default;
 	};
-	
+
 	inline bool inside(wsapi::cursor_position pos, widget_geometry const& box)
-	{		
+	{
 		return (pos.x >= box.x && pos.x < box.x + box.width)
 			&& (pos.y >= box.y && pos.y < box.y + box.height);
 	}
-	
+
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
-		
+
 	template<class T, class DrawingSurface>
 	concept widget = requires(
 		T& obj,

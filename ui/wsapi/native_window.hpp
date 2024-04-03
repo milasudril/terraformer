@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_WSAPI_HPP
 
 #include "./context.hpp"
+#include "./events.hpp"
 
 #define GLFW_INCLUDE_NONE
 
@@ -36,27 +37,6 @@ namespace terraformer::ui::wsapi
 	void activate_render_context(GLFWwindow*, no_api_config){}
 
 	void swap_buffers(GLFWwindow*, no_api_config){}
-
-	struct fb_size
-	{
-		int width;
-		int height;
-	};
-
-	struct cursor_position
-	{
-		double x;
-		double y;
-	};
-
-	enum class button_state_change:int{press, release};
-
-	struct mouse_button_event
-	{
-		cursor_position where;
-		int button;
-		button_state_change state_change;
-	};
 
 	struct window_geometry_configuration
 	{
