@@ -3,6 +3,7 @@
 
 #include "./context.hpp"
 #include "./events.hpp"
+#include "lib/common/bitmask_enum.hpp"
 
 #define GLFW_INCLUDE_NONE
 
@@ -53,26 +54,7 @@ namespace terraformer::ui::wsapi
 		initially_maximized = 0x10,
 	};
 
-	constexpr window_features operator~(window_features value)
-	{ return static_cast<window_features>(~static_cast<uint32_t>(value)); }
-
-	constexpr window_features operator|(window_features a, window_features b)
-	{ return static_cast<window_features>(static_cast<uint32_t>(a) | static_cast<uint32_t>(b)); }
-
-	constexpr window_features& operator|=(window_features& a, window_features b)
-	{ return a = a | b; }
-
-	constexpr window_features operator&(window_features a, window_features b)
-	{ return static_cast<window_features>(static_cast<uint32_t>(a) & static_cast<uint32_t>(b)); }
-
-	constexpr window_features& operator&=(window_features& a, window_features b)
-	{ return a = a & b; }
-
-	constexpr window_features operator^(window_features a, window_features b)
-	{ return static_cast<window_features>(static_cast<uint32_t>(a) ^ static_cast<uint32_t>(b)); }
-
-	constexpr auto is_set(window_features a, window_features feature)
-	{ return static_cast<bool>(a & feature); }
+	consteval void enable_bitmask_operators(window_features){}
 
 	struct window_configuration
 	{
