@@ -44,6 +44,14 @@ namespace terraformer::ui::wsapi
 		modifier_keys modifiers;
 	};
 
+	enum class cursor_enter_leave:int{enter, leave};
+
+	struct cursor_enter_leave_event
+	{
+		cursor_position where;
+		cursor_enter_leave direction;
+	};
+
 	struct error_message
 	{
 		std::string description;

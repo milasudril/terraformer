@@ -162,7 +162,8 @@ namespace terraformer::ui::wsapi
 				{eh.get().handle_mouse_button_event(event)}->std::same_as<void>;
 			})
 			{
-				glfwSetMouseButtonCallback(m_window.get(),
+				glfwSetMouseButtonCallback(
+					m_window.get(),
 					[](GLFWwindow* window, int button, int action, int modifiers){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						assert(action == GLFW_PRESS || action == GLFW_RELEASE);
@@ -174,6 +175,27 @@ namespace terraformer::ui::wsapi
 								.button = button,
 								.action = action == GLFW_PRESS? button_action::press : button_action::release,
 								.modifiers = modifier_keys{modifiers}
+							}
+						);
+					}
+				);
+			}
+
+			if constexpr (requires(cursor_enter_leave_event const& event){
+				{eh.get().handle_cursor_enter_leave_event(event)}->std::same_as<void>;
+			})
+			{
+				glfwSetCursorEnterCallback(
+					m_window.get(),
+					[](GLFWwindow* window, int direction){
+						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+						assert(direction == GLFW_TRUE || direction == GLFW_FALSE);
+						call_and_catch(
+							&EventHandler::handle_cursor_enter_leave_event,
+							*event_handler,
+							cursor_enter_leave_event{
+								.where = get_cursor_position(window),
+								.direction = direction == GLFW_TRUE? cursor_enter_leave::enter : cursor_enter_leave::leave
 							}
 						);
 					}

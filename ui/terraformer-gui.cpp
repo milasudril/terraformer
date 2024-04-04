@@ -37,6 +37,18 @@ namespace
 		void window_is_closing()
 		{ should_close = true; }
 
+		void handle_cursor_enter_leave_event(terraformer::ui::wsapi::cursor_enter_leave_event const& event)
+		{
+ 			printf(
+				"(%.8g, %.8g) %u\n",
+				event.where.x,
+				event.where.y,
+				static_cast<uint32_t>(event.direction)
+			);
+
+			fflush(stdout);
+		}
+
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{
 			fb_size = size;
