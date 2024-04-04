@@ -115,6 +115,8 @@ namespace terraformer::ui::wsapi
 
 			if(m_window == nullptr)
 			{ throw std::runtime_error{"Failed to create a window"}; }
+
+			glfwSetInputMode(m_window.get(), GLFW_LOCK_KEY_MODS, GLFW_TRUE);
 			activate_render_context();
 		}
 
@@ -161,7 +163,7 @@ namespace terraformer::ui::wsapi
 			})
 			{
 				glfwSetMouseButtonCallback(m_window.get(),
-					[](GLFWwindow* window, int button, int action, int){
+					[](GLFWwindow* window, int button, int action, int modifiers){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						assert(action == GLFW_PRESS || action == GLFW_RELEASE);
 						call_and_catch(
@@ -170,7 +172,8 @@ namespace terraformer::ui::wsapi
 							mouse_button_event{
 								.where = get_cursor_position(window),
 								.button = button,
-								.state_change = action == GLFW_PRESS? button_state_change::press : button_state_change::release
+								.action = action == GLFW_PRESS? button_action::press : button_action::release,
+								.modifiers = modifier_keys{modifiers}
 							}
 						);
 					}

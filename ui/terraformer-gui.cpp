@@ -20,9 +20,18 @@ namespace
 			fprintf(stderr, "%s\n", msg.description.c_str());
 		}
 
-		void handle_mouse_button_event(terraformer::ui::wsapi::mouse_button_event const&)
+		void handle_mouse_button_event(terraformer::ui::wsapi::mouse_button_event const& event)
 		{
- 			puts("Hej");
+ 			printf(
+				"\r(%.8g, %.8g) %d %u %04x",
+				event.where.x,
+				event.where.y,
+				event.button,
+				static_cast<uint32_t>(event.action),
+				static_cast<uint32_t>(event.modifiers)
+			);
+
+			fflush(stdout);
 		}
 
 		void window_is_closing()
