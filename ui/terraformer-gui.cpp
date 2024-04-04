@@ -15,10 +15,9 @@ namespace
 	{
 		terraformer::ui::drawing_api::single_quad_renderer m_quad;
 
-		template<class Exception>
-		void handle_exception(Exception const& error) noexcept
+		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
 		{
-			fprintf(stderr, "%s\n", error.what());
+			fprintf(stderr, "%s\n", msg.description.c_str());
 		}
 
 		void window_is_closing()

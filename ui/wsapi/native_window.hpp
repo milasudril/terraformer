@@ -13,7 +13,7 @@
 #include <memory>
 #include <stdexcept>
 #include <cstdio>
-#include <optional>
+#include <functional>
 
 namespace terraformer::ui::wsapi
 {
@@ -155,13 +155,7 @@ namespace terraformer::ui::wsapi
 			{
 				glfwSetWindowCloseCallback(m_window.get(), [](GLFWwindow* window) -> void {
 					auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-					call_and_catch(
-						*event_handler,
-						[](EventHandler* event_handler) {
-							event_handler->window_is_closing();
-						},
-						event_handler
-					);
+					call_and_catch(&EventHandler::window_is_closing, *event_handler);
 				});
 			}
 
@@ -171,19 +165,7 @@ namespace terraformer::ui::wsapi
 					m_window.get(),
 					[](GLFWwindow* window, int w, int h){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-						call_and_catch(
-							*event_handler,
-							[](EventHandler* event_handler, int w, int h) {
-							event_handler->framebuffer_size_changed(
-								fb_size{
-									.width = w,
-									.height = h
-								}
-							);
-						},
-						event_handler,
-						w,
-						h);
+						call_and_catch(&EventHandler::framebuffer_size_changed, *event_handler, fb_size{w, h});
 					}
 				);
 				eh.get().framebuffer_size_changed(get_fb_size());
@@ -215,15 +197,21 @@ namespace terraformer::ui::wsapi
 		RenderContextConfiguration m_ctxt_cfg;
 
 
-		template<class ExceptionHandler, class Function, class ... Args>
-		static void call_and_catch(ExceptionHandler&& eh, Function&& f, Args&&... args)
+		template<class EventHandler, class Function, class ... Args>
+		static void call_and_catch(Function&& f, EventHandler&& eh, Args&&... args)
 		{
 			try
-			{ std::forward<Function>(f)(std::forward<Args>(args)...); }
+			{ std::invoke(std::forward<Function>(f), std::forward<EventHandler>(eh), std::forward<Args>(args)...); }
 			catch(std::exception const& e)
-			{ eh.handle_exception(e); }
+			{ eh.error_detected(error_message{e.what()}); }
+			catch(char const* msg)
+			{ eh.error_detected(error_message{msg}); }
 			catch(...)
-			{ fprintf(stderr, "Caught unknown exception"); }
+			{
+				fprintf(stderr, "Caught unknown exception\n");
+				fflush(stderr);
+				abort();
+			}
 		}
 	};
 }

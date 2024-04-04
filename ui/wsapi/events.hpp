@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_UI_WSAPI_EVENTS_HPP
 #define TERRAFORMER_UI_WSAPI_EVENTS_HPP
 
+#include <string>
+
 namespace terraformer::ui::wsapi
 {
 	struct fb_size
@@ -22,6 +24,11 @@ namespace terraformer::ui::wsapi
 		cursor_position where;
 		int button;
 		button_state_change state_change;
+	};
+
+	struct error_message
+	{
+		std::string description;
 	};
 }
 #endif
