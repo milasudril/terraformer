@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <cstdio>
 #include <functional>
+#include <cassert>
 
 namespace terraformer::ui::wsapi
 {
@@ -150,6 +151,8 @@ namespace terraformer::ui::wsapi
 		template<class EventHandler>
 		void set_event_handler(std::reference_wrapper<EventHandler> eh)
 		{
+			static_assert(requires(error_message const& msg){{eh.get().error_detected(msg)}->std::same_as<void>;});
+
 			glfwSetWindowUserPointer(m_window.get(), &eh.get());
 			if constexpr (requires{{eh.get().window_is_closing()}->std::same_as<void>;})
 			{
@@ -169,6 +172,27 @@ namespace terraformer::ui::wsapi
 					}
 				);
 				eh.get().framebuffer_size_changed(get_fb_size());
+			}
+
+			if constexpr (requires(mouse_button_event const& event){
+				{eh.get().handle_mouse_button_event(event)}->std::same_as<void>;
+			})
+			{
+				glfwSetMouseButtonCallback(m_window.get(),
+					[](GLFWwindow* window, int button, int action, int){
+						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+						assert(action == GLFW_PRESS || action == GLFW_RELEASE);
+						call_and_catch(
+							&EventHandler::handle_mouse_button_event,
+							*event_handler,
+							mouse_button_event{
+								.where = get_cursor_position(window),
+								.button = button,
+								.state_change = action == GLFW_PRESS? button_state_change::press : button_state_change::release
+							}
+						);
+					}
+				);
 			}
 		}
 
@@ -196,6 +220,12 @@ namespace terraformer::ui::wsapi
 		window_handle m_window;
 		RenderContextConfiguration m_ctxt_cfg;
 
+		static cursor_position get_cursor_position(GLFWwindow* window)
+		{
+			cursor_position ret{};
+			glfwGetCursorPos(window, &ret.x, &ret.y);
+			return ret;
+		};
 
 		template<class EventHandler, class Function, class ... Args>
 		static void call_and_catch(Function&& f, EventHandler&& eh, Args&&... args)

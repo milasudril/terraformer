@@ -20,11 +20,13 @@ namespace
 			fprintf(stderr, "%s\n", msg.description.c_str());
 		}
 
-		void window_is_closing()
+		void handle_mouse_button_event(terraformer::ui::wsapi::mouse_button_event const&)
 		{
-			should_close = true;
-			throw std::runtime_error{"Foo"};
+ 			puts("Hej");
 		}
+
+		void window_is_closing()
+		{ should_close = true; }
 
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{
