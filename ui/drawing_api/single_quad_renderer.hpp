@@ -11,6 +11,12 @@ namespace terraformer::ui::drawing_api
 	class single_quad_renderer
 	{
 	public:
+		static single_quad_renderer& get()
+		{
+			thread_local single_quad_renderer ret{};
+			return ret;
+		}
+
 		void set_world_transform(location where, wsapi::fb_size size)
 		{
 			scaling const s{2.0f/static_cast<float>(size.width), 2.0f/static_cast<float>(size.height), 1.0f};

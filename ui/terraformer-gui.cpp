@@ -34,7 +34,6 @@ namespace
 		}
 
 		terraformer::ui::drawing_api::gl_texture m_texture;
-		terraformer::ui::drawing_api::single_quad_renderer m_quad;
 
 		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
 		{
@@ -74,7 +73,8 @@ namespace
 		{
 			fb_size = size;
 			glViewport(0, 0, size.width, size.height);
-			m_quad.set_world_transform(terraformer::location{-1.0f, 1.0f, 0.0f}, size);
+			terraformer::ui::drawing_api::single_quad_renderer::get()
+				.set_world_transform(terraformer::location{-1.0f, 1.0f, 0.0f}, size);
 		}
 
 		bool operator()(
@@ -83,7 +83,7 @@ namespace
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
 			auto const loc = viewport.get_cursor_position();
-			m_quad.render(
+			terraformer::ui::drawing_api::single_quad_renderer::get().render(
 				terraformer::location{static_cast<float>(loc.x), -static_cast<float>(loc.y), 0.0f},
 				terraformer::location{-1.0f, 1.0f, 0.0f},
 				terraformer::scaling{200.0f, 125.0f, 1.0f},
