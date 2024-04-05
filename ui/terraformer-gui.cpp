@@ -8,11 +8,32 @@
 #include "./main/widget_list.hpp"
 #include "./layouts/workspace.hpp"
 #include "./wsapi/native_window.hpp"
+#include "lib/pixel_store/image.hpp"
 
 namespace
 {
 	struct my_event_handler
 	{
+		my_event_handler()
+		{
+			terraformer::image img{800, 500};
+
+			for(uint32_t y = 0; y != img.height(); ++y)
+			{
+				for(uint32_t x = 0; x != img.width(); ++x)
+				{
+					img(x, y) = terraformer::rgba_pixel{
+						static_cast<float>(x)/static_cast<float>(img.width()),
+						static_cast<float>(y)/static_cast<float>(img.height()),
+						0.0f
+					};
+				}
+			}
+
+			m_texture.upload(std::as_const(img).pixels(), 1);
+		}
+
+		terraformer::ui::drawing_api::gl_texture m_texture;
 		terraformer::ui::drawing_api::single_quad_renderer m_quad;
 
 		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
@@ -65,7 +86,8 @@ namespace
 			m_quad.render(
 				terraformer::location{static_cast<float>(loc.x), -static_cast<float>(loc.y), 0.0f},
 				terraformer::location{-1.0f, 1.0f, 0.0f},
-				terraformer::scaling{200.0f, 125.0f, 1.0f}
+				terraformer::scaling{200.0f, 125.0f, 1.0f},
+				m_texture
 			);
 			viewport.swap_buffers();
 			return should_close;

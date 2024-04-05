@@ -3,6 +3,7 @@
 
 #include "./gl_mesh.hpp"
 #include "./gl_shader.hpp"
+#include "./gl_texture.hpp"
 #include "ui/wsapi/native_window.hpp"
 
 namespace terraformer::ui::drawing_api
@@ -17,14 +18,14 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(4, s[0], s[1], s[2], 0.0f);
 		}
 
-		void render(location where, location origin, scaling scale)
+		void render(location where, location origin, scaling scale, gl_texture const& texture)
 		{
 			auto const v = 0.5f*origin.get();
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
 				.bind();
-
+			texture.bind(GL_TEXTURE0);
 			m_mesh.bind();
 
 			gl_bindings::draw_triangles();

@@ -10,6 +10,7 @@ namespace terraformer
 	{
 	public:
 		using StorageType = geosimd::vec_t<float, 4>;
+		using value_type = float;
 
 		constexpr explicit rgba_pixel(StorageType value): m_value{value} {}
 
