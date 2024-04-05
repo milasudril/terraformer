@@ -36,7 +36,8 @@ namespace terraformer::ui::main
 		DrawingSurface& surface
 	)
 	{
-		{ std::as_const(obj).render_to(surface) } -> std::same_as<void>;
+		{ obj.render() } -> std::same_as<void>;
+		{ std::as_const(obj).drawing_surface() } -> std::convertible_to<DrawingSurface>;
 		{ obj.handle_event(std::as_const(pos)) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
@@ -45,7 +46,8 @@ namespace terraformer::ui::main
 	template<class RenderSurface>
 	struct widget_with_default_actions
 	{
-		void render_to(RenderSurface&) const {}
+		[[nodiscard]] RenderSurface drawing_surface() const { return RenderSurface{}; }
+		void render() const {}
 		bool handle_event(wsapi::cursor_position) const { return false; }
 		bool handle_event(wsapi::mouse_button_event const&) const { return false; }
 		wsapi::fb_size handle_event(wsapi::fb_size size) const { return size; }
