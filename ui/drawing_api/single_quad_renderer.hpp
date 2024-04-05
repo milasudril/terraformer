@@ -54,24 +54,31 @@ layout (location = 2) uniform vec4 model_size;
 layout (location = 3) uniform vec4 world_location;
 layout (location = 4) uniform vec4 world_scale;
 
-out vec4 vertex_color;
+out vec2 uv;
+const vec2 uv_coords[4] = vec2[4](
+	vec2(0.0f, 1.0f),
+	vec2(1.0f, 1.0f),
+	vec2(1.0f, 0.0f),
+	vec2(0.0f, 0.0f)
+);
 
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
 	vec4 loc = model_location + model_size*(input_offset - model_origin);
 	gl_Position = world_location + world_scale*(loc - world_origin);
-
-	vertex_color = vec4(0.5, 0.5, 0.5, 1.0);
+	uv = uv_coords[gl_VertexID];
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
 layout (location = 0) out vec4 fragment_color;
-in vec4 vertex_color;
+layout (binding  = 0) uniform sampler2D theTexture;
+
+in vec2 uv;
 
 void main()
 {
-	fragment_color = vertex_color;
+	fragment_color = texture(theTexture, uv);
 })"}
 		};
 	};
