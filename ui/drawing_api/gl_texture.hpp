@@ -194,18 +194,15 @@ namespace terraformer::ui::drawing_api
 				descriptor.width,
 				descriptor.height);
 
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, descriptor.num_mipmaps != 0 ?
+			glTextureParameteri(handle, GL_TEXTURE_MIN_FILTER, descriptor.num_mipmaps != 0 ?
 				GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTextureParameteri(handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			m_handle.reset(handle);
 			m_descriptor = descriptor;
 		}
 
-		void bind(GLenum texture_unit) const
-		{
-			glActiveTexture(texture_unit);
-			glBindTexture(GL_TEXTURE_2D, m_handle.get());
-		}
+		void bind(GLuint texture_unit) const
+		{ glBindTextureUnit(texture_unit, m_handle.get()); }
 
 		auto const& descriptor() const
 		{ return m_descriptor; }

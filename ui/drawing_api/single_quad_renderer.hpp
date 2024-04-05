@@ -25,7 +25,8 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
 				.bind();
-			texture.bind(GL_TEXTURE0);
+			texture.bind(0);
+
 			m_mesh.bind();
 
 			gl_bindings::draw_triangles();
