@@ -24,48 +24,48 @@ namespace
 			terraformer::random_generator rng;
 			std::uniform_real_distribution U{0.9375f, 1.0f/0.9375f};
 
-
-			for(uint32_t y = 0; y != img.height()/4; ++y)
+			for(uint32_t y = 0; y != img.height(); ++y)
 			{
-				for(uint32_t x = 0; x != img.width()/5; ++x)
-				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.input_area.background;
-				}
-			}
-
-			for(uint32_t y = 0; y != img.height()/4; ++y)
-			{
-				for(uint32_t x = img.width()/5; x != 2*img.width()/5; ++x)
-				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.command_area.background;
-				}
-			}
-
-			for(uint32_t y = 0; y != img.height()/4; ++y)
-			{
-				for(uint32_t x = 2*img.width()/5; x != 3*img.width()/5; ++x)
-				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.output_area.background;
-				}
-			}
-
-			for(uint32_t y = 0; y != img.height()/4; ++y)
-			{
-				for(uint32_t x = 3*img.width()/5; x != 4*img.width()/5; ++x)
+				for(uint32_t x = 0; x != img.width(); ++x)
 				{
 					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.main_panel.background;
 				}
 			}
 
-			for(uint32_t y = 0; y != img.height()/4; ++y)
+
+			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
 			{
-				for(uint32_t x = 4*img.width()/5; x != 5*img.width()/5; ++x)
+				for(uint32_t x = 0; x != img.width()/4; ++x)
+				{
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.input_area.background;
+				}
+			}
+
+			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			{
+				for(uint32_t x = img.width()/4; x != 2*img.width()/4; ++x)
+				{
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.command_area.background;
+				}
+			}
+
+			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			{
+				for(uint32_t x = 2*img.width()/4; x != 3*img.width()/4; ++x)
+				{
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.output_area.background;
+				}
+			}
+
+			for(uint32_t y = img.height()/4; y != 3*img.height()/4; ++y)
+			{
+				for(uint32_t x = 3*img.width()/4; x != 4*img.width()/4; ++x)
 				{
 					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.other_panel.background;
 				}
 			}
 
-			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			for(uint32_t y = 2*img.height()/4; y != 3*img.height()/4; ++y)
 			{
 				for(uint32_t x = 0; x != img.width()/3; ++x)
 				{
@@ -73,7 +73,7 @@ namespace
 				}
 			}
 
-			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			for(uint32_t y = 2*img.height()/4; y != 3*img.height()/4; ++y)
 			{
 				for(uint32_t x = img.width()/3; x != 2*img.width()/3; ++x)
 				{
@@ -81,7 +81,7 @@ namespace
 				}
 			}
 
-			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			for(uint32_t y = 2*img.height()/4; y != 3*img.height()/4; ++y)
 			{
 				for(uint32_t x = 2*img.width()/3; x != img.width(); ++x)
 				{
