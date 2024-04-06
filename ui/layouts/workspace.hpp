@@ -16,7 +16,10 @@ namespace terraformer::ui::layout_handling
 			return *this;
 		}
 
-		void render(){}
+		void render()
+		{
+			render_widgets(m_widgets);
+		}
 
  		DrawingSurface drawing_surface() const{}
 
