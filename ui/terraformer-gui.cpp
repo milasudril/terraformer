@@ -22,7 +22,7 @@ namespace
 		{
 			terraformer::image img{256, 256};
 			terraformer::random_generator rng;
-			std::uniform_real_distribution U{0.875f, 1.0f/0.875f};
+			std::uniform_real_distribution U{0.9375f, 1.0f/0.9375f};
 
 
 			for(uint32_t y = 0; y != img.height(); ++y)
