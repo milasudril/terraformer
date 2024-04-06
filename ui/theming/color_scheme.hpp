@@ -135,10 +135,64 @@ namespace terraformer::ui::theming
 			}
 		},
 		.selection{
+			.background = rgba_pixel{
+				0.3333f,
+				0.6667f,
+				0.0f,
+				1.0f
+			},
+			.text = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			},
+			.border = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			}
 		},
 		.mouse_focus{
+			.background = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				0.0f
+			},
+			.text = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			},
+			.border = rgba_pixel{
+				0.3333f,
+				0.0f,
+				0.6667f,
+				1.0f
+			}
 		},
 		.keyboard_focus{
+			.background = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			},
+			.text = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			},
+			.border = rgba_pixel{
+				0.6667f,
+				0.0f,
+				0.3333f,
+				1.0f
+			}
 		},
 		.misc_colors{}
 	};

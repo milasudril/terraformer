@@ -65,6 +65,30 @@ namespace
 				}
 			}
 
+			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			{
+				for(uint32_t x = 0; x != img.width()/3; ++x)
+				{
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.selection.background;
+				}
+			}
+
+			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			{
+				for(uint32_t x = img.width()/3; x != 2*img.width()/3; ++x)
+				{
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.mouse_focus.border;
+				}
+			}
+
+			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			{
+				for(uint32_t x = 2*img.width()/3; x != img.width(); ++x)
+				{
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.keyboard_focus.border;
+				}
+			}
+
 			m_texture.upload(std::as_const(img).pixels(), 1);
 		}
 
