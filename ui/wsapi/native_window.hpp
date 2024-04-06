@@ -51,7 +51,7 @@ namespace terraformer::ui::wsapi
 		initially_focused = 0x2,
 		focus_on_show = 0x4,
 		user_resizable = 0x8,
-		initially_maximized = 0x10,
+		initially_maximized = 0x10
 	};
 
 	consteval void enable_bitmask_operators(window_features){}

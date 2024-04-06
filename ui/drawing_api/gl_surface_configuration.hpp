@@ -57,6 +57,10 @@ namespace terraformer::ui::drawing_api
 		}
 		if(cfg.multisampling != 0)
 		{ glEnable(GL_MULTISAMPLE); }
+
+		if(cfg.use_srgb == GLFW_TRUE)
+		{ glEnable(GL_FRAMEBUFFER_SRGB); }
+
 		fprintf(stderr, "(i) Initialized OpenGL reporting version %s\n", glGetString(GL_VERSION));
 	}
 
