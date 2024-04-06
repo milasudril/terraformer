@@ -8,7 +8,7 @@
 #include "./main/widget_list.hpp"
 #include "./layouts/workspace.hpp"
 #include "./wsapi/native_window.hpp"
-#include "./theming/colorscheme.hpp"
+#include "./theming/color_scheme.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/rng.hpp"
 

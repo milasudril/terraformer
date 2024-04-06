@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_UI_THEMING_COLORSCHEME_HPP
-#define TERRAFORMER_UI_THEMING_COLORSCHEME_HPP
+#ifndef TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
+#define TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
 
 #include "lib/pixel_store/rgba_pixel.hpp"
 
@@ -32,9 +32,9 @@ namespace terraformer::ui::theming
 	inline constinit color_scheme current_color_scheme{
 		.main_panel{
 			.background = rgba_pixel{
-				0.875f/2.0f,
-				0.875f/2.0f,
-				0.875f/2.0f,
+				0.937f/2.0f,
+				0.937f/2.0f,
+				0.937f/2.0f,
 				1.0f
 			},
 			.text = rgba_pixel{
@@ -51,12 +51,30 @@ namespace terraformer::ui::theming
 			}
 		},
 		.other_panel{
+			.background = rgba_pixel{
+				0.937f/4.0f,
+				0.937f/4.0f,
+				0.937f/4.0f,
+				1.0f
+			},
+			.text = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			},
+			.border = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			}
 		},
 		.input_area{
 			.background = rgba_pixel{
-				0.875f,
-				0.875f,
-				0.875f,
+				0.937f,
+				0.937f,
+				0.937f,
 				1.0f
 			},
 			.text = rgba_pixel{
