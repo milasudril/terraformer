@@ -69,7 +69,7 @@ namespace
 			{
 				for(uint32_t x = 0; x != img.width()/3; ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.selection.background;
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.selection_color;
 				}
 			}
 
@@ -77,7 +77,7 @@ namespace
 			{
 				for(uint32_t x = img.width()/3; x != 2*img.width()/3; ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.mouse_focus.border;
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.mouse_focus_color;
 				}
 			}
 
@@ -85,7 +85,7 @@ namespace
 			{
 				for(uint32_t x = 2*img.width()/3; x != img.width(); ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.keyboard_focus.border;
+					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.keyboard_focus_color;
 				}
 			}
 

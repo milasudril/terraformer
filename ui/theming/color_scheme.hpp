@@ -22,9 +22,9 @@ namespace terraformer::ui::theming
 		color_set command_area;
 		color_set output_area;
 
-		color_set selection;
-		color_set mouse_focus;
-		color_set keyboard_focus;
+		rgba_pixel selection_color;
+		rgba_pixel mouse_focus_color;
+		rgba_pixel keyboard_focus_color;
 
 		std::array<rgba_pixel, 16> misc_colors;
 	};
@@ -134,65 +134,23 @@ namespace terraformer::ui::theming
 				1.0f
 			}
 		},
-		.selection{
-			.background = rgba_pixel{
-				0.5,
-				1.0f,
-				0.0f,
-				1.0f
-			},
-			.text = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			},
-			.border = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			}
+		.selection_color = rgba_pixel{
+			0.5f,
+			1.0f,
+			0.0f,
+			1.0f
 		},
-		.mouse_focus{
-			.background = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				0.0f
-			},
-			.text = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			},
-			.border = rgba_pixel{
-				0.5f,
-				0.0f,
-				1.0f,
-				1.0f
-			}
+		.mouse_focus_color = rgba_pixel{
+			1.0f,
+			0.0f,
+			0.5f,
+			1.0f
 		},
-		.keyboard_focus{
-			.background = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			},
-			.text = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			},
-			.border = rgba_pixel{
-				1.0f,
-				0.0f,
-				0.5f,
-				1.0f
-			}
+		.keyboard_focus_color = rgba_pixel{
+			0.5f,
+			0.0f,
+			1.0f,
+			1.0f
 		},
 		.misc_colors{}
 	};
