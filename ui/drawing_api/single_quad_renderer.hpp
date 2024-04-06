@@ -77,7 +77,7 @@ void main()
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
 	vec4 loc = model_location + model_size*(input_offset - model_origin);
 	gl_Position = world_location + world_scale*(loc - world_origin);
-	uv = model_size.xy*uv_coords[gl_VertexID]/(2.0f*textureSize(theTexture, 0));
+	uv = model_size.xy*uv_coords[gl_VertexID]/textureSize(theTexture, 0);
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
