@@ -24,14 +24,14 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(4, s[0], s[1], s[2], 0.0f);
 		}
 
-		void render(location where, location origin, scaling scale, gl_texture const& texture)
+		void render(location where, location origin, scaling scale, gl_texture const& background)
 		{
 			auto const v = 0.5f*origin.get();
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
 				.bind();
-			texture.bind(0);
+			background.bind(0);
 
 			m_mesh.bind();
 
@@ -62,8 +62,6 @@ layout (location = 2) uniform vec4 model_size;
 layout (location = 3) uniform vec4 world_location;
 layout (location = 4) uniform vec4 world_scale;
 
-layout (binding  = 0) uniform sampler2D theTexture;
-
 out vec2 uv;
 const vec2 uv_coords[4] = vec2[4](
 	vec2(0.0f, 1.0f),
@@ -77,18 +75,18 @@ void main()
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
 	vec4 loc = model_location + model_size*(input_offset - model_origin);
 	gl_Position = world_location + world_scale*(loc - world_origin);
-	uv = model_size.xy*uv_coords[gl_VertexID]/textureSize(theTexture, 0);
+	uv = model_size.xy*uv_coords[gl_VertexID];
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
 layout (location = 0) out vec4 fragment_color;
-layout (binding  = 0) uniform sampler2D theTexture;
+layout (binding  = 0) uniform sampler2D background;
 
 in vec2 uv;
 
 void main()
 {
-	fragment_color = texture(theTexture, uv);
+	fragment_color = texture(background, uv/textureSize(background, 0));
 })"}
 		};
 	};
