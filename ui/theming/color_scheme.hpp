@@ -28,13 +28,17 @@ namespace terraformer::ui::theming
 
 		std::array<rgba_pixel, 16> misc_colors;
 	};
+	constexpr auto max_val = 1.0f;
+	constexpr auto rate = (-1.0f - std::log2(max_val))/4.0f;
+	static_assert(max_val*std::exp2(0.0f*rate) == max_val);
+	static_assert(max_val*std::exp2(4.0f*rate) == 0.5f);
 
 	inline constinit color_scheme current_color_scheme{
 		.main_panel{
 			.background = rgba_pixel{
-				0.937f/2.0f,
-				0.937f/2.0f,
-				0.937f/2.0f,
+				std::exp2(rate*3.0f),
+				std::exp2(rate*3.0f),
+				std::exp2(rate*3.0f),
 				1.0f
 			},
 			.text = rgba_pixel{
@@ -52,9 +56,9 @@ namespace terraformer::ui::theming
 		},
 		.other_panel{
 			.background = rgba_pixel{
-				0.937f/4.0f,
-				0.937f/4.0f,
-				0.937f/4.0f,
+				std::exp2(rate*4.0f),
+				std::exp2(rate*4.0f),
+				std::exp2(rate*4.0f),
 				1.0f
 			},
 			.text = rgba_pixel{
@@ -72,9 +76,9 @@ namespace terraformer::ui::theming
 		},
 		.input_area{
 			.background = rgba_pixel{
-				0.937f,
-				0.937f,
-				0.937f,
+				std::exp2(rate*0.0f),
+				std::exp2(rate*0.0f),
+				std::exp2(rate*0.0f),
 				1.0f
 			},
 			.text = rgba_pixel{
@@ -91,8 +95,44 @@ namespace terraformer::ui::theming
 			}
 		},
 		.command_area{
+			.background = rgba_pixel{
+				std::exp2(rate*1.0f),
+				std::exp2(rate*1.0f),
+				std::exp2(rate*1.0f),
+				1.0f
+			},
+			.text = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			},
+			.border = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			}
 		},
 		.output_area{
+			.background = rgba_pixel{
+				std::exp2(rate*2.0f),
+				std::exp2(rate*2.0f),
+				std::exp2(rate*2.0f),
+				1.0f
+			},
+			.text = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			},
+			.border = rgba_pixel{
+				0.0f,
+				0.0f,
+				0.0f,
+				1.0f
+			}
 		},
 		.selection{
 		},
