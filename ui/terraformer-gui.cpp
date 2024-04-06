@@ -20,79 +20,82 @@ namespace
 	{
 		my_event_handler()
 		{
-			terraformer::image img{256, 256};
+			terraformer::image bg{256, 256};
+			terraformer::image fg{256, 256};
 			terraformer::random_generator rng;
 			std::uniform_real_distribution U{0.9375f, 1.0f/0.9375f};
 
-			for(uint32_t y = 0; y != img.height(); ++y)
+			for(uint32_t y = 0; y != bg.height(); ++y)
 			{
-				for(uint32_t x = 0; x != img.width(); ++x)
+				for(uint32_t x = 0; x != bg.width(); ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.main_panel.background;
+					bg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.main_panel.background;
 				}
 			}
 
 
-			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			for(uint32_t y = fg.height()/4; y != 2*fg.height()/4; ++y)
 			{
-				for(uint32_t x = 0; x != img.width()/4; ++x)
+				for(uint32_t x = 0; x != fg.width()/4; ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.input_area.background;
+					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.input_area.background;
 				}
 			}
 
-			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			for(uint32_t y = fg.height()/4; y != 2*fg.height()/4; ++y)
 			{
-				for(uint32_t x = img.width()/4; x != 2*img.width()/4; ++x)
+				for(uint32_t x = fg.width()/4; x != 2*fg.width()/4; ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.command_area.background;
+					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.command_area.background;
 				}
 			}
 
-			for(uint32_t y = img.height()/4; y != 2*img.height()/4; ++y)
+			for(uint32_t y = fg.height()/4; y != 2*fg.height()/4; ++y)
 			{
-				for(uint32_t x = 2*img.width()/4; x != 3*img.width()/4; ++x)
+				for(uint32_t x = 2*fg.width()/4; x != 3*fg.width()/4; ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.output_area.background;
+					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.output_area.background;
 				}
 			}
 
-			for(uint32_t y = img.height()/4; y != 3*img.height()/4; ++y)
+			for(uint32_t y = fg.height()/4; y != 3*fg.height()/4; ++y)
 			{
-				for(uint32_t x = 3*img.width()/4; x != 4*img.width()/4; ++x)
+				for(uint32_t x = 3*fg.width()/4; x != 4*fg.width()/4; ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.other_panel.background;
+					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.other_panel.background;
 				}
 			}
 
-			for(uint32_t y = 2*img.height()/4; y != 3*img.height()/4; ++y)
+			for(uint32_t y = 2*fg.height()/4; y != 3*fg.height()/4; ++y)
 			{
-				for(uint32_t x = 0; x != img.width()/3; ++x)
+				for(uint32_t x = 0; x != fg.width()/3; ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.selection_color;
+					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.selection_color;
 				}
 			}
 
-			for(uint32_t y = 2*img.height()/4; y != 3*img.height()/4; ++y)
+			for(uint32_t y = 2*fg.height()/4; y != 3*fg.height()/4; ++y)
 			{
-				for(uint32_t x = img.width()/3; x != 2*img.width()/3; ++x)
+				for(uint32_t x = fg.width()/3; x != 2*fg.width()/3; ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.mouse_focus_color;
+					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.mouse_focus_color;
 				}
 			}
 
-			for(uint32_t y = 2*img.height()/4; y != 3*img.height()/4; ++y)
+			for(uint32_t y = 2*fg.height()/4; y != 3*fg.height()/4; ++y)
 			{
-				for(uint32_t x = 2*img.width()/3; x != img.width(); ++x)
+				for(uint32_t x = 2*fg.width()/3; x != fg.width(); ++x)
 				{
-					img(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.keyboard_focus_color;
+					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.keyboard_focus_color;
 				}
 			}
 
-			m_texture.upload(std::as_const(img).pixels(), 1);
+			m_background.upload(std::as_const(bg).pixels(), 1);
+			m_foreground.upload(std::as_const(fg).pixels(), 1);
 		}
 
-		terraformer::ui::drawing_api::gl_texture m_texture;
+		terraformer::ui::drawing_api::gl_texture m_background;
+		terraformer::ui::drawing_api::gl_texture m_foreground;
 
 		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
 		{
@@ -147,14 +150,15 @@ namespace
 				terraformer::location{static_cast<float>(loc.x), -static_cast<float>(loc.y), 0.0f},
 				terraformer::location{-1.0f, 1.0f, 0.0f},
 				terraformer::scaling{200.0f, 125.0f, 1.0f},
-				m_texture
+				m_background
 			);
 #else
 			terraformer::ui::drawing_api::single_quad_renderer::get().render(
 				terraformer::location{0.0f, 0.0f, 0.0f},
 				terraformer::location{-1.0f, 1.0f, 0.0f},
 				terraformer::scaling{static_cast<float>(fb_size.width), static_cast<float>(fb_size.height), 1.0f},
-				m_texture
+				m_background,
+				m_foreground
 			);
 #endif
 			viewport.swap_buffers();

@@ -24,7 +24,13 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(4, s[0], s[1], s[2], 0.0f);
 		}
 
-		void render(location where, location origin, scaling scale, gl_texture const& background)
+		void render(
+			location where,
+			location origin,
+			scaling scale,
+			gl_texture const& background,
+			gl_texture const& foreground
+		)
 		{
 			auto const v = 0.5f*origin.get();
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
@@ -32,6 +38,7 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
 				.bind();
 			background.bind(0);
+			foreground.bind(1);
 
 			m_mesh.bind();
 
@@ -80,13 +87,16 @@ void main()
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
 layout (location = 0) out vec4 fragment_color;
-layout (binding  = 0) uniform sampler2D background;
+layout (binding = 0) uniform sampler2D background;
+layout (binding = 1) uniform sampler2D foreground;
 
 in vec2 uv;
 
 void main()
 {
-	fragment_color = texture(background, uv/textureSize(background, 0));
+	vec4 bg = texture(background, uv/textureSize(background, 0));
+	vec4 fg = texture(foreground, uv/textureSize(foreground, 0));
+	fragment_color = mix(bg, fg, fg.w);
 })"}
 		};
 	};
