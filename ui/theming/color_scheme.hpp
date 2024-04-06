@@ -136,8 +136,8 @@ namespace terraformer::ui::theming
 		},
 		.selection{
 			.background = rgba_pixel{
-				0.3333f,
-				0.6667f,
+				0.5,
+				1.0f,
 				0.0f,
 				1.0f
 			},
@@ -168,9 +168,9 @@ namespace terraformer::ui::theming
 				1.0f
 			},
 			.border = rgba_pixel{
-				0.3333f,
+				0.5f,
 				0.0f,
-				0.6667f,
+				1.0f,
 				1.0f
 			}
 		},
@@ -188,9 +188,9 @@ namespace terraformer::ui::theming
 				1.0f
 			},
 			.border = rgba_pixel{
-				0.6667f,
+				1.0f,
 				0.0f,
-				0.3333f,
+				0.5f,
 				1.0f
 			}
 		},
