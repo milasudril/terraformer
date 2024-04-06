@@ -11,14 +11,29 @@ namespace terraformer::ui::layout_handling
 	public:
 		template<class ... Args>
 		workspace& append(Args&&... args)
-		{ 
+		{
 			m_widgets.append(std::forward<Args>(args)...);
 			return *this;
 		}
 
+		void render(){}
+
+ 		DrawingSurface drawing_surface() const{}
+
+		template<class T>
+ 		bool handle_event(T const&) const
+ 		{
+			return false;
+		}
+
+		wsapi::fb_size handle_event(wsapi::fb_size size)
+		{ return size; }
+
 	private:
 		main::widget_list<DrawingSurface> m_widgets;
 	};
+
+	static_assert(main::widget<workspace<int>, int>);
 }
 
 #endif
