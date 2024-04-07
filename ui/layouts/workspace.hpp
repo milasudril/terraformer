@@ -3,6 +3,8 @@
 
 #include "ui/main/widget_list.hpp"
 
+#include <functional>
+
 namespace terraformer::ui::layout_handling
 {
 	template<class StockTexturesRepo>
@@ -11,8 +13,10 @@ namespace terraformer::ui::layout_handling
 	public:
 		using drawing_surface_type = typename StockTexturesRepo::texture_type;
 
-		explicit workspace(StockTexturesRepo&& texture_pool = StockTexturesRepo{}):
-			m_textures{std::move(texture_pool)}
+		explicit workspace(
+			std::reference_wrapper<StockTexturesRepo const> texture_repo = StockTexturesRepo::get_default_instance()
+		):
+			m_textures{texture_repo}
 		{}
 
 		template<class ... Args>
@@ -26,10 +30,10 @@ namespace terraformer::ui::layout_handling
 		{ render_widgets(m_widgets); }
 
 		auto const& background() const
-		{ return m_textures.main_panel_background(); }
+		{ return m_textures.get().main_panel_background; }
 
 		auto const& foreground() const
-		{ return m_textures.null_texture(); }
+		{ return m_textures.get().null_texture; }
 
 
 		bool handle_event(wsapi::cursor_position pos)
@@ -65,7 +69,7 @@ namespace terraformer::ui::layout_handling
 
 	private:
 		main::widget_list<drawing_surface_type> m_widgets;
-		[[no_unique_address]] StockTexturesRepo m_textures;
+		std::reference_wrapper<StockTexturesRepo const> m_textures;
 	};
 }
 
