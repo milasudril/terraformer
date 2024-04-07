@@ -22,6 +22,7 @@ namespace terraformer::ui::main
 			widget_geometry,
 			render_callback,
 			drawing_surface_callback,
+			drawing_surface_callback,
 			cursor_position_callback,
 			mouse_button_callback,
 			size_callback
@@ -46,7 +47,10 @@ namespace terraformer::ui::main
 					return static_cast<Widget*>(obj)->render();
 				},
 				[](void const* obj) -> DrawingSurface {
-					return static_cast<Widget const*>(obj)->drawing_surface();
+					return static_cast<Widget const*>(obj)->background();
+				},
+				[](void const* obj) -> DrawingSurface {
+					return static_cast<Widget const*>(obj)->foreground();
 				},
 				[](void* obj, wsapi::cursor_position pos) -> bool {
 					return static_cast<Widget*>(obj)->handle_event(pos);
@@ -86,17 +90,20 @@ namespace terraformer::ui::main
 		auto render_callbacks() const
 		{ return m_objects.template get<3>(); }
 
-		auto drawing_surface_callbacks() const
+		auto background_callbacks() const
 		{ return m_objects.template get<4>(); }
 
-		auto cursor_position_callbacks() const
+		auto foreground_callbacks() const
 		{ return m_objects.template get<5>(); }
 
-		auto mouse_button_callbacks() const
+		auto cursor_position_callbacks() const
 		{ return m_objects.template get<6>(); }
 
-		auto size_callbacks() const
+		auto mouse_button_callbacks() const
 		{ return m_objects.template get<7>(); }
+
+		auto size_callbacks() const
+		{ return m_objects.template get<8>(); }
 
 	private:
 		widget_array m_objects;
@@ -119,7 +126,8 @@ namespace terraformer::ui::main
 	template<class Renderer, class DrawingSurface>
 	void show_widgets(Renderer&& renderer, widget_list<DrawingSurface> const& widgets)
 	{
-		auto const drawing_surface_callbacks = widgets.drawing_surface_callbacks();
+		auto const background_callbacks = widgets.background_callbacks();
+		auto const foreground_callbacks = widgets.foreground_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const widget_visibilities = widgets.widget_visibilities();
@@ -127,7 +135,13 @@ namespace terraformer::ui::main
 		for(auto k  = widgets.first_element_index(); k != n; ++k)
 		{
 			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
-			{ renderer.render_surface(drawing_surface_callbacks[k](widget_pointers[k]), widget_geometries[k]); }
+			{
+				renderer.render_surface(
+					background_callbacks[k](widget_pointers[k]),
+					foreground_callbacks[k](widget_pointers[k]),
+					widget_geometries[k]
+				);
+			}
 		}
 	}
 

@@ -21,7 +21,9 @@ namespace terraformer::ui::layout_handling
 			render_widgets(m_widgets);
 		}
 
- 		DrawingSurface drawing_surface() const{}
+ 		DrawingSurface background() const{}
+
+ 		DrawingSurface foreground() const{}
 
 		template<class T>
  		bool handle_event(T const&) const

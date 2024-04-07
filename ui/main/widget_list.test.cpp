@@ -20,7 +20,10 @@ namespace
 		void render()
 		{ ++render_count; }
 
-		dummy_surface drawing_surface() const
+		dummy_surface background() const
+		{ return dummy_surface{}; }
+
+		dummy_surface foreground() const
 		{ return dummy_surface{}; }
 
 		bool handle_event(terraformer::ui::wsapi::cursor_position)
@@ -332,12 +335,11 @@ TESTCASE(terraformer_ui_main_widget_list_render_widgets)
 	{
 		if(widget_visibilities[k] == terraformer::ui::main::widget_visibility::visible)
 		{
-//			EXPECT_EQ(widget_surfaces[k].update_count, 1);
+			//TODO: EXPECT_EQ(widget_surfaces[k].update_count, 1);
 		}
 		else
 		{
-			//EXPECT_EQ(widget_surfaces[k].update_count, 0);
-
+			//TODO: EXPECT_EQ(widget_surfaces[k].update_count, 0);
 		}
 	}
 }
@@ -346,8 +348,15 @@ namespace
 {
 	struct dummy_renderer
 	{
-		void render_surface(dummy_surface const&, terraformer::ui::main::widget_geometry const&)
-		{ ++callcount; }
+		void render_surface(
+			dummy_surface const&,
+			dummy_surface const&,
+			terraformer::ui::main::widget_geometry const&
+		)
+		{
+			// TODO: Validate background and foreground
+			++callcount;
+		}
 
 		size_t callcount{0};
 	};

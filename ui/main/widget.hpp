@@ -15,11 +15,11 @@ namespace terraformer::ui::main
 		int width;
 		int height;
 
-		constexpr bool operator==(widget_geometry const&) const = default;
-		constexpr bool operator!=(widget_geometry const&) const = default;
+		[[nodiscard]] constexpr bool operator==(widget_geometry const&) const = default;
+		[[nodiscard]] constexpr bool operator!=(widget_geometry const&) const = default;
 	};
 
-	inline bool inside(wsapi::cursor_position pos, widget_geometry const& box)
+	[[nodiscard]] inline bool inside(wsapi::cursor_position pos, widget_geometry const& box)
 	{
 		return (pos.x >= box.x && pos.x < box.x + box.width)
 			&& (pos.y >= box.y && pos.y < box.y + box.height);
@@ -37,7 +37,8 @@ namespace terraformer::ui::main
 	)
 	{
 		{ obj.render() } -> std::same_as<void>;
-		{ std::as_const(obj).drawing_surface() } -> std::convertible_to<DrawingSurface>;
+		{ std::as_const(obj).background() } -> std::convertible_to<DrawingSurface>;
+		{ std::as_const(obj).foreground() } -> std::convertible_to<DrawingSurface>;
 		{ obj.handle_event(std::as_const(pos)) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
@@ -46,11 +47,12 @@ namespace terraformer::ui::main
 	template<class RenderSurface>
 	struct widget_with_default_actions
 	{
-		[[nodiscard]] RenderSurface drawing_surface() const { return RenderSurface{}; }
+		[[nodiscard]] RenderSurface background() const { return RenderSurface{}; }
+		[[nodiscard]] RenderSurface foreground() const { return RenderSurface{}; }
 		void render() const {}
-		bool handle_event(wsapi::cursor_position) const { return false; }
-		bool handle_event(wsapi::mouse_button_event const&) const { return false; }
-		wsapi::fb_size handle_event(wsapi::fb_size size) const { return size; }
+		[[nodiscard]] bool handle_event(wsapi::cursor_position) const { return false; }
+		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }
+		[[nodiscard]] wsapi::fb_size handle_event(wsapi::fb_size size) const { return size; }
 	};
 
 	static_assert(widget<widget_with_default_actions<int>, int>);
