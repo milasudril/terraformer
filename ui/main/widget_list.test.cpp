@@ -58,10 +58,26 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 	dummy_widget<3> widget_3;
 
 	std::array<terraformer::ui::main::widget_geometry, 4> const initial_geometries{
-		terraformer::ui::main::widget_geometry{1, 2, 3, 4},
-		terraformer::ui::main::widget_geometry{5, 6, 7, 8},
-		terraformer::ui::main::widget_geometry{9, 10, 11, 12},
-		terraformer::ui::main::widget_geometry{13, 14, 15, 16}
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{1.0f, 2.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{3.0f, 4.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{5.0f, 6.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{7.0f, 8.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{9.0f, 10.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{11.0f, 12.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{13.0f, 14.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{15.0f, 16.0f, 0.0f}
+		}
 	};
 
 	std::array<terraformer::ui::main::widget_visibility, 4> const initial_visibilities{
@@ -307,10 +323,26 @@ TESTCASE(terraformer_ui_main_widget_list_render_widgets)
 	dummy_widget<3> widget_3;
 
 	std::array<terraformer::ui::main::widget_geometry, 4> const initial_geometries{
-		terraformer::ui::main::widget_geometry{1, 2, 3, 4},
-		terraformer::ui::main::widget_geometry{5, 6, 7, 8},
-		terraformer::ui::main::widget_geometry{9, 10, 11, 12},
-		terraformer::ui::main::widget_geometry{13, 14, 15, 16}
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{1.0f, 2.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{3.0f, 4.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{5.0f, 6.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{7.0f, 8.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{9.0f, 10.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{11.0f, 12.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{13.0f, 14.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{15.0f, 16.0f, 0.0f}
+		}
 	};
 
 	std::array<terraformer::ui::main::widget_visibility, 4> const initial_visibilities{
@@ -372,10 +404,26 @@ TESTCASE(terraformer_ui_main_widget_list_show_widgets)
 	dummy_widget<3> widget_3;
 
 	std::array<terraformer::ui::main::widget_geometry, 4> const initial_geometries{
-		terraformer::ui::main::widget_geometry{1, 2, 3, 4},
-		terraformer::ui::main::widget_geometry{5, 6, 7, 8},
-		terraformer::ui::main::widget_geometry{9, 10, 11, 12},
-		terraformer::ui::main::widget_geometry{13, 14, 15, 16}
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{1.0f, 2.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{3.0f, 4.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{5.0f, 6.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{7.0f, 8.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{9.0f, 10.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{11.0f, 12.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{13.0f, 14.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{15.0f, 16.0f, 0.0f}
+		}
 	};
 
 	std::array<terraformer::ui::main::widget_visibility, 4> const initial_visibilities{
@@ -405,10 +453,26 @@ TESTCASE(terraformer_ui_main_widget_list_find_widget_by_cursor_position)
 	dummy_widget<3> widget_3;
 
 	std::array<terraformer::ui::main::widget_geometry, 4> const initial_geometries{
-		terraformer::ui::main::widget_geometry{1, 2, 3, 4},
-		terraformer::ui::main::widget_geometry{5, 6, 7, 8},
-		terraformer::ui::main::widget_geometry{9, 10, 11, 12},
-		terraformer::ui::main::widget_geometry{13, 14, 15, 16}
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{1.0f, 2.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{3.0f, 4.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{5.0f, 6.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{7.0f, 8.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{9.0f, 10.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{11.0f, 12.0f, 0.0f}
+		},
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{13.0f, 14.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, -1.0f, 0.0f},
+			.size = terraformer::scaling{15.0f, 16.0f, 0.0f}
+		}
 	};
 
 	std::array<terraformer::ui::main::widget_visibility, 4> const initial_visibilities{

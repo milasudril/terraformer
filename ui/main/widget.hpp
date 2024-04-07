@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_MAIN_WIDGET_HPP
 
 #include "ui/wsapi/events.hpp"
+#include "lib/common/spaces.hpp"
 
 #include <utility>
 #include <type_traits>
@@ -10,10 +11,9 @@ namespace terraformer::ui::main
 {
 	struct widget_geometry
 	{
-		int x;
-		int y;
-		int width;
-		int height;
+		location where;
+		location origin;
+		scaling size;
 
 		[[nodiscard]] constexpr bool operator==(widget_geometry const&) const = default;
 		[[nodiscard]] constexpr bool operator!=(widget_geometry const&) const = default;
@@ -21,8 +21,11 @@ namespace terraformer::ui::main
 
 	[[nodiscard]] inline bool inside(wsapi::cursor_position pos, widget_geometry const& box)
 	{
-		return (pos.x >= box.x && pos.x < box.x + box.width)
-			&& (pos.y >= box.y && pos.y < box.y + box.height);
+		auto const offset = (box.origin - location{0.0f, 0.0f, 0.0f}).apply(0.5f*box.size);
+		auto const dr = box.where - offset;
+		auto const conv_pos = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - offset;
+		return (conv_pos[0] >= dr[0] && conv_pos[0] < dr[0] + box.size[0])
+			&& (conv_pos[1] >= dr[1] && conv_pos[1] < dr[1] + box.size[1]);
 	}
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
