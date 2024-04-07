@@ -28,8 +28,6 @@ namespace terraformer::ui::main
 	template<class DrawingSurface>
 	auto generate_default_background(rgba_pixel color)
 	{
-		printf("Generating background\n");
-
 		terraformer::image img{256, 256};
 		terraformer::random_generator rng;
 		std::uniform_real_distribution U{0.9375f, 1.0f/0.9375f};
