@@ -96,6 +96,18 @@ void main()
 {
 	vec4 bg = texture(background, uv/textureSize(background, 0));
 	vec4 fg = texture(foreground, uv/textureSize(foreground, 0));
+
+	// This assumes values are pre-multiplied alpha. Otherwise, the formula for the color components
+	// would be
+	//
+	// (C_fg*a_fg + C_bg*a_bg*(1 - a_fg))/(a_fg + a_bg*(1 - a_fg))
+	//
+	// If a_bg = 1, this simplifies to
+	//
+	// (C_fg*a_fg + C_bg*(1 - a_fg))/(a_fg + (1 - a_fg)) = C_fg*a_fg + C_bg*(1 - a_fg)
+	//
+	// which is the regular interpolation formula, with a_fg as interpolation parameter.
+	//
 	fragment_color = mix(bg, fg, fg.w);
 })"}
 		};
