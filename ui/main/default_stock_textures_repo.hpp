@@ -16,6 +16,7 @@ namespace terraformer::ui::main
 	{
 		using texture_type = DrawingSurface;
 
+		DrawingSurface null_texture;
 		DrawingSurface main_panel_background;
 		DrawingSurface other_panel_background;
 		DrawingSurface input_area_background;
@@ -45,9 +46,17 @@ namespace terraformer::ui::main
 	}
 
 	template<class DrawingSurface>
+	auto generate_null_texture()
+	{
+		terraformer::image img{1, 1};
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 0));
+	}
+
+	template<class DrawingSurface>
 	auto generate_default_stock_textures(theming::color_scheme const& color_scheme = theming::current_color_scheme)
 	{
 		return default_stock_textures_repo{
+			.null_texture = generate_null_texture<DrawingSurface>(),
 			.main_panel_background = generate_default_background<DrawingSurface>(color_scheme.main_panel.background),
 			.other_panel_background = generate_default_background<DrawingSurface>(color_scheme.other_panel.background),
 			.input_area_background = generate_default_background<DrawingSurface>(color_scheme.input_area.background),
