@@ -5,10 +5,14 @@
 
 namespace terraformer::ui::layout_handling
 {
-	template<class DrawingSurface>
+	template<class DefaultTexturePool>
 	class workspace
 	{
 	public:
+		explicit workspace(DefaultTexturePool&& texture_pool = DefaultTexturePool{}):
+			m_textures{std::move(texture_pool)}
+		{}
+
 		template<class ... Args>
 		workspace& append(Args&&... args)
 		{
@@ -21,9 +25,12 @@ namespace terraformer::ui::layout_handling
 			render_widgets(m_widgets);
 		}
 
- 		DrawingSurface background() const{}
+		auto const& background() const
+		{
+			return m_textures.main_panel_background;
+		}
 
- 		DrawingSurface foreground() const{}
+		auto const& foreground() const{ m_textures.null_texture; }
 
 		template<class T>
  		bool handle_event(T const&) const
@@ -35,10 +42,9 @@ namespace terraformer::ui::layout_handling
 		{ return size; }
 
 	private:
-		main::widget_list<DrawingSurface> m_widgets;
+		main::widget_list<typename DefaultTexturePool::texture_type> m_widgets;
+		DefaultTexturePool m_textures;
 	};
-
-	static_assert(main::widget<workspace<int>, int>);
 }
 
 #endif
