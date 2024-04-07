@@ -142,15 +142,6 @@ namespace
 				m_foreground
 			);
 
-#if 0
-			terraformer::ui::drawing_api::single_quad_renderer::get_default_instance().render(
-				terraformer::location{0.0f, 0.0f, 0.0f},
-				terraformer::location{-1.0f, 1.0f, 0.0f},
-				terraformer::scaling{static_cast<float>(fb_size.width), static_cast<float>(fb_size.height), 1.0f},
-				*m_background,
-				m_foreground
-			);
-#endif
 			viewport.swap_buffers();
 			return should_close;
 		}
