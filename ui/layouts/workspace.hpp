@@ -9,6 +9,8 @@ namespace terraformer::ui::layout_handling
 	class workspace
 	{
 	public:
+		using drawing_surface_type = typename DefaultTexturePool::texture_type;
+
 		explicit workspace(DefaultTexturePool&& texture_pool = DefaultTexturePool{}):
 			m_textures{std::move(texture_pool)}
 		{}
@@ -21,29 +23,49 @@ namespace terraformer::ui::layout_handling
 		}
 
 		void render()
-		{
-			render_widgets(m_widgets);
-		}
+		{ render_widgets(m_widgets); }
 
 		auto const& background() const
+		{ return m_textures.main_panel_background(); }
+
+		auto const& foreground() const
+		{ return m_textures.null_texture(); }
+
+
+		bool handle_event(wsapi::cursor_position pos)
 		{
-			return m_textures.main_panel_background;
+			auto i = find(pos, m_widgets);
+			if(i == m_widgets.npos)
+			{ return false; }
+
+			printf("Cursor over widget %zu\n", i.get());
+			fflush(stdout);
+
+			return i->handle_event(pos);
 		}
 
-		auto const& foreground() const{ m_textures.null_texture; }
+		bool handle_event(wsapi::mouse_button_event const& mbe)
+		{
+			auto i = find(mbe.where, m_widgets);
+			if(i == m_widgets.npos)
+			{ return false; }
 
-		template<class T>
- 		bool handle_event(T const&) const
- 		{
-			return false;
+			printf("Cursor over widget %zu\n", i.get());
+			fflush(stdout);
+
+			return i->handle_event(mbe);
 		}
 
 		wsapi::fb_size handle_event(wsapi::fb_size size)
 		{ return size; }
 
+		template<class Renderer>
+		void show_widgets(Renderer&& renderer)
+		{ show_widgets(std::forward<Renderer>(renderer), m_widgets); }
+
 	private:
-		main::widget_list<typename DefaultTexturePool::texture_type> m_widgets;
-		DefaultTexturePool m_textures;
+		main::widget_list<drawing_surface_type> m_widgets;
+		[[no_unique_address]] DefaultTexturePool m_textures;
 	};
 }
 
