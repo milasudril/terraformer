@@ -5,7 +5,7 @@
 
 #include <functional>
 
-namespace terraformer::ui::layout_handling
+namespace terraformer::ui::layouts
 {
 	template<class StockTexturesRepo>
 	class workspace

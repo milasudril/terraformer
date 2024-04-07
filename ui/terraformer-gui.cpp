@@ -133,6 +133,15 @@ namespace
 		)
 		{
 			glClear(GL_COLOR_BUFFER_BIT);
+			auto& renderer = terraformer::ui::drawing_api::single_quad_renderer::get_default_instance();
+			renderer.render(
+				terraformer::location{0.0f, 0.0f, 0.0f},
+				terraformer::location{-1.0f, 1.0f, 0.0f},
+				terraformer::scaling{static_cast<float>(fb_size.width), static_cast<float>(fb_size.height), 1.0f},
+				m_workspace.background(),
+				m_foreground
+			);
+
 #if 0
 			terraformer::ui::drawing_api::single_quad_renderer::get_default_instance().render(
 				terraformer::location{0.0f, 0.0f, 0.0f},
@@ -148,6 +157,9 @@ namespace
 
 		bool should_close{false};
 		terraformer::ui::wsapi::fb_size fb_size;
+		terraformer::ui::layouts::workspace<
+			terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>
+		> m_workspace;
 	};
 }
 
