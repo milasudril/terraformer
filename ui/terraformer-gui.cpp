@@ -136,7 +136,7 @@ namespace
 		{
 			fb_size = size;
 			glViewport(0, 0, size.width, size.height);
-			terraformer::ui::drawing_api::single_quad_renderer::get()
+			terraformer::ui::drawing_api::single_quad_renderer::get_default_instance()
 				.set_world_transform(terraformer::location{-1.0f, 1.0f, 0.0f}, size);
 		}
 
@@ -154,7 +154,7 @@ namespace
 				m_background
 			);
 #else
-			terraformer::ui::drawing_api::single_quad_renderer::get().render(
+			terraformer::ui::drawing_api::single_quad_renderer::get_default_instance().render(
 				terraformer::location{0.0f, 0.0f, 0.0f},
 				terraformer::location{-1.0f, 1.0f, 0.0f},
 				terraformer::scaling{static_cast<float>(fb_size.width), static_cast<float>(fb_size.height), 1.0f},
@@ -173,7 +173,7 @@ namespace
 
 int main(int, char**)
 {
-	auto& gui_ctxt = terraformer::ui::wsapi::context::get();
+	auto& gui_ctxt = terraformer::ui::wsapi::context::get_instance();
 	terraformer::ui::wsapi::native_window mainwin{
 		gui_ctxt,
 		"Terraformer",

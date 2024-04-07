@@ -16,7 +16,7 @@ namespace terraformer::ui::wsapi
 	class context
 	{
 	public:
-		static context& get()
+		static context& get_instance()
 		{
 			static context ctxt;
 			return ctxt;
