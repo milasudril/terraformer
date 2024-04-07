@@ -22,7 +22,7 @@ namespace terraformer::ui::main
 		DrawingSurface command_area_background;
 		DrawingSurface output_area_backround;
 
-		inline static auto& get_default_instance();
+		[[nodiscard]] inline static auto& get_default_instance();
 	};
 
 	template<class DrawingSurface>

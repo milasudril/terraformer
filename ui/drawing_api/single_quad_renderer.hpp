@@ -11,7 +11,7 @@ namespace terraformer::ui::drawing_api
 	class single_quad_renderer
 	{
 	public:
-		static single_quad_renderer& get_default_instance()
+		[[nodiscard]] static single_quad_renderer& get_default_instance()
 		{
 			thread_local single_quad_renderer ret{};
 			return ret;
