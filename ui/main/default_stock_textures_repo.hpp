@@ -19,6 +19,8 @@ namespace terraformer::ui::main
 		DrawingSurface input_area_background;
 		DrawingSurface command_area_background;
 		DrawingSurface output_area_backround;
+
+		inline static auto& get_default_instance();
 	};
 
 	template<class DrawingSurface>
@@ -50,6 +52,13 @@ namespace terraformer::ui::main
 			.command_area_background = generate_default_background<DrawingSurface>(color_scheme.command_area.background),
 			.output_area_backround = generate_default_background<DrawingSurface>(color_scheme.output_area.background)
 		};
+	}
+
+	template<class DrawingSurface>
+	inline auto& default_stock_textures_repo<DrawingSurface>::get_default_instance()
+	{
+		thread_local auto ret = generate_default_stock_textures<DrawingSurface>();
+		return ret;
 	}
 };
 

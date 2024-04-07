@@ -21,9 +21,7 @@ namespace
 	{
 		my_event_handler()
 		{
-			m_background = terraformer::ui::main::generate_default_background<
-				terraformer::ui::drawing_api::gl_texture
-			>(terraformer::ui::theming::current_color_scheme.main_panel.background);
+			m_background =	&terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>::get_default_instance().main_panel_background;
 
 			terraformer::image fg{256, 256};
 			terraformer::random_generator rng;
@@ -88,7 +86,7 @@ namespace
 			m_foreground.upload(std::as_const(fg).pixels(), 1);
 		}
 
-		terraformer::ui::drawing_api::gl_texture m_background;
+		terraformer::ui::drawing_api::gl_texture const* m_background;
 		terraformer::ui::drawing_api::gl_texture m_foreground;
 
 		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
@@ -151,7 +149,7 @@ namespace
 				terraformer::location{0.0f, 0.0f, 0.0f},
 				terraformer::location{-1.0f, 1.0f, 0.0f},
 				terraformer::scaling{static_cast<float>(fb_size.width), static_cast<float>(fb_size.height), 1.0f},
-				m_background,
+				*m_background,
 				m_foreground
 			);
 #endif
