@@ -7,6 +7,10 @@
 
 namespace terraformer::ui::layouts
 {
+	template<class ... Args>
+	void do_show_widgets(Args&&... args)
+	{ show_widgets(std::forward<Args>(args)...); }
+
 	template<class StockTexturesRepo>
 	class workspace
 	{
@@ -65,9 +69,10 @@ namespace terraformer::ui::layouts
 
 		template<class Renderer>
 		void show_widgets(Renderer&& renderer)
-		{ show_widgets(std::forward<Renderer>(renderer), m_widgets); }
+		{ do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
 
 	private:
+
 		main::widget_list<drawing_surface_type> m_widgets;
 		std::reference_wrapper<StockTexturesRepo const> m_textures;
 	};

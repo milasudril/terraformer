@@ -132,6 +132,8 @@ namespace
 			terraformer::ui::wsapi::native_window<terraformer::ui::drawing_api::gl_surface_configuration>& viewport
 		)
 		{
+			m_workspace.render();
+
 			glClear(GL_COLOR_BUFFER_BIT);
 			auto& renderer = terraformer::ui::drawing_api::single_quad_renderer::get_default_instance();
 			renderer.render(
@@ -139,8 +141,10 @@ namespace
 				terraformer::location{-1.0f, 1.0f, 0.0f},
 				terraformer::scaling{static_cast<float>(fb_size.width), static_cast<float>(fb_size.height), 1.0f},
 				m_workspace.background(),
-				m_foreground
+				m_workspace.foreground()
 			);
+
+			m_workspace.show_widgets(renderer);
 
 			viewport.swap_buffers();
 			return should_close;
