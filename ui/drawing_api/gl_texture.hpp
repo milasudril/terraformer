@@ -147,18 +147,18 @@ namespace terraformer::ui::drawing_api
 			set_format(descriptor);
 		}
 
-		void upload(std::span<std::byte const> data, gl_texture_descriptor const& descriptor)
+		auto& upload(std::span<std::byte const> data, gl_texture_descriptor const& descriptor)
 		{
 			if(descriptor != m_descriptor) [[unlikely]]
-			{
-				set_format(descriptor);
-			}
+ 			{ set_format(descriptor); }
 
 			upload_impl(data);
+
+			return *this;
 		}
 
 		template<class T>
-		void upload(span_2d<T const> pixels, GLsizei num_mipmaps)
+		auto& upload(span_2d<T const> pixels, GLsizei num_mipmaps)
 		{
 			gl_texture_descriptor const descriptor{
 				static_cast<GLsizei>(pixels.width()),
@@ -170,18 +170,19 @@ namespace terraformer::ui::drawing_api
 
 			std::span const pixel_array{std::data(pixels), pixels.width()*pixels.height()};
 
-			upload(std::as_bytes(pixel_array), descriptor);
+			return upload(std::as_bytes(pixel_array), descriptor);
 		}
 
-		void upload(std::span<std::byte const> data)
+		auto& upload(std::span<std::byte const> data)
 		{
 			auto const image_size = get_image_size(m_descriptor);
 			if(image_size != std::size(data)) [[unlikely]]
 			{
 				fprintf(stderr, "(!) Ignoring texture data of wrong size\n");
-				return;
+				return *this;
 			}
 			upload_impl(data);
+			return *this;
 		}
 
 		void set_format(gl_texture_descriptor const& descriptor)

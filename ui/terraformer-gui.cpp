@@ -6,6 +6,7 @@
 #include "./drawing_api/gl_texture.hpp"
 #include "./drawing_api/single_quad_renderer.hpp"
 #include "./main/widget_list.hpp"
+#include "./main/default_stock_textures_repo.hpp"
 #include "./layouts/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./theming/color_scheme.hpp"
@@ -20,21 +21,14 @@ namespace
 	{
 		my_event_handler()
 		{
-			terraformer::image bg{256, 256};
+			m_background = terraformer::ui::main::generate_default_background<
+				terraformer::ui::drawing_api::gl_texture
+			>(terraformer::ui::theming::current_color_scheme.main_panel.background);
+
 			terraformer::image fg{256, 256};
 			terraformer::random_generator rng;
+
 			std::uniform_real_distribution U{0.9375f, 1.0f/0.9375f};
-
-			for(uint32_t y = 0; y != bg.height(); ++y)
-			{
-				for(uint32_t x = 0; x != bg.width(); ++x)
-				{
-					bg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.main_panel.background;
-					bg(x, y).alpha(1.0f);
-				}
-			}
-
-
 			for(uint32_t y = fg.height()/4; y != 2*fg.height()/4; ++y)
 			{
 				for(uint32_t x = 0; x != fg.width()/4; ++x)
@@ -91,7 +85,6 @@ namespace
 				}
 			}
 
-			m_background.upload(std::as_const(bg).pixels(), 1);
 			m_foreground.upload(std::as_const(fg).pixels(), 1);
 		}
 
