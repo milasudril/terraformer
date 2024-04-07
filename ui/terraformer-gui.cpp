@@ -30,6 +30,7 @@ namespace
 				for(uint32_t x = 0; x != bg.width(); ++x)
 				{
 					bg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.main_panel.background;
+					bg(x, y).alpha(1.0f);
 				}
 			}
 
