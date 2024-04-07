@@ -5,13 +5,13 @@
 
 namespace terraformer::ui::layout_handling
 {
-	template<class DefaultTexturePool>
+	template<class StockTexturesRepo>
 	class workspace
 	{
 	public:
-		using drawing_surface_type = typename DefaultTexturePool::texture_type;
+		using drawing_surface_type = typename StockTexturesRepo::texture_type;
 
-		explicit workspace(DefaultTexturePool&& texture_pool = DefaultTexturePool{}):
+		explicit workspace(StockTexturesRepo&& texture_pool = StockTexturesRepo{}):
 			m_textures{std::move(texture_pool)}
 		{}
 
@@ -65,7 +65,7 @@ namespace terraformer::ui::layout_handling
 
 	private:
 		main::widget_list<drawing_surface_type> m_widgets;
-		[[no_unique_address]] DefaultTexturePool m_textures;
+		[[no_unique_address]] StockTexturesRepo m_textures;
 	};
 }
 
