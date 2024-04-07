@@ -380,10 +380,12 @@ namespace
 {
 	struct dummy_renderer
 	{
-		void render_surface(
+		void render(
+			terraformer::location,
+			terraformer::location,
+			terraformer::scaling,
 			dummy_surface const&,
-			dummy_surface const&,
-			terraformer::ui::main::widget_geometry const&
+			dummy_surface const&
 		)
 		{
 			// TODO: Validate background and foreground

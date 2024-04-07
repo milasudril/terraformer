@@ -136,10 +136,12 @@ namespace terraformer::ui::main
 		{
 			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
 			{
-				renderer.render_surface(
+				renderer.render(
+					widget_geometries[k].where,
+					widget_geometries[k].origin,
+					widget_geometries[k].size,
 					background_callbacks[k](widget_pointers[k]),
-					foreground_callbacks[k](widget_pointers[k]),
-					widget_geometries[k]
+					foreground_callbacks[k](widget_pointers[k])
 				);
 			}
 		}
