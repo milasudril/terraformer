@@ -1,6 +1,7 @@
 #ifndef TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
 #define TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
 
+#include "./whsi.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 
 #include <array>
@@ -28,6 +29,7 @@ namespace terraformer::ui::theming
 
 		std::array<rgba_pixel, 16> misc_colors;
 	};
+
 	constexpr auto max_val = 1.0f;
 	constexpr auto rate = (-1.0f - std::log2(max_val))/4.0f;
 	static_assert(max_val*std::exp2(0.0f*rate) == max_val);
