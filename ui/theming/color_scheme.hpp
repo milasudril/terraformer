@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
 #define TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
 
-#include "./whsi.hpp"
+#include "./whi.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 
 #include <array>
@@ -43,7 +43,7 @@ namespace terraformer::ui::theming
 		{
 			auto const hue = static_cast<float>((7*k)%std::size(ret))/static_cast<float>(std::size(ret));
 
-			ret[k] = make_rgba_pixel_from_whsi(hue, 1.0f, 1.0f, 1.0f);
+			ret[k] = make_rgba_pixel_from_whi(hue, 1.0f, 1.0f);
 		}
 
 		return ret;
