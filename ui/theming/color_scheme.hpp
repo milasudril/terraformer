@@ -27,7 +27,8 @@ namespace terraformer::ui::theming
 		rgba_pixel mouse_focus_color;
 		rgba_pixel keyboard_focus_color;
 
-		std::array<rgba_pixel, 12> misc_colors;
+		std::array<rgba_pixel, 12> misc_dark_colors;
+		std::array<rgba_pixel, 12> misc_bright_colors;
 	};
 
 	constexpr auto max_val = 1.0f;
@@ -35,7 +36,8 @@ namespace terraformer::ui::theming
 	static_assert(max_val*std::exp2(0.0f*rate) == max_val);
 	static_assert(max_val*std::exp2(4.0f*rate) == 0.5f);
 
-	constexpr auto generate_default_palette()
+	template<class Generator>
+	constexpr auto generate_default_palette(Generator&& gen)
 	{
 		std::array<rgba_pixel, 12> ret{};
 
@@ -43,7 +45,7 @@ namespace terraformer::ui::theming
 		{
 			auto const hue = static_cast<float>((7*k)%std::size(ret))/static_cast<float>(std::size(ret));
 
-			ret[k] = make_rgba_pixel_from_whi(hue, 1.0f, 1.0f);
+			ret[k] = gen(hue, 1.0f);
 		}
 
 		return ret;
@@ -168,7 +170,8 @@ namespace terraformer::ui::theming
 			1.0f,
 			1.0f
 		},
-		.misc_colors = generate_default_palette()
+		.misc_dark_colors = generate_default_palette(make_rgba_pixel_from_whi),
+		.misc_bright_colors = generate_default_palette(make_rgba_pixel_from_whi_inv)
 	};
 }
 
