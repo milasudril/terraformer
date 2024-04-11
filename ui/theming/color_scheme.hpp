@@ -51,6 +51,9 @@ namespace terraformer::ui::theming
 		return ret;
 	}
 
+	constexpr auto default_dark_palette = generate_default_palette(make_rgba_pixel_from_whi);
+	constexpr auto default_bright_palette = generate_default_palette(make_rgba_pixel_from_whi_inv);
+
 	inline constinit color_scheme current_color_scheme{
 		.main_panel{
 			.background = rgba_pixel{
@@ -170,8 +173,8 @@ namespace terraformer::ui::theming
 			1.0f,
 			1.0f
 		},
-		.misc_dark_colors = generate_default_palette(make_rgba_pixel_from_whi),
-		.misc_bright_colors = generate_default_palette(make_rgba_pixel_from_whi_inv)
+		.misc_dark_colors = default_dark_palette,
+		.misc_bright_colors = default_bright_palette
 	};
 }
 
