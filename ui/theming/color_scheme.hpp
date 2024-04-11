@@ -15,6 +15,12 @@ namespace terraformer::ui::theming
 		rgba_pixel border;
 	};
 
+	struct twocolor_gradient
+	{
+		rgba_pixel begin;
+		rgba_pixel end;
+	};
+
 	struct color_scheme
 	{
 		color_set main_panel;
@@ -26,6 +32,9 @@ namespace terraformer::ui::theming
 		rgba_pixel selection_color;
 		rgba_pixel mouse_focus_color;
 		rgba_pixel keyboard_focus_color;
+
+		twocolor_gradient progress_colors;
+		twocolor_gradient resource_usage_colors;
 
 		std::array<rgba_pixel, 12> misc_dark_colors;
 		std::array<rgba_pixel, 12> misc_bright_colors;
@@ -53,6 +62,24 @@ namespace terraformer::ui::theming
 
 	constexpr auto default_dark_palette = generate_default_palette(make_rgba_pixel_from_whi);
 	constexpr auto default_bright_palette = generate_default_palette(make_rgba_pixel_from_whi_inv);
+
+	constexpr auto error_hue = 0.0f;
+	constexpr auto warning_hue = 1.0f/6.0f;
+	constexpr auto worker_busy_hue = 0.0f;
+	constexpr auto worker_ready_hue = 1.0f/3.0f;
+
+	constexpr auto default_dark_error_color = make_rgba_pixel_from_whi(error_hue, 1.0f);
+	constexpr auto default_bright_error_color = make_rgba_pixel_from_whi(error_hue, 1.0f);
+	constexpr auto default_dark_warning_color = make_rgba_pixel_from_whi(warning_hue, 1.0f);
+	constexpr auto default_bright_warning_color = make_rgba_pixel_from_whi_inv(warning_hue, 1.0f);
+	constexpr auto default_dark_worker_busy_color = make_rgba_pixel_from_whi(worker_busy_hue, 1.0f);
+	constexpr auto default_bright_worker_busy_color = make_rgba_pixel_from_whi_inv(worker_busy_hue, 1.0f);
+	constexpr auto default_dark_worker_ready_color = make_rgba_pixel_from_whi(worker_ready_hue, 1.0f);
+	constexpr auto default_bright_worker_ready_color = make_rgba_pixel_from_whi_inv(worker_ready_hue, 1.0f);
+	constexpr auto default_dark_resources_free_color = default_dark_worker_ready_color;
+	constexpr auto default_bright_resources_free_color = default_bright_worker_ready_color;
+	constexpr auto default_dark_resources_used_color = default_dark_worker_busy_color;
+	constexpr auto default_bright_resources_used_color = default_bright_worker_busy_color;
 
 	inline constinit color_scheme current_color_scheme{
 		.main_panel{
@@ -155,23 +182,16 @@ namespace terraformer::ui::theming
 				1.0f
 			}
 		},
-		.selection_color = rgba_pixel{
-			0.5f,
-			1.0f,
-			0.0f,
-			1.0f
+		.selection_color = default_bright_warning_color,
+		.mouse_focus_color = make_rgba_pixel_from_whi(3.0f/4.0f, 1.0f),
+		.keyboard_focus_color = make_rgba_pixel_from_whi(7.0f/12.0f, 1.0f),
+		.progress_colors{
+			.begin = default_dark_worker_busy_color,
+			.end = default_dark_worker_ready_color
 		},
-		.mouse_focus_color = rgba_pixel{
-			1.0f,
-			0.0f,
-			0.5f,
-			1.0f
-		},
-		.keyboard_focus_color = rgba_pixel{
-			0.5f,
-			0.0f,
-			1.0f,
-			1.0f
+		.resource_usage_colors{
+			.begin = default_dark_resources_free_color,
+			.end = default_dark_resources_used_color
 		},
 		.misc_dark_colors = default_dark_palette,
 		.misc_bright_colors = default_bright_palette
