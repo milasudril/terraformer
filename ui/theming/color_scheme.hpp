@@ -27,13 +27,27 @@ namespace terraformer::ui::theming
 		rgba_pixel mouse_focus_color;
 		rgba_pixel keyboard_focus_color;
 
-		std::array<rgba_pixel, 16> misc_colors;
+		std::array<rgba_pixel, 12> misc_colors;
 	};
 
 	constexpr auto max_val = 1.0f;
 	constexpr auto rate = (-1.0f - std::log2(max_val))/4.0f;
 	static_assert(max_val*std::exp2(0.0f*rate) == max_val);
 	static_assert(max_val*std::exp2(4.0f*rate) == 0.5f);
+
+	constexpr auto generate_default_palette()
+	{
+		std::array<rgba_pixel, 12> ret{};
+
+		for(size_t k = 0; k != std::size(ret); ++k)
+		{
+			auto const hue = static_cast<float>((7*k)%std::size(ret))/static_cast<float>(std::size(ret));
+
+			ret[k] = make_rgba_pixel_from_whsi(hue, 1.0f, 1.0f, 1.0f);
+		}
+
+		return ret;
+	}
 
 	inline constinit color_scheme current_color_scheme{
 		.main_panel{
@@ -154,7 +168,7 @@ namespace terraformer::ui::theming
 			1.0f,
 			1.0f
 		},
-		.misc_colors{}
+		.misc_colors = generate_default_palette()
 	};
 }
 
