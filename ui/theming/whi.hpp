@@ -78,7 +78,7 @@ namespace terraformer::ui::theming
 
 	constexpr auto make_rgba_pixel_from_whi_inv(float hue, float intensity)
 	{
-		auto const val = make_rgba_pixel_from_whi(mod(hue + 0.5f, 1.0f), intensity);
+		auto const val = make_rgba_pixel_from_whi(mod(hue + 0.52f, 1.0f), intensity);
 		return rgba_pixel{geosimd::vec_t{3.0f/5.0f, 3.0f/8.0f, 1.0f, 2.0f} - val.value()};
 	}
 }
