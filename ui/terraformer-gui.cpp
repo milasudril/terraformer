@@ -39,31 +39,14 @@ namespace
 
 		void handle_mouse_button_event(terraformer::ui::wsapi::mouse_button_event const& event)
 		{
- 			printf(
-				"\r(%.8g, %.8g) %d %u %04x",
-				event.where.x,
-				event.where.y,
-				event.button,
-				static_cast<uint32_t>(event.action),
-				static_cast<uint32_t>(event.modifiers)
-			);
-
-			fflush(stdout);
+			m_workspace.handle_event(event);
 		}
 
 		void window_is_closing()
 		{ should_close = true; }
 
-		void handle_cursor_enter_leave_event(terraformer::ui::wsapi::cursor_enter_leave_event const& event)
+		void handle_cursor_enter_leave_event(terraformer::ui::wsapi::cursor_enter_leave_event const&)
 		{
- 			printf(
-				"(%.8g, %.8g) %u\n",
-				event.where.x,
-				event.where.y,
-				static_cast<uint32_t>(event.direction)
-			);
-
-			fflush(stdout);
 		}
 
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)

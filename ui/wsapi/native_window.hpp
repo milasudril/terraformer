@@ -231,6 +231,7 @@ namespace terraformer::ui::wsapi
 		{
 			cursor_position ret{};
 			glfwGetCursorPos(window, &ret.x, &ret.y);
+			ret.y = -ret.y;
 			return ret;
 		};
 

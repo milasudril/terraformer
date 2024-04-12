@@ -21,11 +21,11 @@ namespace terraformer::ui::main
 
 	[[nodiscard]] inline bool inside(wsapi::cursor_position pos, widget_geometry const& box)
 	{
-		auto const offset = (box.origin - location{0.0f, 0.0f, 0.0f}).apply(0.5f*box.size);
-		auto const dr = box.where - offset;
-		auto const conv_pos = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - offset;
-		return (conv_pos[0] >= dr[0] && conv_pos[0] < dr[0] + box.size[0])
-			&& (conv_pos[1] >= dr[1] && conv_pos[1] < dr[1] + box.size[1]);
+		auto const r = 0.5*box.size;
+		auto const offset_to_origin = (location{0.0f, 0.0f, 0.0f} - box.origin).apply(r);
+		auto const object_midpoint = box.where + offset_to_origin;
+		auto const dr = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - object_midpoint;
+		return std::abs(dr[0]) < r[0] && std::abs(dr[1]) < r[1];
 	}
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};

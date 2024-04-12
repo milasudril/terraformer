@@ -54,6 +54,7 @@ namespace terraformer::ui::layouts
 
 		bool handle_event(wsapi::mouse_button_event const& mbe)
 		{
+			printf("Event generated at %.8g %.8g\n", mbe.where.x, mbe.where.y);
 			auto i = find(mbe.where, m_widgets);
 			if(i == m_widgets.npos)
 			{ return false; }
@@ -61,7 +62,10 @@ namespace terraformer::ui::layouts
 			printf("Cursor over widget %zu\n", i.get());
 			fflush(stdout);
 
-			return i->handle_event(mbe);
+			auto const widgets = m_widgets.widget_pointers();
+			auto const mbe_handlers = m_widgets.mouse_button_callbacks();
+
+			return mbe_handlers[i](widgets[i], mbe);
 		}
 
 		wsapi::fb_size handle_event(wsapi::fb_size size)
