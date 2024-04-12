@@ -73,7 +73,7 @@ namespace terraformer::ui::layouts
 
 	private:
 
-		main::widget_list<drawing_surface_type> m_widgets;
+		main::widget_list<drawing_surface_type const&> m_widgets;
 		std::reference_wrapper<StockTexturesRepo const> m_textures;
 	};
 }

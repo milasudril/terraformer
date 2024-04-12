@@ -40,8 +40,8 @@ namespace terraformer::ui::main
 	)
 	{
 		{ obj.render() } -> std::same_as<void>;
-		{ std::as_const(obj).background() } -> std::convertible_to<DrawingSurface>;
-		{ std::as_const(obj).foreground() } -> std::convertible_to<DrawingSurface>;
+		{ std::as_const(obj).background() } -> std::same_as<DrawingSurface>;
+		{ std::as_const(obj).foreground() } -> std::same_as<DrawingSurface>;
 		{ obj.handle_event(std::as_const(pos)) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;

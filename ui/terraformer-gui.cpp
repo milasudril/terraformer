@@ -10,6 +10,7 @@
 #include "./layouts/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./theming/color_scheme.hpp"
+#include "./widgets/testwidget.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/rng.hpp"
 
@@ -21,70 +22,11 @@ namespace
 	{
 		my_event_handler()
 		{
-			terraformer::image fg{256, 256};
-			terraformer::random_generator rng;
-
-			std::uniform_real_distribution U{0.9375f, 1.0f/0.9375f};
-			for(uint32_t y = fg.height()/4; y != 2*fg.height()/4; ++y)
-			{
-				for(uint32_t x = 0; x != fg.width()/4; ++x)
-				{
-					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.input_area.background;
-				}
-			}
-
-			for(uint32_t y = fg.height()/4; y != 2*fg.height()/4; ++y)
-			{
-				for(uint32_t x = fg.width()/4; x != 2*fg.width()/4; ++x)
-				{
-					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.command_area.background;
-				}
-			}
-
-			for(uint32_t y = fg.height()/4; y != 2*fg.height()/4; ++y)
-			{
-				for(uint32_t x = 2*fg.width()/4; x != 3*fg.width()/4; ++x)
-				{
-					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.output_area.background;
-				}
-			}
-
-			for(uint32_t y = fg.height()/4; y != 3*fg.height()/4; ++y)
-			{
-				for(uint32_t x = 3*fg.width()/4; x != 4*fg.width()/4; ++x)
-				{
-					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.other_panel.background;
-				}
-			}
-
-			for(uint32_t y = 2*fg.height()/4; y != 3*fg.height()/4; ++y)
-			{
-				for(uint32_t x = 0; x != fg.width()/3; ++x)
-				{
-					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.selection_color;
-				}
-			}
-
-			for(uint32_t y = 2*fg.height()/4; y != 3*fg.height()/4; ++y)
-			{
-				for(uint32_t x = fg.width()/3; x != 2*fg.width()/3; ++x)
-				{
-					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.mouse_focus_color;
-				}
-			}
-
-			for(uint32_t y = 2*fg.height()/4; y != 3*fg.height()/4; ++y)
-			{
-				for(uint32_t x = 2*fg.width()/3; x != fg.width(); ++x)
-				{
-					fg(x, y) = 0.9375f*U(rng)*terraformer::ui::theming::current_color_scheme.keyboard_focus_color;
-				}
-			}
-
-			m_foreground.upload(std::as_const(fg).pixels(), 1);
+			m_workspace.append(
+				std::ref(m_foo),
+				terraformer::ui::main::widget_geometry{}
+			);
 		}
-
-		terraformer::ui::drawing_api::gl_texture m_foreground;
 
 		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
 		{
@@ -152,6 +94,9 @@ namespace
 
 		bool should_close{false};
 		terraformer::ui::wsapi::fb_size fb_size;
+
+		terraformer::ui::widgets::testwidget m_foo;
+
 		terraformer::ui::layouts::workspace<
 			terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>
 		> m_workspace;
