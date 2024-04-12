@@ -43,6 +43,9 @@ namespace terraformer::ui::drawing_api
 		static constexpr auto value = GL_RGBA;
 	};
 
+	template<class T>
+	constexpr auto to_gl_color_channel_layout_v = to_gl_color_channel_layout<T>::value;
+
 	inline GLenum gl_make_sized_format_red(GLenum type)
 	{
 		switch(type)
@@ -143,9 +146,7 @@ namespace terraformer::ui::drawing_api
 		explicit gl_texture():m_descriptor{0, 0, 0, 0, 0}{}
 
 		explicit gl_texture(gl_texture_descriptor const& descriptor):gl_texture{}
-		{
-			set_format(descriptor);
-		}
+		{ set_format(descriptor); }
 
 		auto& upload(std::span<std::byte const> data, gl_texture_descriptor const& descriptor)
 		{

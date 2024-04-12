@@ -46,23 +46,25 @@ namespace terraformer::ui::theming
 
 		auto const v_temp = [](float hue, float c, float x) {
 			if(hue < 1.0f)
-			{ return geosimd::vec_t{c, x, 0.0f, 0.0f}; }
+			{ return geosimd::vec_t{c, x, 0.0f, 1.0f}; }
 			if(hue < 2.0f)
-			{ return geosimd::vec_t{x, c, 0.0f, 0.0f}; }
+			{ return geosimd::vec_t{x, c, 0.0f, 1.0f}; }
 			if(hue < 3.0f)
-			{ return geosimd::vec_t{0.0f, c, x, 0.0f}; }
+			{ return geosimd::vec_t{0.0f, c, x, 1.0f}; }
 			if(hue < 4.0f)
-			{ return geosimd::vec_t{0.0f, x, c, 0.0f}; }
+			{ return geosimd::vec_t{0.0f, x, c, 1.0f}; }
 			if(hue < 5.0f)
-			{ return geosimd::vec_t{x, 0.0f, c, 0.0f}; }
-			return geosimd::vec_t{c, 0.0f, x, 0.0f};
+			{ return geosimd::vec_t{x, 0.0f, c, 1.0f}; }
+			return geosimd::vec_t{c, 0.0f, x, 1.0f};
 		}(hue, c, x);
 
-		constexpr geosimd::vec_t weights{5.0f/16.0f, 1.0f/2.0f, 3.0f/16.0f, 0.0f};
+		constexpr geosimd::vec_t weights{5.0f/16.0f, 1.0f/2.0f, 3.0f/16.0f, 1.0f/16.0f};
 		auto const weights_inv = geosimd::vec_t{1.0f, 1.0f, 1.0f, 1.0f}
-				/(16.0f*weights + geosimd::vec_t{0.0f, 0.0f, 0.0f, 1.0f});
+				/(16.0f*weights);
 		return rgba_pixel{v_temp*weights_inv};
 	}
+
+	static_assert(make_rgba_pixel_from_whi(0.0f, 1.0f).alpha() == 1.0f);
 
 	static_assert(make_rgba_pixel_from_whi(2.0f/3.0f, 1.0f).red() == 0.0f);
 	static_assert(make_rgba_pixel_from_whi(2.0f/3.0f, 1.0f).green() == 0.0f);
@@ -81,5 +83,7 @@ namespace terraformer::ui::theming
 		auto const val = make_rgba_pixel_from_whi(mod(hue + 0.52f, 1.0f), intensity);
 		return rgba_pixel{geosimd::vec_t{3.0f/5.0f, 3.0f/8.0f, 1.0f, 2.0f} - val.value()};
 	}
+
+	static_assert(make_rgba_pixel_from_whi_inv(0.0f, 1.0f).alpha() == 1.0f);
 }
 #endif

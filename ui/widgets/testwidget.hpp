@@ -13,6 +13,28 @@ namespace terraformer::ui::widgets
 		{
 			if(m_dirty)
 			{
+				auto const& descriptor = m_foreground.descriptor();
+				auto const w = static_cast<uint32_t>(descriptor.width);
+				auto const h = static_cast<uint32_t>(descriptor.height);
+
+				image img{w, h};
+				for(uint32_t y = 0; y != h; ++y)
+				{
+					for(uint32_t x = 0; x != w; ++x)
+					{ img(x, y) = rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}; }
+				}
+
+				m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+
+				auto const color = theming::current_color_scheme.misc_dark_colors[m_current_color];
+				for(uint32_t y = 0; y != h; ++y)
+				{
+					for(uint32_t x = 0; x != w; ++x)
+					{ img(x, y) = color; }
+				}
+
+				m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+
 				printf("Rendering\n");
 				m_dirty = false;
 			}
@@ -43,7 +65,23 @@ namespace terraformer::ui::widgets
 		}
 
 		wsapi::fb_size handle_event(wsapi::fb_size size)
-		{	return size; }
+		{
+			printf("Size was updated to %d %d\n", size.width, size.height);
+
+			drawing_api::gl_texture_descriptor descriptor{
+				.width = size.width,
+				.height = size.height,
+				.format = drawing_api::to_gl_color_channel_layout_v<rgba_pixel>,
+				.type = drawing_api::to_gl_type_id_v<rgba_pixel>,
+				.num_mipmaps = 1
+			};
+
+			m_foreground.set_format(descriptor);
+			m_background.set_format(descriptor);
+			m_dirty = true;
+			return size;
+
+		}
 
 	private:
 		drawing_api::gl_texture m_foreground;

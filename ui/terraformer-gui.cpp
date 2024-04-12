@@ -51,10 +51,12 @@ namespace
 
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{
+			printf("Fb size was changed\n");
 			fb_size = size;
 			glViewport(0, 0, size.width, size.height);
 			terraformer::ui::drawing_api::single_quad_renderer::get_default_instance()
 				.set_world_transform(terraformer::location{-1.0f, 1.0f, 0.0f}, size);
+			m_workspace.handle_event(size);
 		}
 
 		bool operator()(

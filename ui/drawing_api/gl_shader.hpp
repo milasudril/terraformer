@@ -66,6 +66,12 @@ namespace terraformer::ui::drawing_api
 			return *this;
 		}
 
+		gl_program& set_uniform(int index, int value)
+		{
+			glProgramUniform1i(m_handle.get(), index, value);
+			return *this;
+		}
+
 	private:
 		gl_program_handle m_handle;
 	};

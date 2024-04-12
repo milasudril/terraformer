@@ -86,7 +86,7 @@ void main()
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
-layout (location = 0) out vec4 fragment_color;
+out vec4 fragment_color;
 layout (binding = 0) uniform sampler2D background;
 layout (binding = 1) uniform sampler2D foreground;
 
