@@ -49,11 +49,15 @@ namespace terraformer::ui::main
 
 		bool operator()(wsapi::native_window<drawing_api::gl_surface_configuration>& viewport)
 		{
-			m_widget_container.render();
-
-			// TODO: Not good if widgets are rendered on top of something else (as in a hud)
 			glClear(GL_COLOR_BUFFER_BIT);
+			render();
+			viewport.swap_buffers();
+			return m_window_controller.main_loop_should_exit(viewport);
+		}
 
+		void render()
+		{
+			m_widget_container.render();
 			// TODO: Using default quad renderer works for now, but perhaps this should be customizable
 			auto& renderer = drawing_api::single_quad_renderer::get_default_instance();
 			renderer.render(
@@ -65,9 +69,6 @@ namespace terraformer::ui::main
 			);
 
 			m_widget_container.show_widgets(renderer);
-
-			viewport.swap_buffers();
-			return m_window_controller.main_loop_should_exit();
 		}
 
 	private:
