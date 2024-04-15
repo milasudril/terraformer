@@ -49,6 +49,12 @@ namespace
 		{
 		}
 
+		void handle_cursor_motion_event(terraformer::ui::wsapi::cursor_motion_event const& event)
+		{
+			printf("\r%.8g %.8g", event.where.x, event.where.y);
+			fflush(stdout);
+		}
+
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{
 			printf("Fb size was changed\n");

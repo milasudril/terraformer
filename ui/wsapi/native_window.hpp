@@ -181,6 +181,29 @@ namespace terraformer::ui::wsapi
 				);
 			}
 
+			if constexpr (requires(cursor_motion_event const& event){
+				{eh.get().handle_cursor_motion_event(event)} -> std::same_as<void>;
+			})
+			{
+				glfwSetCursorPosCallback(
+					m_window.get(),
+					[](GLFWwindow* window, double x, double y)
+					{
+						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+						call_and_catch(
+							&EventHandler::handle_cursor_motion_event,
+							*event_handler,
+							cursor_motion_event{
+								.where{
+									.x = x,
+									.y = -y
+								}
+							}
+						);
+					}
+				);
+			}
+
 			if constexpr (requires(cursor_enter_leave_event const& event){
 				{eh.get().handle_cursor_enter_leave_event(event)}->std::same_as<void>;
 			})
@@ -214,11 +237,7 @@ namespace terraformer::ui::wsapi
 		}
 
 		cursor_position get_cursor_position() const
-		{
-			cursor_position ret{};
-			glfwGetCursorPos(m_window.get(), &ret.x, &ret.y);
-			return ret;
-		}
+		{ return get_cursor_position(m_window.get()); }
 
 		auto handle() const { return m_window.get(); }
 
