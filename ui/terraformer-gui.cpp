@@ -32,29 +32,35 @@ namespace
 			);
 		}
 
+		template<auto>
 		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
 		{
 			fprintf(stderr, "%s\n", msg.description.c_str());
 		}
 
+		template<auto>
 		void handle_mouse_button_event(terraformer::ui::wsapi::mouse_button_event const& event)
 		{
 			m_workspace.handle_event(event);
 		}
 
+		template<auto>
 		void window_is_closing()
 		{ should_close = true; }
 
+		template<auto>
 		void handle_cursor_enter_leave_event(terraformer::ui::wsapi::cursor_enter_leave_event const&)
 		{
 		}
 
+		template<auto>
 		void handle_cursor_motion_event(terraformer::ui::wsapi::cursor_motion_event const& event)
 		{
 			printf("\r%.8g %.8g", event.where.x, event.where.y);
 			fflush(stdout);
 		}
 
+		template<auto>
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{
 			printf("Fb size was changed\n");
@@ -114,6 +120,6 @@ int main(int, char**)
 
 	glEnable(GL_CULL_FACE);
 	my_event_handler eh;
-	mainwin.set_event_handler(std::ref(eh));
+	mainwin.set_event_handler<0>(std::ref(eh));
 	gui_ctxt.wait_events(std::ref(eh), std::ref(mainwin));
 }

@@ -132,34 +132,34 @@ namespace terraformer::ui::wsapi
 			swap_buffers(m_window.get(), m_ctxt_cfg);
 		}
 
-		template<class EventHandler>
+		template<auto WindowId, class EventHandler>
 		void set_event_handler(std::reference_wrapper<EventHandler> eh)
 		{
-			static_assert(requires(error_message const& msg){{eh.get().error_detected(msg)}->std::same_as<void>;});
+			static_assert(requires(error_message const& msg){{eh.get().template error_detected<WindowId>(msg)}->std::same_as<void>;});
 
 			glfwSetWindowUserPointer(m_window.get(), &eh.get());
-			if constexpr (requires{{eh.get().window_is_closing()}->std::same_as<void>;})
+			if constexpr (requires{{eh.get().template window_is_closing<WindowId>()}->std::same_as<void>;})
 			{
 				glfwSetWindowCloseCallback(m_window.get(), [](GLFWwindow* window) -> void {
 					auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-					call_and_catch(&EventHandler::window_is_closing, *event_handler);
+					call_and_catch<WindowId>(&EventHandler::template window_is_closing<WindowId>, *event_handler);
 				});
 			}
 
-			if constexpr (requires(fb_size size){{eh.get().framebuffer_size_changed(size)}->std::same_as<void>;})
+			if constexpr (requires(fb_size size){{eh.get().template framebuffer_size_changed<WindowId>(size)}->std::same_as<void>;})
 			{
 				glfwSetFramebufferSizeCallback(
 					m_window.get(),
 					[](GLFWwindow* window, int w, int h){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-						call_and_catch(&EventHandler::framebuffer_size_changed, *event_handler, fb_size{w, h});
+						call_and_catch<WindowId>(&EventHandler::template framebuffer_size_changed<WindowId>, *event_handler, fb_size{w, h});
 					}
 				);
-				eh.get().framebuffer_size_changed(get_fb_size());
+				eh.get().template framebuffer_size_changed<WindowId>(get_fb_size());
 			}
 
 			if constexpr (requires(mouse_button_event const& event){
-				{eh.get().handle_mouse_button_event(event)}->std::same_as<void>;
+				{eh.get().template handle_mouse_button_event<WindowId>(event)}->std::same_as<void>;
 			})
 			{
 				glfwSetMouseButtonCallback(
@@ -167,8 +167,8 @@ namespace terraformer::ui::wsapi
 					[](GLFWwindow* window, int button, int action, int modifiers){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						assert(action == GLFW_PRESS || action == GLFW_RELEASE);
-						call_and_catch(
-							&EventHandler::handle_mouse_button_event,
+						call_and_catch<WindowId>(
+							&EventHandler::template handle_mouse_button_event<WindowId>,
 							*event_handler,
 							mouse_button_event{
 								.where = get_cursor_position(window),
@@ -182,7 +182,7 @@ namespace terraformer::ui::wsapi
 			}
 
 			if constexpr (requires(cursor_motion_event const& event){
-				{eh.get().handle_cursor_motion_event(event)} -> std::same_as<void>;
+				{eh.get().template handle_cursor_motion_event<WindowId>(event)} -> std::same_as<void>;
 			})
 			{
 				glfwSetCursorPosCallback(
@@ -190,8 +190,8 @@ namespace terraformer::ui::wsapi
 					[](GLFWwindow* window, double x, double y)
 					{
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-						call_and_catch(
-							&EventHandler::handle_cursor_motion_event,
+						call_and_catch<WindowId>(
+							&EventHandler::template handle_cursor_motion_event<WindowId>,
 							*event_handler,
 							cursor_motion_event{
 								.where{
@@ -213,8 +213,8 @@ namespace terraformer::ui::wsapi
 					[](GLFWwindow* window, int direction){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						assert(direction == GLFW_TRUE || direction == GLFW_FALSE);
-						call_and_catch(
-							&EventHandler::handle_cursor_enter_leave_event,
+						call_and_catch<WindowId>(
+							&EventHandler::template handle_cursor_enter_leave_event<WindowId>,
 							*event_handler,
 							cursor_enter_leave_event{
 								.where = get_cursor_position(window),
@@ -254,15 +254,15 @@ namespace terraformer::ui::wsapi
 			return ret;
 		};
 
-		template<class EventHandler, class Function, class ... Args>
+		template<auto WindowId, class EventHandler, class Function, class ... Args>
 		static void call_and_catch(Function&& f, EventHandler&& eh, Args&&... args)
 		{
 			try
 			{ std::invoke(std::forward<Function>(f), std::forward<EventHandler>(eh), std::forward<Args>(args)...); }
 			catch(std::exception const& e)
-			{ eh.error_detected(error_message{e.what()}); }
+			{ eh.template error_detected<WindowId>(error_message{e.what()}); }
 			catch(char const* msg)
-			{ eh.error_detected(error_message{msg}); }
+			{ eh.template error_detected<WindowId>(error_message{msg}); }
 			catch(...)
 			{
 				fprintf(stderr, "Caught unknown exception\n");
