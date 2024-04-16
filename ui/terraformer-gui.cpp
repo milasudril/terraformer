@@ -5,17 +5,11 @@
 #include "./drawing_api/gl_surface_configuration.hpp"
 #include "./drawing_api/gl_texture.hpp"
 #include "./drawing_api/single_quad_renderer.hpp"
-#include "./main/widget_list.hpp"
 #include "./main/default_stock_textures_repo.hpp"
 #include "./main/event_dispatcher.hpp"
 #include "./layouts/workspace.hpp"
 #include "./wsapi/native_window.hpp"
-#include "./theming/color_scheme.hpp"
 #include "./widgets/testwidget.hpp"
-#include "lib/pixel_store/image.hpp"
-#include "lib/common/rng.hpp"
-
-#include <random>
 
 namespace
 {
