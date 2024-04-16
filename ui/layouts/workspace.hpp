@@ -39,7 +39,6 @@ namespace terraformer::ui::layouts
 		auto const& foreground() const
 		{ return m_textures.get().null_texture; }
 
-		template<auto WindowId>
 		bool handle_event(wsapi::cursor_motion_event const& event)
 		{
 			auto i = find(event.where, m_widgets);
@@ -55,7 +54,6 @@ namespace terraformer::ui::layouts
 			return false;
 		}
 
-		template<auto WindowId>
 		bool handle_event(wsapi::mouse_button_event const& event)
 		{
 			auto i = find(event.where, m_widgets);
@@ -68,7 +66,6 @@ namespace terraformer::ui::layouts
 			return mbe_handlers[i](widgets[i], event);
 		}
 
-		template<auto WindowId>
 		wsapi::fb_size handle_event(wsapi::fb_size size)
 		{
 			auto const size_callbacks = m_widgets.size_callbacks();

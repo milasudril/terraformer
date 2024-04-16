@@ -31,11 +31,11 @@ namespace terraformer::ui::main
 
 		template<auto WindowId>
 		void handle_mouse_button_event(wsapi::mouse_button_event const& event)
-		{ value_of(m_widget_container).template handle_event<WindowId>(event); }
+		{ value_of(m_widget_container).handle_event(event); }
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(wsapi::cursor_motion_event const& event)
-		{ value_of(m_widget_container).template handle_event<WindowId>(event); }
+		{ value_of(m_widget_container).handle_event(event); }
 
 		template<auto WindowId>
 		void window_is_closing()
@@ -52,7 +52,7 @@ namespace terraformer::ui::main
 			value_of(m_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(terraformer::location{-1.0f, 1.0f, 0.0f}, size);
-			value_of(m_widget_container).template handle_event<WindowId>(size);
+			value_of(m_widget_container).handle_event(size);
 		}
 
 		template<class Viewport>
