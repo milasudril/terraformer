@@ -24,27 +24,34 @@ namespace terraformer::ui::main
 			m_error_handler{std::forward<T4>(error_handler)}
 		{}
 
+		template<auto WindowId>
 		void error_detected(wsapi::error_message const& msg) noexcept
-		{ m_error_handler.handle(msg); }
+		{ m_error_handler.template error_detected<WindowId>(msg); }
 
+		template<auto WindowId>
 		void handle_mouse_button_event(wsapi::mouse_button_event const& event)
-		{ m_widget_container.handle_event(event); }
+		{ m_widget_container.template handle_event<WindowId>(event); }
 
-		// TODO: This will need to know about the current window
+		template<auto WindowId>
+		void handle_cursor_motion_event(wsapi::cursor_motion_event const& event)
+		{ m_widget_container.template handle_event<WindowId>(event); }
+
+		template<auto WindowId>
 		void window_is_closing()
-		{ m_window_controller.window_is_closing(); }
+		{ m_window_controller.template window_is_closing<WindowId>(); }
 
-		// TODO: This will need to know about the current window
-		void handle_cursor_enter_leave_event(wsapi::cursor_enter_leave_event const& event)
-		{ m_window_controller.cursor_at_window_boundary(event);}
+		template<auto WindowId>
+		void handle_cursor_enter_leave_event(terraformer::ui::wsapi::cursor_enter_leave_event const& event)
+		{ m_window_controller.template cursor_at_window_boundary<WindowId>(event); }
 
+		template<auto WindowId>
 		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
 		{
 			m_fb_size = size;
 			m_renderer
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(terraformer::location{-1.0f, 1.0f, 0.0f}, size);
-			m_widget_container.handle_event(size);
+			m_widget_container.template handle_event<WindowId>(size);
 		}
 
 		template<class Viewport>
