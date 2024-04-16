@@ -39,31 +39,36 @@ namespace terraformer::ui::layouts
 		auto const& foreground() const
 		{ return m_textures.get().null_texture; }
 
-
-		bool handle_event(wsapi::cursor_position pos)
+		template<auto WindowId>
+		bool handle_event(wsapi::cursor_motion_event const& event)
 		{
-			auto i = find(pos, m_widgets);
+			auto i = find(event.where, m_widgets);
 			if(i == m_widgets.npos)
 			{ return false; }
+#if 0
+			// TODO: Need to add callback in widget list
+			auto const widgets = m_widgets.widget_pointers();
+			auto const cme_handlers = m_widgets.mouse_button_callbacks();
 
-			printf("Cursor over widget %zu\n", i.get());
-			fflush(stdout);
-
-			return i->handle_event(pos);
+			return mbe_handlers[i](widgets[i], mbe);
+#endif
+			return false;
 		}
 
-		bool handle_event(wsapi::mouse_button_event const& mbe)
+		template<auto WindowId>
+		bool handle_event(wsapi::mouse_button_event const& event)
 		{
-			auto i = find(mbe.where, m_widgets);
+			auto i = find(event.where, m_widgets);
 			if(i == m_widgets.npos)
 			{ return false; }
 
 			auto const widgets = m_widgets.widget_pointers();
 			auto const mbe_handlers = m_widgets.mouse_button_callbacks();
 
-			return mbe_handlers[i](widgets[i], mbe);
+			return mbe_handlers[i](widgets[i], event);
 		}
 
+		template<auto WindowId>
 		wsapi::fb_size handle_event(wsapi::fb_size size)
 		{
 			auto const size_callbacks = m_widgets.size_callbacks();

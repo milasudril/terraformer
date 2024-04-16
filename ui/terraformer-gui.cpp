@@ -7,6 +7,7 @@
 #include "./drawing_api/single_quad_renderer.hpp"
 #include "./main/widget_list.hpp"
 #include "./main/default_stock_textures_repo.hpp"
+#include "./main/event_dispatcher.hpp"
 #include "./layouts/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./theming/color_scheme.hpp"
@@ -18,89 +19,25 @@
 
 namespace
 {
-	struct my_event_handler
+	struct window_controller
 	{
-		my_event_handler()
-		{
-			m_workspace.append(
-				std::ref(m_foo),
-				terraformer::ui::main::widget_geometry{
-					.where = terraformer::location{50.0f, -25.0f, 0.0f},
-					.origin= terraformer::location{-1.0f, 1.0f, 0.0f},
-					.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
-				}
-			);
-		}
+		template<auto>
+		void window_is_closing()
+		{ should_exit = true; }
 
+		bool main_loop_should_exit(auto&&...) const
+		{ return should_exit; }
+
+		bool should_exit{false};
+	};
+
+	struct error_handler
+	{
 		template<auto>
 		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
 		{
 			fprintf(stderr, "%s\n", msg.description.c_str());
 		}
-
-		template<auto>
-		void handle_mouse_button_event(terraformer::ui::wsapi::mouse_button_event const& event)
-		{
-			m_workspace.handle_event(event);
-		}
-
-		template<auto>
-		void window_is_closing()
-		{ should_close = true; }
-
-		template<auto>
-		void handle_cursor_enter_leave_event(terraformer::ui::wsapi::cursor_enter_leave_event const&)
-		{
-		}
-
-		template<auto>
-		void handle_cursor_motion_event(terraformer::ui::wsapi::cursor_motion_event const& event)
-		{
-			printf("\r%.8g %.8g", event.where.x, event.where.y);
-			fflush(stdout);
-		}
-
-		template<auto>
-		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
-		{
-			printf("Fb size was changed\n");
-			fb_size = size;
-			glViewport(0, 0, size.width, size.height);
-			terraformer::ui::drawing_api::single_quad_renderer::get_default_instance()
-				.set_world_transform(terraformer::location{-1.0f, 1.0f, 0.0f}, size);
-			m_workspace.handle_event(size);
-		}
-
-		bool operator()(
-			terraformer::ui::wsapi::native_window<terraformer::ui::drawing_api::gl_surface_configuration>& viewport
-		)
-		{
-			m_workspace.render();
-
-			glClear(GL_COLOR_BUFFER_BIT);
-			auto& renderer = terraformer::ui::drawing_api::single_quad_renderer::get_default_instance();
-			renderer.render(
-				terraformer::location{0.0f, 0.0f, 0.0f},
-				terraformer::location{-1.0f, 1.0f, 0.0f},
-				terraformer::scaling{static_cast<float>(fb_size.width), static_cast<float>(fb_size.height), 1.0f},
-				m_workspace.background(),
-				m_workspace.foreground()
-			);
-
-			m_workspace.show_widgets(renderer);
-
-			viewport.swap_buffers();
-			return should_close;
-		}
-
-		bool should_close{false};
-		terraformer::ui::wsapi::fb_size fb_size;
-
-		terraformer::ui::widgets::testwidget m_foo;
-
-		terraformer::ui::layouts::workspace<
-			terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>
-		> m_workspace;
 	};
 }
 
@@ -119,7 +56,29 @@ int main(int, char**)
 	};
 
 	glEnable(GL_CULL_FACE);
-	my_event_handler eh;
-	mainwin.set_event_handler<0>(std::ref(eh));
-	gui_ctxt.wait_events(std::ref(eh), std::ref(mainwin));
+
+	terraformer::ui::widgets::testwidget foo;
+
+	terraformer::ui::layouts::workspace<
+		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>
+	> my_workspace;
+
+	my_workspace.append(
+		std::ref(foo),
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{50.0f, -25.0f, 0.0f},
+			.origin= terraformer::location{-1.0f, 1.0f, 0.0f},
+			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
+		}
+	);
+
+	terraformer::ui::main::event_dispatcher event_dispatcher{
+		std::ref(my_workspace),
+		window_controller{},
+		std::ref(terraformer::ui::drawing_api::single_quad_renderer::get_default_instance()),
+		error_handler{}
+	};
+
+	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
+	gui_ctxt.wait_events(std::ref(event_dispatcher), std::ref(mainwin));
 }

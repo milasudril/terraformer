@@ -45,6 +45,18 @@ namespace terraformer::ui::drawing_api
 			gl_bindings::draw_triangles();
 		}
 
+		auto& clear_buffers()
+		{
+			glClear(GL_COLOR_BUFFER_BIT);
+			return *this;
+		}
+
+		auto& set_viewport(int x, int y, int width, int height)
+		{
+			glViewport(x, y, width, height);
+			return *this;
+		}
+
 	private:
 		gl_mesh<unsigned int, location> m_mesh{
 			std::array<unsigned int, 6>{
