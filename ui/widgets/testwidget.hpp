@@ -21,19 +21,37 @@ namespace terraformer::ui::widgets
 				for(uint32_t y = 0; y != h; ++y)
 				{
 					for(uint32_t x = 0; x != w; ++x)
-					{ img(x, y) = rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}; }
+					{ img(x, y) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}; }
 				}
-
-				m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
-
-				auto const color = theming::current_color_scheme.misc_dark_colors[m_current_color];
-				for(uint32_t y = 0; y != h; ++y)
-				{
-					for(uint32_t x = 0; x != w; ++x)
-					{ img(x, y) = color; }
-				}
-
 				m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+
+				{
+					auto const num_colors = std::size(theming::current_color_scheme.misc_bright_colors);
+					auto const color = theming::current_color_scheme.misc_bright_colors[(m_current_color + 1)%num_colors];
+					for(uint32_t x = 0; x != w; ++x)
+					{
+						img(x, 0) = color;
+						img(x, 1) = color;
+						img(x, 2) = color;
+						img(x, 3) = color;
+						img(x, h - 1) = color;
+						img(x, h - 2) = color;
+						img(x, h - 3) = color;
+						img(x, h - 4) = color;
+					}
+
+					m_border.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+				}
+
+				{
+					auto const color = theming::current_color_scheme.misc_dark_colors[m_current_color];
+					for(uint32_t y = 0; y != h; ++y)
+					{
+						for(uint32_t x = 0; x != w; ++x)
+						{ img(x, y) = color; }
+					}
+					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+				}
 
 				printf("Rendering\n");
 				m_dirty = false;
@@ -44,10 +62,13 @@ namespace terraformer::ui::widgets
 		{ return m_background; }
 
 		auto const& foreground() const
-		{ return m_foreground; }
+		{ return m_cursor_above? m_border : m_foreground; }
 
 		bool handle_event(wsapi::cursor_motion_event const&)
-		{ return false;}
+		{
+			m_cursor_above = true;
+			return false;
+		}
 
 		bool handle_event(wsapi::mouse_button_event const& mbe)
 		{
@@ -85,8 +106,10 @@ namespace terraformer::ui::widgets
 
 	private:
 		drawing_api::gl_texture m_foreground;
+		drawing_api::gl_texture m_border;
 		drawing_api::gl_texture m_background;
 		size_t m_current_color = 0;
+		bool m_cursor_above = false;
 		bool m_dirty = false;
 	};
 }
