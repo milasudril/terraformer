@@ -26,7 +26,7 @@ namespace
 		dummy_surface foreground() const
 		{ return dummy_surface{}; }
 
-		bool handle_event(terraformer::ui::wsapi::cursor_position)
+		bool handle_event(terraformer::ui::wsapi::cursor_motion_event const&)
 		{
 			++cursor_position_count;
 			return true;
@@ -159,14 +159,14 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 	// Call handle_event cursor_position
 	{
 		auto const widget_ptrs = widgets.widget_pointers();
-		auto const cursor_position_callbacks = widgets.cursor_position_callbacks();
+		auto const cursor_motion_callbacks = widgets.cursor_motion_callbacks();
 
 		for(auto k =  widgets.first_element_index();
 			k != std::size(widgets);
 			++k
 		)
 		{
-			cursor_position_callbacks[k](widget_ptrs[k], terraformer::ui::wsapi::cursor_position{});
+			cursor_motion_callbacks[k](widget_ptrs[k], terraformer::ui::wsapi::cursor_motion_event{});
 
 			switch(k.get())
 			{

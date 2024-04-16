@@ -46,7 +46,7 @@ namespace terraformer::ui::widgets
 		auto const& foreground() const
 		{ return m_foreground; }
 
-		bool handle_event(wsapi::cursor_position)
+		bool handle_event(wsapi::cursor_motion_event const&)
 		{ return false;}
 
 		bool handle_event(wsapi::mouse_button_event const& mbe)

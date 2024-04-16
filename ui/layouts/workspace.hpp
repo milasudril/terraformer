@@ -44,14 +44,11 @@ namespace terraformer::ui::layouts
 			auto i = find(event.where, m_widgets);
 			if(i == m_widgets.npos)
 			{ return false; }
-#if 0
-			// TODO: Need to add callback in widget list
-			auto const widgets = m_widgets.widget_pointers();
-			auto const cme_handlers = m_widgets.mouse_button_callbacks();
 
-			return mbe_handlers[i](widgets[i], mbe);
-#endif
-			return false;
+			auto const widgets = m_widgets.widget_pointers();
+ 			auto const cme_handlers = m_widgets.cursor_motion_callbacks();
+
+			return cme_handlers[i](widgets[i], event);
 		}
 
 		bool handle_event(wsapi::mouse_button_event const& event)
