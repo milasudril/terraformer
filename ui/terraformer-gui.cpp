@@ -52,6 +52,7 @@ int main(int, char**)
 	glEnable(GL_CULL_FACE);
 
 	terraformer::ui::widgets::testwidget foo;
+	terraformer::ui::widgets::testwidget bar;
 
 	terraformer::ui::layouts::workspace<
 		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>
@@ -61,6 +62,15 @@ int main(int, char**)
 		std::ref(foo),
 		terraformer::ui::main::widget_geometry{
 			.where = terraformer::location{50.0f, -25.0f, 0.0f},
+			.origin= terraformer::location{-1.0f, 1.0f, 0.0f},
+			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
+		}
+	);
+
+	my_workspace.append(
+		std::ref(bar),
+		terraformer::ui::main::widget_geometry{
+			.where = terraformer::location{250.0f, -25.0f, 0.0f},
 			.origin= terraformer::location{-1.0f, 1.0f, 0.0f},
 			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
 		}
