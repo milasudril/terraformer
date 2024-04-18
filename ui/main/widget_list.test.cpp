@@ -26,6 +26,9 @@ namespace
 		dummy_surface foreground() const
 		{ return dummy_surface{}; }
 
+		void handle_event(terraformer::ui::wsapi::cursor_enter_leave_event const&)
+		{}
+
 		bool handle_event(terraformer::ui::wsapi::cursor_motion_event const&)
 		{
 			++cursor_position_count;

@@ -39,13 +39,44 @@ namespace terraformer::ui::layouts
 		auto const& foreground() const
 		{ return m_textures.get().null_texture; }
 
+		void handle_event(wsapi::cursor_enter_leave_event const&)
+		{ }
+
 		bool handle_event(wsapi::cursor_motion_event const& event)
 		{
-			auto i = find(event.where, m_widgets);
-			if(i == m_widgets.npos)
-			{ return false; }
+			// TODO: event.where must be converted to widget coordinates
+
+			auto const i = find(event.where, m_widgets);
+			auto const old_index = m_cursor_widget_index;
+			m_cursor_widget_index = i;
 
 			auto const widgets = m_widgets.widget_pointers();
+			auto const cele_handlers = m_widgets.cursor_enter_leave_callbacks();
+			if(i != old_index && old_index != widget_list::npos)
+			{
+				cele_handlers[old_index](
+					widgets[old_index],
+					wsapi::cursor_enter_leave_event{
+						.where = event.where,
+						.direction = wsapi::cursor_enter_leave::leave
+					}
+				);
+			}
+
+			if(i == widget_list::npos)
+			{ return false; }
+
+			if(i != old_index)
+			{
+				cele_handlers[i](
+					widgets[i],
+					wsapi::cursor_enter_leave_event{
+						.where = event.where,
+						.direction = wsapi::cursor_enter_leave::enter
+					}
+				);
+			}
+
  			auto const cme_handlers = m_widgets.cursor_motion_callbacks();
 
 			return cme_handlers[i](widgets[i], event);
@@ -53,8 +84,10 @@ namespace terraformer::ui::layouts
 
 		bool handle_event(wsapi::mouse_button_event const& event)
 		{
-			auto i = find(event.where, m_widgets);
-			if(i == m_widgets.npos)
+			// TODO: event.where must be converted to widget coordinates
+
+			auto const i = find(event.where, m_widgets);
+			if(i == widget_list::npos)
 			{ return false; }
 
 			auto const widgets = m_widgets.widget_pointers();
@@ -92,8 +125,11 @@ namespace terraformer::ui::layouts
 		{ do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
 
 	private:
+		using widget_list = main::widget_list<drawing_surface_type const&>;
 
-		main::widget_list<drawing_surface_type const&> m_widgets;
+		widget_list m_widgets;
+		widget_list::index_type m_cursor_widget_index{widget_list::npos};
+
 		std::reference_wrapper<StockTexturesRepo const> m_textures;
 	};
 }

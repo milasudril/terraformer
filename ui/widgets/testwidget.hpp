@@ -64,9 +64,13 @@ namespace terraformer::ui::widgets
 		auto const& foreground() const
 		{ return m_cursor_above? m_border : m_foreground; }
 
+		void handle_event(wsapi::cursor_enter_leave_event const& cele)
+		{
+			m_cursor_above = cele.direction == wsapi::cursor_enter_leave::enter? true :false;
+		}
+
 		bool handle_event(wsapi::cursor_motion_event const&)
 		{
-			m_cursor_above = true;
 			return false;
 		}
 

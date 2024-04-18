@@ -12,6 +12,7 @@ namespace terraformer::ui::main
 	public:
 		using render_callback = void (*)(void*);
 		using drawing_surface_callback = DrawingSurface (*)(void const*);
+		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const&);
 		using size_callback = wsapi::fb_size (*)(void*, wsapi::fb_size);
@@ -23,6 +24,7 @@ namespace terraformer::ui::main
 			render_callback,
 			drawing_surface_callback,
 			drawing_surface_callback,
+ 			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
 			size_callback
@@ -51,6 +53,9 @@ namespace terraformer::ui::main
 				},
 				[](void const* obj) -> DrawingSurface {
 					return static_cast<Widget const*>(obj)->foreground();
+				},
+				[](void* obj, wsapi::cursor_enter_leave_event const& event) -> void{
+					static_cast<Widget*>(obj)->handle_event(event);
 				},
 				[](void* obj, wsapi::cursor_motion_event const& event) -> bool {
 					return static_cast<Widget*>(obj)->handle_event(event);
@@ -96,14 +101,17 @@ namespace terraformer::ui::main
 		auto foreground_callbacks() const
 		{ return m_objects.template get<5>(); }
 
-		auto cursor_motion_callbacks() const
+		auto cursor_enter_leave_callbacks() const
 		{ return m_objects.template get<6>(); }
 
-		auto mouse_button_callbacks() const
+		auto cursor_motion_callbacks() const
 		{ return m_objects.template get<7>(); }
 
-		auto size_callbacks() const
+		auto mouse_button_callbacks() const
 		{ return m_objects.template get<8>(); }
+
+		auto size_callbacks() const
+		{ return m_objects.template get<9>(); }
 
 	private:
 		widget_array m_objects;

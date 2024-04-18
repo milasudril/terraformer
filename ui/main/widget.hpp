@@ -34,6 +34,7 @@ namespace terraformer::ui::main
 	concept widget = requires(
 		T& obj,
 		wsapi::fb_size size,
+		wsapi::cursor_enter_leave_event const& cele,
 		wsapi::cursor_motion_event const& cme,
 		wsapi::mouse_button_event const& mbe,
 		DrawingSurface& surface
@@ -42,6 +43,7 @@ namespace terraformer::ui::main
 		{ obj.render() } -> std::same_as<void>;
 		{ std::as_const(obj).background() } -> std::same_as<DrawingSurface>;
 		{ std::as_const(obj).foreground() } -> std::same_as<DrawingSurface>;
+		{ obj.handle_event(cele) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
@@ -53,7 +55,8 @@ namespace terraformer::ui::main
 		[[nodiscard]] RenderSurface background() const { return RenderSurface{}; }
 		[[nodiscard]] RenderSurface foreground() const { return RenderSurface{}; }
 		void render() const {}
-		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const& cme) const { return false; }
+		void handle_event(wsapi::cursor_enter_leave_event const&);
+		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }
 		[[nodiscard]] wsapi::fb_size handle_event(wsapi::fb_size size) const { return size; }
 	};
