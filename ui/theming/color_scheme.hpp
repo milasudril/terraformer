@@ -29,6 +29,8 @@ namespace terraformer::ui::theming
 		color_set command_area;
 		color_set output_area;
 
+		rgba_pixel cursor_color;
+
 		rgba_pixel selection_color;
 		rgba_pixel mouse_focus_color;
 		rgba_pixel keyboard_focus_color;
@@ -182,6 +184,7 @@ namespace terraformer::ui::theming
 				1.0f
 			}
 		},
+		.cursor_color = make_rgba_pixel_from_whi(2.0f/3.0f, 1.0f),
 		.selection_color = default_bright_warning_color,
 		.mouse_focus_color = make_rgba_pixel_from_whi(3.0f/4.0f, 1.0f),
 		.keyboard_focus_color = make_rgba_pixel_from_whi(7.0f/12.0f, 1.0f),
