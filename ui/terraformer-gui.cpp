@@ -11,6 +11,8 @@
 #include "./wsapi/native_window.hpp"
 #include "./widgets/testwidget.hpp"
 
+#include "./theming/cursors.hpp"
+
 namespace
 {
 	struct window_controller
