@@ -7,7 +7,7 @@
 #include "./drawing_api/single_quad_renderer.hpp"
 #include "./main/default_stock_textures_repo.hpp"
 #include "./main/event_dispatcher.hpp"
-#include "./layouts/workspace.hpp"
+#include "./widgets/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./widgets/testwidget.hpp"
 
@@ -54,7 +54,7 @@ int main(int, char**)
 	terraformer::ui::widgets::testwidget foo;
 	terraformer::ui::widgets::testwidget bar;
 
-	terraformer::ui::layouts::workspace<
+	terraformer::ui::widgets::workspace<
 		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>
 	> my_workspace;
 

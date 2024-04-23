@@ -5,7 +5,7 @@
 
 #include <functional>
 
-namespace terraformer::ui::layouts
+namespace terraformer::ui::widgets
 {
 	template<class ... Args>
 	void do_show_widgets(Args&&... args)
