@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_THEMING_CURSORS_HPP
 #define TERRAFORMER_UI_THEMING_CURSORS_HPP
 
-#include "./static_cursor.hpp"
+#include "./cursor.hpp"
 
 namespace terraformer::ui::theming
 {
@@ -38,6 +38,8 @@ namespace terraformer::ui::theming
 			}
 		};
 	};
+
+	constexpr auto default_cursor_view = make_cursor_view(stock_cursors::default_cursor);
 }
 
 #endif
