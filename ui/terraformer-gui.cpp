@@ -11,7 +11,7 @@
 #include "./wsapi/native_window.hpp"
 #include "./widgets/testwidget.hpp"
 
-#include "./theming/cursors.hpp"
+#include "./theming/stock_cursors.hpp"
 
 namespace
 {
