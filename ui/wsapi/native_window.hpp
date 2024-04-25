@@ -241,9 +241,8 @@ namespace terraformer::ui::wsapi
 
 		auto handle() const { return m_window.get(); }
 
-		void set_cursor(GLFWcursor* new_cursor)
-		{ glfwSetCursor(m_window.get(), new_cursor); }
-
+		void set_cursor(cursor const& new_cursor)
+		{ glfwSetCursor(m_window.get(), new_cursor.handle()); }
 
 	private:
 		window_handle m_window;

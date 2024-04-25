@@ -26,16 +26,43 @@ namespace terraformer::ui::wsapi
 
 	using cursor_handle = std::unique_ptr<GLFWcursor, cursor_deleter>;
 
-	class context
+	class cursor
 	{
 	public:
-		struct cursor_pixel_type
+		struct pixel_type
 		{
 			uint8_t r;
 			uint8_t g;
 			uint8_t b;
 			uint8_t a;
 		};
+
+		explicit cursor(
+			span_2d<pixel_type> pixels,
+			int x_hot,
+			int y_hot
+		)
+		{
+			GLFWimage const img{
+				.width = static_cast<int>(pixels.width()),
+				.height = static_cast<int>(pixels.height()),
+				.pixels = reinterpret_cast<unsigned char*>(pixels.data())
+			};
+
+			m_handle = cursor_handle{glfwCreateCursor(&img, x_hot, y_hot)};
+		}
+
+		auto handle() const
+		{ return m_handle.get(); }
+
+	private:
+		cursor_handle m_handle;
+	};
+
+	class context
+	{
+	public:
+		using cursor_pixel_type = cursor::pixel_type;
 
 		[[nodiscard]] static constexpr auto make_cursor_pixel(rgba_pixel value)
 		{
@@ -52,15 +79,7 @@ namespace terraformer::ui::wsapi
 			int x_hot,
 			int y_hot
 		)
-		{
-			GLFWimage const img{
-				.width = static_cast<int>(pixels.width()),
-				.height = static_cast<int>(pixels.height()),
-				.pixels = reinterpret_cast<unsigned char*>(pixels.data())
-			};
-
-			return cursor_handle{glfwCreateCursor(&img, x_hot, y_hot)};
-		}
+		{ return cursor{pixels, x_hot, y_hot}; }
 
 		[[nodiscard]] static context& get_instance()
 		{

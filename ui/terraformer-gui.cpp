@@ -85,13 +85,13 @@ int main(int, char**)
 		error_handler{}
 	};
 
-	auto default_cursor = terraformer::ui::theming::create_cursor(
+	auto const default_cursor = terraformer::ui::theming::create_cursor(
 		gui_ctxt,
 		terraformer::ui::theming::default_cursor,
 		terraformer::ui::theming::current_color_scheme.cursor_color
 	);
 
-	mainwin.set_cursor(default_cursor.get());
+	mainwin.set_cursor(default_cursor);
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(std::ref(event_dispatcher), std::ref(mainwin));
