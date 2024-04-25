@@ -10,8 +10,7 @@
 #include "./widgets/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./widgets/testwidget.hpp"
-
-#include "./theming/stock_cursors.hpp"
+#include "./theming/cursor_set.hpp"
 
 namespace
 {
@@ -87,7 +86,7 @@ int main(int, char**)
 
 	auto const default_cursor = terraformer::ui::theming::create_cursor(
 		gui_ctxt,
-		terraformer::ui::theming::default_cursor,
+		terraformer::ui::theming::current_cursor_set.main,
 		terraformer::ui::theming::current_color_scheme.cursor_color
 	);
 
