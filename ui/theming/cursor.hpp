@@ -3,7 +3,7 @@
 
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "lib/common/span_2d.hpp"
-#include "lib/array_classes/single_array.hpp"
+#include "lib/pixel_store/image.hpp"
 #include <array>
 
 namespace terraformer::ui::theming
@@ -37,20 +37,26 @@ namespace terraformer::ui::theming
 	}
 
 	template<class CursorFactory>
-	auto create_cursor(cursor_view const& cursor, rgba_pixel color)
+	auto create_cursor(CursorFactory&& factory, cursor_view const& cursor, rgba_pixel color)
 	{
-		using pixel_type = CursorFactory::pixel_type;
-		single_array<pixel_type> pixels;
-		pixels.resize(cursor.pixels.width() * cursor.pixels.height());
-		std::array<rgba_pixel, 3> color_map{
+		using pixel_type = std::remove_cvref_t<CursorFactory>::cursor_pixel_type;
+		basic_image<pixel_type> output{cursor.pixels.width(), cursor.pixels.height()};
+		std::array<rgba_pixel, 4> color_map{
 			rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 			rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
 			color,
 			rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
 		};
-		for(auto k = pixels.first_element_index(); k != std::size(pixels); ++k)
-		{ pixels[k] = CursorFactory::make_cursor_pixel(color_map[cursor.pixels[k]]); }
-		return CursorFactory::create_cursor(std::as_bytes(pixels), cursor.x_hot, cursor.y_hot);
+		for(uint32_t y = 0; y != output.height(); ++y)
+		{
+			for(uint32_t x = 0; x != output.width(); ++x)
+			{
+				auto const color_index = cursor.pixels(x, y);
+				output(x, y) = factory.make_cursor_pixel(color_map[color_index]);
+			}
+		}
+
+		return factory.create_cursor(output.pixels(), cursor.x_hot, cursor.y_hot);
 	}
 }
 

@@ -39,7 +39,7 @@ namespace terraformer::ui::theming
 		};
 	};
 
-	constexpr auto default_cursor_view = make_cursor_view(stock_cursors::default_cursor);
+	constexpr auto default_cursor = make_cursor_view(stock_cursors::default_cursor);
 }
 
 #endif

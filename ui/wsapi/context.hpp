@@ -7,15 +7,61 @@
 
 #define GLFW_INCLUDE_NONE
 
+#include "lib/pixel_store/rgba_pixel.hpp"
+#include "lib/common/span_2d.hpp"
+
 #include <GLFW/glfw3.h>
 #include <GL/glew.h>
 #include <GL/gl.h>
 
+#include <memory>
+
 namespace terraformer::ui::wsapi
 {
+	struct cursor_deleter
+	{
+		void operator()(GLFWcursor* cursor) const
+		{ glfwDestroyCursor(cursor); }
+	};
+
+	using cursor_handle = std::unique_ptr<GLFWcursor, cursor_deleter>;
+
 	class context
 	{
 	public:
+		struct cursor_pixel_type
+		{
+			uint8_t r;
+			uint8_t g;
+			uint8_t b;
+			uint8_t a;
+		};
+
+		[[nodiscard]] static constexpr auto make_cursor_pixel(rgba_pixel value)
+		{
+			return cursor_pixel_type{
+				static_cast<uint8_t>(255.0f*std::pow(value.red(), 1.0f/2.2f)),
+				static_cast<uint8_t>(255.0f*std::pow(value.green(), 1.0f/2.2f)),
+				static_cast<uint8_t>(255.0f*std::pow(value.blue(), 1.0f/2.2f)),
+				static_cast<uint8_t>(255.0f*std::pow(value.alpha(), 1.0f/2.2f))
+			};
+		}
+
+		[[nodiscard]] static auto create_cursor(
+			span_2d<cursor_pixel_type> pixels,
+			int x_hot,
+			int y_hot
+		)
+		{
+			GLFWimage const img{
+				.width = static_cast<int>(pixels.width()),
+				.height = static_cast<int>(pixels.height()),
+				.pixels = reinterpret_cast<unsigned char*>(pixels.data())
+			};
+
+			return cursor_handle{glfwCreateCursor(&img, x_hot, y_hot)};
+		}
+
 		[[nodiscard]] static context& get_instance()
 		{
 			static context ctxt;
