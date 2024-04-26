@@ -67,8 +67,6 @@ namespace terraformer::ui::drawing_api
 		gl_program m_program{
 			gl_shader<GL_VERTEX_SHADER>{
 				R"(#version 460 core
-layout (location = 0) in vec4 input_offset;
-
 layout (location = 0) uniform vec4 model_location;
 layout (location = 1) uniform vec4 model_origin;
 layout (location = 2) uniform vec4 model_size;
