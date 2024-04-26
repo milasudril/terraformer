@@ -11,10 +11,13 @@ namespace terraformer::ui::drawing_api
 	template<class IndexType, class ... VertexAttributeTypes>
 	class gl_mesh
 	{
+		private:
+			struct dummy{};
+
 		public:
 			using vbo_tuple = std::conditional_t<
 				sizeof...(VertexAttributeTypes) == 0,
-				char,
+				dummy,
 				tuple<gl_vertex_buffer<VertexAttributeTypes>...>
 			>;
 
