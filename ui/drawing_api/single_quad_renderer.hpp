@@ -58,15 +58,9 @@ namespace terraformer::ui::drawing_api
 		}
 
 	private:
-		gl_mesh<unsigned int, location> m_mesh{
+		gl_mesh<unsigned int> m_mesh{
 			std::array<unsigned int, 6>{
 				0, 1, 2, 0, 2, 3
-			},
-			std::array<location, 4>{
-				location{-0.5f, -0.5f, 0.0f},
-				location{0.5f, -0.5f, 0.0f},
-				location{0.5f, 0.5f, 0.0f},
-				location{-0.5f,0.5f, 0.0f},
 			}
 		};
 
@@ -89,10 +83,17 @@ const vec2 uv_coords[4] = vec2[4](
 	vec2(0.0f, 0.0f)
 );
 
+const vec4 coords[4] = vec4[4](
+	vec4(-0.5f, -0.5, 0.0, 1.0f),
+	vec4(0.5, -0.5, 0.0, 1.0f),
+	vec4(0.5, 0.5, 0.0, 1.0f),
+	vec4(-0.5,0.5, 0.0, 1.0f)
+);
+
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	vec4 loc = model_location + model_size*(input_offset - model_origin);
+	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin);
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID];
 })"

@@ -12,7 +12,11 @@ namespace terraformer::ui::drawing_api
 	class gl_mesh
 	{
 		public:
-			using vbo_tuple = tuple<gl_vertex_buffer<VertexAttributeTypes>...>;
+			using vbo_tuple = std::conditional_t<
+				sizeof...(VertexAttributeTypes) == 0,
+				char,
+				tuple<gl_vertex_buffer<VertexAttributeTypes>...>
+			>;
 
 			template<class IndexArray, class ... VertexAttribArrays>
 			requires(sizeof...(VertexAttribArrays) == sizeof...(VertexAttributeTypes))
@@ -24,23 +28,26 @@ namespace terraformer::ui::drawing_api
 				m_vertex_attribs{gl_vertex_buffer{std::forward<VertexAttribArrays>(vertex_attribs)}...}
 			{
 				m_vao.set_buffer(m_index_buffer);
-				apply([this](auto const&... buffers){
-					GLuint current_index = 0;
-					((m_vao.set_buffer(current_index++, buffers)), ...);
-				},
-				m_vertex_attribs);
+				if constexpr(sizeof...(VertexAttributeTypes) != 0)
+				{
+					apply([this](auto const&... buffers){
+						GLuint current_index = 0;
+						((m_vao.set_buffer(current_index++, buffers)), ...);
+					},
+					m_vertex_attribs);
+				}
 			}
 
 			void bind() const
 			{ m_vao.bind(); }
 
 			size_t get_index_count() const
-			{ return std::size(m_index_buffer.faces()); }
+			{	return std::size(m_index_buffer.faces()); }
 
 		private:
 			gl_vertex_array m_vao;
 			gl_index_buffer<IndexType> m_index_buffer;
-			vbo_tuple m_vertex_attribs;
+			[[no_unique_address]] vbo_tuple m_vertex_attribs;
 	};
 }
 
