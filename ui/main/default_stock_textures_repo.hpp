@@ -16,18 +16,14 @@ namespace terraformer::ui::main
 	{
 		using texture_type = DrawingSurface;
 
-		DrawingSurface null_texture;
-		DrawingSurface main_panel_background;
-		DrawingSurface other_panel_background;
-		DrawingSurface input_area_background;
-		DrawingSurface command_area_background;
-		DrawingSurface output_area_backround;
+		DrawingSurface clean;
+		DrawingSurface noisy;
 
 		[[nodiscard]] inline static auto& get_default_instance();
 	};
 
 	template<class DrawingSurface>
-	auto generate_default_background(rgba_pixel color)
+	auto generate_noisy_texture()
 	{
 		terraformer::image img{256, 256};
 		terraformer::random_generator rng;
@@ -37,7 +33,7 @@ namespace terraformer::ui::main
 		{
 			for(uint32_t x = 0; x != img.width(); ++x)
 			{
-				img(x, y) = 0.9375f*U(rng)*color;
+				img(x, y) = 0.9375f*U(rng)*rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 				img(x, y).alpha(1.0f);
 			}
 		}
@@ -46,22 +42,19 @@ namespace terraformer::ui::main
 	}
 
 	template<class DrawingSurface>
-	auto generate_null_texture()
+	auto generate_white_texture()
 	{
 		terraformer::image img{1, 1};
+		img(0, 0) = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 0));
 	}
 
 	template<class DrawingSurface>
-	auto generate_default_stock_textures(theming::color_scheme const& color_scheme = theming::current_color_scheme)
+	auto generate_default_stock_textures()
 	{
 		return default_stock_textures_repo{
-			.null_texture = generate_null_texture<DrawingSurface>(),
-			.main_panel_background = generate_default_background<DrawingSurface>(color_scheme.main_panel.background),
-			.other_panel_background = generate_default_background<DrawingSurface>(color_scheme.other_panel.background),
-			.input_area_background = generate_default_background<DrawingSurface>(color_scheme.input_area.background),
-			.command_area_background = generate_default_background<DrawingSurface>(color_scheme.command_area.background),
-			.output_area_backround = generate_default_background<DrawingSurface>(color_scheme.output_area.background)
+			.clean = generate_white_texture<DrawingSurface>(),
+			.noisy = generate_noisy_texture<DrawingSurface>()
 		};
 	}
 

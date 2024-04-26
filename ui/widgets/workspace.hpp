@@ -34,10 +34,10 @@ namespace terraformer::ui::widgets
 		{ render_widgets(m_widgets); }
 
 		auto const& background() const
-		{ return m_textures.get().main_panel_background; }
+		{ return m_textures.get().clean; }
 
 		auto const& foreground() const
-		{ return m_textures.get().null_texture; }
+		{ return m_textures.get().noisy; }
 
 		void handle_event(wsapi::cursor_enter_leave_event const&)
 		{ }
