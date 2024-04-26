@@ -29,13 +29,17 @@ namespace terraformer::ui::drawing_api
 			location origin,
 			scaling scale,
 			gl_texture const& background,
-			gl_texture const& foreground
+			std::array<rgba_pixel, 4> const& background_tints,
+			gl_texture const& foreground,
+			std::array<rgba_pixel, 4> const& foreground_tints
 		)
 		{
 			auto const v = 0.5f*origin.get();
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
+				.set_uniform(5, background_tints)
+				.set_uniform(9, foreground_tints)
 				.bind();
 			background.bind(0);
 			foreground.bind(1);
@@ -72,8 +76,14 @@ layout (location = 1) uniform vec4 model_origin;
 layout (location = 2) uniform vec4 model_size;
 layout (location = 3) uniform vec4 world_location;
 layout (location = 4) uniform vec4 world_scale;
+layout (location = 5) uniform vec4 background_tints[4];
+layout (location = 9) uniform vec4 foreground_tints[4];
+
 
 out vec2 uv;
+out vec4 background_tint;
+out vec4 foreground_tint;
+
 const vec2 uv_coords[4] = vec2[4](
 	vec2(0.0f, 1.0f),
 	vec2(1.0f, 1.0f),
@@ -94,6 +104,8 @@ void main()
 	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin);
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID];
+	background_tint = background_tints[gl_VertexID];
+	foreground_tint = background_tints[gl_VertexID];
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
@@ -102,11 +114,13 @@ layout (binding = 0) uniform sampler2D background;
 layout (binding = 1) uniform sampler2D foreground;
 
 in vec2 uv;
+in vec4 background_tint;
+in vec4 foreground_tint;
 
 void main()
 {
-	vec4 bg = texture(background, uv/textureSize(background, 0));
-	vec4 fg = texture(foreground, uv/textureSize(foreground, 0));
+	vec4 bg = texture(background, uv/textureSize(background, 0))*background_tint;
+	vec4 fg = texture(foreground, uv/textureSize(foreground, 0))*foreground_tint;
 
 	// This assumes values are pre-multiplied alpha. Otherwise, the formula for the color components
 	// would be

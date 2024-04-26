@@ -42,16 +42,16 @@ namespace terraformer::ui::main
 		{ value_of(m_window_controller).template window_is_closing<WindowId>(); }
 
 		template<auto WindowId>
-		void handle_cursor_enter_leave_event(terraformer::ui::wsapi::cursor_enter_leave_event const& event)
+		void handle_cursor_enter_leave_event(ui::wsapi::cursor_enter_leave_event const& event)
 		{ value_of(m_window_controller).template cursor_at_window_boundary<WindowId>(event); }
 
 		template<auto WindowId>
-		void framebuffer_size_changed(terraformer::ui::wsapi::fb_size size)
+		void framebuffer_size_changed(ui::wsapi::fb_size size)
 		{
 			m_fb_size = size;
 			value_of(m_renderer)
 				.set_viewport(0, 0, size.width, size.height)
-				.set_world_transform(terraformer::location{-1.0f, 1.0f, 0.0f}, size);
+				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
 			value_of(m_widget_container).handle_event(size);
 		}
 
@@ -68,11 +68,23 @@ namespace terraformer::ui::main
 		{
 			value_of(m_widget_container).render();
 			value_of(m_renderer).render(
-				terraformer::location{0.0f, 0.0f, 0.0f},
-				terraformer::location{-1.0f, 1.0f, 0.0f},
-				terraformer::scaling{static_cast<float>(m_fb_size.width), static_cast<float>(m_fb_size.height), 1.0f},
+				location{0.0f, 0.0f, 0.0f},
+				location{-1.0f, 1.0f, 0.0f},
+				scaling{static_cast<float>(m_fb_size.width), static_cast<float>(m_fb_size.height), 1.0f},
 				value_of(m_widget_container).background(),
-				value_of(m_widget_container).foreground()
+				std::array{
+					rgba_pixel{1.0f, 0.0f, 0.0f, 1.0f},
+					rgba_pixel{1.0f, 1.0f, 0.0f, 1.0f},
+					rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f},
+					rgba_pixel{0.0f, 0.0f, 1.0f, 1.0f}
+				},
+				value_of(m_widget_container).foreground(),
+				std::array{
+					rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+					rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+					rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+					rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+				}
 			);
 
 			value_of(m_widget_container).show_widgets(value_of(m_renderer));

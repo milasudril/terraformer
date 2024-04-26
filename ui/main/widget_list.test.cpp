@@ -388,7 +388,9 @@ namespace
 			terraformer::location,
 			terraformer::scaling,
 			dummy_surface const&,
-			dummy_surface const&
+			std::array<terraformer::rgba_pixel, 4> const&,
+			dummy_surface const&,
+			std::array<terraformer::rgba_pixel, 4> const&
 		)
 		{
 			// TODO: Validate background and foreground

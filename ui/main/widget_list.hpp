@@ -3,6 +3,7 @@
 
 #include "./widget.hpp"
 #include "lib/array_classes/multi_array.hpp"
+#include "lib/pixel_store/rgba_pixel.hpp"
 
 namespace terraformer::ui::main
 {
@@ -149,7 +150,21 @@ namespace terraformer::ui::main
 					widget_geometries[k].origin,
 					widget_geometries[k].size,
 					background_callbacks[k](widget_pointers[k]),
-					foreground_callbacks[k](widget_pointers[k])
+					// TODO: Fetch tint from widget
+					std::array{
+						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+					},
+					foreground_callbacks[k](widget_pointers[k]),
+					// TODO: Fetch tint from widget
+					std::array{
+						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+					}
 				);
 			}
 		}

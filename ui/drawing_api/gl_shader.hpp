@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_DRAWING_API_GLSHADER_HPP
 
 #include "./gl_resource.hpp"
+#include "lib/pixel_store/rgba_pixel.hpp"
 
 #include <memory>
 
@@ -69,6 +70,18 @@ namespace terraformer::ui::drawing_api
 		gl_program& set_uniform(int index, int value)
 		{
 			glProgramUniform1i(m_handle.get(), index, value);
+			return *this;
+		}
+
+		template<size_t N>
+		gl_program& set_uniform(int index, std::array<rgba_pixel, N> const& vals)
+		{
+			glProgramUniform4fv(
+				m_handle.get(),
+				index,
+				static_cast<GLsizei>(N),
+				reinterpret_cast<float const*>(std::data(vals))
+			);
 			return *this;
 		}
 
