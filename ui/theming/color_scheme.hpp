@@ -83,7 +83,7 @@ namespace terraformer::ui::theming
 	constexpr auto default_dark_resources_used_color = default_dark_worker_busy_color;
 	constexpr auto default_bright_resources_used_color = default_bright_worker_busy_color;
 
-	inline constinit color_scheme current_color_scheme{
+	constexpr color_scheme default_color_scheme{
 		.main_panel{
 			.background = rgba_pixel{
 				std::exp2(rate*3.0f),
@@ -199,6 +199,8 @@ namespace terraformer::ui::theming
 		.misc_dark_colors = default_dark_palette,
 		.misc_bright_colors = default_bright_palette
 	};
+
+	inline constinit color_scheme current_color_scheme = default_color_scheme;
 }
 
 #endif

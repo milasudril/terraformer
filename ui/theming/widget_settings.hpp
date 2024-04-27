@@ -7,6 +7,10 @@ namespace terraformer::ui::theming
 	{
 		color_scheme colors;
 	};
+
+	constexpr widget_settings default_widget_settings{
+		.colors = default_color_scheme
+	};
 }
 
 #endif
