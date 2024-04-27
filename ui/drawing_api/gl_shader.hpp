@@ -73,6 +73,7 @@ namespace terraformer::ui::drawing_api
 			return *this;
 		}
 
+		// FIXME: Make this work for every std::array<tuple<float>, N> like thing
 		template<size_t N>
 		gl_program& set_uniform(int index, std::array<rgba_pixel, N> const& vals)
 		{
