@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_TESTWIDGET_HPP
 #define TERRAFORMER_UI_WIDGETS_TESTWIDGET_HPP
 
-#include "ui/drawing_api/gl_texture.hpp"
+#include "ui/drawing_api/single_quad_renderer.hpp"
 #include "ui/theming/color_scheme.hpp"
 
 namespace terraformer::ui::widgets
@@ -9,7 +9,7 @@ namespace terraformer::ui::widgets
 	class testwidget
 	{
 	public:
-		void render()
+		void render(drawing_api::single_quad_renderer::input_rectangle& output_rect)
 		{
 			if(m_dirty)
 			{
@@ -53,16 +53,11 @@ namespace terraformer::ui::widgets
 					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 				}
 
-				printf("Rendering\n");
 				m_dirty = false;
 			}
+			output_rect.foreground = m_cursor_above? &m_border : &m_foreground;
+			output_rect.background = &m_background;
 		}
-
-		auto const& background() const
-		{ return m_background; }
-
-		auto const& foreground() const
-		{ return m_cursor_above? m_border : m_foreground; }
 
 		void handle_event(wsapi::cursor_enter_leave_event const& cele)
 		{

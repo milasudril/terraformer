@@ -30,31 +30,27 @@ namespace terraformer::ui::main
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 
-	template<class T, class DrawingSurface>
+	template<class T, class OutputRectangle>
 	concept widget = requires(
 		T& obj,
 		wsapi::fb_size size,
 		wsapi::cursor_enter_leave_event const& cele,
 		wsapi::cursor_motion_event const& cme,
 		wsapi::mouse_button_event const& mbe,
-		DrawingSurface& surface
+		OutputRectangle& surface
 	)
 	{
-		{ obj.render() } -> std::same_as<void>;
-		{ std::as_const(obj).background() } -> std::same_as<DrawingSurface>;
-		{ std::as_const(obj).foreground() } -> std::same_as<DrawingSurface>;
+		{ obj.render(surface) } -> std::same_as<void>;
 		{ obj.handle_event(cele) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
 	};
 
-	template<class RenderSurface>
+	template<class OutputRectangle>
 	struct widget_with_default_actions
 	{
-		[[nodiscard]] RenderSurface background() const { return RenderSurface{}; }
-		[[nodiscard]] RenderSurface foreground() const { return RenderSurface{}; }
-		void render() const {}
+		void render(OutputRectangle&) const {}
 		void handle_event(wsapi::cursor_enter_leave_event const&);
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }

@@ -66,25 +66,12 @@ namespace terraformer::ui::main
 
 		void render()
 		{
-			value_of(m_widget_container).render();
+			value_of(m_widget_container).render(m_output_rectangle);
 			value_of(m_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},
 				scaling{static_cast<float>(m_fb_size.width), static_cast<float>(m_fb_size.height), 1.0f},
-				value_of(m_widget_container).background(),
-				std::array{
-					rgba_pixel{1.0f, 0.0f, 0.0f, 1.0f},
-					rgba_pixel{1.0f, 1.0f, 0.0f, 1.0f},
-					rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f},
-					rgba_pixel{0.0f, 0.0f, 1.0f, 1.0f}
-				},
-				value_of(m_widget_container).foreground(),
-				std::array{
-					rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-					rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-					rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-					rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
-				}
+				m_output_rectangle
 			);
 
 			value_of(m_widget_container).show_widgets(value_of(m_renderer));
@@ -94,6 +81,7 @@ namespace terraformer::ui::main
 		wsapi::fb_size m_fb_size{};
 		WidgetContainer m_widget_container;
 		WindowController m_window_controller;
+		typename dereferenced_type<Renderer>::input_rectangle m_output_rectangle;
 		Renderer m_renderer;
 		ErrorHandler m_error_handler;
 	};

@@ -11,11 +11,11 @@ namespace terraformer::ui::widgets
 	void do_show_widgets(Args&&... args)
 	{ show_widgets(std::forward<Args>(args)...); }
 
-	template<class StockTexturesRepo>
+	template<class Renderer, class StockTexturesRepo>
 	class workspace
 	{
 	public:
-		using drawing_surface_type = typename StockTexturesRepo::texture_type;
+		using output_rectangle = typename Renderer::input_rectangle;
 
 		explicit workspace(
 			std::reference_wrapper<StockTexturesRepo const> texture_repo = StockTexturesRepo::get_default_instance()
@@ -30,14 +30,12 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		void render()
-		{ render_widgets(m_widgets); }
-
-		auto const& background() const
-		{ return m_textures.get().clean; }
-
-		auto const& foreground() const
-		{ return m_textures.get().noisy; }
+		void render(output_rectangle& output_rect)
+		{
+			output_rect.background = &m_textures.get().clean;
+			output_rect.foreground = &m_textures.get().noisy;
+			render_widgets(m_widgets);
+		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const&)
 		{ }
@@ -120,12 +118,13 @@ namespace terraformer::ui::widgets
 			return size;
 		}
 
-		template<class Renderer>
-		void show_widgets(Renderer&& renderer)
+		template<class R>
+		requires(std::is_same_v<std::remove_cvref_t<R>, Renderer>)
+		void show_widgets(R&& renderer)
 		{ do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
 
 	private:
-		using widget_list = main::widget_list<drawing_surface_type const&>;
+		using widget_list = main::widget_list<output_rectangle>;
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};

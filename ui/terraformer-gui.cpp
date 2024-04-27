@@ -56,6 +56,7 @@ int main(int, char**)
 	terraformer::ui::widgets::testwidget bar;
 
 	terraformer::ui::widgets::workspace<
+		terraformer::ui::drawing_api::single_quad_renderer,
 		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>
 	> my_workspace;
 

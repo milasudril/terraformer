@@ -14,6 +14,9 @@ namespace terraformer
 	template<class T>
 	decltype(auto) value_of(T&& val)
 	{ return std::forward<T>(val); }
+
+	template<class T>
+	using dereferenced_type = std::remove_cvref_t<decltype(value_of(std::declval<T>()))>;
 }
 
 #endif

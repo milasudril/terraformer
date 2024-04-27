@@ -7,12 +7,12 @@
 
 namespace terraformer::ui::main
 {
-	template<class DrawingSurface>
+	template<class OutputRectangle>
 	class widget_list
 	{
 	public:
-		using render_callback = void (*)(void*);
-		using drawing_surface_callback = DrawingSurface (*)(void const*);
+		using output_rectangle = OutputRectangle;
+		using render_callback = void (*)(void*, output_rectangle& rect);
 		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const&);
@@ -20,11 +20,10 @@ namespace terraformer::ui::main
 
 		using widget_array = multi_array<
 			void*,
+			output_rectangle,
 			widget_visibility,
 			widget_geometry,
 			render_callback,
-			drawing_surface_callback,
-			drawing_surface_callback,
  			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
@@ -35,7 +34,7 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		template<widget<DrawingSurface> Widget>
+		template<widget<output_rectangle> Widget>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -44,16 +43,11 @@ namespace terraformer::ui::main
 		{
 			m_objects.push_back(
 				&w.get(),
+				output_rectangle{},
 				initial_visibility,
 				initial_geometry,
-				[](void* obj) -> void {
-					return static_cast<Widget*>(obj)->render();
-				},
-				[](void const* obj) -> DrawingSurface {
-					return static_cast<Widget const*>(obj)->background();
-				},
-				[](void const* obj) -> DrawingSurface {
-					return static_cast<Widget const*>(obj)->foreground();
+				[](void* obj, output_rectangle& rect) -> void {
+					return static_cast<Widget*>(obj)->render(rect);
 				},
 				[](void* obj, wsapi::cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
@@ -81,65 +75,66 @@ namespace terraformer::ui::main
 		auto widget_pointers() const
 		{ return m_objects.template get<0>(); }
 
-		auto widget_visibilities() const
+		auto output_rectangles() const
 		{ return m_objects.template get<1>(); }
+
+		auto output_rectangles()
+		{ return m_objects.template get<1>(); }
+
+		auto widget_visibilities() const
+		{ return m_objects.template get<2>(); }
 
 		auto widget_visibilities()
-		{ return m_objects.template get<1>(); }
+		{ return m_objects.template get<2>(); }
 
 		auto widget_geometries() const
-		{ return m_objects.template get<2>(); }
-
-		auto widget_geometries()
-		{ return m_objects.template get<2>(); }
-
-		auto render_callbacks() const
 		{ return m_objects.template get<3>(); }
 
-		auto background_callbacks() const
+		auto widget_geometries()
+		{ return m_objects.template get<3>(); }
+
+		auto render_callbacks() const
 		{ return m_objects.template get<4>(); }
 
-		auto foreground_callbacks() const
+		auto cursor_enter_leave_callbacks() const
 		{ return m_objects.template get<5>(); }
 
-		auto cursor_enter_leave_callbacks() const
+		auto cursor_motion_callbacks() const
 		{ return m_objects.template get<6>(); }
 
-		auto cursor_motion_callbacks() const
+		auto mouse_button_callbacks() const
 		{ return m_objects.template get<7>(); }
 
-		auto mouse_button_callbacks() const
-		{ return m_objects.template get<8>(); }
-
 		auto size_callbacks() const
-		{ return m_objects.template get<9>(); }
+		{ return m_objects.template get<8>(); }
 
 	private:
 		widget_array m_objects;
 	};
 
-	template<class DrawingSurface>
-	void render_widgets(widget_list<DrawingSurface>& widgets)
+	template<class OutputRectangle>
+	void render_widgets(widget_list<OutputRectangle>& widgets)
 	{
 		auto const render_callbacks = widgets.render_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
 		auto const widget_visibilities = widgets.widget_visibilities();
+		auto output_rectangles = widgets.output_rectangles();
+
 		auto const n = std::size(widgets);
 		for(auto k = widgets.first_element_index(); k != n; ++k)
 		{
 			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
-			{ render_callbacks[k](widget_pointers[k]); }
+			{ render_callbacks[k](widget_pointers[k], output_rectangles[k]); }
 		}
 	}
 
-	template<class Renderer, class DrawingSurface>
-	void show_widgets(Renderer&& renderer, widget_list<DrawingSurface> const& widgets)
+	template<class Renderer, class OutputRectangle>
+	void show_widgets(Renderer&& renderer, widget_list<OutputRectangle> const& widgets)
 	{
-		auto const background_callbacks = widgets.background_callbacks();
-		auto const foreground_callbacks = widgets.foreground_callbacks();
-		auto const widget_pointers = widgets.widget_pointers();
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const widget_visibilities = widgets.widget_visibilities();
+		auto const output_rects = widgets.output_rectangles();
+
 		auto const n = std::size(widgets);
 		for(auto k  = widgets.first_element_index(); k != n; ++k)
 		{
@@ -149,22 +144,7 @@ namespace terraformer::ui::main
 					widget_geometries[k].where,
 					widget_geometries[k].origin,
 					widget_geometries[k].size,
-					background_callbacks[k](widget_pointers[k]),
-					// TODO: Fetch tint from widget
-					std::array{
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
-					},
-					foreground_callbacks[k](widget_pointers[k]),
-					// TODO: Fetch tint from widget
-					std::array{
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
-					}
+					output_rects[k]
 				);
 			}
 		}

@@ -5,12 +5,30 @@
 #include "./gl_shader.hpp"
 #include "./gl_texture.hpp"
 #include "ui/wsapi/native_window.hpp"
+#include "lib/common/value_accessor.hpp"
+
+#include <variant>
 
 namespace terraformer::ui::drawing_api
 {
 	class single_quad_renderer
 	{
 	public:
+		struct fg_bg_separator
+		{
+			location begin;
+			location end;
+		};
+
+		struct input_rectangle
+		{
+			gl_texture const* background;
+			gl_texture const* foreground;
+			std::array<rgba_pixel, 4> background_tints;
+			std::array<rgba_pixel, 4> foreground_tints;
+			struct fg_bg_separator fg_bg_separator;
+		};
+
 		[[nodiscard]] static single_quad_renderer& get_default_instance()
 		{
 			thread_local single_quad_renderer ret{};
@@ -28,24 +46,24 @@ namespace terraformer::ui::drawing_api
 			location where,
 			location origin,
 			scaling scale,
-			gl_texture const& background,
-			std::array<rgba_pixel, 4> const& background_tints,
-			gl_texture const& foreground,
-			std::array<rgba_pixel, 4> const& foreground_tints
+			input_rectangle const& rect
 		)
 		{
 			auto const v = 0.5f*origin.get();
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, background_tints)
-				.set_uniform(9, foreground_tints)
+				.set_uniform(5, rect.background_tints)
+				.set_uniform(9, rect.foreground_tints)
 				.bind();
-			background.bind(0);
-			foreground.bind(1);
+
+			assert(rect.background != nullptr);
+			rect.background -> bind(0);
+
+			assert(rect.foreground != nullptr);
+			rect.foreground -> bind(1);
 
 			m_mesh.bind();
-
 			gl_bindings::draw_triangles();
 		}
 
@@ -119,8 +137,8 @@ in vec4 foreground_tint;
 
 void main()
 {
-	vec4 bg = texture(background, uv/textureSize(background, 0))*background_tint;
-	vec4 fg = texture(foreground, uv/textureSize(foreground, 0))*foreground_tint;
+	vec4 bg = texture(background, uv/textureSize(background, 0)); //*background_tint;
+	vec4 fg = texture(foreground, uv/textureSize(foreground, 0)); //*foreground_tint;
 
 	// This assumes values are pre-multiplied alpha. Otherwise, the formula for the color components
 	// would be
@@ -133,7 +151,7 @@ void main()
 	//
 	// which is the regular interpolation formula, with a_fg as interpolation parameter.
 	//
-	fragment_color = mix(bg, fg, fg.w*float(uv.x < 300.0));
+	fragment_color = mix(bg, fg, fg.w);
 })"}
 		};
 	};
