@@ -1,4 +1,4 @@
-//@	{"target":{"name": "widget_list.test"}}
+//	{"target":{"name": "widget_list.test"}}
 
 #include "./widget_list.hpp"
 

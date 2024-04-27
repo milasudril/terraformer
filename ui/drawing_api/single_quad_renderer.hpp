@@ -79,7 +79,6 @@ layout (location = 4) uniform vec4 world_scale;
 layout (location = 5) uniform vec4 background_tints[4];
 layout (location = 9) uniform vec4 foreground_tints[4];
 
-
 out vec2 uv;
 out vec4 background_tint;
 out vec4 foreground_tint;
@@ -112,6 +111,7 @@ void main()
 out vec4 fragment_color;
 layout (binding = 0) uniform sampler2D background;
 layout (binding = 1) uniform sampler2D foreground;
+layout (location = 13) uniform vec4 fg_bg_separator[2];
 
 in vec2 uv;
 in vec4 background_tint;
@@ -133,7 +133,7 @@ void main()
 	//
 	// which is the regular interpolation formula, with a_fg as interpolation parameter.
 	//
-	fragment_color = mix(bg, fg, fg.w);
+	fragment_color = mix(bg, fg, fg.w*float(uv.x < 300.0));
 })"}
 		};
 	};
