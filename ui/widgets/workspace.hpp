@@ -41,7 +41,7 @@ namespace terraformer::ui::widgets
 				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
 			};
-			// FIXME: Foreground tints should use colors from current color scheme
+
 			output_rect.foreground_tints = std::array{
 				look.colors.main_panel.background,
 				look.colors.main_panel.background,
