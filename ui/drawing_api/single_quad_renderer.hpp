@@ -122,7 +122,7 @@ void main()
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID];
 	background_tint = background_tints[gl_VertexID];
-	foreground_tint = background_tints[gl_VertexID];
+	foreground_tint = foreground_tints[gl_VertexID];
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
@@ -137,8 +137,8 @@ in vec4 foreground_tint;
 
 void main()
 {
-	vec4 bg = texture(background, uv/textureSize(background, 0)); //*background_tint;
-	vec4 fg = texture(foreground, uv/textureSize(foreground, 0)); //*foreground_tint;
+	vec4 bg = texture(background, uv/textureSize(background, 0))*background_tint;
+	vec4 fg = texture(foreground, uv/textureSize(foreground, 0))*foreground_tint;
 
 	// This assumes values are pre-multiplied alpha. Otherwise, the formula for the color components
 	// would be

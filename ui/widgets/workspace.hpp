@@ -34,6 +34,20 @@ namespace terraformer::ui::widgets
 		{
 			output_rect.background = &m_textures.get().clean;
 			output_rect.foreground = &m_textures.get().noisy;
+
+			output_rect.background_tints = std::array{
+				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
+			};
+			// FIXME: Foreground tints should use colors from current color scheme
+			output_rect.foreground_tints = std::array{
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+			};
 			render_widgets(m_widgets);
 		}
 
