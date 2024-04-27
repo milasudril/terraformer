@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_MAIN_WIDGET_HPP
 
 #include "ui/wsapi/events.hpp"
+#include "ui/theming/widget_look.hpp"
 #include "lib/common/spaces.hpp"
 
 #include <utility>
@@ -37,10 +38,11 @@ namespace terraformer::ui::main
 		wsapi::cursor_enter_leave_event const& cele,
 		wsapi::cursor_motion_event const& cme,
 		wsapi::mouse_button_event const& mbe,
-		OutputRectangle& surface
+		OutputRectangle& surface,
+		theming::widget_look const& look
 	)
 	{
-		{ obj.render(surface) } -> std::same_as<void>;
+		{ obj.render(surface, look) } -> std::same_as<void>;
 		{ obj.handle_event(cele) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
@@ -50,7 +52,7 @@ namespace terraformer::ui::main
 	template<class OutputRectangle>
 	struct widget_with_default_actions
 	{
-		void render(OutputRectangle&) const {}
+		void render(OutputRectangle&, theming::widget_look const&) const {}
 		void handle_event(wsapi::cursor_enter_leave_event const&);
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }

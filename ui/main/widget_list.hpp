@@ -12,7 +12,7 @@ namespace terraformer::ui::main
 	{
 	public:
 		using output_rectangle = OutputRectangle;
-		using render_callback = void (*)(void*, output_rectangle& rect);
+		using render_callback = void (*)(void*, output_rectangle& rect, theming::widget_look const& look);
 		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const&);
@@ -46,8 +46,8 @@ namespace terraformer::ui::main
 				output_rectangle{},
 				initial_visibility,
 				initial_geometry,
-				[](void* obj, output_rectangle& rect) -> void {
-					return static_cast<Widget*>(obj)->render(rect);
+				[](void* obj, output_rectangle& rect, theming::widget_look const& look) -> void {
+					return static_cast<Widget*>(obj)->render(rect, look);
 				},
 				[](void* obj, wsapi::cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
@@ -113,7 +113,7 @@ namespace terraformer::ui::main
 	};
 
 	template<class OutputRectangle>
-	void render_widgets(widget_list<OutputRectangle>& widgets)
+	void render_widgets(widget_list<OutputRectangle>& widgets, theming::widget_look const& look)
 	{
 		auto const render_callbacks = widgets.render_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
@@ -124,7 +124,7 @@ namespace terraformer::ui::main
 		for(auto k = widgets.first_element_index(); k != n; ++k)
 		{
 			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
-			{ render_callbacks[k](widget_pointers[k], output_rectangles[k]); }
+			{ render_callbacks[k](widget_pointers[k], output_rectangles[k], look); }
 		}
 	}
 

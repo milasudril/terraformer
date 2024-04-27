@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_UI_THEMING_WIDGET_LOOK_HPP
 #define TERRAFORMER_UI_THEMING_WIDGET_LOOK_HPP
 
+#include "./color_scheme.hpp"
+
 namespace terraformer::ui::theming
 {
 	struct widget_look

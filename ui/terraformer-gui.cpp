@@ -85,14 +85,16 @@ int main(int, char**)
 		error_handler{}
 	};
 
+	auto const& widget_look = terraformer::ui::theming::default_widget_look;
+
 	auto const default_cursor = terraformer::ui::theming::create_cursor(
 		gui_ctxt,
 		terraformer::ui::theming::current_cursor_set.main,
-		terraformer::ui::theming::current_color_scheme.cursor_color
+		widget_look.colors.cursor_color
 	);
 
 	mainwin.set_cursor(default_cursor);
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
-	gui_ctxt.wait_events(std::ref(event_dispatcher), std::ref(mainwin));
+	gui_ctxt.wait_events(std::ref(event_dispatcher), std::ref(mainwin), std::ref(widget_look));
 }

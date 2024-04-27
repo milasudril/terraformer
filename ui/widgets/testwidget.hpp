@@ -2,14 +2,17 @@
 #define TERRAFORMER_UI_WIDGETS_TESTWIDGET_HPP
 
 #include "ui/drawing_api/single_quad_renderer.hpp"
-#include "ui/theming/color_scheme.hpp"
+#include "ui/theming/widget_look.hpp"
 
 namespace terraformer::ui::widgets
 {
 	class testwidget
 	{
 	public:
-		void render(drawing_api::single_quad_renderer::input_rectangle& output_rect)
+		void render(
+			drawing_api::single_quad_renderer::input_rectangle& output_rect,
+			theming::widget_look const& look
+		)
 		{
 			if(m_dirty)
 			{
@@ -25,9 +28,9 @@ namespace terraformer::ui::widgets
 				}
 				m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 
+				auto const num_colors = std::size(look.colors.misc_bright_colors);
 				{
-					auto const num_colors = std::size(theming::current_color_scheme.misc_bright_colors);
-					auto const color = theming::current_color_scheme.misc_bright_colors[(m_current_color + 1)%num_colors];
+					auto const color = look.colors.misc_bright_colors[(m_current_color + num_colors + 1)%num_colors];
 					for(uint32_t x = 0; x != w; ++x)
 					{
 						img(x, 0) = color;
@@ -44,7 +47,7 @@ namespace terraformer::ui::widgets
 				}
 
 				{
-					auto const color = theming::current_color_scheme.misc_dark_colors[m_current_color];
+					auto const color = look.colors.misc_dark_colors[(m_current_color + num_colors)%num_colors];
 					for(uint32_t y = 0; y != h; ++y)
 					{
 						for(uint32_t x = 0; x != w; ++x)
@@ -71,13 +74,11 @@ namespace terraformer::ui::widgets
 
 		bool handle_event(wsapi::mouse_button_event const& mbe)
 		{
-			auto const num_colors = std::size(theming::current_color_scheme.misc_dark_colors);
-
 			if((mbe.button == 0 || mbe.button == 1)
 				&& mbe.action == wsapi::button_action::release)
 			{
 				auto const dir = mbe.button == 0 ? -1 : 1;
-				m_current_color = (m_current_color + dir + num_colors)%num_colors;
+				m_current_color += dir;
 				m_dirty = true;
 				printf("Hej %zu\n", m_current_color);
 			}

@@ -3,6 +3,7 @@
 
 #include "ui/wsapi/events.hpp"
 #include "ui/drawing_api/single_quad_renderer.hpp"
+#include "ui/theming/widget_look.hpp"
 #include "lib/common/value_accessor.hpp"
 
 namespace terraformer::ui::main
@@ -56,17 +57,17 @@ namespace terraformer::ui::main
 		}
 
 		template<class Viewport>
-		bool operator()(Viewport&& viewport)
+		bool operator()(Viewport&& viewport, theming::widget_look const& look)
 		{
 			value_of(m_renderer).clear_buffers();
-			render();
+			render(look);
 			value_of(viewport).swap_buffers();
 			return value_of(m_window_controller).main_loop_should_exit(viewport);
 		}
 
-		void render()
+		void render(theming::widget_look const& look)
 		{
-			value_of(m_widget_container).render(m_output_rectangle);
+			value_of(m_widget_container).render(m_output_rectangle, look);
 			value_of(m_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},

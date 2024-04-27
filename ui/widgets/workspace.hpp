@@ -30,7 +30,7 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		void render(output_rectangle& output_rect)
+		void render(output_rectangle& output_rect, theming::widget_look const& look)
 		{
 			output_rect.background = &m_textures.get().clean;
 			output_rect.foreground = &m_textures.get().noisy;
@@ -48,7 +48,7 @@ namespace terraformer::ui::widgets
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
 			};
-			render_widgets(m_widgets);
+			render_widgets(m_widgets, look);
 		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const&)
