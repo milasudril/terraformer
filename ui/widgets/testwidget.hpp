@@ -60,6 +60,14 @@ namespace terraformer::ui::widgets
 			}
 			output_rect.foreground = m_cursor_above? &m_border : &m_foreground;
 			output_rect.background = &m_background;
+			constexpr std::array tints{
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+			};
+			output_rect.foreground_tints = tints;
+			output_rect.background_tints = tints;
 		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const& cele)
