@@ -5,10 +5,8 @@
 #include "./gl_shader.hpp"
 #include "./gl_texture.hpp"
 #include "ui/wsapi/native_window.hpp"
-#include "ui/main/default_stock_textures_repo.hpp"
-#include "lib/common/value_accessor.hpp"
 
-#include <variant>
+#include <cassert>
 
 namespace terraformer::ui::drawing_api
 {
