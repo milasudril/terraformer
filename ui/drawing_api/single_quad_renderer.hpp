@@ -5,6 +5,7 @@
 #include "./gl_shader.hpp"
 #include "./gl_texture.hpp"
 #include "ui/wsapi/native_window.hpp"
+#include "ui/main/default_stock_textures_repo.hpp"
 #include "lib/common/value_accessor.hpp"
 
 #include <variant>
@@ -28,6 +29,8 @@ namespace terraformer::ui::drawing_api
 			std::array<rgba_pixel, 4> foreground_tints;
 			struct fg_bg_separator fg_bg_separator;
 		};
+
+		using texture_repo = main::default_stock_textures_repo<gl_texture>;
 
 		[[nodiscard]] static single_quad_renderer& get_default_instance()
 		{

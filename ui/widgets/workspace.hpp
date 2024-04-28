@@ -11,17 +11,12 @@ namespace terraformer::ui::widgets
 	void do_show_widgets(Args&&... args)
 	{ show_widgets(std::forward<Args>(args)...); }
 
-	template<main::renderer Renderer, class StockTexturesRepo>
+	template<main::renderer Renderer>
 	class workspace
 	{
 	public:
 		using output_rectangle = typename Renderer::input_rectangle;
-
-		explicit workspace(
-			std::reference_wrapper<StockTexturesRepo const> texture_repo = StockTexturesRepo::get_default_instance()
-		):
-			m_textures{texture_repo}
-		{}
+		using texture_repo = typename Renderer::texture_repo;
 
 		template<class ... Args>
 		workspace& append(Args&&... args)
@@ -30,10 +25,16 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		void render(output_rectangle& output_rect, theming::widget_look const& look)
+		void render(
+			output_rectangle& output_rect,
+			texture_repo const& textures,
+			theming::widget_look const& look
+		)
 		{
-			output_rect.background = &m_textures.get().clean;
-			output_rect.foreground = &m_textures.get().noisy;
+			// TODO: We should more conceptual names rather than something that describes the
+			//       concrete texture
+			output_rect.background = &textures.clean;
+			output_rect.foreground = &textures.noisy;
 
 			output_rect.background_tints = std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
@@ -48,7 +49,7 @@ namespace terraformer::ui::widgets
 				look.colors.main_panel.background,
 				look.colors.main_panel.background
 			};
-			render_widgets(m_widgets, look);
+			render_widgets(m_widgets, textures, look);
 		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const&)
@@ -142,8 +143,6 @@ namespace terraformer::ui::widgets
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};
-
-		std::reference_wrapper<StockTexturesRepo const> m_textures;
 	};
 }
 

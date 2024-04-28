@@ -56,18 +56,19 @@ namespace terraformer::ui::main
 			value_of(m_widget_container).handle_event(size);
 		}
 
-		template<class Viewport>
-		bool operator()(Viewport&& viewport, theming::widget_look const& look)
+		template<class Viewport, class TextureRepo>
+		bool operator()(Viewport&& viewport, TextureRepo const& textures, theming::widget_look const& look)
 		{
 			value_of(m_renderer).clear_buffers();
-			render(look);
+			render(textures, look);
 			value_of(viewport).swap_buffers();
 			return value_of(m_window_controller).main_loop_should_exit(viewport);
 		}
 
-		void render(theming::widget_look const& look)
+		template<class TextureRepo>
+		void render(TextureRepo const& textures, theming::widget_look const& look)
 		{
-			value_of(m_widget_container).render(m_output_rectangle, look);
+			value_of(m_widget_container).render(m_output_rectangle, textures, look);
 			value_of(m_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},

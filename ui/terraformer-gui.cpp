@@ -55,16 +55,13 @@ int main(int, char**)
 	terraformer::ui::widgets::testwidget foo;
 	terraformer::ui::widgets::testwidget bar;
 
-	terraformer::ui::widgets::workspace<
-		terraformer::ui::drawing_api::single_quad_renderer,
-		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>
-	> my_workspace;
+	terraformer::ui::widgets::workspace<terraformer::ui::drawing_api::single_quad_renderer> my_workspace;
 
 	my_workspace.append(
 		std::ref(foo),
 		terraformer::ui::main::widget_geometry{
 			.where = terraformer::location{50.0f, -25.0f, 0.0f},
-			.origin= terraformer::location{-1.0f, 1.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, 1.0f, 0.0f},
 			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
 		}
 	);
@@ -73,7 +70,7 @@ int main(int, char**)
 		std::ref(bar),
 		terraformer::ui::main::widget_geometry{
 			.where = terraformer::location{250.0f, -25.0f, 0.0f},
-			.origin= terraformer::location{-1.0f, 1.0f, 0.0f},
+			.origin = terraformer::location{-1.0f, 1.0f, 0.0f},
 			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
 		}
 	);
@@ -86,6 +83,8 @@ int main(int, char**)
 	};
 
 	auto const& widget_look = terraformer::ui::theming::default_widget_look;
+	auto const texture_repo =
+		terraformer::ui::main::generate_default_stock_textures<terraformer::ui::drawing_api::gl_texture>();
 
 	auto const default_cursor = terraformer::ui::theming::create_cursor(
 		gui_ctxt,
@@ -96,5 +95,10 @@ int main(int, char**)
 	mainwin.set_cursor(default_cursor);
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
-	gui_ctxt.wait_events(std::ref(event_dispatcher), std::ref(mainwin), std::ref(widget_look));
+	gui_ctxt.wait_events(
+		std::ref(event_dispatcher),
+		std::ref(mainwin),
+		std::ref(texture_repo),
+		std::ref(widget_look)
+	);
 }

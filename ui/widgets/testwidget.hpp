@@ -11,6 +11,7 @@ namespace terraformer::ui::widgets
 	public:
 		void render(
 			drawing_api::single_quad_renderer::input_rectangle& output_rect,
+			drawing_api::single_quad_renderer::texture_repo const&,
 			theming::widget_look const& look
 		)
 		{

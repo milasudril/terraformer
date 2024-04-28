@@ -35,6 +35,7 @@ namespace terraformer::ui::main
 	concept renderer = requires()
 	{
 		typename Renderer::input_rectangle;
+		typename Renderer::texture_repo;
 	};
 
 	template<class T, class R>
@@ -45,10 +46,11 @@ namespace terraformer::ui::main
 		wsapi::cursor_motion_event const& cme,
 		wsapi::mouse_button_event const& mbe,
 		typename R::input_rectangle& surface,
+		typename R::texture_repo const& textures,
 		theming::widget_look const& look
 	)
 	{
-		{ obj.render(surface, look) } -> std::same_as<void>;
+		{ obj.render(surface, textures, look) } -> std::same_as<void>;
 		{ obj.handle_event(cele) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
@@ -59,7 +61,8 @@ namespace terraformer::ui::main
 	struct widget_with_default_actions
 	{
 		using output_rectangle = typename Renderer::input_rectangle;
-		void render(output_rectangle&, theming::widget_look const&) const {}
+		using texture_repo = typename Renderer::texture_repo;
+		void render(output_rectangle&, texture_repo const&, theming::widget_look const&) const {}
 		void handle_event(wsapi::cursor_enter_leave_event const&);
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }
@@ -71,6 +74,7 @@ namespace terraformer::ui::main
 		struct test_renderer
 		{
 			using input_rectangle = int;
+			using texture_repo = double;
 		};
 		static_assert(widget<widget_with_default_actions<test_renderer>, test_renderer>);
 	}
