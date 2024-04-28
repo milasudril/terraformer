@@ -30,8 +30,6 @@ namespace terraformer::ui::drawing_api
 			struct fg_bg_separator fg_bg_separator;
 		};
 
-		using texture_repo = main::default_stock_textures_repo<gl_texture>;
-
 		[[nodiscard]] static single_quad_renderer& get_default_instance()
 		{
 			thread_local single_quad_renderer ret{};

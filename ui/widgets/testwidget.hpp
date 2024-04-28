@@ -9,9 +9,10 @@ namespace terraformer::ui::widgets
 	class testwidget
 	{
 	public:
+		template<class TextureRepo>
 		void render(
 			drawing_api::single_quad_renderer::input_rectangle& output_rect,
-			drawing_api::single_quad_renderer::texture_repo const&,
+			TextureRepo&&,
 			theming::widget_look const& look
 		)
 		{

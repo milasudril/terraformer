@@ -11,12 +11,12 @@ namespace terraformer::ui::widgets
 	void do_show_widgets(Args&&... args)
 	{ show_widgets(std::forward<Args>(args)...); }
 
-	template<main::renderer Renderer>
+	template<class OutputRectangle, class TextureRepo>
 	class workspace
 	{
 	public:
-		using output_rectangle = typename Renderer::input_rectangle;
-		using texture_repo = typename Renderer::texture_repo;
+		using output_rectangle = OutputRectangle;
+		using texture_repo = TextureRepo;
 
 		template<class ... Args>
 		workspace& append(Args&&... args)
@@ -133,13 +133,12 @@ namespace terraformer::ui::widgets
 			return size;
 		}
 
-		template<class R>
-		requires(std::is_same_v<std::remove_cvref_t<R>, Renderer>)
-		void show_widgets(R&& renderer)
+		template<class Renderer>
+		void show_widgets(Renderer&& renderer)
 		{ do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
 
 	private:
-		using widget_list = main::widget_list<Renderer>;
+		using widget_list = main::widget_list<OutputRectangle, TextureRepo>;
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};

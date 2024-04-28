@@ -7,12 +7,12 @@
 
 namespace terraformer::ui::main
 {
-	template<renderer Renderer>
+	template<class OutputRectangle, class TextureRepo>
 	class widget_list
 	{
 	public:
-		using output_rectangle = typename Renderer::input_rectangle;
-		using texture_repo = typename Renderer::texture_repo;
+		using output_rectangle = OutputRectangle;
+		using texture_repo = TextureRepo;
 		using render_callback = void (*)(void*, output_rectangle&, texture_repo const&,theming::widget_look const&);
 		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
@@ -35,7 +35,7 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		template<widget<Renderer> Widget>
+		template<widget<OutputRectangle, TextureRepo> Widget>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -118,10 +118,10 @@ namespace terraformer::ui::main
 		widget_array m_objects;
 	};
 
-	template<renderer Renderer>
+	template<class OutputRectangle, class TextureRepo>
 	void render_widgets(
-		widget_list<Renderer>& widgets,
-		typename widget_list<Renderer>::texture_repo const& textures,
+		widget_list<OutputRectangle, TextureRepo>& widgets,
+		TextureRepo const& textures,
 		theming::widget_look const& look
 	)
 	{
@@ -138,8 +138,8 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<renderer Renderer>
-	void show_widgets(Renderer&& renderer, widget_list<Renderer> const& widgets)
+	template<class Renderer, class OutputRectangle, class TextureRepo>
+	void show_widgets(Renderer&& renderer, widget_list<OutputRectangle, TextureRepo> const& widgets)
 	{
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const widget_visibilities = widgets.widget_visibilities();
@@ -170,14 +170,14 @@ namespace terraformer::ui::main
 		);
 	}
 
-	template<class DrawingSurface>
-	auto find(wsapi::cursor_position pos, widget_list<DrawingSurface> const& widgets)
+	template<class OutputRectangle, class TextureRepo>
+	auto find(wsapi::cursor_position pos, widget_list<OutputRectangle, TextureRepo> const& widgets)
 	{
 		auto const i = find(pos, widgets.widget_geometries());
 		if(i == std::end(widgets.widget_geometries()))
-		{ return widget_list<DrawingSurface>::npos; }
+		{ return widget_list<OutputRectangle, TextureRepo>::npos; }
 
-		return typename widget_list<DrawingSurface>::index_type{
+		return typename widget_list<OutputRectangle, TextureRepo>::index_type{
 			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
 		};
 	}

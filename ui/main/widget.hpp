@@ -31,22 +31,15 @@ namespace terraformer::ui::main
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 
-	template<class Renderer>
-	concept renderer = requires()
-	{
-		typename Renderer::input_rectangle;
-		typename Renderer::texture_repo;
-	};
-
-	template<class T, class R>
-	concept widget = renderer<R> && requires(
+	template<class T, class OutputRectangle, class TextureRepo>
+	concept widget = requires(
 		T& obj,
 		wsapi::fb_size size,
 		wsapi::cursor_enter_leave_event const& cele,
 		wsapi::cursor_motion_event const& cme,
 		wsapi::mouse_button_event const& mbe,
-		typename R::input_rectangle& surface,
-		typename R::texture_repo const& textures,
+		OutputRectangle& surface,
+		TextureRepo const& textures,
 		theming::widget_look const& look
 	)
 	{
@@ -57,11 +50,11 @@ namespace terraformer::ui::main
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
 	};
 
-	template<renderer Renderer>
+	template<class OutputRectangle, class TextureRepo>
 	struct widget_with_default_actions
 	{
-		using output_rectangle = typename Renderer::input_rectangle;
-		using texture_repo = typename Renderer::texture_repo;
+		using output_rectangle = OutputRectangle;
+		using texture_repo = TextureRepo;
 		void render(output_rectangle&, texture_repo const&, theming::widget_look const&) const {}
 		void handle_event(wsapi::cursor_enter_leave_event const&);
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
@@ -71,12 +64,7 @@ namespace terraformer::ui::main
 
 	namespace
 	{
-		struct test_renderer
-		{
-			using input_rectangle = int;
-			using texture_repo = double;
-		};
-		static_assert(widget<widget_with_default_actions<test_renderer>, test_renderer>);
+		static_assert(widget<widget_with_default_actions<int, double>, int, double>);
 	}
 }
 
