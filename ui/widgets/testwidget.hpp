@@ -3,6 +3,8 @@
 
 #include "ui/drawing_api/single_quad_renderer.hpp"
 #include "ui/theming/widget_look.hpp"
+#include "lib/pixel_store/image.hpp"
+#include "lib/pixel_store/rgba_pixel.hpp"
 
 namespace terraformer::ui::widgets
 {
