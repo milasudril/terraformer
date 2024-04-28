@@ -2,7 +2,6 @@
 #define TERRAFORMER_UI_DRAWING_API_GLSHADER_HPP
 
 #include "./gl_resource.hpp"
-#include "lib/pixel_store/rgba_pixel.hpp"
 
 #include <memory>
 
@@ -73,9 +72,9 @@ namespace terraformer::ui::drawing_api
 			return *this;
 		}
 
-		// FIXME: Make this work for every std::array<tuple<float>, N> like thing
-		template<size_t N>
-		gl_program& set_uniform(int index, std::array<rgba_pixel, N> const& vals)
+		template<class T, size_t N>
+		requires(std::tuple_size_v<T> == 4 && std::is_same_v<typename T::value_type, float>)
+		gl_program& set_uniform(int index, std::array<T, N> const& vals)
 		{
 			glProgramUniform4fv(
 				m_handle.get(),

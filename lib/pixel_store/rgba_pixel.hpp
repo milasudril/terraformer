@@ -3,6 +3,7 @@
 
 #include <geosimd/vec_t.hpp>
 #include <type_traits>
+#include <utility>
 
 namespace terraformer
 {
@@ -148,4 +149,16 @@ namespace terraformer
 	inline auto to_string(rgba_pixel const& x)
 	{ return to_string(x.value()); }
 }
+
+template<>
+struct std::tuple_size<terraformer::rgba_pixel>
+{
+	static constexpr size_t value = 4;
+};
+
+template<std::size_t Index>
+struct std::tuple_element<Index, terraformer::rgba_pixel>
+{
+	using type = terraformer::rgba_pixel::value_type;
+};
 #endif
