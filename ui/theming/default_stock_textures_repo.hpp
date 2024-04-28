@@ -57,13 +57,6 @@ namespace terraformer::ui::main
 			.noisy = generate_noisy_texture<DrawingSurface>()
 		};
 	}
-
-	template<class DrawingSurface>
-	inline auto& default_stock_textures_repo<DrawingSurface>::get_default_instance()
-	{
-		thread_local auto ret = generate_default_stock_textures<DrawingSurface>();
-		return ret;
-	}
 };
 
 #endif

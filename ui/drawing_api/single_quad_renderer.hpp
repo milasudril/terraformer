@@ -28,12 +28,6 @@ namespace terraformer::ui::drawing_api
 			struct fg_bg_separator fg_bg_separator;
 		};
 
-		[[nodiscard]] static single_quad_renderer& get_default_instance()
-		{
-			thread_local single_quad_renderer ret{};
-			return ret;
-		}
-
 		void set_world_transform(location where, wsapi::fb_size size)
 		{
 			scaling const s{2.0f/static_cast<float>(size.width), 2.0f/static_cast<float>(size.height), 1.0f};

@@ -199,8 +199,6 @@ namespace terraformer::ui::theming
 		.misc_dark_colors = default_dark_palette,
 		.misc_bright_colors = default_bright_palette
 	};
-
-	inline constinit color_scheme current_color_scheme = default_color_scheme;
 }
 
 #endif

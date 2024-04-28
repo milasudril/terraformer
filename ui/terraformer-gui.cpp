@@ -78,10 +78,12 @@ int main(int, char**)
 		}
 	);
 
+	terraformer::ui::drawing_api::single_quad_renderer renderer{};
+
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		std::ref(my_workspace),
 		window_controller{},
-		std::ref(terraformer::ui::drawing_api::single_quad_renderer::get_default_instance()),
+		terraformer::ui::drawing_api::single_quad_renderer{},
 		error_handler{}
 	};
 
