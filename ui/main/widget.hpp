@@ -31,14 +31,20 @@ namespace terraformer::ui::main
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 
-	template<class T, class OutputRectangle>
-	concept widget = requires(
+	template<class Renderer>
+	concept renderer = requires()
+	{
+		typename Renderer::input_rectangle;
+	};
+
+	template<class T, class R>
+	concept widget = renderer<R> && requires(
 		T& obj,
 		wsapi::fb_size size,
 		wsapi::cursor_enter_leave_event const& cele,
 		wsapi::cursor_motion_event const& cme,
 		wsapi::mouse_button_event const& mbe,
-		OutputRectangle& surface,
+		typename R::input_rectangle& surface,
 		theming::widget_look const& look
 	)
 	{
@@ -49,17 +55,25 @@ namespace terraformer::ui::main
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
 	};
 
-	template<class OutputRectangle>
+	template<renderer Renderer>
 	struct widget_with_default_actions
 	{
-		void render(OutputRectangle&, theming::widget_look const&) const {}
+		using output_rectangle = typename Renderer::input_rectangle;
+		void render(output_rectangle&, theming::widget_look const&) const {}
 		void handle_event(wsapi::cursor_enter_leave_event const&);
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }
 		[[nodiscard]] wsapi::fb_size handle_event(wsapi::fb_size size) const { return size; }
 	};
 
-	static_assert(widget<widget_with_default_actions<int>, int>);
+	namespace
+	{
+		struct test_renderer
+		{
+			using input_rectangle = int;
+		};
+		static_assert(widget<widget_with_default_actions<test_renderer>, test_renderer>);
+	}
 }
 
 #endif

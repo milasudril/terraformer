@@ -7,11 +7,11 @@
 
 namespace terraformer::ui::main
 {
-	template<class OutputRectangle>
+	template<renderer Renderer>
 	class widget_list
 	{
 	public:
-		using output_rectangle = OutputRectangle;
+		using output_rectangle = typename Renderer::input_rectangle;
 		using render_callback = void (*)(void*, output_rectangle& rect, theming::widget_look const& look);
 		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
@@ -34,7 +34,7 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		template<widget<output_rectangle> Widget>
+		template<widget<Renderer> Widget>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -112,8 +112,8 @@ namespace terraformer::ui::main
 		widget_array m_objects;
 	};
 
-	template<class OutputRectangle>
-	void render_widgets(widget_list<OutputRectangle>& widgets, theming::widget_look const& look)
+	template<renderer Renderer>
+	void render_widgets(widget_list<Renderer>& widgets, theming::widget_look const& look)
 	{
 		auto const render_callbacks = widgets.render_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
@@ -128,8 +128,8 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<class Renderer, class OutputRectangle>
-	void show_widgets(Renderer&& renderer, widget_list<OutputRectangle> const& widgets)
+	template<renderer Renderer>
+	void show_widgets(Renderer&& renderer, widget_list<Renderer> const& widgets)
 	{
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const widget_visibilities = widgets.widget_visibilities();
