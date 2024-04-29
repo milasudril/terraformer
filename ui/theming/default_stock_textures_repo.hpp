@@ -16,8 +16,13 @@ namespace terraformer::ui::main
 	{
 		using texture_type = DrawingSurface;
 
-		DrawingSurface clean;
-		DrawingSurface noisy;
+		DrawingSurface none;
+
+		DrawingSurface main_panel_background;
+		DrawingSurface other_panel_background;
+		DrawingSurface input_area_background;
+		DrawingSurface command_area_background;
+		DrawingSurface output_area_background;
 
 		[[nodiscard]] inline static auto& get_default_instance();
 	};
@@ -42,6 +47,14 @@ namespace terraformer::ui::main
 	}
 
 	template<class DrawingSurface>
+	auto generate_transparent_texture()
+	{
+		terraformer::image img{1, 1};
+		img(0, 0) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f};
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 0));
+	}
+
+	template<class DrawingSurface>
 	auto generate_white_texture()
 	{
 		terraformer::image img{1, 1};
@@ -53,8 +66,12 @@ namespace terraformer::ui::main
 	auto generate_default_stock_textures()
 	{
 		return default_stock_textures_repo{
-			.clean = generate_white_texture<DrawingSurface>(),
-			.noisy = generate_noisy_texture<DrawingSurface>()
+			.none = generate_transparent_texture<DrawingSurface>(),
+			.main_panel_background = generate_noisy_texture<DrawingSurface>(),
+			.other_panel_background = generate_noisy_texture<DrawingSurface>(),
+			.input_area_background = generate_white_texture<DrawingSurface>(),
+			.command_area_background = generate_white_texture<DrawingSurface>(),
+			.output_area_background = generate_white_texture<DrawingSurface>()
 		};
 	}
 };

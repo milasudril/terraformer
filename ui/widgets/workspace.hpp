@@ -33,17 +33,17 @@ namespace terraformer::ui::widgets
 		{
 			// TODO: We should more conceptual names rather than something that describes the
 			//       concrete texture
-			output_rect.background = &textures.clean;
-			output_rect.foreground = &textures.noisy;
-
-			output_rect.background_tints = std::array{
-				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
-			};
+			output_rect.background = &textures.main_panel_background;
+			output_rect.foreground = &textures.none;
 
 			output_rect.foreground_tints = std::array{
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
+			};
+
+			output_rect.background_tints = std::array{
 				look.colors.main_panel.background,
 				look.colors.main_panel.background,
 				look.colors.main_panel.background,
