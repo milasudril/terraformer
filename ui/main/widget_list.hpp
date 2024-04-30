@@ -7,13 +7,13 @@
 
 namespace terraformer::ui::main
 {
-	template<class TextureRepo, class OutputRectangle>
+	template<class TextureRepo, class ... OutputRectangle>
 	class widget_list
 	{
 	public:
-		using output_rectangle = OutputRectangle;
+		//using output_rectangle = OutputRectangle;
 		using texture_repo = TextureRepo;
-		using render_callback = void (*)(void*, output_rectangle&, texture_repo const&,theming::widget_look const&);
+		//using render_callback = void (*)(void*, output_rectangle&, texture_repo const&,theming::widget_look const&);
 		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const&);
@@ -21,10 +21,10 @@ namespace terraformer::ui::main
 
 		using widget_array = multi_array<
 			void*,
-			output_rectangle,
+			OutputRectangle...,
 			widget_visibility,
 			widget_geometry,
-			render_callback,
+			void (*)(void*, OutputRectangle&, texture_repo const&,theming::widget_look const&)...,
  			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
@@ -35,7 +35,7 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		template<widget<TextureRepo, OutputRectangle> Widget>
+		template<class Widget>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -44,17 +44,17 @@ namespace terraformer::ui::main
 		{
 			m_objects.push_back(
 				&w.get(),
-				output_rectangle{},
+				OutputRectangle{}...,
 				initial_visibility,
 				initial_geometry,
 				[](
 					void* obj,
-					output_rectangle& rect,
+					OutputRectangle& rect,
 					texture_repo const& textures,
 					theming::widget_look const& look
 				) -> void {
 					return static_cast<Widget*>(obj)->render(rect, textures, look);
-				},
+				}...,
 				[](void* obj, wsapi::cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
