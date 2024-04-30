@@ -9,7 +9,7 @@ namespace terraformer::ui::widgets
 {
 	template<class ... Args>
 	void do_show_widgets(Args&&... args)
-	{ show_widgets(std::forward<Args>(args)...); }
+	{ show_widgets<0>(std::forward<Args>(args)...); }
 
 	template<class TextureRepo, class OutputRectangle>
 	class workspace
@@ -49,7 +49,7 @@ namespace terraformer::ui::widgets
 				look.colors.main_panel.background,
 				look.colors.main_panel.background
 			};
-			render_widgets(m_widgets, textures, look);
+			render_widgets<0>(m_widgets, textures, look);
 		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const&)
@@ -138,7 +138,7 @@ namespace terraformer::ui::widgets
 		{ do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
 
 	private:
-		using widget_list = main::widget_list<TextureRepo, OutputRectangle>;
+		using widget_list = main::widget_list<TextureRepo, OutputRectangle, int>;
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};

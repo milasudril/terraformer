@@ -81,54 +81,57 @@ namespace terraformer::ui::main
 		auto widget_pointers() const
 		{ return m_objects.template get<0>(); }
 
+		template<size_t Index>
 		auto output_rectangles() const
-		{ return m_objects.template get<1>(); }
+		{ return m_objects.template get<1 + Index>(); }
 
+		template<size_t Index>
 		auto output_rectangles()
-		{ return m_objects.template get<1>(); }
+		{ return m_objects.template get<1 + Index>(); }
 
 		auto widget_visibilities() const
-		{ return m_objects.template get<2>(); }
+		{ return m_objects.template get<1 + sizeof...(OutputRectangle)>(); }
 
 		auto widget_visibilities()
-		{ return m_objects.template get<2>(); }
+		{ return m_objects.template get<1 + sizeof...(OutputRectangle)>(); }
 
 		auto widget_geometries() const
-		{ return m_objects.template get<3>(); }
+		{ return m_objects.template get<2 + sizeof...(OutputRectangle)>(); }
 
 		auto widget_geometries()
-		{ return m_objects.template get<3>(); }
+		{ return m_objects.template get<2 + sizeof...(OutputRectangle)>(); }
 
+		template<size_t OutputIndex>
 		auto render_callbacks() const
-		{ return m_objects.template get<4>(); }
+		{ return m_objects.template get<3 + sizeof...(OutputRectangle) + OutputIndex>(); }
 
 		auto cursor_enter_leave_callbacks() const
-		{ return m_objects.template get<5>(); }
+		{ return m_objects.template get<3 + 2*sizeof...(OutputRectangle)>(); }
 
 		auto cursor_motion_callbacks() const
-		{ return m_objects.template get<6>(); }
+		{ return m_objects.template get<4 + 2*sizeof...(OutputRectangle)>(); }
 
 		auto mouse_button_callbacks() const
-		{ return m_objects.template get<7>(); }
+		{ return m_objects.template get<5 + 2*sizeof...(OutputRectangle)>(); }
 
 		auto size_callbacks() const
-		{ return m_objects.template get<8>(); }
+		{ return m_objects.template get<6 + 2*sizeof...(OutputRectangle)>(); }
 
 	private:
 		widget_array m_objects;
 	};
 
-	template<class TextureRepo, class OutputRectangle>
+	template<size_t OutputIndex, class TextureRepo, class ...OutputRectangle>
 	void render_widgets(
-		widget_list<TextureRepo, OutputRectangle>& widgets,
+		widget_list<TextureRepo, OutputRectangle...>& widgets,
 		TextureRepo const& textures,
 		theming::widget_look const& look
 	)
 	{
-		auto const render_callbacks = widgets.render_callbacks();
+		auto const render_callbacks = widgets.template render_callbacks<OutputIndex>();
 		auto const widget_pointers = widgets.widget_pointers();
 		auto const widget_visibilities = widgets.widget_visibilities();
-		auto output_rectangles = widgets.output_rectangles();
+		auto output_rectangles = widgets.template output_rectangles<OutputIndex>();
 
 		auto const n = std::size(widgets);
 		for(auto k = widgets.first_element_index(); k != n; ++k)
@@ -138,12 +141,12 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<class Renderer, class TextureRepo, class OutputRectangle>
-	void show_widgets(Renderer&& renderer, widget_list<TextureRepo, OutputRectangle> const& widgets)
+	template<size_t OutputIndex, class Renderer, class TextureRepo, class ...OutputRectangle>
+	void show_widgets(Renderer&& renderer, widget_list<TextureRepo, OutputRectangle...> const& widgets)
 	{
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const widget_visibilities = widgets.widget_visibilities();
-		auto const output_rects = widgets.output_rectangles();
+		auto const output_rects = widgets.template output_rectangles<OutputIndex>();
 
 		auto const n = std::size(widgets);
 		for(auto k  = widgets.first_element_index(); k != n; ++k)
@@ -170,10 +173,10 @@ namespace terraformer::ui::main
 		);
 	}
 
-	template<class TextureRepo, class OutputRectangle>
-	auto find(wsapi::cursor_position pos, widget_list<TextureRepo, OutputRectangle> const& widgets)
+	template<class TextureRepo, class ... OutputRectangle>
+	auto find(wsapi::cursor_position pos, widget_list<TextureRepo, OutputRectangle...> const& widgets)
 	{
-		using wl = widget_list<TextureRepo, OutputRectangle>;
+		using wl = widget_list<TextureRepo, OutputRectangle...>;
 		auto const i = find(pos, widgets.widget_geometries());
 		if(i == std::end(widgets.widget_geometries()))
 		{ return wl::npos; }

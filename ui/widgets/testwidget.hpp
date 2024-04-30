@@ -13,6 +13,14 @@ namespace terraformer::ui::widgets
 	public:
 		template<class TextureRepo>
 		void render(
+			int&,
+			TextureRepo&&,
+			theming::widget_look const&
+		)
+		{}
+
+		template<class TextureRepo>
+		void render(
 			drawing_api::single_quad_renderer::input_rectangle& output_rect,
 			TextureRepo&&,
 			theming::widget_look const& look
