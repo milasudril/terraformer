@@ -11,7 +11,7 @@ namespace terraformer::ui::widgets
 	void do_show_widgets(Args&&... args)
 	{ show_widgets(std::forward<Args>(args)...); }
 
-	template<class OutputRectangle, class TextureRepo>
+	template<class TextureRepo, class OutputRectangle>
 	class workspace
 	{
 	public:
@@ -138,7 +138,7 @@ namespace terraformer::ui::widgets
 		{ do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
 
 	private:
-		using widget_list = main::widget_list<OutputRectangle, TextureRepo>;
+		using widget_list = main::widget_list<TextureRepo, OutputRectangle>;
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};

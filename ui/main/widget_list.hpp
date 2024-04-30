@@ -7,7 +7,7 @@
 
 namespace terraformer::ui::main
 {
-	template<class OutputRectangle, class TextureRepo>
+	template<class TextureRepo, class OutputRectangle>
 	class widget_list
 	{
 	public:
@@ -35,7 +35,7 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		template<widget<OutputRectangle, TextureRepo> Widget>
+		template<widget<TextureRepo, OutputRectangle> Widget>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -118,9 +118,9 @@ namespace terraformer::ui::main
 		widget_array m_objects;
 	};
 
-	template<class OutputRectangle, class TextureRepo>
+	template<class TextureRepo, class OutputRectangle>
 	void render_widgets(
-		widget_list<OutputRectangle, TextureRepo>& widgets,
+		widget_list<TextureRepo, OutputRectangle>& widgets,
 		TextureRepo const& textures,
 		theming::widget_look const& look
 	)
@@ -138,8 +138,8 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<class Renderer, class OutputRectangle, class TextureRepo>
-	void show_widgets(Renderer&& renderer, widget_list<OutputRectangle, TextureRepo> const& widgets)
+	template<class Renderer, class TextureRepo, class OutputRectangle>
+	void show_widgets(Renderer&& renderer, widget_list<TextureRepo, OutputRectangle> const& widgets)
 	{
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const widget_visibilities = widgets.widget_visibilities();
@@ -170,14 +170,15 @@ namespace terraformer::ui::main
 		);
 	}
 
-	template<class OutputRectangle, class TextureRepo>
-	auto find(wsapi::cursor_position pos, widget_list<OutputRectangle, TextureRepo> const& widgets)
+	template<class TextureRepo, class OutputRectangle>
+	auto find(wsapi::cursor_position pos, widget_list<TextureRepo, OutputRectangle> const& widgets)
 	{
+		using wl = widget_list<TextureRepo, OutputRectangle>;
 		auto const i = find(pos, widgets.widget_geometries());
 		if(i == std::end(widgets.widget_geometries()))
-		{ return widget_list<OutputRectangle, TextureRepo>::npos; }
+		{ return wl::npos; }
 
-		return typename widget_list<OutputRectangle, TextureRepo>::index_type{
+		return typename wl::index_type{
 			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
 		};
 	}

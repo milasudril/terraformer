@@ -31,7 +31,7 @@ namespace terraformer::ui::main
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 
-	template<class T, class OutputRectangle, class TextureRepo>
+	template<class T, class TextureRepo, class OutputRectangle>
 	concept widget = requires(
 		T& obj,
 		wsapi::fb_size size,
@@ -50,12 +50,10 @@ namespace terraformer::ui::main
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
 	};
 
-	template<class OutputRectangle, class TextureRepo>
 	struct widget_with_default_actions
 	{
-		using output_rectangle = OutputRectangle;
-		using texture_repo = TextureRepo;
-		void render(output_rectangle&, texture_repo const&, theming::widget_look const&) const {}
+		template<class OutputRectangle, class TextureRepo>
+		void render(OutputRectangle&&, TextureRepo&&, theming::widget_look const&) const {}
 		void handle_event(wsapi::cursor_enter_leave_event const&);
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }
@@ -64,7 +62,7 @@ namespace terraformer::ui::main
 
 	namespace
 	{
-		static_assert(widget<widget_with_default_actions<int, double>, int, double>);
+		static_assert(widget<widget_with_default_actions, int, double>);
 	}
 }
 
