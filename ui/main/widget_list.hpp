@@ -11,9 +11,7 @@ namespace terraformer::ui::main
 	class widget_list
 	{
 	public:
-		//using output_rectangle = OutputRectangle;
 		using texture_repo = TextureRepo;
-		//using render_callback = void (*)(void*, output_rectangle&, texture_repo const&,theming::widget_look const&);
 		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const&);
