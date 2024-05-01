@@ -7,7 +7,7 @@
 
 namespace terraformer::ui::main
 {
-	template<class TextureRepo, class ... OutputRectangle>
+	template<class TextureRepo, class ... WidgetRenderingResult>
 	class widget_list
 	{
 	public:
@@ -19,11 +19,11 @@ namespace terraformer::ui::main
 
 		using widget_array = multi_array<
 			void*,
-			OutputRectangle...,
+			WidgetRenderingResult...,
 			widget_visibility,
 			widget_geometry,
-			void (*)(void*, OutputRectangle&, texture_repo const&,theming::widget_look const&)...,
- 			cursor_enter_leave_callback,
+			void (*)(void*, WidgetRenderingResult&, texture_repo const&,theming::widget_look const&)...,
+			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
 			size_callback
@@ -42,12 +42,12 @@ namespace terraformer::ui::main
 		{
 			m_objects.push_back(
 				&w.get(),
-				OutputRectangle{}...,
+				WidgetRenderingResult{}...,
 				initial_visibility,
 				initial_geometry,
 				[](
 					void* obj,
-					OutputRectangle& rect,
+					WidgetRenderingResult& rect,
 					texture_repo const& textures,
 					theming::widget_look const& look
 				) -> void {
@@ -88,40 +88,40 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<1 + Index>(); }
 
 		auto widget_visibilities() const
-		{ return m_objects.template get<1 + sizeof...(OutputRectangle)>(); }
+		{ return m_objects.template get<1 + sizeof...(WidgetRenderingResult)>(); }
 
 		auto widget_visibilities()
-		{ return m_objects.template get<1 + sizeof...(OutputRectangle)>(); }
+		{ return m_objects.template get<1 + sizeof...(WidgetRenderingResult)>(); }
 
 		auto widget_geometries() const
-		{ return m_objects.template get<2 + sizeof...(OutputRectangle)>(); }
+		{ return m_objects.template get<2 + sizeof...(WidgetRenderingResult)>(); }
 
 		auto widget_geometries()
-		{ return m_objects.template get<2 + sizeof...(OutputRectangle)>(); }
+		{ return m_objects.template get<2 + sizeof...(WidgetRenderingResult)>(); }
 
 		template<size_t OutputIndex>
 		auto render_callbacks() const
-		{ return m_objects.template get<3 + sizeof...(OutputRectangle) + OutputIndex>(); }
+		{ return m_objects.template get<3 + sizeof...(WidgetRenderingResult) + OutputIndex>(); }
 
 		auto cursor_enter_leave_callbacks() const
-		{ return m_objects.template get<3 + 2*sizeof...(OutputRectangle)>(); }
+		{ return m_objects.template get<3 + 2*sizeof...(WidgetRenderingResult)>(); }
 
 		auto cursor_motion_callbacks() const
-		{ return m_objects.template get<4 + 2*sizeof...(OutputRectangle)>(); }
+		{ return m_objects.template get<4 + 2*sizeof...(WidgetRenderingResult)>(); }
 
 		auto mouse_button_callbacks() const
-		{ return m_objects.template get<5 + 2*sizeof...(OutputRectangle)>(); }
+		{ return m_objects.template get<5 + 2*sizeof...(WidgetRenderingResult)>(); }
 
 		auto size_callbacks() const
-		{ return m_objects.template get<6 + 2*sizeof...(OutputRectangle)>(); }
+		{ return m_objects.template get<6 + 2*sizeof...(WidgetRenderingResult)>(); }
 
 	private:
 		widget_array m_objects;
 	};
 
-	template<size_t OutputIndex, class TextureRepo, class ...OutputRectangle>
+	template<size_t OutputIndex, class TextureRepo, class ...WidgetRenderingResult>
 	void render_widgets(
-		widget_list<TextureRepo, OutputRectangle...>& widgets,
+		widget_list<TextureRepo, WidgetRenderingResult...>& widgets,
 		TextureRepo const& textures,
 		theming::widget_look const& look
 	)
@@ -139,8 +139,8 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<size_t OutputIndex, class Renderer, class TextureRepo, class ...OutputRectangle>
-	void show_widgets(Renderer&& renderer, widget_list<TextureRepo, OutputRectangle...> const& widgets)
+	template<size_t OutputIndex, class Renderer, class TextureRepo, class ...WidgetRenderingResult>
+	void show_widgets(Renderer&& renderer, widget_list<TextureRepo, WidgetRenderingResult...> const& widgets)
 	{
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const widget_visibilities = widgets.widget_visibilities();
@@ -171,10 +171,10 @@ namespace terraformer::ui::main
 		);
 	}
 
-	template<class TextureRepo, class ... OutputRectangle>
-	auto find(wsapi::cursor_position pos, widget_list<TextureRepo, OutputRectangle...> const& widgets)
+	template<class TextureRepo, class ... WidgetRenderingResult>
+	auto find(wsapi::cursor_position pos, widget_list<TextureRepo, WidgetRenderingResult...> const& widgets)
 	{
-		using wl = widget_list<TextureRepo, OutputRectangle...>;
+		using wl = widget_list<TextureRepo, WidgetRenderingResult...>;
 		auto const i = find(pos, widgets.widget_geometries());
 		if(i == std::end(widgets.widget_geometries()))
 		{ return wl::npos; }
