@@ -5,6 +5,7 @@
 #include "./drawing_api/gl_surface_configuration.hpp"
 #include "./drawing_api/gl_texture.hpp"
 #include "./drawing_api/single_quad_renderer.hpp"
+#include "./drawing_api/frame_renderer.hpp"
 #include "./main/event_dispatcher.hpp"
 #include "./widgets/workspace.hpp"
 #include "./wsapi/native_window.hpp"

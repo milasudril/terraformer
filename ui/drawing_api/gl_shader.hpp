@@ -72,6 +72,12 @@ namespace terraformer::ui::drawing_api
 			return *this;
 		}
 
+		gl_program& set_uniform(int index, float value)
+		{
+			glProgramUniform1f(m_handle.get(), index, value);
+			return *this;
+		}
+
 		template<class T, size_t N>
 		requires(std::tuple_size_v<T> == 4 && std::is_same_v<typename T::value_type, float>)
 		gl_program& set_uniform(int index, std::array<T, N> const& vals)
