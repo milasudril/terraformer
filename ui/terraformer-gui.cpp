@@ -56,7 +56,8 @@ int main(int, char**)
 	terraformer::ui::widgets::testwidget foo;
 	terraformer::ui::widgets::testwidget bar;
 
-	terraformer::ui::widgets::workspace<	terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>,
+	terraformer::ui::widgets::workspace<
+		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>,
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
 	> my_workspace;
 
@@ -83,7 +84,7 @@ int main(int, char**)
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		std::ref(my_workspace),
 		window_controller{},
-		terraformer::ui::drawing_api::single_quad_renderer{},
+		std::ref(renderer),
 		error_handler{}
 	};
 
@@ -104,6 +105,18 @@ int main(int, char**)
 		std::ref(event_dispatcher),
 		std::ref(mainwin),
 		std::ref(texture_repo),
-		std::ref(widget_look)
+		std::ref(widget_look),
+		[&renderer, &bar, &texture_repo, &widget_look](){
+			terraformer::ui::drawing_api::single_quad_renderer::input_rectangle rect{};
+			printf("Rendering overlay %p to %p\n", &bar, &rect);
+			bar.render(rect, texture_repo, widget_look);
+			renderer.render(
+				terraformer::location{50.0f, -150.0f, 0.0f},
+				terraformer::location{-1.0f, 1.0f, 0.0f},
+				terraformer::scaling{150.0f, 100.0f, 0.0f},
+				rect
+			);
+			printf("=============\n");
+		}
 	);
 }

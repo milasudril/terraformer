@@ -32,6 +32,8 @@ namespace terraformer::ui::widgets
 				auto const w = static_cast<uint32_t>(descriptor.width);
 				auto const h = static_cast<uint32_t>(descriptor.height);
 
+				printf("%p creating texture of size %ux%u\n", this, w, h);
+
 				image img{w, h};
 				for(uint32_t y = 0; y != h; ++y)
 				{
@@ -70,6 +72,8 @@ namespace terraformer::ui::widgets
 
 				m_dirty = false;
 			}
+
+			printf("%p setting values in %p\n",this, &output_rect);
 			output_rect.foreground = m_cursor_above? &m_border : &m_foreground;
 			output_rect.background = &m_background;
 			constexpr std::array tints{
@@ -107,7 +111,7 @@ namespace terraformer::ui::widgets
 
 		wsapi::fb_size handle_event(wsapi::fb_size size)
 		{
-			printf("Size was updated to %d %d\n", size.width, size.height);
+			printf("%p Size was updated to %d %d\n", this, size.width, size.height);
 
 			drawing_api::gl_texture_descriptor descriptor{
 				.width = size.width,

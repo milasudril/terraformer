@@ -56,11 +56,12 @@ namespace terraformer::ui::main
 			value_of(m_widget_container).handle_event(size);
 		}
 
-		template<class Viewport, class TextureRepo>
-		bool operator()(Viewport&& viewport, TextureRepo const& textures, theming::widget_look const& look)
+		template<class Viewport, class TextureRepo, class ... Overlay>
+		bool operator()(Viewport&& viewport, TextureRepo const& textures, theming::widget_look const& look, Overlay&&... overlay)
 		{
 			value_of(m_renderer).clear_buffers();
 			render(textures, look);
+			(...,overlay());
 			value_of(viewport).swap_buffers();
 			return value_of(m_window_controller).main_loop_should_exit(viewport);
 		}
@@ -75,7 +76,6 @@ namespace terraformer::ui::main
 				scaling{static_cast<float>(m_fb_size.width), static_cast<float>(m_fb_size.height), 1.0f},
 				m_output_rectangle
 			);
-
 			value_of(m_widget_container).show_widgets(value_of(m_renderer));
 		}
 
