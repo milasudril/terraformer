@@ -57,7 +57,7 @@ namespace terraformer::ui::drawing_api
 			rect.foreground -> bind(1);
 
 			m_mesh.bind();
-			gl_bindings::draw_triangles();
+			gl_bindings::draw_triangles_repeatedly(4);
 		}
 
 		auto& clear_buffers()
@@ -111,7 +111,7 @@ const vec4 coords[4] = vec4[4](
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin);
+	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin) + gl_InstanceID*vec4(50.0f, -50.0f, 0.0f, 0.0f);
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID];
 	background_tint = background_tints[gl_VertexID];

@@ -29,6 +29,9 @@ namespace terraformer::ui::drawing_api
 		static void draw_triangles()
 		{ glDrawElements(GL_TRIANGLES, s_bound_elem_count, s_bound_index_type, nullptr); }
 
+		static void draw_triangles_repeatedly(GLsizei count)
+		{ glDrawElementsInstanced(GL_TRIANGLES, s_bound_elem_count, s_bound_index_type, nullptr, count); }
+
 	protected:
 		thread_local static inline GLsizei s_bound_elem_count;
 		thread_local static inline GLenum s_bound_index_type;
