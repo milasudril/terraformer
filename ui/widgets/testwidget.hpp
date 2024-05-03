@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_WIDGETS_TESTWIDGET_HPP
 
 #include "ui/drawing_api/single_quad_renderer.hpp"
+#include "ui/drawing_api/frame_renderer.hpp"
 #include "ui/theming/widget_look.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
@@ -22,6 +23,73 @@ namespace terraformer::ui::widgets
 		template<class TextureRepo>
 		void render(
 			drawing_api::single_quad_renderer::input_rectangle& output_rect,
+			TextureRepo&&,
+			theming::widget_look const& look
+		)
+		{
+			if(m_dirty)
+			{
+				auto const& descriptor = m_foreground.descriptor();
+				auto const w = static_cast<uint32_t>(descriptor.width);
+				auto const h = static_cast<uint32_t>(descriptor.height);
+
+				printf("%p creating texture of size %ux%u\n", this, w, h);
+
+				image img{w, h};
+				for(uint32_t y = 0; y != h; ++y)
+				{
+					for(uint32_t x = 0; x != w; ++x)
+					{ img(x, y) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}; }
+				}
+				m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+
+				auto const num_colors = std::size(look.colors.misc_bright_colors);
+				{
+					auto const color = look.colors.misc_bright_colors[(m_current_color + num_colors + 1)%num_colors];
+					for(uint32_t x = 0; x != w; ++x)
+					{
+						img(x, 0) = color;
+						img(x, 1) = color;
+						img(x, 2) = color;
+						img(x, 3) = color;
+						img(x, h - 1) = color;
+						img(x, h - 2) = color;
+						img(x, h - 3) = color;
+						img(x, h - 4) = color;
+					}
+
+					m_border.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+				}
+
+				{
+					auto const color = look.colors.misc_dark_colors[(m_current_color + num_colors)%num_colors];
+					for(uint32_t y = 0; y != h; ++y)
+					{
+						for(uint32_t x = 0; x != w; ++x)
+						{ img(x, y) = color; }
+					}
+					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+				}
+
+				m_dirty = false;
+			}
+
+			printf("%p setting values in %p\n",this, &output_rect);
+			output_rect.foreground = m_cursor_above? &m_border : &m_foreground;
+			output_rect.background = &m_background;
+			constexpr std::array tints{
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+			};
+			output_rect.foreground_tints = tints;
+			output_rect.background_tints = tints;
+		}
+
+		template<class TextureRepo>
+		void render(
+			drawing_api::frame_renderer::input_rectangle& output_rect,
 			TextureRepo&&,
 			theming::widget_look const& look
 		)

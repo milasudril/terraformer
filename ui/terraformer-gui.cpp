@@ -4,7 +4,7 @@
 
 #include "./drawing_api/gl_surface_configuration.hpp"
 #include "./drawing_api/gl_texture.hpp"
-#include "./drawing_api/single_quad_renderer.hpp"
+#include "./drawing_api/frame_renderer.hpp"
 #include "./drawing_api/frame_renderer.hpp"
 #include "./main/event_dispatcher.hpp"
 #include "./widgets/workspace.hpp"
@@ -58,7 +58,7 @@ int main(int, char**)
 
 	terraformer::ui::widgets::workspace<
 		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>,
-		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
+		terraformer::ui::drawing_api::frame_renderer::input_rectangle
 	> my_workspace;
 
 	my_workspace.append(
@@ -79,7 +79,7 @@ int main(int, char**)
 		}
 	);
 
-	terraformer::ui::drawing_api::single_quad_renderer renderer{};
+	terraformer::ui::drawing_api::frame_renderer renderer{};
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		std::ref(my_workspace),
@@ -105,18 +105,6 @@ int main(int, char**)
 		std::ref(event_dispatcher),
 		std::ref(mainwin),
 		std::ref(texture_repo),
-		std::ref(widget_look),
-		[&renderer, &bar, &texture_repo, &widget_look](){
-			terraformer::ui::drawing_api::single_quad_renderer::input_rectangle rect{};
-			printf("Rendering overlay %p to %p\n", &bar, &rect);
-			bar.render(rect, texture_repo, widget_look);
-			renderer.render(
-				terraformer::location{50.0f, -150.0f, 0.0f},
-				terraformer::location{-1.0f, 1.0f, 0.0f},
-				terraformer::scaling{150.0f, 100.0f, 0.0f},
-				rect
-			);
-			printf("=============\n");
-		}
+		std::ref(widget_look)
 	);
 }
