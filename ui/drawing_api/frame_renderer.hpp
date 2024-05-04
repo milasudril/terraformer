@@ -76,8 +76,8 @@ namespace terraformer::ui::drawing_api
 		gl_mesh<unsigned int> m_mesh{
 			std::array<unsigned int, 24>{
 				0, 1, 2, 2, 1, 3,
-				4, 6, 5, 5, 6, 7,
-				8, 10, 9, 9, 10, 11,
+				4, 5, 6, 6, 5, 7,
+				8, 9, 10, 10, 9, 11,
 				12, 13, 14, 14, 13, 15
 			}
 		};
@@ -112,16 +112,16 @@ const vec4 coords[16] = vec4[16](
 	vec4(0.5f, 0.5f, 0.0f, 1.0f),
 
 	// Bottom
-	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 
 	// Left
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 
 	// Right
 	vec4(0.5f, 0.5f, 0.0f, 1.0f),
@@ -139,15 +139,15 @@ const vec4 offsets[16] = vec4[16](
 
 	// Bottom
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(1.0f, 1.0f, 0.0f, 0.0f),
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
 	vec4(-1.0f, 1.0f, 0.0f, 0.0f),
+	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(1.0f, 1.0f, 0.0f, 0.0f),
 
 	// Left
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(1.0f, -1.0f, 0.0f, 0.0f),
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
 	vec4(1.0f, 1.0f, 0.0f, 0.0f),
+	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(1.0f, -1.0f, 0.0f, 0.0f),
 
 	// Right
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
