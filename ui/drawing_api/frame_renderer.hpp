@@ -57,7 +57,7 @@ namespace terraformer::ui::drawing_api
 			rect.foreground -> bind(1);
 
 			m_mesh.bind();
-			gl_bindings::draw_triangles();
+			gl_bindings::draw_triangles_repeatedly(2);
 		}
 
 		auto& clear_buffers()
@@ -74,11 +74,9 @@ namespace terraformer::ui::drawing_api
 
 	private:
 		gl_mesh<unsigned int> m_mesh{
-			std::array<unsigned int, 24>{
+			std::array<unsigned int, 12>{
 				0, 1, 2, 2, 1, 3,
-				4, 5, 6, 6, 5, 7,
-				8, 9, 10, 10, 9, 11,
-				12, 13, 14, 14, 13, 15
+				4, 5, 6, 6, 5, 7
 			}
 		};
 
@@ -104,63 +102,42 @@ const vec2 uv_coords[4] = vec2[4](
 	vec2(1.0f, 1.0f)
 );
 
-const vec4 coords[16] = vec4[16](
+const vec4 coords[8] = vec4[8](
 	// Top
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(0.5f, 0.5f, 0.0f, 1.0f),
 
-	// Bottom
-	vec4(0.5f, -0.5f, 0.0f, 1.0f),
-	vec4(0.5f, -0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
-
 	// Left
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-
-	// Right
-	vec4(0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(0.5f, -0.5f, 0.0f, 1.0f),
-	vec4(0.5f, -0.5f, 0.0f, 1.0f)
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f)
 );
 
-const vec4 offsets[16] = vec4[16](
+const vec4 offsets[8] = vec4[8](
 	// Top
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
 	vec4(1.0f, -1.0f, 0.0f, 0.0f),
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
 	vec4(-1.0f, -1.0f, 0.0f, 0.0f),
 
-	// Bottom
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(-1.0f, 1.0f, 0.0f, 0.0f),
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(1.0f, 1.0f, 0.0f, 0.0f),
-
 	// Left
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
 	vec4(1.0f, 1.0f, 0.0f, 0.0f),
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(1.0f, -1.0f, 0.0f, 0.0f),
-
-	// Right
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(-1.0f, -1.0f, 0.0f, 0.0f),
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(-1.0f, 1.0f, 0.0f, 0.0f)
+	vec4(1.0f, -1.0f, 0.0f, 0.0f)
 );
 
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	const float thickness = 16.0f;
-	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin) + thickness*offsets[gl_VertexID];
+	const float thickness = 4.0f;
+	const float sign = ((gl_InstanceID&0x1) == 0x1)? -1.0f : 1.0f;
+	vec4 loc = model_location
+		+ model_size*(sign*coords[gl_VertexID] - model_origin)
+		+ sign*thickness*offsets[gl_VertexID];
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID&0x3];
 	background_tint = background_tints[gl_VertexID&0x3];
