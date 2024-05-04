@@ -57,7 +57,7 @@ namespace terraformer::ui::drawing_api
 			rect.foreground -> bind(1);
 
 			m_mesh.bind();
-			gl_bindings::draw_triangles_repeatedly(4);
+			gl_bindings::draw_triangles();
 		}
 
 		auto& clear_buffers()
@@ -75,7 +75,7 @@ namespace terraformer::ui::drawing_api
 	private:
 		gl_mesh<unsigned int> m_mesh{
 			std::array<unsigned int, 6>{
-				0, 1, 2, 0, 2, 3
+				0, 1, 2, 2, 1, 3
 			}
 		};
 
@@ -95,17 +95,17 @@ out vec4 background_tint;
 out vec4 foreground_tint;
 
 const vec2 uv_coords[4] = vec2[4](
+	vec2(0.0f, 0.0f),
 	vec2(0.0f, 1.0f),
-	vec2(1.0f, 1.0f),
 	vec2(1.0f, 0.0f),
-	vec2(0.0f, 0.0f)
+	vec2(1.0f, 1.0f)
 );
 
 const vec4 coords[4] = vec4[4](
-	vec4(-0.5f, -0.5, 0.0, 1.0f),
-	vec4(0.5, -0.5, 0.0, 1.0f),
-	vec4(0.5, 0.5, 0.0, 1.0f),
-	vec4(-0.5,0.5, 0.0, 1.0f)
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.25f, 0.25, 0.0f, 1.0f),
+	vec4(0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(0.25f, 0.25f, 0.0f, 1.0f)
 );
 
 void main()
