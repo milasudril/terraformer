@@ -103,15 +103,23 @@ const vec2 uv_coords[4] = vec2[4](
 
 const vec4 coords[4] = vec4[4](
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(-0.25f, 0.25, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(0.25f, 0.25f, 0.0f, 1.0f)
+	vec4(0.5f, 0.5f, 0.0f, 1.0f)
+);
+
+const vec4 offsets[4] = vec4[4](
+	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(1.0f, -1.0f, 0.0f, 0.0f),
+	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(-1.0f, -1.0f, 0.0f, 0.0f)
 );
 
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin) + gl_InstanceID*vec4(50.0f, -50.0f, 0.0f, 0.0f);
+	const float thickness = 16.0f;
+	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin) + thickness*offsets[gl_VertexID];
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID];
 	background_tint = background_tints[gl_VertexID];
