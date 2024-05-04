@@ -117,15 +117,15 @@ const vec4 offsets[8] = vec4[8](
 
 const int tint_map[16] = int[16](
 	0, 1, 2, 3,
-	0, 1, 2, 3,
-	4, 5, 6, 7,
-	4, 5, 6, 7
+	0, 1, 4, 5,
+	6, 7, 4, 5,
+	6, 7, 2, 3
 );
 
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	const float thickness = 128.0f;
+	const float thickness = 200.0f;
 	const float sign = ((gl_InstanceID&0x1) == 0x1)? -1.0f : 1.0f;
 	vec4 loc = model_location
 		+ model_size*(sign*coords[gl_VertexID] - model_origin)
