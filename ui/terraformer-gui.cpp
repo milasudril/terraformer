@@ -53,14 +53,14 @@ int main(int, char**)
 
 	glEnable(GL_CULL_FACE);
 
-	terraformer::ui::widgets::testwidget foo;
-	terraformer::ui::widgets::testwidget bar;
+//	terraformer::ui::widgets::testwidget foo;
+//	terraformer::ui::widgets::testwidget bar;
 
 	terraformer::ui::widgets::workspace<
 		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>,
 		terraformer::ui::drawing_api::frame_renderer::input_rectangle
 	> my_workspace;
-
+#if 0
 	my_workspace.append(
 		std::ref(foo),
 		terraformer::ui::main::widget_geometry{
@@ -78,6 +78,7 @@ int main(int, char**)
 			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
 		}
 	);
+#endif
 
 	terraformer::ui::drawing_api::frame_renderer renderer{};
 

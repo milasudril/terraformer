@@ -142,16 +142,17 @@ namespace terraformer::ui::widgets
 			}
 
 			printf("%p setting values in %p\n",this, &output_rect);
-			output_rect.foreground = m_cursor_above? &m_border : &m_foreground;
-			output_rect.background = &m_background;
-			constexpr std::array tints{
+			output_rect.texture = &m_foreground;
+			output_rect.tints = std::array{
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
 			};
-			output_rect.foreground_tints = tints;
-			output_rect.background_tints = tints;
 		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const& cele)

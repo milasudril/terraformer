@@ -13,19 +13,10 @@ namespace terraformer::ui::drawing_api
 	class frame_renderer
 	{
 	public:
-		struct fg_bg_separator
-		{
-			location begin;
-			location end;
-		};
-
 		struct input_rectangle
 		{
-			gl_texture const* background;
-			gl_texture const* foreground;
-			std::array<rgba_pixel, 4> background_tints;
-			std::array<rgba_pixel, 4> foreground_tints;
-			struct fg_bg_separator fg_bg_separator;
+			gl_texture const* texture;
+			std::array<rgba_pixel, 8> tints;
 		};
 
 		void set_world_transform(location where, wsapi::fb_size size)
@@ -46,15 +37,11 @@ namespace terraformer::ui::drawing_api
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, rect.background_tints)
-				.set_uniform(9, rect.foreground_tints)
+				.set_uniform(5, rect.tints)
 				.bind();
 
-			assert(rect.background != nullptr);
-			rect.background -> bind(0);
-
-			assert(rect.foreground != nullptr);
-			rect.foreground -> bind(1);
+			assert(rect.texture != nullptr);
+			rect.texture -> bind(0);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles_repeatedly(2);
@@ -88,12 +75,10 @@ layout (location = 1) uniform vec4 model_origin;
 layout (location = 2) uniform vec4 model_size;
 layout (location = 3) uniform vec4 world_location;
 layout (location = 4) uniform vec4 world_scale;
-layout (location = 5) uniform vec4 background_tints[4];
-layout (location = 9) uniform vec4 foreground_tints[4];
+layout (location = 5) uniform vec4 tints[8];
 
 out vec2 uv;
-out vec4 background_tint;
-out vec4 foreground_tint;
+out vec4 tint;
 
 const vec2 uv_coords[4] = vec2[4](
 	vec2(0.0f, 0.0f),
@@ -130,18 +115,25 @@ const vec4 offsets[8] = vec4[8](
 	vec4(1.0f, 1.0f, 0.0f, 0.0f)
 );
 
+const int tint_map[16] = int[16](
+	0, 1, 2, 3,
+	0, 1, 2, 3,
+	4, 5, 6, 7,
+	4, 5, 6, 7
+);
+
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	const float thickness = 4.0f;
+	const float thickness = 128.0f;
 	const float sign = ((gl_InstanceID&0x1) == 0x1)? -1.0f : 1.0f;
 	vec4 loc = model_location
 		+ model_size*(sign*coords[gl_VertexID] - model_origin)
 		+ sign*thickness*offsets[gl_VertexID];
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID&0x3];
-	background_tint = background_tints[gl_VertexID&0x3];
-	foreground_tint = foreground_tints[gl_VertexID&0x3];
+	const int tint_index = 8*gl_InstanceID + gl_VertexID;
+	tint = tints[tint_map[tint_index]];
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
@@ -151,26 +143,14 @@ layout (binding = 1) uniform sampler2D foreground;
 layout (location = 13) uniform vec4 fg_bg_separator[2];
 
 in vec2 uv;
-in vec4 background_tint;
-in vec4 foreground_tint;
+in vec4 tint;
 
 void main()
 {
-	vec4 bg = texture(background, uv/textureSize(background, 0))*background_tint;
-	vec4 fg = texture(foreground, uv/textureSize(foreground, 0))*foreground_tint;
+	//vec4 bg = texture(background, uv/textureSize(background, 0))*background_tint;
+	//vec4 fg = texture(foreground, uv/textureSize(foreground, 0))*foreground_tint;
 
-	// This assumes values are pre-multiplied alpha. Otherwise, the formula for the color components
-	// would be
-	//
-	// (C_fg*a_fg + C_bg*a_bg*(1 - a_fg))/(a_fg + a_bg*(1 - a_fg))
-	//
-	// If a_bg = 1, this simplifies to
-	//
-	// (C_fg*a_fg + C_bg*(1 - a_fg))/(a_fg + (1 - a_fg)) = C_fg*a_fg + C_bg*(1 - a_fg)
-	//
-	// which is the regular interpolation formula, with a_fg as interpolation parameter.
-	//
-	fragment_color = mix(bg, fg, fg.w);
+	fragment_color = tint;
 })"}
 		};
 	};
