@@ -74,8 +74,9 @@ namespace terraformer::ui::drawing_api
 
 	private:
 		gl_mesh<unsigned int> m_mesh{
-			std::array<unsigned int, 6>{
-				0, 1, 2, 2, 1, 3
+			std::array<unsigned int, 12>{
+				0, 1, 2, 2, 1, 3,
+				4, 6, 5, 5, 6, 7,
 			}
 		};
 
@@ -101,18 +102,28 @@ const vec2 uv_coords[4] = vec2[4](
 	vec2(1.0f, 1.0f)
 );
 
-const vec4 coords[4] = vec4[4](
+const vec4 coords[8] = vec4[8](
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(0.5f, 0.5f, 0.0f, 1.0f)
+	vec4(0.5f, 0.5f, 0.0f, 1.0f),
+
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(0.5f, -0.5f, 0.0f, 1.0f)
 );
 
-const vec4 offsets[4] = vec4[4](
+const vec4 offsets[8] = vec4[8](
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
 	vec4(1.0f, -1.0f, 0.0f, 0.0f),
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(-1.0f, -1.0f, 0.0f, 0.0f)
+	vec4(-1.0f, -1.0f, 0.0f, 0.0f),
+
+	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(1.0f, 1.0f, 0.0f, 0.0f),
+	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(-1.0f, 1.0f, 0.0f, 0.0f)
 );
 
 void main()
@@ -121,9 +132,9 @@ void main()
 	const float thickness = 16.0f;
 	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin) + thickness*offsets[gl_VertexID];
 	gl_Position = world_location + world_scale*(loc - world_origin);
-	uv = model_size.xy*uv_coords[gl_VertexID];
-	background_tint = background_tints[gl_VertexID];
-	foreground_tint = foreground_tints[gl_VertexID];
+	uv = model_size.xy*uv_coords[gl_VertexID&0x3];
+	background_tint = background_tints[gl_VertexID&0x3];
+	foreground_tint = foreground_tints[gl_VertexID&0x3];
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
