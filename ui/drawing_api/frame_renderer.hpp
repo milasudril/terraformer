@@ -63,7 +63,7 @@ namespace terraformer::ui::drawing_api
 		gl_mesh<unsigned int> m_mesh{
 			std::array<unsigned int, 12>{
 				0, 1, 2, 2, 1, 3,
-				4, 6, 5, 5, 6, 7
+				4, 5, 6, 6, 5, 7
 			}
 		};
 
@@ -95,10 +95,10 @@ const vec4 coords[8] = vec4[8](
 	vec4(0.5f, 0.5f, 0.0f, 1.0f),
 
 	// Left
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, -0.5f, 0.0f, 1.0f)
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f)
 );
 
 const vec4 offsets[8] = vec4[8](
@@ -110,16 +110,16 @@ const vec4 offsets[8] = vec4[8](
 
 	// Left
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(1.0f, -1.0f, 0.0f, 0.0f),
+	vec4(1.0f, 1.0f, 0.0f, 0.0f),
 	vec4(0.0f, 0.0f, 0.0f, 0.0f),
-	vec4(1.0f, 1.0f, 0.0f, 0.0f)
+	vec4(1.0f, -1.0f, 0.0f, 0.0f)
 );
 
 const int tint_map[16] = int[16](
 	0, 4, 1, 5,
-	0, 4, 2, 6,
+	2, 6, 0, 4,
 	3, 7, 2, 6,
-	3, 7, 1, 5
+	1, 5, 3, 7
 );
 
 void main()
