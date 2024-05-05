@@ -100,8 +100,6 @@ namespace terraformer::ui::widgets
 				auto const w = static_cast<uint32_t>(descriptor.width);
 				auto const h = static_cast<uint32_t>(descriptor.height);
 
-				printf("%p creating texture of size %ux%u\n", this, w, h);
-
 				image img{w, h};
 				for(uint32_t y = 0; y != h; ++y)
 				{
@@ -141,7 +139,6 @@ namespace terraformer::ui::widgets
 				m_dirty = false;
 			}
 
-			printf("%p setting values in %p\n",this, &output_rect);
 			output_rect.thickness = 4.0f;
 			output_rect.texture = &m_background;
 			output_rect.tints = std::array{
