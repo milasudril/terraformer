@@ -180,7 +180,7 @@ void main()
 	gl_Position = world_location + world_scale*(loc - world_origin);
 
 	const float length = (gl_VertexID < 4) ? model_size.x : model_size.y;
-	const vec2 uv_scale = vec2(length - 2.0f*thickness, thickness);
+	const vec2 uv_scale = vec2((gl_VertexID < 8)? length - 2.0f*thickness: thickness, thickness);
 	const int segment_index = 2*gl_InstanceID + gl_VertexID/4;
 	uv = float(segment_index)*vec2(0.0f, thickness) + uv_scale*uv_coords[gl_VertexID&0x3];
 
