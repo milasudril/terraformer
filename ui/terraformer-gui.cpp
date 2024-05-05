@@ -64,7 +64,7 @@ int main(int, char**)
 	my_workspace.append(
 		std::ref(foo),
 		terraformer::ui::main::widget_geometry{
-			.where = terraformer::location{50.0f, -25.0f, 0.0f},
+			.where = terraformer::location{150.0f, -125.0f, 0.0f},
 			.origin = terraformer::location{-1.0f, 1.0f, 0.0f},
 			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
 		}
@@ -73,7 +73,7 @@ int main(int, char**)
 	my_workspace.append(
 		std::ref(bar),
 		terraformer::ui::main::widget_geometry{
-			.where = terraformer::location{250.0f, -25.0f, 0.0f},
+			.where = terraformer::location{350.0f, -125.0f, 0.0f},
 			.origin = terraformer::location{-1.0f, 1.0f, 0.0f},
 			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
 		}

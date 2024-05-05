@@ -99,15 +99,15 @@ const vec4 coords[8] = vec4[8](
 
 const vec4 offsets[8] = vec4[8](
 	// Top
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(1.0f, 0.0f, 0.0f, 0.0f),
 	vec4(1.0f, -1.0f, 0.0f, 0.0f),
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(-1.0f, 0.0f, 0.0f, 0.0f),
 	vec4(-1.0f, -1.0f, 0.0f, 0.0f),
 
 	// Left
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(0.0f, 1.0f, 0.0f, 0.0f),
 	vec4(1.0f, 1.0f, 0.0f, 0.0f),
-	vec4(0.0f, 0.0f, 0.0f, 0.0f),
+	vec4(0.0f, -1.0f, 0.0f, 0.0f),
 	vec4(1.0f, -1.0f, 0.0f, 0.0f)
 );
 
@@ -127,16 +127,9 @@ const int tint_map[16] = int[16](
 
 const vec2 uv_coords[4] = vec2[4](
 	vec2(0.0f, 0.0f),
-	vec2(0.0f, 0.0f),
+	vec2(0.0f, 1.0f),
 	vec2(1.0f, 0.0f),
-	vec2(1.0f, 0.0f)
-);
-
-const vec2 uv_offsets[4] = vec2[4](
-	vec2(0.0f, 0.0f),
-	vec2(1.0f, 1.0f),
-	vec2(0.0f, 0.0f),
-	vec2(-1.0f, 1.0f)
+	vec2(1.0f, 1.0f)
 );
 
 void main()
@@ -149,13 +142,9 @@ void main()
 	gl_Position = world_location + world_scale*(loc - world_origin);
 
 	const float length = (gl_VertexID < 4) ? model_size.x : model_size.y;
-	const vec2 uv_scale = vec2(length, thickness);
-
+	const vec2 uv_scale = vec2(length - 2.0f*thickness, thickness);
 	const int segment_index = 2*gl_InstanceID + gl_VertexID/4;
-
-	uv = float(segment_index)*vec2(0.0f, thickness)
-		+ uv_scale*uv_coords[gl_VertexID&0x3] + thickness*uv_offsets[gl_VertexID&0x3];
-
+	uv = float(segment_index)*vec2(0.0f, thickness) + uv_scale*uv_coords[gl_VertexID&0x3];
 
 	const int tint_index = 8*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];
