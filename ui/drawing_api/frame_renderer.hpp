@@ -149,7 +149,13 @@ void main()
 
 	const float length = (gl_VertexID < 4) ? model_size.x : model_size.y;
 	const vec2 uv_scale = vec2(length, thickness);
-	uv = uv_scale*uv_coords[gl_VertexID&0x3] + thickness*uv_offsets[gl_VertexID&0x3];
+
+	const int segment_index = 2*gl_InstanceID + gl_VertexID/4;
+
+	uv = float(segment_index)*vec2(0.0f, thickness)
+		+ uv_scale*uv_coords[gl_VertexID&0x3] + thickness*uv_offsets[gl_VertexID&0x3];
+
+
 	const int tint_index = 8*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];
 })"
