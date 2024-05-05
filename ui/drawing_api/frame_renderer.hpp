@@ -126,19 +126,18 @@ const int tint_map[16] = int[16](
 
 const vec2 uv_coords[4] = vec2[4](
 	vec2(0.0f, 0.0f),
-	vec2(0.0f, 1.0f),
+	vec2(0.0f, 0.0f),
 	vec2(1.0f, 0.0f),
-	vec2(1.0f, 1.0f)
+	vec2(1.0f, 0.0f)
 );
 
-/*
 const vec2 uv_offsets[4] = vec2[4](
 	vec2(0.0f, 0.0f),
 	vec2(1.0f, 1.0f),
 	vec2(0.0f, 0.0f),
 	vec2(-1.0f, 1.0f)
 );
-*/
+
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
@@ -150,7 +149,7 @@ void main()
 
 	const float length = (gl_VertexID < 4) ? model_size.x : model_size.y;
 	const vec2 uv_scale = vec2(length, thickness);
-	uv = uv_scale*uv_coords[gl_VertexID&0x3];
+	uv = uv_scale*uv_coords[gl_VertexID&0x3] + thickness*uv_offsets[gl_VertexID&0x3];
 	const int tint_index = 8*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];
 })"
