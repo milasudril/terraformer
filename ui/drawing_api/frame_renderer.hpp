@@ -63,9 +63,10 @@ namespace terraformer::ui::drawing_api
 
 	private:
 		gl_mesh<unsigned int> m_mesh{
-			std::array<unsigned int, 12>{
+			std::array<unsigned int, 18>{
 				0, 1, 2, 2, 1, 3,
-				4, 5, 6, 6, 5, 7
+				4, 5, 6, 6, 5, 7,
+				8, 9, 10, 10, 9, 11
 			}
 		};
 
@@ -83,7 +84,7 @@ layout (location = 6) uniform vec4 tints[8];
 out vec2 uv;
 out vec4 tint;
 
-const vec4 coords[8] = vec4[8](
+const vec4 coords[12] = vec4[12](
 	// Top
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
@@ -94,10 +95,16 @@ const vec4 coords[8] = vec4[8](
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+
+	// Top corner
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f)
 );
 
-const vec4 offsets[8] = vec4[8](
+const vec4 offsets[12] = vec4[12](
 	// Top
 	vec4(1.0f, 0.0f, 0.0f, 0.0f),
 	vec4(1.0f, -1.0f, 0.0f, 0.0f),
@@ -108,21 +115,33 @@ const vec4 offsets[8] = vec4[8](
 	vec4(0.0f, 1.0f, 0.0f, 0.0f),
 	vec4(1.0f, 1.0f, 0.0f, 0.0f),
 	vec4(0.0f, -1.0f, 0.0f, 0.0f),
-	vec4(1.0f, -1.0f, 0.0f, 0.0f)
+	vec4(1.0f, -1.0f, 0.0f, 0.0f),
+
+	// Top corner
+	vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	vec4(0.0f, -1.0f, 0.0f, 1.0f),
+	vec4(1.0f, 0.0f, 0.0f, 1.0f),
+	vec4(1.0f, -1.0f, 0.0f, 1.0f)
 );
 
-const int tint_map[16] = int[16](
+const int tint_map[24] = int[24](
 	// Top
 	0, 4, 1, 5,
 
 	// Left
 	2, 6, 0, 4,
 
+	// Top-left corner
+	0, 0, 0, 4,
+
 	// Bottom
 	3, 7, 2, 6,
 
 	// Right
-	1, 5, 3, 7
+	1, 5, 3, 7,
+
+	// Bottom-right corner
+	3, 3, 3, 7
 );
 
 const vec2 uv_coords[4] = vec2[4](
@@ -146,7 +165,7 @@ void main()
 	const int segment_index = 2*gl_InstanceID + gl_VertexID/4;
 	uv = float(segment_index)*vec2(0.0f, thickness) + uv_scale*uv_coords[gl_VertexID&0x3];
 
-	const int tint_index = 8*gl_InstanceID + gl_VertexID;
+	const int tint_index = 12*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];
 })"
 			},
@@ -159,7 +178,8 @@ in vec4 tint;
 
 void main()
 {
-	fragment_color = texture(tex, uv/textureSize(tex, 0))*tint;
+//	fragment_color = texture(tex, uv/textureSize(tex, 0))*tint;
+	fragment_color = tint;
 })"}
 		};
 	};
