@@ -63,10 +63,11 @@ namespace terraformer::ui::drawing_api
 
 	private:
 		gl_mesh<unsigned int> m_mesh{
-			std::array<unsigned int, 18>{
+			std::array<unsigned int, 24>{
 				0, 1, 2, 2, 1, 3,
 				4, 5, 6, 6, 5, 7,
-				8, 9, 10, 10, 9, 11
+				8, 9, 10, 10, 9, 11,
+				12, 13, 14, 14, 13, 15
 			}
 		};
 
@@ -84,7 +85,7 @@ layout (location = 6) uniform vec4 tints[8];
 out vec2 uv;
 out vec4 tint;
 
-const vec4 coords[12] = vec4[12](
+const vec4 coords[16] = vec4[16](
 	// Top
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
@@ -101,10 +102,16 @@ const vec4 coords[12] = vec4[12](
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f)
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+
+	// Bottom corner
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f)
 );
 
-const vec4 offsets[12] = vec4[12](
+const vec4 offsets[16] = vec4[16](
 	// Top
 	vec4(1.0f, 0.0f, 0.0f, 0.0f),
 	vec4(1.0f, -1.0f, 0.0f, 0.0f),
@@ -121,10 +128,16 @@ const vec4 offsets[12] = vec4[12](
 	vec4(0.0f, 0.0f, 0.0f, 1.0f),
 	vec4(0.0f, -1.0f, 0.0f, 1.0f),
 	vec4(1.0f, 0.0f, 0.0f, 1.0f),
-	vec4(1.0f, -1.0f, 0.0f, 1.0f)
+	vec4(1.0f, -1.0f, 0.0f, 1.0f),
+
+	// Bottom corner
+	vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	vec4(1.0f, 0.0f, 0.0f, 1.0f),
+	vec4(0.0f, 1.0f, 0.0f, 1.0f),
+	vec4(1.0f, 1.0f, 0.0f, 1.0f)
 );
 
-const int tint_map[24] = int[24](
+const int tint_map[32] = int[32](
 	// Top
 	0, 4, 1, 5,
 
@@ -134,6 +147,9 @@ const int tint_map[24] = int[24](
 	// Top-left corner
 	0, 0, 0, 4,
 
+	// Bottom-left corner
+	2, 2, 2, 6,
+
 	// Bottom
 	3, 7, 2, 6,
 
@@ -141,7 +157,10 @@ const int tint_map[24] = int[24](
 	1, 5, 3, 7,
 
 	// Bottom-right corner
-	3, 3, 3, 7
+	3, 3, 3, 7,
+
+	// Top-right corner
+	1, 1, 1, 5
 );
 
 const vec2 uv_coords[4] = vec2[4](
@@ -165,7 +184,7 @@ void main()
 	const int segment_index = 2*gl_InstanceID + gl_VertexID/4;
 	uv = float(segment_index)*vec2(0.0f, thickness) + uv_scale*uv_coords[gl_VertexID&0x3];
 
-	const int tint_index = 12*gl_InstanceID + gl_VertexID;
+	const int tint_index = 16*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];
 })"
 			},
