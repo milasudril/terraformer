@@ -13,6 +13,8 @@
 #include "./theming/cursor_set.hpp"
 #include "./theming/default_stock_textures_repo.hpp"
 
+#include "lib/pixel_store/image_io.hpp"
+
 namespace
 {
 	struct window_controller
@@ -89,8 +91,11 @@ int main(int, char**)
 	};
 
 	auto const& widget_look = terraformer::ui::theming::default_widget_look;
-	auto const texture_repo =
+	auto texture_repo =
 		terraformer::ui::main::generate_default_stock_textures<terraformer::ui::drawing_api::gl_texture>();
+
+	auto const frame_image = load(terraformer::empty<terraformer::image>{}, "ui/drawing_api/test_frame.exr");
+	texture_repo.main_panel_background = std::move(terraformer::ui::drawing_api::gl_texture{}.upload(frame_image.pixels(), 8));
 
 	auto const default_cursor = terraformer::ui::theming::create_cursor(
 		gui_ctxt,
