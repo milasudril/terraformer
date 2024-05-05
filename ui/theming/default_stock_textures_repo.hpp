@@ -47,6 +47,27 @@ namespace terraformer::ui::main
 	}
 
 	template<class DrawingSurface>
+	auto generate_test_pattern()
+	{
+		terraformer::image img{256, 256};
+
+		for(uint32_t y = 0; y != img.height(); ++y)
+		{
+			for(uint32_t x = 0; x != img.width(); ++x)
+			{
+				auto const row = y/16;
+				auto const col = x/32;
+				if((row%2 == 0 && col%2 == 1) || (row%2 == 1 && col%2 == 0))
+				{ img(x, y) = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f}; }
+				else
+				{ img(x, y) = rgba_pixel{0.25f, 0.25f, 0.25f, 1.0f}; }
+			}
+		}
+
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 8));
+	}
+
+	template<class DrawingSurface>
 	auto generate_transparent_texture()
 	{
 		terraformer::image img{1, 1};
@@ -67,7 +88,7 @@ namespace terraformer::ui::main
 	{
 		return default_stock_textures_repo{
 			.none = generate_transparent_texture<DrawingSurface>(),
-			.main_panel_background = generate_noisy_texture<DrawingSurface>(),
+			.main_panel_background = generate_test_pattern<DrawingSurface>(),
 			.other_panel_background = generate_noisy_texture<DrawingSurface>(),
 			.input_area_background = generate_white_texture<DrawingSurface>(),
 			.command_area_background = generate_white_texture<DrawingSurface>(),

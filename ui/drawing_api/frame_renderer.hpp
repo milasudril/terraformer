@@ -37,7 +37,7 @@ namespace terraformer::ui::drawing_api
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, 50.0f)
+				.set_uniform(5, 96.0f)
 				.set_uniform(6, rect.tints)
 				.bind();
 
@@ -82,13 +82,6 @@ layout (location = 6) uniform vec4 tints[8];
 out vec2 uv;
 out vec4 tint;
 
-const vec2 uv_coords[4] = vec2[4](
-	vec2(0.0f, 0.0f),
-	vec2(0.0f, 1.0f),
-	vec2(1.0f, 0.0f),
-	vec2(1.0f, 1.0f)
-);
-
 const vec4 coords[8] = vec4[8](
 	// Top
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
@@ -131,6 +124,21 @@ const int tint_map[16] = int[16](
 	1, 5, 3, 7
 );
 
+const vec2 uv_coords[4] = vec2[4](
+	vec2(0.0f, 0.0f),
+	vec2(0.0f, 1.0f),
+	vec2(1.0f, 0.0f),
+	vec2(1.0f, 1.0f)
+);
+
+/*
+const vec2 uv_offsets[4] = vec2[4](
+	vec2(0.0f, 0.0f),
+	vec2(1.0f, 1.0f),
+	vec2(0.0f, 0.0f),
+	vec2(-1.0f, 1.0f)
+);
+*/
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
@@ -139,7 +147,10 @@ void main()
 		+ model_size*(sign*coords[gl_VertexID] - model_origin)
 		+ sign*thickness*offsets[gl_VertexID];
 	gl_Position = world_location + world_scale*(loc - world_origin);
-	uv = model_size.xy*uv_coords[gl_VertexID&0x3];
+
+	const float length = (gl_VertexID < 4) ? model_size.x : model_size.y;
+	const vec2 uv_scale = vec2(length, thickness);
+	uv = uv_scale*uv_coords[gl_VertexID&0x3];
 	const int tint_index = 8*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];
 })"
@@ -153,9 +164,7 @@ in vec4 tint;
 
 void main()
 {
-	//vec4 bg = texture(tex, uv/textureSize(tex, 0))*tint;
-
-	fragment_color = tint;
+	fragment_color = texture(tex, uv/textureSize(tex, 0))*tint;
 })"}
 		};
 	};
