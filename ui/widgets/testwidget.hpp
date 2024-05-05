@@ -142,7 +142,8 @@ namespace terraformer::ui::widgets
 			}
 
 			printf("%p setting values in %p\n",this, &output_rect);
-			output_rect.texture = &m_foreground;
+			output_rect.thickness = 4.0f;
+			output_rect.texture = &m_background;
 			output_rect.tints = std::array{
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
