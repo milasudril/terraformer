@@ -98,17 +98,17 @@ const vec4 coords[16] = vec4[16](
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
 
-	// Top corner
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
-
 	// Bottom corner
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
 	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
-	vec4(-0.5f, -0.5f, 0.0f, 1.0f)
+	vec4(-0.5f, -0.5f, 0.0f, 1.0f),
+
+	// Top corner
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f),
+	vec4(-0.5f, 0.5f, 0.0f, 1.0f)
 );
 
 const vec4 offsets[16] = vec4[16](
@@ -124,17 +124,17 @@ const vec4 offsets[16] = vec4[16](
 	vec4(0.0f, -1.0f, 0.0f, 0.0f),
 	vec4(1.0f, -1.0f, 0.0f, 0.0f),
 
-	// Top corner
-	vec4(0.0f, 0.0f, 0.0f, 1.0f),
-	vec4(0.0f, -1.0f, 0.0f, 1.0f),
-	vec4(1.0f, 0.0f, 0.0f, 1.0f),
-	vec4(1.0f, -1.0f, 0.0f, 1.0f),
-
 	// Bottom corner
 	vec4(0.0f, 0.0f, 0.0f, 1.0f),
 	vec4(1.0f, 0.0f, 0.0f, 1.0f),
 	vec4(0.0f, 1.0f, 0.0f, 1.0f),
-	vec4(1.0f, 1.0f, 0.0f, 1.0f)
+	vec4(1.0f, 1.0f, 0.0f, 1.0f),
+
+	// Top corner
+	vec4(0.0f, 0.0f, 0.0f, 1.0f),
+	vec4(0.0f, -1.0f, 0.0f, 1.0f),
+	vec4(1.0f, 0.0f, 0.0f, 1.0f),
+	vec4(1.0f, -1.0f, 0.0f, 1.0f)
 );
 
 const int tint_map[32] = int[32](
@@ -144,11 +144,11 @@ const int tint_map[32] = int[32](
 	// Left
 	2, 6, 0, 4,
 
-	// Top-left corner
-	0, 0, 0, 4,
-
 	// Bottom-left corner
 	2, 2, 2, 6,
+
+	// Top-left corner
+	0, 0, 0, 4,
 
 	// Bottom
 	3, 7, 2, 6,
@@ -156,11 +156,11 @@ const int tint_map[32] = int[32](
 	// Right
 	1, 5, 3, 7,
 
-	// Bottom-right corner
-	3, 3, 3, 7,
-
 	// Top-right corner
-	1, 1, 1, 5
+	1, 1, 1, 5,
+
+	// Bottom-right corner
+	3, 3, 3, 7
 );
 
 const vec2 uv_coords[4] = vec2[4](
