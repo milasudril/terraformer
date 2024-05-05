@@ -15,6 +15,7 @@ namespace terraformer::ui::drawing_api
 	public:
 		struct input_rectangle
 		{
+			float thickness;
 			gl_texture const* texture;
 			std::array<rgba_pixel, 8> tints;
 		};
@@ -37,7 +38,7 @@ namespace terraformer::ui::drawing_api
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, 96.0f)
+				.set_uniform(5, rect.thickness)
 				.set_uniform(6, rect.tints)
 				.bind();
 
