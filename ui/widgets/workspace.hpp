@@ -37,11 +37,11 @@ namespace terraformer::ui::widgets
 				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
 				rgba_pixel{1.0f, 0.0f, 0.0f, 1.0f},
 				rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f},
-				rgba_pixel{1.0f, 1.0f, 0.0f, 1.0f},
 				rgba_pixel{0.0f, 0.0f, 1.0f, 1.0f},
-				rgba_pixel{1.0f, 0.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 				rgba_pixel{0.0f, 1.0f, 1.0f, 1.0f},
-				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+				rgba_pixel{1.0f, 0.0f, 1.0f, 1.0f},
+				rgba_pixel{1.0f, 1.0f, 0.0f, 1.0f},
 			};
 			render_widgets<0>(m_widgets, textures, look);
 		}

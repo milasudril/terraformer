@@ -37,11 +37,12 @@ namespace terraformer::ui::drawing_api
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, rect.tints)
+				.set_uniform(5, 50.0f)
+				.set_uniform(6, rect.tints)
 				.bind();
 
 			assert(rect.texture != nullptr);
-			rect.texture -> bind(0);
+			rect.texture->bind(0);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles_repeatedly(2);
@@ -75,7 +76,8 @@ layout (location = 1) uniform vec4 model_origin;
 layout (location = 2) uniform vec4 model_size;
 layout (location = 3) uniform vec4 world_location;
 layout (location = 4) uniform vec4 world_scale;
-layout (location = 5) uniform vec4 tints[8];
+layout (location = 5) uniform float thickness;
+layout (location = 6) uniform vec4 tints[8];
 
 out vec2 uv;
 out vec4 tint;
@@ -116,16 +118,22 @@ const vec4 offsets[8] = vec4[8](
 );
 
 const int tint_map[16] = int[16](
+	// Top
 	0, 4, 1, 5,
+
+	// Left
 	2, 6, 0, 4,
+
+	// Bottom
 	3, 7, 2, 6,
+
+	// Right
 	1, 5, 3, 7
 );
 
 void main()
 {
 	const vec4 world_origin = vec4(0.0, 0.0, 0.0, 1.0);
-	const float thickness = 200.0f;
 	const float sign = ((gl_InstanceID&0x1) == 0x1)? -1.0f : 1.0f;
 	vec4 loc = model_location
 		+ model_size*(sign*coords[gl_VertexID] - model_origin)
@@ -138,17 +146,14 @@ void main()
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
 out vec4 fragment_color;
-layout (binding = 0) uniform sampler2D background;
-layout (binding = 1) uniform sampler2D foreground;
-layout (location = 13) uniform vec4 fg_bg_separator[2];
+layout (binding = 0) uniform sampler2D tex;
 
 in vec2 uv;
 in vec4 tint;
 
 void main()
 {
-	//vec4 bg = texture(background, uv/textureSize(background, 0))*background_tint;
-	//vec4 fg = texture(foreground, uv/textureSize(foreground, 0))*foreground_tint;
+	//vec4 bg = texture(tex, uv/textureSize(tex, 0))*tint;
 
 	fragment_color = tint;
 })"}
