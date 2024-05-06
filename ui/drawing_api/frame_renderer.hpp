@@ -185,10 +185,9 @@ void main()
 	const vec2 uv_scale = vec2((gl_VertexID < 8)? length - 2.0f*thickness: thickness, thickness);
 	const int quad_index = gl_VertexID/4;
 	const int segment_index = 2*gl_InstanceID + quad_index;
-	uv = ((gl_VertexID < 8) ?
-			float(segment_index)*vec2(0.0f, thickness) + uv_scale*uv_coords[gl_VertexID&0x3]:
-			thickness*(vec2(float(segment_index - 2), 4.0f) + uv_coords[gl_VertexID&0x3])
-		)/textureSize(tex, 0);
+	uv = (gl_VertexID < 8) ?
+		(float(segment_index)*vec2(0.0f, thickness) + uv_scale*uv_coords[gl_VertexID&0x3])/textureSize(tex, 0):
+		vec2(0.25f*float(segment_index - 2), 0.8f) + vec2(0.25f, 0.2f)*uv_coords[gl_VertexID&0x3];
 
 	const int tint_index = 16*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];
