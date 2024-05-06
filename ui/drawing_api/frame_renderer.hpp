@@ -82,6 +82,8 @@ layout (location = 4) uniform vec4 world_scale;
 layout (location = 5) uniform float thickness;
 layout (location = 6) uniform vec4 tints[8];
 
+layout (binding = 0) uniform sampler2D tex;
+
 out vec2 uv;
 out vec4 tint;
 
@@ -183,9 +185,10 @@ void main()
 	const vec2 uv_scale = vec2((gl_VertexID < 8)? length - 2.0f*thickness: thickness, thickness);
 	const int quad_index = gl_VertexID/4;
 	const int segment_index = 2*gl_InstanceID + quad_index;
-	uv = (gl_VertexID < 8) ?
-		float(segment_index)*vec2(0.0f, thickness) + uv_scale*uv_coords[gl_VertexID&0x3]:
-		thickness*(vec2(float(segment_index - 2), 4.0f) + uv_coords[gl_VertexID&0x3]);
+	uv = ((gl_VertexID < 8) ?
+			float(segment_index)*vec2(0.0f, thickness) + uv_scale*uv_coords[gl_VertexID&0x3]:
+			thickness*(vec2(float(segment_index - 2), 4.0f) + uv_coords[gl_VertexID&0x3])
+		)/textureSize(tex, 0);
 
 	const int tint_index = 16*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];
@@ -200,7 +203,7 @@ in vec4 tint;
 
 void main()
 {
-	fragment_color = texture(tex, uv/textureSize(tex, 0))*tint;
+	fragment_color = texture(tex, uv)*tint;
 })"}
 		};
 	};
