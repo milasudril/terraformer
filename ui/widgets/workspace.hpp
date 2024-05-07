@@ -25,6 +25,33 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
+		template<class Something>
+		void render(
+			Something& output_rect,
+			texture_repo const& textures,
+			theming::widget_look const& look
+		)
+		{
+			output_rect.background = &textures.main_panel_background;
+			output_rect.foreground = &textures.none;
+
+			output_rect.foreground_tints = std::array{
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
+			};
+
+			output_rect.background_tints = std::array{
+				look.colors.main_panel.background,
+				look.colors.main_panel.background,
+				look.colors.main_panel.background,
+				look.colors.main_panel.background
+			};
+
+ 			render_widgets<0>(m_widgets, textures, look);
+ 		}
+
 		void render(
 			output_rectangle& output_rect,
 			texture_repo const& textures,
