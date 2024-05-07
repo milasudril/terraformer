@@ -31,7 +31,7 @@ namespace terraformer::ui::widgets
 			theming::widget_look const& look
 		)
 		{
-			output_rect.thickness = 24.0f;
+			output_rect.thickness = 50.0f;
 			output_rect.texture = &textures.main_panel_background;
 			output_rect.tints = std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},

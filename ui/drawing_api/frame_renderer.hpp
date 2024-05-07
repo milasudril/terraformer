@@ -186,12 +186,12 @@ void main()
 	const vec2 tex_size = textureSize(tex, 0);
 	const float texture_width = tex_size.x;
 	const float texture_height = tex_size.y;
-	const float uv_horz_scale = 0.2f*texture_height/thickness;
-	const vec2 uv_scale = vec2((gl_VertexID < 8)? uv_horz_scale*seg_length/texture_width : thickness, 0.2f);
+	const float uv_horz_scale = 0.2f*texture_height*seg_length/(texture_width * thickness);
+	const vec2 uv_scale = vec2((gl_VertexID < 8)? uv_horz_scale : thickness, 0.2f);
 	const int quad_index = gl_VertexID/4;
 	const int segment_index = 2*gl_InstanceID + quad_index;
 	uv = (gl_VertexID < 8) ?
-		(vec2(-0.5f*uv_horz_scale*seg_length/texture_width, float(segment_index)*0.2f) + uv_scale*uv_coords[gl_VertexID&0x3]) + vec2(0.5f, 0.0f):
+		(vec2(-0.5f, float(segment_index)) + uv_coords[gl_VertexID&0x3])*uv_scale + vec2(0.5f, 0.0f):
 		vec2(0.25f*float(segment_index - 2), 0.8f) + vec2(0.25f, 0.2f)*uv_coords[gl_VertexID&0x3];
 
 	const int tint_index = 16*gl_InstanceID + gl_VertexID;
