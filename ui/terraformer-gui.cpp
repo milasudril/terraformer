@@ -60,7 +60,7 @@ int main(int, char**)
 
 	terraformer::ui::widgets::workspace<
 		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>,
-		terraformer::ui::drawing_api::frame_renderer::input_rectangle
+		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
 	> my_workspace;
 
 	my_workspace.append(
@@ -81,7 +81,7 @@ int main(int, char**)
 		}
 	);
 
-	terraformer::ui::drawing_api::frame_renderer renderer{};
+	terraformer::ui::drawing_api::single_quad_renderer renderer{};
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		std::ref(my_workspace),
@@ -93,9 +93,6 @@ int main(int, char**)
 	auto const& widget_look = terraformer::ui::theming::default_widget_look;
 	auto texture_repo =
 		terraformer::ui::main::generate_default_stock_textures<terraformer::ui::drawing_api::gl_texture>();
-
-	auto const frame_image = load(terraformer::empty<terraformer::image>{}, "ui/drawing_api/test_frame.exr");
-	texture_repo.main_panel_background = std::move(terraformer::ui::drawing_api::gl_texture{}.upload(frame_image.pixels(), 8));
 
 	auto const default_cursor = terraformer::ui::theming::create_cursor(
 		gui_ctxt,

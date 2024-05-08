@@ -92,7 +92,7 @@ namespace terraformer::ui::main
 	{
 		return default_stock_textures_repo{
 			.none = generate_transparent_texture<DrawingSurface>(),
-			.main_panel_background = generate_test_pattern<DrawingSurface>(),
+			.main_panel_background = generate_noisy_texture<DrawingSurface>(),
 			.other_panel_background = generate_noisy_texture<DrawingSurface>(),
 			.input_area_background = generate_white_texture<DrawingSurface>(),
 			.command_area_background = generate_white_texture<DrawingSurface>(),

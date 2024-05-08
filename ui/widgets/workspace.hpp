@@ -25,9 +25,8 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		template<class Something>
 		void render(
-			Something& output_rect,
+			output_rectangle& output_rect,
 			texture_repo const& textures,
 			theming::widget_look const& look
 		)
@@ -51,27 +50,6 @@ namespace terraformer::ui::widgets
 
  			render_widgets<0>(m_widgets, textures, look);
  		}
-
-		void render(
-			output_rectangle& output_rect,
-			texture_repo const& textures,
-			theming::widget_look const& look
-		)
-		{
-			output_rect.thickness = 50.0f;
-			output_rect.texture = &textures.main_panel_background;
-			output_rect.tints = std::array{
-				rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
-				rgba_pixel{1.0f, 0.0f, 0.0f, 1.0f},
-				rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f},
-				rgba_pixel{0.0f, 0.0f, 1.0f, 1.0f},
-				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-				rgba_pixel{0.0f, 1.0f, 1.0f, 1.0f},
-				rgba_pixel{1.0f, 0.0f, 1.0f, 1.0f},
-				rgba_pixel{1.0f, 1.0f, 0.0f, 1.0f},
-			};
-			render_widgets<0>(m_widgets, textures, look);
-		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const&)
 		{ }
