@@ -161,6 +161,30 @@ namespace terraformer::ui::main
 		}
 	}
 
+	template<class Renderer, class TextureRepo, class ...WidgetRenderingResult, class OutputRectangle>
+	void decorate_widgets(Renderer&& renderer,
+		widget_list<TextureRepo, WidgetRenderingResult...> const& widgets,
+		OutputRectangle const& rect
+	)
+	{
+		auto const widget_geometries = widgets.widget_geometries();
+		auto const widget_visibilities = widgets.widget_visibilities();
+
+		auto const n = std::size(widgets);
+		for(auto k  = widgets.first_element_index(); k != n; ++k)
+		{
+			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
+			{
+				renderer.render(
+					widget_geometries[k].where,
+					widget_geometries[k].origin,
+					widget_geometries[k].size,
+					rect
+				);
+			}
+		}
+	}
+
 	inline auto find(wsapi::cursor_position pos, span<widget_geometry const> geoms)
 	{
 		return std::ranges::find_if(

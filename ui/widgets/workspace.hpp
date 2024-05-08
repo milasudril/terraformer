@@ -7,9 +7,16 @@
 
 namespace terraformer::ui::widgets
 {
-	template<class ... Args>
-	void do_show_widgets(Args&&... args)
-	{ show_widgets<0>(std::forward<Args>(args)...); }
+	namespace detail
+	{
+		template<class ... Args>
+		void do_show_widgets(Args&&... args)
+		{ show_widgets<0>(std::forward<Args>(args)...); }
+
+		template<class ... Args>
+		void do_decorate_widgets(Args&&... args)
+		{ decorate_widgets(std::forward<Args>(args)...); }
+	}
 
 	template<class TextureRepo, class WidgetRenderingResult>
 	class workspace
@@ -134,7 +141,28 @@ namespace terraformer::ui::widgets
 
 		template<class Renderer>
 		void show_widgets(Renderer&& renderer)
-		{ do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
+		{ detail::do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
+
+		template<class Renderer>
+		void decorate_widgets(Renderer&& renderer, texture_repo const& textures, theming::widget_look const& look)
+		{
+			auto const tint = look.interactive_frame.color;
+			typename dereferenced_type<Renderer>::input_rectangle output_rect{
+				.thickness = look.interactive_frame.thickness,
+				.texture = &textures.other_panel_background,
+				.tints = std::array{
+					tint,
+					tint,
+					tint,
+					tint,
+					tint,
+					tint,
+					tint,
+					tint
+				}
+			};
+			detail::do_decorate_widgets(std::forward<Renderer>(renderer), m_widgets, output_rect);
+		}
 
 	private:
 		using widget_list = main::widget_list<TextureRepo, WidgetRenderingResult>;

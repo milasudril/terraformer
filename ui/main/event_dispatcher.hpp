@@ -8,22 +8,36 @@
 
 namespace terraformer::ui::main
 {
-	template<class WidgetContainer, class WindowController, class Renderer, class ErrorHandler>
+	template<
+		class WidgetContainer,
+		class WindowController,
+		class ContentRenderer,
+		class FrameRenderer,
+		class ErrorHandler
+	>
 	class event_dispatcher
 	{
 	public:
-		template<class T1, class T2, class T3, class T4>
+		template<class T1, class T2, class T3, class T4, class T5>
 		requires(
 				 std::is_same_v<std::remove_cvref_t<T1>, WidgetContainer>
 			&& std::is_same_v<std::remove_cvref_t<T2>, WindowController>
-			&& std::is_same_v<std::remove_cvref_t<T3>, Renderer>
-			&& std::is_same_v<std::remove_cvref_t<T4>, ErrorHandler>
+			&& std::is_same_v<std::remove_cvref_t<T3>, ContentRenderer>
+			&& std::is_same_v<std::remove_cvref_t<T4>, FrameRenderer>
+			&& std::is_same_v<std::remove_cvref_t<T5>, ErrorHandler>
 		)
-		explicit event_dispatcher(T1&& widget_container, T2&& window_controller, T3&& renderer, T4&& error_handler):
+		explicit event_dispatcher(
+			T1&& widget_container,
+			T2&& window_controller,
+			T3&& content_renderer,
+			T4&& frame_renderer,
+			T5&& error_handler
+		):
 			m_widget_container{std::forward<T1>(widget_container)},
 			m_window_controller{std::forward<T2>(window_controller)},
-			m_renderer{std::forward<T3>(renderer)},
-			m_error_handler{std::forward<T4>(error_handler)}
+			m_content_renderer{std::forward<T3>(content_renderer)},
+			m_frame_renderer{std::forward<T4>(frame_renderer)},
+			m_error_handler{std::forward<T5>(error_handler)}
 		{}
 
 		template<auto WindowId>
@@ -50,7 +64,7 @@ namespace terraformer::ui::main
 		void framebuffer_size_changed(ui::wsapi::fb_size size)
 		{
 			m_fb_size = size;
-			value_of(m_renderer)
+			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
 			value_of(m_widget_container).handle_event(size);
@@ -59,7 +73,7 @@ namespace terraformer::ui::main
 		template<class Viewport, class TextureRepo, class ... Overlay>
 		bool operator()(Viewport&& viewport, TextureRepo const& textures, theming::widget_look const& look, Overlay&&... overlay)
 		{
-			value_of(m_renderer).clear_buffers();
+			value_of(m_content_renderer).clear_buffers();
 			render(textures, look);
 			(...,overlay());
 			value_of(viewport).swap_buffers();
@@ -70,27 +84,35 @@ namespace terraformer::ui::main
 		void render(TextureRepo const& textures, theming::widget_look const& look)
 		{
 			value_of(m_widget_container).render(m_output_rectangle, textures, look);
-			value_of(m_renderer).render(
+			value_of(m_content_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},
 				scaling{static_cast<float>(m_fb_size.width), static_cast<float>(m_fb_size.height), 1.0f},
 				m_output_rectangle
 			);
-			value_of(m_widget_container).show_widgets(value_of(m_renderer));
+			value_of(m_widget_container).show_widgets(value_of(m_content_renderer));
+			value_of(m_widget_container).decorate_widgets(value_of(m_frame_renderer), textures, look);
 		}
 
 	private:
 		wsapi::fb_size m_fb_size{};
 		WidgetContainer m_widget_container;
 		WindowController m_window_controller;
-		typename dereferenced_type<Renderer>::input_rectangle m_output_rectangle;
-		Renderer m_renderer;
+		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle;
+		ContentRenderer m_content_renderer;
+		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
 	};
 
-	template<class T1, class T2, class T3, class T4>
-	event_dispatcher(T1&&, T2&&, T3&&, T4&&) ->
-	event_dispatcher<std::remove_cvref_t<T1>, std::remove_cvref_t<T2>, std::remove_cvref_t<T3>, std::remove_cvref_t<T4>>;
+	template<class T1, class T2, class T3, class T4, class T5>
+	event_dispatcher(T1&&, T2&&, T3&&, T4&&, T5&&) ->
+		event_dispatcher<
+			std::remove_cvref_t<T1>,
+			std::remove_cvref_t<T2>,
+			std::remove_cvref_t<T3>,
+			std::remove_cvref_t<T4>,
+			std::remove_cvref_t<T5>
+		>;
 }
 
 

@@ -5,13 +5,26 @@
 
 namespace terraformer::ui::theming
 {
+	struct frame_look
+	{
+		float thickness;
+		rgba_pixel color;
+	};
+
+	constexpr frame_look default_interactive_frame_look{
+		.thickness = 4.0f,
+		.color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+	};
+
 	struct widget_look
 	{
 		color_scheme colors;
+		frame_look interactive_frame;
 	};
 
 	constexpr widget_look default_widget_look{
-		.colors = default_color_scheme
+		.colors = default_color_scheme,
+		.interactive_frame = default_interactive_frame_look
 	};
 }
 
