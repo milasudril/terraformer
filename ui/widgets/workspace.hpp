@@ -149,7 +149,7 @@ namespace terraformer::ui::widgets
 			auto const tint = look.interactive_frame.color;
 			typename dereferenced_type<Renderer>::input_rectangle output_rect{
 				.thickness = look.interactive_frame.thickness,
-				.texture = &textures.other_panel_background,
+				.texture = &textures.interactive_frame_texture,
 				.tints = std::array{
 					tint,
 					tint,

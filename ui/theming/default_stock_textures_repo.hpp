@@ -23,6 +23,7 @@ namespace terraformer::ui::main
 		DrawingSurface input_area_background;
 		DrawingSurface command_area_background;
 		DrawingSurface output_area_background;
+		DrawingSurface interactive_frame_texture;
 
 		[[nodiscard]] inline static auto& get_default_instance();
 	};
@@ -44,6 +45,55 @@ namespace terraformer::ui::main
 		}
 
 		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 8));
+	}
+
+	template<class DrawingSurface>
+	auto generate_stock_interactive_frame_texture()
+	{
+		constexpr std::array<int, 16*20> pixels{
+			2, 2, 2, 2,   2, 2, 2, 2,   2, 2, 2, 2,   2, 2, 2, 2,
+			1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,
+			1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,
+			0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,
+
+			2, 2, 2, 2,   2, 2, 2, 2,   2, 2, 2, 2,   2, 2, 2, 2,
+			1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,
+			1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,
+			0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,
+
+			0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,
+			1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,
+			1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,
+			2, 2, 2, 2,   2, 2, 2, 2,   2, 2, 2, 2,   2, 2, 2, 2,
+
+			0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,   0, 0, 0, 0,
+			1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,
+			1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,   1, 1, 1, 1,
+			2, 2, 2, 2,   2, 2, 2, 2,   2, 2, 2, 2,   2, 2, 2, 2,
+
+			1, 2, 2, 2,   2, 2, 2, 2,   1, 0, 0, 0,   0, 0, 0, 0,
+			0, 1, 1, 1,   2, 1, 1, 1,   2, 1, 1, 1,   0, 1, 1, 1,
+			0, 1, 1, 1,   2, 1, 1, 1,   2, 1, 1, 1,   0, 1, 1, 1,
+			0, 1, 1, 1,   2, 1, 1, 0,   2, 1, 1, 0,   0, 1, 1, 2
+		};
+
+		terraformer::image img{16, 20};
+
+		constexpr std::array colors{
+			rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f},
+			rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
+			rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+		};
+		int k = 0;
+		for(uint32_t y = 0; y != img.height(); ++y)
+		{
+			for(uint32_t x = 0; x != img.width(); ++x)
+			{
+				img(x, y) = colors[pixels[k]];
+				++k;
+			}
+		}
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 2));
 	}
 
 	template<class DrawingSurface>
@@ -96,7 +146,8 @@ namespace terraformer::ui::main
 			.other_panel_background = generate_noisy_texture<DrawingSurface>(),
 			.input_area_background = generate_white_texture<DrawingSurface>(),
 			.command_area_background = generate_white_texture<DrawingSurface>(),
-			.output_area_background = generate_white_texture<DrawingSurface>()
+			.output_area_background = generate_white_texture<DrawingSurface>(),
+			.interactive_frame_texture = generate_stock_interactive_frame_texture<DrawingSurface>()
 		};
 	}
 };
