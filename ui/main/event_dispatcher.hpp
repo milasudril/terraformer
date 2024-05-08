@@ -67,6 +67,9 @@ namespace terraformer::ui::main
 			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
+			value_of(m_frame_renderer)
+				.set_viewport(0, 0, size.width, size.height)
+				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
 			value_of(m_widget_container).handle_event(size);
 		}
 
