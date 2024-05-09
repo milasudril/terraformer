@@ -11,12 +11,14 @@ namespace terraformer::ui::theming
 		cursor_view main;
 		cursor_view horz_resize;
 		cursor_view vert_resize;
+		cursor_view resize;
 	};
 
 	constinit cursor_set current_cursor_set{
 		.main = make_cursor_view(stock_cursors::main),
 		.horz_resize = make_cursor_view(stock_cursors::horz_resize),
-		.vert_resize = make_cursor_view(stock_cursors::vert_resize)
+		.vert_resize = make_cursor_view(stock_cursors::vert_resize),
+		.resize = make_cursor_view(stock_cursors::resize)
 	};
 }
 
