@@ -149,10 +149,11 @@ namespace terraformer::ui::widgets
 			detail::do_decorate_widgets(
 				std::forward<Renderer>(renderer),
 				m_widgets,
+				// TODO: This lambda could be useful elsewhere
 				[&textures, &look, cursor_index = m_cursor_widget_index](auto index){
 					auto const tint = index == cursor_index?
 						look.colors.mouse_focus_color:
-						look.interactive_frame.color;
+						look.colors.interactive_frame_color;
 
 					return typename dereferenced_type<Renderer>::input_rectangle{
 						.thickness = look.interactive_frame.thickness,
