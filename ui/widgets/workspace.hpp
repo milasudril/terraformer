@@ -64,6 +64,7 @@ namespace terraformer::ui::widgets
 		bool handle_event(wsapi::cursor_motion_event const& event)
 		{
 			// TODO: event.where must be converted to widget coordinates
+			// TODO: Separate frame from the widget itself
 
 			auto const i = find(event.where, m_widgets);
 			auto const old_index = m_cursor_widget_index;
@@ -104,6 +105,7 @@ namespace terraformer::ui::widgets
 		bool handle_event(wsapi::mouse_button_event const& event)
 		{
 			// TODO: event.where must be converted to widget coordinates
+			// TODO: Separate frame from the widget itself
 
 			auto const i = find(event.where, m_widgets);
 			if(i == widget_list::npos)
@@ -117,6 +119,7 @@ namespace terraformer::ui::widgets
 
 		wsapi::fb_size handle_event(wsapi::fb_size size)
 		{
+			// TODO: The available size should not include any decorations (frames, scrollbars etc)
 			auto const size_callbacks = m_widgets.size_callbacks();
 			auto const widget_pointers = m_widgets.widget_pointers();
 			auto const widget_visibilities = m_widgets.widget_visibilities();
