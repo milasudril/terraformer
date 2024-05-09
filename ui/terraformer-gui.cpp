@@ -93,7 +93,7 @@ int main(int, char**)
 
 	auto const default_cursor = terraformer::ui::theming::create_cursor(
 		gui_ctxt,
-		terraformer::ui::theming::current_cursor_set.horz_resize,
+		terraformer::ui::theming::current_cursor_set.vert_resize,
 		widget_look.colors.cursor_color
 	);
 
