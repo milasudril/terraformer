@@ -42,23 +42,6 @@ namespace terraformer::ui::widgets
 
 				auto const num_colors = std::size(look.colors.misc_bright_colors);
 				{
-					auto const color = look.colors.misc_bright_colors[(m_current_color + num_colors + 1)%num_colors];
-					for(uint32_t x = 0; x != w; ++x)
-					{
-						img(x, 0) = color;
-						img(x, 1) = color;
-						img(x, 2) = color;
-						img(x, 3) = color;
-						img(x, h - 1) = color;
-						img(x, h - 2) = color;
-						img(x, h - 3) = color;
-						img(x, h - 4) = color;
-					}
-
-					m_border.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
-				}
-
-				{
 					auto const color = look.colors.misc_dark_colors[(m_current_color + num_colors)%num_colors];
 					for(uint32_t y = 0; y != h; ++y)
 					{
@@ -71,7 +54,7 @@ namespace terraformer::ui::widgets
 				m_dirty = false;
 			}
 
-			output_rect.foreground = m_cursor_above? &m_border : &m_foreground;
+			output_rect.foreground = &m_foreground;
 			output_rect.background = &m_background;
 			constexpr std::array tints{
 				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
@@ -101,7 +84,6 @@ namespace terraformer::ui::widgets
 				auto const dir = mbe.button == 0 ? -1 : 1;
 				m_current_color += dir;
 				m_dirty = true;
-				printf("Hej %zu\n", m_current_color);
 			}
 			return false;
 		}
@@ -127,7 +109,6 @@ namespace terraformer::ui::widgets
 
 	private:
 		drawing_api::gl_texture m_foreground;
-		drawing_api::gl_texture m_border;
 		drawing_api::gl_texture m_background;
 		size_t m_current_color = 0;
 		bool m_cursor_above = false;
