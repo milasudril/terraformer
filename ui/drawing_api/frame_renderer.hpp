@@ -186,13 +186,20 @@ void main()
 	const vec2 tex_size = textureSize(tex, 0);
 	const float texture_width = tex_size.x;
 	const float texture_height = tex_size.y;
+	const float island_width = 0.25f*(texture_width - 8)/texture_width;
+	const float island_hight = 0.2f*(texture_height - 10)/texture_height;
 	const float uv_horz_scale = 0.2f*texture_height*seg_length/(texture_width * thickness);
-	const vec2 uv_scale = vec2((gl_VertexID < 8)? uv_horz_scale : thickness, 0.2f);
+	const vec2 uv_size = vec2(
+		(gl_VertexID < 8)? uv_horz_scale : thickness,
+		island_hight
+	);
+	const vec2 uv_pitch = vec2((gl_VertexID < 8)? uv_horz_scale : thickness, 0.2f);
 	const int quad_index = gl_VertexID/4;
 	const int segment_index = 2*gl_InstanceID + quad_index;
 	uv = (gl_VertexID < 8) ?
-		(vec2(-0.5f, float(segment_index)) + uv_coords[gl_VertexID&0x3])*uv_scale + vec2(0.5f, 0.0f):
-		vec2(0.25f*float(segment_index - 2), 0.8f) + vec2(0.25f, 0.2f)*uv_coords[gl_VertexID&0x3];
+		vec2(-0.5f, float(segment_index))*uv_pitch + uv_coords[gl_VertexID&0x3]*uv_size + vec2(0.5f, 1.0f/texture_height)
+		: vec2(0.25f*float(segment_index - 2) + 1.0f/texture_width, 0.8f + 1.0f/texture_height)
+		+ vec2(island_width, island_hight)*uv_coords[gl_VertexID&0x3];
 
 	const int tint_index = 16*gl_InstanceID + gl_VertexID;
 	tint = tints[tint_map[tint_index]];

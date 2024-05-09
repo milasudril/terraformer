@@ -12,7 +12,7 @@ namespace terraformer::ui::theming
 	};
 
 	constexpr frame_look default_interactive_frame_look{
-		.thickness = 4.0f,
+		.thickness = 8.0f,
 		.color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
 	};
 
