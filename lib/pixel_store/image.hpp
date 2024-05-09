@@ -20,6 +20,8 @@ namespace terraformer
 
 		using IndexType = typename span_2d<PixelType>::IndexType;
 
+		explicit basic_image() = default;
+
 		explicit basic_image(span_2d_extents size):basic_image{size.width, size.height}{}
 
 		explicit basic_image(IndexType width, IndexType height):
@@ -70,9 +72,11 @@ namespace terraformer
 
 		operator span_2d<PixelType const>() const { return pixels(); }
 
+		bool has_pixels() const { return m_data != nullptr; }
+
 	private:
-		IndexType m_width;
-		IndexType m_height;
+		IndexType m_width{0};
+		IndexType m_height{0};
 		std::unique_ptr<PixelType[]> m_data;
 
 		PixelType const* getAddress(IndexType x, IndexType y) const

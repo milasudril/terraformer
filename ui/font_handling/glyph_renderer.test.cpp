@@ -12,7 +12,10 @@ TESTCASE(terraformer_ui_font_handling_glyph_renderer_init)
 
 	terraformer::ui::font_handling::glyph_renderer renderer{fontfile.c_str()};
 
-	auto& glyph = renderer.set_font_size(16).get_glyph(terraformer::ui::font_handling::codepoint{65});
+	auto& glyph = renderer.get_glyph(
+		terraformer::ui::font_handling::font_size{16},
+		terraformer::ui::font_handling::codepoint{65}
+	);
 
 	printf("%p\n", &glyph);
 }
