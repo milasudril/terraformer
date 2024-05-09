@@ -146,22 +146,21 @@ namespace terraformer::ui::widgets
 		template<class Renderer>
 		void decorate_widgets(Renderer&& renderer, texture_repo const& textures, theming::widget_look const& look)
 		{
-			auto const tint = look.interactive_frame.color;
-			typename dereferenced_type<Renderer>::input_rectangle output_rect{
-				.thickness = look.interactive_frame.thickness,
-				.texture = &textures.interactive_frame_texture,
-				.tints = std::array{
-					tint,
-					tint,
-					tint,
-					tint,
-					tint,
-					tint,
-					tint,
-					tint
+			detail::do_decorate_widgets(
+				std::forward<Renderer>(renderer),
+				m_widgets,
+				[&textures, &look, cursor_index = m_cursor_widget_index](auto index){
+					auto const tint = index == cursor_index?
+						look.colors.mouse_focus_color:
+						look.interactive_frame.color;
+
+					return typename dereferenced_type<Renderer>::input_rectangle{
+						.thickness = look.interactive_frame.thickness,
+						.texture = &textures.interactive_frame_texture,
+						.tints = std::array{tint, tint, tint, tint, tint, tint, tint, tint}
+					};
 				}
-			};
-			detail::do_decorate_widgets(std::forward<Renderer>(renderer), m_widgets, output_rect);
+			);
 		}
 
 	private:

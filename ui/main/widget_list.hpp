@@ -161,10 +161,10 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<class Renderer, class TextureRepo, class ...WidgetRenderingResult, class OutputRectangle>
+	template<class Renderer, class TextureRepo, class ...WidgetRenderingResult, class StyleGenerator>
 	void decorate_widgets(Renderer&& renderer,
 		widget_list<TextureRepo, WidgetRenderingResult...> const& widgets,
-		OutputRectangle const& rect
+		StyleGenerator&& style
 	)
 	{
 		auto const widget_geometries = widgets.widget_geometries();
@@ -179,7 +179,7 @@ namespace terraformer::ui::main
 					widget_geometries[k].where,
 					widget_geometries[k].origin,
 					widget_geometries[k].size,
-					rect
+					style(k)
 				);
 			}
 		}
