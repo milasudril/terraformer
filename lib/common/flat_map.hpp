@@ -14,8 +14,7 @@ namespace terraformer
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
 		template<class KeyType, class ... ValueType>
-		requires
-			std::is_same_v<
+		requires std::is_same_v<
 				multi_array_tag<std::remove_cvref_t<KeyType>, std::remove_cvref_t<ValueType>...>,
 				multi_array_tag<Key, Value...>
 			>
