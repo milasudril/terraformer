@@ -290,3 +290,155 @@ TESTCASE(terraformer_multi_array_move_assign)
 	EXPECT_EQ(std::size(array).get(), 3);
 	EXPECT_EQ(std::size(other).get(), 0);
 }
+
+TESTCASE(terraformer_multi_array_insert_at_begin)
+{
+	using my_array_type = terraformer::multi_array<
+		no_default_constructible_type<size_t>,
+		no_default_constructible_type<double>
+	>;
+
+	my_array_type array;
+	array.reserve(my_array_type::size_type{16});
+	for(size_t k = 0; k != 16; ++k)
+	{
+		no_default_constructible_type<size_t>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_ctor(1);
+		if(k != 0)
+		{
+			no_default_constructible_type<double>::expect_move_assign(k - 1);
+			no_default_constructible_type<size_t>::expect_move_assign(k - 1);
+			no_default_constructible_type<double>::expect_move_ctor(1);
+			no_default_constructible_type<size_t>::expect_move_ctor(1);
+		}
+		array.insert(my_array_type::index_type{0}, k, 0.5*static_cast<double>(k));
+	}
+
+	auto const ints = array.get<0>();
+	auto const doubles = array.get<1>();
+	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	{
+		auto const expected_value = std::size(array).get() - k.get() - 1;
+		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
+		EXPECT_EQ(static_cast<holder<double>>(doubles[k]).value(), 0.5f*static_cast<double>(expected_value));
+	}
+}
+
+TESTCASE(terraformer_multi_array_insert_at_end)
+{
+	using my_array_type = terraformer::multi_array<
+		no_default_constructible_type<size_t>,
+		no_default_constructible_type<double>
+	>;
+
+	my_array_type array;
+	array.reserve(my_array_type::size_type{16});
+	for(size_t k = 0; k != 16; ++k)
+	{
+		no_default_constructible_type<size_t>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_ctor(1);
+		array.insert(my_array_type::index_type{k}, k, 0.5*static_cast<double>(k));
+	}
+
+	auto const ints = array.get<0>();
+	auto const doubles = array.get<1>();
+	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	{
+		auto const expected_value = k.get();
+		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
+		EXPECT_EQ(static_cast<holder<double>>(doubles[k]).value(), 0.5f*static_cast<double>(expected_value));
+	}
+}
+
+TESTCASE(terraformer_multi_array_insert_somewhere)
+{
+	using my_array_type = terraformer::multi_array<
+		no_default_constructible_type<size_t>,
+		no_default_constructible_type<double>
+	>;
+
+	my_array_type array;
+	array.reserve(my_array_type::size_type{24});
+	for(size_t k = 0; k != 8; ++k)
+	{
+		no_default_constructible_type<size_t>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_ctor(1);
+		array.push_back(k, 0.5*static_cast<double>(k));
+	}
+
+	for(size_t k = 0; k != 8; ++k)
+	{
+		no_default_constructible_type<size_t>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_ctor(1);
+		array.push_back(k + 16, 0.5*static_cast<double>(k + 16));
+	}
+
+	for(size_t k = 0; k != 8; ++k)
+	{
+		no_default_constructible_type<size_t>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_move_assign(7);
+		no_default_constructible_type<size_t>::expect_move_assign(7);
+		no_default_constructible_type<double>::expect_move_ctor(1);
+		no_default_constructible_type<size_t>::expect_move_ctor(1);
+		array.insert(my_array_type::index_type{k + 8}, k + 8, 0.5*static_cast<double>(k + 8));
+	}
+
+	auto const ints = array.get<0>();
+	auto const doubles = array.get<1>();
+	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	{
+		auto const expected_value = k.get();
+		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
+		EXPECT_EQ(static_cast<holder<double>>(doubles[k]).value(), 0.5f*static_cast<double>(expected_value));
+	}
+}
+
+TESTCASE(terraformer_multi_array_insert_somewhere_with_one_reservation)
+{
+	using my_array_type = terraformer::multi_array<
+		no_default_constructible_type<size_t>,
+		no_default_constructible_type<double>
+	>;
+
+	my_array_type array;
+	for(size_t k = 0; k != 8; ++k)
+	{
+		no_default_constructible_type<size_t>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_ctor(1);
+		array.push_back(k, 0.5*static_cast<double>(k));
+	}
+
+	no_default_constructible_type<double>::expect_move_ctor(8);
+	no_default_constructible_type<size_t>::expect_move_ctor(8);
+
+	for(size_t k = 0; k != 8; ++k)
+	{
+		no_default_constructible_type<size_t>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_ctor(1);
+		array.push_back(k + 16, 0.5*static_cast<double>(k + 16));
+	}
+
+	no_default_constructible_type<double>::expect_move_ctor(16);
+	no_default_constructible_type<size_t>::expect_move_ctor(16);
+
+	for(size_t k = 0; k != 8; ++k)
+	{
+		no_default_constructible_type<size_t>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_ctor(1);
+		no_default_constructible_type<double>::expect_move_assign(7);
+		no_default_constructible_type<size_t>::expect_move_assign(7);
+		no_default_constructible_type<double>::expect_move_ctor(1);
+		no_default_constructible_type<size_t>::expect_move_ctor(1);
+		array.insert(my_array_type::index_type{k + 8}, k + 8, 0.5*static_cast<double>(k + 8));
+	}
+
+	auto const ints = array.get<0>();
+	auto const doubles = array.get<1>();
+	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	{
+		auto const expected_value = k.get();
+		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
+		EXPECT_EQ(static_cast<holder<double>>(doubles[k]).value(), 0.5f*static_cast<double>(expected_value));
+	}
+}

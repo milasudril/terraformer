@@ -6,6 +6,7 @@
 #include "lib/common/tuple.hpp"
 
 #include <type_traits>
+#include <cassert>
 
 namespace terraformer
 {
@@ -45,6 +46,46 @@ namespace terraformer
 				++index
 			),...
 		);
+	}
+
+	template<class ... T>
+	void move_element(
+		std::array<memory_block, sizeof...(T)> const& storage,
+		array_index<multi_array_tag<T...>> from,
+		array_index<multi_array_tag<T...>> to
+	)
+	{
+		size_t index = 0;
+		(
+			(
+				*(storage[index].template interpret_as<T>() + to.get())
+					= std::move(*(storage[index].template interpret_as<T>() + from.get())),
+				std::destroy_at(storage[index].template interpret_as<T>() + from.get()),
+				++index
+			),...
+		);
+		fflush(stdout);
+	}
+
+	template<class ... T>
+	void move_element_to_uninitialized(
+		std::array<memory_block, sizeof...(T)> const& storage,
+		array_index<multi_array_tag<T...>> from,
+		array_index<multi_array_tag<T...>> to
+	)
+	{
+		size_t index = 0;
+		(
+			(
+				std::construct_at(
+					storage[index].template interpret_as<T>() + to.get(),
+					std::move(*(storage[index].template interpret_as<T>() + from.get()))
+				),
+				std::destroy_at(storage[index].template interpret_as<T>() + from.get()),
+				++index
+			),...
+		);
+		fflush(stdout);
 	}
 
 	template<class ... T>
@@ -255,6 +296,38 @@ namespace terraformer
 		{
 			destroy(m_storage, index, size_type{m_size.get() - index.get()});
 			m_size = size_type{index};
+		}
+
+		template<class ... Arg>
+		requires std::is_same_v<multi_array_tag<std::remove_cvref_t<Arg>...>, multi_array_tag<T...>>
+		|| requires (Arg const&... args)
+		{
+			{multi_array_tag<T...>::convert(args...)};
+		}
+		void insert(index_type index, Arg&&... elems)
+		{
+			auto new_size = m_size + size_type{1};
+			if(new_size > m_capacity)
+			{ reserve(std::max(size_type{8}, static_cast<size_t>(2)*capacity())); }
+
+			if(index.get() >= m_size.get())
+			{
+				construct(m_storage, index_type{m_size.get()}, std::forward<Arg>(elems)...);
+				m_size = new_size;
+				return;
+			}
+			assert(m_size.get() != 0);
+
+			auto k = index_type{m_size.get() - 1};
+			move_element_to_uninitialized(m_storage, k, index_type{m_size.get()});
+			while(k != index)
+			{
+				move_element(m_storage, k - 1, k);
+				--k;
+			}
+
+			construct(m_storage, index, std::forward<Arg>(elems)...);
+			m_size = new_size;
 		}
 
 	private:
