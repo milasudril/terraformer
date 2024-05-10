@@ -14,18 +14,30 @@ char const* terraformer::ui::font_handling::get_ft_error_message(FT_Error err)
 terraformer::ui::font_handling::glyph
 terraformer::ui::font_handling::extract_glyph(FT_GlyphSlotRec const& ft_glyph)
 {
-	// TODO: Set copy pixels into image
-	// TODO: Set correct values in render_offset
-	// TODO: Set correct values in cursor_advancement
-
-	return glyph{
+	glyph ret{
 		.image = basic_image<uint8_t>{
 			ft_glyph.bitmap.width,
 			ft_glyph.bitmap.rows
 		},
-		.render_offset{},
-		.cursor_advancement{}
-	};
+		.render_offset = displacement{
+			static_cast<float>(ft_glyph.bitmap_left),
+			static_cast<float>(ft_glyph.bitmap_top),
+			0.0f
+		},
+		.cursor_advancement = displacement{
+			static_cast<float>(ft_glyph.advance.x)/64.0f,
+			static_cast<float>(ft_glyph.advance.y)/64.0f,
+			0.0f
+		}
+ 	};
+
+	for(uint32_t y = 0; y != ret.image.height(); ++y)
+	{
+		for(uint32_t x = 0; x != ret.image.width(); ++x)
+		{ ret.image(x, y) = ft_glyph.bitmap.buffer[y * ft_glyph.bitmap.width + x]; }
+	}
+
+	return ret;
 }
 
 terraformer::ui::font_handling::glyph& terraformer::ui::font_handling::glyph_table::insert(
