@@ -3,11 +3,9 @@
 
 #include "lib/array_classes/multi_array.hpp"
 
-#include <functional>
-
 namespace terraformer
 {
-	template<class Key, class Compare = std::less<Key>,class ... Value>
+	template<class Compare, class Key, class ... Value>
 	class flat_map
 	{
 	public:
@@ -25,40 +23,40 @@ namespace terraformer
 		{
 			{multi_array_tag<Key, Value...>::convert(key, values...)};
 		}
-		std::pair<index_type, bool> insert(KeyType&& key, ValueType&&... values)
+		[[nodiscard]] std::pair<index_type, bool> insert(KeyType&& key, ValueType&&... values)
 		{
 			auto const key_array = keys();
 			auto const i = std::ranges::lower_bound(key_array, std::as_const(key), std::as_const(m_compare));
+			index_type index{static_cast<size_t>(i - std::begin(key_array))};
 			if(i == std::end(key_array) || m_compare(*i, key) || m_compare(key, *i))
 			{
-				auto const index = i - std::begin(key_array);
-				m_storage.insert(index, std::forward<KeyType>(key), std::forward<KeyType>(values)...);
-				return std::pair{index_type{index}, true};
+				m_storage.insert(index, std::forward<KeyType>(key), std::forward<ValueType>(values)...);
+				return std::pair{index, true};
 			}
-			return std::pair{index_type{i - std::begin(key_array)}, false};
+			return std::pair{index, false};
 		}
 
 		template<class KeyType>
 		requires std::is_same_v<std::remove_cvref_t<KeyType>, Key>
-		index_type find(KeyType&& key) const
+		[[nodiscard]] index_type find(KeyType&& key) const
 		{
 			auto const key_array = keys();
 			auto const i = std::ranges::lower_bound(key_array, key, std::as_const(m_compare));
 			if(i == std::end(key_array) || m_compare(*i, key) || m_compare(key, *i))
 			{ return npos; }
-			return std::pair{index_type{i - std::begin(key_array)}, false};
+			return index_type{static_cast<size_t>(i - std::begin(key_array))};
 		}
 
-		auto keys() const
+		[[nodiscard]] auto keys() const
 		{ return m_storage.template get<0>(); }
 
 		template<size_t Index>
-		auto values() const
-		{ return m_storage.template get<Index - 1>(); }
+		[[nodiscard]] auto values() const
+		{ return m_storage.template get<Index + 1>(); }
 
 		template<size_t Index>
-		auto values()
-		{ return m_storage.template get<Index - 1>(); }
+		[[nodiscard]] auto values()
+		{ return m_storage.template get<Index + 1>(); }
 
 	private:
 		[[no_unique_address]] Compare m_compare;
