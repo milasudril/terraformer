@@ -6,7 +6,7 @@
 #ifndef TERRAFORMER_UI_FONT_HANDLING_GLYPH_RENDERER_HPP
 #define TERRAFORMER_UI_FONT_HANDLING_GLYPH_RENDERER_HPP
 
-#include "lib/array_classes/single_array.hpp"
+#include "lib/common/flat_map.hpp"
 #include "lib/pixel_store/image.hpp"
 
 #include <ft2build.h>
@@ -48,12 +48,11 @@ namespace terraformer::ui::font_handling
 		displacement cursor_advancement;
 	};
 
-	glyph extract_glyph(FT_GlyphSlotRec const& ft_glyph);
 
 	class glyph_table
 	{
 	public:
-		glyph& insert(codepoint index, FT_GlyphSlotRec const& glyph);
+		glyph& insert(codepoint index, glyph&& glyph_to_insert);
 
 		glyph const* find(codepoint index) const
 		{
@@ -72,13 +71,15 @@ namespace terraformer::ui::font_handling
 		std::unordered_map<codepoint, glyph> m_other;
 	};
 
-	using font = single_array<glyph_table>;
-	using font_size = font::index_type;
+	using font = flat_map<std::greater<>, int, glyph_table>;
+
+	glyph extract_glyph(FT_GlyphSlotRec const& ft_glyph);
 
 	class glyph_renderer
 	{
 	public:
-		glyph_renderer():m_face{nullptr}{}
+		glyph_renderer():m_face{nullptr}
+		{ m_loaded_glyphs.reserve(4); }
 
 		explicit glyph_renderer(char const* filename)
 		{
@@ -93,28 +94,30 @@ namespace terraformer::ui::font_handling
 			{ FT_Done_Face(m_face); }
 		}
 
-		auto& get_glyph(font_size size, codepoint charcode) const
+		auto& get_glyph(int size, codepoint charcode) const
 		{
-			assert(size.get() != 0);
-
-			auto const font_size_index = size - 1;
-			if(font_size_index < std::size(m_loaded_glyphs)) [[likely]]
+			if(m_current_glyph_table == nullptr || m_current_font_size != size) [[unlikely]]
 			{
-				auto const ret = m_loaded_glyphs[font_size_index].find(charcode);
-				if(ret != nullptr) [[likely]]
-				{ return *ret; }
+				auto const res = m_loaded_glyphs.insert(size, glyph_table{});
+				m_current_glyph_table = &m_loaded_glyphs.values<0>()[res.first];
+				m_current_font_size = size;
 			}
 
-			return std::as_const(load_glyph(size, charcode));
+			auto const ret = m_current_glyph_table->find(charcode);
+			if(ret != nullptr) [[likely]]
+			{ return *ret; }
+
+			return std::as_const(m_current_glyph_table->insert(charcode, load_glyph(charcode)));
 		}
 
 	private:
-		glyph& load_glyph(font_size size, codepoint charcode) const;
+		glyph load_glyph(codepoint charcode) const;
 
 		static thread_local font_loader m_loader;
+		mutable int m_current_font_size{0};
+		mutable glyph_table* m_current_glyph_table{nullptr};
 		mutable font m_loaded_glyphs;
-		mutable font_size m_active_font_size;
-		mutable FT_Face m_face;
+		mutable FT_Face m_face{};
 	};
 
 	inline thread_local font_loader glyph_renderer::m_loader{};

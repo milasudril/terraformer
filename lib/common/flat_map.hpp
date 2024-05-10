@@ -57,6 +57,9 @@ namespace terraformer
 		[[nodiscard]] auto values()
 		{ return m_storage.template get<Index + 1>(); }
 
+		void reserve(size_t capacity)
+		{ m_storage.reserve(typename storage_type::size_type{capacity}); }
+
 	private:
 		[[no_unique_address]] Compare m_compare;
 		multi_array<Key, Value...> m_storage;
