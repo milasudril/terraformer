@@ -65,6 +65,9 @@ namespace terraformer::ui::font_handling
 		hb_glyph_position_t* glyph_pos;
 	};
 
+	inline auto& get_glyph(shaping_result const& result, glyph_index index)
+	{ return result.renderer.get().get_glyph(index); };
+
 	class text_shaper
 	{
 	public:

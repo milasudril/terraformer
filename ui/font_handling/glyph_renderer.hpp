@@ -108,6 +108,12 @@ namespace terraformer::ui::font_handling
 			return get_glyph(glyph_index{FT_Get_Char_Index(m_face, static_cast<FT_ULong>(charcode))});
 		}
 
+		auto get_global_glyph_height() const
+		{ return m_face->ascender - m_face->descender; }
+
+		auto get_global_glyph_width() const
+		{ return m_face->max_advance_width; }
+
 	private:
 		glyph load_glyph(glyph_index index) const;
 
