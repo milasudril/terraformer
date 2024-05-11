@@ -24,16 +24,16 @@ namespace terraformer::ui::font_handling
 
 	using hb_font_handle = std::unique_ptr<hb_font_t, hb_font_deleter>;
 
-	auto make_shaper_font(int size, glyph_renderer& renderer)
+	auto make_font(int size, glyph_renderer& renderer)
 	{
 		return hb_font_handle{hb_ft_font_create(renderer.set_font_size(size).get_face(),[](void*){})};
 	}
 
-	class shaper_font
+	class font
 	{
 	public:
-		explicit shaper_font(int font_size, glyph_renderer& renderer):
-			m_handle{make_shaper_font(font_size, renderer)},
+		explicit font(int font_size, glyph_renderer& renderer):
+			m_handle{make_font(font_size, renderer)},
 			m_renderer{renderer}
 		{}
 
@@ -102,7 +102,7 @@ namespace terraformer::ui::font_handling
 			return *this;
 		}
 
-		[[nodiscard]] auto run(shaper_font const& font)
+		[[nodiscard]] auto run(font const& font)
 		{
 			hb_shape(font.get_hb_font(), m_handle.get(), nullptr, 0);
 			unsigned int glyph_count{};
