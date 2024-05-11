@@ -47,16 +47,11 @@ namespace terraformer::ui::main
 	//     h_min < w/r < h_max <=> h_min*r < w < h_max*r, that is [h_min*r, h_max*r] intersect [w_min, w_max] is non-empty
 	//   If both fails, pick width and height in range to closest match the aspect ratio
 
-	struct unconstrained_widget_size
-	{};
-
 	struct widget_size_range
 	{
 		float min = 0.0f;
 		float max = std::numeric_limits<float>::infinity();
 	};
-
-	struct wid
 
 	struct widget_size_constraint
 	{
