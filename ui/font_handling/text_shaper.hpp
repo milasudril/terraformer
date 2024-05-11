@@ -29,11 +29,10 @@ namespace terraformer::ui::font_handling
 		return hb_font_handle{hb_ft_font_create(renderer.set_font_size(size).get_face(),[](void*){})};
 	}
 
-	template<class GlyphRenderer>
 	class shaper_font
 	{
 	public:
-		explicit shaper_font(int font_size, GlyphRenderer& renderer):
+		explicit shaper_font(int font_size, glyph_renderer& renderer):
 			m_handle{make_shaper_font(font_size, renderer)},
 			m_renderer{renderer}
 		{}
@@ -46,7 +45,7 @@ namespace terraformer::ui::font_handling
 
 	private:
 		hb_font_handle m_handle;
-		std::reference_wrapper<GlyphRenderer> m_renderer;
+		std::reference_wrapper<glyph_renderer> m_renderer;
 	};
 
 	struct hb_buffer_deleter
@@ -57,10 +56,9 @@ namespace terraformer::ui::font_handling
 
 	using hb_buffer_handle = std::unique_ptr<hb_buffer_t, hb_buffer_deleter>;
 
-	template<class GlyphRenderer>
 	struct shaping_result
 	{
-		std::reference_wrapper<GlyphRenderer> renderer;
+		std::reference_wrapper<glyph_renderer> renderer;
 		size_t glyph_count;
 		hb_glyph_info_t* glyph_info;
 		hb_glyph_position_t* glyph_pos;
@@ -104,8 +102,7 @@ namespace terraformer::ui::font_handling
 			return *this;
 		}
 
-		template<class GlyphRenderer>
-		[[nodiscard]] auto run(shaper_font<GlyphRenderer> const& font)
+		[[nodiscard]] auto run(shaper_font const& font)
 		{
 			hb_shape(font.get_hb_font(), m_handle.get(), nullptr, 0);
 			unsigned int glyph_count{};
