@@ -24,10 +24,29 @@ terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 
 	return span_2d_extents{
 		.width = narrowing_cast<uint32_t>(width/64),
-		.height = narrowing_cast<uint32_t>(width/64)
+		.height = narrowing_cast<uint32_t>(height/64)
 	};
 }
-
+#if 0
+namespace
+{
+	void dump_glyph(terraformer::span_2d<uint8_t const> img)
+	{
+		for(uint32_t y = 0; y != img.height(); ++y)
+		{
+			for(uint32_t x = 0; x != img.width(); ++x)
+			{
+				if(img(x, y) > 128)
+				{ putchar('*'); }
+				else
+				{ putchar('-'); }
+			}
+			putchar('\n');
+		}
+		putchar('\n');
+	}
+}
+#endif
 
 terraformer::basic_image<uint8_t>
 terraformer::ui::font_handling::render(shaping_result const& result)

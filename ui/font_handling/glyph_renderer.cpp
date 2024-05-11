@@ -42,14 +42,14 @@ terraformer::ui::font_handling::extract_glyph(FT_GlyphSlotRec const& ft_glyph)
 
 void terraformer::ui::font_handling::render(glyph const& glyph, span_2d<uint8_t> output_image, uint32_t x_offset, uint32_t y_offset)
 {
-	auto const img = glyph.image.pixels();
+	auto const img = std::as_const(glyph.image).pixels();
 	for(uint32_t y = 0; y != img.height(); ++y)
 	{
 		for(uint32_t x = 0; x != img.width(); ++x)
 		{
-			auto const x_loc = std::max(x + x_offset, output_image.width() - 1);
-			auto const y_loc = std::max(y + y_offset, output_image.height() - 1);
-			output_image(x_loc, y_loc) = img(x, y);
+			auto const x_loc = std::min(x + x_offset, output_image.width() - 1);
+			auto const y_loc = std::min(y + y_offset, output_image.height() - 1);
+			output_image(x_loc, y_loc) = std::max(img(x, y), output_image(x_loc, y_loc));
 		}
 	}
 }

@@ -24,13 +24,8 @@ TESTCASE(terraformer_ui_font_handling_shape_text)
 	EXPECT_EQ(&result.renderer.get(), &renderer);
 
 	auto img = render(result);
-
-	for(size_t k = 0; k != result.glyph_count; ++k)
-	{
-		auto const& gi = result.glyph_info[k];
-//		auto const& gp = result.glyph_pos[k];
-		printf("%d ", gi.codepoint);
-	}
-	putchar('\n');
-
+	FILE* dump = fopen("/dev/shm/slask.data", "wb");
+	printf("%u %u\n", img.width(), img.height());
+	fwrite(std::data(img.pixels()), 1, img.width()*img.height(), dump);
+	fclose(dump);
 }
