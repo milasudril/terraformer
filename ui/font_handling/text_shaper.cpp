@@ -31,6 +31,8 @@ terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 terraformer::basic_image<uint8_t>
 terraformer::ui::font_handling::render(shaping_result const& result)
 {
+	// TODO: Fix vertical rendering
+
 	auto const size = compute_extents(result);
 	terraformer::basic_image<uint8_t> ret{size.width, size.height};
 
@@ -46,7 +48,6 @@ terraformer::ui::font_handling::render(shaping_result const& result)
 	{
 		auto const& glyph = get_glyph(result, glyph_index{glyph_info[i].codepoint});
 		auto const x_offset  = -glyph_pos[i].x_offset;
-		printf("%d %d\n", x_offset, glyph.x_offset);
 		auto const y_offset  = glyph_pos[i].y_offset;
 
 		render(
