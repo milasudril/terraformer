@@ -27,26 +27,6 @@ terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 		.height = narrowing_cast<uint32_t>(height/64)
 	};
 }
-#if 0
-namespace
-{
-	void dump_glyph(terraformer::span_2d<uint8_t const> img)
-	{
-		for(uint32_t y = 0; y != img.height(); ++y)
-		{
-			for(uint32_t x = 0; x != img.width(); ++x)
-			{
-				if(img(x, y) > 128)
-				{ putchar('*'); }
-				else
-				{ putchar('-'); }
-			}
-			putchar('\n');
-		}
-		putchar('\n');
-	}
-}
-#endif
 
 terraformer::basic_image<uint8_t>
 terraformer::ui::font_handling::render(shaping_result const& result)
@@ -57,16 +37,25 @@ terraformer::ui::font_handling::render(shaping_result const& result)
 	auto const n = result.glyph_count;
 	auto const glyph_info = result.glyph_info;
 	auto const glyph_pos = result.glyph_pos;
+	auto const ascender = result.renderer.get().get_ascender()/64;
 
-	uint64_t x_offset = 0;
-	uint64_t y_offset = 0;
+	uint64_t cursor_x = 0;
+	uint64_t cursor_y = 0;
 
 	for(size_t i = 0; i != n; ++i)
 	{
 		auto const& glyph = get_glyph(result, glyph_index{glyph_info[i].codepoint});
-		render(glyph, ret.pixels(), static_cast<uint32_t>(x_offset/64), static_cast<uint32_t>(y_offset/64));
-		x_offset += glyph_pos[i].x_advance;
-		y_offset += glyph_pos[i].y_advance;
+		auto const x_offset  = glyph_pos[i].x_offset;
+		auto const y_offset  = glyph_pos[i].y_offset;
+
+		render(
+			glyph,
+			ret.pixels(),
+			static_cast<uint32_t>((cursor_x + x_offset)/64) + glyph.x_offset,
+			static_cast<uint32_t>((cursor_y + y_offset)/64) + ascender - glyph.y_offset
+		);
+		cursor_x += glyph_pos[i].x_advance;
+		cursor_y += glyph_pos[i].y_advance;
 	}
 
 	return ret;

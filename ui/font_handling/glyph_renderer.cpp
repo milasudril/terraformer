@@ -19,16 +19,8 @@ terraformer::ui::font_handling::extract_glyph(FT_GlyphSlotRec const& ft_glyph)
 			ft_glyph.bitmap.width,
 			ft_glyph.bitmap.rows
 		},
-		.render_offset = displacement{
-			static_cast<float>(ft_glyph.bitmap_left),
-			static_cast<float>(ft_glyph.bitmap_top),
-			0.0f
-		},
-		.cursor_advancement = displacement{
-			static_cast<float>(ft_glyph.advance.x)/64.0f,
-			static_cast<float>(ft_glyph.advance.y)/64.0f,
-			0.0f
-		}
+		.x_offset = ft_glyph.bitmap_left,
+		.y_offset = ft_glyph.bitmap_top
  	};
 
 	for(uint32_t y = 0; y != ret.image.height(); ++y)

@@ -46,8 +46,8 @@ namespace terraformer::ui::font_handling
 	struct glyph
 	{
 		basic_image<uint8_t> image;
-		displacement render_offset;
-		displacement cursor_advancement;
+		int32_t x_offset;
+		int32_t y_offset;
 	};
 
 	glyph extract_glyph(FT_GlyphSlotRec const& ft_glyph);
@@ -112,6 +112,9 @@ namespace terraformer::ui::font_handling
 
 		auto get_global_glyph_height() const
 		{ return m_face->ascender - m_face->descender; }
+
+		auto get_ascender() const
+		{ return m_face->ascender; }
 
 		auto get_global_glyph_width() const
 		{ return m_face->max_advance_width; }
