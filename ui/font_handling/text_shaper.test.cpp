@@ -16,7 +16,7 @@ TESTCASE(terraformer_ui_font_handling_shape_text)
 
 	auto result = shaper.append(u8"Yxmördaren Julia Blomqvist på fäktning i Schweiz ff")
 		.with(hb_script_t::HB_SCRIPT_LATIN)
-		.with(hb_direction_t::HB_DIRECTION_LTR)
+		.with(hb_direction_t::HB_DIRECTION_TTB)
 		.with(hb_language_from_string("sv-SE", -1))
 		.run(the_font);
 
