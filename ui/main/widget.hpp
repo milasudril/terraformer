@@ -31,6 +31,23 @@ namespace terraformer::ui::main
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 
+	struct widget_size
+	{
+		float width;
+		float height;
+	};
+
+	struct widget_size_constraint
+	{
+		widget_size min{0.0f, 0.0f};
+		widget_size max{
+			std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()
+		};
+		widget_size quantum{0.0f, 0.0f};
+		std::optional<float> aspect_ratio;
+	};
+
+
 	template<class T, class TextureRepo, class OutputRectangle>
 	concept widget = requires(
 		T& obj,
