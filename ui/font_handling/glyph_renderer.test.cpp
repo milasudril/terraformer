@@ -27,7 +27,7 @@ namespace
 TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_latin1)
 {
 	terraformer::ui::font_handling::font_mapper fonts;
-	auto const fontfile = fonts.get_path("DejaVu Sans");
+	auto const fontfile = fonts.get_path("sans-serif");
 
 	terraformer::ui::font_handling::glyph_renderer renderer{fontfile.c_str()};
 

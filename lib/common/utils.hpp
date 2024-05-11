@@ -13,6 +13,7 @@
 #include <string>
 #include <ranges>
 #include <cstdio>
+#include <stdexcept>
 
 namespace terraformer
 {
@@ -96,6 +97,17 @@ namespace terraformer
 		}
 		return std::pair{end_1, end_2};
 	}
+
+	template<std::integral Dest, std::integral Src>
+	Dest narrowing_cast(Src src)
+	{
+		auto result = static_cast<Dest>(src);
+		if(static_cast<Src>(result) != src)
+		{ throw std::runtime_error{"Value out of range"}; }
+
+		return result;
+	}
+
 }
 
 #endif

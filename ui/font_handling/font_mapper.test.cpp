@@ -17,12 +17,12 @@ TESTCASE(terraformer_ui_font_handling_font_mapper_get_path)
 {
 	terraformer::ui::font_handling::font_mapper mapper;
 
-	auto result_a = mapper.get_path("DejaVu Sans");
+	auto result_a = mapper.get_path("sans-serif");
 	EXPECT_NE(std::size(result_a.string()), 0);
 	auto stat_a = status(result_a);
 	EXPECT_NE(static_cast<int>(stat_a.type()), static_cast<int>(std::filesystem::file_type::not_found));
 
-	auto result_b = mapper.get_path("DejaVu Serif");
+	auto result_b = mapper.get_path("serif");
 	EXPECT_NE(std::size(result_b.string()), 0);
 	auto stat_b = status(result_b);
 	EXPECT_NE(static_cast<int>(stat_b.type()), static_cast<int>(std::filesystem::file_type::not_found));
