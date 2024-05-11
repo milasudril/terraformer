@@ -23,6 +23,8 @@ TESTCASE(terraformer_ui_font_handling_shape_text)
 	EXPECT_EQ(result.glyph_count, 48);
 	EXPECT_EQ(&result.renderer.get(), &renderer);
 
+	auto img = render(result);
+
 	for(size_t k = 0; k != result.glyph_count; ++k)
 	{
 		auto const& gi = result.glyph_info[k];

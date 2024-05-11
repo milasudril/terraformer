@@ -1,5 +1,6 @@
 //@	{
-//@		"dependencies":[{"ref":"harfbuzz", "origin":"pkg-config"}]
+//@		"dependencies":[{"ref":"harfbuzz", "origin":"pkg-config"}],
+//@		"dependencies_extra":[{"ref":"./text_shaper.o", "rel":"implementation"}]
 //@	}
 
 #ifndef TERRAFORMER_UI_FONT_HANDLING_TEXT_SHAPER_HPP
@@ -24,7 +25,7 @@ namespace terraformer::ui::font_handling
 
 	using hb_font_handle = std::unique_ptr<hb_font_t, hb_font_deleter>;
 
-	auto make_font(int size, glyph_renderer& renderer)
+	inline auto make_font(int size, glyph_renderer& renderer)
 	{
 		return hb_font_handle{hb_ft_font_create(renderer.set_font_size(size).get_face(),[](void*){})};
 	}
@@ -120,6 +121,8 @@ namespace terraformer::ui::font_handling
 		hb_buffer_handle m_handle;
 		bool m_clear_before_append{false};
 	};
+
+	basic_image<uint8_t> render(shaping_result const& result);
 }
 
 #endif
