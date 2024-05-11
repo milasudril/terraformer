@@ -39,7 +39,9 @@ namespace terraformer::ui::font_handling
 		FT_Library m_handle;
 	};
 
-	enum class codepoint : FT_ULong{};
+	enum class glyph_index : FT_UInt {};
+
+	enum class codepoint : FT_ULong {};
 
 	struct glyph
 	{
@@ -52,9 +54,9 @@ namespace terraformer::ui::font_handling
 	class glyph_table
 	{
 	public:
-		glyph& insert(codepoint index, glyph&& glyph_to_insert);
+		glyph& insert(glyph_index index, glyph&& glyph_to_insert);
 
-		glyph const* find(codepoint index) const
+		glyph const* find(glyph_index index) const
 		{
 			if(static_cast<FT_ULong>(index) < 256) [[likely]]
 			{
@@ -68,7 +70,7 @@ namespace terraformer::ui::font_handling
 
 	private:
 		std::array<glyph, 256> m_latin_1;
-		std::unordered_map<codepoint, glyph> m_other;
+		std::unordered_map<glyph_index, glyph> m_other;
 	};
 
 	using font = flat_map<std::greater<>, int, glyph_table>;
@@ -111,19 +113,24 @@ namespace terraformer::ui::font_handling
 		auto& get_face()
 		{ return m_face; }
 
-		auto& get_glyph(codepoint charcode) const
+		auto& get_glyph(glyph_index index) const
 		{
 			assert(m_current_glyph_table != nullptr);
 
-			auto const ret = m_current_glyph_table->find(charcode);
+			auto const ret = m_current_glyph_table->find(index);
 			if(ret != nullptr) [[likely]]
 			{ return *ret; }
 
-			return std::as_const(m_current_glyph_table->insert(charcode, load_glyph(charcode)));
+			return std::as_const(m_current_glyph_table->insert(index, load_glyph(index)));
+		}
+
+		auto& get_glyph(codepoint charcode) const
+		{
+			return get_glyph(glyph_index{FT_Get_Char_Index(m_face, static_cast<FT_ULong>(charcode))});
 		}
 
 	private:
-		glyph load_glyph(codepoint charcode) const;
+		glyph load_glyph(glyph_index index) const;
 
 		static thread_local font_loader m_loader;
 		int m_current_font_size{0};

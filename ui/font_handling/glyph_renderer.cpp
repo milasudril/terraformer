@@ -41,7 +41,7 @@ terraformer::ui::font_handling::extract_glyph(FT_GlyphSlotRec const& ft_glyph)
 }
 
 terraformer::ui::font_handling::glyph& terraformer::ui::font_handling::glyph_table::insert(
-	codepoint index,
+	glyph_index index,
 	glyph&& new_glyph
 )
 {
@@ -59,10 +59,10 @@ terraformer::ui::font_handling::glyph& terraformer::ui::font_handling::glyph_tab
 }
 
 terraformer::ui::font_handling::glyph
-terraformer::ui::font_handling::glyph_renderer::load_glyph(codepoint charcode) const
+terraformer::ui::font_handling::glyph_renderer::load_glyph(glyph_index index) const
 {
 	{
-		auto const res = FT_Load_Char(m_face, static_cast<FT_ULong>(charcode), FT_LOAD_RENDER);
+		auto const res = FT_Load_Glyph(m_face, static_cast<FT_UInt>(index), FT_LOAD_RENDER);
 		if(res != FT_Err_Ok)
 		{ throw std::runtime_error{get_ft_error_message(res)}; }
 	}
