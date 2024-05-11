@@ -40,24 +40,6 @@ terraformer::ui::font_handling::extract_glyph(FT_GlyphSlotRec const& ft_glyph)
 	return ret;
 }
 
-terraformer::ui::font_handling::glyph& terraformer::ui::font_handling::glyph_table::insert(
-	glyph_index index,
-	glyph&& new_glyph
-)
-{
-	if(static_cast<FT_UInt>(index) < std::size(m_low_index))
-	{ return m_low_index[static_cast<FT_UInt>(index)] = std::move(new_glyph); }
-
-	auto const i = m_other.insert(
-		std::pair{
-			std::as_const(index),
-			std::move(new_glyph)
-		}
-	);
-
-	return i.first->second;
-}
-
 terraformer::ui::font_handling::glyph
 terraformer::ui::font_handling::glyph_renderer::load_glyph(glyph_index index) const
 {

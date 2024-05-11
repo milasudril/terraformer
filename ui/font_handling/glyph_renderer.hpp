@@ -50,31 +50,6 @@ namespace terraformer::ui::font_handling
 		displacement cursor_advancement;
 	};
 
-
-	class glyph_table
-	{
-	public:
-		glyph& insert(glyph_index index, glyph&& glyph_to_insert);
-
-		glyph const* find(glyph_index index) const
-		{
-			if(static_cast<FT_UInt>(index) < 256) [[likely]]
-			{
-				auto const& slot = m_low_index[static_cast<FT_UInt>(index)];
-				return slot.image.has_pixels() ? &slot : nullptr;
-			}
-
-			auto const i = m_other.find(index);
-			return i != std::end(m_other) ? &i->second : nullptr;
-		}
-
-	private:
-		std::array<glyph, 256> m_low_index;
-		std::unordered_map<glyph_index, glyph> m_other;
-	};
-
-	using font = flat_map<std::greater<>, int, glyph_table>;
-
 	glyph extract_glyph(FT_GlyphSlotRec const& ft_glyph);
 
 	class glyph_renderer
@@ -106,6 +81,9 @@ namespace terraformer::ui::font_handling
 
 			auto const res = m_loaded_glyphs.insert(size, glyph_table{});
 			m_current_glyph_table = &m_loaded_glyphs.values<0>()[res.first];
+			if(res.second)
+			{ m_current_glyph_table->reserve(256); }
+
 			m_current_font_size = size;
 			return *this;
 		}
@@ -118,10 +96,11 @@ namespace terraformer::ui::font_handling
 			assert(m_current_glyph_table != nullptr);
 
 			auto const ret = m_current_glyph_table->find(index);
-			if(ret != nullptr) [[likely]]
-			{ return *ret; }
+			if(ret != glyph_table::npos) [[likely]]
+			{ return std::as_const(m_current_glyph_table->values<0>()[ret]); }
 
-			return std::as_const(m_current_glyph_table->insert(index, load_glyph(index)));
+			auto const i = m_current_glyph_table->insert(index, load_glyph(index));
+			return std::as_const(m_current_glyph_table->values<0>()[i.first]);
 		}
 
 		auto& get_glyph(codepoint charcode) const
@@ -134,8 +113,13 @@ namespace terraformer::ui::font_handling
 
 		static thread_local font_loader m_loader;
 		int m_current_font_size{0};
+		using glyph_table = flat_map<std::less<>, glyph_index, glyph>;
 		glyph_table* m_current_glyph_table{nullptr};
-		mutable font m_loaded_glyphs;
+		mutable flat_map<
+			std::greater<>,
+			int,
+			glyph_table
+		> m_loaded_glyphs;
 		mutable FT_Face m_face{};
 	};
 
