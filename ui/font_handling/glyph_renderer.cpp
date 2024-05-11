@@ -62,12 +62,6 @@ terraformer::ui::font_handling::glyph
 terraformer::ui::font_handling::glyph_renderer::load_glyph(codepoint charcode) const
 {
 	{
-		auto const res = FT_Set_Pixel_Sizes(m_face, 0, m_current_font_size);
-		if(res != FT_Err_Ok)
-		{ throw std::runtime_error{get_ft_error_message(res)}; }
-	}
-
-	{
 		auto const res = FT_Load_Char(m_face, static_cast<FT_ULong>(charcode), FT_LOAD_RENDER);
 		if(res != FT_Err_Ok)
 		{ throw std::runtime_error{get_ft_error_message(res)}; }

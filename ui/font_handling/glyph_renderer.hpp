@@ -94,14 +94,23 @@ namespace terraformer::ui::font_handling
 			{ FT_Done_Face(m_face); }
 		}
 
-		auto& get_glyph(int size, codepoint charcode) const
+		auto& set_font_size(int size)
 		{
-			if(m_current_glyph_table == nullptr || m_current_font_size != size) [[unlikely]]
 			{
-				auto const res = m_loaded_glyphs.insert(size, glyph_table{});
-				m_current_glyph_table = &m_loaded_glyphs.values<0>()[res.first];
-				m_current_font_size = size;
+				auto const res = FT_Set_Pixel_Sizes(m_face, 0, size);
+				if(res != FT_Err_Ok)
+				{ throw std::runtime_error{get_ft_error_message(res)}; }
 			}
+
+			auto const res = m_loaded_glyphs.insert(size, glyph_table{});
+			m_current_glyph_table = &m_loaded_glyphs.values<0>()[res.first];
+			m_current_font_size = size;
+			return *this;
+		}
+
+		auto& get_glyph(codepoint charcode) const
+		{
+			assert(m_current_glyph_table != nullptr);
 
 			auto const ret = m_current_glyph_table->find(charcode);
 			if(ret != nullptr) [[likely]]
@@ -114,8 +123,8 @@ namespace terraformer::ui::font_handling
 		glyph load_glyph(codepoint charcode) const;
 
 		static thread_local font_loader m_loader;
-		mutable int m_current_font_size{0};
-		mutable glyph_table* m_current_glyph_table{nullptr};
+		int m_current_font_size{0};
+		glyph_table* m_current_glyph_table{nullptr};
 		mutable font m_loaded_glyphs;
 		mutable FT_Face m_face{};
 	};

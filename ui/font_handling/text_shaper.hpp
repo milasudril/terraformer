@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_FONT_HANDLING_TEXT_SHAPER_HPP
 #define TERRAFORMER_UI_FONT_HANDLING_TEXT_SHAPER_HPP
 
-#include "lib/common/cast.hpp"
+#include "lib/common/utils.hpp"
 
 #include <hb.h>
 #include <memory>
