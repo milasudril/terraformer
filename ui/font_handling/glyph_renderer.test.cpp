@@ -24,7 +24,7 @@ namespace
 	}
 }
 
-TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_latin1)
+TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_small_index)
 {
 	terraformer::ui::font_handling::font_mapper fonts;
 	auto const fontfile = fonts.get_path("sans-serif");
@@ -70,7 +70,7 @@ TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_latin1)
 	EXPECT_NE(&glyph_6, &glyph_4);
 }
 
-TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_outside_latin_1)
+TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_large_index)
 {
 	terraformer::ui::font_handling::font_mapper fonts;
 	auto const fontfile = fonts.get_path("DejaVu Sans");
@@ -78,21 +78,21 @@ TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_outside_latin_1)
 	terraformer::ui::font_handling::glyph_renderer renderer{fontfile.c_str()};
 
 	// Load in cold state
-	auto& glyph_1 = renderer.set_font_size(24).get_glyph(terraformer::ui::font_handling::codepoint{256});
+	auto& glyph_1 = renderer.set_font_size(24).get_glyph(terraformer::ui::font_handling::codepoint{0x1f600});
 
 	// Load with same size as before
-	auto& glyph_2 = renderer.get_glyph(terraformer::ui::font_handling::codepoint{257});
+	auto& glyph_2 = renderer.get_glyph(terraformer::ui::font_handling::codepoint{0x1f603});
 	EXPECT_NE(&glyph_1, &glyph_2);
 
 	// Load with different size as before
-	auto& glyph_3 = renderer.set_font_size(16).get_glyph(terraformer::ui::font_handling::codepoint{257});
+	auto& glyph_3 = renderer.set_font_size(16).get_glyph(terraformer::ui::font_handling::codepoint{0x1f603});
 	EXPECT_NE(&glyph_1, &glyph_3);
 	EXPECT_NE(&glyph_2, &glyph_3);
 
 	// Fetch all loaded glyphs
-	auto& glyph_4 = renderer.set_font_size(24).get_glyph(terraformer::ui::font_handling::codepoint{256});
-	auto& glyph_5 = renderer.get_glyph(terraformer::ui::font_handling::codepoint{257});
-	auto& glyph_6 = renderer.set_font_size(16).get_glyph(terraformer::ui::font_handling::codepoint{257});
+	auto& glyph_4 = renderer.set_font_size(24).get_glyph(terraformer::ui::font_handling::codepoint{0x1f600});
+	auto& glyph_5 = renderer.get_glyph(terraformer::ui::font_handling::codepoint{0x1f603});
+	auto& glyph_6 = renderer.set_font_size(16).get_glyph(terraformer::ui::font_handling::codepoint{0x1f603});
 
 #if 0
 	// TODO: Must compare by value since unordered_map may move elements

@@ -58,9 +58,9 @@ namespace terraformer::ui::font_handling
 
 		glyph const* find(glyph_index index) const
 		{
-			if(static_cast<FT_ULong>(index) < 256) [[likely]]
+			if(static_cast<FT_UInt>(index) < 256) [[likely]]
 			{
-				auto const& slot = m_latin_1[static_cast<FT_ULong>(index)];
+				auto const& slot = m_low_index[static_cast<FT_UInt>(index)];
 				return slot.image.has_pixels() ? &slot : nullptr;
 			}
 
@@ -69,7 +69,7 @@ namespace terraformer::ui::font_handling
 		}
 
 	private:
-		std::array<glyph, 256> m_latin_1;
+		std::array<glyph, 256> m_low_index;
 		std::unordered_map<glyph_index, glyph> m_other;
 	};
 

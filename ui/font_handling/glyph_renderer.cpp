@@ -45,8 +45,8 @@ terraformer::ui::font_handling::glyph& terraformer::ui::font_handling::glyph_tab
 	glyph&& new_glyph
 )
 {
-	if(static_cast<FT_ULong>(index) < std::size(m_latin_1))
-	{ return m_latin_1[static_cast<FT_ULong>(index)] = std::move(new_glyph); }
+	if(static_cast<FT_UInt>(index) < std::size(m_low_index))
+	{ return m_low_index[static_cast<FT_UInt>(index)] = std::move(new_glyph); }
 
 	auto const i = m_other.insert(
 		std::pair{
