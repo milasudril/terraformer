@@ -31,19 +31,37 @@ namespace terraformer::ui::main
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 
-	struct widget_size
+	// Size options
+	//
+	// One of
+	// * No constraint                                      <=> width = (0, inf),   height = (0, inf),   aspect ratio = nullopt
+	// * Constraint in aspect ratio                         <=> width = (0, inf),   height = (0, inf),   aspect ratio = r
+	// * Constraint in height (min, max)                    <=> width = (0, inf),   height = (min, max), aspect ratio = nullopt
+	// * Constraint in height (min, max) + aspect ratio     <=> width = (0, inf),   height = (min, max), aspect ratio = r
+	// * Constraint in width (min, max)                     <=> width = (min, max), height = (0, inf),   aspect ratio = nullopt
+	// * Constraint in width (min, max) + aspect ratio      <=> width = (min, max), height = (0, inf),   aspect ratio = r
+	// * Constraint in width (min, max) + height (min, max) <=> width = (min, max), height = (min, max), aspect ratio = nullopt
+	// * Constraint in width (min, max) + height (min, max) <=> width = (min, max), height = (min, max), aspect ratio = r
+	//   Requires at least one of
+	//     w_min < h*r < w_max <=> w_min/r < h < w_max/r, that is [w_min/r, w_max/r] intersect [h_min, h_max] is non-empty
+	//     h_min < w/r < h_max <=> h_min*r < w < h_max*r, that is [h_min*r, h_max*r] intersect [w_min, w_max] is non-empty
+	//   If both fails, pick width and height in range to closest match the aspect ratio
+
+	struct unconstrained_widget_size
+	{};
+
+	struct widget_size_range
 	{
-		float width;
-		float height;
+		float min = 0.0f;
+		float max = std::numeric_limits<float>::infinity();
 	};
+
+	struct wid
 
 	struct widget_size_constraint
 	{
-		widget_size min{0.0f, 0.0f};
-		widget_size max{
-			std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity()
-		};
-		widget_size quantum{0.0f, 0.0f};
+		widget_size_range width;
+		widget_size_range height;
 		std::optional<float> aspect_ratio;
 	};
 
