@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_UI_FONT_HANDLING_TEXT_SHAPER_HPP
 #define TERRAFORMER_UI_FONT_HANDLING_TEXT_SHAPER_HPP
 
+#include "./glyph_renderer.hpp"
+
 #include "lib/common/utils.hpp"
 
 #include <hb.h>
@@ -14,13 +16,20 @@ namespace terraformer::ui::font_handling
 		{ hb_font_destroy(font); }
 	};
 
+	using hb_font_handle = std::unique_ptr<hb_font_t>;
+
+	auto make_hb_font(int size, glyph_renderer& renderer)
+	{
+		return hb_font_handle{hb_ft_font_create(renderer.set_font_size(size).get_face(),[](void*){})};
+	}
+
 	struct hb_buffer_deleter
 	{
 		void operator()(hb_buffer_t* buffer)
 		{ hb_buffer_destroy(buffer); }
 	};
 
-	using hb_handle = std::unique_ptr<hb_buffer_t, hb_buffer_deleter>;
+	using hb_buffer_handle = std::unique_ptr<hb_buffer_t, hb_buffer_deleter>;
 
 	struct shaping_result
 	{
@@ -77,7 +86,7 @@ namespace terraformer::ui::font_handling
 		}
 
 	private:
-		hb_handle m_handle;
+		hb_buffer_handle m_handle;
 		bool m_clear_before_append{false};
 	};
 }

@@ -108,6 +108,9 @@ namespace terraformer::ui::font_handling
 			return *this;
 		}
 
+		auto& get_face()
+		{ return m_face; }
+
 		auto& get_glyph(codepoint charcode) const
 		{
 			assert(m_current_glyph_table != nullptr);
