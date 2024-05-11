@@ -125,6 +125,8 @@ namespace terraformer::ui::font_handling
 		bool m_clear_before_append{false};
 	};
 
+	span_2d_extents compute_extents(shaping_result const& result);
+
 	basic_image<uint8_t> render(shaping_result const& result);
 }
 

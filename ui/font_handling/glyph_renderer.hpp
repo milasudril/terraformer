@@ -52,6 +52,8 @@ namespace terraformer::ui::font_handling
 
 	glyph extract_glyph(FT_GlyphSlotRec const& ft_glyph);
 
+	void render(glyph const& glyph, span_2d<uint8_t> output_image, uint32_t x_offset, uint32_t y_offset);
+
 	class glyph_renderer
 	{
 	public:
