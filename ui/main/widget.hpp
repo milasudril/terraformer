@@ -34,17 +34,29 @@ namespace terraformer::ui::main
 	// Size options
 	//
 	// One of
-	// * No constraint                                      <=> width = (0, inf),   height = (0, inf),   aspect ratio = nullopt
-	// * Constraint in aspect ratio                         <=> width = (0, inf),   height = (0, inf),   aspect ratio = r
-	// * Constraint in height (min, max)                    <=> width = (0, inf),   height = (min, max), aspect ratio = nullopt
-	// * Constraint in height (min, max) + aspect ratio     <=> width = (0, inf),   height = (min, max), aspect ratio = r
-	// * Constraint in width (min, max)                     <=> width = (min, max), height = (0, inf),   aspect ratio = nullopt
-	// * Constraint in width (min, max) + aspect ratio      <=> width = (min, max), height = (0, inf),   aspect ratio = r
-	// * Constraint in width (min, max) + height (min, max) <=> width = (min, max), height = (min, max), aspect ratio = nullopt
-	// * Constraint in width (min, max) + height (min, max) <=> width = (min, max), height = (min, max), aspect ratio = r
+	// * No constraint
+	//   <=> width = (0, inf),   height = (0, inf),   aspect ratio = nullopt
+	// * Constraint in aspect ratio
+	//   <=> width = (0, inf),   height = (0, inf),   aspect ratio = r
+	// * Constraint in height (min, max)
+	//   <=> width = (0, inf),   height = (min, max), aspect ratio = nullopt
+	// * Constraint in height (min, max) + aspect ratio
+	//   <=> width = (0, inf),   height = (min, max), aspect ratio = r
+	// * Constraint in width (min, max)
+	//   <=> width = (min, max), height = (0, inf),   aspect ratio = nullopt
+	// * Constraint in width (min, max) + aspect ratio
+	//   <=> width = (min, max), height = (0, inf),   aspect ratio = r
+	// * Constraint in width (min, max) + height (min, max)
+	//   <=> width = (min, max), height = (min, max), aspect ratio = nullopt
+	// * Constraint in width (min, max) + height (min, max)
+	//   <=> width = (min, max), height = (min, max), aspect ratio = r
 	//   Requires at least one of
-	//     w_min < h*r < w_max <=> w_min/r < h < w_max/r, that is [w_min/r, w_max/r] intersect [h_min, h_max] is non-empty
-	//     h_min < w/r < h_max <=> h_min*r < w < h_max*r, that is [h_min*r, h_max*r] intersect [w_min, w_max] is non-empty
+	//     w_min < h*r < w_max <=> w_min/r < h < w_max/r,
+	//     that is [w_min/r, w_max/r] intersect [h_min, h_max] is non-empty
+	//
+	//     h_min < w/r < h_max <=> h_min*r < w < h_max*r,
+	//     that is [h_min*r, h_max*r] intersect [w_min, w_max] is non-empty
+	//
 	//   If both fails, pick width and height in range to closest match the aspect ratio
 
 	struct widget_size_range
