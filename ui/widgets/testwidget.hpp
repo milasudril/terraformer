@@ -90,7 +90,17 @@ namespace terraformer::ui::widgets
 
 		main::widget_size_constraints get_size_constraints() const
 		{
-			return main::widget_size_constraints{};
+			return main::widget_size_constraints{
+				.width{
+					.min = 64.0f,
+					.max = std::numeric_limits<float>::infinity()
+				},
+				.height{
+					.min = 16.0f,
+					.max = std::numeric_limits<float>::infinity()
+				},
+				.aspect_ratio = std::nullopt
+			};
 		}
 
 		wsapi::fb_size handle_event(wsapi::fb_size size)

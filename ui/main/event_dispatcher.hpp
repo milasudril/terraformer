@@ -63,6 +63,7 @@ namespace terraformer::ui::main
 		template<auto WindowId>
 		void framebuffer_size_changed(ui::wsapi::fb_size size)
 		{
+			[[maybe_unused]] auto size_constraints = value_of(m_widget_container).get_size_constraints();
 			m_fb_size = size;
 			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)

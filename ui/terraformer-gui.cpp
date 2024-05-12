@@ -10,6 +10,7 @@
 #include "./widgets/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./widgets/testwidget.hpp"
+#include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/default_stock_textures_repo.hpp"
 
@@ -56,31 +57,17 @@ int main(int, char**)
 	terraformer::ui::widgets::testwidget foo;
 	terraformer::ui::widgets::testwidget bar;
 
-	terraformer::ui::widgets::workspace<
+	terraformer::ui::widgets::vbox<
 		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>,
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
-	> my_workspace;
+	> my_vbox;
 
-	my_workspace.append(
-		std::ref(foo),
-		terraformer::ui::main::widget_geometry{
-			.where = terraformer::location{150.0f, -125.0f, 0.0f},
-			.origin = terraformer::location{-1.0f, 1.0f, 0.0f},
-			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
-		}
-	);
+	my_vbox.append(std::ref(foo));
 
-	my_workspace.append(
-		std::ref(bar),
-		terraformer::ui::main::widget_geometry{
-			.where = terraformer::location{350.0f, -125.0f, 0.0f},
-			.origin = terraformer::location{-1.0f, 1.0f, 0.0f},
-			.size = terraformer::scaling{150.0f, 100.0f, 0.0f}
-		}
-	);
+	my_vbox.append(std::ref(bar));
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
-		std::ref(my_workspace),
+		std::ref(my_vbox),
 		window_controller{},
 		terraformer::ui::drawing_api::single_quad_renderer{},
 		terraformer::ui::drawing_api::frame_renderer{},
@@ -91,12 +78,12 @@ int main(int, char**)
 	auto texture_repo =
 		terraformer::ui::main::generate_default_stock_textures<terraformer::ui::drawing_api::gl_texture>();
 
+
 	auto const default_cursor = terraformer::ui::theming::create_cursor(
 		gui_ctxt,
-		terraformer::ui::theming::current_cursor_set.resize,
+		terraformer::ui::theming::current_cursor_set.main,
 		widget_look.colors.cursor_color
 	);
-
 	mainwin.set_cursor(default_cursor);
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
