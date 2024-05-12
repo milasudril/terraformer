@@ -15,7 +15,8 @@ namespace terraformer::ui::main
 		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const&);
-		using size_callback = wsapi::fb_size (*)(void*, wsapi::fb_size);
+		using size_constraints_callback = widget_size_constraints (*)(void const*);
+		using size_callback = void (*)(void*, wsapi::fb_size);
 
 		using widget_array = multi_array<
 			void*,
@@ -26,6 +27,7 @@ namespace terraformer::ui::main
 			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
+			size_constraints_callback,
 			size_callback
 		>;
 
@@ -59,11 +61,14 @@ namespace terraformer::ui::main
 				[](void* obj, wsapi::cursor_motion_event const& event) -> bool {
 					return static_cast<Widget*>(obj)->handle_event(event);
 				},
-				[](void* obj, wsapi::mouse_button_event const& mbe) ->bool {
+				[](void* obj, wsapi::mouse_button_event const& mbe) -> bool {
 					return static_cast<Widget*>(obj)->handle_event(mbe);
 				},
-				[](void* obj, wsapi::fb_size size)-> wsapi::fb_size {
-					return static_cast<Widget*>(obj)->handle_event(size);
+				[](void const* obj) -> widget_size_constraints {
+					return static_cast<Widget const*>(obj)->get_size_constraints();
+				},
+				[](void* obj, wsapi::fb_size size) {
+					static_cast<Widget*>(obj)->handle_event(size);
 				}
 			);
 
@@ -112,8 +117,11 @@ namespace terraformer::ui::main
 		auto mouse_button_callbacks() const
 		{ return m_objects.template get<5 + 2*sizeof...(WidgetRenderingResult)>(); }
 
-		auto size_callbacks() const
+		auto size_constraints_callbacks() const
 		{ return m_objects.template get<6 + 2*sizeof...(WidgetRenderingResult)>(); }
+
+		auto size_callbacks() const
+		{ return m_objects.template get<7 + 2*sizeof...(WidgetRenderingResult)>(); }
 
 	private:
 		widget_array m_objects;

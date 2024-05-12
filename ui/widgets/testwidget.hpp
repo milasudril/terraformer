@@ -88,6 +88,11 @@ namespace terraformer::ui::widgets
 			return false;
 		}
 
+		main::widget_size_constraints get_size_constraints() const
+		{
+			return main::widget_size_constraints{};
+		}
+
 		wsapi::fb_size handle_event(wsapi::fb_size size)
 		{
 			printf("%p Size was updated to %d %d\n", this, size.width, size.height);

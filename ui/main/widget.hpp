@@ -65,7 +65,7 @@ namespace terraformer::ui::main
 		float max = std::numeric_limits<float>::infinity();
 	};
 
-	struct widget_size_constraint
+	struct widget_size_constraints
 	{
 		widget_size_range width;
 		widget_size_range height;
@@ -89,7 +89,8 @@ namespace terraformer::ui::main
 		{ obj.handle_event(cele) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
-		{ obj.handle_event(std::as_const(size)) } -> std::same_as<wsapi::fb_size>;
+		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
+		{ obj.get_size_constraints() } -> std::same_as<widget_size_constraints>;
 	};
 
 	struct widget_with_default_actions
@@ -99,7 +100,9 @@ namespace terraformer::ui::main
 		void handle_event(wsapi::cursor_enter_leave_event const&);
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }
-		[[nodiscard]] wsapi::fb_size handle_event(wsapi::fb_size size) const { return size; }
+		void handle_event(wsapi::fb_size) const { }
+		[[nodiscard]] widget_size_constraints get_size_constraints() const
+		{ return widget_size_constraints{}; }
 	};
 
 	namespace
