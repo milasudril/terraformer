@@ -7,6 +7,7 @@
 
 #include <utility>
 #include <type_traits>
+#include <optional>
 
 namespace terraformer::ui::main
 {
@@ -31,34 +32,6 @@ namespace terraformer::ui::main
 
 	enum class widget_visibility:int{visible, not_rendered, collapsed};
 
-	// Size options
-	//
-	// One of
-	// * No constraint
-	//   <=> width = (0, inf),   height = (0, inf),   aspect ratio = nullopt
-	// * Constraint in aspect ratio
-	//   <=> width = (0, inf),   height = (0, inf),   aspect ratio = r
-	// * Constraint in height (min, max)
-	//   <=> width = (0, inf),   height = (min, max), aspect ratio = nullopt
-	// * Constraint in height (min, max) + aspect ratio
-	//   <=> width = (0, inf),   height = (min, max), aspect ratio = r
-	// * Constraint in width (min, max)
-	//   <=> width = (min, max), height = (0, inf),   aspect ratio = nullopt
-	// * Constraint in width (min, max) + aspect ratio
-	//   <=> width = (min, max), height = (0, inf),   aspect ratio = r
-	// * Constraint in width (min, max) + height (min, max)
-	//   <=> width = (min, max), height = (min, max), aspect ratio = nullopt
-	// * Constraint in width (min, max) + height (min, max)
-	//   <=> width = (min, max), height = (min, max), aspect ratio = r
-	//   Requires at least one of
-	//     w_min < h*r < w_max <=> w_min/r < h < w_max/r,
-	//     that is [w_min/r, w_max/r] intersect [h_min, h_max] is non-empty
-	//
-	//     h_min < w/r < h_max <=> h_min*r < w < h_max*r,
-	//     that is [h_min*r, h_max*r] intersect [w_min, w_max] is non-empty
-	//
-	//   If both fails, pick width and height in range to closest match the aspect ratio
-
 	struct widget_size_range
 	{
 		float min = 0.0f;
@@ -72,6 +45,48 @@ namespace terraformer::ui::main
 		std::optional<float> aspect_ratio;
 	};
 
+	inline scaling minimize_height(widget_size_constraints const& constraints)
+	{
+		auto const preliminary_height = constraints.height.min;
+		if(constraints.aspect_ratio.has_value())
+		{
+			auto const width = std::clamp(
+				*constraints.aspect_ratio*preliminary_height,
+				constraints.width.min,
+				constraints.width.max
+			);
+
+			auto const new_height = width/(*constraints.aspect_ratio);
+			if(new_height < constraints.height.min || new_height > constraints.height.max)
+			{ throw std::runtime_error{"Impossible size constraint"}; }
+
+			return scaling{width, new_height, 1.0f};
+		}
+
+		return scaling{constraints.width.min, preliminary_height, 1.0f};
+	};
+
+	inline scaling minimize_width(widget_size_constraints const& constraints)
+	{
+		auto const preliminary_width = constraints.width.min;
+		if(constraints.aspect_ratio.has_value())
+		{
+			auto const height = std::clamp(
+				preliminary_width/(*constraints.aspect_ratio),
+				constraints.height.min,
+				constraints.height.max
+			);
+
+			auto const new_width = height*(*constraints.aspect_ratio);
+
+			if(new_width < constraints.width.min || new_width > constraints.width.max)
+			{ throw std::runtime_error{"Impossible size constraint"}; }
+
+			return scaling{new_width, height, 1.0f};
+		}
+
+		return scaling{preliminary_width, constraints.height.min, 1.0f};
+	}
 
 	template<class T, class TextureRepo, class OutputRectangle>
 	concept widget = requires(
