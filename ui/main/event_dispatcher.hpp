@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
 #define TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
 
+#include "./widget.hpp"
+
 #include "ui/wsapi/events.hpp"
 #include "ui/drawing_api/single_quad_renderer.hpp"
 #include "ui/theming/widget_look.hpp"
@@ -64,8 +66,7 @@ namespace terraformer::ui::main
 		void framebuffer_size_changed(ui::wsapi::fb_size size)
 		{
 			value_of(m_widget_container).update_layout();
-			[[maybe_unused]] auto size_constraints = value_of(m_widget_container).get_size_constraints();
-			m_fb_size = size;
+			m_container_size = value_of(m_widget_container).get_size_constraints();
 			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
@@ -92,7 +93,11 @@ namespace terraformer::ui::main
 			value_of(m_content_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},
-				scaling{static_cast<float>(m_fb_size.width), static_cast<float>(m_fb_size.height), 1.0f},
+				scaling{
+					m_container_size.width.min,
+					m_container_size.height.min,
+					1.0f
+				},
 				m_output_rectangle
 			);
 			value_of(m_widget_container).show_widgets(value_of(m_content_renderer));
@@ -100,7 +105,7 @@ namespace terraformer::ui::main
 		}
 
 	private:
-		wsapi::fb_size m_fb_size{};
+		widget_size_constraints m_container_size;
 		WidgetContainer m_widget_container;
 		WindowController m_window_controller;
 		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle;
