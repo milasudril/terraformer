@@ -4,6 +4,7 @@
 #include "ui/wsapi/events.hpp"
 #include "ui/theming/widget_look.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/utils.hpp"
 
 #include <utility>
 #include <type_traits>
@@ -88,24 +89,24 @@ namespace terraformer::ui::main
 		return scaling{preliminary_width, constraints.height.min, 1.0f};
 	}
 
-	template<class T, class TextureRepo, class OutputRectangle>
+	template<class T, class TextureRepo, class ... OutputRectangle>
 	concept widget = requires(
 		T& obj,
 		wsapi::fb_size size,
 		wsapi::cursor_enter_leave_event const& cele,
 		wsapi::cursor_motion_event const& cme,
 		wsapi::mouse_button_event const& mbe,
-		OutputRectangle& surface,
 		TextureRepo const& textures,
-		theming::widget_look const& look
+		theming::widget_look const& look,
+		OutputRectangle&... surface
 	)
 	{
-		{ obj.render(surface, textures, look) } -> std::same_as<void>;
+		{ (..., obj.render(surface, textures, look)) } -> std::same_as<void>;
 		{ obj.handle_event(cele) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
-		{ obj.get_size_constraints() } -> std::same_as<widget_size_constraints>;
+		{ obj.get_size_constraints() } -> same_as_unqual<widget_size_constraints>;
 	};
 
 	struct widget_with_default_actions

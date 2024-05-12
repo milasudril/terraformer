@@ -36,6 +36,7 @@ namespace terraformer::ui::main
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
 		template<class Widget>
+		requires widget<Widget, TextureRepo, WidgetRenderingResult...>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,

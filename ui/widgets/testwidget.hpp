@@ -103,7 +103,7 @@ namespace terraformer::ui::widgets
 			};
 		}
 
-		wsapi::fb_size handle_event(wsapi::fb_size size)
+		void handle_event(wsapi::fb_size size)
 		{
 			printf("%p Size was updated to %d %d\n", this, size.width, size.height);
 
@@ -118,8 +118,6 @@ namespace terraformer::ui::widgets
 			m_foreground.set_format(descriptor);
 			m_background.set_format(descriptor);
 			m_dirty = true;
-			return size;
-
 		}
 
 	private:
