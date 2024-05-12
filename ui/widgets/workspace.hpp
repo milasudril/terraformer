@@ -7,17 +7,6 @@
 
 namespace terraformer::ui::widgets
 {
-	namespace detail
-	{
-		template<class ... Args>
-		void do_show_widgets(Args&&... args)
-		{ show_widgets<0>(std::forward<Args>(args)...); }
-
-		template<class ... Args>
-		void do_decorate_widgets(Args&&... args)
-		{ decorate_widgets(std::forward<Args>(args)...); }
-	}
-
 	template<class TextureRepo, class WidgetRenderingResult>
 	class workspace
 	{
@@ -144,12 +133,16 @@ namespace terraformer::ui::widgets
 
 		template<class Renderer>
 		void show_widgets(Renderer&& renderer)
-		{ detail::do_show_widgets(std::forward<Renderer>(renderer), m_widgets); }
+		{
+			using main::show_widgets;
+			show_widgets<0>(std::forward<Renderer>(renderer), m_widgets);
+		}
 
 		template<class Renderer>
 		void decorate_widgets(Renderer&& renderer, texture_repo const& textures, theming::widget_look const& look)
 		{
-			detail::do_decorate_widgets(
+			using main::decorate_widgets;
+			decorate_widgets(
 				std::forward<Renderer>(renderer),
 				m_widgets,
 				// TODO: This lambda could be useful elsewhere
