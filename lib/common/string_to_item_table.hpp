@@ -27,6 +27,17 @@ namespace terraformer
 	public:
 		using stored_key = std::unique_ptr<char[]>;
 
+		ItemType const* at_ptr(char const* key) const
+		{
+			if(!m_first_item.has_value())
+			{ return nullptr; }
+
+			if(m_first_item.key == key)
+			{ return &m_first_item->value; }
+
+			return m_other_items.at_ptr(key);
+		}
+
 	private:
 		struct match
 		{
@@ -42,6 +53,17 @@ namespace terraformer
 	class string_to_item_table<ItemType, false>
 	{
 	public:
+		using storage_type = flat_map<std::less<>, uint64_t, string_to_item_table<ItemType, true>>;
+
+		ItemType const* at_ptr(char const* key) const
+		{
+			auto const ptr = m_storage.at_ptr(make_hash(key));
+			if(ptr == nullptr)
+			{ return nullptr; }
+
+			return ptr->at_ptr(key);
+		}
+
 	private:
 		static constexpr auto make_hash(char const* str)
 		{
@@ -56,7 +78,7 @@ namespace terraformer
 			return hash;
 		};
 
-		flat_map<std::less<>, uint64_t, string_to_item_table<ItemType, true>> m_storage;
+		storage_type m_storage;
 	};
 }
 
