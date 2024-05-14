@@ -5,37 +5,44 @@
 
 namespace terraformer
 {
+	template<class StringStorage>
+	struct string_compare_less
+	{
+		bool operator()(StringStorage const& a, StringStorage const& b) const
+		{ return strcmp(a.get(), b.get()) < 0; }
+
+		bool operator()(char const* a, StringStorage const& b) const
+		{ return strcmp(a, b.get()) < 0; }
+
+		bool operator()(StringStorage const& a, char const* b) const
+		{ return strcmp(a.get(), b) < 0; }
+	};
+
+	template<class ItemType, bool direct = false>
+	class string_to_item_table;
+
 	template<class ItemType>
-	class string_to_item_table
+	class string_to_item_table<ItemType, true>
+	{
+	public:
+		using stored_key = std::unique_ptr<char[]>;
+
+	private:
+		struct match
+		{
+			std::string key;
+			ItemType value;
+		};
+
+		std::optional<match> m_first_item;
+		flat_map<string_compare_less<stored_key>, stored_key, ItemType> m_other_items;
+	};
+
+	template<class ItemType>
+	class string_to_item_table<ItemType, false>
 	{
 	public:
 	private:
-		using stored_key = std::unique_ptr<char[]>;
-
-		struct compare
-		{
-			bool operator()(stored_key const& a, stored_key const& b) const
-			{ return strcmp(a.get(), b.get()) < 0; }
-
-			bool operator()(char const* a, stored_key const& b) const
-			{ return strcmp(a, b.get()) < 0; }
-
-			bool operator()(stored_key const& a, char const* b) const
-			{ return strcmp(a.get(), b) < 0; }
-		};
-
-		struct match
-		{
-			stored_key key;
-			Item value;
-		};
-
-		struct collision_resolver
-		{
-			match first_match;
-			flat_map<compare, stored_key, ItemType> other_matches;
-		};
-
 		static constexpr auto make_hash(char const* str)
 		{
 			auto hash = 0xcbf29ce484222325llu;
@@ -49,7 +56,7 @@ namespace terraformer
 			return hash;
 		};
 
-		flat_map<std::less<>, uint64_t, collision_resolver> m_storage;
+		flat_map<std::less<>, uint64_t, string_to_item_table<ItemType, true>> m_storage;
 	};
 }
 
