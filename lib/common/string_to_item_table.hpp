@@ -29,11 +29,8 @@ namespace terraformer
 
 		ItemType const* at_ptr(char const* key) const
 		{
-			if(!m_first_item.has_value())
-			{ return nullptr; }
-
-			if(m_first_item.key == key)
-			{ return &m_first_item->value; }
+			if(m_first_item.key == key) [[likely]]
+			{ return &m_first_item.value; }
 
 			return m_other_items.at_ptr(key);
 		}
@@ -45,7 +42,7 @@ namespace terraformer
 			ItemType value;
 		};
 
-		std::optional<match> m_first_item;
+		match m_first_item;
 		flat_map<string_compare_less<stored_key>, stored_key, ItemType> m_other_items;
 	};
 
