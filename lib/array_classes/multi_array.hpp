@@ -19,7 +19,25 @@ namespace terraformer
 		{ return std::type_identity<U>{}; }
 
 		static consteval void convert(T const&...){}
+
+		static constexpr auto type_count = sizeof...(T);
 	};
+
+	template<size_t Index, class T>
+	struct type_at{};
+
+	template<size_t Index, class Head, class ...T>
+	struct type_at<Index, multi_array_tag<Head, T...>>:type_at<Index - 1, multi_array_tag<T...>>
+	{};
+
+	template<class Head, class ...T>
+	struct type_at<0, multi_array_tag<Head, T...>>
+	{
+		using type = Head;
+	};
+
+	template<size_t Index, class ArrayTag>
+	using type_at_t = typename type_at<Index, ArrayTag>::type;
 
 	template<class ... T>
 	auto generate_mem_blocks(array_size<multi_array_tag<T...>> size)
@@ -60,7 +78,6 @@ namespace terraformer
 			(
 				*(storage[index].template interpret_as<T>() + to.get())
 					= std::move(*(storage[index].template interpret_as<T>() + from.get())),
-				std::destroy_at(storage[index].template interpret_as<T>() + from.get()),
 				++index
 			),...
 		);
@@ -166,6 +183,24 @@ namespace terraformer
 		);
 	}
 
+	template<size_t StartAt, class ArrayTag, class Head, class ... Args>
+	void assign_values(
+		std::array<memory_block, ArrayTag::type_count> const& dest,
+		array_index<ArrayTag> offset,
+		Head&& head,
+		Args&&... args
+	)
+	{
+		if constexpr(StartAt != ArrayTag::type_count)
+		{
+			using current_type = type_at_t<StartAt, ArrayTag>;
+			auto obj = dest[StartAt].template interpret_as<current_type>() + offset.get();
+			*obj = std::forward<Head>(head);
+			if constexpr(sizeof...(args) != 0)
+			{ assign_values<StartAt + 1>(dest, offset, std::forward<Args>(args)...); }
+		}
+	}
+
 	template<class ... T>
 	class multi_array
 	{
@@ -249,6 +284,11 @@ namespace terraformer
 			construct(m_storage, index_type{m_size.get()}, std::forward<Arg>(elems)...);
 			m_size = new_size;
 		}
+
+		template<size_t From, class ... Arg>
+		void assign(index_type index, Arg&&... args)
+		{ assign_values<From>(m_storage, index, std::forward<Arg>(args)...); }
+
 
 		void clear() noexcept
 		{
