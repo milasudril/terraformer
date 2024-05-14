@@ -101,4 +101,24 @@ TESTCASE(terraformer_flat_map_insert)
 			EXPECT_EQ(values[k], values[res]);
 		}
 	}
+
+	// Overwrite existing value
+	{
+		auto const find_res = my_map.find(2);
+		EXPECT_NE(find_res, map_type::npos);
+		auto const insert_res = my_map.insert_or_assign(2, 6.5);
+		EXPECT_EQ(insert_res.first, map_type::index_type{2});
+		EXPECT_EQ(my_map.values<0>()[insert_res.first], 6.5);
+		EXPECT_EQ(insert_res.second, false);
+	}
+
+	// Insert or assign with a new key
+	{
+		auto const find_res = my_map.find(10);
+		EXPECT_EQ(find_res, map_type::npos);
+		auto const insert_res = my_map.insert_or_assign(10, 8.0);
+		EXPECT_EQ(insert_res.first, map_type::index_type{4});
+		EXPECT_EQ(my_map.values<0>()[insert_res.first], 8.0);
+		EXPECT_EQ(insert_res.second, true);
+	}
 }

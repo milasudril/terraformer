@@ -35,6 +35,29 @@ namespace terraformer
 			return std::pair{index, false};
 		}
 
+		template<class KeyType, class ... ValueType>
+		requires std::is_same_v<
+				multi_array_tag<std::remove_cvref_t<KeyType>, std::remove_cvref_t<ValueType>...>,
+				multi_array_tag<Key, Value...>
+			>
+		|| requires (KeyType const& key, ValueType const&... values)
+		{
+			{multi_array_tag<Key, Value...>::convert(key, values...)};
+		}
+		[[nodiscard]] std::pair<index_type, bool> insert_or_assign(KeyType&& key, ValueType&&... values)
+		{
+			auto const key_array = keys();
+			auto const i = std::ranges::lower_bound(key_array, std::as_const(key), std::as_const(m_compare));
+			index_type index{static_cast<size_t>(i - std::begin(key_array))};
+			if(i == std::end(key_array) || m_compare(*i, key) || m_compare(key, *i))
+			{
+				m_storage.insert(index, std::forward<KeyType>(key), std::forward<ValueType>(values)...);
+				return std::pair{index, true};
+			}
+			m_storage.template assign<1>(index, std::forward<ValueType>(values)...);
+			return std::pair{index, false};
+		}
+
 		template<class KeyType>
 		requires std::is_same_v<std::remove_cvref_t<KeyType>, Key>
 		[[nodiscard]] index_type find(KeyType&& key) const
