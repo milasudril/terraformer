@@ -16,6 +16,7 @@ TESTCASE(terraformer_string_to_item_table_direct_insert_and_find)
 		auto const res = values.at_ptr("key 1");
 		REQUIRE_NE(res, nullptr);
 		EXPECT_EQ(*res, 13432);
+		EXPECT_EQ(res, &values.first_element_value());
 	}
 
 	// Try to replace first item with `insert`
@@ -81,4 +82,56 @@ TESTCASE(terraformer_string_to_item_table_direct_insert_and_find)
 		REQUIRE_NE(find_res, nullptr);
 		EXPECT_EQ(*find_res, 777);
 	}
+}
+
+TESTCASE(terraformer_string_to_item_table_insert_and_find)
+{
+	terraformer::string_to_item_table<int> values;
+
+	// Table is initially empty
+	{
+		auto const res = values.at_ptr("key 1");
+		EXPECT_EQ(res, nullptr);
+	}
+
+	// Insert a new item with insert
+	{
+		EXPECT_EQ(values.at_ptr("key 3"), nullptr);
+		auto const res = values.insert("key 3", 456);
+		EXPECT_EQ(res.second, true);
+		auto const find_res = values.at_ptr("key 3");
+		REQUIRE_NE(find_res, nullptr);
+		EXPECT_EQ(*find_res, 456);
+	}
+
+	// Try to replace existing value with insert
+	{
+		EXPECT_NE(values.at_ptr("key 3"), nullptr);
+		auto const res = values.insert("key 3", 777);
+		EXPECT_EQ(res.second, false);
+		auto const find_res = values.at_ptr("key 3");
+		REQUIRE_NE(find_res, nullptr);
+		EXPECT_EQ(*find_res, 456);
+	}
+
+	// Insert a new value with insert_or_assign
+	{
+		EXPECT_EQ(values.at_ptr("key 2"), nullptr);
+		auto const res = values.insert_or_assign("key 2", 634);
+		EXPECT_EQ(res.second, true);
+		auto const find_res = values.at_ptr("key 2");
+		REQUIRE_NE(find_res, nullptr);
+		EXPECT_EQ(*find_res, 634);
+	}
+
+	// Replace existing value with insert_or_assign
+	{
+		EXPECT_NE(values.at_ptr("key 3"), nullptr);
+		auto const res = values.insert_or_assign("key 3", 777);
+		EXPECT_EQ(res.second, false);
+		auto const find_res = values.at_ptr("key 3");
+		REQUIRE_NE(find_res, nullptr);
+		EXPECT_EQ(*find_res, 777);
+	}
+
 }

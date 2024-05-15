@@ -53,6 +53,12 @@ namespace terraformer
 			return &m_other_items.template values<0>()[i];
 		}
 
+		auto const& first_element_value() const
+		{ return m_first_key_value.value; }
+
+		auto& first_element_value()
+		{ return m_first_key_value.value; }
+
 		template<class Item>
 		auto insert(char const* key, Item&& value)
 		{
@@ -95,11 +101,12 @@ namespace terraformer
 
 		ItemType const* at_ptr(char const* key) const
 		{
-			auto const ptr = m_storage.at_ptr(make_hash(key));
-			if(ptr == nullptr)
+			auto const hashed_key = make_hash(key);
+			auto const i = m_storage.find(hashed_key);
+			if(i == storage_type::npos) [[unlikely]]
 			{ return nullptr; }
 
-			return ptr->at_ptr(key);
+			return m_storage.template values<0>()[i].at_ptr(key);
 		}
 
 		template<class Item>
@@ -109,13 +116,15 @@ namespace terraformer
 			auto const i = m_storage.find(hashed_key);
 			if(i == storage_type::npos) [[likely]]
 			{
-				return m_storage.insert(
+				[[maybe_unused]] auto const insert_res = m_storage.insert(
 					hashed_key,
 					string_to_item_table<ItemType, true>{
 						key,
 						std::forward<Item>(value)
 					}
 				);
+
+				return std::pair{&m_storage.template values<0>()[i].first_element_value(), true};
 			}
 
 			return m_storage.template values<0>()[i].insert(key, std::move(value));
@@ -128,13 +137,15 @@ namespace terraformer
 			auto const i = m_storage.find(hashed_key);
 			if(i == storage_type::npos) [[likely]]
 			{
-				return m_storage.insert(
+				[[maybe_unused]] auto const insert_res =  m_storage.insert(
 					hashed_key,
 					string_to_item_table<ItemType, true>{
 						key,
 						std::forward<Item>(value)
 					}
 				);
+
+				return std::pair{&m_storage.template values<0>()[i].first_element_value(), true};
 			}
 			return m_storage.template values<0>()[i].insert_or_assign(key, std::forward<Item>(value));
 		}
