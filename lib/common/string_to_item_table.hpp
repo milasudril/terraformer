@@ -2,6 +2,7 @@
 #define TERRAFORMER_STRING_TO_ITEM_TABLE_HPP
 
 #include "./flat_map.hpp"
+#include <cstring>
 
 namespace terraformer
 {
@@ -27,6 +28,14 @@ namespace terraformer
 	public:
 		using stored_key = std::unique_ptr<char[]>;
 
+		static auto make_stored_key(char const* key)
+		{
+			auto length = strlen(key);
+			auto ret = std::make_unique<char[]>(length + 1);
+			memcpy(ret.get(), key, length + 1);
+			return ret;
+		}
+
 		template<class Item>
 		explicit string_to_item_table(char const* first_key, Item&& first_item):
 			m_first_key_value{first_key, std::forward<Item>(first_item)}
@@ -47,14 +56,23 @@ namespace terraformer
 		template<class Item>
 		auto insert(char const* key, Item&& value)
 		{
-			auto const i = m_other_items.insert(key, std::forward<Item>(value));
+			if(key == m_first_key_value.key) [[unlikely]]
+			{ return std::pair{&m_first_key_value.value, false}; }
+
+			auto const i = m_other_items.insert(make_stored_key(key), std::forward<Item>(value));
 			return std::pair{&m_other_items.template values<0>()[i.first], i.second};
 		}
 
 		template<class Item>
 		auto insert_or_assign(char const* key, Item&& value)
 		{
-			auto const i = m_other_items.insert_or_assign(key, std::forward<Item>(value));
+			if(key == m_first_key_value.key) [[unlikely]]
+			{
+				m_first_key_value.value = std::forward<Item>(value);
+				return std::pair{&m_first_key_value.value, false};
+			}
+
+			auto const i = m_other_items.insert_or_assign(make_stored_key(key), std::forward<Item>(value));
 			return std::pair{&m_other_items.template values<0>()[i.first], i.second};
 		}
 

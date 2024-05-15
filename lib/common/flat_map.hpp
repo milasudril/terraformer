@@ -59,11 +59,10 @@ namespace terraformer
 		}
 
 		template<class KeyType>
-		requires std::is_same_v<std::remove_cvref_t<KeyType>, Key>
 		[[nodiscard]] index_type find(KeyType&& key) const
 		{
 			auto const key_array = keys();
-			auto const i = std::ranges::lower_bound(key_array, key, std::as_const(m_compare));
+			auto const i = std::lower_bound(std::begin(key_array), std::end(key_array), key, m_compare);
 			if(i == std::end(key_array) || m_compare(*i, key) || m_compare(key, *i))
 			{ return npos; }
 			return index_type{static_cast<size_t>(i - std::begin(key_array))};
