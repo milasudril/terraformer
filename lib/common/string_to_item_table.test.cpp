@@ -133,5 +133,40 @@ TESTCASE(terraformer_string_to_item_table_insert_and_find)
 		REQUIRE_NE(find_res, nullptr);
 		EXPECT_EQ(*find_res, 777);
 	}
+}
+
+TESTCASE(terraformer_string_to_item_table_hash_collision)
+{
+	terraformer::string_to_item_table<int> values;
+
+	char const* key_1 = "8yn0iYCKYHlIj4-BwPqk";
+	char const* key_2 = "GReLUrM4wMqfg9yzV3KQ";
+	REQUIRE_EQ(terraformer::make_hash(key_1), terraformer::make_hash(key_2));
+
+	{
+		auto const res = values.insert(key_1, 456);
+		EXPECT_EQ(res.second, true);
+		auto const find_res = values.at_ptr(key_1);
+		REQUIRE_NE(find_res, nullptr);
+		EXPECT_EQ(*find_res, 456);
+	}
+
+	{
+		auto const res = values.insert(key_2, 131);
+		EXPECT_EQ(res.second, true);
+		auto const find_res = values.at_ptr(key_2);
+		REQUIRE_NE(find_res, nullptr);
+		EXPECT_EQ(*find_res, 131);
+	}
+
+	{
+		auto const find_res_1 = values.at_ptr(key_1);
+		auto const find_res_2 = values.at_ptr(key_2);
+		EXPECT_NE(find_res_1, find_res_2);
+		REQUIRE_NE(find_res_1, nullptr);
+		EXPECT_EQ(*find_res_1, 456);
+		REQUIRE_NE(find_res_2, nullptr);
+		EXPECT_EQ(*find_res_2, 131);
+	}
 
 }

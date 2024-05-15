@@ -6,6 +6,19 @@
 
 namespace terraformer
 {
+	constexpr auto make_hash(char const* str)
+	{
+		auto hash = 0xcbf29ce484222325llu;
+		auto const fnv_prime = 0x100000001b3llu;
+		while(*str != '\0')
+		{
+			hash ^= static_cast<uint8_t>(*str);
+			hash *= fnv_prime;
+			++str;
+		}
+		return hash;
+	};
+
 	template<class StringStorage>
 	struct string_compare_less
 	{
@@ -151,19 +164,6 @@ namespace terraformer
 		}
 
 	private:
-		static constexpr auto make_hash(char const* str)
-		{
-			auto hash = 0xcbf29ce484222325llu;
-			auto const fnv_prime = 0x100000001b3llu;
-			while(*str != '\0')
-			{
-				hash ^= static_cast<uint8_t>(*str);
-				hash *= fnv_prime;
-				++str;
-			}
-			return hash;
-		};
-
 		storage_type m_storage;
 	};
 }
