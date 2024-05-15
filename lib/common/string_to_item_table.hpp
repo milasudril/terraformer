@@ -27,12 +27,35 @@ namespace terraformer
 	public:
 		using stored_key = std::unique_ptr<char[]>;
 
+		template<class Item>
+		explicit string_to_item_table(char const* first_key, Item&& first_item):
+			m_first_key_value{first_key, std::forward<Item>(first_item)}
+		{}
+
 		ItemType const* at_ptr(char const* key) const
 		{
-			if(m_first_item.key == key) [[likely]]
-			{ return &m_first_item.value; }
+			if(m_first_key_value.key == key) [[likely]]
+			{ return &m_first_key_value.value; }
 
-			return m_other_items.at_ptr(key);
+			auto const i = m_other_items.find(key);
+			if(i == flat_map<string_compare_less<stored_key>, stored_key, ItemType>::npos)
+			{ return nullptr; }
+
+			return &m_other_items.template values<0>()[i];
+		}
+
+		template<class Item>
+		auto insert(char const* key, Item&& value)
+		{
+			auto const i = m_other_items.insert(key, std::forward<Item>(value));
+			return std::pair{&m_other_items.template values<0>()[i.first], i.second};
+		}
+
+		template<class Item>
+		auto insert_or_assign(char const* key, Item&& value)
+		{
+			auto const i = m_other_items.insert_or_assign(key, std::forward<Item>(value));
+			return std::pair{&m_other_items.template values<0>()[i.first], i.second};
 		}
 
 	private:
@@ -42,7 +65,7 @@ namespace terraformer
 			ItemType value;
 		};
 
-		match m_first_item;
+		match m_first_key_value;
 		flat_map<string_compare_less<stored_key>, stored_key, ItemType> m_other_items;
 	};
 
@@ -59,6 +82,43 @@ namespace terraformer
 			{ return nullptr; }
 
 			return ptr->at_ptr(key);
+		}
+
+		template<class Item>
+		auto insert(char const* key, Item&& value)
+		{
+			auto const hashed_key = make_hash(key);
+			auto const i = m_storage.find(hashed_key);
+			if(i == storage_type::npos) [[likely]]
+			{
+				return m_storage.insert(
+					hashed_key,
+					string_to_item_table<ItemType, true>{
+						key,
+						std::forward<Item>(value)
+					}
+				);
+			}
+
+			return m_storage.template values<0>()[i].insert(key, std::move(value));
+		}
+
+		template<class Item>
+		auto insert_or_assign(char const* key, Item&& value)
+		{
+			auto const hashed_key = make_hash(key);
+			auto const i = m_storage.find(hashed_key);
+			if(i == storage_type::npos) [[likely]]
+			{
+				return m_storage.insert(
+					hashed_key,
+					string_to_item_table<ItemType, true>{
+						key,
+						std::forward<Item>(value)
+					}
+				);
+			}
+			return m_storage.template values<0>()[i].insert_or_assign(key, std::forward<Item>(value));
 		}
 
 	private:
