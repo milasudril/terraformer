@@ -178,6 +178,74 @@ TESTCASE(terraformer_string_to_item_table_hash_collision)
 	}
 }
 
+
+TESTCASE(terraformer_string_to_item_table_std_unordered_random_lookup_perf)
+{
+	auto factory = create(
+		std::type_identity<langmorph::word_factory>{},
+		"testdata/shakespeare.wad64",
+		"langmorph_data"
+	);
+
+	terraformer::random_generator rng;
+	size_t dict_size = 1;
+
+	while(dict_size <= 16384)
+	{
+		size_t lookup_count = 1024*1024*8;
+
+		printf("%zu", dict_size);
+		fflush(stdout);
+		for(size_t length = 1; length != 4; ++length)
+		{
+			std::unordered_map<std::string, size_t> values;
+			std::chrono::duration<double> t_insert;
+			std::vector<std::string> keys;
+			{
+				auto now = std::chrono::steady_clock::now();
+				for(size_t k = 0; k != dict_size; ++k)
+				{
+					while(true)
+					{
+						std::string key;
+						for(size_t elem_count = 0; elem_count != length; ++elem_count)
+						{ key += std::string{"/"}.append(factory(rng)); }
+
+						if(values.emplace(key, k ).second)
+						{
+							keys.push_back(std::move(key));
+							break;
+						}
+					}
+				}
+
+				t_insert = std::chrono::duration<double>{std::chrono::steady_clock::now() - now}
+					/static_cast<double>(dict_size);
+			}
+
+			std::chrono::duration<double> t_lookup;
+			{
+				auto now = std::chrono::steady_clock::now();
+				std::uniform_int_distribution U{static_cast<size_t>(0), std::size(keys) - 1};
+				for(size_t k = 0; k != lookup_count; ++k)
+				{
+					auto const index = U(rng);
+					auto const find_res = values.find(keys[index]);
+					REQUIRE_NE(find_res, values.end());
+				}
+
+				t_lookup = std::chrono::duration<double>{std::chrono::steady_clock::now() - now}
+					/static_cast<double>(lookup_count);
+			}
+			printf(" %.8g", t_lookup.count());
+			fflush(stdout);
+		}
+		printf("\n");
+		fflush(stdout);
+		dict_size <<= 1;
+	}
+}
+
 TESTCASE(terraformer_string_to_item_table_random_lookup_perf)
 {
 	auto factory = create(
