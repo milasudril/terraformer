@@ -100,15 +100,6 @@ namespace terraformer
 				++index
 			),...
 		);
-#if 0
-		index = 0;
-		(
-			(
-				std::destroy_at(storage[index].template interpret_as<T>() + from.get()),
-				++index
-			),...
-		);
-#endif
 	}
 
 	template<class ... T>
@@ -371,6 +362,7 @@ namespace terraformer
 				move_element(m_storage, k - 1, k);
 				--k;
 			}
+			destroy(m_storage, index, size_type{1});
 			construct(m_storage, index, std::forward<Arg>(elems)...);
 			m_size = new_size;
 		}
