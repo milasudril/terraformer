@@ -312,7 +312,7 @@ TESTCASE(terraformer_multi_array_insert_at_begin)
 		}
 		array.insert(my_array_type::index_type{0}, k, 0.5*static_cast<double>(k));
 	}
-#if 0
+
 	auto const ints = array.get<0>();
 	auto const doubles = array.get<1>();
 	for(auto k = array.first_element_index(); k != std::size(array); ++k)
@@ -321,10 +321,36 @@ TESTCASE(terraformer_multi_array_insert_at_begin)
 		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
 		EXPECT_EQ(static_cast<holder<double>>(doubles[k]).value(), 0.5f*static_cast<double>(expected_value));
 	}
-#endif
 }
 
-#if 0
+TESTCASE(terraformer_multi_array_insert_at_begin_string_size_t)
+{
+	using my_array_type = terraformer::multi_array<
+		std::string,
+		size_t
+	>;
+
+	my_array_type array;
+	array.push_back("/knabeneptse/esins", 1);
+	array.push_back("/mace/erer", 2);
+	array.push_back("/mace/pleartuch", 3);
+
+	{
+		printf("Before insert\n");
+		auto const keys = array.get<0>();
+		for(auto k = keys.first_element_index(); k != std::size(keys); ++k)
+		{ printf("%s\n", keys[k].c_str()); }
+	}
+
+	array.insert(array.first_element_index(), "/esey/prore", 0);
+	{
+		printf("After insert\n");
+		auto const keys = array.get<0>();
+		for(auto k = keys.first_element_index(); k != std::size(keys); ++k)
+		{ printf("%s\n", keys[k].c_str()); }
+	}
+}
+
 TESTCASE(terraformer_multi_array_insert_at_end)
 {
 	using my_array_type = terraformer::multi_array<
@@ -495,4 +521,3 @@ TESTCASE(terraformer_multi_array_partial_assign_value)
 		}
 	}
 }
-#endif

@@ -3,6 +3,8 @@
 
 #include "lib/array_classes/multi_array.hpp"
 
+#include <iostream>
+
 namespace terraformer
 {
 	template<class Compare, class Key, class ... Value>
@@ -81,6 +83,8 @@ namespace terraformer
 
 		void reserve(size_t capacity)
 		{ m_storage.reserve(typename storage_type::size_type{capacity}); }
+
+		bool debug_enabled{false};
 
 	private:
 		[[no_unique_address]] Compare m_compare;
