@@ -48,38 +48,14 @@ TESTCASE(terraformer_resource_table_emplace)
 	auto const res3 = table.emplace("New key", 456);
 	EXPECT_EQ(res3.first, res1.first);
 
-	auto const res4 = table.insert_or_assign("Hej", 456);
-	REQUIRE_NE(res4.first, nullptr);
-	EXPECT_EQ(res4.second, false);
-	EXPECT_EQ(*res4.first, 456);
-	EXPECT_EQ(*res3.first, 123);
-
-	auto const link3 = table.create_or_replace_link("New key", "Hej");
-	REQUIRE_NE(link3.first, nullptr);
-	EXPECT_EQ(*link3.first, 123);
-	EXPECT_EQ(link3.second, false);
-
-	auto const link4 = table.create_or_replace_link("Hej", "Foobar");
-	REQUIRE_NE(link4.first, nullptr);
-	EXPECT_EQ(*link4.first, 123);
-	EXPECT_EQ(link4.second, true);
-
-	auto const res5 = table.insert_or_assign_linked("Foobar", 789);
+	auto const res5 = table.insert_or_assign_linked("Hej", 789);
 	REQUIRE_NE(res5.first, nullptr);
 	EXPECT_EQ(*res5.first, 789);
 	EXPECT_EQ(res5.second, false);
-	EXPECT_EQ(*link4.first, 789);
-	EXPECT_EQ(*link3.first, 789);
+	EXPECT_EQ(res5.first, link.first);
 
 	auto const res6 = table.insert_or_assign_linked("Kaka", 23243);
 	REQUIRE_NE(res6.first, nullptr);
 	EXPECT_EQ(*res6.first, 23243);
 	EXPECT_EQ(res6.second, true);
-	EXPECT_EQ(*link4.first, 789);
-	EXPECT_EQ(*link3.first, 789);
-
-	auto const link5 = table.create_or_replace_link("Non-existing-key", "Other key");
-	EXPECT_EQ(link5.first, nullptr);
-	EXPECT_EQ(link5.second, false);
-	EXPECT_EQ(table.contains("Other key"), false);
 }
