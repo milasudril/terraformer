@@ -21,6 +21,30 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
+		template<class OutputRectangle, class WidgetStyle>
+ 		void prepare_for_presentation(OutputRectangle& output_rect, WidgetStyle const& style)
+		{
+			output_rect.background = style.get_texture("ui/main_panel/background");
+			output_rect.foreground = style.get_null_texture();
+			output_rect.foreground_tints = std::array{
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
+			};
+
+			auto const background_color = style.get_color("ui/main_panel/background");
+
+			output_rect.background_tints = std::array{
+				background_color,
+				background_color,
+				background_color,
+				background_color,
+			};
+
+ 			prepare_for_presentation<0>(m_widgets, style);
+		}
+
 		void render(
 			output_rectangle& output_rect,
 			texture_repo const& textures,
