@@ -134,3 +134,23 @@ TESTCASE(terraformer_shared_any_copy_assign)
 	EXPECT_EQ(object_1.use_count(), 2);
 	EXPECT_EQ(object_2.use_count(), 2);
 }
+
+namespace
+{
+	struct foo
+	{
+			foo()
+			{ throw "Failed"; }
+	};
+}
+
+TESTCASE(terraformer_shared_any_object_ctor_throws)
+{
+	try
+	{
+		terraformer::shared_any obj{std::type_identity<foo>{}};
+		abort();
+	}
+	catch(...)
+	{}
+}
