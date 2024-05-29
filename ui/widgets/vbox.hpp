@@ -24,9 +24,8 @@ namespace terraformer::ui::widgets
 
  		void prepare_for_presentation(WidgetRenderingResult& output_rect, resource_table const& resources)
 		{
-			using texture_type = typename WidgetRenderingResult::texture_type;
-			output_rect.background = resources.get_if<texture_type>("ui/main_panel/background_texture");
-			output_rect.foreground = resources.get_if<texture_type>("ui/null_texture");
+			output_rect.background = resources.get_if("ui/main_panel/background_texture");
+			output_rect.foreground = resources.get_if("ui/null_texture");
 			output_rect.foreground_tints = std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
