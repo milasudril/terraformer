@@ -17,19 +17,27 @@ namespace terraformer
 		using base::base;
 		using base::contains;
 
-		template<class Value, class KeyType>
-		[[nodiscard]] Value const* get_if(KeyType&& key) const
+		template<class KeyType>
+		[[nodiscard]] auto get_if(KeyType&& key) const
 		{
 			auto const i = base::find(key);
-			return i != base::end()? i->second.template get_if<Value>() : nullptr;
+			return i != base::end()? i->second.get_const() : shared_any::value_const{};
+		}
+
+		template<class KeyType>
+		[[nodiscard]] auto get_if(KeyType&& key)
+		{
+			auto const i = base::find(key);
+			return i != base::end()? i->second.get() : shared_any::value{};
 		}
 
 		template<class Value, class KeyType>
+		[[nodiscard]] Value const* get_if(KeyType&& key) const
+		{ return get_if(std::forward<KeyType>(key)); }
+
+		template<class Value, class KeyType>
 		[[nodiscard]] Value* get_if(KeyType&& key)
-		{
-			auto const i = base::find(key);
-			return i != base::end()? i->second.template get_if<Value>() : nullptr;
-		}
+		{ return get_if(std::forward<KeyType>(key)); }
 
 		template<class Value, class KeyType, class ... Args>
 		[[nodiscard("Verify that insertion took place")]]
