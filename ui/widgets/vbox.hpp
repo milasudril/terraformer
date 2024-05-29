@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_WIDGETS_VBOX_HPP
 
 #include "ui/main/widget_list.hpp"
+#include "lib/common/resource_table.hpp"
 
 #include <functional>
 
@@ -21,11 +22,11 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		template<class OutputRectangle, class WidgetStyle>
- 		void prepare_for_presentation(OutputRectangle& output_rect, WidgetStyle const& style)
+ 		void prepare_for_presentation(WidgetRenderingResult& output_rect, resource_table const& resources)
 		{
-			output_rect.background = style.get_texture("ui/main_panel/background");
-			output_rect.foreground = style.get_null_texture();
+			using texture_type = typename WidgetRenderingResult::texture_type;
+			output_rect.background = resources.get_if<texture_type>("ui/main_panel/background_texture");
+			output_rect.foreground = resources.get_if<texture_type>("ui/null_texture");
 			output_rect.foreground_tints = std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
@@ -33,7 +34,9 @@ namespace terraformer::ui::widgets
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
 			};
 
-			auto const background_color = style.get_color("ui/main_panel/background");
+			auto const background_color_ptr = resources.get_if<rgba_pixel>("ui/main_panel/background_tint");
+			auto const background_color = background_color_ptr != nullptr?
+				*background_color_ptr : rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 
 			output_rect.background_tints = std::array{
 				background_color,
@@ -42,7 +45,7 @@ namespace terraformer::ui::widgets
 				background_color,
 			};
 
- 			prepare_for_presentation<0>(m_widgets, style);
+ 			prepare_for_presentation<0>(m_widgets, resources);
 		}
 
 		void render(
