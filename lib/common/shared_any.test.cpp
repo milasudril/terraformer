@@ -139,8 +139,8 @@ namespace
 {
 	struct foo
 	{
-			foo()
-			{ throw "Failed"; }
+		foo()
+		{ throw "Failed"; }
 	};
 }
 
