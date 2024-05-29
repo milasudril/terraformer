@@ -22,6 +22,18 @@ TESTCASE(terraformer_shared_any_create_and_read_state)
 	EXPECT_EQ(ptr->second, 5678);
 	EXPECT_EQ(object, true);
 	EXPECT_EQ(object.use_count(), 1);
+	int* const val_1 = object.get();
+	EXPECT_EQ(val_1, nullptr);
+
+	std::pair<int, int>* const val_2 = object.get();
+	EXPECT_EQ(val_2, ptr);
+
+	std::pair<int, int> const* val_3 = object.get();
+	EXPECT_EQ(val_3, ptr);
+
+	// casts away qualifiers std::pair<int, int>* val_4 = object.get_const();
+	std::pair<int, int> const* val_4 = object.get_const();
+	EXPECT_EQ(val_4, ptr);
 }
 
 TESTCASE(terraformer_shared_any_and_reset)

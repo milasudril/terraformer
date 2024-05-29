@@ -10,7 +10,36 @@ namespace terraformer
 {
 	class shared_any
 	{
+		struct nonconst_tag
+		{ using type = void*; };
+
+		struct const_tag
+		{ using type = void const*; };
+
+		template<class Tag>
+		class value_impl
+		{
+		public:
+			value_impl() = default;
+
+			template<class T>
+			operator T*() const noexcept
+			{ return std::type_index{typeid(T)} == m_type? static_cast<T*>(m_pointer) : nullptr; }
+
+		private:
+			friend class shared_any;
+			explicit value_impl(typename Tag::type pointer, std::type_index type):
+				m_pointer{pointer},
+				m_type{type}
+			{}
+
+			typename Tag::type m_pointer = nullptr;
+			std::type_index m_type = std::type_index{typeid(void)};
+		};
 	public:
+		using value = value_impl<nonconst_tag>;
+		using value_const = value_impl<const_tag>;
+
 		shared_any() noexcept = default;
 
 		template<class T, class ... Args>
@@ -46,6 +75,12 @@ namespace terraformer
 		template<class T>
 		T* get_if() const noexcept
 		{ return m_holder.get_if<T>(); }
+
+		auto get() const noexcept
+		{ return value{m_holder.pointer, m_holder.current_type}; }
+
+		auto get_const() const noexcept
+		{ return value_const{m_holder.pointer, m_holder.current_type}; }
 
 		void reset() noexcept
 		{
