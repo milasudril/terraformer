@@ -45,6 +45,7 @@ namespace terraformer
 		shared_any() noexcept = default;
 
 		template<class T, class ... Args>
+		requires(!std::is_same_v<std::remove_const_t<T>, shared_any>)
 		explicit shared_any(std::type_identity<T>, Args&&... args):
 			m_holder{std::type_identity<T>{}, std::forward<Args>(args)...}
 		{}
