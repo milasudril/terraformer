@@ -167,7 +167,7 @@ namespace terraformer::ui::widgets
 
 		// Widget collection stuff
 
-		void update_layout()
+		void update_layout(float margin_x, float margin_y)
 		{
 			auto const widget_pointers = m_widgets.widget_pointers();
 			auto const widget_geometries = m_widgets.widget_geometries();
@@ -176,14 +176,14 @@ namespace terraformer::ui::widgets
 			auto const n = std::size(m_widgets);
 			auto min_width = 0.0f;
 			auto max_width = std::numeric_limits<float>::infinity();
-			auto height = 4.0f;
+			auto height = margin_y;
 			for(auto k = m_widgets.first_element_index(); k != n; ++k)
 			{
 				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
 				{
 					auto const constraints = size_constraints_callbacks[k](widget_pointers[k]);
 					widget_geometries[k].where = location{
-						0.0f,
+						margin_x,
 						-height,
 						0.0f
 					};
@@ -197,8 +197,8 @@ namespace terraformer::ui::widgets
 
 			m_current_size_constraints = main::widget_size_constraints{
 				.width{
-					.min = min_width,
-					.max = std::max(min_width, max_width)
+					.min = min_width + 2.0f*margin_x,
+					.max = std::max(min_width, max_width) + 2.0f*margin_x
 				},
 				.height{
 					.min = height,
