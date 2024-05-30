@@ -176,7 +176,7 @@ namespace terraformer::ui::widgets
 			auto const n = std::size(m_widgets);
 			auto min_width = 0.0f;
 			auto max_width = std::numeric_limits<float>::infinity();
-			auto height = 0.0f;
+			auto height = 4.0f;
 			for(auto k = m_widgets.first_element_index(); k != n; ++k)
 			{
 				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
@@ -191,7 +191,7 @@ namespace terraformer::ui::widgets
 					widget_geometries[k].size = minimize_height(constraints);
 					min_width = std::max(min_width, widget_geometries[k].size[0]);
 					max_width = std::min(max_width, constraints.width.max);
-					height += widget_geometries[k].size[1];
+					height += widget_geometries[k].size[1] + 4.0f;
 				}
 			}
 
