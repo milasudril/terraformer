@@ -40,6 +40,12 @@ namespace terraformer
 			);
 		}
 
+		void emplace_link(shared_any const& other)
+		{
+			assert(other.object_id() != std::bit_cast<intptr_t>(this));
+			m_values.push_back(other);
+		}
+
 		auto size() const
 		{ return std::size(m_values); }
 
@@ -52,7 +58,6 @@ namespace terraformer
 		using base = std::unordered_map<std::string, shared_any>;
 
 	public:
-		using base::base;
 		using base::contains;
 
 		template<class KeyType>

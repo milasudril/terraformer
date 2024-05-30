@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <utility>
 #include <compare>
+#include <bit>
+#include <cstdint>
 
 namespace terraformer
 {
@@ -96,6 +98,9 @@ namespace terraformer
 
 		operator bool() const noexcept
 		{ return m_holder.pointer != nullptr; }
+
+		intptr_t object_id() const
+		{ return std::bit_cast<intptr_t>(m_holder.pointer); }
 
 	private:
 		static void noop(void*){}
