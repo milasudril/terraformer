@@ -2,6 +2,7 @@
 #define TERRAFORMER_RESOURCE_TABLE_HPP
 
 #include "./shared_any.hpp"
+#include "lib/array_classes/single_array.hpp"
 
 #include <unordered_map>
 #include <string>
@@ -9,6 +10,43 @@
 
 namespace terraformer
 {
+	class resource_list
+	{
+	public:
+		using index_type = single_array<shared_any>::index_type;
+
+		[[nodiscard]] auto operator[](index_type index) const
+		{ return m_values[index].get_const(); }
+
+		[[nodiscard]] auto operator[](index_type index)
+		{ return m_values[index].get(); }
+
+		template<class T>
+		[[nodiscard]] T const* get_if(index_type index) const
+		{ return (*this)[index]; }
+
+		template<class T>
+		[[nodiscard]] T* get_if(index_type index)
+		{ return (*this)[index]; }
+
+		template<class Value, class ... Args>
+		void emplace_back(Args&&... args)
+		{
+			return m_values.push_back(
+				shared_any{
+					std::type_identity<Value>{},
+					std::forward<Args>(args)...
+				}
+			);
+		}
+
+		auto size() const
+		{ return std::size(m_values); }
+
+	private:
+		single_array<shared_any> m_values;
+	};
+
 	class resource_table:private std::unordered_map<std::string, shared_any>
 	{
 		using base = std::unordered_map<std::string, shared_any>;
