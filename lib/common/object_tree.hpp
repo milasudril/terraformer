@@ -106,13 +106,11 @@ namespace terraformer
 
 		object_tree operator/(size_t index)
 		{
-			using index_type = array_type::index_type;
-
 			auto const val = m_value.template get_if<array_type>();
 			if(val == nullptr)
 			{ return object_tree{}; }
 
-			return index < std::size(*val).get()? object_tree{(*val)[index_type{index}]} : object_tree{};
+			return (*val)/index;
 		}
 
 		template<class Func>
