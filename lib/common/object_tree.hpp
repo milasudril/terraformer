@@ -20,17 +20,42 @@ namespace terraformer
 		{ return std::hash<std::string>{}(txt); }
 	};
 
+	class object_tree;
+
+	class object_array: private single_array<shared_any>
+	{
+	public:
+		using base = single_array<shared_any>;
+		using base::index_type;
+		using base::size_type;
+		using base::begin;
+		using base::end;
+		using base::size;
+		using base::operator[];
+
+		template<class TypeOfValueToInsert, class ... Args>
+		object_array& append(Args&&... args)
+		{
+			base::push_back(
+				shared_any{
+					std::type_identity<TypeOfValueToInsert>{},
+					std::forward<Args>(args)...
+				}
+			);
+			return *this;
+		}
+
+		inline object_tree operator/(size_t index);
+	};
+
 	class object_tree
 	{
 	public:
 		using map_type = std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>;
-		using array_type = single_array<shared_any>;
+		using array_type = object_array;
 
 		template<class T>
-		static constexpr auto is_leaf_type_v = !(
-			  std::is_same_v<std::remove_cvref_t<T>, array_type>
-			||std::is_same_v<std::remove_cvref_t<T>, map_type>
-		);
+		static constexpr auto is_leaf_type_v = !std::is_same_v<std::remove_cvref_t<T>, object_tree>;
 
 		object_tree(object_tree const&) = delete;
 		object_tree& operator=(object_tree const&) = delete;
@@ -52,13 +77,12 @@ namespace terraformer
 
 			if(auto const array = m_value.template get_if<array_type>(); array != nullptr)
 			{
-				array->push_back(shared_any{std::type_identity<TypeOfValueToInsert>{}, std::forward<Args>(args)...});
+				array->template append<TypeOfValueToInsert>(std::forward<Args>(args)...);
 				return object_tree{m_value};
 			}
 
 			return object_tree{};
 		}
-
 
 		bool is_null() const
 		{ return !m_value; }
@@ -125,4 +149,9 @@ namespace terraformer
 	private:
 		shared_any m_value;
 	};
+
+	object_tree object_array::operator/(size_t index)
+	{
+		return index < std::size(*this).get()? object_tree{(*this)[index_type{index}]} : object_tree{};
+	}
 }
