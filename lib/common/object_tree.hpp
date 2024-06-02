@@ -99,6 +99,7 @@ namespace terraformer
 		explicit object_pointer(any_pointer<IsConst> pointer): m_pointer{pointer}{}
 
 		template<class TypeOfValueToInsert, class ... Args>
+		requires(!IsConst)
 		object_pointer append(Args&&... args) const
 		{
 			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
@@ -111,6 +112,7 @@ namespace terraformer
 		}
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
+		requires(!IsConst)
 		object_pointer insert(KeyType&& key, Args&&... args) const
 		{
 			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
@@ -126,6 +128,7 @@ namespace terraformer
 		}
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
+		requires(!IsConst)
 		object_pointer insert_or_assign(KeyType&& key, Args&&... args) const
 		{
 			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
