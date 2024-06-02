@@ -42,12 +42,18 @@ namespace terraformer
 		std::type_index m_type = std::type_index{typeid(void)};
 	};
 
+	using any_pointer_to_const = any_pointer<true>;
+
+	any_pointer(void*, std::type_index) -> any_pointer<false>;
+
+	any_pointer(void const*, std::type_index) -> any_pointer<true>;
+
+	template<class T>
+	any_pointer(T* ptr) -> any_pointer<std::is_const_v<T>>;
+
 	class shared_any
 	{
 	public:
-		using value = any_pointer<false>;
-		using value_const = any_pointer<true>;
-
 		shared_any() noexcept = default;
 
 		template<class T, class ... Args>
@@ -86,10 +92,10 @@ namespace terraformer
 		{ return m_holder.get_if<T>(); }
 
 		auto get() const noexcept
-		{ return value{m_holder.pointer, m_holder.current_type}; }
+		{ return any_pointer{m_holder.pointer, m_holder.current_type}; }
 
 		auto get_const() const noexcept
-		{ return value_const{m_holder.pointer, m_holder.current_type}; }
+		{ return any_pointer{as_const(m_holder.pointer), m_holder.current_type}; }
 
 		void reset() noexcept
 		{

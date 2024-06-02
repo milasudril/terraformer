@@ -64,14 +64,14 @@ namespace terraformer
 		[[nodiscard]] auto get_if(KeyType&& key) const
 		{
 			auto const i = base::find(key);
-			return i != base::end()? i->second.get_const() : shared_any::value_const{};
+			return i != base::end()? i->second.get_const() : any_pointer_to_const{};
 		}
 
 		template<class KeyType>
 		[[nodiscard]] auto get_if(KeyType&& key)
 		{
 			auto const i = base::find(key);
-			return i != base::end()? i->second.get() : shared_any::value{};
+			return i != base::end()? i->second.get() : any_pointer<false>{};
 		}
 
 		template<class Value, class KeyType>
