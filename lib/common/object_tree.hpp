@@ -20,7 +20,8 @@ namespace terraformer
 		{ return std::hash<std::string>{}(txt); }
 	};
 
-	class object_tree;
+	template<bool>
+	class object_pointer;
 
 	class object_array: private single_array<shared_any>
 	{
@@ -32,6 +33,7 @@ namespace terraformer
 		using base::end;
 		using base::size;
 		using base::operator[];
+		using base::empty;
 
 		template<class TypeOfValueToInsert, class ... Args>
 		object_array& append(Args&&... args)
@@ -45,7 +47,7 @@ namespace terraformer
 			return *this;
 		}
 
-		inline object_tree operator/(size_t index);
+		inline object_pointer<false> operator/(size_t index);
 	};
 
 	class object_dict: private std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>
@@ -55,6 +57,7 @@ namespace terraformer
 		using base::begin;
 		using base::end;
 		using base::size;
+		using base::empty;
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
 		object_dict& insert(KeyType&& key, Args&&... args)
@@ -81,149 +84,139 @@ namespace terraformer
 		}
 
 		template<class KeyType>
-		inline object_tree operator/(KeyType&& key);
+		inline object_pointer<false> operator/(KeyType&& key);
 	};
 
-	class object_tree
+	template<bool IsConst>
+	class object_pointer
 	{
 	public:
 		using map_type = object_dict;
 		using array_type = object_array;
 
-		object_tree(object_tree const&) = delete;
-		object_tree& operator=(object_tree const&) = delete;
-		object_tree(object_tree&&) = default;
-		object_tree& operator=(object_tree&&) = default;
+		explicit object_pointer() = default;
 
-		explicit object_tree() = default;
-
-		explicit object_tree(shared_any&& obj): m_value{std::move(obj)}{}
-
-		explicit object_tree(shared_any const& obj):m_value{obj}{}
+		explicit object_pointer(any_pointer<IsConst> pointer): m_pointer{pointer}{}
 
 		template<class TypeOfValueToInsert, class ... Args>
-		object_tree append(Args&&... args)
+		object_pointer append(Args&&... args) const
 		{
-			if(!m_value)
-			{ m_value = shared_any{std::type_identity<array_type>{}}; }
-
-			if(auto const array = m_value.template get_if<array_type>(); array != nullptr)
+			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
 			{
 				array->template append<TypeOfValueToInsert>(std::forward<Args>(args)...);
-				return object_tree{m_value};
+				return *this;
 			}
 
-			return object_tree{};
+			return object_pointer{};
 		}
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
-		object_tree insert(KeyType&& key, Args&&... args)
+		object_pointer insert(KeyType&& key, Args&&... args) const
 		{
-			if(!m_value)
-			{ m_value = shared_any{std::type_identity<map_type>{}}; }
-
-			if(auto const map = m_value.template get_if<map_type>(); map != nullptr)
+			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
 			{
 				map->template insert<TypeOfValueToInsert>(
 					std::forward<KeyType>(key),
 					std::forward<Args>(args)...
 				);
-				return object_tree{m_value};
+				return *this;
 			}
 
-			return object_tree{};
+			return object_pointer{};
 		}
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
-		object_tree insert_or_assign(KeyType&& key, Args&&... args)
+		object_pointer insert_or_assign(KeyType&& key, Args&&... args) const
 		{
-			if(!m_value)
-			{ m_value = shared_any{std::type_identity<map_type>{}}; }
-
-			if(auto const map = m_value.template get_if<map_type>(); map != nullptr)
+			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
 			{
 				map->template insert_or_assign<TypeOfValueToInsert>(
 					std::forward<KeyType>(key),
 					std::forward<Args>(args)...
 				);
-				return object_tree{m_value};
+				return *this;
 			}
 
-			return object_tree{};
+			return object_pointer{};
 		}
 
 
 		bool is_null() const
-		{ return !m_value; }
+		{ return !m_pointer; }
 
 		//FIXME: Add `const` support
 
 		template<class T>
-		operator T*()
-		{ return m_value.template get_if<T>(); }
+		operator T*() const
+		{ return static_cast<T*>(m_pointer); }
 
-		object_tree operator/(std::string_view key)
+		object_pointer operator/(std::string_view key) const
 		{
-			auto const val = m_value.template get_if<map_type>();
+			auto const val = m_pointer.template get_if<map_type>();
 			if(val == nullptr)
-			{ return object_tree{}; }
+			{ return object_pointer{}; }
 
 			return (*val)/key;
 		}
 
-		object_tree operator/(size_t index)
+		object_pointer operator/(size_t index) const
 		{
-			auto const val = m_value.template get_if<array_type>();
+			auto const val = m_pointer.template get_if<array_type>();
 			if(val == nullptr)
-			{ return object_tree{}; }
+			{ return object_pointer{}; }
 
 			return (*val)/index;
 		}
 
 		template<class Func>
-		void visit_elements(Func&& f)
+		void visit_elements(Func&& f) const
 		{
-			if(auto const map = m_value.template get_if<map_type>(); map != nullptr)
+			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
 			{
 				for(auto& item : *map)
-				{ f(item.first, object_tree{item.second}); }
+				{ f(item.first, object_pointer{item.second}); }
 			}
 			else
-			if(auto const array = m_value.template get_if<array_type>(); array != nullptr)
+			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
 			{
 				auto const n = std::size(*array);
 				span const elems{array->begin(), array->end()};
 				for(auto k = elems.first_element_index(); k != n; ++k)
-				{ f(k, object_tree{elems[k]}); }
+				{ f(k, object_pointer{elems[k]}); }
 			}
 			else
-			{ f(object_tree{m_value}); }
+			{ f(object_pointer{m_pointer}); }
 		}
 
 		size_t non_recursive_size() const
 		{
-			if(auto const map = m_value.template get_if<map_type>(); map != nullptr)
+			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
 			{ return std::size(*map); }
 			else
-			if(auto const array = m_value.template get_if<array_type>(); array != nullptr)
+			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
 			{ return std::size(*array).get(); }
 			else
-			{ return m_value? static_cast<size_t>(1) : 0; }
+			{ return m_pointer? static_cast<size_t>(1) : 0; }
 		}
 
 	private:
-		shared_any m_value;
+		any_pointer<IsConst> m_pointer;
 	};
 
-	object_tree object_array::operator/(size_t index)
+	object_pointer(any_pointer<true>) -> object_pointer<true>;
+	object_pointer(any_pointer<false>) -> object_pointer<false>;
+
+	object_pointer<false> object_array::operator/(size_t index)
 	{
-		return index < std::size(*this).get()? object_tree{(*this)[index_type{index}]} : object_tree{};
+		return index < std::size(*this).get()?
+			object_pointer{(*this)[index_type{index}].get()} :
+			object_pointer<false>{};
 	}
 
 	template<class KeyType>
-	object_tree object_dict::operator/(KeyType&& key)
+	object_pointer<false> object_dict::operator/(KeyType&& key)
 	{
 		auto const i = base::find(std::forward<KeyType>(key));
-		return i != std::end(*this)? object_tree{i->second} : object_tree{};
+		return i != std::end(*this)? object_pointer{i->second.get()} : object_pointer<false>{};
 	}
 }

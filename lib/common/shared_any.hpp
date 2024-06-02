@@ -37,6 +37,17 @@ namespace terraformer
 		operator T*() const noexcept
 		{ return std::type_index{typeid(T)} == m_type? static_cast<T*>(m_pointer) : nullptr; }
 
+		template<class T>
+		T* get_if() const noexcept
+		{
+			if(m_type == std::type_index{typeid(T)})
+			{ return static_cast<T*>(m_pointer); }
+			return nullptr;
+		}
+
+		operator bool() const noexcept
+		{ return m_pointer != nullptr; }
+
 	private:
 		pointer m_pointer = nullptr;
 		std::type_index m_type = std::type_index{typeid(void)};
