@@ -90,9 +90,6 @@ namespace terraformer
 		using map_type = object_dict;
 		using array_type = object_array;
 
-		template<class T>
-		static constexpr auto is_leaf_type_v = !std::is_same_v<std::remove_cvref_t<T>, object_tree>;
-
 		object_tree(object_tree const&) = delete;
 		object_tree& operator=(object_tree const&) = delete;
 		object_tree(object_tree&&) = default;
@@ -105,7 +102,6 @@ namespace terraformer
 		explicit object_tree(shared_any const& obj):m_value{obj}{}
 
 		template<class TypeOfValueToInsert, class ... Args>
-		requires(is_leaf_type_v<TypeOfValueToInsert>)
 		object_tree append(Args&&... args)
 		{
 			if(!m_value)
@@ -121,7 +117,6 @@ namespace terraformer
 		}
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
-		requires(is_leaf_type_v<TypeOfValueToInsert>)
 		object_tree insert(KeyType&& key, Args&&... args)
 		{
 			if(!m_value)
@@ -140,7 +135,6 @@ namespace terraformer
 		}
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
-		requires(is_leaf_type_v<TypeOfValueToInsert>)
 		object_tree insert_or_assign(KeyType&& key, Args&&... args)
 		{
 			if(!m_value)
@@ -165,7 +159,6 @@ namespace terraformer
 		//FIXME: Add `const` support
 
 		template<class T>
-		requires(is_leaf_type_v<T>)
 		operator T*()
 		{ return m_value.template get_if<T>(); }
 
