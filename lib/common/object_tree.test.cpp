@@ -77,8 +77,8 @@ TESTCASE(terraformer_object_tree_insert)
 			"An array",
 			terraformer::object_array{}
 				.append<int>(3)
-				.append<terraformer::object_map>(
-					terraformer::object_map{}
+				.append<terraformer::object_dict>(
+					terraformer::object_dict{}
 						.insert_or_assign<double>("A value", 6.5)
 						.insert<double>("Another value", 4.5)
 					)

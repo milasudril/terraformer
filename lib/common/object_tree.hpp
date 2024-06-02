@@ -48,7 +48,7 @@ namespace terraformer
 		inline object_tree operator/(size_t index);
 	};
 
-	class object_map: private std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>
+	class object_dict: private std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>
 	{
 	public:
 		using base = std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>;
@@ -57,7 +57,7 @@ namespace terraformer
 		using base::size;
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
-		object_map& insert(KeyType&& key, Args&&... args)
+		object_dict& insert(KeyType&& key, Args&&... args)
 		{
 			auto res = base::emplace(
 				std::forward<KeyType>(key),
@@ -71,7 +71,7 @@ namespace terraformer
 		}
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
-		object_map& insert_or_assign(KeyType&& key, Args&&... args)
+		object_dict& insert_or_assign(KeyType&& key, Args&&... args)
 		{
 			base::insert_or_assign(
 				std::forward<KeyType>(key),
@@ -87,7 +87,7 @@ namespace terraformer
 	class object_tree
 	{
 	public:
-		using map_type = object_map;
+		using map_type = object_dict;
 		using array_type = object_array;
 
 		template<class T>
@@ -228,7 +228,7 @@ namespace terraformer
 	}
 
 	template<class KeyType>
-	object_tree object_map::operator/(KeyType&& key)
+	object_tree object_dict::operator/(KeyType&& key)
 	{
 		auto const i = base::find(std::forward<KeyType>(key));
 		return i != std::end(*this)? object_tree{i->second} : object_tree{};
