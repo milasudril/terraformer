@@ -31,7 +31,9 @@ TESTCASE(terraformer_shared_any_create_and_read_state)
 	std::pair<int, int> const* val_3 = object.get();
 	EXPECT_EQ(val_3, ptr);
 
-	// casts away qualifiers std::pair<int, int>* val_4 = object.get_const();
+// Should not compile
+//std::pair<int, int>* val_bad = object.get_const();
+
 	std::pair<int, int> const* val_4 = object.get_const();
 	EXPECT_EQ(val_4, ptr);
 }

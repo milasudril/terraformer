@@ -10,37 +10,43 @@
 
 namespace terraformer
 {
+	template< class T >
+	constexpr T const* as_const(T* t ) noexcept
+	{ return t; }
+
+	template<bool IsConst>
+	class any_pointer
+	{
+	public:
+		using pointer = std::conditional_t<IsConst, void const*, void*>;
+
+		any_pointer() = default;
+
+		explicit any_pointer(pointer ptr, std::type_index type):
+			m_pointer{ptr},
+			m_type{type}
+		{}
+
+		template<class T>
+		explicit any_pointer(T* ptr):
+			m_pointer{ptr},
+			m_type{std::type_index{typeid(T)}}
+		{}
+
+		template<class T>
+		operator T*() const noexcept
+		{ return std::type_index{typeid(T)} == m_type? static_cast<T*>(m_pointer) : nullptr; }
+
+	private:
+		pointer m_pointer = nullptr;
+		std::type_index m_type = std::type_index{typeid(void)};
+	};
+
 	class shared_any
 	{
-		struct nonconst_tag
-		{ using type = void*; };
-
-		struct const_tag
-		{ using type = void const*; };
-
-		template<class Tag>
-		class value_impl
-		{
-		public:
-			value_impl() = default;
-
-			template<class T>
-			operator T*() const noexcept
-			{ return std::type_index{typeid(T)} == m_type? static_cast<T*>(m_pointer) : nullptr; }
-
-		private:
-			friend class shared_any;
-			explicit value_impl(typename Tag::type pointer, std::type_index type):
-				m_pointer{pointer},
-				m_type{type}
-			{}
-
-			typename Tag::type m_pointer = nullptr;
-			std::type_index m_type = std::type_index{typeid(void)};
-		};
 	public:
-		using value = value_impl<nonconst_tag>;
-		using value_const = value_impl<const_tag>;
+		using value = any_pointer<false>;
+		using value_const = any_pointer<true>;
 
 		shared_any() noexcept = default;
 
