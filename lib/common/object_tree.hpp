@@ -10,13 +10,13 @@ namespace terraformer
 	struct string_hash
 	{
 		using is_transparent = void;
-		[[nodiscard]] size_t operator()(const char *txt) const
+		[[nodiscard]] size_t operator()(char const* txt) const
 		{ return std::hash<std::string_view>{}(txt); }
 
 		[[nodiscard]] size_t operator()(std::string_view txt) const
 		{ return std::hash<std::string_view>{}(txt); }
 
-		[[nodiscard]] size_t operator()(const std::string &txt) const
+		[[nodiscard]] size_t operator()(std::string const& txt) const
 		{ return std::hash<std::string>{}(txt); }
 	};
 
@@ -48,10 +48,46 @@ namespace terraformer
 		inline object_tree operator/(size_t index);
 	};
 
+	class object_map: private std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>
+	{
+	public:
+		using base = std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>;
+		using base::begin;
+		using base::end;
+		using base::size;
+
+		template<class TypeOfValueToInsert, class KeyType, class ... Args>
+		object_map& insert(KeyType&& key, Args&&... args)
+		{
+			auto res = base::emplace(
+				std::forward<KeyType>(key),
+				shared_any{std::type_identity<TypeOfValueToInsert>{}, std::forward<Args>(args)...}
+			);
+
+			if(res.second == false)
+			{ throw std::runtime_error{"Key already exists"}; }
+
+			return *this;
+		}
+
+		template<class TypeOfValueToInsert, class KeyType, class ... Args>
+		object_map& insert_or_assign(KeyType&& key, Args&&... args)
+		{
+			base::insert_or_assign(
+				std::forward<KeyType>(key),
+				shared_any{std::type_identity<TypeOfValueToInsert>{}, std::forward<Args>(args)...}
+			);
+			return *this;
+		}
+
+		template<class KeyType>
+		inline object_tree operator/(KeyType&& key);
+	};
+
 	class object_tree
 	{
 	public:
-		using map_type = std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>;
+		using map_type = object_map;
 		using array_type = object_array;
 
 		template<class T>
@@ -84,6 +120,45 @@ namespace terraformer
 			return object_tree{};
 		}
 
+		template<class TypeOfValueToInsert, class KeyType, class ... Args>
+		requires(is_leaf_type_v<TypeOfValueToInsert>)
+		object_tree insert(KeyType&& key, Args&&... args)
+		{
+			if(!m_value)
+			{ m_value = shared_any{std::type_identity<map_type>{}}; }
+
+			if(auto const map = m_value.template get_if<map_type>(); map != nullptr)
+			{
+				map->template insert<TypeOfValueToInsert>(
+					std::forward<KeyType>(key),
+					std::forward<Args>(args)...
+				);
+				return object_tree{m_value};
+			}
+
+			return object_tree{};
+		}
+
+		template<class TypeOfValueToInsert, class KeyType, class ... Args>
+		requires(is_leaf_type_v<TypeOfValueToInsert>)
+		object_tree insert_or_assign(KeyType&& key, Args&&... args)
+		{
+			if(!m_value)
+			{ m_value = shared_any{std::type_identity<map_type>{}}; }
+
+			if(auto const map = m_value.template get_if<map_type>(); map != nullptr)
+			{
+				map->template insert_or_assign<TypeOfValueToInsert>(
+					std::forward<KeyType>(key),
+					std::forward<Args>(args)...
+				);
+				return object_tree{m_value};
+			}
+
+			return object_tree{};
+		}
+
+
 		bool is_null() const
 		{ return !m_value; }
 
@@ -100,8 +175,7 @@ namespace terraformer
 			if(val == nullptr)
 			{ return object_tree{}; }
 
-			auto const i = val->find(key);
-			return i != std::end(*val)? object_tree{i->second} : object_tree{};
+			return (*val)/key;
 		}
 
 		object_tree operator/(size_t index)
@@ -151,5 +225,12 @@ namespace terraformer
 	object_tree object_array::operator/(size_t index)
 	{
 		return index < std::size(*this).get()? object_tree{(*this)[index_type{index}]} : object_tree{};
+	}
+
+	template<class KeyType>
+	object_tree object_map::operator/(KeyType&& key)
+	{
+		auto const i = base::find(std::forward<KeyType>(key));
+		return i != std::end(*this)? object_tree{i->second} : object_tree{};
 	}
 }
