@@ -59,6 +59,8 @@ TESTCASE(terraformer_object_tree_append)
 	EXPECT_EQ(tree.insert<int>("An array cannot take string as key", 345).is_null(), true);
 	EXPECT_EQ(tree.non_recursive_size(), 4);
 
+	EXPECT_EQ((tree/"Trying to use a string as key").is_null(), true);
+
 	tree.insert_or_assign<int>("One", 35434);
 	EXPECT_EQ(tree.non_recursive_size(), 4);
 	EXPECT_EQ(*static_cast<int*>(tree/0), 1);
