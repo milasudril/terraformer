@@ -143,7 +143,6 @@ namespace terraformer
 			return object_pointer{};
 		}
 
-
 		bool is_null() const
 		{ return !m_pointer; }
 

@@ -74,9 +74,13 @@ TESTCASE(terraformer_object_tree_insert)
 						.insert_or_assign<double>("A value", 6.5)
 						.insert<double>("Another value", 4.5)
 					)
-			);
+		)
+		.insert<terraformer::object_dict>(
+			"A dictionary",
+			terraformer::object_dict{}.insert<int>("Foo", 14)
+		);
 
-	REQUIRE_EQ(vals.size(), 4);
+	REQUIRE_EQ(vals.size(), 5);
 	{
 		int const* val = vals/"One";
 		REQUIRE_NE(val, nullptr);
@@ -116,6 +120,18 @@ TESTCASE(terraformer_object_tree_insert)
 
 		double const* inner_val_5 = vals/"An array"/2;
 		EXPECT_EQ(inner_val_5, nullptr);
+
+		EXPECT_EQ((vals/"An array"/"Key in array").is_null(), true);
+	}
+
+	{
+		terraformer::object_dict* val = vals/"A dictionary";
+		REQUIRE_NE(val, nullptr);
+		int const* inner_val = (*val)/"Foo";
+		REQUIRE_NE(inner_val, nullptr);
+		EXPECT_EQ(*inner_val, 14);
+		EXPECT_EQ(*static_cast<int*>(vals/"A dictionary"/"Foo"), 14)
+		EXPECT_EQ((vals/"A dictionary"/0).is_null(), true);
 	}
 
 	try
@@ -125,14 +141,14 @@ TESTCASE(terraformer_object_tree_insert)
 	}
 	catch(...)
 	{}
-	EXPECT_EQ(vals.size(), 4);
+	EXPECT_EQ(vals.size(), 5);
 
 
 	vals.insert_or_assign<int>("One", 35434);
-	EXPECT_EQ(vals.size(), 4);
+	EXPECT_EQ(vals.size(), 5);
 	EXPECT_EQ(*static_cast<int*>(vals/"One"), 35434);
 
 	vals.insert_or_assign<int>("New key", 454353);
-	EXPECT_EQ(vals.size(), 5);
+	EXPECT_EQ(vals.size(), 6);
 	EXPECT_EQ(*static_cast<int*>(vals/"New key"), 454353);
 }
