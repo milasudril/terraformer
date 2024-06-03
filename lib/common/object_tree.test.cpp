@@ -178,4 +178,14 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		EXPECT_EQ(*static_cast<std::string*>(vals/"An array"/2), "a value");
 	}
 
+	{
+		EXPECT_EQ((vals/"One").size(), 1);
+		EXPECT_EQ((vals/"One").append<int>(1).is_null(), true);
+		EXPECT_EQ((vals/"One").size(), 1);
+		EXPECT_EQ((vals/"One").insert<int>("Other value", 1).is_null(), true);
+		EXPECT_EQ((vals/"One").size(), 1);
+		EXPECT_EQ((vals/"One").insert_or_assign<int>("Other value", 1).is_null(), true);
+		EXPECT_EQ((vals/"One").size(), 1);
+	}
+
 }
