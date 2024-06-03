@@ -195,7 +195,7 @@ namespace terraformer
 			{ f(object_pointer{m_pointer}); }
 		}
 
-		size_t non_recursive_size() const
+		size_t size() const
 		{
 			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
 			{ return std::size(*map); }
