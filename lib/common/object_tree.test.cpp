@@ -219,4 +219,13 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		EXPECT_EQ((vals/"One").insert_or_assign<int>("Other value", 1).is_null(), true);
 		EXPECT_EQ((vals/"One").size(), 1);
 	}
+
+	// TODO: Improve these tests
+	vals.visit_elements([](auto, auto ptr){
+		ptr.visit_elements([](auto const&, auto...){});
+	});
+
+	std::as_const(vals).visit_elements([](auto, auto ptr){
+		ptr.visit_elements([](auto const&, auto...){});
+	});
 }

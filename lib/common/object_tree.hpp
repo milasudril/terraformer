@@ -167,8 +167,6 @@ namespace terraformer
 		bool is_null() const
 		{ return !m_pointer; }
 
-		//FIXME: Add `const` support
-
 		template<class T>
 		operator T*() const
 		{ return static_cast<T*>(m_pointer); }
@@ -195,10 +193,10 @@ namespace terraformer
 		void visit_elements(Func&& f) const
 		{
 			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
-			{ map.template visit_elements(std::forward<Func>(f)); }
+			{ map->template visit_elements(std::forward<Func>(f)); }
 			else
 			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
-			{ array.template visit_elements(std::forward<Func>(f)); }
+			{ array->template visit_elements(std::forward<Func>(f)); }
 			else
 			{ std::forward<Func>(f)(object_pointer<IsConst>{m_pointer}); }
 		}
