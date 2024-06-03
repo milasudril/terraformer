@@ -50,6 +50,21 @@ TESTCASE(terraformer_object_dict)
 	static_assert(!std::is_convertible_v<int*, decltype(lookup_val)>);
 	EXPECT_EQ(*static_cast<int const*>(lookup_val), 1);
 	EXPECT_EQ((std::as_const(vals)/"Bajs").is_null(), true);
+
+	// Insert existing value
+	try
+	{
+		vals.insert<int>("One", 2);
+		abort();
+	}
+	catch(...)
+	{}
+
+	vals.insert_or_assign<int>("One", 2);
+	EXPECT_EQ(*static_cast<int*>(vals/"One"), 2);
+
+	vals.insert_or_assign<double>("e", std::numbers::e_v<double>);
+	EXPECT_EQ(*static_cast<double*>(vals/"e"), std::numbers::e_v<double>);
 }
 
 #if 0
