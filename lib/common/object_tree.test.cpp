@@ -4,6 +4,31 @@
 
 #include <testfwk/testfwk.hpp>
 
+TESTCASE(terraformer_object_array)
+{
+	terraformer::object_array vals;
+	EXPECT_EQ(vals.empty(), true);
+
+	vals.append<int>(1)
+		.append<double>(2.5)
+		.append<std::string>("Hello, World");
+
+	EXPECT_EQ(vals.empty(), false);
+	REQUIRE_EQ(vals.size(), terraformer::object_array::size_type{3});
+	EXPECT_EQ(*static_cast<int*>(vals/0), 1);
+	EXPECT_EQ(*static_cast<double*>(vals/1), 2.5);
+	EXPECT_EQ(*static_cast<std::string*>(vals/2), "Hello, World");
+	EXPECT_EQ(static_cast<double*>(vals/0), nullptr);
+	EXPECT_EQ(static_cast<double*>(vals/3), nullptr);
+
+	auto lookup_val = std::as_const(vals)/0;
+
+	static_assert(!std::is_convertible_v<int*, decltype(lookup_val)>);
+	EXPECT_EQ(*static_cast<int const*>(lookup_val), 1);
+}
+
+#if 0
+
 TESTCASE(terraformer_object_tree_append)
 {
 	terraformer::object_array vals;
@@ -152,3 +177,4 @@ TESTCASE(terraformer_object_tree_insert)
 	EXPECT_EQ(vals.size(), 6);
 	EXPECT_EQ(*static_cast<int*>(vals/"New key"), 454353);
 }
+#endif

@@ -48,6 +48,8 @@ namespace terraformer
 		}
 
 		inline object_pointer<false> operator/(size_t index);
+
+		inline object_pointer<true> operator/(size_t index) const;
 	};
 
 	class object_dict: private std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>
@@ -213,6 +215,13 @@ namespace terraformer
 		return index < std::size(*this).get()?
 			object_pointer{(*this)[index_type{index}].get()} :
 			object_pointer<false>{};
+	}
+
+	object_pointer<true> object_array::operator/(size_t index) const
+	{
+		return index < std::size(*this).get()?
+			object_pointer{(*this)[index_type{index}].get_const()} :
+			object_pointer<true>{};
 	}
 
 	template<class KeyType>
