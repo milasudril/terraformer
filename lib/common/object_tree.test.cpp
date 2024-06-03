@@ -149,4 +149,23 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		EXPECT_EQ(*static_cast<int*>(vals/"A dictionary"/"Foo"), 14)
 		EXPECT_EQ((vals/"A dictionary"/0).is_null(), true);
 	}
+
+	{
+		EXPECT_EQ((vals/"A dictionary").append<std::string>("Fail").is_null(), true);
+		EXPECT_EQ((vals/"A dictionary").size(), 1);
+		EXPECT_EQ((vals/"A dictionary").insert<std::string>("value", "Success").is_null(), false);
+		EXPECT_EQ(*static_cast<std::string*>(vals/"A dictionary"/"value"), "Success");
+		EXPECT_EQ((vals/"A dictionary").size(), 2);
+		try
+		{
+			(vals/"A dictionary").insert<std::string>("value", "Success");
+			abort();
+		}
+		catch(...)
+		{}
+		EXPECT_EQ((vals/"A dictionary").size(), 2);
+		EXPECT_EQ((vals/"A dictionary").insert_or_assign<std::string>("value", "A new value").is_null(), false);
+		EXPECT_EQ(*static_cast<std::string*>(vals/"A dictionary"/"value"), "A new value");
+	}
+
 }
