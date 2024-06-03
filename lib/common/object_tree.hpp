@@ -108,8 +108,8 @@ namespace terraformer
 	class object_pointer
 	{
 	public:
-		using map_type = object_dict;
-		using array_type = object_array;
+		using map_type = std::conditional_t<IsConst, object_dict const, object_dict>;
+		using array_type = std::conditional_t<IsConst, object_array const, object_array>;
 
 		explicit object_pointer() = default;
 

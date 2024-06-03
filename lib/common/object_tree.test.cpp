@@ -194,6 +194,7 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		catch(...)
 		{}
 		EXPECT_EQ((vals/"A dictionary").size(), 2);
+		EXPECT_EQ((std::as_const(vals)/"A dictionary").size(), 2);
 		EXPECT_EQ((vals/"A dictionary").insert_or_assign<std::string>("value", "A new value").is_null(), false);
 		EXPECT_EQ(*static_cast<std::string*>(vals/"A dictionary"/"value"), "A new value");
 	}
@@ -205,6 +206,7 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		EXPECT_EQ((vals/"An array").size(), 2);
 		EXPECT_EQ((vals/"An array").append<std::string>("a value").is_null(), false);
 		EXPECT_EQ((vals/"An array").size(), 3);
+		EXPECT_EQ((std::as_const(vals)/"An array").size(), 3);
 		EXPECT_EQ(*static_cast<std::string*>(vals/"An array"/2), "a value");
 	}
 
