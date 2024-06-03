@@ -108,7 +108,7 @@ namespace terraformer
 	class object_pointer
 	{
 	public:
-		using map_type = std::conditional_t<IsConst, object_dict const, object_dict>;
+		using dict_type = std::conditional_t<IsConst, object_dict const, object_dict>;
 		using array_type = std::conditional_t<IsConst, object_array const, object_array>;
 
 		explicit object_pointer() = default;
@@ -136,9 +136,9 @@ namespace terraformer
 		requires(!IsConst)
 		object_pointer insert(KeyType&& key, Args&&... args) const
 		{
-			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
+			if(auto const dict = m_pointer.template get_if<dict_type>(); dict != nullptr)
 			{
-				map->template insert<TypeOfValueToInsert>(
+				dict->template insert<TypeOfValueToInsert>(
 					std::forward<KeyType>(key),
 					std::forward<Args>(args)...
 				);
@@ -152,9 +152,9 @@ namespace terraformer
 		requires(!IsConst)
 		object_pointer insert_or_assign(KeyType&& key, Args&&... args) const
 		{
-			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
+			if(auto const dict = m_pointer.template get_if<dict_type>(); dict != nullptr)
 			{
-				map->template insert_or_assign<TypeOfValueToInsert>(
+				dict->template insert_or_assign<TypeOfValueToInsert>(
 					std::forward<KeyType>(key),
 					std::forward<Args>(args)...
 				);
@@ -173,7 +173,7 @@ namespace terraformer
 
 		object_pointer operator/(std::string_view key) const
 		{
-			auto const val = m_pointer.template get_if<map_type>();
+			auto const val = m_pointer.template get_if<dict_type>();
 			if(val == nullptr)
 			{ return object_pointer{}; }
 
@@ -192,8 +192,8 @@ namespace terraformer
 		template<class Func>
 		void visit_elements(Func&& f) const
 		{
-			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
-			{ map->template visit_elements(std::forward<Func>(f)); }
+			if(auto const dict = m_pointer.template get_if<dict_type>(); dict != nullptr)
+			{ dict->template visit_elements(std::forward<Func>(f)); }
 			else
 			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
 			{ array->template visit_elements(std::forward<Func>(f)); }
@@ -203,8 +203,8 @@ namespace terraformer
 
 		size_t size() const
 		{
-			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
-			{ return std::size(*map); }
+			if(auto const dict = m_pointer.template get_if<dict_type>(); dict != nullptr)
+			{ return std::size(*dict); }
 			else
 			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
 			{ return std::size(*array).get(); }
