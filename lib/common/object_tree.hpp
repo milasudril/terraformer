@@ -195,15 +195,12 @@ namespace terraformer
 		void visit_elements(Func&& f) const
 		{
 			if(auto const map = m_pointer.template get_if<map_type>(); map != nullptr)
-			{
-				for(auto& item : *map)
-				{ f(item.first, object_pointer{item.second}); }
-			}
+			{ map.template visit_elements(std::forward<Func>(f)); }
 			else
 			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
 			{ array.template visit_elements(std::forward<Func>(f)); }
 			else
-			{ f(object_pointer<IsConst>{m_pointer}); }
+			{ std::forward<Func>(f)(object_pointer<IsConst>{m_pointer}); }
 		}
 
 		size_t size() const
