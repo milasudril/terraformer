@@ -87,6 +87,9 @@ namespace terraformer
 
 		template<class KeyType>
 		inline object_pointer<false> operator/(KeyType&& key);
+
+		template<class KeyType>
+		inline object_pointer<true> operator/(KeyType&& key) const;
 	};
 
 	template<bool IsConst>
@@ -230,4 +233,12 @@ namespace terraformer
 		auto const i = base::find(std::forward<KeyType>(key));
 		return i != std::end(*this)? object_pointer{i->second.get()} : object_pointer<false>{};
 	}
+
+	template<class KeyType>
+	object_pointer<true> object_dict::operator/(KeyType&& key) const
+	{
+		auto const i = base::find(std::forward<KeyType>(key));
+		return i != std::end(*this)? object_pointer{i->second.get_const()} : object_pointer<true>{};
+	}
+
 }

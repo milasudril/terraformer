@@ -19,12 +19,37 @@ TESTCASE(terraformer_object_array)
 	EXPECT_EQ(*static_cast<double*>(vals/1), 2.5);
 	EXPECT_EQ(*static_cast<std::string*>(vals/2), "Hello, World");
 	EXPECT_EQ(static_cast<double*>(vals/0), nullptr);
-	EXPECT_EQ(static_cast<double*>(vals/3), nullptr);
+	EXPECT_EQ((vals/3).is_null(), true);
 
 	auto lookup_val = std::as_const(vals)/0;
-
 	static_assert(!std::is_convertible_v<int*, decltype(lookup_val)>);
 	EXPECT_EQ(*static_cast<int const*>(lookup_val), 1);
+	EXPECT_EQ((std::as_const(vals)/3).is_null(), true);
+}
+
+TESTCASE(terraformer_object_dict)
+{
+	// Initial state
+	terraformer::object_dict vals;
+	EXPECT_EQ(vals.empty(), true);
+
+	// Insert
+	vals.insert<int>("One", 1)
+		.insert<double>("Pi", std::numbers::pi_v<double>)
+		.insert<std::string>("Foo", "This is a longer string lol");
+
+	EXPECT_EQ(vals.empty(), false);
+	EXPECT_EQ(vals.size(), 3);
+	EXPECT_EQ(*static_cast<int*>(vals/"One"), 1);
+	EXPECT_EQ(*static_cast<double*>(vals/"Pi"), std::numbers::pi_v<double>);
+	EXPECT_EQ(*static_cast<std::string*>(vals/"Foo"), "This is a longer string lol");
+	EXPECT_EQ(static_cast<double*>(vals/"One"), nullptr);
+	EXPECT_EQ((vals/"Bajs").is_null(), true);
+
+	auto lookup_val = std::as_const(vals)/"One";
+	static_assert(!std::is_convertible_v<int*, decltype(lookup_val)>);
+	EXPECT_EQ(*static_cast<int const*>(lookup_val), 1);
+	EXPECT_EQ((std::as_const(vals)/"Bajs").is_null(), true);
 }
 
 #if 0
