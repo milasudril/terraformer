@@ -96,6 +96,12 @@ namespace terraformer
 
 		template<class KeyType>
 		inline object_pointer<true> operator/(KeyType&& key) const;
+
+		template<class Function>
+		void visit_elements(Function&& f);
+
+		template<class Function>
+		void visit_elements(Function&& f) const;
 	};
 
 	template<bool IsConst>
@@ -267,5 +273,19 @@ namespace terraformer
 	{
 		auto const i = base::find(std::forward<KeyType>(key));
 		return i != std::end(*this)? object_pointer{i->second.get_const()} : object_pointer<true>{};
+	}
+
+	template<class Function>
+	void object_dict::visit_elements(Function&& f)
+	{
+		for(auto& item : *this)
+		{ f(item.first, object_pointer{item.second.get()}); }
+	}
+
+	template<class Function>
+	void object_dict::visit_elements(Function&& f) const
+	{
+		for(auto& item : *this)
+		{ f(item.first, object_pointer{item.second.get_const()}); }
 	}
 }

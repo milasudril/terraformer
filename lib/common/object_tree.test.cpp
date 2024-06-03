@@ -79,6 +79,22 @@ TESTCASE(terraformer_object_dict)
 
 	vals.insert_or_assign<double>("e", std::numbers::e_v<double>);
 	EXPECT_EQ(*static_cast<double*>(vals/"e"), std::numbers::e_v<double>);
+
+	size_t iter_count = 0;
+	vals.visit_elements([&iter_count, &vals](auto const& key, auto object_ptr) mutable {
+		static_assert(std::is_same_v<decltype(object_ptr), terraformer::object_pointer<false>>);
+		EXPECT_EQ(object_ptr, vals/key);
+		++iter_count;
+	});
+	EXPECT_EQ(iter_count, std::size(vals));
+
+	iter_count = 0;
+	std::as_const(vals).visit_elements([&iter_count, &vals](auto const& key, auto object_ptr) mutable {
+		static_assert(std::is_same_v<decltype(object_ptr), terraformer::object_pointer<true>>);
+		EXPECT_EQ(object_ptr, vals/key);
+		++iter_count;
+	});
+	EXPECT_EQ(iter_count, std::size(vals));
 }
 
 TESTCASE(terraformer_object_tree_object_pointer)
