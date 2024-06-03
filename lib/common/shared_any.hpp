@@ -18,11 +18,18 @@ namespace terraformer
 	class any_pointer
 	{
 	public:
-		using pointer = std::conditional_t<IsConst, void const*, void*>;
+		using pointer_type = std::conditional_t<IsConst, void const*, void*>;
 
 		any_pointer() = default;
 
-		explicit any_pointer(pointer ptr, std::type_index type):
+		template<class Dummy = void>
+		requires(IsConst)
+		any_pointer(any_pointer<false> other):
+			m_pointer{other.pointer()},
+			m_type{other.type()}
+		{}
+
+		explicit any_pointer(pointer_type ptr, std::type_index type):
 			m_pointer{ptr},
 			m_type{type}
 		{}
@@ -48,8 +55,16 @@ namespace terraformer
 		operator bool() const noexcept
 		{ return m_pointer != nullptr; }
 
+		auto operator<=>(any_pointer const&) const = default;
+
+		auto pointer() const
+		{ return m_pointer; }
+
+		auto type() const
+		{ return m_type; }
+
 	private:
-		pointer m_pointer = nullptr;
+		pointer_type m_pointer = nullptr;
 		std::type_index m_type = std::type_index{typeid(void)};
 	};
 

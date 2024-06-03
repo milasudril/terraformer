@@ -50,6 +50,12 @@ namespace terraformer
 		inline object_pointer<false> operator/(size_t index);
 
 		inline object_pointer<true> operator/(size_t index) const;
+
+		template<class Function>
+		void visit_elements(Function&& f);
+
+		template<class Function>
+		void visit_elements(Function&& f) const;
 	};
 
 	class object_dict: private std::unordered_map<std::string, shared_any, string_hash, std::equal_to<>>
@@ -100,6 +106,10 @@ namespace terraformer
 		using array_type = object_array;
 
 		explicit object_pointer() = default;
+
+		template<class Dummy = void>
+		requires(IsConst)
+		object_pointer(object_pointer<false> other):m_pointer{other.pointer()}{}
 
 		explicit object_pointer(any_pointer<IsConst> pointer): m_pointer{pointer}{}
 
@@ -185,14 +195,9 @@ namespace terraformer
 			}
 			else
 			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
-			{
-				auto const n = std::size(*array);
-				span const elems{array->begin(), array->end()};
-				for(auto k = elems.first_element_index(); k != n; ++k)
-				{ f(k, object_pointer{elems[k]}); }
-			}
+			{ array.template visit_elements(std::forward<Func>(f)); }
 			else
-			{ f(object_pointer{m_pointer}); }
+			{ f(object_pointer<IsConst>{m_pointer}); }
 		}
 
 		size_t size() const
@@ -205,6 +210,11 @@ namespace terraformer
 			else
 			{ return m_pointer? static_cast<size_t>(1) : 0; }
 		}
+
+		auto operator<=>(object_pointer const&) const = default;
+
+		auto pointer() const
+		{ return m_pointer; }
 
 	private:
 		any_pointer<IsConst> m_pointer;
@@ -227,6 +237,24 @@ namespace terraformer
 			object_pointer<true>{};
 	}
 
+	template<class Function>
+	void object_array::visit_elements(Function&& f)
+	{
+		auto const n = std::size(*this);
+		span const elems{begin(), end()};
+		for(auto k = elems.first_element_index(); k != n; ++k)
+		{ f(k, object_pointer{elems[k].get()}); }
+	}
+
+	template<class Function>
+	void object_array::visit_elements(Function&& f) const
+	{
+		auto const n = std::size(*this);
+		span const elems{begin(), end()};
+		for(auto k = elems.first_element_index(); k != n; ++k)
+		{ f(k, object_pointer{elems[k].get_const()}); }
+	}
+
 	template<class KeyType>
 	object_pointer<false> object_dict::operator/(KeyType&& key)
 	{
@@ -240,5 +268,4 @@ namespace terraformer
 		auto const i = base::find(std::forward<KeyType>(key));
 		return i != std::end(*this)? object_pointer{i->second.get_const()} : object_pointer<true>{};
 	}
-
 }

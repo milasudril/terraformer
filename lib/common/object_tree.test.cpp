@@ -25,6 +25,20 @@ TESTCASE(terraformer_object_array)
 	static_assert(!std::is_convertible_v<int*, decltype(lookup_val)>);
 	EXPECT_EQ(*static_cast<int const*>(lookup_val), 1);
 	EXPECT_EQ((std::as_const(vals)/3).is_null(), true);
+
+	vals.visit_elements([k = size_t{0}, &vals](auto index, auto object_ptr) mutable {
+		static_assert(std::is_same_v<decltype(object_ptr), terraformer::object_pointer<false>>);
+		EXPECT_EQ(object_ptr, vals/k);
+		EXPECT_EQ(index.get(), k);
+		++k;
+	});
+
+	std::as_const(vals).visit_elements([k = size_t{0}, &vals](auto index, auto object_ptr) mutable {
+		static_assert(std::is_same_v<decltype(object_ptr), terraformer::object_pointer<true>>);
+		EXPECT_EQ(object_ptr, vals/k);
+		EXPECT_EQ(index.get(), k);
+		++k;
+	});
 }
 
 TESTCASE(terraformer_object_dict)
@@ -187,5 +201,4 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		EXPECT_EQ((vals/"One").insert_or_assign<int>("Other value", 1).is_null(), true);
 		EXPECT_EQ((vals/"One").size(), 1);
 	}
-
 }
