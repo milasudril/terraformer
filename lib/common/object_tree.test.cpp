@@ -9,22 +9,27 @@ TESTCASE(terraformer_object_array)
 	terraformer::object_array vals;
 	EXPECT_EQ(vals.empty(), true);
 
+	terraformer::shared_any obj_to_link_to{std::type_identity<int>{}, 34};
+	EXPECT_EQ(obj_to_link_to.use_count(), 1);
+
 	vals.append<int>(1)
 		.append<double>(2.5)
-		.append<std::string>("Hello, World");
+		.append<std::string>("Hello, World")
+		.append_link(obj_to_link_to);
 
 	EXPECT_EQ(vals.empty(), false);
-	REQUIRE_EQ(vals.size(), terraformer::object_array::size_type{3});
+	REQUIRE_EQ(vals.size(), terraformer::object_array::size_type{4});
 	EXPECT_EQ(*static_cast<int*>(vals/0), 1);
 	EXPECT_EQ(*static_cast<double*>(vals/1), 2.5);
 	EXPECT_EQ(*static_cast<std::string*>(vals/2), "Hello, World");
 	EXPECT_EQ(static_cast<double*>(vals/0), nullptr);
-	EXPECT_EQ((vals/3).is_null(), true);
+	EXPECT_EQ((vals/3).pointer(), obj_to_link_to.get());
+	EXPECT_EQ((vals/4).is_null(), true);
 
 	auto lookup_val = std::as_const(vals)/0;
 	static_assert(!std::is_convertible_v<int*, decltype(lookup_val)>);
 	EXPECT_EQ(*static_cast<int const*>(lookup_val), 1);
-	EXPECT_EQ((std::as_const(vals)/3).is_null(), true);
+	EXPECT_EQ((std::as_const(vals)/4).is_null(), true);
 
 	vals.visit_elements([k = size_t{0}, &vals](auto index, auto object_ptr) mutable {
 		static_assert(std::is_same_v<decltype(object_ptr), terraformer::object_pointer<false>>);
@@ -47,18 +52,25 @@ TESTCASE(terraformer_object_dict)
 	terraformer::object_dict vals;
 	EXPECT_EQ(vals.empty(), true);
 
+	terraformer::shared_any obj_to_link_to{std::type_identity<int>{}, 34};
+	EXPECT_EQ(obj_to_link_to.use_count(), 1);
+
 	// Insert
 	vals.insert<int>("One", 1)
 		.insert<double>("Pi", std::numbers::pi_v<double>)
-		.insert<std::string>("Foo", "This is a longer string lol");
+		.insert<std::string>("Foo", "This is a longer string lol")
+		.create_link("A link", obj_to_link_to);
+
+	EXPECT_EQ(obj_to_link_to.use_count(), 2);
 
 	EXPECT_EQ(vals.empty(), false);
-	EXPECT_EQ(vals.size(), 3);
+	EXPECT_EQ(vals.size(), 4);
 	EXPECT_EQ(*static_cast<int*>(vals/"One"), 1);
 	EXPECT_EQ(*static_cast<double*>(vals/"Pi"), std::numbers::pi_v<double>);
 	EXPECT_EQ(*static_cast<std::string*>(vals/"Foo"), "This is a longer string lol");
 	EXPECT_EQ(static_cast<double*>(vals/"One"), nullptr);
 	EXPECT_EQ((vals/"Bajs").is_null(), true);
+	EXPECT_EQ((vals/"A link").pointer(), obj_to_link_to.get());
 
 	auto lookup_val = std::as_const(vals)/"One";
 	static_assert(!std::is_convertible_v<int*, decltype(lookup_val)>);
@@ -211,11 +223,16 @@ TESTCASE(terraformer_object_tree_object_pointer)
 	}
 
 	{
+		terraformer::shared_any obj_to_link_to{std::type_identity<int>{}, 354};
 		EXPECT_EQ((vals/"A dictionary").append<std::string>("Fail").is_null(), true);
+		EXPECT_EQ((vals/"A dictionary").append_link(obj_to_link_to).is_null(), true);
 		EXPECT_EQ((vals/"A dictionary").size(), 1);
 		EXPECT_EQ((vals/"A dictionary").insert<std::string>("value", "Success").is_null(), false);
 		EXPECT_EQ(*static_cast<std::string*>(vals/"A dictionary"/"value"), "Success");
 		EXPECT_EQ((vals/"A dictionary").size(), 2);
+		EXPECT_EQ((vals/"A dictionary").create_link("a link", obj_to_link_to).is_null(), false);
+		EXPECT_EQ((vals/"A dictionary"/"a link").pointer(), obj_to_link_to.get());
+		EXPECT_EQ((vals/"A dictionary").size(), 3);
 		try
 		{
 			(vals/"A dictionary").insert<std::string>("value", "Success");
@@ -223,20 +240,23 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		}
 		catch(...)
 		{}
-		EXPECT_EQ((vals/"A dictionary").size(), 2);
-		EXPECT_EQ((std::as_const(vals)/"A dictionary").size(), 2);
+		EXPECT_EQ((vals/"A dictionary").size(), 3);
+		EXPECT_EQ((std::as_const(vals)/"A dictionary").size(), 3);
 		EXPECT_EQ((vals/"A dictionary").insert_or_assign<std::string>("value", "A new value").is_null(), false);
 		EXPECT_EQ(*static_cast<std::string*>(vals/"A dictionary"/"value"), "A new value");
 	}
 
 	{
+		terraformer::shared_any obj_to_link_to{std::type_identity<int>{}, 354};
 		EXPECT_EQ((vals/"An array").insert<std::string>("value", "fail").is_null(), true);
+		EXPECT_EQ((vals/"An array").create_link("a link 2", obj_to_link_to).is_null(), true);
 		EXPECT_EQ((vals/"An array").size(), 2);
 		EXPECT_EQ((vals/"An array").insert_or_assign<std::string>("value", "fail").is_null(), true);
 		EXPECT_EQ((vals/"An array").size(), 2);
 		EXPECT_EQ((vals/"An array").append<std::string>("a value").is_null(), false);
 		EXPECT_EQ((vals/"An array").size(), 3);
-		EXPECT_EQ((std::as_const(vals)/"An array").size(), 3);
+		EXPECT_EQ((vals/"An array").append_link(obj_to_link_to).is_null(), false);
+		EXPECT_EQ((std::as_const(vals)/"An array").size(), 4);
 		EXPECT_EQ(*static_cast<std::string*>(vals/"An array"/2), "a value");
 	}
 

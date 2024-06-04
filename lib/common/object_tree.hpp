@@ -47,6 +47,13 @@ namespace terraformer
 			return *this;
 		}
 
+		template<class ValueType>
+		object_array& append_link(ValueType&& val)
+		{
+			base::push_back(std::forward<ValueType>(val));
+			return *this;
+		}
+
 		inline object_pointer<false> operator/(size_t index);
 
 		inline object_pointer<true> operator/(size_t index) const;
@@ -91,6 +98,20 @@ namespace terraformer
 			return *this;
 		}
 
+		template<class KeyType, class ValueType>
+		object_dict& create_link(KeyType&& key, ValueType&& val)
+		{
+			auto res = base::emplace(
+				std::forward<KeyType>(key),
+				std::forward<ValueType>(val)
+			);
+
+			if(res.second == false)
+			{ throw std::runtime_error{"Key already exists"}; }
+
+			return *this;
+		}
+
 		template<class KeyType>
 		inline object_pointer<false> operator/(KeyType&& key);
 
@@ -132,6 +153,19 @@ namespace terraformer
 			return object_pointer{};
 		}
 
+		template<class ValueType>
+		requires(!IsConst)
+		object_pointer append_link(ValueType&& val)
+		{
+			if(auto const array = m_pointer.template get_if<array_type>(); array != nullptr)
+			{
+				array->append_link(std::forward<ValueType>(val));
+				return *this;
+			}
+
+			return object_pointer{};
+		}
+
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
 		requires(!IsConst)
 		object_pointer insert(KeyType&& key, Args&&... args) const
@@ -157,6 +191,21 @@ namespace terraformer
 				dict->template insert_or_assign<TypeOfValueToInsert>(
 					std::forward<KeyType>(key),
 					std::forward<Args>(args)...
+				);
+				return *this;
+			}
+
+			return object_pointer{};
+		}
+
+		template<class KeyType, class ValueType>
+		object_pointer create_link(KeyType&& key, ValueType&& val)
+		{
+			if(auto const dict = m_pointer.template get_if<dict_type>(); dict != nullptr)
+			{
+				dict->create_link(
+					std::forward<KeyType>(key),
+					std::forward<ValueType>(val)
 				);
 				return *this;
 			}
