@@ -171,6 +171,10 @@ namespace terraformer
 		operator T*() const
 		{ return static_cast<T*>(m_pointer); }
 
+		template<class T>
+		T* get_if() const
+		{ return static_cast<T*>(m_pointer); }
+
 		object_pointer operator/(std::string_view key) const
 		{
 			auto const val = m_pointer.template get_if<dict_type>();

@@ -2,7 +2,7 @@
 #define TERRAFORMER_UI_WIDGETS_VBOX_HPP
 
 #include "ui/main/widget_list.hpp"
-#include "lib/common/resource_table.hpp"
+#include "lib/common/object_tree.hpp"
 
 #include <functional>
 
@@ -22,10 +22,12 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
- 		void prepare_for_presentation(WidgetRenderingResult& output_rect, resource_table const& resources)
+ 		void prepare_for_presentation(WidgetRenderingResult& output_rect, object_dict const& resources)
 		{
-			output_rect.background = resources.get_if("ui/main_panel/background_texture");
-			output_rect.foreground = resources.get_if("ui/null_texture");
+			auto const panel = resources/"ui"/"panels"/0;
+
+			output_rect.background = panel/"background_texture";
+			output_rect.foreground = resources/"null_texture";
 			output_rect.foreground_tints = std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
@@ -33,7 +35,7 @@ namespace terraformer::ui::widgets
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
 			};
 
-			auto const background_color_ptr = resources.get_if<rgba_pixel>("ui/main_panel/background_tint");
+			auto const background_color_ptr = (panel/"background_tint").get_if<rgba_pixel>();
 			auto const background_color = background_color_ptr != nullptr?
 				*background_color_ptr : rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 
