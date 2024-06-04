@@ -97,6 +97,36 @@ TESTCASE(terraformer_object_dict)
 	EXPECT_EQ(iter_count, std::size(vals));
 }
 
+namespace
+{
+	template<bool IsConst>
+	struct item_visitor
+	{
+		item_visitor()
+		{ puts("{"); }
+
+		~item_visitor()
+		{ puts("}"); }
+
+		void operator()(std::string const& key, terraformer::object_pointer<IsConst> object)
+		{
+			printf("%s: ", key.c_str());
+			object.visit_elements(item_visitor<IsConst>{});
+		}
+
+		void operator()(terraformer::object_array::index_type key, terraformer::object_pointer<IsConst> object)
+		{
+			printf("%zu: ", key.get());
+			object.visit_elements(item_visitor<IsConst>{});
+		}
+
+		void operator()(terraformer::object_pointer<IsConst> obj)
+		{
+			printf("%p\n", obj.pointer().pointer());
+		}
+	};
+}
+
 TESTCASE(terraformer_object_tree_object_pointer)
 {
 	terraformer::object_dict vals;
@@ -220,12 +250,9 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		EXPECT_EQ((vals/"One").size(), 1);
 	}
 
-	// TODO: Improve these tests
-	vals.visit_elements([](auto, auto ptr){
-		ptr.visit_elements([](auto const&, auto...){});
-	});
-
-	std::as_const(vals).visit_elements([](auto, auto ptr){
-		ptr.visit_elements([](auto const&, auto...){});
-	});
+	puts("=====================");
+	vals.visit_elements(item_visitor<false>{});
+	puts("=====================");
+	std::as_const(vals).visit_elements(item_visitor<true>{});
+	puts("=====================");
 }
