@@ -99,7 +99,7 @@ namespace terraformer
 		}
 
 		template<class KeyType, class ValueType>
-		object_dict& create_link(KeyType&& key, ValueType&& val)
+		object_dict& insert_link(KeyType&& key, ValueType&& val)
 		{
 			auto res = base::emplace(
 				std::forward<KeyType>(key),
@@ -199,11 +199,11 @@ namespace terraformer
 		}
 
 		template<class KeyType, class ValueType>
-		object_pointer create_link(KeyType&& key, ValueType&& val)
+		object_pointer insert_link(KeyType&& key, ValueType&& val)
 		{
 			if(auto const dict = m_pointer.template get_if<dict_type>(); dict != nullptr)
 			{
-				dict->create_link(
+				dict->insert_link(
 					std::forward<KeyType>(key),
 					std::forward<ValueType>(val)
 				);

@@ -59,7 +59,7 @@ TESTCASE(terraformer_object_dict)
 	vals.insert<int>("One", 1)
 		.insert<double>("Pi", std::numbers::pi_v<double>)
 		.insert<std::string>("Foo", "This is a longer string lol")
-		.create_link("A link", obj_to_link_to);
+		.insert_link("A link", obj_to_link_to);
 
 	EXPECT_EQ(obj_to_link_to.use_count(), 2);
 
@@ -230,7 +230,7 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		EXPECT_EQ((vals/"A dictionary").insert<std::string>("value", "Success").is_null(), false);
 		EXPECT_EQ(*static_cast<std::string*>(vals/"A dictionary"/"value"), "Success");
 		EXPECT_EQ((vals/"A dictionary").size(), 2);
-		EXPECT_EQ((vals/"A dictionary").create_link("a link", obj_to_link_to).is_null(), false);
+		EXPECT_EQ((vals/"A dictionary").insert_link("a link", obj_to_link_to).is_null(), false);
 		EXPECT_EQ((vals/"A dictionary"/"a link").pointer(), obj_to_link_to.get());
 		EXPECT_EQ((vals/"A dictionary").size(), 3);
 		try
@@ -249,7 +249,7 @@ TESTCASE(terraformer_object_tree_object_pointer)
 	{
 		terraformer::shared_any obj_to_link_to{std::type_identity<int>{}, 354};
 		EXPECT_EQ((vals/"An array").insert<std::string>("value", "fail").is_null(), true);
-		EXPECT_EQ((vals/"An array").create_link("a link 2", obj_to_link_to).is_null(), true);
+		EXPECT_EQ((vals/"An array").insert_link("a link 2", obj_to_link_to).is_null(), true);
 		EXPECT_EQ((vals/"An array").size(), 2);
 		EXPECT_EQ((vals/"An array").insert_or_assign<std::string>("value", "fail").is_null(), true);
 		EXPECT_EQ((vals/"An array").size(), 2);
