@@ -2,7 +2,6 @@
 #define TERRAFORMER_UI_WIDGETS_VBOX_HPP
 
 #include "ui/main/widget_list.hpp"
-#include "lib/common/object_tree.hpp"
 
 #include <functional>
 
@@ -22,7 +21,11 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
- 		void prepare_for_presentation(WidgetRenderingResult& output_rect, object_dict const& resources)
+ 		void prepare_for_presentation(
+			WidgetRenderingResult& output_rect,
+			main::widget_instance_info const&,
+			object_dict const& resources
+		)
 		{
 			auto const panel = resources/"ui"/"panels"/0;
 

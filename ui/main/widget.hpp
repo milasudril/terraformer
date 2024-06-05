@@ -3,8 +3,10 @@
 
 #include "ui/wsapi/events.hpp"
 #include "ui/theming/widget_look.hpp"
+#include "lib/common/object_tree.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
+
 
 #include <utility>
 #include <type_traits>
@@ -12,6 +14,12 @@
 
 namespace terraformer::ui::main
 {
+	struct widget_instance_info
+	{
+		size_t section_level;
+		size_t paragraph_index;
+	};
+
 	struct widget_geometry
 	{
 		location where;
