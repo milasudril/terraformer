@@ -104,12 +104,12 @@ namespace terraformer::ui::main
 		wsapi::cursor_enter_leave_event const& cele,
 		wsapi::cursor_motion_event const& cme,
 		wsapi::mouse_button_event const& mbe,
-		TextureRepo const& textures,
-		theming::widget_look const& look,
+		widget_instance_info const& instance_info,
+		object_dict const& resources,
 		OutputRectangle&... surface
 	)
 	{
-		{ (..., obj.render(surface, textures, look)) } -> std::same_as<void>;
+		{ (..., obj.prepare_for_presentation(surface, instance_info, resources)) } -> std::same_as<void>;
 		{ obj.handle_event(cele) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
@@ -119,8 +119,8 @@ namespace terraformer::ui::main
 
 	struct widget_with_default_actions
 	{
-		template<class OutputRectangle, class TextureRepo>
-		void render(OutputRectangle&&, TextureRepo&&, theming::widget_look const&) const {}
+		template<class OutputRectangle>
+		void prepare_for_presentation(OutputRectangle&&, widget_instance_info const&, object_dict const&) const {}
 		void handle_event(wsapi::cursor_enter_leave_event const&);
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }

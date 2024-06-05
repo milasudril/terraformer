@@ -103,13 +103,15 @@ int main(int, char**)
 				"null_texture",
 				terraformer::ui::main::generate_transparent_texture<terraformer::ui::drawing_api::gl_texture>()
 			)
+			.insert<terraformer::object_array>("misc_dark_colors", terraformer::object_array{}
+				.append<terraformer::rgba_pixel>(1.0f, 0.0f, 0.0f, 1.0f)
+			)
 		);
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(
 		std::ref(event_dispatcher),
 		std::ref(mainwin),
-		std::ref(texture_repo),
-		std::ref(widget_look)
+		std::ref(resources)
 	);
 }

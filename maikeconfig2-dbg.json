@@ -9,7 +9,7 @@
 				{
 					"config":
 					{
-						"cflags":["-g"]
+						"cflags":["-ggdb3"]
 					}
 				}
 			},
@@ -19,7 +19,7 @@
 				{
 					"config":
 					{
-						"cflags": ["-g"]
+						"cflags": ["-ggdb3"]
 					}
 				}
 			},
@@ -29,7 +29,7 @@
 				{
 					"config":
 					{
-						"cflags": ["-g"]
+						"cflags": ["-ggdb3"]
 					}
 				}
 			}

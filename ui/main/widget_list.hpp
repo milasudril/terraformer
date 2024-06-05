@@ -23,7 +23,11 @@ namespace terraformer::ui::main
 			WidgetRenderingResult...,
 			widget_visibility,
 			widget_geometry,
-			void (*)(void*, WidgetRenderingResult&, texture_repo const&,theming::widget_look const&)...,
+			void (*)(void* obj,
+				WidgetRenderingResult& rect,
+				widget_instance_info const& instance_info,
+				object_dict const& render_resources
+			)...,
 			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
@@ -51,10 +55,10 @@ namespace terraformer::ui::main
 				[](
 					void* obj,
 					WidgetRenderingResult& rect,
-					texture_repo const& textures,
-					theming::widget_look const& look
+					widget_instance_info const& instance_info,
+					object_dict const& render_resources
 				) -> void {
-					return static_cast<Widget*>(obj)->render(rect, textures, look);
+					return static_cast<Widget*>(obj)->prepare_for_presentation(rect, instance_info, render_resources);
 				}...,
 				[](void* obj, wsapi::cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
@@ -145,6 +149,36 @@ namespace terraformer::ui::main
 		{
 			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
 			{ render_callbacks[k](widget_pointers[k], output_rectangles[k], textures, look); }
+		}
+	}
+
+	template<size_t OutputIndex, class TextureRepo, class ...WidgetRenderingResult>
+	void prepare_widgets_for_presentation(
+		widget_list<TextureRepo, WidgetRenderingResult...>& widgets,
+ 		widget_instance_info const& widget_instance,
+		object_dict const& render_resources
+	)
+	{
+		auto const render_callbacks = widgets.template render_callbacks<OutputIndex>();
+		auto const widget_pointers = widgets.widget_pointers();
+		auto const widget_visibilities = widgets.widget_visibilities();
+		auto output_rectangles = widgets.template output_rectangles<OutputIndex>();
+
+		auto const n = std::size(widgets);
+		for(auto k = widgets.first_element_index(); k != n; ++k)
+		{
+			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
+			{
+				render_callbacks[k](
+					widget_pointers[k],
+					output_rectangles[k],
+					widget_instance_info{
+						.section_level = widget_instance.section_level,
+						.paragraph_index = k.get()
+					},
+					render_resources
+				);
+			}
 		}
 	}
 

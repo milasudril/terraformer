@@ -23,14 +23,13 @@ namespace terraformer::ui::widgets
 
  		void prepare_for_presentation(
 			WidgetRenderingResult& output_rect,
-			main::widget_instance_info const&,
+			main::widget_instance_info const& instance_info,
 			object_dict const& resources
 		)
 		{
 			auto const panel = resources/"ui"/"panels"/0;
-
 			output_rect.background = panel/"background_texture";
-			output_rect.foreground = resources/"null_texture";
+			output_rect.foreground = resources/"ui"/"null_texture";
 			output_rect.foreground_tints = std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
@@ -38,7 +37,7 @@ namespace terraformer::ui::widgets
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
 			};
 
-			auto const background_color_ptr = (panel/"background_tint").get_if<rgba_pixel>();
+			auto const background_color_ptr = (panel/"background_tint").get_if<rgba_pixel const>();
 			auto const background_color = background_color_ptr != nullptr?
 				*background_color_ptr : rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 
@@ -49,7 +48,14 @@ namespace terraformer::ui::widgets
 				background_color,
 			};
 
- 			prepare_for_presentation<0>(m_widgets, resources);
+ 			prepare_widgets_for_presentation<0>(
+				m_widgets,
+				main::widget_instance_info{
+					.section_level = instance_info.section_level,
+					.paragraph_index = 0
+				},
+				resources
+			);
 		}
 
 		void render(

@@ -11,19 +11,10 @@ namespace terraformer::ui::widgets
 	class testwidget
 	{
 	public:
-		template<class TextureRepo>
-		void render(
-			int&,
-			TextureRepo&&,
-			theming::widget_look const&
-		)
-		{}
-
-		template<class TextureRepo>
-		void render(
+		void prepare_for_presentation(
 			drawing_api::single_quad_renderer::input_rectangle& output_rect,
-			TextureRepo&&,
-			theming::widget_look const& look
+			main::widget_instance_info const&,
+			object_dict const& render_resources
 		)
 		{
 			if(m_dirty)
@@ -40,9 +31,12 @@ namespace terraformer::ui::widgets
 				}
 				m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 
-				auto const num_colors = std::size(look.colors.misc_bright_colors);
+				auto const tints = render_resources/"ui"/"misc_dark_colors";
+				auto const num_colors = std::size(tints);
+				assert(num_colors != 0);
+
 				{
-					auto const color = look.colors.misc_dark_colors[(m_current_color + num_colors)%num_colors];
+					auto const color = *(tints/((m_current_color + num_colors)%num_colors)).get_if<rgba_pixel const>();
 					for(uint32_t y = 0; y != h; ++y)
 					{
 						for(uint32_t x = 0; x != w; ++x)
