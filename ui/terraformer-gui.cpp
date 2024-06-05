@@ -86,6 +86,25 @@ int main(int, char**)
 	);
 	mainwin.set_cursor(default_cursor);
 
+	terraformer::shared_any noisy_texture{
+		std::type_identity<terraformer::ui::drawing_api::gl_texture>{},
+		terraformer::ui::main::generate_noisy_texture<terraformer::ui::drawing_api::gl_texture>()
+	};
+	terraformer::object_dict resources;
+	resources.insert<terraformer::object_dict>(
+		"ui", terraformer::object_dict{}
+			.insert<terraformer::object_array>("panels",terraformer::object_array{}
+				.append<terraformer::object_dict>(terraformer::object_dict{}
+					.insert_link("background_texture", noisy_texture)
+					.insert<terraformer::rgba_pixel>("background_tint", widget_look.colors.main_panel.background)
+				)
+			)
+			.insert<terraformer::ui::drawing_api::gl_texture>(
+				"null_texture",
+				terraformer::ui::main::generate_transparent_texture<terraformer::ui::drawing_api::gl_texture>()
+			)
+		);
+
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(
 		std::ref(event_dispatcher),
