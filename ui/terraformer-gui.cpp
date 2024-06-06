@@ -10,6 +10,7 @@
 #include "./widgets/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./widgets/testwidget.hpp"
+#include "./widgets/button.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
@@ -55,14 +56,14 @@ int main(int, char**)
 	glEnable(GL_CULL_FACE);
 
 	terraformer::ui::widgets::testwidget foo;
-	terraformer::ui::widgets::testwidget bar;
+	terraformer::ui::widgets::button bar;
+	bar.text("Hello, World");
 
 	terraformer::ui::widgets::vbox<
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
 	> my_vbox;
 
 	my_vbox.append(std::ref(foo));
-
 	my_vbox.append(std::ref(bar));
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
