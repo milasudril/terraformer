@@ -38,6 +38,12 @@ namespace terraformer
 		using base::operator[];
 		using base::empty;
 
+		object_array() = default,
+		object_array(object_array&&) = default;
+		object_array& operator=(object_array&&) = default;
+		object_array(object_array const&) = delete;
+		object_array& operator=(object_array const&) = delete;
+
 		template<class TypeOfValueToInsert, class ... Args>
 		object_array& append(Args&&... args)
 		{
@@ -76,6 +82,12 @@ namespace terraformer
 		using base::end;
 		using base::size;
 		using base::empty;
+
+		object_dict() = default,
+		object_dict(object_dict&&) = default;
+		object_dict& operator=(object_dict&&) = default;
+		object_dict(object_dict const&) = delete;
+		object_dict& operator=(object_dict const&) = delete;
 
 		template<class TypeOfValueToInsert, class KeyType, class ... Args>
 		object_dict& insert(KeyType&& key, Args&&... args)

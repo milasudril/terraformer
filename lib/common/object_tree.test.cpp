@@ -148,17 +148,19 @@ TESTCASE(terraformer_object_tree_object_pointer)
 		.insert<std::string>("Three", "Hello, World")
 		.insert<terraformer::object_array>(
 			"An array",
-			terraformer::object_array{}
+			std::move(terraformer::object_array{}
 				.append<int>(3)
 				.append<terraformer::object_dict>(
-					terraformer::object_dict{}
+					std::move(terraformer::object_dict{}
 						.insert_or_assign<double>("A value", 6.5)
 						.insert<double>("Another value", 4.5)
 					)
+				)
+			)
 		)
 		.insert<terraformer::object_dict>(
 			"A dictionary",
-			terraformer::object_dict{}.insert<int>("Foo", 14)
+			std::move(terraformer::object_dict{}.insert<int>("Foo", 14))
 		);
 
 	REQUIRE_EQ(vals.size(), 5);

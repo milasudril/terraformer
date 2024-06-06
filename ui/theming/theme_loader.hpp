@@ -42,25 +42,31 @@ namespace terraformer::ui::theming
 
 		object_dict resources;
 		resources.insert<object_dict>(
-			"ui", object_dict{}
-				.insert<object_array>("panels", object_array{}
-					.append<object_dict>(object_dict{}
-						.insert_link("background_texture", noisy_texture)
-						.insert<rgba_pixel>("background_tint", default_color_scheme.main_panel.background)
+			"ui", std::move(
+				object_dict{}
+					.insert<object_array>("panels", std::move(object_array{}
+					.append<object_dict>(std::move(
+						object_dict{}
+							.insert_link("background_texture", noisy_texture)
+							.insert<rgba_pixel>("background_tint", default_color_scheme.main_panel.background))
+						)
 					)
 				)
-				.insert<object_dict>("command_area", object_dict{}
-					.insert<rgba_pixel>("background_tint", default_color_scheme.command_area.background)
-					.insert<rgba_pixel>("text_color", default_color_scheme.command_area.text)
-					.insert_link("background_texture", white_texture)
+				.insert<object_dict>("command_area", std::move(
+					object_dict{}
+						.insert<rgba_pixel>("background_tint", default_color_scheme.command_area.background)
+						.insert<rgba_pixel>("text_color", default_color_scheme.command_area.text)
+						.insert_link("background_texture", white_texture)
 				//	.insert_link("font", body_text)
+					)
 				)
 				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
 				.insert<TextureType>(
 					"null_texture",
 					generate_transparent_texture<TextureType>()
 				)
-			);
+			)
+		);
 		return resources;
 	}
 };
