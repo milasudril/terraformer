@@ -15,6 +15,13 @@ namespace terraformer::ui::theming
 			generate_noisy_texture<TextureType>()
 		};
 
+		object_array misc_dark_colors;
+		auto const colors = default_color_scheme.misc_dark_colors;
+		for(size_t k = 0; k != std::size(colors); ++k)
+		{
+			misc_dark_colors.append<rgba_pixel>(colors[k]);
+		}
+
 		object_dict resources;
 		resources.insert<object_dict>(
 			"ui", object_dict{}
@@ -24,9 +31,7 @@ namespace terraformer::ui::theming
 						.insert<rgba_pixel>("background_tint", default_color_scheme.main_panel.background)
 					)
 				)
-				.insert<object_array>("misc_dark_colors", object_array{}
-					.append<rgba_pixel>(1.0f, 0.0f, 0.0f, 1.0f)
-				)
+				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
 				.insert<TextureType>(
 					"null_texture",
 					generate_transparent_texture<TextureType>()
