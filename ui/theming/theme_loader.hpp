@@ -3,6 +3,8 @@
 
 #include "./texture_generators.hpp"
 #include "./color_scheme.hpp"
+#include "ui/font_handling/font_mapper.hpp"
+#include "ui/font_handling/text_shaper.hpp"
 #include "lib/common/object_tree.hpp"
 
 namespace terraformer::ui::theming
@@ -14,6 +16,22 @@ namespace terraformer::ui::theming
 			std::type_identity<TextureType>{},
 			generate_noisy_texture<TextureType>()
 		};
+
+		shared_any white_texture{
+			std::type_identity<TextureType>{},
+			generate_white_texture<TextureType>()
+		};
+
+#if 0
+		font_handling::font_mapper fonts;
+		auto const fontfile = fonts.get_path("serif");
+		font_handling::glyph_renderer renderer{fontfile.c_str()};
+
+		shared_any body_text{
+			std::type_identity<font_handling::font>{},
+			font_handling::font{24, renderer}
+		};
+#endif
 
 		object_array misc_dark_colors;
 		auto const colors = default_color_scheme.misc_dark_colors;
@@ -30,6 +48,12 @@ namespace terraformer::ui::theming
 						.insert_link("background_texture", noisy_texture)
 						.insert<rgba_pixel>("background_tint", default_color_scheme.main_panel.background)
 					)
+				)
+				.insert<object_dict>("command_area", object_dict{}
+					.insert<rgba_pixel>("background_tint", default_color_scheme.command_area.background)
+					.insert<rgba_pixel>("text_color", default_color_scheme.command_area.text)
+					.insert_link("background_texture", white_texture)
+				//	.insert_link("font", body_text)
 				)
 				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
 				.insert<TextureType>(
