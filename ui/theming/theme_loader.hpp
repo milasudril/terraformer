@@ -22,16 +22,13 @@ namespace terraformer::ui::theming
 			generate_white_texture<TextureType>()
 		};
 
-#if 0
 		font_handling::font_mapper fonts;
-		auto const fontfile = fonts.get_path("serif");
-		font_handling::glyph_renderer renderer{fontfile.c_str()};
+		auto const fontfile = fonts.get_path("sans-serif");
 
 		shared_any body_text{
 			std::type_identity<font_handling::font>{},
-			font_handling::font{24, renderer}
+			std::move(font_handling::font{fontfile.c_str()}.set_font_size(16))
 		};
-#endif
 
 		object_array misc_dark_colors;
 		auto const colors = default_color_scheme.misc_dark_colors;
@@ -57,7 +54,7 @@ namespace terraformer::ui::theming
 						.insert<rgba_pixel>("background_tint", default_color_scheme.command_area.background)
 						.insert<rgba_pixel>("text_color", default_color_scheme.command_area.text)
 						.insert_link("background_texture", white_texture)
-				//	.insert_link("font", body_text)
+						.insert_link("font", body_text)
 					)
 				)
 				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
