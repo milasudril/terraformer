@@ -1,3 +1,6 @@
+#ifndef TERRAFORMER_OBJECT_TREE_HPP
+#define TERRAFORMER_OBJECT_TREE_HPP
+
 #include "./shared_any.hpp"
 #include "lib/array_classes/single_array.hpp"
 
@@ -337,3 +340,4 @@ namespace terraformer
 		{ f(item.first, object_pointer{item.second.get_const()}); }
 	}
 }
+#endif

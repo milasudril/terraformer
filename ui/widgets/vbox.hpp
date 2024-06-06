@@ -7,12 +7,11 @@
 
 namespace terraformer::ui::widgets
 {
-	template<class TextureRepo, class WidgetRenderingResult>
+	template<class WidgetRenderingResult>
 	class vbox
 	{
 	public:
 		using output_rectangle = WidgetRenderingResult;
-		using texture_repo = TextureRepo;
 
 		template<class Widget>
 		vbox& append(Widget&& widget)
@@ -57,32 +56,6 @@ namespace terraformer::ui::widgets
 				resources
 			);
 		}
-
-		void render(
-			output_rectangle& output_rect,
-			texture_repo const& textures,
-			theming::widget_look const& look
-		)
-		{
-			output_rect.background = &textures.main_panel_background;
-			output_rect.foreground = &textures.none;
-
-			output_rect.foreground_tints = std::array{
-				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
-			};
-
-			output_rect.background_tints = std::array{
-				look.colors.main_panel.background,
-				look.colors.main_panel.background,
-				look.colors.main_panel.background,
-				look.colors.main_panel.background
-			};
-
- 			render_widgets<0>(m_widgets, textures, look);
- 		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const&)
 		{ }
@@ -220,11 +193,15 @@ namespace terraformer::ui::widgets
 		}
 
 		template<class Renderer>
-		void decorate_widgets(Renderer&&, texture_repo const&, theming::widget_look const&)
+		void decorate_widgets(
+			Renderer&&,
+			main::widget_instance_info const& instance_info,
+			object_dict const& resources
+		)
 		{ }
 
 	private:
-		using widget_list = main::widget_list<TextureRepo, WidgetRenderingResult>;
+		using widget_list = main::widget_list<WidgetRenderingResult>;
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};

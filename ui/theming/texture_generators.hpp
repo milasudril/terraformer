@@ -9,25 +9,8 @@
 
 #include <cstdio>
 
-namespace terraformer::ui::main
+namespace terraformer::ui::theming
 {
-	template<class DrawingSurface>
-	struct default_stock_textures_repo
-	{
-		using texture_type = DrawingSurface;
-
-		DrawingSurface none;
-
-		DrawingSurface main_panel_background;
-		DrawingSurface other_panel_background;
-		DrawingSurface input_area_background;
-		DrawingSurface command_area_background;
-		DrawingSurface output_area_background;
-		DrawingSurface interactive_frame_texture;
-
-		[[nodiscard]] inline static auto& get_default_instance();
-	};
-
 	template<class DrawingSurface>
 	auto generate_noisy_texture()
 	{
@@ -145,20 +128,6 @@ namespace terraformer::ui::main
 		terraformer::image img{1, 1};
 		img(0, 0) = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 0));
-	}
-
-	template<class DrawingSurface>
-	auto generate_default_stock_textures()
-	{
-		return default_stock_textures_repo{
-			.none = generate_transparent_texture<DrawingSurface>(),
-			.main_panel_background = generate_noisy_texture<DrawingSurface>(),
-			.other_panel_background = generate_noisy_texture<DrawingSurface>(),
-			.input_area_background = generate_white_texture<DrawingSurface>(),
-			.command_area_background = generate_white_texture<DrawingSurface>(),
-			.output_area_background = generate_white_texture<DrawingSurface>(),
-			.interactive_frame_texture = generate_stock_interactive_frame_texture<DrawingSurface>()
-		};
 	}
 };
 

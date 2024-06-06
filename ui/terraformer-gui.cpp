@@ -12,7 +12,7 @@
 #include "./widgets/testwidget.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
-#include "./theming/default_stock_textures_repo.hpp"
+#include "./theming/theme_loader.hpp"
 
 namespace
 {
@@ -58,7 +58,6 @@ int main(int, char**)
 	terraformer::ui::widgets::testwidget bar;
 
 	terraformer::ui::widgets::vbox<
-		terraformer::ui::main::default_stock_textures_repo<terraformer::ui::drawing_api::gl_texture>,
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
 	> my_vbox;
 
@@ -74,39 +73,7 @@ int main(int, char**)
 		error_handler{}
 	};
 
-	auto const& widget_look = terraformer::ui::theming::default_widget_look;
-	auto texture_repo =
-		terraformer::ui::main::generate_default_stock_textures<terraformer::ui::drawing_api::gl_texture>();
-
-
-	auto const default_cursor = terraformer::ui::theming::create_cursor(
-		gui_ctxt,
-		terraformer::ui::theming::current_cursor_set.main,
-		widget_look.colors.cursor_color
-	);
-	mainwin.set_cursor(default_cursor);
-
-	terraformer::shared_any noisy_texture{
-		std::type_identity<terraformer::ui::drawing_api::gl_texture>{},
-		terraformer::ui::main::generate_noisy_texture<terraformer::ui::drawing_api::gl_texture>()
-	};
-	terraformer::object_dict resources;
-	resources.insert<terraformer::object_dict>(
-		"ui", terraformer::object_dict{}
-			.insert<terraformer::object_array>("panels",terraformer::object_array{}
-				.append<terraformer::object_dict>(terraformer::object_dict{}
-					.insert_link("background_texture", noisy_texture)
-					.insert<terraformer::rgba_pixel>("background_tint", widget_look.colors.main_panel.background)
-				)
-			)
-			.insert<terraformer::ui::drawing_api::gl_texture>(
-				"null_texture",
-				terraformer::ui::main::generate_transparent_texture<terraformer::ui::drawing_api::gl_texture>()
-			)
-			.insert<terraformer::object_array>("misc_dark_colors", terraformer::object_array{}
-				.append<terraformer::rgba_pixel>(1.0f, 0.0f, 0.0f, 1.0f)
-			)
-		);
+	auto resources = terraformer::ui::theming::load_default_resources<terraformer::ui::drawing_api::gl_texture>();
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(

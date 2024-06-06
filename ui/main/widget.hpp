@@ -97,7 +97,7 @@ namespace terraformer::ui::main
 		return scaling{preliminary_width, constraints.height.min, 1.0f};
 	}
 
-	template<class T, class TextureRepo, class ... OutputRectangle>
+	template<class T, class ... OutputRectangle>
 	concept widget = requires(
 		T& obj,
 		wsapi::fb_size size,
@@ -131,7 +131,7 @@ namespace terraformer::ui::main
 
 	namespace
 	{
-		static_assert(widget<widget_with_default_actions, int, double>);
+		static_assert(widget<widget_with_default_actions, double>);
 	}
 }
 
