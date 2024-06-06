@@ -25,28 +25,35 @@ namespace terraformer::ui::font_handling
 
 	using hb_font_handle = std::unique_ptr<hb_font_t, hb_font_deleter>;
 
-	inline auto make_font(int size, glyph_renderer& renderer)
+	inline auto make_font(glyph_renderer& renderer)
 	{
-		return hb_font_handle{hb_ft_font_create(renderer.set_font_size(size).get_face(),[](void*){})};
+		return hb_font_handle{hb_ft_font_create(renderer.get_face(), [](void*){})};
 	}
 
 	class font
 	{
 	public:
-		explicit font(int font_size, glyph_renderer& renderer):
-			m_handle{make_font(font_size, renderer)},
-			m_renderer{renderer}
+		explicit font(char const* filename):
+			m_renderer{std::make_unique<glyph_renderer>(filename)},
+			m_handle{make_font(*m_renderer)}
 		{}
 
 		auto get_hb_font() const
 		{ return m_handle.get(); }
 
 		auto& get_renderer() const
-		{ return m_renderer; }
+		{ return *m_renderer; }
+
+		auto& set_font_size(int new_size)
+		{
+			m_renderer->set_font_size(new_size);
+			hb_ft_font_changed(m_handle.get());
+			return *this;
+		}
 
 	private:
+		std::unique_ptr<glyph_renderer> m_renderer;
 		hb_font_handle m_handle;
-		std::reference_wrapper<glyph_renderer> m_renderer;
 	};
 
 	struct hb_buffer_deleter

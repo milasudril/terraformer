@@ -10,8 +10,8 @@ TESTCASE(terraformer_ui_font_handling_shape_text)
 {
 	terraformer::ui::font_handling::font_mapper fonts;
 	auto const fontfile = fonts.get_path("serif");
-	terraformer::ui::font_handling::glyph_renderer renderer{fontfile.c_str()};
-	terraformer::ui::font_handling::font the_font{24, renderer};
+	terraformer::ui::font_handling::font the_font{fontfile.c_str()};
+	the_font.set_font_size(24);
 	terraformer::ui::font_handling::text_shaper shaper{};
 
 	auto result = shaper.append(u8"Yxmördaren Julia Blomqvist på fäktning i Schweiz ff")
@@ -21,7 +21,7 @@ TESTCASE(terraformer_ui_font_handling_shape_text)
 		.run(the_font);
 
 	EXPECT_EQ(result.glyph_count, 50);
-	EXPECT_EQ(&result.renderer.get(), &renderer);
+	EXPECT_EQ(&result.renderer.get(), &the_font.get_renderer());
 
 	auto img = render(result);
 	FILE* dump = fopen("/dev/shm/slask.data", "wb");
