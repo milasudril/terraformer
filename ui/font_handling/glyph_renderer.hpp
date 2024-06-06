@@ -131,7 +131,7 @@ namespace terraformer::ui::font_handling
 			int,
 			glyph_table
 		> m_loaded_glyphs;
-		mutable FT_Face m_face{};
+		FT_Face m_face{};
 	};
 
 	inline thread_local font_loader glyph_renderer::m_loader{};
