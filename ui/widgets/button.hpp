@@ -82,7 +82,7 @@ namespace terraformer::ui::widgets
 			return false;
 		}
 
-		main::widget_size_constraints get_size_constraints() const
+		main::widget_size_constraints get_size_constraints(object_dict const&) const
 		{
 			return main::widget_size_constraints{
 				.width{

@@ -67,6 +67,7 @@ int main(int, char**)
 	my_vbox.append(std::ref(bar));
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
+		terraformer::ui::theming::load_default_resources<terraformer::ui::drawing_api::gl_texture>(),
 		std::ref(my_vbox),
 		window_controller{},
 		terraformer::ui::drawing_api::single_quad_renderer{},
@@ -74,12 +75,9 @@ int main(int, char**)
 		error_handler{}
 	};
 
-	auto resources = terraformer::ui::theming::load_default_resources<terraformer::ui::drawing_api::gl_texture>();
-
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(
 		std::ref(event_dispatcher),
-		std::ref(mainwin),
-		std::ref(resources)
+		std::ref(mainwin)
 	);
 }

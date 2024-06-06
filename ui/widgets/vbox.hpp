@@ -113,7 +113,7 @@ namespace terraformer::ui::widgets
 			return mbe_handlers[i](widgets[i], event);
 		}
 
-		main::widget_size_constraints const& get_size_constraints() const
+		main::widget_size_constraints const& get_size_constraints(object_dict const&) const
 		{ return m_current_size_constraints; }
 
 		wsapi::fb_size handle_event(wsapi::fb_size size)
@@ -151,7 +151,7 @@ namespace terraformer::ui::widgets
 
 		// Widget collection stuff
 
-		void update_layout(float margin_x, float margin_y)
+		void update_layout(float margin_x, float margin_y, object_dict const& render_resources)
 		{
 			auto const widget_pointers = m_widgets.widget_pointers();
 			auto const widget_geometries = m_widgets.widget_geometries();
@@ -165,7 +165,7 @@ namespace terraformer::ui::widgets
 			{
 				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
 				{
-					auto const constraints = size_constraints_callbacks[k](widget_pointers[k]);
+					auto const constraints = size_constraints_callbacks[k](widget_pointers[k], render_resources);
 					widget_geometries[k].where = location{
 						margin_x,
 						-height,
