@@ -19,37 +19,25 @@ namespace terraformer::ui::widgets
 		{
 			if(m_current_stage == render_stage::update_texture) [[unlikely]]
 			{
-#if 0
 				auto const& descriptor = m_foreground.descriptor();
 				auto const w = static_cast<uint32_t>(descriptor.width);
 				auto const h = static_cast<uint32_t>(descriptor.height);
+				printf("Generating text texture %u %u\n", w, h);
 
 				image img{w, h};
 				for(uint32_t y = 0; y != h; ++y)
 				{
 					for(uint32_t x = 0; x != w; ++x)
-					{ img(x, y) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}; }
+					{
+						auto const mask_val = static_cast<float>(m_rendered_text(x, y))/255.0f;
+						img(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
+					}
 				}
 				m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
-
-				auto const tints = render_resources/"ui"/"misc_dark_colors";
-				auto const num_colors = std::size(tints);
-				assert(num_colors != 0);
-
-				{
-					auto const color = *(tints/((m_current_color + num_colors)%num_colors)).get_if<rgba_pixel const>();
-					for(uint32_t y = 0; y != h; ++y)
-					{
-						for(uint32_t x = 0; x != w; ++x)
-						{ img(x, y) = color; }
-					}
-					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
-				}
-#endif
 				m_current_stage = render_stage::completed;
 			}
 
-			output_rect.foreground = render_resources/"ui"/"null_texture";
+			output_rect.foreground = &m_foreground;
 			output_rect.background = render_resources/"ui"/"command_area"/"background_texture";
 			auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
 			auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
