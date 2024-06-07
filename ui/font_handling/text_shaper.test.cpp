@@ -11,7 +11,7 @@ TESTCASE(terraformer_ui_font_handling_shape_text)
 	terraformer::ui::font_handling::font_mapper fonts;
 	auto const fontfile = fonts.get_path("serif");
 	terraformer::ui::font_handling::font the_font{fontfile.c_str()};
-	the_font.set_font_size(24);
+	the_font.set_font_size(16);
 	terraformer::ui::font_handling::text_shaper shaper{};
 
 	auto result = shaper.append(u8"Yxmördaren Julia Blomqvist på fäktning i Schweiz ff")

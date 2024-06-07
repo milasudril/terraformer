@@ -111,10 +111,10 @@ namespace terraformer::ui::font_handling
 		}
 
 		auto get_global_glyph_height() const
-		{ return m_face->ascender - m_face->descender; }
+		{ return m_face->size->metrics.ascender - m_face->size->metrics.descender; }
 
 		auto get_ascender() const
-		{ return m_face->ascender; }
+		{ return m_face->size->metrics.ascender; }
 
 		auto get_global_glyph_width() const
 		{ return m_face->max_advance_width; }

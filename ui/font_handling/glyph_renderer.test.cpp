@@ -35,6 +35,7 @@ TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_small_index)
 	auto& glyph_1 = renderer.set_font_size(24)
 		.get_glyph(terraformer::ui::font_handling::codepoint{65});
 	dump_glyph(glyph_1);
+	printf("%lu\n", renderer.get_global_glyph_height());
 
 	// Load with same size as before
 	auto& glyph_2 = renderer.get_glyph(terraformer::ui::font_handling::codepoint{66});
@@ -47,6 +48,7 @@ TESTCASE(terraformer_ui_font_handling_glyph_renderer_load_small_index)
 	EXPECT_NE(&glyph_1, &glyph_3);
 	EXPECT_NE(&glyph_2, &glyph_3);
 	dump_glyph(glyph_3);
+	printf("%lu\n", renderer.get_global_glyph_height());
 
 	// Fetch all loaded glyphs
 	auto& glyph_4 = renderer.set_font_size(24).get_glyph(terraformer::ui::font_handling::codepoint{65});
