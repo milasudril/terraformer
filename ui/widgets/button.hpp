@@ -17,7 +17,7 @@ namespace terraformer::ui::widgets
 			object_dict const& render_resources
 		)
 		{
-			if(m_dirty)
+			if(m_current_stage == render_stage::update_texture) [[unlikely]]
 			{
 				auto const& descriptor = m_foreground.descriptor();
 				auto const w = static_cast<uint32_t>(descriptor.width);
@@ -45,7 +45,7 @@ namespace terraformer::ui::widgets
 					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 				}
 
-				m_dirty = false;
+				m_current_stage = render_stage::completed;
 			}
 
 			output_rect.foreground = &m_foreground;
@@ -77,26 +77,30 @@ namespace terraformer::ui::widgets
 			{
 				auto const dir = mbe.button == 0 ? -1 : 1;
 				m_current_color += dir;
-				m_dirty = true;
+				m_current_stage = render_stage::update_texture;
 			}
 			return false;
 		}
 
 		main::widget_size_constraints get_size_constraints(object_dict const& resources) const
 		{
-			auto const font = (resources/"ui"/"command_area"/"font").get_if<font_handling::font const>();
-			assert(font != nullptr);
+			if(m_current_stage == render_stage::update_text) [[unlikely]]
+			{
+				auto const font = (resources/"ui"/"command_area"/"font").get_if<font_handling::font const>();
+				assert(font != nullptr);
 
-			terraformer::ui::font_handling::text_shaper shaper{};
-			// TODO: Add uspport for different scripts, direction, and languages
-			auto result = shaper.append(m_text)
-				.with(hb_script_t::HB_SCRIPT_LATIN)
-				.with(hb_direction_t::HB_DIRECTION_LTR)
-				.with(hb_language_from_string("en-UE", -1))
-				.run(*font);
+				font_handling::text_shaper shaper{};
 
-			m_rendered_text = render(result);
+				// TODO: Add support for different scripts, direction, and languages
+				auto result = shaper.append(m_text)
+					.with(hb_script_t::HB_SCRIPT_LATIN)
+					.with(hb_direction_t::HB_DIRECTION_LTR)
+					.with(hb_language_from_string("en-UE", -1))
+					.run(*font);
 
+				m_rendered_text = render(result);
+				m_current_stage = render_stage::update_texture;
+			}
 			return main::widget_size_constraints{
 				.width{
 					.min = static_cast<float>(m_rendered_text.width()),
@@ -112,8 +116,6 @@ namespace terraformer::ui::widgets
 
 		void handle_event(wsapi::fb_size size)
 		{
-			printf("%p Size was updated to %d %d\n", this, size.width, size.height);
-
 			drawing_api::gl_texture_descriptor descriptor{
 				.width = size.width,
 				.height = size.height,
@@ -124,26 +126,27 @@ namespace terraformer::ui::widgets
 
 			m_foreground.set_format(descriptor);
 			m_background.set_format(descriptor);
-			m_dirty = true;
+			m_current_stage = render_stage::update_texture;
 		}
 
 		template<class StringType>
 		button& text(StringType&& text)
 		{
 			m_text = std::forward<StringType>(text);
-			m_dirty = true;
+			m_current_stage = render_stage::update_text;
 			return *this;
 		}
 
 	private:
 		std::basic_string<char8_t> m_text;
 		mutable basic_image<uint8_t> m_rendered_text;
+		enum class render_stage: int{update_text, update_texture, completed};
+		mutable render_stage m_current_stage = render_stage::update_text;
 
 		drawing_api::gl_texture m_foreground;
 		drawing_api::gl_texture m_background;
 		size_t m_current_color = 0;
 		bool m_cursor_above = false;
-		bool m_dirty = false;
 	};
 }
 
