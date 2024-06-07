@@ -19,6 +19,7 @@ namespace terraformer::ui::widgets
 		{
 			if(m_current_stage == render_stage::update_texture) [[unlikely]]
 			{
+#if 0
 				auto const& descriptor = m_foreground.descriptor();
 				auto const w = static_cast<uint32_t>(descriptor.width);
 				auto const h = static_cast<uint32_t>(descriptor.height);
@@ -44,20 +45,19 @@ namespace terraformer::ui::widgets
 					}
 					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 				}
-
+#endif
 				m_current_stage = render_stage::completed;
 			}
 
-			output_rect.foreground = &m_foreground;
-			output_rect.background = &m_background;
-			constexpr std::array tints{
-				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-				rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
-			};
-			output_rect.foreground_tints = tints;
-			output_rect.background_tints = tints;
+			output_rect.foreground = render_resources/"ui"/"null_texture";
+			output_rect.background = render_resources/"ui"/"command_area"/"background_texture";
+			auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
+			auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
+			assert(bg_tint != nullptr);
+			assert(fg_tint != nullptr);
+
+			output_rect.background_tints = std::array{*bg_tint, *bg_tint, *bg_tint, *bg_tint};
+			output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
 		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const& cele)
@@ -125,7 +125,6 @@ namespace terraformer::ui::widgets
 			};
 
 			m_foreground.set_format(descriptor);
-			m_background.set_format(descriptor);
 			m_current_stage = render_stage::update_texture;
 		}
 
@@ -144,7 +143,6 @@ namespace terraformer::ui::widgets
 		mutable render_stage m_current_stage = render_stage::update_text;
 
 		drawing_api::gl_texture m_foreground;
-		drawing_api::gl_texture m_background;
 		size_t m_current_color = 0;
 		bool m_cursor_above = false;
 	};
