@@ -57,7 +57,7 @@ int main(int, char**)
 
 	terraformer::ui::widgets::testwidget foo;
 	terraformer::ui::widgets::button bar;
-	bar.text("Hello, World");
+	bar.text(u8"Hello, World");
 
 	terraformer::ui::widgets::vbox<
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle

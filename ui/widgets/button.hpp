@@ -2,7 +2,7 @@
 #define TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 
 #include "ui/drawing_api/single_quad_renderer.hpp"
-#include "ui/theming/widget_look.hpp"
+#include "ui/font_handling/text_shaper.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 
@@ -82,15 +82,28 @@ namespace terraformer::ui::widgets
 			return false;
 		}
 
-		main::widget_size_constraints get_size_constraints(object_dict const&) const
+		main::widget_size_constraints get_size_constraints(object_dict const& resources) const
 		{
+			auto const font = (resources/"ui"/"command_area"/"font").get_if<font_handling::font const>();
+			assert(font != nullptr);
+
+			terraformer::ui::font_handling::text_shaper shaper{};
+			// TODO: Add uspport for different scripts, direction, and languages
+			auto result = shaper.append(m_text)
+				.with(hb_script_t::HB_SCRIPT_LATIN)
+				.with(hb_direction_t::HB_DIRECTION_LTR)
+				.with(hb_language_from_string("en-UE", -1))
+				.run(*font);
+
+			m_rendered_text = render(result);
+
 			return main::widget_size_constraints{
 				.width{
-					.min = 64.0f,
+					.min = static_cast<float>(m_rendered_text.width()),
 					.max = std::numeric_limits<float>::infinity()
 				},
 				.height{
-					.min = 16.0f,
+					.min = static_cast<float>(m_rendered_text.height()),
 					.max = std::numeric_limits<float>::infinity()
 				},
 				.aspect_ratio = std::nullopt
@@ -123,7 +136,8 @@ namespace terraformer::ui::widgets
 		}
 
 	private:
-		std::string m_text;
+		std::basic_string<char8_t> m_text;
+		mutable basic_image<uint8_t> m_rendered_text;
 
 		drawing_api::gl_texture m_foreground;
 		drawing_api::gl_texture m_background;
