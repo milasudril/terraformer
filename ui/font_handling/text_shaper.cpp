@@ -13,7 +13,10 @@ terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 	for(size_t i = 0; i != n; ++i)
 	{
 		auto const& glyph = get_glyph(result, glyph_index{glyph_info[i].codepoint});
-		width += (i != n - 1)? glyph_pos[i].x_advance : glyph.image.width()*64;
+		width += (i != n - 1)?
+			glyph_pos[i].x_advance :
+			std::max(glyph.image.width()*64, static_cast<uint32_t>(glyph_pos[i].x_advance));
+		printf("%zu ", width/64);
 		height += (i != n - 1)? -glyph_pos[i].y_advance : glyph.image.height()*64;
 	}
 
