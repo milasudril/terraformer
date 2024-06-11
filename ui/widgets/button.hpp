@@ -25,11 +25,11 @@ namespace terraformer::ui::widgets
 				printf("Generating text texture %u %u\n", w, h);
 
 				image img{w, h};
-				for(uint32_t y = 0; y != h; ++y)
+				for(uint32_t y = m_margin; y != h - m_margin; ++y)
 				{
-					for(uint32_t x = 0; x != w; ++x)
+					for(uint32_t x = m_margin; x != w - m_margin; ++x)
 					{
-						auto const mask_val = static_cast<float>(m_rendered_text(x, y))/255.0f;
+						auto const mask_val = static_cast<float>(m_rendered_text(x - m_margin, y - m_margin))/255.0f;
 						img(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
 					}
 				}
@@ -89,13 +89,18 @@ namespace terraformer::ui::widgets
 				m_rendered_text = render(result);
 				m_current_stage = render_stage::update_texture;
 			}
+
+			auto const margin = (resources/"ui"/"widget_inner_margin").get_if<int const>();
+			assert(margin != nullptr);
+			m_margin = *margin;
+
 			return main::widget_size_constraints{
 				.width{
-					.min = static_cast<float>(m_rendered_text.width()),
+					.min = static_cast<float>(m_rendered_text.width() + 2*m_margin),
 					.max = std::numeric_limits<float>::infinity()
 				},
 				.height{
-					.min = static_cast<float>(m_rendered_text.height()),
+					.min = static_cast<float>(m_rendered_text.height() + 2*m_margin),
 					.max = std::numeric_limits<float>::infinity()
 				},
 				.aspect_ratio = std::nullopt
@@ -129,6 +134,7 @@ namespace terraformer::ui::widgets
 		mutable basic_image<uint8_t> m_rendered_text;
 		enum class render_stage: int{update_text, update_texture, completed};
 		mutable render_stage m_current_stage = render_stage::update_text;
+		mutable int m_margin = 0;
 
 		drawing_api::gl_texture m_foreground;
 		size_t m_current_color = 0;

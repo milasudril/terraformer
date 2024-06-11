@@ -57,7 +57,7 @@ int main(int, char**)
 
 	terraformer::ui::widgets::testwidget foo;
 	terraformer::ui::widgets::button bar;
-	bar.text(u8"A B C D E F G H I J K L M N O P Q R S T U V X Y Z a b c d e f g h i j k l m n o p q r s t u v x y z");
+	bar.text(u8"Click Me!");
 
 	terraformer::ui::widgets::vbox<
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
