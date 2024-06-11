@@ -23,11 +23,11 @@ namespace terraformer::ui::theming
 		};
 
 		font_handling::font_mapper fonts;
-		auto const fontfile = fonts.get_path("sans-serif");
+ 		auto const fontfile = fonts.get_path("sans-serif");
 
 		shared_any body_text{
 			std::type_identity<font_handling::font>{},
-			std::move(font_handling::font{fontfile.c_str()}.set_font_size(16))
+			std::move(font_handling::font{fontfile.c_str()}.set_font_size(11))
 		};
 
 		object_array misc_dark_colors;
