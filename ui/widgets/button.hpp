@@ -22,7 +22,6 @@ namespace terraformer::ui::widgets
 				auto const& descriptor = m_foreground.descriptor();
 				auto const w = static_cast<uint32_t>(descriptor.width);
 				auto const h = static_cast<uint32_t>(descriptor.height);
-				printf("Generating text texture %u %u\n", w, h);
 
 				image img{w, h};
 				for(uint32_t y = m_margin; y != h - m_margin; ++y)
