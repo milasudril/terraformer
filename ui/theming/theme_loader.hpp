@@ -58,7 +58,8 @@ namespace terraformer::ui::theming
 					)
 				)
 				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
-				.insert<int>("widget_inner_margin", 2)
+				.insert<unsigned int>("widget_inner_margin", 4)
+				.insert<unsigned int>("3d_border_thickness", 2)
 				.insert<TextureType>(
 					"null_texture",
 					generate_transparent_texture<TextureType>()

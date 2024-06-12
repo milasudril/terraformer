@@ -22,13 +22,15 @@ namespace terraformer::ui::widgets
 				{
 					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
 					assert(background_intensity != nullptr);
+
+					// TODO: This should be a helper function
 					auto const val = *background_intensity;
+					auto const border_thickness = m_border_thickness;
 
 					auto const highlight = rgba_pixel{val, val, val, 1.0f};
 					auto const main_area = 0.5f*rgba_pixel{val, val, val, 2.0f};
 					auto const shadow = 0.25f*rgba_pixel{val, val, val, 4.0f};
 
-					// TODO: Write helper function
 					auto const& descriptor = m_background.descriptor();
 					auto const w = static_cast<uint32_t>(descriptor.width);
 					auto const h = static_cast<uint32_t>(descriptor.height);
@@ -39,7 +41,8 @@ namespace terraformer::ui::widgets
 						{
 							auto const border = (x < h - y) || (y < h/2 && x < w - y) ?
 								 highlight : shadow;
-							img(x, y) = (x>=2 && x <= w - 3) && (y >= 2 && y <= h - 3) ? main_area : border;
+							img(x, y) = (x>=border_thickness && x <= w - (border_thickness + 1))
+								&& (y >= border_thickness && y <= h - (border_thickness + 1)) ? main_area : border;
 						}
 					}
 					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
@@ -109,9 +112,12 @@ namespace terraformer::ui::widgets
 				m_current_stage = render_stage::update_texture;
 			}
 
-			auto const margin = (resources/"ui"/"widget_inner_margin").get_if<int const>();
+			auto const margin = (resources/"ui"/"widget_inner_margin").get_if<unsigned int const>();
+			auto const border_thickness = (resources/"ui"/"3d_border_thickness").get_if<unsigned int const>();
 			assert(margin != nullptr);
-			m_margin = *margin + 2;
+			assert(border_thickness != nullptr);
+			m_margin = *margin + *border_thickness;
+			m_border_thickness = *border_thickness;
 
 			return main::widget_size_constraints{
 				.width{
@@ -154,7 +160,8 @@ namespace terraformer::ui::widgets
 		mutable basic_image<uint8_t> m_rendered_text;
 		enum class render_stage: int{update_text, update_texture, completed};
 		mutable render_stage m_current_stage = render_stage::update_text;
-		mutable int m_margin = 0;
+		mutable unsigned int m_margin = 0;
+		mutable unsigned int m_border_thickness = 0;
 
 		drawing_api::gl_texture m_background;
 		drawing_api::gl_texture m_foreground;
