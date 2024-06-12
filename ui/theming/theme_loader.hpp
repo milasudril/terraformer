@@ -53,8 +53,8 @@ namespace terraformer::ui::theming
 					object_dict{}
 						.insert<rgba_pixel>("background_tint", default_color_scheme.command_area.background)
 						.insert<rgba_pixel>("text_color", default_color_scheme.command_area.text)
-						.insert_link("background_texture", white_texture)
 						.insert_link("font", body_text)
+						.insert<float>("background_intensity", 1.0f)
 					)
 				)
 				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))

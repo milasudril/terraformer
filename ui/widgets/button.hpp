@@ -19,25 +19,53 @@ namespace terraformer::ui::widgets
 		{
 			if(m_current_stage == render_stage::update_texture) [[unlikely]]
 			{
-				auto const& descriptor = m_foreground.descriptor();
-				auto const w = static_cast<uint32_t>(descriptor.width);
-				auto const h = static_cast<uint32_t>(descriptor.height);
-
-				image img{w, h};
-				for(uint32_t y = m_margin; y != h - m_margin; ++y)
 				{
-					for(uint32_t x = m_margin; x != w - m_margin; ++x)
+					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
+					assert(background_intensity != nullptr);
+					auto const val = *background_intensity;
+
+					auto const highlight = rgba_pixel{val, val, val, 1.0f};
+					auto const main_area = 0.5f*rgba_pixel{val, val, val, 2.0f};
+					auto const shadow = 0.25f*rgba_pixel{val, val, val, 4.0f};
+
+					// TODO: Write helper function
+					auto const& descriptor = m_background.descriptor();
+					auto const w = static_cast<uint32_t>(descriptor.width);
+					auto const h = static_cast<uint32_t>(descriptor.height);
+					image img{w, h};
+					for(uint32_t y = 0; y != h; ++y)
 					{
-						auto const mask_val = static_cast<float>(m_rendered_text(x - m_margin, y - m_margin))/255.0f;
-						img(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
+						for(uint32_t x = 0; x != w; ++x)
+						{
+							auto const border = (x < h - y) || (y < h/2 && x < w - y) ?
+								 highlight : shadow;
+							img(x, y) = (x>=2 && x <= w - 3) && (y >= 2 && y <= h - 3) ? main_area : border;
+						}
 					}
+					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 				}
-				m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+
+				{
+					// TODO: Write helper function
+					auto const& descriptor = m_foreground.descriptor();
+					auto const w = static_cast<uint32_t>(descriptor.width);
+					auto const h = static_cast<uint32_t>(descriptor.height);
+					image img{w, h};
+					for(uint32_t y = m_margin; y != h - m_margin; ++y)
+					{
+						for(uint32_t x = m_margin; x != w - m_margin; ++x)
+						{
+							auto const mask_val = static_cast<float>(m_rendered_text(x - m_margin, y - m_margin))/255.0f;
+							img(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
+						}
+					}
+					m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+				}
 				m_current_stage = render_stage::completed;
 			}
 
 			output_rect.foreground = &m_foreground;
-			output_rect.background = render_resources/"ui"/"command_area"/"background_texture";
+			output_rect.background = &m_background;
 			auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
 			auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
 			assert(bg_tint != nullptr);
@@ -47,9 +75,8 @@ namespace terraformer::ui::widgets
 			output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
 		}
 
-		void handle_event(wsapi::cursor_enter_leave_event const& cele)
+		void handle_event(wsapi::cursor_enter_leave_event const&)
 		{
-			m_cursor_above = cele.direction == wsapi::cursor_enter_leave::enter? true :false;
 		}
 
 		bool handle_event(wsapi::cursor_motion_event const&)
@@ -57,15 +84,8 @@ namespace terraformer::ui::widgets
 			return false;
 		}
 
-		bool handle_event(wsapi::mouse_button_event const& mbe)
+		bool handle_event(wsapi::mouse_button_event const&)
 		{
-			if((mbe.button == 0 || mbe.button == 1)
-				&& mbe.action == wsapi::button_action::release)
-			{
-				auto const dir = mbe.button == 0 ? -1 : 1;
-				m_current_color += dir;
-				m_current_stage = render_stage::update_texture;
-			}
 			return false;
 		}
 
@@ -91,7 +111,7 @@ namespace terraformer::ui::widgets
 
 			auto const margin = (resources/"ui"/"widget_inner_margin").get_if<int const>();
 			assert(margin != nullptr);
-			m_margin = *margin;
+			m_margin = *margin + 2;
 
 			return main::widget_size_constraints{
 				.width{
@@ -116,6 +136,7 @@ namespace terraformer::ui::widgets
 				.num_mipmaps = 1
 			};
 
+			m_background.set_format(descriptor);
 			m_foreground.set_format(descriptor);
 			m_current_stage = render_stage::update_texture;
 		}
@@ -135,9 +156,8 @@ namespace terraformer::ui::widgets
 		mutable render_stage m_current_stage = render_stage::update_text;
 		mutable int m_margin = 0;
 
+		drawing_api::gl_texture m_background;
 		drawing_api::gl_texture m_foreground;
-		size_t m_current_color = 0;
-		bool m_cursor_above = false;
 	};
 }
 
