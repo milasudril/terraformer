@@ -12,7 +12,7 @@ namespace terraformer::ui::widgets
 	class button
 	{
 	public:
-		enum class state{released, pushed};
+		enum class state{released, pressed};
 
 		void prepare_for_presentation(
 			drawing_api::single_quad_renderer::input_rectangle& output_rect,
@@ -55,7 +55,7 @@ namespace terraformer::ui::widgets
 							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
 					);
-					m_background_pushed.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+					m_background_pressed.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 				}
 
 				{
@@ -79,7 +79,7 @@ namespace terraformer::ui::widgets
 
 			output_rect.foreground = &m_foreground;
 			output_rect.background = (m_state == state::released)?
-				&m_background_released : &m_background_pushed;
+				&m_background_released : &m_background_pressed;
 			auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
 			auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
 			assert(bg_tint != nullptr);
@@ -105,8 +105,9 @@ namespace terraformer::ui::widgets
 				switch(mbe.action)
 				{
 					case wsapi::button_action::press:
-						m_state = state::pushed;
+						m_state = state::pressed;
 						break;
+
 					case wsapi::button_action::release:
 						m_state = state::released;
 						break;
@@ -167,7 +168,7 @@ namespace terraformer::ui::widgets
 			};
 
 			m_background_released.set_format(descriptor);
-			m_background_pushed.set_format(descriptor);
+			m_background_pressed.set_format(descriptor);
 			m_foreground.set_format(descriptor);
 			m_current_stage = render_stage::update_texture;
 		}
@@ -189,7 +190,7 @@ namespace terraformer::ui::widgets
 		mutable unsigned int m_border_thickness = 0;
 
 		drawing_api::gl_texture m_background_released;
-		drawing_api::gl_texture m_background_pushed;
+		drawing_api::gl_texture m_background_pressed;
 		drawing_api::gl_texture m_foreground;
 		state m_state = state::released;
 	};
