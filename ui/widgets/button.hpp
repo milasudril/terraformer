@@ -12,6 +12,8 @@ namespace terraformer::ui::widgets
 	class button
 	{
 	public:
+		enum class state{released, pushed};
+
 		void prepare_for_presentation(
 			drawing_api::single_quad_renderer::input_rectangle& output_rect,
 			main::widget_instance_info const&,
@@ -23,7 +25,7 @@ namespace terraformer::ui::widgets
 				{
 					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
 					assert(background_intensity != nullptr);
-					auto const& descriptor = m_background.descriptor();
+					auto const& descriptor = m_background_released.descriptor();
 					auto const val = *background_intensity;
 					auto const img = generate(
 						drawing_api::beveled_rectangle{
@@ -35,7 +37,25 @@ namespace terraformer::ui::widgets
 							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
 					);
-					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+					m_background_released.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+				}
+
+				{
+					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
+					assert(background_intensity != nullptr);
+					auto const& descriptor = m_background_released.descriptor();
+					auto const val = *background_intensity;
+					auto const img = generate(
+						drawing_api::beveled_rectangle{
+							.width = static_cast<uint32_t>(descriptor.width),
+							.height = static_cast<uint32_t>(descriptor.height),
+							.border_thickness = m_border_thickness,
+							.upper_left_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
+							.lower_right_color = rgba_pixel{val, val, val, 1.0f},
+							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
+						}
+					);
+					m_background_pushed.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 				}
 
 				{
@@ -58,7 +78,8 @@ namespace terraformer::ui::widgets
 			}
 
 			output_rect.foreground = &m_foreground;
-			output_rect.background = &m_background;
+			output_rect.background = (m_state == state::released)?
+				&m_background_released : &m_background_pushed;
 			auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
 			auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
 			assert(bg_tint != nullptr);
@@ -77,8 +98,21 @@ namespace terraformer::ui::widgets
 			return false;
 		}
 
-		bool handle_event(wsapi::mouse_button_event const&)
+		bool handle_event(wsapi::mouse_button_event const& mbe)
 		{
+			if(mbe.button == 0)
+			{
+				switch(mbe.action)
+				{
+					case wsapi::button_action::press:
+						m_state = state::pushed;
+						break;
+					case wsapi::button_action::release:
+						m_state = state::released;
+						break;
+				}
+			}
+
 			return false;
 		}
 
@@ -132,7 +166,8 @@ namespace terraformer::ui::widgets
 				.num_mipmaps = 1
 			};
 
-			m_background.set_format(descriptor);
+			m_background_released.set_format(descriptor);
+			m_background_pushed.set_format(descriptor);
 			m_foreground.set_format(descriptor);
 			m_current_stage = render_stage::update_texture;
 		}
@@ -153,8 +188,10 @@ namespace terraformer::ui::widgets
 		mutable unsigned int m_margin = 0;
 		mutable unsigned int m_border_thickness = 0;
 
-		drawing_api::gl_texture m_background;
+		drawing_api::gl_texture m_background_released;
+		drawing_api::gl_texture m_background_pushed;
 		drawing_api::gl_texture m_foreground;
+		state m_state = state::released;
 	};
 }
 
