@@ -89,8 +89,19 @@ namespace terraformer::ui::widgets
 			output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
 		}
 
-		void handle_event(wsapi::cursor_enter_leave_event const&)
+		void handle_event(wsapi::cursor_enter_leave_event const& cle)
 		{
+			switch(cle.direction)
+			{
+				case wsapi::cursor_enter_leave::leave:
+					m_saved_state = m_state;
+					m_state = state::released;
+					break;
+
+				case wsapi::cursor_enter_leave::enter:
+					m_state = m_saved_state;
+					break;
+			}
 		}
 
 		bool handle_event(wsapi::cursor_motion_event const&)
@@ -193,6 +204,7 @@ namespace terraformer::ui::widgets
 		drawing_api::gl_texture m_background_pressed;
 		drawing_api::gl_texture m_foreground;
 		state m_state = state::released;
+		state m_saved_state = state::released;
 	};
 }
 
