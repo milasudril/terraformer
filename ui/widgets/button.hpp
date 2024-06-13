@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 
 #include "ui/drawing_api/single_quad_renderer.hpp"
+#include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
@@ -22,29 +23,18 @@ namespace terraformer::ui::widgets
 				{
 					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
 					assert(background_intensity != nullptr);
-
-					// TODO: This should be a helper function
-					auto const val = *background_intensity;
-					auto const border_thickness = m_border_thickness;
-
-					auto const highlight = rgba_pixel{val, val, val, 1.0f};
-					auto const main_area = 0.5f*rgba_pixel{val, val, val, 2.0f};
-					auto const shadow = 0.25f*rgba_pixel{val, val, val, 4.0f};
-
 					auto const& descriptor = m_background.descriptor();
-					auto const w = static_cast<uint32_t>(descriptor.width);
-					auto const h = static_cast<uint32_t>(descriptor.height);
-					image img{w, h};
-					for(uint32_t y = 0; y != h; ++y)
-					{
-						for(uint32_t x = 0; x != w; ++x)
-						{
-							auto const border = (x < h - y) || (y < h/2 && x < w - y) ?
-								 highlight : shadow;
-							img(x, y) = (x>=border_thickness && x <= w - (border_thickness + 1))
-								&& (y >= border_thickness && y <= h - (border_thickness + 1)) ? main_area : border;
+					auto const val = *background_intensity;
+					auto const img = generate(
+						drawing_api::beveled_rectangle{
+							.width = static_cast<uint32_t>(descriptor.width),
+							.height = static_cast<uint32_t>(descriptor.height),
+							.border_thickness = m_border_thickness,
+							.upper_left_color = rgba_pixel{val, val, val, 1.0f},
+							.lower_right_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
+							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
-					}
+					);
 					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
 				}
 
