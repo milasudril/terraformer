@@ -95,7 +95,7 @@ namespace terraformer::ui::widgets
 			{
 				case wsapi::cursor_enter_leave::leave:
 					m_saved_state = m_state;
-					m_state = state::released;
+					m_state = m_value;
 					break;
 
 				case wsapi::cursor_enter_leave::enter:
@@ -120,7 +120,7 @@ namespace terraformer::ui::widgets
 						break;
 
 					case wsapi::button_action::release:
-						m_state = state::released;
+						m_state = m_value;
 						break;
 				}
 			}
@@ -192,6 +192,15 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
+		button& value(bool new_value)
+		{
+			m_value = new_value? state::pressed : state::released;
+			return *this;
+		}
+
+		bool value() const
+		{ return m_value == state::pressed; }
+
 	private:
 		std::basic_string<char8_t> m_text;
 		mutable basic_image<uint8_t> m_rendered_text;
@@ -203,6 +212,8 @@ namespace terraformer::ui::widgets
 		drawing_api::gl_texture m_background_released;
 		drawing_api::gl_texture m_background_pressed;
 		drawing_api::gl_texture m_foreground;
+
+		state m_value = state::released;
 		state m_state = state::released;
 		state m_saved_state = state::released;
 	};
