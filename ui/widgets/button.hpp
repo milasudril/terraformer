@@ -20,59 +20,56 @@ namespace terraformer::ui::widgets
 			object_dict const& render_resources
 		)
 		{
-			if(m_current_stage == render_stage::update_texture) [[unlikely]]
+			if(m_current_stage == render_stage::regenerate_textures) [[unlikely]]
 			{
 				{
 					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
 					assert(background_intensity != nullptr);
-					auto const& descriptor = m_background_released.descriptor();
 					auto const val = *background_intensity;
-					auto const img = generate(
+					m_background_released_host = generate(
 						drawing_api::beveled_rectangle{
-							.width = static_cast<uint32_t>(descriptor.width),
-							.height = static_cast<uint32_t>(descriptor.height),
+							.width = static_cast<uint32_t>(m_current_size.width),
+							.height = static_cast<uint32_t>(m_current_size.width),
 							.border_thickness = m_border_thickness,
 							.upper_left_color = rgba_pixel{val, val, val, 1.0f},
 							.lower_right_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
 							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
 					);
-					m_background_released.upload(std::as_const(img).pixels());
+					m_background_released.upload(std::as_const(m_background_released_host).pixels());
 				}
 
 				{
 					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
 					assert(background_intensity != nullptr);
-					auto const& descriptor = m_background_released.descriptor();
 					auto const val = *background_intensity;
-					auto const img = generate(
+					m_background_pressed_host = generate(
 						drawing_api::beveled_rectangle{
-							.width = static_cast<uint32_t>(descriptor.width),
-							.height = static_cast<uint32_t>(descriptor.height),
+							.width = static_cast<uint32_t>(m_current_size.width),
+							.height = static_cast<uint32_t>(m_current_size.height),
 							.border_thickness = m_border_thickness,
 							.upper_left_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
 							.lower_right_color = rgba_pixel{val, val, val, 1.0f},
 							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
 					);
-					m_background_pressed.upload(std::as_const(img).pixels());
+					m_background_pressed.upload(std::as_const(m_background_pressed_host).pixels());
 				}
 
 				{
 					// TODO: Write helper function
-					auto const& descriptor = m_foreground.descriptor();
-					auto const w = static_cast<uint32_t>(descriptor.width);
-					auto const h = static_cast<uint32_t>(descriptor.height);
-					image img{w, h};
+					auto const w = static_cast<uint32_t>(m_current_size.width);
+					auto const h = static_cast<uint32_t>(m_current_size.height);
+					m_foreground_host = image{w, h};
 					for(uint32_t y = m_margin; y != h - m_margin; ++y)
 					{
 						for(uint32_t x = m_margin; x != w - m_margin; ++x)
 						{
 							auto const mask_val = static_cast<float>(m_rendered_text(x - m_margin, y - m_margin))/255.0f;
-							img(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
+							m_foreground_host(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
 						}
 					}
-					m_foreground.upload(std::as_const(img).pixels());
+					m_foreground.upload(std::as_const(m_foreground_host).pixels());
 				}
 				m_current_stage = render_stage::completed;
 			}
@@ -145,7 +142,7 @@ namespace terraformer::ui::widgets
 					.run(*font);
 
 				m_rendered_text = render(result);
-				m_current_stage = render_stage::update_texture;
+				m_current_stage = render_stage::regenerate_textures;
 			}
 
 			auto const margin = (resources/"ui"/"widget_inner_margin").get_if<unsigned int const>();
@@ -169,20 +166,7 @@ namespace terraformer::ui::widgets
 		}
 
 		void handle_event(wsapi::fb_size size)
-		{
-			drawing_api::gl_texture_descriptor descriptor{
-				.width = size.width,
-				.height = size.height,
-				.format = drawing_api::to_gl_color_channel_layout_v<rgba_pixel>,
-				.type = drawing_api::to_gl_type_id_v<rgba_pixel>,
-				.num_mipmaps = 1
-			};
-
-			m_background_released.set_format(descriptor);
-			m_background_pressed.set_format(descriptor);
-			m_foreground.set_format(descriptor);
-			m_current_stage = render_stage::update_texture;
-		}
+		{ m_current_size = size; }
 
 		template<class StringType>
 		button& text(StringType&& text)
@@ -204,7 +188,7 @@ namespace terraformer::ui::widgets
 	private:
 		std::basic_string<char8_t> m_text;
 		mutable basic_image<uint8_t> m_rendered_text;
-		enum class render_stage: int{update_text, update_texture, completed};
+		enum class render_stage: int{update_text, regenerate_textures, completed};
 		mutable render_stage m_current_stage = render_stage::update_text;
 		mutable unsigned int m_margin = 0;
 		mutable unsigned int m_border_thickness = 0;
@@ -212,6 +196,11 @@ namespace terraformer::ui::widgets
 		drawing_api::gl_texture m_background_released;
 		drawing_api::gl_texture m_background_pressed;
 		drawing_api::gl_texture m_foreground;
+
+		wsapi::fb_size m_current_size;
+		image m_background_released_host;
+		image m_background_pressed_host;
+		image m_foreground_host;
 
 		state m_value = state::released;
 		state m_state = state::released;
