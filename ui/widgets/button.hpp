@@ -2,7 +2,6 @@
 #define TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 
 #include "./generic_texture.hpp"
-#include "ui/drawing_api/single_quad_renderer.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "lib/pixel_store/image.hpp"
@@ -15,8 +14,9 @@ namespace terraformer::ui::widgets
 	public:
 		enum class state{released, pressed};
 
+		template<class OutputRectangle>
 		void prepare_for_presentation(
-			drawing_api::single_quad_renderer::input_rectangle& output_rect,
+			OutputRectangle& output_rect,
 			main::widget_instance_info const&,
 			object_dict const& render_resources
 		)
