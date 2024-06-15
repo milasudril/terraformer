@@ -60,47 +60,48 @@ namespace terraformer
 		void (*destroy)(void*) = noop;
 	};
 
-	class shared_any
+	template<class LifetimeManager>
+	class any_smart_pointer
 	{
 	public:
-		using holder = shared_any_holder;
+		using holder = LifetimeManager;
 
-		shared_any() noexcept = default;
+		any_smart_pointer() noexcept = default;
 
 		template<class T, class ... Args>
-		requires(!std::is_same_v<std::remove_const_t<T>, shared_any>)
-		explicit shared_any(std::type_identity<T>, Args&&... args):
+		requires(!std::is_same_v<std::remove_const_t<T>, any_smart_pointer>)
+		explicit any_smart_pointer(std::type_identity<T>, Args&&... args):
 			m_holder{std::type_identity<T>{}, std::forward<Args>(args)...}
 		{}
 
-		~shared_any() noexcept
+		~any_smart_pointer() noexcept
 		{ reset(); }
 
-		shared_any(shared_any&& other) noexcept:
+		any_smart_pointer(any_smart_pointer&& other) noexcept:
 			m_holder{std::exchange(other.m_holder, holder{})}
 		{}
 
-		shared_any& operator=(shared_any&& other) noexcept
+		any_smart_pointer& operator=(any_smart_pointer&& other) noexcept
 		{
 			reset();
 			m_holder = std::exchange(other.m_holder, m_holder);
 			return *this;
 		}
 
-		shared_any(shared_any const& other):
+		any_smart_pointer(any_smart_pointer const& other):
 			m_holder{other.m_holder}
 		{ m_holder.inc_usecount(); }
 
-		shared_any& operator=(shared_any const& other)
+		any_smart_pointer& operator=(any_smart_pointer const& other)
 		{
-			shared_any tmp{other};
+			any_smart_pointer tmp{other};
 			*this = std::move(tmp);
 			return *this;
 		}
 
 		template<class T>
 		T* get_if() const noexcept
-		{ return m_holder.get_if<T>(); }
+		{ return m_holder.template get_if<T>(); }
 
 		auto get() const noexcept
 		{ return any_pointer{m_holder.pointer, m_holder.current_type}; }
@@ -114,7 +115,7 @@ namespace terraformer
 			m_holder = holder{};
 		}
 
-		std::strong_ordering operator<=>(shared_any const& other) const noexcept
+		std::strong_ordering operator<=>(any_smart_pointer const& other) const noexcept
 		{ return m_holder <=> other.m_holder; }
 
 		size_t use_count() const noexcept
@@ -129,5 +130,7 @@ namespace terraformer
 	private:
 		holder m_holder;
 	};
+
+	using shared_any = any_smart_pointer<shared_any_holder>;
 }
 #endif
