@@ -1,6 +1,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 #define TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 
+#include "./generic_texture.hpp"
 #include "ui/drawing_api/single_quad_renderer.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
@@ -29,14 +30,13 @@ namespace terraformer::ui::widgets
 					m_background_released_host = generate(
 						drawing_api::beveled_rectangle{
 							.width = static_cast<uint32_t>(m_current_size.width),
-							.height = static_cast<uint32_t>(m_current_size.width),
+							.height = static_cast<uint32_t>(m_current_size.height),
 							.border_thickness = m_border_thickness,
 							.upper_left_color = rgba_pixel{val, val, val, 1.0f},
 							.lower_right_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
 							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
 					);
-					m_background_released.upload(std::as_const(m_background_released_host).pixels());
 				}
 
 				{
@@ -53,7 +53,6 @@ namespace terraformer::ui::widgets
 							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
 					);
-					m_background_pressed.upload(std::as_const(m_background_pressed_host).pixels());
 				}
 
 				{
@@ -69,14 +68,24 @@ namespace terraformer::ui::widgets
 							m_foreground_host(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
 						}
 					}
-					m_foreground.upload(std::as_const(m_foreground_host).pixels());
 				}
+
 				m_current_stage = render_stage::completed;
 			}
 
-			output_rect.foreground = &m_foreground;
+			if(!m_background_released)
+			{
+				m_background_released = output_rect.create_texture();
+				m_background_released.upload(std::as_const(m_background_released_host).pixels());
+				m_background_pressed = output_rect.create_texture();
+				m_background_pressed.upload(std::as_const(m_background_pressed_host).pixels());
+				m_foreground = output_rect.create_texture();
+				m_foreground.upload(std::as_const(m_foreground_host).pixels());
+			}
+
+			output_rect.foreground = m_foreground.get_const();
 			output_rect.background = (m_state == state::released)?
-				&m_background_released : &m_background_pressed;
+				m_background_released.get() : m_background_pressed.get_const();
 			auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
 			auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
 			assert(bg_tint != nullptr);
@@ -193,9 +202,9 @@ namespace terraformer::ui::widgets
 		mutable unsigned int m_margin = 0;
 		mutable unsigned int m_border_thickness = 0;
 
-		drawing_api::gl_texture m_background_released;
-		drawing_api::gl_texture m_background_pressed;
-		drawing_api::gl_texture m_foreground;
+		generic_unique_texture m_background_released;
+		generic_unique_texture m_background_pressed;
+		generic_unique_texture m_foreground;
 
 		wsapi::fb_size m_current_size;
 		image m_background_released_host;

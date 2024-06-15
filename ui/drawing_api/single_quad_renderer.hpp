@@ -26,6 +26,9 @@ namespace terraformer::ui::drawing_api
 			std::array<rgba_pixel, 4> background_tints;
 			std::array<rgba_pixel, 4> foreground_tints;
 			struct fg_bg_separator fg_bg_separator;
+
+			static gl_texture create_texture()
+			{ return gl_texture{}; }
 		};
 
 		void set_world_transform(location where, wsapi::fb_size size)
@@ -51,10 +54,10 @@ namespace terraformer::ui::drawing_api
 				.bind();
 
 			assert(rect.background != nullptr);
-			rect.background -> bind(0);
+			rect.background->bind(0);
 
 			assert(rect.foreground != nullptr);
-			rect.foreground -> bind(1);
+			rect.foreground->bind(1);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles();

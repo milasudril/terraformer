@@ -7,15 +7,14 @@
 #include "lib/pixel_store/rgba_pixel.hpp"
 
 #include <bit>
+#include <cassert>
 
 namespace terraformer::ui::drawing_api
 {
 	struct gl_texture_deleter
 	{
 		void operator()(GLuint handle) const
-		{
-			glDeleteTextures(1, &handle);
-		}
+		{ glDeleteTextures(1, &handle); }
 	};
 
 	using gl_texture_handle = gl_resource<gl_texture_deleter>;
@@ -145,10 +144,13 @@ namespace terraformer::ui::drawing_api
 	class gl_texture
 	{
 	public:
-		explicit gl_texture():m_descriptor{0, 0, 0, 0, 0}{}
+		explicit gl_texture():m_descriptor{0, 0, 0, 0, 0}
+		{ }
 
 		explicit gl_texture(gl_texture_descriptor const& descriptor):gl_texture{}
-		{ set_format(descriptor); }
+		{
+			set_format(descriptor);
+		}
 
 		auto& upload(std::span<std::byte const> data, gl_texture_descriptor const& descriptor)
 		{
@@ -168,7 +170,7 @@ namespace terraformer::ui::drawing_api
 				static_cast<GLsizei>(pixels.height()),
 				to_gl_color_channel_layout<T>::value,
 				to_gl_type_id_v<T>,
-				static_cast<GLsizei>(std::bit_width(std::max(pixels.width(), pixels.height()) - 1))
+				std::max(static_cast<GLsizei>(std::bit_width(std::max(pixels.width(), pixels.height()) - 1)), 1)
 			};
 
 			std::span const pixel_array{std::data(pixels), pixels.width()*pixels.height()};
@@ -192,13 +194,17 @@ namespace terraformer::ui::drawing_api
 		{
 			GLuint handle;
 			glCreateTextures(GL_TEXTURE_2D, 1, &handle);
+			assert(descriptor.width != 0);
+			assert(descriptor.height != 0);
+			assert(descriptor.num_mipmaps != 0);
+
 			glTextureStorage2D(handle,
 				descriptor.num_mipmaps,
 				gl_make_sized_format(descriptor.format, descriptor.type),
 				descriptor.width,
 				descriptor.height);
 
-			glTextureParameteri(handle, GL_TEXTURE_MIN_FILTER, descriptor.num_mipmaps != 0 ?
+			glTextureParameteri(handle, GL_TEXTURE_MIN_FILTER, descriptor.num_mipmaps > 1 ?
 				GL_LINEAR_MIPMAP_LINEAR : GL_LINEAR);
 			glTextureParameteri(handle, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 			m_handle.reset(handle);
@@ -210,6 +216,9 @@ namespace terraformer::ui::drawing_api
 
 		auto const& descriptor() const
 		{ return m_descriptor; }
+
+		auto handle() const
+		{ return static_cast<uint32_t>(m_handle.get()); }
 
 	private:
 		void upload_impl(std::span<std::byte const> data)

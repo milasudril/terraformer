@@ -66,6 +66,8 @@ namespace terraformer
 
 	using any_pointer_to_const = any_pointer<true>;
 
+	using any_pointer_to_mutable = any_pointer<false>;
+
 	any_pointer(void*, std::type_index) -> any_pointer<false>;
 
 	any_pointer(void const*, std::type_index) -> any_pointer<true>;
