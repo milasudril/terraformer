@@ -29,7 +29,7 @@ namespace terraformer::ui::widgets
 					for(uint32_t x = 0; x != w; ++x)
 					{ img(x, y) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}; }
 				}
-				m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+				m_foreground.upload(std::as_const(img).pixels());
 
 				auto const tints = render_resources/"ui"/"misc_dark_colors";
 				auto const num_colors = std::size(tints);
@@ -42,7 +42,7 @@ namespace terraformer::ui::widgets
 						for(uint32_t x = 0; x != w; ++x)
 						{ img(x, y) = color; }
 					}
-					m_background.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+					m_background.upload(std::as_const(img).pixels());
 				}
 
 				m_dirty = false;

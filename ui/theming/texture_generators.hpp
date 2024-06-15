@@ -27,7 +27,7 @@ namespace terraformer::ui::theming
 			}
 		}
 
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 8));
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
 	}
 
 	template<class DrawingSurface>
@@ -111,7 +111,7 @@ namespace terraformer::ui::theming
 			}
 		}
 
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 8));
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
 	}
 
 	template<class DrawingSurface>
@@ -119,7 +119,7 @@ namespace terraformer::ui::theming
 	{
 		terraformer::image img{1, 1};
 		img(0, 0) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f};
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 0));
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
 	}
 
 	template<class DrawingSurface>
@@ -127,7 +127,7 @@ namespace terraformer::ui::theming
 	{
 		terraformer::image img{1, 1};
 		img(0, 0) = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 0));
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
 	}
 };
 

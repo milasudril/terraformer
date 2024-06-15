@@ -37,7 +37,7 @@ namespace terraformer::ui::widgets
 							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
 					);
-					m_background_released.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+					m_background_released.upload(std::as_const(img).pixels());
 				}
 
 				{
@@ -55,7 +55,7 @@ namespace terraformer::ui::widgets
 							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
 						}
 					);
-					m_background_pressed.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+					m_background_pressed.upload(std::as_const(img).pixels());
 				}
 
 				{
@@ -72,7 +72,7 @@ namespace terraformer::ui::widgets
 							img(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
 						}
 					}
-					m_foreground.upload(std::as_const(img).pixels(), descriptor.num_mipmaps);
+					m_foreground.upload(std::as_const(img).pixels());
 				}
 				m_current_stage = render_stage::completed;
 			}

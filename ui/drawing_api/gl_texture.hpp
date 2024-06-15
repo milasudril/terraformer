@@ -6,6 +6,8 @@
 #include "lib/common/span_2d.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 
+#include <bit>
+
 namespace terraformer::ui::drawing_api
 {
 	struct gl_texture_deleter
@@ -159,14 +161,14 @@ namespace terraformer::ui::drawing_api
 		}
 
 		template<class T>
-		auto& upload(span_2d<T const> pixels, GLsizei num_mipmaps)
+		auto& upload(span_2d<T const> pixels)
 		{
 			gl_texture_descriptor const descriptor{
 				static_cast<GLsizei>(pixels.width()),
 				static_cast<GLsizei>(pixels.height()),
 				to_gl_color_channel_layout<T>::value,
 				to_gl_type_id_v<T>,
-				num_mipmaps
+				static_cast<GLsizei>(std::bit_width(std::max(pixels.width(), pixels.height()) - 1))
 			};
 
 			std::span const pixel_array{std::data(pixels), pixels.width()*pixels.height()};
@@ -191,7 +193,7 @@ namespace terraformer::ui::drawing_api
 			GLuint handle;
 			glCreateTextures(GL_TEXTURE_2D, 1, &handle);
 			glTextureStorage2D(handle,
-				descriptor.num_mipmaps + 1,
+				descriptor.num_mipmaps,
 				gl_make_sized_format(descriptor.format, descriptor.type),
 				descriptor.width,
 				descriptor.height);
