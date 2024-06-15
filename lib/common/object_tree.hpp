@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_OBJECT_TREE_HPP
 #define TERRAFORMER_OBJECT_TREE_HPP
 
-#include "./shared_any.hpp"
+#include "lib/any/shared_any.hpp"
 #include "lib/array_classes/single_array.hpp"
 
 #include <string>
