@@ -71,7 +71,11 @@ namespace terraformer
 
 		void reset() noexcept
 		{
-			m_holder.dec_usecount();
+			if constexpr(controls_shared_resource<LifetimeManager>)
+			{ m_holder.dec_usecount(); }
+			else
+			{ m_holder.delete_resource(); }
+
 			m_holder = holder{};
 		}
 

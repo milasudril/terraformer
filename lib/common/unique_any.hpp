@@ -22,7 +22,7 @@ namespace terraformer
 		std::strong_ordering operator<=>(unique_any_holder const& other) const noexcept
 		{ return std::compare_three_way{}(pointer, other.pointer); }
 
-		void dec_usecount() noexcept
+		void delete_resource() noexcept
 		{ destroy(pointer); }
 
 		template<class T>
