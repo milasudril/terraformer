@@ -25,47 +25,7 @@ namespace terraformer::ui::widgets
 			OutputRectangle& output_rect,
 			main::widget_instance_info const&,
 			object_dict const& render_resources
-		)
-		{
-			if(m_current_stage == render_stage::regenerate_textures) [[unlikely]]
-			{ regenerate_textures(render_resources); }
-
-			bool upload_textures = (m_current_stage == render_stage::upload_textures);
-			output_rect.foreground = m_foreground.get_const();
-			if(!output_rect.foreground)
-			{
-				m_foreground = output_rect.create_texture();
-				output_rect.foreground = m_foreground.get_const();
-				upload_textures = true;
-			}
-
-			output_rect.background = (m_state == state::released)?
-				m_background_released.get() : m_background_pressed.get_const();
-			if(!output_rect.background)
-			{
-				m_background_released = output_rect.create_texture();
-				m_background_pressed = output_rect.create_texture();
-				output_rect.background = (m_state == state::released)?
-					m_background_released.get() : m_background_pressed.get_const();
-				upload_textures = true;
-			}
-
-			if(upload_textures)
-			{
-				m_background_released.upload(std::as_const(m_background_released_host).pixels());
-				m_background_pressed.upload(std::as_const(m_background_pressed_host).pixels());
-				m_foreground.upload(std::as_const(m_foreground_host).pixels());
-				m_current_stage = render_stage::completed;
-			}
-
-			auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
-			auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
-			assert(bg_tint != nullptr);
-			assert(fg_tint != nullptr);
-
-			output_rect.background_tints = std::array{*bg_tint, *bg_tint, *bg_tint, *bg_tint};
-			output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
-		}
+		);
 
 		void handle_event(wsapi::cursor_enter_leave_event const& cle)
 		{
@@ -147,6 +107,53 @@ namespace terraformer::ui::widgets
 		state m_state = state::released;
 		state m_saved_state = state::released;
 	};
+
+	template<class OutputRectangle>
+	void button::prepare_for_presentation(
+		OutputRectangle& output_rect,
+		main::widget_instance_info const&,
+		object_dict const& render_resources
+	)
+	{
+		if(m_current_stage == render_stage::regenerate_textures) [[unlikely]]
+		{ regenerate_textures(render_resources); }
+
+		bool upload_textures = (m_current_stage == render_stage::upload_textures);
+		output_rect.foreground = m_foreground.get_const();
+		if(!output_rect.foreground)
+		{
+			m_foreground = output_rect.create_texture();
+			output_rect.foreground = m_foreground.get_const();
+			upload_textures = true;
+		}
+
+		output_rect.background = (m_state == state::released)?
+			m_background_released.get() : m_background_pressed.get_const();
+		if(!output_rect.background)
+		{
+			m_background_released = output_rect.create_texture();
+			m_background_pressed = output_rect.create_texture();
+			output_rect.background = (m_state == state::released)?
+				m_background_released.get() : m_background_pressed.get_const();
+			upload_textures = true;
+		}
+
+		if(upload_textures)
+		{
+			m_background_released.upload(std::as_const(m_background_released_host).pixels());
+			m_background_pressed.upload(std::as_const(m_background_pressed_host).pixels());
+			m_foreground.upload(std::as_const(m_foreground_host).pixels());
+			m_current_stage = render_stage::completed;
+		}
+
+		auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
+		auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
+		assert(bg_tint != nullptr);
+		assert(fg_tint != nullptr);
+
+		output_rect.background_tints = std::array{*bg_tint, *bg_tint, *bg_tint, *bg_tint};
+		output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
+	}
 }
 
 #endif
