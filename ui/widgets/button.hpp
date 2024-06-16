@@ -69,20 +69,13 @@ namespace terraformer::ui::widgets
 				);
 			}
 
-			{
-				// TODO: Write helper function
-				auto const w = static_cast<uint32_t>(m_current_size.width);
-				auto const h = static_cast<uint32_t>(m_current_size.height);
-				m_foreground_host = image{w, h};
-				for(uint32_t y = m_margin; y != h - m_margin; ++y)
-				{
-					for(uint32_t x = m_margin; x != w - m_margin; ++x)
-					{
-						auto const mask_val = static_cast<float>(m_rendered_text(x - m_margin, y - m_margin))/255.0f;
-						m_foreground_host(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
-					}
-				}
-			}
+			m_foreground_host = drawing_api::convert_mask(
+				static_cast<uint32_t>(m_current_size.width),
+				static_cast<uint32_t>(m_current_size.height),
+				m_rendered_text,
+				m_margin
+			);
+
 			m_current_stage = render_stage::completed;
 		}
 
