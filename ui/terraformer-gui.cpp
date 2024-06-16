@@ -73,7 +73,10 @@ int main(int, char**)
 	terraformer::ui::widgets::testwidget foo;
 	terraformer::ui::widgets::button bar;
 	bar.text(u8"Click me!")
-		.value(false);
+		.value(false)
+		.on_activated([](terraformer::ui::widgets::button& obj){
+			obj.value(!obj.value());
+		});
 
 	terraformer::ui::widgets::vbox<
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle

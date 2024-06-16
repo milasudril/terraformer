@@ -8,6 +8,7 @@
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
 #include "lib/common/object_tree.hpp"
+#include "lib/common/move_only_function.hpp"
 
 namespace terraformer::ui::widgets
 {
@@ -26,6 +27,13 @@ namespace terraformer::ui::widgets
 			main::widget_instance_info const&,
 			object_dict const& render_resources
 		);
+
+		template<class Function>
+		button& on_activated(Function&& func)
+		{
+			m_on_activated = std::forward<Function>(func);
+			return *this;
+		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const& cle)
 		{
@@ -55,6 +63,7 @@ namespace terraformer::ui::widgets
 
 					case wsapi::button_action::release:
 						m_temp_state.reset();
+						m_on_activated(*this);
 						break;
 				}
 			}
@@ -85,6 +94,9 @@ namespace terraformer::ui::widgets
 		{ return m_value == state::pressed; }
 
 	private:
+		move_only_function<void(button&)> m_on_activated =
+			move_only_function<void(button&)>{no_operation_tag{}};
+
 		std::basic_string<char8_t> m_text;
 		mutable basic_image<uint8_t> m_rendered_text;
 		enum class render_stage: int{update_text, regenerate_textures, upload_textures, completed};
