@@ -14,6 +14,57 @@ namespace terraformer::ui::widgets
 	public:
 		enum class state{released, pressed};
 
+		void regenerate_textures(object_dict const& render_resources)
+		{
+			{
+				auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
+				assert(background_intensity != nullptr);
+				auto const val = *background_intensity;
+				m_background_released_host = generate(
+					drawing_api::beveled_rectangle{
+						.width = static_cast<uint32_t>(m_current_size.width),
+						.height = static_cast<uint32_t>(m_current_size.height),
+						.border_thickness = m_border_thickness,
+						.upper_left_color = rgba_pixel{val, val, val, 1.0f},
+						.lower_right_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
+						.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
+					}
+				);
+			}
+
+			{
+				auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
+				assert(background_intensity != nullptr);
+				auto const val = *background_intensity;
+				m_background_pressed_host = generate(
+					drawing_api::beveled_rectangle{
+						.width = static_cast<uint32_t>(m_current_size.width),
+						.height = static_cast<uint32_t>(m_current_size.height),
+						.border_thickness = m_border_thickness,
+						.upper_left_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
+						.lower_right_color = rgba_pixel{val, val, val, 1.0f},
+						.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
+					}
+				);
+			}
+
+			{
+				// TODO: Write helper function
+				auto const w = static_cast<uint32_t>(m_current_size.width);
+				auto const h = static_cast<uint32_t>(m_current_size.height);
+				m_foreground_host = image{w, h};
+				for(uint32_t y = m_margin; y != h - m_margin; ++y)
+				{
+					for(uint32_t x = m_margin; x != w - m_margin; ++x)
+					{
+						auto const mask_val = static_cast<float>(m_rendered_text(x - m_margin, y - m_margin))/255.0f;
+						m_foreground_host(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
+					}
+				}
+			}
+			m_current_stage = render_stage::completed;
+		}
+
 		template<class OutputRectangle>
 		void prepare_for_presentation(
 			OutputRectangle& output_rect,
@@ -22,56 +73,7 @@ namespace terraformer::ui::widgets
 		)
 		{
 			if(m_current_stage == render_stage::regenerate_textures) [[unlikely]]
-			{
-				{
-					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
-					assert(background_intensity != nullptr);
-					auto const val = *background_intensity;
-					m_background_released_host = generate(
-						drawing_api::beveled_rectangle{
-							.width = static_cast<uint32_t>(m_current_size.width),
-							.height = static_cast<uint32_t>(m_current_size.height),
-							.border_thickness = m_border_thickness,
-							.upper_left_color = rgba_pixel{val, val, val, 1.0f},
-							.lower_right_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
-							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
-						}
-					);
-				}
-
-				{
-					auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
-					assert(background_intensity != nullptr);
-					auto const val = *background_intensity;
-					m_background_pressed_host = generate(
-						drawing_api::beveled_rectangle{
-							.width = static_cast<uint32_t>(m_current_size.width),
-							.height = static_cast<uint32_t>(m_current_size.height),
-							.border_thickness = m_border_thickness,
-							.upper_left_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
-							.lower_right_color = rgba_pixel{val, val, val, 1.0f},
-							.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
-						}
-					);
-				}
-
-				{
-					// TODO: Write helper function
-					auto const w = static_cast<uint32_t>(m_current_size.width);
-					auto const h = static_cast<uint32_t>(m_current_size.height);
-					m_foreground_host = image{w, h};
-					for(uint32_t y = m_margin; y != h - m_margin; ++y)
-					{
-						for(uint32_t x = m_margin; x != w - m_margin; ++x)
-						{
-							auto const mask_val = static_cast<float>(m_rendered_text(x - m_margin, y - m_margin))/255.0f;
-							m_foreground_host(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
-						}
-					}
-				}
-
-				m_current_stage = render_stage::completed;
-			}
+			{ regenerate_textures(render_resources); }
 
 			if(!m_background_released)
 			{
@@ -111,9 +113,7 @@ namespace terraformer::ui::widgets
 		}
 
 		bool handle_event(wsapi::cursor_motion_event const&)
-		{
-			return false;
-		}
+		{ return false; }
 
 		bool handle_event(wsapi::mouse_button_event const& mbe)
 		{
