@@ -14,8 +14,29 @@ namespace terraformer::ui::widgets
 	public:
 		enum class state{released, pressed};
 
+		void regenerate_text_mask(object_dict const& render_resources) const
+		{
+			auto const font = (render_resources/"ui"/"command_area"/"font").get_if<font_handling::font const>();
+			assert(font != nullptr);
+
+			font_handling::text_shaper shaper{};
+
+			// TODO: Add support for different scripts, direction, and languages
+			auto result = shaper.append(m_text)
+				.with(hb_script_t::HB_SCRIPT_LATIN)
+				.with(hb_direction_t::HB_DIRECTION_LTR)
+				.with(hb_language_from_string("en-UE", -1))
+				.run(*font);
+
+			m_rendered_text = render(result);
+			m_current_stage = render_stage::regenerate_textures;
+		}
+
 		void regenerate_textures(object_dict const& render_resources)
 		{
+			if(m_current_stage == render_stage::update_text) [[unlikely]]
+			{ regenerate_text_mask(render_resources); }
+
 			{
 				auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
 				assert(background_intensity != nullptr);
@@ -134,28 +155,13 @@ namespace terraformer::ui::widgets
 			return false;
 		}
 
-		main::widget_size_constraints get_size_constraints(object_dict const& resources) const
+		main::widget_size_constraints get_size_constraints(object_dict const& render_resources) const
 		{
 			if(m_current_stage == render_stage::update_text) [[unlikely]]
-			{
-				auto const font = (resources/"ui"/"command_area"/"font").get_if<font_handling::font const>();
-				assert(font != nullptr);
+			{ regenerate_text_mask(render_resources); }
 
-				font_handling::text_shaper shaper{};
-
-				// TODO: Add support for different scripts, direction, and languages
-				auto result = shaper.append(m_text)
-					.with(hb_script_t::HB_SCRIPT_LATIN)
-					.with(hb_direction_t::HB_DIRECTION_LTR)
-					.with(hb_language_from_string("en-UE", -1))
-					.run(*font);
-
-				m_rendered_text = render(result);
-				m_current_stage = render_stage::regenerate_textures;
-			}
-
-			auto const margin = (resources/"ui"/"widget_inner_margin").get_if<unsigned int const>();
-			auto const border_thickness = (resources/"ui"/"3d_border_thickness").get_if<unsigned int const>();
+			auto const margin = (render_resources/"ui"/"widget_inner_margin").get_if<unsigned int const>();
+			auto const border_thickness = (render_resources/"ui"/"3d_border_thickness").get_if<unsigned int const>();
 			assert(margin != nullptr);
 			assert(border_thickness != nullptr);
 			m_margin = *margin + *border_thickness;
