@@ -71,11 +71,11 @@ int main(int, char**)
 	glDebugMessageCallback( MessageCallback, 0 );
 
 	terraformer::ui::widgets::testwidget foo;
-	terraformer::ui::widgets::button bar;
+	terraformer::ui::widgets::toggle_button bar;
 	bar.text(u8"Click me!")
 		.value(false)
-		.on_activated([](terraformer::ui::widgets::button& obj){
-			obj.value(!obj.value());
+		.on_value_changed([](terraformer::ui::widgets::button const& obj){
+			printf("Value is now %s\n", obj.value()? "true" : "false");
 		});
 
 	terraformer::ui::widgets::vbox<

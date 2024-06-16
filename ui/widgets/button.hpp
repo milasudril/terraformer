@@ -17,6 +17,30 @@ namespace terraformer::ui::widgets
 	public:
 		enum class state{released, pressed};
 
+		template<class Function>
+		button& on_activated(Function&& func)
+		{
+			m_on_activated = std::forward<Function>(func);
+			return *this;
+		}
+
+		template<class StringType>
+		button& text(StringType&& text)
+		{
+			m_text = std::forward<StringType>(text);
+			m_current_stage = render_stage::update_text;
+			return *this;
+		}
+
+		button& value(bool new_value)
+		{
+			m_value = new_value? state::pressed : state::released;
+			return *this;
+		}
+
+		bool value() const
+		{ return m_value == state::pressed; }
+
 		void regenerate_text_mask(object_dict const& render_resources) const;
 
 		void regenerate_textures(object_dict const& render_resources);
@@ -27,13 +51,6 @@ namespace terraformer::ui::widgets
 			main::widget_instance_info const&,
 			object_dict const& render_resources
 		);
-
-		template<class Function>
-		button& on_activated(Function&& func)
-		{
-			m_on_activated = std::forward<Function>(func);
-			return *this;
-		}
 
 		void handle_event(wsapi::cursor_enter_leave_event const& cle)
 		{
@@ -75,23 +92,6 @@ namespace terraformer::ui::widgets
 
 		void handle_event(wsapi::fb_size size)
 		{ m_current_size = size; }
-
-		template<class StringType>
-		button& text(StringType&& text)
-		{
-			m_text = std::forward<StringType>(text);
-			m_current_stage = render_stage::update_text;
-			return *this;
-		}
-
-		button& value(bool new_value)
-		{
-			m_value = new_value? state::pressed : state::released;
-			return *this;
-		}
-
-		bool value() const
-		{ return m_value == state::pressed; }
 
 	private:
 		move_only_function<void(button&)> m_on_activated =
@@ -165,6 +165,48 @@ namespace terraformer::ui::widgets
 		output_rect.background_tints = std::array{*bg_tint, *bg_tint, *bg_tint, *bg_tint};
 		output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
 	}
+
+	class toggle_button:private button
+	{
+	public:
+		toggle_button()
+		{
+			button::on_activated(on_activated_callback);
+		}
+
+		using button::handle_event;
+		using button::prepare_for_presentation;
+		using button::get_size_constraints;
+		using button::text;
+		using button::value;
+
+		template<class Function>
+		toggle_button& on_value_changed(Function&& func)
+		{
+			button::on_activated([cb = std::forward<Function>(func)](button& src){
+				on_activated_callback(src);
+				cb(src);
+			});
+			return *this;
+		}
+
+		template<class StringType>
+		toggle_button& text(StringType&& text)
+		{
+			button::text(std::forward<StringType>(text));
+			return *this;
+		}
+
+		toggle_button& value(bool new_value)
+		{
+			button::value(new_value);
+			return *this;
+		}
+
+	private:
+		static void on_activated_callback(button& source)
+		{ source.value(!source.value()); }
+	};
 }
 
 #endif

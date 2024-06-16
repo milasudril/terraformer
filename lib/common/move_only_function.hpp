@@ -12,6 +12,8 @@ namespace terraformer
 	class move_only_function<R(Args...)>
 	{
 	public:
+		using stateless_callback = R (*)(Args...);
+
 		move_only_function() = default;
 
 		move_only_function(no_operation_tag)
@@ -54,8 +56,20 @@ namespace terraformer
 		~move_only_function()
 		{ m_dtor(m_handle); }
 
+		move_only_function(stateless_callback cb):
+			m_handle{reinterpret_cast<void*>(cb)},
+			m_function{[](void* handle, Args... args){
+				auto cb = reinterpret_cast<stateless_callback>(handle);
+				return cb(std::forward<Args>(args)...);
+			}},
+			m_dtor{empty_dtor}
+		{}
+
 		template<class Func>
-		requires(!std::is_same_v<std::remove_cvref_t<Func>, move_only_function>)
+		requires(
+			!std::is_same_v<std::remove_cvref_t<Func>, move_only_function>
+			&& !std::is_same_v<std::decay_t<Func>, stateless_callback>
+		)
 		move_only_function(Func&& f):
 			m_handle{new Func(std::forward<Func>(f))},
 			m_function{[](void* handle, Args... args){
