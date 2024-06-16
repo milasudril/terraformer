@@ -32,12 +32,10 @@ namespace terraformer::ui::widgets
 			switch(cle.direction)
 			{
 				case wsapi::cursor_enter_leave::leave:
-					m_saved_state = m_state;
-					m_state = m_value;
+					m_temp_state = std::nullopt;
 					break;
 
 				case wsapi::cursor_enter_leave::enter:
-					m_state = m_saved_state;
 					break;
 			}
 		}
@@ -52,11 +50,11 @@ namespace terraformer::ui::widgets
 				switch(mbe.action)
 				{
 					case wsapi::button_action::press:
-						m_state = state::pressed;
+						m_temp_state = state::pressed;
 						break;
 
 					case wsapi::button_action::release:
-						m_state = m_value;
+						m_temp_state.reset();
 						break;
 				}
 			}
@@ -104,8 +102,7 @@ namespace terraformer::ui::widgets
 		image m_foreground_host;
 
 		state m_value = state::released;
-		state m_state = state::released;
-		state m_saved_state = state::released;
+		std::optional<state> m_temp_state;
 	};
 
 	template<class OutputRectangle>
@@ -115,6 +112,8 @@ namespace terraformer::ui::widgets
 		object_dict const& render_resources
 	)
 	{
+		auto const display_state = m_temp_state.value_or(m_value);
+
 		if(m_current_stage == render_stage::regenerate_textures) [[unlikely]]
 		{ regenerate_textures(render_resources); }
 
@@ -127,13 +126,13 @@ namespace terraformer::ui::widgets
 			upload_textures = true;
 		}
 
-		output_rect.background = (m_state == state::released)?
+		output_rect.background = (display_state == state::released)?
 			m_background_released.get() : m_background_pressed.get_const();
 		if(!output_rect.background)
 		{
 			m_background_released = output_rect.create_texture();
 			m_background_pressed = output_rect.create_texture();
-			output_rect.background = (m_state == state::released)?
+			output_rect.background = (display_state == state::released)?
 				m_background_released.get() : m_background_pressed.get_const();
 			upload_textures = true;
 		}

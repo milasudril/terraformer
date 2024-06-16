@@ -72,7 +72,8 @@ int main(int, char**)
 
 	terraformer::ui::widgets::testwidget foo;
 	terraformer::ui::widgets::button bar;
-	bar.text(u8"Jackdaws loves my big sphinx of schwartz");
+	bar.text(u8"Click me!")
+		.value(false);
 
 	terraformer::ui::widgets::vbox<
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
