@@ -1,6 +1,9 @@
 #ifndef TERRAFORMER_MOVE_ONLY_FUNCTION_HPP
 #define TERRAFORMER_MOVE_ONLY_FUNCTION_HPP
 
+#include <type_traits>
+#include <utility>
+
 namespace terraformer
 {
 	template<class...>
@@ -84,6 +87,9 @@ namespace terraformer
 
 		R operator()(Args... args)
 		{ return m_function(m_handle, std::forward<Args>(args)...); }
+
+		operator bool() const
+		{ return m_function == nullptr; }
 
 	private:
 		static void empty_dtor(void*){}
