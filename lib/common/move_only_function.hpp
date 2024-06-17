@@ -89,13 +89,12 @@ namespace terraformer
 		{ return m_function(m_handle, std::forward<Args>(args)...); }
 
 		operator bool() const
-		{ return m_function == nullptr; }
+		{ return m_function != nullptr; }
 
 	private:
 		static void empty_dtor(void*){}
-
 		void* m_handle = nullptr;
-		R (*m_function)(void*, Args&&... args) = nullptr;
+		R (*m_function)(void*, Args... args) = nullptr;
 		void (*m_dtor)(void*) = empty_dtor;
 	};
 
