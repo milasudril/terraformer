@@ -11,6 +11,14 @@ namespace terraformer
 
 	struct no_operation_tag{};
 
+	template<auto Callable>
+	struct bound_callable
+	{
+		template<class... Args>
+		static constexpr decltype(auto) call(Args&&... args)
+		{ return Callable(std::forward<Args>(args)...); }
+	};
+
 	template<class R, class... Args>
 	class move_only_function<R(Args...)>
 	{
@@ -67,6 +75,16 @@ namespace terraformer
 			}},
 			m_dtor{empty_dtor}
 		{}
+
+		template<stateless_callback Callable>
+		move_only_function(bound_callable<Callable>):
+			m_handle{nullptr},
+			m_function{[](void*, Args... args){
+				return bound_callable<Callable>::call(std::forward<Args>(args)...);
+			}},
+			m_dtor{empty_dtor}
+		{
+		}
 
 		template<class Func>
 		requires(

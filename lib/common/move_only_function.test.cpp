@@ -33,6 +33,15 @@ TESTCASE(terraformer_move_only_function_stateless_callback)
 	EXPECT_EQ(val, 6);
 }
 
+TESTCASE(terraformer_move_onlly_function_stateless_callback_compiletime_binding)
+{
+	terraformer::move_only_function<int(int)> obj{terraformer::bound_callable<do_stuff>{}};
+
+	REQUIRE_EQ(obj, true);
+	auto const val = obj(3);
+	EXPECT_EQ(val, 6);
+}
+
 TESTCASE(terraformer_move_only_function_stateful_callback)
 {
 	int callcount = 0;
