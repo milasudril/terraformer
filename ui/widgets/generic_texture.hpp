@@ -45,7 +45,7 @@ namespace terraformer::ui::widgets
 		void reset() noexcept
 		{
 			m_pointer.reset();
-			m_upload = noop;
+			m_upload = nullptr;
 		}
 
 		size_t use_count() const noexcept
@@ -63,9 +63,7 @@ namespace terraformer::ui::widgets
 
 	private:
 		any_smart_pointer<LifetimeManager> m_pointer;
-
-		static void noop(any_pointer_to_mutable, span_2d<rgba_pixel const>){};
-		void (*m_upload)(any_pointer_to_mutable, span_2d<rgba_pixel const>) = noop;
+		void (*m_upload)(any_pointer_to_mutable, span_2d<rgba_pixel const>) = nullptr;
 	};
 
 	using generic_unique_texture = generic_texture<unique_any_holder>;
