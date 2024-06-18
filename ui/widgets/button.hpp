@@ -171,7 +171,7 @@ namespace terraformer::ui::widgets
 	public:
 		toggle_button()
 		{
-			button::on_activated(on_activated_callback);
+			button::on_activated(bound_callable<on_activated_callback>{});
 		}
 
 		using button::handle_event;
