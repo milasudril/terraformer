@@ -1,8 +1,59 @@
 //@	{"target":{"name": "button.test"}}
 
 #include "./button.hpp"
+#include "ui/font_handling/font_mapper.hpp"
 
 #include <testfwk/testfwk.hpp>
+
+namespace
+{
+	template<int N>
+	struct dummy_texture
+	{
+		void upload(terraformer::span_2d<terraformer::rgba_pixel const>){}
+	};
+	
+	template<class TextureType>
+	struct output_rect
+	{
+		TextureType const* foreground;
+		TextureType const* background;
+		std::array<terraformer::rgba_pixel, 4> foreground_tints;
+		std::array<terraformer::rgba_pixel, 4> background_tints;
+		
+		static auto create_texture()
+		{ return TextureType{}; }
+	};
+	
+	auto create_render_resources()
+	{
+		terraformer::ui::font_handling::font_mapper fonts;
+ 		auto const fontfile = fonts.get_path("sans-serif");
+
+		terraformer::shared_any body_text{
+			std::type_identity<terraformer::ui::font_handling::font>{},
+			std::move(terraformer::ui::font_handling::font{fontfile.c_str()}.set_font_size(11))
+		};
+
+		terraformer::object_dict resources;
+		resources.insert<terraformer::object_dict>(
+			"ui", std::move(
+				terraformer::object_dict{}
+				.insert<terraformer::object_dict>("command_area", std::move(
+					terraformer::object_dict{}
+						.insert<terraformer::rgba_pixel>("background_tint", 0.125f, 0.125f, 0.125f, 1.0f)
+						.insert<terraformer::rgba_pixel>("text_color", 1.0f, 0.0f, 0.0f, 1.0f)
+						.insert_link("font", body_text)
+						.insert<float>("background_intensity", 1.0f)
+					)
+				)
+				.insert<unsigned int>("widget_inner_margin", 4)
+				.insert<unsigned int>("3d_border_thickness", 2)
+			)
+		);
+		return resources;
+	}
+};
 
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_false)
 {
@@ -21,6 +72,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
+	auto const resources = create_render_resources();
+	output_rect<dummy_texture<0>> rect{};
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	// TODO: Verify that button is rendered using "released" as background
 
 	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
