@@ -28,7 +28,7 @@ namespace terraformer::ui::widgets
 		button& text(StringType&& text)
 		{
 			m_text = std::forward<StringType>(text);
-			m_current_stage = render_stage::update_text;
+			m_dirty_bits |= text_dirty;
 			return *this;
 		}
 
@@ -99,8 +99,10 @@ namespace terraformer::ui::widgets
 
 		std::basic_string<char8_t> m_text;
 		mutable basic_image<uint8_t> m_rendered_text;
-		enum class render_stage: int{update_text, regenerate_textures, upload_textures, completed};
-		mutable render_stage m_current_stage = render_stage::update_text;
+		static constexpr auto text_dirty = 0x1;
+		static constexpr auto host_textures_dirty = 0x2;
+		static constexpr auto gpu_textures_dirty = 0x4;
+		mutable unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
 		mutable unsigned int m_margin = 0;
 		mutable unsigned int m_border_thickness = 0;
 
@@ -126,16 +128,15 @@ namespace terraformer::ui::widgets
 	{
 		auto const display_state = m_temp_state.value_or(m_value);
 
-		if(m_current_stage == render_stage::regenerate_textures) [[unlikely]]
+		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 		{ regenerate_textures(render_resources); }
 
-		bool upload_textures = (m_current_stage == render_stage::upload_textures);
 		output_rect.foreground = m_foreground.get_const();
 		if(!output_rect.foreground)
 		{
 			m_foreground = output_rect.create_texture();
 			output_rect.foreground = m_foreground.get_const();
-			upload_textures = true;
+			m_dirty_bits |= gpu_textures_dirty;
 		}
 
 		output_rect.background = (display_state == state::released)?
@@ -146,15 +147,15 @@ namespace terraformer::ui::widgets
 			m_background_pressed = output_rect.create_texture();
 			output_rect.background = (display_state == state::released)?
 				m_background_released.get() : m_background_pressed.get_const();
-			upload_textures = true;
+			m_dirty_bits |= gpu_textures_dirty;
 		}
 
-		if(upload_textures)
+		if(m_dirty_bits & gpu_textures_dirty)
 		{
 			m_background_released.upload(std::as_const(m_background_released_host).pixels());
 			m_background_pressed.upload(std::as_const(m_background_pressed_host).pixels());
 			m_foreground.upload(std::as_const(m_foreground_host).pixels());
-			m_current_stage = render_stage::completed;
+			m_dirty_bits &= ~gpu_textures_dirty;
 		}
 
 		auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();

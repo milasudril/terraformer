@@ -17,12 +17,13 @@ void terraformer::ui::widgets::button::regenerate_text_mask(object_dict const& r
 		.run(*font);
 
 	m_rendered_text = render(result);
-	m_current_stage = render_stage::regenerate_textures;
+	m_dirty_bits &= ~text_dirty;
+	m_dirty_bits |= host_textures_dirty;
 }
 
 void terraformer::ui::widgets::button::regenerate_textures(object_dict const& render_resources)
 {
-	if(m_current_stage == render_stage::update_text) [[unlikely]]
+	if(m_dirty_bits & text_dirty) [[unlikely]]
 	{ regenerate_text_mask(render_resources); }
 
 	{
@@ -64,14 +65,14 @@ void terraformer::ui::widgets::button::regenerate_textures(object_dict const& re
 		m_margin
 	);
 
-	m_current_stage = render_stage::upload_textures;
+	m_dirty_bits &= ~host_textures_dirty;
 }
 
 terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button::get_size_constraints(
 	object_dict const& render_resources
 ) const
 {
-	if(m_current_stage == render_stage::update_text) [[unlikely]]
+	if(m_dirty_bits & text_dirty) [[unlikely]]
 	{ regenerate_text_mask(render_resources); }
 
 	auto const margin = (render_resources/"ui"/"widget_inner_margin").get_if<unsigned int const>();
