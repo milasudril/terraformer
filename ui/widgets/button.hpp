@@ -91,7 +91,10 @@ namespace terraformer::ui::widgets
 		main::widget_size_constraints get_size_constraints(object_dict const& render_resources) const;
 
 		void handle_event(wsapi::fb_size size)
-		{ m_current_size = size; }
+		{
+			m_current_size = size; 
+			m_dirty_bits |= host_textures_dirty;
+		}
 
 	private:
 		move_only_function<void(button&)> m_on_activated =
