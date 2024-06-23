@@ -190,8 +190,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 
 	my_button.handle_event(terraformer::ui::wsapi::fb_size{
 		.width = 20,
-		.height = 10
+		.height = 14
 	});
+	my_button.theme_updated(create_render_resources());
 
 	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
@@ -200,7 +201,14 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 		.modifiers = {}
 	});
 	EXPECT_EQ(my_button.value(), false);
-	// TODO: Verify that button is rendered using "released" as background
+	auto const resources = create_render_resources();
+	output_rect<dummy_texture<0>> rect{};
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
+	EXPECT_EQ(my_button.value(), false);
+	EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::released
+	);
 }
 
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
