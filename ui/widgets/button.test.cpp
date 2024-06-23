@@ -246,8 +246,8 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 		.modifiers = {}
 	});
 
-	EXPECT_EQ(callcount, 0);
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
+	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
 		inspect_button_state(rect.background->img.pixels()),
@@ -263,14 +263,16 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	my_button.on_activated([&callcount, &my_button](auto& button){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
-	});
+	})
+	.theme_updated(create_render_resources());
 	my_button.handle_event(terraformer::ui::wsapi::fb_size{
 		.width = 20,
-		.height = 10
+		.height = 14
 	});
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "released" as background
+	auto const resources = create_render_resources();
+	output_rect<dummy_texture<0>> rect{};
 
 	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
@@ -278,25 +280,37 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		.action = terraformer::ui::wsapi::button_action::press,
 		.modifiers = {}
 	});
-	EXPECT_EQ(my_button.value(), false);
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "pressed" as background
+	EXPECT_EQ(my_button.value(), false);
+	EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::pressed
+	);
 
 	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
 		.direction = terraformer::ui::wsapi::cursor_enter_leave::leave
 	});
-	EXPECT_EQ(my_button.value(), false);
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "released" as background
+	EXPECT_EQ(my_button.value(), false);
+	EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::released
+	);
 
 	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
 		.direction = terraformer::ui::wsapi::cursor_enter_leave::enter
 	});
-	EXPECT_EQ(my_button.value(), false);
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "released" as background
+	EXPECT_EQ(my_button.value(), false);
+	EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::released
+	);
 }
 
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter_value_true)
