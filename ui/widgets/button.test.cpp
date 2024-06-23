@@ -323,14 +323,22 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		EXPECT_EQ(&button, &my_button);
 	})
 	.value(true)
-	.handle_event(terraformer::ui::wsapi::fb_size{
+	.theme_updated(create_render_resources());
+	
+	my_button.handle_event(terraformer::ui::wsapi::fb_size{
 		.width = 20,
-		.height = 10
+		.height = 14
 	});
 
+	auto const resources = create_render_resources();
+	output_rect<dummy_texture<0>> rect{};
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "pressed" as background
+		EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::pressed
+	);
 
 	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
@@ -338,25 +346,38 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		.action = terraformer::ui::wsapi::button_action::press,
 		.modifiers = {}
 	});
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "pressed" as background
+	EXPECT_EQ(callcount, 0);
+		EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::pressed
+	);
 
 	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
 		.direction = terraformer::ui::wsapi::cursor_enter_leave::leave
 	});
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "pressed" as background
+	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
+		.where = terraformer::ui::wsapi::cursor_position{},
+		.direction = terraformer::ui::wsapi::cursor_enter_leave::leave
+	});
 
 	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
 		.direction = terraformer::ui::wsapi::cursor_enter_leave::enter
 	});
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "pressed" as background
+	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
+		.where = terraformer::ui::wsapi::cursor_position{},
+		.direction = terraformer::ui::wsapi::cursor_enter_leave::leave
+	});
 }
 
 TESTCASE(terraformer_ui_widgets_button_handle_cme)
