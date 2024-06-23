@@ -58,6 +58,16 @@ namespace
 		);
 		return resources;
 	}
+	
+	auto inspect_button_state(terraformer::span_2d<terraformer::rgba_pixel const> img)
+	{
+		auto const w = img.width();
+		auto const h = img.height();
+		if(img(0, 0).red() > img(w - 1, h - 1).red())
+		{ return terraformer::ui::widgets::button::state::released; }
+		else
+		{ return terraformer::ui::widgets::button::state::pressed; }
+	}
 };
 
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_false)
@@ -76,14 +86,15 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 		.height = 14
 	});
 
-	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	auto const resources = create_render_resources();
 	output_rect<dummy_texture<0>> rect{};
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
-	REQUIRE_EQ(rect.background->img.width(), 20);
-	REQUIRE_EQ(rect.background->img.height(), 14);
-	EXPECT_GT(rect.background->img(0, 0).red(), rect.background->img(19, 13).red());
+	EXPECT_EQ(callcount, 0);
+	EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::released
+	);
 
 	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
@@ -92,8 +103,12 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 		.modifiers = {}
 	});
 	EXPECT_EQ(my_button.value(), false);
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 0);
-	// TODO: Verify that button is rendered using "pressed" as background
+	EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::pressed
+	);
 
 	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
@@ -102,8 +117,12 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 		.modifiers = {}
 	});
 	EXPECT_EQ(my_button.value(), false);
+	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 1);
-	// TODO: Verify that button is rendered using "released" as background
+	EXPECT_EQ(
+		inspect_button_state(rect.background->img.pixels()),
+		terraformer::ui::widgets::button::state::released
+	);
 }
 
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_true)

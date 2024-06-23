@@ -104,6 +104,7 @@ namespace terraformer::ui::widgets
 			assert(border_thickness != nullptr);
 			m_margin = *margin + *border_thickness;
 			m_border_thickness = *border_thickness;
+			m_dirty_bits |= host_textures_dirty;
 		}
 
 	private:
