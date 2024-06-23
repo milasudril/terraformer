@@ -3,6 +3,7 @@
 #include "./button.hpp"
 #include "ui/font_handling/font_mapper.hpp"
 
+#include "lib/pixel_store/image_io.hpp"
 #include <testfwk/testfwk.hpp>
 
 namespace
@@ -10,7 +11,11 @@ namespace
 	template<int N>
 	struct dummy_texture
 	{
-		void upload(terraformer::span_2d<terraformer::rgba_pixel const>){}
+		terraformer::image img;
+		void upload(terraformer::span_2d<terraformer::rgba_pixel const> pixels)
+		{
+			img = terraformer::image{pixels};
+		}
 	};
 	
 	template<class TextureType>
@@ -63,11 +68,12 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 	my_button.on_activated([&callcount, &my_button](auto& button){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
-	});
+	}).
+	theme_updated(create_render_resources());
 
 	my_button.handle_event(terraformer::ui::wsapi::fb_size{
 		.width = 20,
-		.height = 10
+		.height = 14
 	});
 
 	EXPECT_EQ(callcount, 0);
@@ -75,7 +81,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 	auto const resources = create_render_resources();
 	output_rect<dummy_texture<0>> rect{};
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
-	// TODO: Verify that button is rendered using "released" as background
+	REQUIRE_EQ(rect.background->img.width(), 20);
+	REQUIRE_EQ(rect.background->img.height(), 14);
+	EXPECT_GT(rect.background->img(0, 0).red(), rect.background->img(19, 13).red());
 
 	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
 		.where = terraformer::ui::wsapi::cursor_position{},

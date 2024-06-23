@@ -95,6 +95,16 @@ namespace terraformer::ui::widgets
 			m_current_size = size; 
 			m_dirty_bits |= host_textures_dirty;
 		}
+		
+		void theme_updated(object_dict const& render_resources)
+		{
+			auto const margin = (render_resources/"ui"/"widget_inner_margin").get_if<unsigned int const>();
+			auto const border_thickness = (render_resources/"ui"/"3d_border_thickness").get_if<unsigned int const>();
+			assert(margin != nullptr);
+			assert(border_thickness != nullptr);
+			m_margin = *margin + *border_thickness;
+			m_border_thickness = *border_thickness;
+		}
 
 	private:
 		move_only_function<void(button&)> m_on_activated =

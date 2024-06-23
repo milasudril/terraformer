@@ -20,7 +20,7 @@ namespace terraformer
 
 		using IndexType = typename span_2d<PixelType>::IndexType;
 
-		explicit basic_image() = default;
+		basic_image() = default;
 
 		explicit basic_image(span_2d_extents size):basic_image{size.width, size.height}{}
 
