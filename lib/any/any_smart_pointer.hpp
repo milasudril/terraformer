@@ -17,6 +17,9 @@ namespace terraformer
 		{x.inc_usecount()};
 		{x.dec_usecount()};
 	};
+	
+	template<class T, class LifetimeManager>
+	class smart_pointer;
 
 	template<class LifetimeManager>
 	class any_smart_pointer
@@ -91,9 +94,33 @@ namespace terraformer
 
 		intptr_t object_id() const
 		{ return std::bit_cast<intptr_t>(m_holder.pointer); }
-
+		
 	private:
 		holder m_holder;
+	};
+	
+	template<class T, class LifetimeManager>
+	class smart_pointer:private any_smart_pointer<LifetimeManager>
+	{
+	public:
+		using base = any_smart_pointer<LifetimeManager>;
+
+		template<class Head, class ... Args>
+		requires(!std::is_same_v<std::remove_const_t<Head>, smart_pointer>)
+		explicit smart_pointer(std::type_identity<T>, Args&&... args):
+			base{std::type_identity<T>{}, std::forward<Args>(args)...}
+		{}
+		
+		T* get() const
+		{ return base::template get_if<T>(); }
+		
+		T get_const() const
+		{ return base::template get_if<T const>(); }
+		
+		using base::reset;
+		using base::operator<=>;
+		using base::use_count;
+		using base::object_id;
 	};
 }
 #endif
