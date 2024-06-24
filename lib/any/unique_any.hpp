@@ -41,5 +41,8 @@ namespace terraformer
 	static_assert(!controls_shared_resource<unique_any_holder>);
 
 	using unique_any = any_smart_pointer<unique_any_holder>;
+	
+	template<class T>
+	using unique_ptr = smart_pointer<T, unique_any_holder>;
 }
 #endif
