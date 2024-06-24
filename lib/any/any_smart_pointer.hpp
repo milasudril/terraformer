@@ -95,6 +95,9 @@ namespace terraformer
 		intptr_t object_id() const
 		{ return std::bit_cast<intptr_t>(m_holder.pointer); }
 		
+		template<class T>
+		auto dup_as() const;
+		
 	private:
 		holder m_holder;
 	};
