@@ -104,6 +104,8 @@ namespace terraformer
 	{
 	public:
 		using base = any_smart_pointer<LifetimeManager>;
+		
+		smart_pointer() = default;
 
 		template<class Head, class ... Args>
 		requires(!std::is_same_v<std::remove_const_t<Head>, smart_pointer>)
@@ -114,11 +116,12 @@ namespace terraformer
 		T* get() const
 		{ return base::template get_if<T>(); }
 		
-		T get_const() const
+		T const* get_const() const
 		{ return base::template get_if<T const>(); }
 		
 		using base::reset;
 		using base::operator<=>;
+		using base::operator bool;
 		using base::use_count;
 		using base::object_id;
 	};

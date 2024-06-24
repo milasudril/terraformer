@@ -168,3 +168,11 @@ TESTCASE(terraformer_shared_any_object_ctor_throws)
 	catch(...)
 	{}
 }
+
+TESTCASE(terraformer_shared_ptr_default_state)
+{
+	terraformer::shared_ptr<int> obj{};
+	EXPECT_EQ(obj, false);
+	EXPECT_EQ(obj.get(), nullptr);
+	EXPECT_EQ(obj.get_const(), nullptr);
+}
