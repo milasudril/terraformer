@@ -107,8 +107,7 @@ namespace terraformer
 		
 		smart_pointer() = default;
 
-		template<class Head, class ... Args>
-		requires(!std::is_same_v<std::remove_const_t<Head>, smart_pointer>)
+		template<class ... Args>
 		explicit smart_pointer(std::type_identity<T>, Args&&... args):
 			base{std::type_identity<T>{}, std::forward<Args>(args)...}
 		{}
