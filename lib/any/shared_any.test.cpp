@@ -168,21 +168,3 @@ TESTCASE(terraformer_shared_any_object_ctor_throws)
 	catch(...)
 	{}
 }
-
-TESTCASE(terraformer_shared_ptr_default_state)
-{
-	terraformer::shared_ptr<int> obj{};
-	EXPECT_EQ(obj, false);
-	EXPECT_EQ(obj.get(), nullptr);
-	EXPECT_EQ(obj.get_const(), nullptr);
-}
-
-TESTCASE(terraformer_shared_ptr_create)
-{
-	terraformer::shared_ptr obj{std::type_identity<int>{}, 123};
-	EXPECT_EQ(obj, true);
-	REQUIRE_NE(obj.get(), nullptr);
-	REQUIRE_NE(obj.get_const(), nullptr);
-	EXPECT_EQ(*obj.get(), 123);
-	EXPECT_EQ(*obj.get_const(), 123);
-}

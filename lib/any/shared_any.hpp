@@ -59,8 +59,5 @@ namespace terraformer
 	static_assert(controls_shared_resource<shared_any_holder>);
 
 	using shared_any = any_smart_pointer<shared_any_holder>;
-	
-	template<class T>
-	using shared_ptr = smart_pointer<T, shared_any_holder>;
 }
 #endif
