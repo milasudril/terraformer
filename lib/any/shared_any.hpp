@@ -7,8 +7,12 @@
 
 namespace terraformer
 {
+	template<bool IsConst>
 	struct shared_any_holder
 	{
+		template<class T>
+		using pointer_type = std::conditional_t<IsConst, T const*, T*>;
+
 		static void noop(void*){}
 
 		shared_any_holder() = default;
@@ -40,10 +44,10 @@ namespace terraformer
 		}
 
 		template<class T>
-		T* get_if() const noexcept
+		pointer_type<T> get_if() const noexcept
 		{
 			if(current_type == std::type_index{typeid(T)})
-			{ return static_cast<T*>(pointer); }
+			{ return static_cast<pointer_type<T>>(pointer); }
 			return nullptr;
 		}
 
@@ -56,8 +60,10 @@ namespace terraformer
 		void (*destroy)(void*) = noop;
 	};
 
-	static_assert(controls_shared_resource<shared_any_holder>);
+	static_assert(controls_shared_resource<shared_any_holder<false>>);
+	static_assert(controls_shared_resource<shared_any_holder<true>>);
 
-	using shared_any = any_smart_pointer<shared_any_holder>;
+	using shared_any = any_smart_pointer<shared_any_holder<false>>;
+	using shared_const_any = any_smart_pointer<shared_any_holder<true>>;
 }
 #endif

@@ -7,8 +7,12 @@
 
 namespace terraformer
 {
+	template<bool IsConst>
 	struct unique_any_holder
 	{
+		template<class T>
+		using pointer_type = std::conditional_t<IsConst, T const*, T*>;
+
 		static void noop(void*){}
 
 		unique_any_holder() = default;
@@ -26,10 +30,10 @@ namespace terraformer
 		{ destroy(pointer); }
 
 		template<class T>
-		T* get_if() const noexcept
+		pointer_type<T> get_if() const noexcept
 		{
 			if(current_type == std::type_index{typeid(T)})
-			{ return static_cast<T*>(pointer); }
+			{ return static_cast<pointer_type<T>>(pointer); }
 			return nullptr;
 		}
 
@@ -38,8 +42,10 @@ namespace terraformer
 		void (*destroy)(void*) = noop;
 	};
 
-	static_assert(!controls_shared_resource<unique_any_holder>);
+	static_assert(!controls_shared_resource<unique_any_holder<false>>);
+	static_assert(!controls_shared_resource<unique_any_holder<true>>);
 
-	using unique_any = any_smart_pointer<unique_any_holder>;
+	using unique_any = any_smart_pointer<unique_any_holder<false>>;
+	using unique_const_any = any_smart_pointer<unique_any_holder<true>>;
 }
 #endif

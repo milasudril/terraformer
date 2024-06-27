@@ -66,8 +66,8 @@ namespace terraformer::ui::widgets
 		void (*m_upload)(any_pointer_to_mutable, span_2d<rgba_pixel const>) = nullptr;
 	};
 
-	using generic_unique_texture = generic_texture<unique_any_holder>;
-	using generic_shared_texture = generic_texture<shared_any_holder>;
+	using generic_unique_texture = generic_texture<unique_any_holder<false>>;
+	using generic_shared_texture = generic_texture<shared_any_holder<false>>;
 }
 
 #endif
