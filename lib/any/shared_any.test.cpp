@@ -168,3 +168,11 @@ TESTCASE(terraformer_shared_any_object_ctor_throws)
 	catch(...)
 	{}
 }
+
+TESTCASE(terraformer_shared_const_any_create_and_access)
+{
+	terraformer::shared_const_any obj{std::type_identity<int>{}, 1};
+	// Should not compile: auto val = obj.get_if<int>();
+	auto val = obj.get_if<int const>();
+	static_assert(std::is_same_v<decltype(val), int const*>);
+}
