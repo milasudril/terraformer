@@ -60,7 +60,7 @@ namespace terraformer
 		}
 
 		template<class T>
-		T* get_if() const noexcept
+		auto get_if() const noexcept
 		{ return m_holder.template get_if<T>(); }
 
 		auto get() const noexcept
