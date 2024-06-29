@@ -12,6 +12,7 @@ namespace terraformer
 	{
 		template<class T>
 		using pointer_type = std::conditional_t<IsConst, T const*, T*>;
+		static constexpr auto const_flag = IsConst;
 
 		static void noop(pointer_type<void>){}
 

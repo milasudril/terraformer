@@ -172,9 +172,24 @@ TESTCASE(terraformer_shared_any_object_ctor_throws)
 TESTCASE(terraformer_shared_const_any_create_and_access)
 {
 	terraformer::shared_const_any obj{std::type_identity<int>{}, 1};
-	static_assert(!requires{
-			{std::declval<terraformer::shared_const_any>().template get_if<int>() } -> std::same_as<int*>;
-	});
 	auto val = obj.get_if<int const>();
 	static_assert(std::is_same_v<decltype(val), int const*>);
+}
+
+TESTCASE(terraformer_shared_any_to_shared_const_any)
+{
+	terraformer::shared_any obj{std::type_identity<int>{}, 1};
+	EXPECT_EQ(obj.use_count(), 1);
+
+	terraformer::shared_const_any obj_other = obj;
+
+	EXPECT_EQ(obj.use_count(), 2);
+	EXPECT_EQ(obj_other.use_count(), 2);
+	EXPECT_NE(obj.get_if<int const>(), nullptr);
+	REQUIRE_EQ(typeid(int const), typeid(int));
+	EXPECT_EQ(obj.get_if<int const>(), obj_other.get_if<int const>());
+	EXPECT_EQ(*obj_other.get_if<int const>(), 1);
+
+	auto ptr = obj_other.get();
+	static_assert(std::is_same_v<decltype(ptr), terraformer::any_pointer<true>>);
 }

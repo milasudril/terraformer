@@ -7,6 +7,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <bit>
+#include <cassert>
+#include <cstdio>
 
 namespace terraformer
 {
@@ -23,6 +25,9 @@ namespace terraformer
 	{
 	public:
 		using holder = LifetimeManager;
+
+		template<class>
+		friend class any_smart_pointer;
 
 		any_smart_pointer() noexcept = default;
 
@@ -46,6 +51,12 @@ namespace terraformer
 			return *this;
 		}
 
+		template<class OtherHolder>
+		any_smart_pointer(any_smart_pointer<OtherHolder> const& other)
+		requires controls_shared_resource<holder>:
+			m_holder{other.m_holder}
+		{ m_holder.inc_usecount(); }
+
 		any_smart_pointer(any_smart_pointer const& other)
 		requires controls_shared_resource<holder>:
 			m_holder{other.m_holder}
@@ -64,7 +75,7 @@ namespace terraformer
 		{ return m_holder.template get_if<T>(); }
 
 		auto get() const noexcept
-		{ return any_pointer{m_holder.pointer, m_holder.current_type}; }
+		{ return any_pointer<LifetimeManager::const_flag>{m_holder.pointer, m_holder.current_type}; }
 
 		auto get_const() const noexcept
 		{ return any_pointer{as_const(m_holder.pointer), m_holder.current_type}; }
