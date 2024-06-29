@@ -67,6 +67,8 @@ namespace terraformer
 
 		inline object_pointer<true> operator/(size_t index) const;
 
+		inline shared_const_any dup(size_t index) const;
+
 		template<class Function>
 		void visit_elements(Function&& f);
 
@@ -133,11 +135,15 @@ namespace terraformer
 		template<class KeyType>
 		inline object_pointer<true> operator/(KeyType&& key) const;
 
+		template<class KeyType>
+		inline shared_const_any dup(KeyType&& key) const;
+
 		template<class Function>
 		void visit_elements(Function&& f);
 
 		template<class Function>
 		void visit_elements(Function&& f) const;
+
 	};
 
 	template<bool IsConst>
@@ -248,6 +254,15 @@ namespace terraformer
 			return (*val)/key;
 		}
 
+		auto dup(std::string_view const key) const
+		{
+			auto const val = m_pointer.template get_if<dict_type>();
+			if(val == nullptr)
+			{ return shared_const_any{}; }
+
+			return val->dup(key);
+		}
+
 		object_pointer operator/(size_t index) const
 		{
 			auto const val = m_pointer.template get_if<array_type>();
@@ -255,6 +270,15 @@ namespace terraformer
 			{ return object_pointer{}; }
 
 			return (*val)/index;
+		}
+
+		auto dup(size_t index) const
+		{
+			auto const val = m_pointer.template get_if<array_type>();
+			if(val == nullptr)
+			{ return shared_const_any{}; }
+
+			return val->dup(index);
 		}
 
 		template<class Func>
@@ -306,6 +330,13 @@ namespace terraformer
 			object_pointer<true>{};
 	}
 
+	shared_const_any object_array::dup(size_t index) const
+	{
+		return index < std::size(*this).get()?
+			shared_const_any{(*this)[index_type{index}]} :
+			shared_const_any{};
+	}
+
 	template<class Function>
 	void object_array::visit_elements(Function&& f)
 	{
@@ -336,6 +367,13 @@ namespace terraformer
 	{
 		auto const i = base::find(std::forward<KeyType>(key));
 		return i != std::end(*this)? object_pointer{i->second.get_const()} : object_pointer<true>{};
+	}
+
+	template<class KeyType>
+	shared_const_any object_dict::dup(KeyType&& key) const
+	{
+		auto const i = base::find(std::forward<KeyType>(key));
+		return i != std::end(*this)? shared_const_any{i->second} : shared_const_any{};
 	}
 
 	template<class Function>

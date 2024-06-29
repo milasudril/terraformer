@@ -92,19 +92,28 @@ namespace terraformer::ui::widgets
 
 		void handle_event(wsapi::fb_size size)
 		{
-			m_current_size = size; 
+			m_current_size = size;
 			m_dirty_bits |= host_textures_dirty;
 		}
-		
+
 		void theme_updated(object_dict const& render_resources)
 		{
-			auto const margin = (render_resources/"ui"/"widget_inner_margin").get_if<unsigned int const>();
-			auto const border_thickness = (render_resources/"ui"/"3d_border_thickness").get_if<unsigned int const>();
+			auto const ui = render_resources/"ui";
+			auto const margin = (ui/"widget_inner_margin").get_if<unsigned int const>();
+			auto const border_thickness = (ui/"3d_border_thickness").get_if<unsigned int const>();
+
 			assert(margin != nullptr);
 			assert(border_thickness != nullptr);
 			m_margin = *margin + *border_thickness;
 			m_border_thickness = *border_thickness;
 			m_dirty_bits |= host_textures_dirty;
+
+			auto const command_area = ui/"command_area";
+			assert(!command_area.is_null());
+			m_font = command_area.dup("font");
+			auto const background_intensity = (command_area/"background_intensity").get_if<float const>();
+			assert(background_intensity != nullptr);
+			m_background_intensity = *background_intensity;
 		}
 
 	private:
@@ -119,6 +128,8 @@ namespace terraformer::ui::widgets
 		mutable unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
 		mutable unsigned int m_margin = 0;
 		mutable unsigned int m_border_thickness = 0;
+		shared_const_any m_font;
+		float m_background_intensity;
 
 		generic_unique_texture m_background_released;
 		generic_unique_texture m_background_pressed;
