@@ -2,9 +2,9 @@
 
 #include "./button.hpp"
 
-void terraformer::ui::widgets::button::regenerate_text_mask(object_dict const& render_resources) const
+void terraformer::ui::widgets::button::regenerate_text_mask()
 {
-	auto const font = (render_resources/"ui"/"command_area"/"font").get_if<font_handling::font const>();
+	auto const font = m_font.get_if<font_handling::font const>();
 	assert(font != nullptr);
 
 	font_handling::text_shaper shaper{};
@@ -17,19 +17,17 @@ void terraformer::ui::widgets::button::regenerate_text_mask(object_dict const& r
 		.run(*font);
 
 	m_rendered_text = render(result);
-	m_dirty_bits &= ~text_dirty;
 	m_dirty_bits |= host_textures_dirty;
 }
 
-void terraformer::ui::widgets::button::regenerate_textures(object_dict const& render_resources)
+void terraformer::ui::widgets::button::regenerate_textures()
 {
 	if(m_dirty_bits & text_dirty) [[unlikely]]
-	{ regenerate_text_mask(render_resources); }
+	{ regenerate_text_mask(); }
 
+	auto const background_intensity = m_background_intensity;
 	{
-		auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
-		assert(background_intensity != nullptr);
-		auto const val = *background_intensity;
+		auto const val = background_intensity;
 		m_background_released_host = generate(
 			drawing_api::beveled_rectangle{
 				.width = static_cast<uint32_t>(m_current_size.width),
@@ -43,9 +41,7 @@ void terraformer::ui::widgets::button::regenerate_textures(object_dict const& re
 	}
 
 	{
-		auto const background_intensity = (render_resources/"ui"/"command_area"/"background_intensity").get_if<float const>();
-		assert(background_intensity != nullptr);
-		auto const val = *background_intensity;
+		auto const val = background_intensity;
 		m_background_pressed_host = generate(
 			drawing_api::beveled_rectangle{
 				.width = static_cast<uint32_t>(m_current_size.width),
@@ -69,18 +65,10 @@ void terraformer::ui::widgets::button::regenerate_textures(object_dict const& re
 }
 
 terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button::get_size_constraints(
-	object_dict const& render_resources
-) const
+	object_dict const&) const
 {
-	if(m_dirty_bits & text_dirty) [[unlikely]]
-	{ regenerate_text_mask(render_resources); }
-
-	auto const margin = (render_resources/"ui"/"widget_inner_margin").get_if<unsigned int const>();
-	auto const border_thickness = (render_resources/"ui"/"3d_border_thickness").get_if<unsigned int const>();
-	assert(margin != nullptr);
-	assert(border_thickness != nullptr);
-	m_margin = *margin + *border_thickness;
-	m_border_thickness = *border_thickness;
+	if(m_dirty_bits & text_dirty)
+	{ const_cast<button*>(this)->regenerate_text_mask(); }
 
 	return main::widget_size_constraints{
 		.width{
@@ -109,9 +97,9 @@ void terraformer::ui::widgets::button::theme_updated(object_dict const& render_r
 	auto const command_area = ui/"command_area";
 	assert(!command_area.is_null());
 	m_font = command_area.dup("font");
+	assert(m_font);
 	auto const background_intensity = (command_area/"background_intensity").get_if<float const>();
 	assert(background_intensity != nullptr);
 	m_background_intensity = *background_intensity;
-
-	m_dirty_bits |= (host_textures_dirty | text_dirty);
+	m_dirty_bits |= host_textures_dirty | text_dirty;
 }

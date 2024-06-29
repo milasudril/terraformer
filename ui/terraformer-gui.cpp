@@ -77,7 +77,6 @@ int main(int, char**)
 		.on_value_changed([](terraformer::ui::widgets::button const& obj){
 			printf("Value is now %s\n", obj.value()? "true" : "false");
 		});
-
 	terraformer::ui::widgets::vbox<
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
 	> my_vbox;

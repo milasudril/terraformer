@@ -41,9 +41,9 @@ namespace terraformer::ui::widgets
 		bool value() const
 		{ return m_value == state::pressed; }
 
-		void regenerate_text_mask(object_dict const& render_resources) const;
+		void regenerate_text_mask();
 
-		void regenerate_textures(object_dict const& render_resources);
+		void regenerate_textures();
 
 		template<class OutputRectangle>
 		void prepare_for_presentation(
@@ -103,13 +103,13 @@ namespace terraformer::ui::widgets
 			move_only_function<void(button&)>{no_operation_tag{}};
 
 		std::basic_string<char8_t> m_text;
-		mutable basic_image<uint8_t> m_rendered_text;
+		basic_image<uint8_t> m_rendered_text;
 		static constexpr auto text_dirty = 0x1;
 		static constexpr auto host_textures_dirty = 0x2;
 		static constexpr auto gpu_textures_dirty = 0x4;
-		mutable unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
-		mutable unsigned int m_margin = 0;
-		mutable unsigned int m_border_thickness = 0;
+		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
+		unsigned int m_margin = 0;
+		unsigned int m_border_thickness = 0;
 		shared_const_any m_font;
 		float m_background_intensity;
 
@@ -136,7 +136,7 @@ namespace terraformer::ui::widgets
 		auto const display_state = m_temp_state.value_or(m_value);
 
 		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
-		{ regenerate_textures(render_resources); }
+		{ regenerate_textures(); }
 
 		output_rect.foreground = m_foreground.get_const();
 		if(!output_rect.foreground)
@@ -187,6 +187,7 @@ namespace terraformer::ui::widgets
 		using button::get_size_constraints;
 		using button::text;
 		using button::value;
+		using button::theme_updated;
 
 		template<class Function>
 		toggle_button& on_value_changed(Function&& func)

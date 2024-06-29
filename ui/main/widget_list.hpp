@@ -16,6 +16,7 @@ namespace terraformer::ui::main
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const&);
 		using size_constraints_callback = widget_size_constraints (*)(void const*, object_dict const&);
 		using size_callback = void (*)(void*, wsapi::fb_size);
+		using theme_updated_callback = void (*)(void*, object_dict const&);
 
 		using widget_array = multi_array<
 			void*,
@@ -31,7 +32,8 @@ namespace terraformer::ui::main
 			cursor_position_callback,
 			mouse_button_callback,
 			size_constraints_callback,
-			size_callback
+			size_callback,
+			theme_updated_callback
 		>;
 
 		using index_type = typename widget_array::index_type;
@@ -73,6 +75,9 @@ namespace terraformer::ui::main
 				},
 				[](void* obj, wsapi::fb_size size) {
 					static_cast<Widget*>(obj)->handle_event(size);
+				},
+				[](void* obj, object_dict const& new_theme) {
+					static_cast<Widget*>(obj)->theme_updated(new_theme);
 				}
 			);
 
@@ -126,6 +131,9 @@ namespace terraformer::ui::main
 
 		auto size_callbacks() const
 		{ return m_objects.template get<7 + 2*sizeof...(WidgetRenderingResult)>(); }
+
+		auto const theme_updated_callbacks() const
+		{ return m_objects.template get<8 + 2*sizeof...(WidgetRenderingResult)>(); }
 
 	private:
 		widget_array m_objects;
@@ -228,6 +236,17 @@ namespace terraformer::ui::main
 		return typename wl::index_type{
 			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
 		};
+	}
+
+	template<class ... WidgetRenderingResult>
+	void theme_updated(widget_list<WidgetRenderingResult...> const& widgets, object_dict const& dict)
+	{
+		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
+		auto const widget_pointers = widgets.widget_pointers();
+
+		auto const n = std::size(widgets);
+		for(auto k  = widgets.first_element_index(); k != n; ++k)
+		{ theme_updated_callbacks[k](widget_pointers[k], dict); }
 	}
 }
 

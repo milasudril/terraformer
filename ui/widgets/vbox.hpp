@@ -113,6 +113,12 @@ namespace terraformer::ui::widgets
 			return mbe_handlers[i](widgets[i], event);
 		}
 
+		void theme_updated(object_dict const& new_theme) const
+		{
+			using main::theme_updated;
+			theme_updated(m_widgets, new_theme);
+		}
+
 		main::widget_size_constraints const& get_size_constraints(object_dict const&) const
 		{ return m_current_size_constraints; }
 

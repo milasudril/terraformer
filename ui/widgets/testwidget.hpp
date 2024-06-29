@@ -114,6 +114,8 @@ namespace terraformer::ui::widgets
 			m_dirty = true;
 		}
 
+		void theme_updated(object_dict const&){}
+
 	private:
 		drawing_api::gl_texture m_foreground;
 		drawing_api::gl_texture m_background;

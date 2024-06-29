@@ -42,6 +42,12 @@ namespace terraformer::ui::main
 		template<auto WindowId>
 		void framebuffer_size_changed(ui::wsapi::fb_size size)
 		{
+			if(!m_theme_is_up_to_date) [[unlikely]]
+			{
+				value_of(m_widget_container).theme_updated(m_resources);
+				m_theme_is_up_to_date = true;
+			}
+
 			value_of(m_widget_container).update_layout(4.0f, 4.0f, m_resources);
 			m_container_size = value_of(m_widget_container).get_size_constraints(m_resources);
 			value_of(m_content_renderer)
@@ -95,6 +101,7 @@ namespace terraformer::ui::main
 		ErrorHandler m_error_handler;
 		widget_size_constraints m_container_size{};
 		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle{};
+		bool m_theme_is_up_to_date = false;
 	};
 }
 

@@ -115,6 +115,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.get_size_constraints(resources) } -> same_as_unqual<widget_size_constraints>;
+		{ obj.theme_updated(resources) } -> std::same_as<void>;
 	};
 
 	struct widget_with_default_actions
@@ -127,6 +128,7 @@ namespace terraformer::ui::main
 		void handle_event(wsapi::fb_size) const { }
 		[[nodiscard]] widget_size_constraints get_size_constraints(object_dict const&) const
 		{ return widget_size_constraints{}; }
+		void theme_updated(object_dict const&) const {}
 	};
 
 	namespace
