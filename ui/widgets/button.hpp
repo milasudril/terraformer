@@ -88,7 +88,7 @@ namespace terraformer::ui::widgets
 			return false;
 		}
 
-		main::widget_size_constraints get_size_constraints(object_dict const& render_resources) const;
+		main::widget_size_constraints get_size_constraints() const;
 
 		void handle_event(wsapi::fb_size size)
 		{

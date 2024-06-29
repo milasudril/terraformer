@@ -64,8 +64,7 @@ void terraformer::ui::widgets::button::regenerate_textures()
 	m_dirty_bits &= ~host_textures_dirty;
 }
 
-terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button::get_size_constraints(
-	object_dict const&) const
+terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button::get_size_constraints() const
 {
 	if(m_dirty_bits & text_dirty)
 	{ const_cast<button*>(this)->regenerate_text_mask(); }

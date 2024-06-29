@@ -114,7 +114,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(cme) } -> std::same_as<bool>;
 		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
-		{ obj.get_size_constraints(resources) } -> same_as_unqual<widget_size_constraints>;
+		{ obj.get_size_constraints() } -> same_as_unqual<widget_size_constraints>;
 		{ obj.theme_updated(resources) } -> std::same_as<void>;
 	};
 
@@ -126,7 +126,7 @@ namespace terraformer::ui::main
 		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
 		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }
 		void handle_event(wsapi::fb_size) const { }
-		[[nodiscard]] widget_size_constraints get_size_constraints(object_dict const&) const
+		[[nodiscard]] widget_size_constraints get_size_constraints() const
 		{ return widget_size_constraints{}; }
 		void theme_updated(object_dict const&) const {}
 	};

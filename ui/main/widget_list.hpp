@@ -14,7 +14,7 @@ namespace terraformer::ui::main
 		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
 		using cursor_position_callback = bool (*)(void*, wsapi::cursor_motion_event const&);
 		using mouse_button_callback = bool (*)(void*, wsapi::mouse_button_event const&);
-		using size_constraints_callback = widget_size_constraints (*)(void const*, object_dict const&);
+		using size_constraints_callback = widget_size_constraints (*)(void const*);
 		using size_callback = void (*)(void*, wsapi::fb_size);
 		using theme_updated_callback = void (*)(void*, object_dict const&);
 
@@ -70,8 +70,8 @@ namespace terraformer::ui::main
 				[](void* obj, wsapi::mouse_button_event const& mbe) -> bool {
 					return static_cast<Widget*>(obj)->handle_event(mbe);
 				},
-				[](void const* obj, object_dict const& render_resources) -> widget_size_constraints {
-					return static_cast<Widget const*>(obj)->get_size_constraints(render_resources);
+				[](void const* obj) -> widget_size_constraints {
+					return static_cast<Widget const*>(obj)->get_size_constraints();
 				},
 				[](void* obj, wsapi::fb_size size) {
 					static_cast<Widget*>(obj)->handle_event(size);

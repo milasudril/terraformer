@@ -48,8 +48,8 @@ namespace terraformer::ui::main
 				m_theme_is_up_to_date = true;
 			}
 
-			value_of(m_widget_container).update_layout(4.0f, 4.0f, m_resources);
-			m_container_size = value_of(m_widget_container).get_size_constraints(m_resources);
+			value_of(m_widget_container).update_layout(4.0f, 4.0f);
+			m_container_size = value_of(m_widget_container).get_size_constraints();
 			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
