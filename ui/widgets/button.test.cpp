@@ -17,7 +17,7 @@ namespace
 			img = terraformer::image{pixels};
 		}
 	};
-	
+
 	template<class TextureType>
 	struct output_rect
 	{
@@ -25,11 +25,11 @@ namespace
 		TextureType const* background;
 		std::array<terraformer::rgba_pixel, 4> foreground_tints;
 		std::array<terraformer::rgba_pixel, 4> background_tints;
-		
+
 		static auto create_texture()
 		{ return TextureType{}; }
 	};
-	
+
 	auto create_render_resources()
 	{
 		terraformer::ui::font_handling::font_mapper fonts;
@@ -58,7 +58,7 @@ namespace
 		);
 		return resources;
 	}
-	
+
 	auto inspect_button_state(terraformer::span_2d<terraformer::rgba_pixel const> img)
 	{
 		auto const w = img.width();
@@ -229,7 +229,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 	.theme_updated(create_render_resources());
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(callcount, 0);
-	
+
 	auto const resources = create_render_resources();
 	output_rect<dummy_texture<0>> rect{};
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
@@ -324,7 +324,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	})
 	.value(true)
 	.theme_updated(create_render_resources());
-	
+
 	my_button.handle_event(terraformer::ui::wsapi::fb_size{
 		.width = 20,
 		.height = 14
@@ -349,12 +349,10 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
-	EXPECT_EQ(callcount, 0);
-		EXPECT_EQ(
+	EXPECT_EQ(
 		inspect_button_state(rect.background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
-
 	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
 		.direction = terraformer::ui::wsapi::cursor_enter_leave::leave
@@ -366,18 +364,17 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		.where = terraformer::ui::wsapi::cursor_position{},
 		.direction = terraformer::ui::wsapi::cursor_enter_leave::leave
 	});
-
 	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
 		.direction = terraformer::ui::wsapi::cursor_enter_leave::enter
 	});
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(my_button.value(), true);
-	EXPECT_EQ(callcount, 0);
 	my_button.handle_event(terraformer::ui::wsapi::cursor_enter_leave_event{
 		.where = terraformer::ui::wsapi::cursor_position{},
 		.direction = terraformer::ui::wsapi::cursor_enter_leave::leave
 	});
+	EXPECT_EQ(callcount, 0);
 }
 
 TESTCASE(terraformer_ui_widgets_button_handle_cme)
@@ -389,7 +386,38 @@ TESTCASE(terraformer_ui_widgets_button_handle_cme)
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
 	});
-	EXPECT_EQ(callcount, 0);
 
 	my_button.handle_event(terraformer::ui::wsapi::cursor_motion_event{});
+	EXPECT_EQ(callcount, 0);
+}
+
+TESTCASE(terraformer_ui_widgets_button_get_size_constraints)
+{
+	terraformer::ui::widgets::button my_button;
+		auto callcount = 0;
+
+	my_button.on_activated([&callcount, &my_button](auto& button){
+		++callcount;
+		EXPECT_EQ(&button, &my_button);
+	})
+	.text(u8"")
+	.theme_updated(create_render_resources());
+
+	auto const res_a = my_button.get_size_constraints();
+
+	my_button.text(u8"Hello, World");
+	auto const res_b = my_button.get_size_constraints();
+
+	EXPECT_LT(res_a.width.min, res_b.width.min);
+	EXPECT_EQ(res_a.width.max, std::numeric_limits<float>::infinity());
+	EXPECT_EQ(res_b.width.max, std::numeric_limits<float>::infinity());
+	EXPECT_EQ(res_a.aspect_ratio, std::nullopt);
+	EXPECT_EQ(res_b.aspect_ratio, std::nullopt);
+
+	auto const res_c = my_button.get_size_constraints();
+	EXPECT_EQ(res_b.width.min, res_c.width.min);
+	EXPECT_EQ(res_c.aspect_ratio, std::nullopt);
+
+
+	EXPECT_EQ(callcount, 0);
 }
