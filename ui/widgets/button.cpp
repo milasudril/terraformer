@@ -17,6 +17,7 @@ void terraformer::ui::widgets::button::regenerate_text_mask()
 		.run(*font);
 
 	m_rendered_text = render(result);
+	m_dirty_bits &= ~text_dirty;
 	m_dirty_bits |= host_textures_dirty;
 }
 
