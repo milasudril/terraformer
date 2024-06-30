@@ -5,11 +5,11 @@
 #include "./drawing_api/gl_surface_configuration.hpp"
 #include "./drawing_api/gl_texture.hpp"
 #include "./drawing_api/frame_renderer.hpp"
-#include "./drawing_api/frame_renderer.hpp"
+#include "./drawing_api/single_quad_renderer.hpp"
 #include "./main/event_dispatcher.hpp"
 #include "./widgets/workspace.hpp"
 #include "./wsapi/native_window.hpp"
-#include "./widgets/testwidget.hpp"
+#include "./widgets/label.hpp"
 #include "./widgets/button.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
@@ -67,10 +67,13 @@ int main(int, char**)
 	};
 
 	glEnable(GL_CULL_FACE);
-	glEnable( GL_DEBUG_OUTPUT );
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback( MessageCallback, 0 );
 
-	terraformer::ui::widgets::testwidget foo;
+	terraformer::ui::widgets::label foo;
+	foo.text(u8"Hello, World");
 	terraformer::ui::widgets::toggle_button bar;
 	bar.text(u8"Click me!")
 		.value(false)

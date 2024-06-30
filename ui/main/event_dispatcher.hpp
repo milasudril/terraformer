@@ -4,7 +4,6 @@
 #include "./widget.hpp"
 
 #include "ui/wsapi/events.hpp"
-#include "ui/drawing_api/single_quad_renderer.hpp"
 #include "lib/common/value_accessor.hpp"
 
 namespace terraformer::ui::main
