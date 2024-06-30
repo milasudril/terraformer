@@ -117,7 +117,7 @@ namespace terraformer::ui::font_handling
 		{ return m_face->size->metrics.ascender; }
 
 		auto get_global_glyph_width() const
-		{ return m_face->max_advance_width; }
+		{ return m_face->size->metrics.max_advance; }
 
 	private:
 		glyph load_glyph(glyph_index index) const;
