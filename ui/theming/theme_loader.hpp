@@ -57,6 +57,12 @@ namespace terraformer::ui::theming
 						.insert<float>("background_intensity", 1.0f)
 					)
 				)
+				.insert<object_dict>("output_area", std::move(
+					object_dict{}
+						.insert_link("font", body_text)
+						.insert<rgba_pixel>("text_color", default_color_scheme.output_area.text)
+					)
+				)
 				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
 				.insert<unsigned int>("widget_inner_margin", 4)
 				.insert<unsigned int>("3d_border_thickness", 2)
