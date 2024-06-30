@@ -77,8 +77,11 @@ int main(int, char**)
 	terraformer::ui::widgets::toggle_button bar;
 	bar.text(u8"Click me!")
 		.value(false)
-		.on_value_changed([](terraformer::ui::widgets::button const& obj){
-			printf("Value is now %s\n", obj.value()? "true" : "false");
+		.on_value_changed([&foo](auto const& obj){
+			if(obj.value())
+			{ foo.value(u8"Value is true");}
+			else
+			{ foo.value(u8"Value is false");}
 		});
 	terraformer::ui::widgets::vbox<
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle

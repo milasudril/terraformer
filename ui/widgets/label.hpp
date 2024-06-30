@@ -17,16 +17,16 @@ namespace terraformer::ui::widgets
 		enum class state{released, pressed};
 
 		template<class StringType>
-		label& text(StringType&& text)
+		label& text(StringType&& str)
 		{
-			m_text = std::forward<StringType>(text);
-			m_dirty_bits |= text_dirty;
+			m_text = std::forward<StringType>(str);
+			m_dirty_bits |= text_dirty | host_textures_dirty;
 			return *this;
 		}
 
 		template<class StringType>
-		label& value(StringType&& text)
-		{ return text(std::forward<StringType>(text)); }
+		label& value(StringType&& str)
+		{ return text(std::forward<StringType>(str)); }
 
 		std::basic_string_view<char8_t> value() const
 		{ return m_text; }

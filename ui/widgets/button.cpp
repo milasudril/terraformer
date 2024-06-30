@@ -63,6 +63,7 @@ void terraformer::ui::widgets::button::regenerate_textures()
 	);
 
 	m_dirty_bits &= ~host_textures_dirty;
+	m_dirty_bits |= gpu_textures_dirty;
 }
 
 terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button::get_size_constraints() const

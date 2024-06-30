@@ -23,7 +23,7 @@ void terraformer::ui::widgets::label::regenerate_text_mask()
 
 void terraformer::ui::widgets::label::regenerate_textures()
 {
-	if(m_dirty_bits & text_dirty) [[unlikely]]
+	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
 	m_foreground_host = drawing_api::convert_mask(
@@ -34,6 +34,7 @@ void terraformer::ui::widgets::label::regenerate_textures()
 	);
 
 	m_dirty_bits &= ~host_textures_dirty;
+	m_dirty_bits |= gpu_textures_dirty;
 }
 
 terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::get_size_constraints() const
