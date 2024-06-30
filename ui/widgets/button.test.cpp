@@ -394,7 +394,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_cme)
 TESTCASE(terraformer_ui_widgets_button_get_size_constraints)
 {
 	terraformer::ui::widgets::button my_button;
-		auto callcount = 0;
+	auto callcount = 0;
 
 	my_button.on_activated([&callcount, &my_button](auto& button){
 		++callcount;
@@ -420,4 +420,49 @@ TESTCASE(terraformer_ui_widgets_button_get_size_constraints)
 
 
 	EXPECT_EQ(callcount, 0);
+}
+
+TESTCASE(terraformer_ui_widgets_toggle_button_on_value_changed)
+{
+	terraformer::ui::widgets::toggle_button my_button{};
+	auto callcount = 0;
+	my_button.on_value_changed([&callcount, &my_button](auto& button){
+		++callcount;
+		EXPECT_EQ(&button, &my_button);
+	});
+
+	EXPECT_EQ(my_button.value(), false);
+	EXPECT_EQ(callcount, 0);
+
+	{
+		decltype(auto) res = my_button.value(true);
+		static_assert(std::is_same_v<decltype(res), terraformer::ui::widgets::toggle_button&>);
+		EXPECT_EQ(callcount, 0);
+	}
+
+	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
+		.where = terraformer::ui::wsapi::cursor_position{},
+		.button = 0,
+		.action = terraformer::ui::wsapi::button_action::release,
+		.modifiers = {}
+	});
+	EXPECT_EQ(callcount, 1);
+}
+
+TESTCASE(terraformer_ui_widgets_toggle_button_text)
+{
+	terraformer::ui::widgets::toggle_button my_button{};
+	auto callcount = 0;
+	my_button.on_value_changed([&callcount, &my_button](auto& button){
+		++callcount;
+		EXPECT_EQ(&button, &my_button);
+	});
+
+	EXPECT_EQ(my_button.value(), false);
+	{
+		decltype(auto) res = my_button.text(u8"Foobar");
+		static_assert(std::is_same_v<decltype(res), terraformer::ui::widgets::toggle_button&>);
+	}
+	EXPECT_EQ(callcount, 0);
+	EXPECT_EQ(my_button.value(), false);
 }

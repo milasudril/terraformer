@@ -194,7 +194,7 @@ namespace terraformer::ui::widgets
 		{
 			button::on_activated([cb = std::forward<Function>(func)](button& src){
 				on_activated_callback(src);
-				cb(src);
+				cb(static_cast<toggle_button&>(src));
 			});
 			return *this;
 		}
