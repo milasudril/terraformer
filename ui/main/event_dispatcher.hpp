@@ -48,8 +48,6 @@ namespace terraformer::ui::main
 				m_theme_is_up_to_date = true;
 			}
 
-			value_of(m_widget_container).update_layout(4.0f, 4.0f);
-			m_container_size = value_of(m_widget_container).get_size_constraints();
 			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
@@ -71,6 +69,9 @@ namespace terraformer::ui::main
 
 		void render()
 		{
+			value_of(m_widget_container).update_layout(4.0f, 4.0f);
+			auto const container_size = value_of(m_widget_container).get_size_constraints();
+
 			value_of(m_widget_container).prepare_for_presentation(
 				m_output_rectangle,
 				widget_instance_info{
@@ -83,8 +84,8 @@ namespace terraformer::ui::main
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},
 				scaling{
-					m_container_size.width.min,
-					m_container_size.height.min,
+					container_size.width.min,
+					container_size.height.min,
 					1.0f
 				},
 				m_output_rectangle
@@ -99,7 +100,6 @@ namespace terraformer::ui::main
 		ContentRenderer m_content_renderer;
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
-		widget_size_constraints m_container_size{};
 		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle{};
 		bool m_theme_is_up_to_date = false;
 	};
