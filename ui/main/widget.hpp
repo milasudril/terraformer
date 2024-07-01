@@ -6,7 +6,7 @@
 #include "lib/common/object_tree.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
-
+#include "lib/any/unique_any.hpp"
 
 #include <utility>
 #include <type_traits>
@@ -18,6 +18,44 @@ namespace terraformer::ui::main
 	{
 		size_t section_level;
 		size_t paragraph_index;
+	};
+
+	struct default_escape_token_tag
+	{
+		constexpr bool operator==(default_escape_token_tag) const
+		{ return true; }
+
+		constexpr bool operator!=(default_escape_token_tag) const
+		{ return false; }
+	};
+
+	constexpr default_escape_token_tag default_escape_token;
+
+	class escape_token
+	{
+	public:
+		escape_token() noexcept = default;
+
+		template<class T, class ... Args>
+		explicit escape_token(std::type_identity<T>, Args&&... args):
+			m_object{std::type_identity<T>{}, std::forward<Args>(args)...}
+		{}
+
+		template<class T>
+		bool operator==(T const& other) const
+		{
+			auto ptr = m_object.get_if<T>();
+			if(ptr == nullptr)
+			{ return false; }
+			return *ptr == other;
+		}
+
+		template<class T>
+		bool operator!=(T const& other) const
+		{ return !(*this == other); }
+
+	private:
+		unique_any m_object;
 	};
 
 	struct widget_geometry

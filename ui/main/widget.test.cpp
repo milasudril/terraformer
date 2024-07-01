@@ -273,3 +273,23 @@ TESTCASE(terraformer_ui_main_widget_size_minimize_width_aspect_ratio_too_heigh)
 	catch(...)
 	{}
 }
+
+TESTCASE(terraformer_ui_main_widget_escape_token_empty)
+{
+	terraformer::ui::main::escape_token obj{};
+	EXPECT_NE(obj, 12);
+	EXPECT_NE(12, obj);
+}
+
+TESTCASE(terraformer_ui_main_widget_default_escape_token)
+{
+	terraformer::ui::main::escape_token obj{std::type_identity<terraformer::ui::main::default_escape_token_tag>{}};
+	EXPECT_EQ(obj, terraformer::ui::main::default_escape_token);
+}
+
+TESTCASE(terraformer_ui_main_widget_escape_token_with_value)
+{
+	terraformer::ui::main::escape_token obj{std::type_identity<int>{}, 1234};
+	EXPECT_EQ(obj, 1234);
+	EXPECT_EQ(1234, obj);
+}
