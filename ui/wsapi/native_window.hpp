@@ -224,6 +224,11 @@ namespace terraformer::ui::wsapi
 					}
 				);
 			}
+#if 0
+			glfwSetCharCallback(m_window.get(), [](GLFWwindow*, unsigned int cp){
+				printf("%08x\n", cp);
+			});
+#endif
 		}
 
 		void set_window_title(char const* title)
