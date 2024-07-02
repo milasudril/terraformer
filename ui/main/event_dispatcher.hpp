@@ -39,6 +39,12 @@ namespace terraformer::ui::main
 		{ value_of(m_window_controller).template cursor_at_window_boundary<WindowId>(event); }
 
 		template<auto WindowId>
+		void handle_typing_event(ui::wsapi::typing_event const& event)
+		{
+			printf("%u\n", event.codepoint);
+		}
+
+		template<auto WindowId>
 		void framebuffer_size_changed(ui::wsapi::fb_size size)
 		{
 			if(!m_theme_is_up_to_date) [[unlikely]]

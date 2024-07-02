@@ -61,5 +61,10 @@ namespace terraformer::ui::wsapi
 	{
 		std::string description;
 	};
+
+	struct typing_event
+	{
+		uint32_t codepoint;
+	};
 }
 #endif
