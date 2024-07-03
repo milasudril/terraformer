@@ -135,6 +135,68 @@ namespace terraformer::ui::main
 		return scaling{preliminary_width, constraints.height.min, 1.0f};
 	}
 
+	class input_device_grab;
+
+	template<class T>
+	concept input_event_sink = requires(
+		T& obj,
+		wsapi::cursor_motion_event const& cme,
+		wsapi::mouse_button_event const& mbe
+	)
+	{
+		{ obj.handle_event(cme) } -> std::same_as<input_device_grab>;
+		{ obj.handle_event(mbe) } -> std::same_as<input_device_grab>;
+	};
+
+	using cursor_motion_event_callback = input_device_grab (*)(void*, wsapi::cursor_motion_event const&);
+	using mouse_button_event_callback = input_device_grab (*)(void*, wsapi::mouse_button_event const&);
+
+	class input_device_grab
+	{
+	public:
+		struct widget_vtable
+		{
+			cursor_motion_event_callback on_cursor_moved;
+			mouse_button_event_callback on_mouse_button_activated;
+		};
+
+		template<class T>
+		requires input_event_sink<T>
+		static constexpr auto make_widget_vtable()
+		{
+			return widget_vtable{
+				.on_cursor_moved = [](void* widget_ptr, wsapi::cursor_motion_event const& cme) {
+					return static_cast<T*>(widget_ptr)->handle_event(cme);
+				},
+				.on_mouse_button_activated = [](void* widget_ptr, wsapi::mouse_button_event const& mbe) {
+					return static_cast<T*>(widget_ptr)->handle_event(mbe);
+				}
+			};
+		}
+
+		template<class T>
+		static constexpr widget_vtable vt = make_widget_vtable<T>();
+
+		input_device_grab() = default;
+
+		template<class T>
+		explicit input_device_grab(std::reference_wrapper<T> widget):
+			m_widget_pointer{&widget.get()},
+			m_vtable{vt<T>}
+		{}
+
+		auto handle_event(wsapi::cursor_motion_event const& cme) const
+		{ return m_vtable->on_cursor_moved(m_widget_pointer, cme); }
+
+		auto handle_event(wsapi::mouse_button_event const& mbe) const
+		{ return m_vtable->on_mouse_button_activated(m_widget_pointer, mbe); }
+
+
+	private:
+		void* m_widget_pointer = nullptr;
+		widget_vtable* m_vtable = nullptr;
+	};
+
 	template<class T, class ... OutputRectangle>
 	concept widget = requires(
 		T& obj,
@@ -154,55 +216,6 @@ namespace terraformer::ui::main
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.get_size_constraints() } -> same_as_unqual<widget_size_constraints>;
 		{ obj.theme_updated(resources) } -> std::same_as<void>;
-	};
-
-	struct input_device_grab_widget_vtable
-	{
-	};
-
-	class input_device_grab
-	{
-	public:
-		struct widget_vtable
-		{
-			input_device_grab (*cursor_motion_event_handler)(void*, wsapi::cursor_motion_event const&);
-			input_device_grab (*mouse_button_event_handler)(void*, wsapi::mouse_button_event const&);
-		};
-
-		template<class T>
-		static constexpr auto make_widget_vtable()
-		{
-			return widget_vtable{
-				.cursor_motion_event_handler = [](void* widget_ptr, wsapi::cursor_motion_event const& cme) {
-					return static_cast<T*>(widget_ptr)->handle_event(cme);
-				},
-				.mouse_button_event_handler = [](void* widget_ptr, wsapi::mouse_button_event const& mbe) {
-					return static_cast<T*>(widget_ptr)->handle_event(mbe);
-				}
-			};
-		}
-
-		template<class T>
-		static constexpr widget_vtable vt = make_widget_vtable<T>();
-
-		input_device_grab() = default;
-
-		template<class T>
-		explicit input_device_grab(std::reference_wrapper<T> widget):
-			m_widget_pointer{&widget.get()},
-			m_vtable{vt<T>}
-		{}
-
-		auto handle_event(wsapi::cursor_motion_event const& cme) const
-		{ return m_vtable->cursor_motion_event_handler(m_widget_pointer, cme); }
-
-		auto handle_event(wsapi::mouse_button_event const& mbe) const
-		{ return m_vtable->mouse_button_event_handler(m_widget_pointer, mbe); }
-
-
-	private:
-		void* m_widget_pointer = nullptr;
-		widget_vtable* m_vtable = nullptr;
 	};
 
 
