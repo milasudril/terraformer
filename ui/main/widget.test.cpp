@@ -274,22 +274,91 @@ TESTCASE(terraformer_ui_main_widget_size_minimize_width_aspect_ratio_too_heigh)
 	{}
 }
 
-TESTCASE(terraformer_ui_main_widget_escape_token_empty)
+TESTCASE(terraformer_ui_main_input_device_grab)
 {
-	terraformer::ui::main::escape_token obj{};
-	EXPECT_NE(obj, 12);
-	EXPECT_NE(12, obj);
+	terraformer::ui::main::input_device_grab grab;
+
+	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_keyboard), false);
+	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_mouse), false);
 }
 
-TESTCASE(terraformer_ui_main_widget_default_escape_token)
+namespace
 {
-	terraformer::ui::main::escape_token obj{std::type_identity<terraformer::ui::main::default_escape_token_tag>{}};
-	EXPECT_EQ(obj, terraformer::ui::main::default_escape_token);
+	struct dummy_widget
+	{
+		void handle_event(
+			terraformer::ui::wsapi::mouse_button_event const& mbe,
+			terraformer::ui::main::input_device_grab& grab
+		)
+		{
+			mbe_received = &mbe;
+			grab_received = &grab;
+		}
+
+		void handle_event(
+			terraformer::ui::wsapi::cursor_motion_event const& cme,
+			terraformer::ui::main::input_device_grab& grab
+		)
+		{
+			cme_received = &cme;
+			grab_received = &grab;
+		}
+
+		terraformer::ui::wsapi::mouse_button_event const* mbe_received = nullptr;
+		terraformer::ui::wsapi::cursor_motion_event const* cme_received = nullptr;
+		terraformer::ui::main::input_device_grab* grab_received = nullptr;
+	};
 }
 
-TESTCASE(terraformer_ui_main_widget_escape_token_with_value)
+TESTCASE(terraformer_ui_main_input_device_grab_grab_keyboard)
 {
-	terraformer::ui::main::escape_token obj{std::type_identity<int>{}, 1234};
-	EXPECT_EQ(obj, 1234);
-	EXPECT_EQ(1234, obj);
+	dummy_widget my_widget;
+	terraformer::ui::main::input_device_grab grab{
+		my_widget,
+		terraformer::ui::main::input_device_mask::default_keyboard
+	};
+
+	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_keyboard), true);
+	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_mouse), false);
+}
+
+
+TESTCASE(terraformer_ui_main_input_device_grab_grab_mouse)
+{
+	dummy_widget my_widget;
+	terraformer::ui::main::input_device_grab grab{
+		my_widget,
+		terraformer::ui::main::input_device_mask::default_mouse
+	};
+
+	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_keyboard), false);
+	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_mouse), true);
+
+	terraformer::ui::wsapi::mouse_button_event mbe{};
+	grab.handle_event(mbe);
+	EXPECT_EQ(my_widget.mbe_received, &mbe);
+	EXPECT_EQ(my_widget.cme_received, nullptr);
+	EXPECT_EQ(my_widget.grab_received, &grab);
+
+	my_widget.mbe_received = nullptr;
+	my_widget.grab_received = nullptr;
+
+	terraformer::ui::wsapi::cursor_motion_event cme{};
+	grab.handle_event(cme);
+	EXPECT_EQ(my_widget.mbe_received, nullptr);
+	EXPECT_EQ(my_widget.cme_received, &cme);
+	EXPECT_EQ(my_widget.grab_received, &grab);
+}
+
+TESTCASE(terraformer_ui_main_input_device_grab_grab_keyboard_and_mouse)
+{
+	dummy_widget my_widget;
+	terraformer::ui::main::input_device_grab grab{
+		my_widget,
+		 terraformer::ui::main::input_device_mask::default_mouse
+		|terraformer::ui::main::input_device_mask::default_keyboard
+	};
+
+	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_keyboard), true);
+	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_mouse), true);
 }

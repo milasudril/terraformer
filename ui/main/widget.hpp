@@ -6,6 +6,7 @@
 #include "lib/common/object_tree.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
+#include "lib/common/bitmask_enum.hpp"
 #include "lib/any/unique_any.hpp"
 
 #include <utility>
@@ -18,44 +19,6 @@ namespace terraformer::ui::main
 	{
 		size_t section_level;
 		size_t paragraph_index;
-	};
-
-	struct default_escape_token_tag
-	{
-		constexpr bool operator==(default_escape_token_tag) const
-		{ return true; }
-
-		constexpr bool operator!=(default_escape_token_tag) const
-		{ return false; }
-	};
-
-	constexpr default_escape_token_tag default_escape_token;
-
-	class escape_token
-	{
-	public:
-		escape_token() noexcept = default;
-
-		template<class T, class ... Args>
-		explicit escape_token(std::type_identity<T>, Args&&... args):
-			m_object{std::type_identity<T>{}, std::forward<Args>(args)...}
-		{}
-
-		template<class T>
-		bool operator==(T const& other) const
-		{
-			auto ptr = m_object.get_if<T>();
-			if(ptr == nullptr)
-			{ return false; }
-			return *ptr == other;
-		}
-
-		template<class T>
-		bool operator!=(T const& other) const
-		{ return !(*this == other); }
-
-	private:
-		unique_any m_object;
 	};
 
 	struct widget_geometry
@@ -141,15 +104,24 @@ namespace terraformer::ui::main
 	concept input_event_sink = requires(
 		T& obj,
 		wsapi::cursor_motion_event const& cme,
-		wsapi::mouse_button_event const& mbe
+		wsapi::mouse_button_event const& mbe,
+		input_device_grab& current_grab
 	)
 	{
-		{ obj.handle_event(cme) } -> std::same_as<input_device_grab>;
-		{ obj.handle_event(mbe) } -> std::same_as<input_device_grab>;
+		{ obj.handle_event(cme, current_grab) } -> std::same_as<void>;
+		{ obj.handle_event(mbe, current_grab) } -> std::same_as<void>;
 	};
 
-	using cursor_motion_event_callback = input_device_grab (*)(void*, wsapi::cursor_motion_event const&);
-	using mouse_button_event_callback = input_device_grab (*)(void*, wsapi::mouse_button_event const&);
+	using cursor_motion_event_callback = void (*)(void*, wsapi::cursor_motion_event const&, input_device_grab&);
+	using mouse_button_event_callback = void (*)(void*, wsapi::mouse_button_event const&, input_device_grab&);
+
+	enum class input_device_mask:unsigned int {
+		none = 0x0,
+		default_keyboard = 0x1,
+		default_mouse = 0x2
+	};
+
+	consteval void enable_bitmask_operators(input_device_mask){}
 
 	class input_device_grab
 	{
@@ -165,11 +137,11 @@ namespace terraformer::ui::main
 		static constexpr auto make_widget_vtable()
 		{
 			return widget_vtable{
-				.on_cursor_moved = [](void* widget_ptr, wsapi::cursor_motion_event const& cme) {
-					return static_cast<T*>(widget_ptr)->handle_event(cme);
+				.on_cursor_moved = [](void* widget_ptr, wsapi::cursor_motion_event const& cme, input_device_grab& grab) {
+					return static_cast<T*>(widget_ptr)->handle_event(cme, grab);
 				},
-				.on_mouse_button_activated = [](void* widget_ptr, wsapi::mouse_button_event const& mbe) {
-					return static_cast<T*>(widget_ptr)->handle_event(mbe);
+				.on_mouse_button_activated = [](void* widget_ptr, wsapi::mouse_button_event const& mbe, input_device_grab& grab) {
+					return static_cast<T*>(widget_ptr)->handle_event(mbe, grab);
 				}
 			};
 		}
@@ -180,21 +152,26 @@ namespace terraformer::ui::main
 		input_device_grab() = default;
 
 		template<class T>
-		explicit input_device_grab(std::reference_wrapper<T> widget):
-			m_widget_pointer{&widget.get()},
-			m_vtable{vt<T>}
+		requires input_event_sink<T>
+		explicit input_device_grab(T& widget, input_device_mask grab_devices):
+			m_widget_pointer{&widget},
+			m_vtable{&vt<T>},
+			m_active_devices{grab_devices}
 		{}
 
-		auto handle_event(wsapi::cursor_motion_event const& cme) const
-		{ return m_vtable->on_cursor_moved(m_widget_pointer, cme); }
+		auto handle_event(wsapi::cursor_motion_event const& cme)
+		{ return m_vtable->on_cursor_moved(m_widget_pointer, cme, *this); }
 
-		auto handle_event(wsapi::mouse_button_event const& mbe) const
-		{ return m_vtable->on_mouse_button_activated(m_widget_pointer, mbe); }
+		auto handle_event(wsapi::mouse_button_event const& mbe)
+		{ return m_vtable->on_mouse_button_activated(m_widget_pointer, mbe, *this); }
 
+		bool has_device(input_device_mask device) const
+		{ return static_cast<bool>(m_active_devices & device); }
 
 	private:
 		void* m_widget_pointer = nullptr;
-		widget_vtable* m_vtable = nullptr;
+		widget_vtable const* m_vtable = nullptr;
+		input_device_mask m_active_devices = input_device_mask::none;
 	};
 
 	template<class T, class ... OutputRectangle>
