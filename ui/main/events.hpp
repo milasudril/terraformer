@@ -18,7 +18,7 @@ namespace terraformer::ui::main
 		double y;
 	};
 
-	enum class button_action:int{press, release};
+	enum class mouse_button_action:int{press, release};
 
 	enum class modifier_keys
 	{
@@ -37,7 +37,7 @@ namespace terraformer::ui::main
 	{
 		cursor_position where;
 		int button;
-		button_action action;
+		mouse_button_action action;
 		modifier_keys modifiers;
 	};
 
@@ -69,7 +69,7 @@ namespace terraformer::ui::main
 	struct keyboard_button_event
 	{
 		keyboard_button which;
-		button_action action;
+		mouse_button_action action;
 		modifier_keys modifiers;
 	};
 }

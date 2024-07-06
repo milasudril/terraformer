@@ -74,11 +74,11 @@ namespace terraformer::ui::widgets
 			{
 				switch(mbe.action)
 				{
-					case main::button_action::press:
+					case main::mouse_button_action::press:
 						m_temp_state = state::pressed;
 						break;
 
-					case main::button_action::release:
+					case main::mouse_button_action::release:
 						m_temp_state.reset();
 						m_on_activated(*this);
 						break;
