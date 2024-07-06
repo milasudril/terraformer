@@ -60,7 +60,7 @@ namespace terraformer::ui::widgets
 		void handle_event(wsapi::cursor_enter_leave_event const&)
 		{ }
 
-		bool handle_event(wsapi::cursor_motion_event const& event)
+		void handle_event(wsapi::cursor_motion_event const& event, main::input_device_grab& grab)
 		{
 			// TODO: event.where must be converted to widget coordinates
 
@@ -82,7 +82,7 @@ namespace terraformer::ui::widgets
 			}
 
 			if(i == widget_list::npos)
-			{ return false; }
+			{ return; }
 
 			if(i != old_index)
 			{
@@ -97,20 +97,20 @@ namespace terraformer::ui::widgets
 
  			auto const cme_handlers = m_widgets.cursor_motion_callbacks();
 
-			return cme_handlers[i](widgets[i], event);
+			cme_handlers[i](widgets[i], event, grab);
 		}
 
-		bool handle_event(wsapi::mouse_button_event const& event)
+		void handle_event(wsapi::mouse_button_event const& event, main::input_device_grab& grab)
 		{
 			// TODO: event.where must be converted to widget coordinates
 			auto const i = find(event.where, m_widgets);
 			if(i == widget_list::npos)
-			{ return false; }
+			{ return; }
 
 			auto const widgets = m_widgets.widget_pointers();
 			auto const mbe_handlers = m_widgets.mouse_button_callbacks();
 
-			return mbe_handlers[i](widgets[i], event);
+			mbe_handlers[i](widgets[i], event, grab);
 		}
 
 		void theme_updated(object_dict const& new_theme) const

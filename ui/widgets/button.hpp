@@ -65,10 +65,10 @@ namespace terraformer::ui::widgets
 			}
 		}
 
-		bool handle_event(wsapi::cursor_motion_event const&)
-		{ return false; }
+		void handle_event(wsapi::cursor_motion_event const&, main::input_device_grab&)
+		{ }
 
-		bool handle_event(wsapi::mouse_button_event const& mbe)
+		void handle_event(wsapi::mouse_button_event const& mbe, main::input_device_grab&)
 		{
 			if(mbe.button == 0)
 			{
@@ -84,8 +84,6 @@ namespace terraformer::ui::widgets
 						break;
 				}
 			}
-
-			return false;
 		}
 
 		main::widget_size_constraints get_size_constraints() const;

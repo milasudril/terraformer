@@ -175,12 +175,10 @@ namespace terraformer::ui::main
 	};
 
 	template<class T, class ... OutputRectangle>
-	concept widget = requires(
+	concept widget = input_event_sink<T> && requires(
 		T& obj,
 		wsapi::fb_size size,
 		wsapi::cursor_enter_leave_event const& cele,
-		wsapi::cursor_motion_event const& cme,
-		wsapi::mouse_button_event const& mbe,
 		widget_instance_info const& instance_info,
 		object_dict const& resources,
 		OutputRectangle&... surface
@@ -188,8 +186,6 @@ namespace terraformer::ui::main
 	{
 		{ (..., obj.prepare_for_presentation(surface, instance_info, resources)) } -> std::same_as<void>;
 		{ obj.handle_event(cele) } -> std::same_as<void>;
-		{ obj.handle_event(cme) } -> std::same_as<bool>;
-		{ obj.handle_event(mbe) } -> std::same_as<bool>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.get_size_constraints() } -> same_as_unqual<widget_size_constraints>;
 		{ obj.theme_updated(resources) } -> std::same_as<void>;
@@ -201,8 +197,8 @@ namespace terraformer::ui::main
 		template<class OutputRectangle>
 		void prepare_for_presentation(OutputRectangle&&, widget_instance_info const&, object_dict const&) const {}
 		void handle_event(wsapi::cursor_enter_leave_event const&);
-		[[nodiscard]] bool handle_event(wsapi::cursor_motion_event const&) const { return false; }
-		[[nodiscard]] bool handle_event(wsapi::mouse_button_event const&) const { return false; }
+		void handle_event(wsapi::cursor_motion_event const&, input_device_grab&) const { }
+		void handle_event(wsapi::mouse_button_event const&, input_device_grab&) const { }
 		void handle_event(wsapi::fb_size) const { }
 		[[nodiscard]] widget_size_constraints get_size_constraints() const
 		{ return widget_size_constraints{}; }

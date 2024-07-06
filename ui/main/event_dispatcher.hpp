@@ -24,11 +24,11 @@ namespace terraformer::ui::main
 
 		template<auto WindowId>
 		void handle_mouse_button_event(wsapi::mouse_button_event const& event)
-		{ value_of(m_widget_container).handle_event(event); }
+		{ value_of(m_widget_container).handle_event(event, m_current_grab); }
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(wsapi::cursor_motion_event const& event)
-		{ value_of(m_widget_container).handle_event(event); }
+		{ value_of(m_widget_container).handle_event(event, m_current_grab); }
 
 		template<auto WindowId>
 		void window_is_closing()
@@ -107,6 +107,8 @@ namespace terraformer::ui::main
 		ErrorHandler m_error_handler;
 		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle{};
 		bool m_theme_is_up_to_date = false;
+
+		input_device_grab m_current_grab{};
 	};
 }
 

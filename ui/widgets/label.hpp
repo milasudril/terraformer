@@ -45,11 +45,11 @@ namespace terraformer::ui::widgets
 		void handle_event(wsapi::cursor_enter_leave_event const&)
 		{ }
 
-		bool handle_event(wsapi::cursor_motion_event const&)
-		{ return false; }
+		void handle_event(wsapi::cursor_motion_event const&, main::input_device_grab&)
+		{ }
 
-		bool handle_event(wsapi::mouse_button_event const&)
-		{ return false; }
+		void handle_event(wsapi::mouse_button_event const&, main::input_device_grab&)
+		{ }
 
 		main::widget_size_constraints get_size_constraints() const;
 

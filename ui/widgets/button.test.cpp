@@ -99,12 +99,17 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 		terraformer::ui::widgets::button::state::released
 	);
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 0,
-		.action = terraformer::ui::wsapi::button_action::press,
-		.modifiers = {}
-	});
+	terraformer::ui::main::input_device_grab grab{};
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::wsapi::button_action::press,
+			.modifiers = {}
+		},
+		grab
+	);
+
 	EXPECT_EQ(my_button.value(), false);
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 0);
@@ -113,12 +118,15 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 		terraformer::ui::widgets::button::state::pressed
 	);
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 0,
-		.action = terraformer::ui::wsapi::button_action::release,
-		.modifiers = {}
-	});
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::wsapi::button_action::release,
+			.modifiers = {}
+		},
+		grab
+	);
 	EXPECT_EQ(my_button.value(), false);
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 1);
@@ -155,12 +163,16 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 		terraformer::ui::widgets::button::state::pressed
 	);
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 0,
-		.action = terraformer::ui::wsapi::button_action::press,
-		.modifiers = {}
-	});
+	terraformer::ui::main::input_device_grab grab{};
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::wsapi::button_action::press,
+			.modifiers = {}
+		},
+		grab
+	);
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), true);
@@ -169,12 +181,15 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 		terraformer::ui::widgets::button::state::pressed
 	);
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 0,
-		.action = terraformer::ui::wsapi::button_action::release,
-		.modifiers = {}
-	});
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::wsapi::button_action::release,
+			.modifiers = {}
+		},
+		grab
+	);
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 1);
 	EXPECT_EQ(my_button.value(), true);
@@ -194,12 +209,16 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 	});
 	my_button.theme_updated(create_render_resources());
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 0,
-		.action = terraformer::ui::wsapi::button_action::release,
-		.modifiers = {}
-	});
+	terraformer::ui::main::input_device_grab grab{};
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::wsapi::button_action::release,
+			.modifiers = {}
+		},
+		grab
+	);
 	EXPECT_EQ(my_button.value(), false);
 	auto const resources = create_render_resources();
 	output_rect<dummy_texture<0>> rect{};
@@ -239,12 +258,16 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 		terraformer::ui::widgets::button::state::released
 	);
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 1,
-		.action = terraformer::ui::wsapi::button_action::press,
-		.modifiers = {}
-	});
+	terraformer::ui::main::input_device_grab grab{};
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 1,
+			.action = terraformer::ui::wsapi::button_action::press,
+			.modifiers = {}
+		},
+		grab
+	);
 
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 0);
@@ -274,12 +297,16 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	auto const resources = create_render_resources();
 	output_rect<dummy_texture<0>> rect{};
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 0,
-		.action = terraformer::ui::wsapi::button_action::press,
-		.modifiers = {}
-	});
+	terraformer::ui::main::input_device_grab grab{};
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::wsapi::button_action::press,
+			.modifiers = {}
+		},
+		grab
+	);
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
@@ -340,12 +367,16 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		terraformer::ui::widgets::button::state::pressed
 	);
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 0,
-		.action = terraformer::ui::wsapi::button_action::press,
-		.modifiers = {}
-	});
+	terraformer::ui::main::input_device_grab grab{};
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::wsapi::button_action::press,
+			.modifiers = {}
+		},
+		grab
+	);
 	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{}, resources);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
@@ -386,8 +417,8 @@ TESTCASE(terraformer_ui_widgets_button_handle_cme)
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
 	});
-
-	my_button.handle_event(terraformer::ui::wsapi::cursor_motion_event{});
+	terraformer::ui::main::input_device_grab grab{};
+	my_button.handle_event(terraformer::ui::wsapi::cursor_motion_event{}, grab);
 	EXPECT_EQ(callcount, 0);
 }
 
@@ -440,12 +471,16 @@ TESTCASE(terraformer_ui_widgets_toggle_button_on_value_changed)
 		EXPECT_EQ(callcount, 0);
 	}
 
-	my_button.handle_event(terraformer::ui::wsapi::mouse_button_event{
-		.where = terraformer::ui::wsapi::cursor_position{},
-		.button = 0,
-		.action = terraformer::ui::wsapi::button_action::release,
-		.modifiers = {}
-	});
+	terraformer::ui::main::input_device_grab grab{};
+	my_button.handle_event(
+		terraformer::ui::wsapi::mouse_button_event{
+			.where = terraformer::ui::wsapi::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::wsapi::button_action::release,
+			.modifiers = {}
+		},
+		grab
+	);
 	EXPECT_EQ(callcount, 1);
 }
 
