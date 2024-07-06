@@ -63,5 +63,14 @@ namespace terraformer::ui::main
 	{
 		uint32_t codepoint;
 	};
+
+	enum class keyboard_button{};
+
+	struct keyboard_button_event
+	{
+		keyboard_button which;
+		button_action action;
+		modifier_keys modifiers;
+	};
 }
 #endif
