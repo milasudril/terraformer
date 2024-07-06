@@ -52,45 +52,43 @@ namespace terraformer::ui::widgets
 			object_dict const& render_resources
 		);
 
-		void handle_event(wsapi::cursor_enter_leave_event const& cle)
+		void handle_event(main::cursor_enter_leave_event const& cle)
 		{
 			switch(cle.direction)
 			{
-				case wsapi::cursor_enter_leave::leave:
+				case main::cursor_enter_leave::leave:
 					m_temp_state = std::nullopt;
 					break;
 
-				case wsapi::cursor_enter_leave::enter:
+				case main::cursor_enter_leave::enter:
 					break;
 			}
 		}
 
-		bool handle_event(wsapi::cursor_motion_event const&)
-		{ return false; }
+		void handle_event(main::cursor_motion_event const&)
+		{ }
 
-		bool handle_event(wsapi::mouse_button_event const& mbe)
+		void handle_event(main::mouse_button_event const& mbe)
 		{
 			if(mbe.button == 0)
 			{
 				switch(mbe.action)
 				{
-					case wsapi::button_action::press:
+					case main::button_action::press:
 						m_temp_state = state::pressed;
 						break;
 
-					case wsapi::button_action::release:
+					case main::button_action::release:
 						m_temp_state.reset();
 						m_on_activated(*this);
 						break;
 				}
 			}
-
-			return false;
 		}
 
 		main::widget_size_constraints get_size_constraints() const;
 
-		void handle_event(wsapi::fb_size size)
+		void handle_event(main::fb_size size)
 		{
 			m_current_size = size;
 			m_dirty_bits |= host_textures_dirty;
@@ -117,7 +115,7 @@ namespace terraformer::ui::widgets
 		generic_unique_texture m_background_pressed;
 		generic_unique_texture m_foreground;
 
-		wsapi::fb_size m_current_size;
+		main::fb_size m_current_size;
 		image m_background_released_host;
 		image m_background_pressed_host;
 		image m_foreground_host;

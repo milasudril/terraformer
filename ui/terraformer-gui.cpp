@@ -32,7 +32,7 @@ namespace
 	struct error_handler
 	{
 		template<auto>
-		void error_detected(terraformer::ui::wsapi::error_message const& msg) noexcept
+		void error_detected(terraformer::ui::main::error_message const& msg) noexcept
 		{
 			fprintf(stderr, "%s\n", msg.description.c_str());
 		}

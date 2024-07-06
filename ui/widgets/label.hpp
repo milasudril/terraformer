@@ -42,18 +42,18 @@ namespace terraformer::ui::widgets
 			object_dict const& render_resources
 		);
 
-		void handle_event(wsapi::cursor_enter_leave_event const&)
+		void handle_event(main::cursor_enter_leave_event const&)
 		{ }
 
-		bool handle_event(wsapi::cursor_motion_event const&)
-		{ return false; }
+		void handle_event(main::cursor_motion_event const&)
+		{ }
 
-		bool handle_event(wsapi::mouse_button_event const&)
-		{ return false; }
+		void handle_event(main::mouse_button_event const&)
+		{ }
 
 		main::widget_size_constraints get_size_constraints() const;
 
-		void handle_event(wsapi::fb_size size)
+		void handle_event(main::fb_size size)
 		{
 			m_current_size = size;
 			m_dirty_bits |= host_textures_dirty;
@@ -74,7 +74,7 @@ namespace terraformer::ui::widgets
 
 		generic_unique_texture m_foreground;
 
-		wsapi::fb_size m_current_size;
+		main::fb_size m_current_size;
 		image m_foreground_host;
 	};
 
