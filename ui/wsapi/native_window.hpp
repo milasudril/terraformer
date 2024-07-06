@@ -114,6 +114,34 @@ namespace terraformer::ui::wsapi
 		return ret;
 	}
 
+	constexpr main::mouse_button_action to_mouse_button_action(int action)
+	{
+		assert(action == GLFW_PRESS || action == GLFW_RELEASE);
+		switch(action)
+		{
+			case GLFW_PRESS:
+				return main::mouse_button_action::press;
+			case GLFW_RELEASE:
+				return main::mouse_button_action::release;
+		}
+		__builtin_unreachable();
+	}
+
+	constexpr main::keyboard_button_action to_keyboard_button_action(int action)
+	{
+		assert(action == GLFW_PRESS || action == GLFW_RELEASE || action == GLFW_REPEAT);
+		switch(action)
+		{
+			case GLFW_PRESS:
+				return main::keyboard_button_action::press;
+			case GLFW_RELEASE:
+				return main::keyboard_button_action::release;
+			case GLFW_REPEAT:
+				return main::keyboard_button_action::repeat;
+		}
+		__builtin_unreachable();
+	}
+
 	template<class RenderContextConfiguration = no_api_config>
 	class native_window
 	{
@@ -190,14 +218,13 @@ namespace terraformer::ui::wsapi
 					m_window.get(),
 					[](GLFWwindow* window, int button, int action, int modifiers){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-						assert(action == GLFW_PRESS || action == GLFW_RELEASE);
 						call_and_catch<WindowId>(
 							&EventHandler::template handle_mouse_button_event<WindowId>,
 							*event_handler,
 							main::mouse_button_event{
 								.where = get_cursor_position(window),
 								.button = button,
-								.action = action == GLFW_PRESS? main::mouse_button_action::press : main::mouse_button_action::release,
+								.action = to_mouse_button_action(action),
 								.modifiers = to_keymask(modifiers)
 							}
 						);
@@ -262,6 +289,27 @@ namespace terraformer::ui::wsapi
 							*event_handler,
 							main::typing_event{
 								.codepoint = cp
+							}
+						);
+					}
+				);
+			}
+
+			if constexpr (requires(main::keyboard_button_event const& event) {
+				{eh.get().template handle_keyboard_button_event<WindowId>(event)}->std::same_as<void>;
+			})
+			{
+				glfwSetKeyCallback(
+					m_window.get(),
+					[](GLFWwindow* window, int key, int, int action, int mods){
+						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+						call_and_catch<WindowId>(
+							&EventHandler::template handle_keyboard_button_event<WindowId>,
+							*event_handler,
+							main::keyboard_button_event{
+								.button = key,
+								.action = to_keyboard_button_action(action),
+								.modifiers = to_keymask(mods)
 							}
 						);
 					}

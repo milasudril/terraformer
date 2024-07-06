@@ -64,12 +64,17 @@ namespace terraformer::ui::main
 		uint32_t codepoint;
 	};
 
-	enum class keyboard_button{};
+	enum class keyboard_button_action:int
+	{
+		press,
+		release,
+		repeat
+	};
 
 	struct keyboard_button_event
 	{
-		keyboard_button which;
-		mouse_button_action action;
+		int button;
+		keyboard_button_action action;
 		modifier_keys modifiers;
 	};
 }

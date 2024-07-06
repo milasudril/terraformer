@@ -45,6 +45,12 @@ namespace terraformer::ui::main
 		}
 
 		template<auto WindowId>
+		void handle_keyboard_button_event(keyboard_button_event const& event)
+		{
+			printf("button = %d, action = %d, modifiers = %08x\n", event.button, static_cast<int>(event.action), static_cast<int>(event.modifiers));
+		}
+
+		template<auto WindowId>
 		void framebuffer_size_changed(fb_size size)
 		{
 			if(!m_theme_is_up_to_date) [[unlikely]]
