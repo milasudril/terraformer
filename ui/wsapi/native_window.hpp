@@ -90,26 +90,26 @@ namespace terraformer::ui::wsapi
 		);
 	}
 
-	constexpr modifier_keys to_keymask(int mask)
+	constexpr main::modifier_keys to_keymask(int mask)
 	{
-		modifier_keys ret{};
+		main::modifier_keys ret{};
 		if(mask & GLFW_MOD_SHIFT)
-		{ ret |= modifier_keys::shift; }
+		{ ret |= main::modifier_keys::shift; }
 
 		if(mask & GLFW_MOD_CONTROL)
-		{ ret |= modifier_keys::control; }
+		{ ret |= main::modifier_keys::control; }
 
 		if(mask & GLFW_MOD_ALT)
-		{ ret |= modifier_keys::alt; }
+		{ ret |= main::modifier_keys::alt; }
 
 		if(mask & GLFW_MOD_SUPER)
-		{ ret |= modifier_keys::super; }
+		{ ret |= main::modifier_keys::super; }
 
 		if(mask & GLFW_MOD_CAPS_LOCK)
-		{ ret |= modifier_keys::capslock; }
+		{ ret |= main::modifier_keys::capslock; }
 
 		if(mask & GLFW_MOD_NUM_LOCK)
-		{ ret |= modifier_keys::numlock; }
+		{ ret |= main::modifier_keys::numlock; }
 
 		return ret;
 	}
@@ -159,7 +159,7 @@ namespace terraformer::ui::wsapi
 		template<auto WindowId, class EventHandler>
 		void set_event_handler(std::reference_wrapper<EventHandler> eh)
 		{
-			static_assert(requires(error_message const& msg){{eh.get().template error_detected<WindowId>(msg)}->std::same_as<void>;});
+			static_assert(requires(main::error_message const& msg){{eh.get().template error_detected<WindowId>(msg)}->std::same_as<void>;});
 
 			glfwSetWindowUserPointer(m_window.get(), &eh.get());
 			if constexpr (requires{{eh.get().template window_is_closing<WindowId>()}->std::same_as<void>;})
@@ -170,19 +170,19 @@ namespace terraformer::ui::wsapi
 				});
 			}
 
-			if constexpr (requires(fb_size size){{eh.get().template framebuffer_size_changed<WindowId>(size)}->std::same_as<void>;})
+			if constexpr (requires(main::fb_size size){{eh.get().template framebuffer_size_changed<WindowId>(size)}->std::same_as<void>;})
 			{
 				glfwSetFramebufferSizeCallback(
 					m_window.get(),
 					[](GLFWwindow* window, int w, int h){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-						call_and_catch<WindowId>(&EventHandler::template framebuffer_size_changed<WindowId>, *event_handler, fb_size{w, h});
+						call_and_catch<WindowId>(&EventHandler::template framebuffer_size_changed<WindowId>, *event_handler, main::fb_size{w, h});
 					}
 				);
 				eh.get().template framebuffer_size_changed<WindowId>(get_fb_size());
 			}
 
-			if constexpr (requires(mouse_button_event const& event){
+			if constexpr (requires(main::mouse_button_event const& event){
 				{eh.get().template handle_mouse_button_event<WindowId>(event)}->std::same_as<void>;
 			})
 			{
@@ -194,10 +194,10 @@ namespace terraformer::ui::wsapi
 						call_and_catch<WindowId>(
 							&EventHandler::template handle_mouse_button_event<WindowId>,
 							*event_handler,
-							mouse_button_event{
+							main::mouse_button_event{
 								.where = get_cursor_position(window),
 								.button = button,
-								.action = action == GLFW_PRESS? button_action::press : button_action::release,
+								.action = action == GLFW_PRESS? main::button_action::press : main::button_action::release,
 								.modifiers = to_keymask(modifiers)
 							}
 						);
@@ -205,7 +205,7 @@ namespace terraformer::ui::wsapi
 				);
 			}
 
-			if constexpr (requires(cursor_motion_event const& event){
+			if constexpr (requires(main::cursor_motion_event const& event){
 				{eh.get().template handle_cursor_motion_event<WindowId>(event)} -> std::same_as<void>;
 			})
 			{
@@ -217,7 +217,7 @@ namespace terraformer::ui::wsapi
 						call_and_catch<WindowId>(
 							&EventHandler::template handle_cursor_motion_event<WindowId>,
 							*event_handler,
-							cursor_motion_event{
+							main::cursor_motion_event{
 								.where{
 									.x = x,
 									.y = -y
@@ -228,7 +228,7 @@ namespace terraformer::ui::wsapi
 				);
 			}
 
-			if constexpr (requires(cursor_enter_leave_event const& event){
+			if constexpr (requires(main::cursor_enter_leave_event const& event){
 				{eh.get().handle_cursor_enter_leave_event(event)}->std::same_as<void>;
 			})
 			{
@@ -240,16 +240,16 @@ namespace terraformer::ui::wsapi
 						call_and_catch<WindowId>(
 							&EventHandler::template handle_cursor_enter_leave_event<WindowId>,
 							*event_handler,
-							cursor_enter_leave_event{
+							main::cursor_enter_leave_event{
 								.where = get_cursor_position(window),
-								.direction = direction == GLFW_TRUE? cursor_enter_leave::enter : cursor_enter_leave::leave
+								.direction = direction == GLFW_TRUE? main::cursor_enter_leave::enter : main::cursor_enter_leave::leave
 							}
 						);
 					}
 				);
 			}
 
-			if constexpr (requires(typing_event const& event) {
+			if constexpr (requires(main::typing_event const& event) {
 				{eh.get().template handle_typing_event<WindowId>(event)}->std::same_as<void>;
 			})
 			{
@@ -260,7 +260,7 @@ namespace terraformer::ui::wsapi
 						call_and_catch<WindowId>(
 							&EventHandler::template handle_typing_event<WindowId>,
 							*event_handler,
-							typing_event{
+							main::typing_event{
 								.codepoint = cp
 							}
 						);
@@ -274,12 +274,12 @@ namespace terraformer::ui::wsapi
 
 		auto get_fb_size() const
 		{
-			fb_size ret{};
+			main::fb_size ret{};
 			glfwGetFramebufferSize(m_window.get(), &ret.width, &ret.height);
 			return ret;
 		}
 
-		cursor_position get_cursor_position() const
+		main::cursor_position get_cursor_position() const
 		{ return get_cursor_position(m_window.get()); }
 
 		auto handle() const { return m_window.get(); }
@@ -291,9 +291,9 @@ namespace terraformer::ui::wsapi
 		window_handle m_window;
 		RenderContextConfiguration m_ctxt_cfg;
 
-		static cursor_position get_cursor_position(GLFWwindow* window)
+		static main::cursor_position get_cursor_position(GLFWwindow* window)
 		{
-			cursor_position ret{};
+			main::cursor_position ret{};
 			glfwGetCursorPos(window, &ret.x, &ret.y);
 			ret.y = -ret.y;
 			return ret;
@@ -305,9 +305,9 @@ namespace terraformer::ui::wsapi
 			try
 			{ std::invoke(std::forward<Function>(f), std::forward<EventHandler>(eh), std::forward<Args>(args)...); }
 			catch(std::exception const& e)
-			{ eh.template error_detected<WindowId>(error_message{e.what()}); }
+			{ eh.template error_detected<WindowId>(main::error_message{e.what()}); }
 			catch(char const* msg)
-			{ eh.template error_detected<WindowId>(error_message{msg}); }
+			{ eh.template error_detected<WindowId>(main::error_message{msg}); }
 			catch(...)
 			{
 				fprintf(stderr, "Caught unknown exception\n");

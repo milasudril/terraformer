@@ -4,7 +4,7 @@
 #include "./gl_mesh.hpp"
 #include "./gl_shader.hpp"
 #include "./gl_texture.hpp"
-#include "ui/wsapi/native_window.hpp"
+#include "ui/wsapi/events.hpp"
 
 #include <cassert>
 
@@ -20,7 +20,7 @@ namespace terraformer::ui::drawing_api
 			std::array<rgba_pixel, 8> tints;
 		};
 
-		void set_world_transform(location where, wsapi::fb_size size)
+		void set_world_transform(location where, main::fb_size size)
 		{
 			scaling const s{2.0f/static_cast<float>(size.width), 2.0f/static_cast<float>(size.height), 1.0f};
 			m_program.set_uniform(3, where[0], where[1], where[2], 1.0f)

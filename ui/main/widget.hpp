@@ -31,7 +31,7 @@ namespace terraformer::ui::main
 		[[nodiscard]] constexpr bool operator!=(widget_geometry const&) const = default;
 	};
 
-	[[nodiscard]] inline bool inside(wsapi::cursor_position pos, widget_geometry const& box)
+	[[nodiscard]] inline bool inside(cursor_position pos, widget_geometry const& box)
 	{
 		auto const r = 0.5*box.size;
 		auto const offset_to_origin = (location{0.0f, 0.0f, 0.0f} - box.origin).apply(r);
@@ -103,8 +103,8 @@ namespace terraformer::ui::main
 	template<class T>
 	concept input_event_sink = requires(
 		T& obj,
-		wsapi::cursor_motion_event const& cme,
-		wsapi::mouse_button_event const& mbe,
+		cursor_motion_event const& cme,
+		mouse_button_event const& mbe,
 		input_device_grab& current_grab
 	)
 	{
@@ -112,8 +112,8 @@ namespace terraformer::ui::main
 		{ obj.handle_event(mbe, current_grab) } -> std::same_as<void>;
 	};
 
-	using cursor_motion_event_callback = void (*)(void*, wsapi::cursor_motion_event const&, input_device_grab&);
-	using mouse_button_event_callback = void (*)(void*, wsapi::mouse_button_event const&, input_device_grab&);
+	using cursor_motion_event_callback = void (*)(void*, cursor_motion_event const&, input_device_grab&);
+	using mouse_button_event_callback = void (*)(void*, mouse_button_event const&, input_device_grab&);
 
 	enum class input_device_mask:unsigned int {
 		none = 0x0,
@@ -137,10 +137,10 @@ namespace terraformer::ui::main
 		static constexpr auto make_widget_vtable()
 		{
 			return widget_vtable{
-				.on_cursor_moved = [](void* widget_ptr, wsapi::cursor_motion_event const& cme, input_device_grab& grab) {
+				.on_cursor_moved = [](void* widget_ptr, cursor_motion_event const& cme, input_device_grab& grab) {
 					return static_cast<T*>(widget_ptr)->handle_event(cme, grab);
 				},
-				.on_mouse_button_activated = [](void* widget_ptr, wsapi::mouse_button_event const& mbe, input_device_grab& grab) {
+				.on_mouse_button_activated = [](void* widget_ptr, mouse_button_event const& mbe, input_device_grab& grab) {
 					return static_cast<T*>(widget_ptr)->handle_event(mbe, grab);
 				}
 			};
@@ -159,10 +159,10 @@ namespace terraformer::ui::main
 			m_active_devices{grab_devices}
 		{}
 
-		auto handle_event(wsapi::cursor_motion_event const& cme)
+		auto handle_event(cursor_motion_event const& cme)
 		{ return m_vtable->on_cursor_moved(m_widget_pointer, cme, *this); }
 
-		auto handle_event(wsapi::mouse_button_event const& mbe)
+		auto handle_event(mouse_button_event const& mbe)
 		{ return m_vtable->on_mouse_button_activated(m_widget_pointer, mbe, *this); }
 
 		bool has_device(input_device_mask device) const
@@ -177,8 +177,8 @@ namespace terraformer::ui::main
 	template<class T, class ... OutputRectangle>
 	concept widget = input_event_sink<T> && requires(
 		T& obj,
-		wsapi::fb_size size,
-		wsapi::cursor_enter_leave_event const& cele,
+		fb_size size,
+		cursor_enter_leave_event const& cele,
 		widget_instance_info const& instance_info,
 		object_dict const& resources,
 		OutputRectangle&... surface
@@ -196,10 +196,10 @@ namespace terraformer::ui::main
 	{
 		template<class OutputRectangle>
 		void prepare_for_presentation(OutputRectangle&&, widget_instance_info const&, object_dict const&) const {}
-		void handle_event(wsapi::cursor_enter_leave_event const&);
-		void handle_event(wsapi::cursor_motion_event const&, input_device_grab&) const { }
-		void handle_event(wsapi::mouse_button_event const&, input_device_grab&) const { }
-		void handle_event(wsapi::fb_size) const { }
+		void handle_event(cursor_enter_leave_event const&);
+		void handle_event(cursor_motion_event const&, input_device_grab&) const { }
+		void handle_event(mouse_button_event const&, input_device_grab&) const { }
+		void handle_event(fb_size) const { }
 		[[nodiscard]] widget_size_constraints get_size_constraints() const
 		{ return widget_size_constraints{}; }
 		void theme_updated(object_dict const&) const {}

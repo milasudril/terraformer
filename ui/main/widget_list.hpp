@@ -11,9 +11,9 @@ namespace terraformer::ui::main
 	class widget_list
 	{
 	public:
-		using cursor_enter_leave_callback = void (*)(void*, wsapi::cursor_enter_leave_event const&);
+		using cursor_enter_leave_callback = void (*)(void*, cursor_enter_leave_event const&);
 		using size_constraints_callback = widget_size_constraints (*)(void const*);
-		using size_callback = void (*)(void*, wsapi::fb_size);
+		using size_callback = void (*)(void*, fb_size);
 		using theme_updated_callback = void (*)(void*, object_dict const&);
 
 		using widget_array = multi_array<
@@ -59,19 +59,19 @@ namespace terraformer::ui::main
 				) -> void {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(rect, instance_info, render_resources);
 				}...,
-				[](void* obj, wsapi::cursor_enter_leave_event const& event) -> void{
+				[](void* obj, cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
-				[](void* obj, wsapi::cursor_motion_event const& event, input_device_grab& grab) -> void{
+				[](void* obj, cursor_motion_event const& event, input_device_grab& grab) -> void{
 					static_cast<Widget*>(obj)->handle_event(event, grab);
 				},
-				[](void* obj, wsapi::mouse_button_event const& mbe, input_device_grab& grab) -> void {
+				[](void* obj, mouse_button_event const& mbe, input_device_grab& grab) -> void {
 					static_cast<Widget*>(obj)->handle_event(mbe, grab);
 				},
 				[](void const* obj) -> widget_size_constraints {
 					return static_cast<Widget const*>(obj)->get_size_constraints();
 				},
-				[](void* obj, wsapi::fb_size size) {
+				[](void* obj, fb_size size) {
 					static_cast<Widget*>(obj)->handle_event(size);
 				},
 				[](void* obj, object_dict const& new_theme) {
@@ -213,7 +213,7 @@ namespace terraformer::ui::main
 		}
 	}
 
-	inline auto find(wsapi::cursor_position pos, span<widget_geometry const> geoms)
+	inline auto find(cursor_position pos, span<widget_geometry const> geoms)
 	{
 		return std::ranges::find_if(
 			geoms,
@@ -224,7 +224,7 @@ namespace terraformer::ui::main
 	}
 
 	template<class ... WidgetRenderingResult>
-	auto find(wsapi::cursor_position pos, widget_list<WidgetRenderingResult...> const& widgets)
+	auto find(cursor_position pos, widget_list<WidgetRenderingResult...> const& widgets)
 	{
 		using wl = widget_list<WidgetRenderingResult...>;
 		auto const i = find(pos, widgets.widget_geometries());

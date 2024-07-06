@@ -4,7 +4,7 @@
 #include "lib/common/bitmask_enum.hpp"
 #include <string>
 
-namespace terraformer::ui::wsapi
+namespace terraformer::ui::main
 {
 	struct fb_size
 	{

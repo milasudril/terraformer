@@ -19,15 +19,15 @@ namespace terraformer::ui::main
 	{
 	public:
 		template<auto WindowId>
-		void error_detected(wsapi::error_message const& msg) noexcept
+		void error_detected(error_message const& msg) noexcept
 		{ value_of(m_error_handler).template error_detected<WindowId>(msg); }
 
 		template<auto WindowId>
-		void handle_mouse_button_event(wsapi::mouse_button_event const& event)
+		void handle_mouse_button_event(mouse_button_event const& event)
 		{ value_of(m_widget_container).handle_event(event, m_current_grab); }
 
 		template<auto WindowId>
-		void handle_cursor_motion_event(wsapi::cursor_motion_event const& event)
+		void handle_cursor_motion_event(cursor_motion_event const& event)
 		{ value_of(m_widget_container).handle_event(event, m_current_grab); }
 
 		template<auto WindowId>
@@ -35,17 +35,17 @@ namespace terraformer::ui::main
 		{ value_of(m_window_controller).template window_is_closing<WindowId>(); }
 
 		template<auto WindowId>
-		void handle_cursor_enter_leave_event(ui::wsapi::cursor_enter_leave_event const& event)
+		void handle_cursor_enter_leave_event(cursor_enter_leave_event const& event)
 		{ value_of(m_window_controller).template cursor_at_window_boundary<WindowId>(event); }
 
 		template<auto WindowId>
-		void handle_typing_event(ui::wsapi::typing_event const& event)
+		void handle_typing_event(typing_event const& event)
 		{
 			printf("%u\n", event.codepoint);
 		}
 
 		template<auto WindowId>
-		void framebuffer_size_changed(ui::wsapi::fb_size size)
+		void framebuffer_size_changed(fb_size size)
 		{
 			if(!m_theme_is_up_to_date) [[unlikely]]
 			{

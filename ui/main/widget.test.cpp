@@ -287,7 +287,7 @@ namespace
 	struct dummy_widget
 	{
 		void handle_event(
-			terraformer::ui::wsapi::mouse_button_event const& mbe,
+			terraformer::ui::main::mouse_button_event const& mbe,
 			terraformer::ui::main::input_device_grab& grab
 		)
 		{
@@ -296,7 +296,7 @@ namespace
 		}
 
 		void handle_event(
-			terraformer::ui::wsapi::cursor_motion_event const& cme,
+			terraformer::ui::main::cursor_motion_event const& cme,
 			terraformer::ui::main::input_device_grab& grab
 		)
 		{
@@ -304,8 +304,8 @@ namespace
 			grab_received = &grab;
 		}
 
-		terraformer::ui::wsapi::mouse_button_event const* mbe_received = nullptr;
-		terraformer::ui::wsapi::cursor_motion_event const* cme_received = nullptr;
+		terraformer::ui::main::mouse_button_event const* mbe_received = nullptr;
+		terraformer::ui::main::cursor_motion_event const* cme_received = nullptr;
 		terraformer::ui::main::input_device_grab* grab_received = nullptr;
 	};
 }
@@ -334,7 +334,7 @@ TESTCASE(terraformer_ui_main_input_device_grab_grab_mouse)
 	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_keyboard), false);
 	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_mouse), true);
 
-	terraformer::ui::wsapi::mouse_button_event mbe{};
+	terraformer::ui::main::mouse_button_event mbe{};
 	grab.handle_event(mbe);
 	EXPECT_EQ(my_widget.mbe_received, &mbe);
 	EXPECT_EQ(my_widget.cme_received, nullptr);
@@ -343,7 +343,7 @@ TESTCASE(terraformer_ui_main_input_device_grab_grab_mouse)
 	my_widget.mbe_received = nullptr;
 	my_widget.grab_received = nullptr;
 
-	terraformer::ui::wsapi::cursor_motion_event cme{};
+	terraformer::ui::main::cursor_motion_event cme{};
 	grab.handle_event(cme);
 	EXPECT_EQ(my_widget.mbe_received, nullptr);
 	EXPECT_EQ(my_widget.cme_received, &cme);

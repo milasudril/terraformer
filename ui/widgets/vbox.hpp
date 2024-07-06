@@ -57,10 +57,10 @@ namespace terraformer::ui::widgets
 			);
 		}
 
-		void handle_event(wsapi::cursor_enter_leave_event const&)
+		void handle_event(main::cursor_enter_leave_event const&)
 		{ }
 
-		void handle_event(wsapi::cursor_motion_event const& event, main::input_device_grab& grab)
+		void handle_event(main::cursor_motion_event const& event, main::input_device_grab& grab)
 		{
 			// TODO: event.where must be converted to widget coordinates
 
@@ -74,9 +74,9 @@ namespace terraformer::ui::widgets
 			{
 				cele_handlers[old_index](
 					widgets[old_index],
-					wsapi::cursor_enter_leave_event{
+					main::cursor_enter_leave_event{
 						.where = event.where,
-						.direction = wsapi::cursor_enter_leave::leave
+						.direction = main::cursor_enter_leave::leave
 					}
 				);
 			}
@@ -88,9 +88,9 @@ namespace terraformer::ui::widgets
 			{
 				cele_handlers[i](
 					widgets[i],
-					wsapi::cursor_enter_leave_event{
+					main::cursor_enter_leave_event{
 						.where = event.where,
-						.direction = wsapi::cursor_enter_leave::enter
+						.direction = main::cursor_enter_leave::enter
 					}
 				);
 			}
@@ -100,7 +100,7 @@ namespace terraformer::ui::widgets
 			cme_handlers[i](widgets[i], event, grab);
 		}
 
-		void handle_event(wsapi::mouse_button_event const& event, main::input_device_grab& grab)
+		void handle_event(main::mouse_button_event const& event, main::input_device_grab& grab)
 		{
 			// TODO: event.where must be converted to widget coordinates
 			auto const i = find(event.where, m_widgets);
@@ -122,7 +122,7 @@ namespace terraformer::ui::widgets
 		main::widget_size_constraints const& get_size_constraints() const
 		{ return m_current_size_constraints; }
 
-		wsapi::fb_size handle_event(wsapi::fb_size size)
+		main::fb_size handle_event(main::fb_size size)
 		{
 			return size;
 		}
@@ -166,7 +166,7 @@ namespace terraformer::ui::widgets
 
 					size_callbacks[k](
 						widget_pointers[k],
-						wsapi::fb_size {
+						main::fb_size {
 							.width = static_cast<int>(widget_geometries[k].size[0]),
 							.height = static_cast<int>(widget_geometries[k].size[1])
 						}
