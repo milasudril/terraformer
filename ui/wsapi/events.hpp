@@ -2,10 +2,6 @@
 #define TERRAFORMER_UI_WSAPI_EVENTS_HPP
 
 #include "lib/common/bitmask_enum.hpp"
-
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
-
 #include <string>
 
 namespace terraformer::ui::wsapi
@@ -26,12 +22,13 @@ namespace terraformer::ui::wsapi
 
 	enum class modifier_keys
 	{
-		shift = GLFW_MOD_SHIFT,
-		control = GLFW_MOD_CONTROL,
-		alt = GLFW_MOD_ALT,
-		super = GLFW_MOD_SUPER,
-		capslock = GLFW_MOD_CAPS_LOCK,
-		numlock = GLFW_MOD_NUM_LOCK
+		none = 0x0,
+		shift = 0x1,
+		control = 0x2,
+		alt = 0x4,
+		super = 0x8,
+		capslock = 0x10,
+		numlock = 0x20
 	};
 
 	consteval void enable_bitmask_operators(modifier_keys){}
