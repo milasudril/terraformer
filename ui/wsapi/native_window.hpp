@@ -90,6 +90,30 @@ namespace terraformer::ui::wsapi
 		);
 	}
 
+	constexpr modifier_keys to_keymask(int mask)
+	{
+		modifier_keys ret{};
+		if(mask & GLFW_MOD_SHIFT)
+		{ ret |= modifier_keys::shift; }
+
+		if(mask & GLFW_MOD_CONTROL)
+		{ ret |= modifier_keys::control; }
+
+		if(mask & GLFW_MOD_ALT)
+		{ ret |= modifier_keys::alt; }
+
+		if(mask & GLFW_MOD_SUPER)
+		{ ret |= modifier_keys::super; }
+
+		if(mask & GLFW_MOD_CAPS_LOCK)
+		{ ret |= modifier_keys::capslock; }
+
+		if(mask & GLFW_MOD_NUM_LOCK)
+		{ ret |= modifier_keys::numlock; }
+
+		return ret;
+	}
+
 	template<class RenderContextConfiguration = no_api_config>
 	class native_window
 	{
@@ -174,7 +198,7 @@ namespace terraformer::ui::wsapi
 								.where = get_cursor_position(window),
 								.button = button,
 								.action = action == GLFW_PRESS? button_action::press : button_action::release,
-								.modifiers = modifier_keys{modifiers}
+								.modifiers = to_keymask(modifiers)
 							}
 						);
 					}
