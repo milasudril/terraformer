@@ -4,7 +4,7 @@
 #include "./gl_mesh.hpp"
 #include "./gl_shader.hpp"
 #include "./gl_texture.hpp"
-#include "ui/wsapi/events.hpp"
+#include "ui/main/events.hpp"
 
 #include <cassert>
 

@@ -1,7 +1,8 @@
 #ifndef TERRAFORMER_UI_MAIN_WIDGET_HPP
 #define TERRAFORMER_UI_MAIN_WIDGET_HPP
 
-#include "ui/wsapi/events.hpp"
+#include "./events.hpp"
+
 #include "ui/theming/widget_look.hpp"
 #include "lib/common/object_tree.hpp"
 #include "lib/common/spaces.hpp"

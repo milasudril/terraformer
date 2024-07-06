@@ -2,8 +2,8 @@
 #define TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
 
 #include "./widget.hpp"
+#include "./events.hpp"
 
-#include "ui/wsapi/events.hpp"
 #include "lib/common/value_accessor.hpp"
 
 namespace terraformer::ui::main
