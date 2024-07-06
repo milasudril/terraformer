@@ -197,7 +197,7 @@ namespace terraformer::ui::wsapi
 							main::mouse_button_event{
 								.where = get_cursor_position(window),
 								.button = button,
-								.action = action == GLFW_PRESS? main::button_action::press : main::button_action::release,
+								.action = action == GLFW_PRESS? main::mouse_button_action::press : main::mouse_button_action::release,
 								.modifiers = to_keymask(modifiers)
 							}
 						);

@@ -103,7 +103,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 0,
-			.action = terraformer::ui::main::button_action::press,
+			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
 		}
 	);
@@ -120,7 +120,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 0,
-			.action = terraformer::ui::main::button_action::release,
+			.action = terraformer::ui::main::mouse_button_action::release,
 			.modifiers = {}
 		}
 	);
@@ -166,7 +166,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 0,
-			.action = terraformer::ui::main::button_action::press,
+			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
 		}
 	);
@@ -183,7 +183,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 0,
-			.action = terraformer::ui::main::button_action::release,
+			.action = terraformer::ui::main::mouse_button_action::release,
 			.modifiers = {}
 		}
 	);
@@ -210,7 +210,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 0,
-			.action = terraformer::ui::main::button_action::release,
+			.action = terraformer::ui::main::mouse_button_action::release,
 			.modifiers = {}
 		}
 	);
@@ -257,7 +257,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 1,
-			.action = terraformer::ui::main::button_action::press,
+			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
 		}
 	);
@@ -294,7 +294,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 0,
-			.action = terraformer::ui::main::button_action::press,
+			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
 		}
 	);
@@ -362,7 +362,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 0,
-			.action = terraformer::ui::main::button_action::press,
+			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
 		}
 	);
@@ -464,7 +464,7 @@ TESTCASE(terraformer_ui_widgets_toggle_button_on_value_changed)
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
 			.button = 0,
-			.action = terraformer::ui::main::button_action::release,
+			.action = terraformer::ui::main::mouse_button_action::release,
 			.modifiers = {}
 		}
 	);

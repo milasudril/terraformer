@@ -73,7 +73,7 @@ namespace terraformer::ui::widgets
 		bool handle_event(wsapi::mouse_button_event const& mbe)
 		{
 			if((mbe.button == 0 || mbe.button == 1)
-				&& mbe.action == wsapi::button_action::release)
+				&& mbe.action == wsapi::mouse_button_action::release)
 			{
 				auto const dir = mbe.button == 0 ? -1 : 1;
 				m_current_color += dir;
