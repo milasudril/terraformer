@@ -113,8 +113,13 @@ namespace terraformer::ui::main
 		{ obj.handle_event(mbe, current_grab) } -> std::same_as<void>;
 	};
 
-	using cursor_motion_event_callback = void (*)(void*, cursor_motion_event const&, input_device_grab&);
-	using mouse_button_event_callback = void (*)(void*, mouse_button_event const&, input_device_grab&);
+	template<class T>
+	using event_callback = void (*)(void*, T const&, input_device_grab&);
+
+	using cursor_motion_event_callback = event_callback<cursor_motion_event>;
+	using mouse_button_event_callback = event_callback<mouse_button_event>;
+	using typing_event_callback = event_callback<typing_event>;
+	using keyboard_button_event_callback = event_callback<keyboard_button_event>;
 
 	enum class input_device_mask:unsigned int {
 		none = 0x0,
