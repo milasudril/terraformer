@@ -88,6 +88,9 @@ namespace terraformer::ui::main
 		auto size() const
 		{ return std::size(m_objects); }
 
+		[[nodiscard]] bool empty() const
+		{ return m_objects.empty(); }
+
 		auto widget_pointers() const
 		{ return m_objects.template get<0>(); }
 

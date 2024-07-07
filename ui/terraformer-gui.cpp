@@ -87,8 +87,12 @@ int main(int, char**)
 		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
 	> my_vbox;
 
+	terraformer::ui::widgets::button kaka;
+	kaka.text(u8"Kaka");
+
 	my_vbox.append(std::ref(foo));
 	my_vbox.append(std::ref(bar));
+	my_vbox.append(std::ref(kaka));
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		terraformer::ui::theming::load_default_resources<terraformer::ui::drawing_api::gl_texture>(),
