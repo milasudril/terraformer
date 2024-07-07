@@ -113,6 +113,12 @@ namespace terraformer::ui::widgets
 			mbe_handlers[i](widgets[i], event, grab);
 		}
 
+		void handle_event(main::typing_event const&, main::input_device_grab&)
+		{ }
+
+		void handle_event(main::keyboard_button_event const&, main::input_device_grab&)
+		{ }
+
 		void theme_updated(object_dict const& new_theme) const
 		{
 			using main::theme_updated;
