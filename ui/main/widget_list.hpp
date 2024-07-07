@@ -82,8 +82,8 @@ namespace terraformer::ui::main
 			return *this;
 		}
 
-		constexpr auto first_element_index() const
-		{ return m_objects.first_element_index(); }
+		static constexpr auto first_element_index()
+		{ return widget_array::first_element_index(); }
 
 		auto size() const
 		{ return std::size(m_objects); }

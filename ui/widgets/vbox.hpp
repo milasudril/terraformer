@@ -116,8 +116,11 @@ namespace terraformer::ui::widgets
 		void handle_event(main::typing_event const&, main::input_device_grab&)
 		{ }
 
-		void handle_event(main::keyboard_button_event const&, main::input_device_grab&)
-		{ }
+		void handle_event(main::keyboard_button_event const& kbe, main::input_device_grab&)
+		{
+			auto const dir = get_navigation_direction(kbe);
+			printf("%d\n", dir);
+		}
 
 		void theme_updated(object_dict const& new_theme) const
 		{
@@ -206,6 +209,7 @@ namespace terraformer::ui::widgets
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};
+		widget_list::index_type m_kbd_widget_index = widget_list::first_element_index();
 		main::widget_size_constraints m_current_size_constraints;
 	};
 }
