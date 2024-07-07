@@ -106,11 +106,15 @@ namespace terraformer::ui::main
 		T& obj,
 		cursor_motion_event const& cme,
 		mouse_button_event const& mbe,
+		typing_event const& te,
+		keyboard_button_event const& kbe,
 		input_device_grab& current_grab
 	)
 	{
 		{ obj.handle_event(cme, current_grab) } -> std::same_as<void>;
 		{ obj.handle_event(mbe, current_grab) } -> std::same_as<void>;
+		{ obj.handle_event(te, current_grab) } -> std::same_as<void>;
+		{ obj.handle_event(kbe, current_grab) } -> std::same_as<void>;
 	};
 
 	template<class T>
@@ -136,6 +140,8 @@ namespace terraformer::ui::main
 		{
 			cursor_motion_event_callback on_cursor_moved;
 			mouse_button_event_callback on_mouse_button_activated;
+			typing_event_callback on_typing;
+			keyboard_button_event_callback on_keyboard_button_activated;
 		};
 
 		template<class T>
@@ -143,11 +149,17 @@ namespace terraformer::ui::main
 		static constexpr auto make_widget_vtable()
 		{
 			return widget_vtable{
-				.on_cursor_moved = [](void* widget_ptr, cursor_motion_event const& cme, input_device_grab& grab) {
-					return static_cast<T*>(widget_ptr)->handle_event(cme, grab);
+				.on_cursor_moved = [](void* widget_ptr, cursor_motion_event const& event, input_device_grab& grab) {
+					return static_cast<T*>(widget_ptr)->handle_event(event, grab);
 				},
-				.on_mouse_button_activated = [](void* widget_ptr, mouse_button_event const& mbe, input_device_grab& grab) {
-					return static_cast<T*>(widget_ptr)->handle_event(mbe, grab);
+				.on_mouse_button_activated = [](void* widget_ptr, mouse_button_event const& event, input_device_grab& grab) {
+					return static_cast<T*>(widget_ptr)->handle_event(event, grab);
+				},
+				.on_typing = [](void* widget_ptr, typing_event const& event, input_device_grab& grab) {
+					return static_cast<T*>(widget_ptr)->handle_event(event, grab);
+				},
+				.on_keyboard_button_activated = [](void* widget_ptr, keyboard_button_event const& event, input_device_grab& grab){
+					return static_cast<T*>(widget_ptr)->handle_event(event, grab);
 				}
 			};
 		}
@@ -165,11 +177,17 @@ namespace terraformer::ui::main
 			m_active_devices{grab_devices}
 		{}
 
-		auto handle_event(cursor_motion_event const& cme)
-		{ return m_vtable->on_cursor_moved(m_widget_pointer, cme, *this); }
+		auto handle_event(cursor_motion_event const& event)
+		{ return m_vtable->on_cursor_moved(m_widget_pointer, event, *this); }
 
-		auto handle_event(mouse_button_event const& mbe)
-		{ return m_vtable->on_mouse_button_activated(m_widget_pointer, mbe, *this); }
+		auto handle_event(mouse_button_event const& event)
+		{ return m_vtable->on_mouse_button_activated(m_widget_pointer, event, *this); }
+
+		auto handle_event(typing_event const& event)
+		{ return m_vtable->on_typing(m_widget_pointer, event, *this); }
+
+		auto handle_event(keyboard_button_event const& event)
+		{ return m_vtable->on_keyboard_button_activated(m_widget_pointer, event, *this); }
 
 		bool has_device(input_device_mask device) const
 		{ return static_cast<bool>(m_active_devices & device); }
@@ -205,6 +223,9 @@ namespace terraformer::ui::main
 		void handle_event(cursor_enter_leave_event const&);
 		void handle_event(cursor_motion_event const&, input_device_grab&) const { }
 		void handle_event(mouse_button_event const&, input_device_grab&) const { }
+		void handle_event(typing_event const&, input_device_grab&) const { }
+		void handle_event(keyboard_button_event const&, input_device_grab&) const { }
+
 		void handle_event(fb_size) const { }
 		[[nodiscard]] widget_size_constraints get_size_constraints() const
 		{ return widget_size_constraints{}; }

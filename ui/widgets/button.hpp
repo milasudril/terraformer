@@ -86,6 +86,12 @@ namespace terraformer::ui::widgets
 			}
 		}
 
+		void handle_event(main::typing_event const&, main::input_device_grab&)
+		{ }
+
+		void handle_event(main::keyboard_button_event const&, main::input_device_grab&)
+		{ }
+
 		main::widget_size_constraints get_size_constraints() const;
 
 		void handle_event(main::fb_size size)
