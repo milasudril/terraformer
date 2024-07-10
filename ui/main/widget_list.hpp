@@ -62,11 +62,11 @@ namespace terraformer::ui::main
 				[](void* obj, cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
-				[](void* obj, cursor_motion_event const& event, input_device_grab& grab) -> void{
-					static_cast<Widget*>(obj)->handle_event(event, grab);
+				[](void* obj, cursor_motion_event const& event) -> void{
+					static_cast<Widget*>(obj)->handle_event(event);
 				},
-				[](void* obj, mouse_button_event const& mbe, input_device_grab& grab) -> void {
-					static_cast<Widget*>(obj)->handle_event(mbe, grab);
+				[](void* obj, mouse_button_event const& mbe) -> void {
+					static_cast<Widget*>(obj)->handle_event(mbe);
 				},
 				[](void const* obj) -> widget_size_constraints {
 					return static_cast<Widget const*>(obj)->get_size_constraints();

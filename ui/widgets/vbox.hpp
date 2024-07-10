@@ -60,7 +60,7 @@ namespace terraformer::ui::widgets
 		void handle_event(main::cursor_enter_leave_event const&)
 		{ }
 
-		void handle_event(main::cursor_motion_event const& event, main::input_device_grab& grab)
+		void handle_event(main::cursor_motion_event const& event)
 		{
 			// TODO: event.where must be converted to widget coordinates
 
@@ -97,10 +97,10 @@ namespace terraformer::ui::widgets
 
  			auto const cme_handlers = m_widgets.cursor_motion_callbacks();
 
-			cme_handlers[i](widgets[i], event, grab);
+			cme_handlers[i](widgets[i], event);
 		}
 
-		void handle_event(main::mouse_button_event const& event, main::input_device_grab& grab)
+		void handle_event(main::mouse_button_event const& event)
 		{
 			// TODO: event.where must be converted to widget coordinates
 			auto const i = find(event.where, m_widgets);
@@ -110,13 +110,13 @@ namespace terraformer::ui::widgets
 			auto const widgets = m_widgets.widget_pointers();
 			auto const mbe_handlers = m_widgets.mouse_button_callbacks();
 
-			mbe_handlers[i](widgets[i], event, grab);
+			mbe_handlers[i](widgets[i], event);
 		}
 
-		void handle_event(main::typing_event const&, main::input_device_grab&)
+		void handle_event(main::typing_event const&)
 		{ }
 
-		void handle_event(main::keyboard_button_event const& kbe, main::input_device_grab&)
+		void handle_event(main::keyboard_button_event const& kbe)
 		{
 			if(kbe.action == main::keyboard_button_action::release)
 			{ return; }

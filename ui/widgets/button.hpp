@@ -65,10 +65,10 @@ namespace terraformer::ui::widgets
 			}
 		}
 
-		void handle_event(main::cursor_motion_event const&, main::input_device_grab&)
+		void handle_event(main::cursor_motion_event const&)
 		{ }
 
-		void handle_event(main::mouse_button_event const& mbe, main::input_device_grab&)
+		void handle_event(main::mouse_button_event const& mbe)
 		{
 			if(mbe.button == 0)
 			{
@@ -86,11 +86,18 @@ namespace terraformer::ui::widgets
 			}
 		}
 
-		void handle_event(main::typing_event const&, main::input_device_grab&)
+		void handle_event(main::typing_event const&)
 		{ }
 
-		void handle_event(main::keyboard_button_event const&, main::input_device_grab&)
+		void handle_event(main::keyboard_button_event const&)
 		{ }
+
+		template<class T>
+		bool grab_should_be_released(T const&) const
+		{ return true; }
+
+		main::input_device_grab activate() const
+		{ return main::input_device_grab{}; }
 
 		main::widget_size_constraints get_size_constraints() const;
 
@@ -192,6 +199,8 @@ namespace terraformer::ui::widgets
 		using button::text;
 		using button::value;
 		using button::theme_updated;
+		using button::grab_should_be_released;
+		using button::activate;
 
 		template<class Function>
 		toggle_button& on_value_changed(Function&& func)

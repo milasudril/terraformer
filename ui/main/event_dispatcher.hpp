@@ -24,19 +24,19 @@ namespace terraformer::ui::main
 
 		template<auto WindowId>
 		void handle_mouse_button_event(mouse_button_event const& event)
-		{ value_of(m_widget_container).handle_event(event, m_current_grab); }
+		{ value_of(m_widget_container).handle_event(event); }
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(cursor_motion_event const& event)
-		{ value_of(m_widget_container).handle_event(event, m_current_grab); }
+		{ value_of(m_widget_container).handle_event(event); }
 
 		template<auto WindowId>
 		void handle_typing_event(typing_event const& event)
-		{ value_of(m_widget_container).handle_event(event, m_current_grab); }
+		{ value_of(m_widget_container).handle_event(event); }
 
 		template<auto WindowId>
 		void handle_keyboard_button_event(keyboard_button_event const& event)
-		{ value_of(m_widget_container).handle_event(event, m_current_grab); }
+		{ value_of(m_widget_container).handle_event(event); }
 
 		template<auto WindowId>
 		void window_is_closing()

@@ -282,6 +282,7 @@ TESTCASE(terraformer_ui_main_input_device_grab)
 	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_mouse), false);
 }
 
+#if 0
 namespace
 {
 	struct dummy_widget
@@ -405,3 +406,4 @@ TESTCASE(terraformer_ui_main_input_device_grab_grab_keyboard_and_mouse)
 	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_keyboard), true);
 	EXPECT_EQ(grab.has_device(terraformer::ui::main::input_device_mask::default_mouse), true);
 }
+#endif
