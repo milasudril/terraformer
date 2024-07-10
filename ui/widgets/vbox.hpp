@@ -128,15 +128,9 @@ namespace terraformer::ui::widgets
 			if(dir == 0)
 			{ return; }
 
-			auto new_index = m_kbd_widget_index + dir;
-			if(new_index < 0)
-			{ new_index = std::size(m_widgets).get() - 1; }
-			if(new_index >= static_cast<ssize_t>(std::size(m_widgets).get()))
-			{ new_index = 0; }
+			m_current_widget = activate_next_widget(m_widgets, m_current_widget.index, dir);
 
-
-			printf("%ld\n", new_index);
-			m_kbd_widget_index = new_index;
+			printf("Current widget is %zu\n", m_current_widget.index);
 		}
 
 		void theme_updated(object_dict const& new_theme) const
@@ -226,7 +220,7 @@ namespace terraformer::ui::widgets
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};
-		ssize_t m_kbd_widget_index = 0;
+		main::activated_widget m_current_widget;
 		main::widget_size_constraints m_current_size_constraints;
 	};
 }

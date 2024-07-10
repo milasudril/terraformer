@@ -216,6 +216,9 @@ namespace terraformer::ui::main
 		bool has_device(input_device_mask device) const
 		{ return static_cast<bool>(m_active_devices & device); }
 
+		bool has_any_device() const
+		{ return m_active_devices != input_device_mask::none; }
+
 		bool grab_should_be_released(cursor_motion_event const& event) const
 		{ return m_vtable->grab_should_be_released_by_cme(m_widget_pointer, event); }
 

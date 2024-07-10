@@ -15,6 +15,7 @@ namespace terraformer::ui::main
 		using size_constraints_callback = widget_size_constraints (*)(void const*);
 		using size_callback = void (*)(void*, fb_size);
 		using theme_updated_callback = void (*)(void*, object_dict const&);
+		using widget_activate_callback = input_device_grab (*)(void*);
 
 		using widget_array = multi_array<
 			void*,
@@ -26,6 +27,7 @@ namespace terraformer::ui::main
 				widget_instance_info const& instance_info,
 				object_dict const& render_resources
 			)...,
+			widget_activate_callback,
 			cursor_enter_leave_callback,
 			cursor_motion_event_callback,
 			mouse_button_event_callback,
@@ -59,6 +61,9 @@ namespace terraformer::ui::main
 				) -> void {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(rect, instance_info, render_resources);
 				}...,
+				[](void* obj) -> input_device_grab {
+					return static_cast<Widget*>(obj)->activate();
+				},
 				[](void* obj, cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
@@ -118,23 +123,26 @@ namespace terraformer::ui::main
 		auto render_callbacks() const
 		{ return m_objects.template get<3 + sizeof...(WidgetRenderingResult) + OutputIndex>(); }
 
-		auto cursor_enter_leave_callbacks() const
+		auto widget_activate_callbacks() const
 		{ return m_objects.template get<3 + 2*sizeof...(WidgetRenderingResult)>(); }
 
-		auto cursor_motion_callbacks() const
+		auto cursor_enter_leave_callbacks() const
 		{ return m_objects.template get<4 + 2*sizeof...(WidgetRenderingResult)>(); }
 
-		auto mouse_button_callbacks() const
+		auto cursor_motion_callbacks() const
 		{ return m_objects.template get<5 + 2*sizeof...(WidgetRenderingResult)>(); }
 
-		auto size_constraints_callbacks() const
+		auto mouse_button_callbacks() const
 		{ return m_objects.template get<6 + 2*sizeof...(WidgetRenderingResult)>(); }
 
-		auto size_callbacks() const
+		auto size_constraints_callbacks() const
 		{ return m_objects.template get<7 + 2*sizeof...(WidgetRenderingResult)>(); }
 
-		auto const theme_updated_callbacks() const
+		auto size_callbacks() const
 		{ return m_objects.template get<8 + 2*sizeof...(WidgetRenderingResult)>(); }
+
+		auto const theme_updated_callbacks() const
+		{ return m_objects.template get<9 + 2*sizeof...(WidgetRenderingResult)>(); }
 
 	private:
 		widget_array m_objects;
@@ -248,6 +256,49 @@ namespace terraformer::ui::main
 		auto const n = std::size(widgets);
 		for(auto k  = widgets.first_element_index(); k != n; ++k)
 		{ theme_updated_callbacks[k](widget_pointers[k], dict); }
+	}
+
+	struct activated_widget
+	{
+		size_t index{0};
+		input_device_grab grab{};
+	};
+
+	template<class ... WidgetRenderingResult>
+	auto activate_next_widget(
+		widget_list<WidgetRenderingResult...> const& widgets,
+		size_t start_at,
+		ssize_t direction
+	)
+	{
+		auto const n = std::size(widgets);
+		auto const widget_pointers = widgets.widget_pointers();
+		auto const widget_activate_callbacks = widgets.widget_activate_callbacks();
+		auto offset = static_cast<ssize_t>(start_at);
+
+		for(auto k = widgets.first_element_index(); k != n; ++k)
+		{
+			auto const i = widgets.first_element_index() + offset;
+			auto grab = widget_activate_callbacks[i](widget_pointers[i]);
+			if(grab.has_any_device())
+			{
+				return activated_widget{
+					.index = static_cast<size_t>(offset),
+					.grab = grab
+				};
+			}
+
+			offset += direction;
+			if(offset < 0)
+			{ offset = n.get() - 1; }
+			if(offset >= static_cast<ssize_t>(n.get()))
+			{ offset = 0; }
+		}
+
+		return activated_widget{
+			.index = start_at,
+			.grab = input_device_grab{}
+		};
 	}
 }
 
