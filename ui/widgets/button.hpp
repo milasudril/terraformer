@@ -96,8 +96,10 @@ namespace terraformer::ui::widgets
 		bool grab_should_be_released(T const&) const
 		{ return true; }
 
-		main::input_device_grab activate() const
-		{ return main::input_device_grab{}; }
+		main::input_device_grab activate()
+		{
+			return main::input_device_grab{*this, main::input_device_mask::default_keyboard};
+		}
 
 		main::widget_size_constraints get_size_constraints() const;
 

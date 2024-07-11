@@ -278,6 +278,12 @@ namespace terraformer::ui::main
 
 		for(auto k = widgets.first_element_index(); k != n; ++k)
 		{
+			offset += direction;
+			if(offset < 0)
+			{ offset = n.get() - 1; }
+			if(offset >= static_cast<ssize_t>(n.get()))
+			{ offset = 0; }
+
 			auto const i = widgets.first_element_index() + offset;
 			auto grab = widget_activate_callbacks[i](widget_pointers[i]);
 			if(grab.has_any_device())
@@ -288,11 +294,6 @@ namespace terraformer::ui::main
 				};
 			}
 
-			offset += direction;
-			if(offset < 0)
-			{ offset = n.get() - 1; }
-			if(offset >= static_cast<ssize_t>(n.get()))
-			{ offset = 0; }
 		}
 
 		return activated_widget{

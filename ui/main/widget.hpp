@@ -219,16 +219,16 @@ namespace terraformer::ui::main
 		bool has_any_device() const
 		{ return m_active_devices != input_device_mask::none; }
 
-		bool grab_should_be_released(cursor_motion_event const& event) const
+		bool should_be_released(cursor_motion_event const& event) const
 		{ return m_vtable->grab_should_be_released_by_cme(m_widget_pointer, event); }
 
-		bool grab_should_be_released(mouse_button_event const& event) const
+		bool should_be_released(mouse_button_event const& event) const
 		{ return m_vtable->grab_should_be_released_by_mbe(m_widget_pointer, event); }
 
-		bool grab_should_be_released(typing_event const& event) const
+		bool should_be_released(typing_event const& event) const
 		{ return m_vtable->grab_should_be_released_by_te(m_widget_pointer, event); }
 
-		bool grab_should_be_released(keyboard_button_event const& event) const
+		bool should_be_released(keyboard_button_event const& event) const
 		{ return m_vtable->grab_should_be_released_by_kbe(m_widget_pointer, event); }
 
 	private:
