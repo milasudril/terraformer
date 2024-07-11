@@ -265,6 +265,35 @@ namespace terraformer::ui::main
 	};
 
 	template<class ... WidgetRenderingResult>
+	auto activate_first_widget(widget_list<WidgetRenderingResult...> const& widgets)
+	{
+		auto const n = std::size(widgets);
+		auto const widget_pointers = widgets.widget_pointers();
+		auto const widget_activate_callbacks = widgets.widget_activate_callbacks();
+		auto offset = static_cast<ssize_t>(0);
+
+		for(auto k = widgets.first_element_index(); k != n; ++k)
+		{
+			auto const i = widgets.first_element_index() + offset;
+			auto grab = widget_activate_callbacks[i](widget_pointers[i]);
+			if(grab.has_any_device())
+			{
+				return activated_widget{
+					.index = static_cast<size_t>(offset),
+					.grab = grab
+				};
+			}
+
+			++offset;
+		}
+
+		return activated_widget{
+			.index = 0,
+			.grab = input_device_grab{}
+		};
+	}
+
+	template<class ... WidgetRenderingResult>
 	auto activate_next_widget(
 		widget_list<WidgetRenderingResult...> const& widgets,
 		size_t start_at,
