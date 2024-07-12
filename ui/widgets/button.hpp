@@ -108,6 +108,9 @@ namespace terraformer::ui::widgets
 			}
 		}
 
+		bool grab_should_be_released(main::keyboard_button_event const& kbe) const
+		{ return kbe.button != 32; }
+
 		template<class T>
 		bool grab_should_be_released(T const&) const
 		{ return true; }

@@ -36,7 +36,13 @@ namespace terraformer::ui::main
 
 		template<auto WindowId>
 		void handle_keyboard_button_event(keyboard_button_event const& event)
-		{ value_of(m_current_grab).handle_event(event); }
+		{
+			if(event.button == 256 ||
+				(get_navigation_direction(event) != 0 && m_current_grab.should_be_released(event)))
+			{ puts("Grab should be released"); }
+
+			value_of(m_current_grab).handle_event(event);
+		}
 
 		template<auto WindowId>
 		void window_is_closing()
