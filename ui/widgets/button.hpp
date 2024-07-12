@@ -89,8 +89,24 @@ namespace terraformer::ui::widgets
 		void handle_event(main::typing_event const&)
 		{ }
 
-		void handle_event(main::keyboard_button_event const&)
-		{ }
+		void handle_event(main::keyboard_button_event const& kbe)
+		{
+			if(kbe.button == 32)
+			{
+				switch(kbe.action)
+				{
+					case main::keyboard_button_action::press:
+						m_temp_state = state::pressed;
+						break;
+					case main::keyboard_button_action::release:
+						m_temp_state.reset();
+						m_on_activated(*this);
+						break;
+					case main::keyboard_button_action::repeat:
+						break;
+				}
+			}
+		}
 
 		template<class T>
 		bool grab_should_be_released(T const&) const
