@@ -147,15 +147,23 @@ namespace terraformer::ui::widgets
 			return size;
 		}
 
+		template<class T>
+		bool grab_should_be_released(T const&) const
+		{ return true; }
+
+		main::input_device_grab activate()
+		{
+			return main::input_device_grab{*this, main::input_device_mask::default_keyboard};
+		}
+
+		// Widget collection stuff
+
 		template<class Renderer>
 		void show_widgets(Renderer&& renderer)
 		{
 			using main::show_widgets;
 			show_widgets<0>(std::forward<Renderer>(renderer), m_widgets);
 		}
-
-
-		// Widget collection stuff
 
 		void update_layout(float margin_x, float margin_y)
 		{

@@ -102,6 +102,7 @@ int main(int, char**)
 		terraformer::ui::drawing_api::frame_renderer{},
 		error_handler{}
 	};
+	event_dispatcher.activate(my_vbox);
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(
