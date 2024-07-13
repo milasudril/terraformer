@@ -24,7 +24,12 @@ namespace terraformer::ui::main
 
 		template<auto WindowId>
 		void handle_mouse_button_event(mouse_button_event const& event)
-		{ value_of(m_current_grab).handle_event(event); }
+		{
+			if(m_current_grab.has_device(input_device_mask::default_mouse))
+			{ m_current_grab.handle_event(event); }
+			else
+			{ value_of(m_widget_container).handle_event(event); }
+		}
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(cursor_motion_event const& event)
@@ -37,11 +42,24 @@ namespace terraformer::ui::main
 		template<auto WindowId>
 		void handle_keyboard_button_event(keyboard_button_event const& event)
 		{
-			if(event.button == 256 ||
-				(get_navigation_direction(event) != 0 && m_current_grab.should_be_released(event)))
-			{ puts("Grab should be released"); }
+			if(m_current_grab.has_device(input_device_mask::default_keyboard))
+			{
+				if(event.button == 256 ||
+					(
+						event.action != main::keyboard_button_action::release &&
+						get_navigation_direction(event) != 0 &&
+						m_current_grab.should_be_released(event)
+					)
+				)
+				{
+					// TODO: Consider navigation direction
+					m_current_grab = m_current_grab.release();
+				}
 
-			value_of(m_current_grab).handle_event(event);
+				value_of(m_current_grab).handle_event(event);
+			}
+			else
+			{ value_of(m_current_grab).handle_event(event); }
 		}
 
 		template<auto WindowId>
@@ -54,11 +72,7 @@ namespace terraformer::ui::main
 
 		template<class Widget>
 		void activate(Widget& widget)
-		{
-			m_current_grab = widget.activate();
-		}
-
-
+		{ m_current_grab = widget.activate(); }
 
 		template<auto WindowId>
 		void framebuffer_size_changed(fb_size size)

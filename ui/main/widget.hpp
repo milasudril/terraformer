@@ -231,10 +231,26 @@ namespace terraformer::ui::main
 		bool should_be_released(keyboard_button_event const& event) const
 		{ return m_vtable->grab_should_be_released_by_kbe(m_widget_pointer, event); }
 
+		template<class T>
+		input_device_grab& set_return_widget(T& widget)
+		{
+			m_return_widget = &widget;
+			m_return_widget_func = [](void* widget){
+				return static_cast<T*>(widget)->activate();
+			};
+			return *this;
+		}
+
+		input_device_grab release() const
+		{ return m_return_widget_func(m_return_widget); }
+
 	private:
 		void* m_widget_pointer = nullptr;
 		widget_vtable const* m_vtable = nullptr;
 		input_device_mask m_active_devices = input_device_mask::none;
+
+		void* m_return_widget = nullptr;
+		input_device_grab (*m_return_widget_func)(void*);
 	};
 
 	template<class T, class ... OutputRectangle>

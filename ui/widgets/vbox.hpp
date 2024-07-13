@@ -155,7 +155,13 @@ namespace terraformer::ui::widgets
 		{
 			if(!m_current_widget.grab.has_any_device())
 			{ m_current_widget = activate_first_widget(m_widgets); }
+			else
+			{
+				m_current_widget = activate_next_widget(m_widgets, m_current_widget.index, 1);
+				printf("%zu\n", m_current_widget.index);
+			}
 
+			m_current_widget.grab.set_return_widget(*this);
 			return m_current_widget.grab;
 		//	return main::input_device_grab{*this, main::input_device_mask::default_keyboard};
 		}
