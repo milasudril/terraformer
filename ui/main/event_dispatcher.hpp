@@ -33,11 +33,21 @@ namespace terraformer::ui::main
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(cursor_motion_event const& event)
-		{ value_of(m_current_grab).handle_event(event); }
+		{
+			if(m_current_grab.has_device(input_device_mask::default_mouse))
+			{ m_current_grab.handle_event(event); }
+			else
+			{ value_of(m_widget_container).handle_event(event); }
+		}
 
 		template<auto WindowId>
 		void handle_typing_event(typing_event const& event)
-		{ value_of(m_current_grab).handle_event(event); }
+		{
+			if(m_current_grab.has_device(input_device_mask::default_keyboard))
+			{ m_current_grab.handle_event(event); }
+			else
+			{ value_of(m_widget_container).handle_event(event); }
+		}
 
 		template<auto WindowId>
 		void handle_keyboard_button_event(keyboard_button_event const& event)
