@@ -69,7 +69,7 @@ namespace terraformer::ui::main
 				value_of(m_current_grab).handle_event(event);
 			}
 			else
-			{ value_of(m_current_grab).handle_event(event); }
+			{ value_of(m_widget_container).handle_event(event); }
 		}
 
 		template<auto WindowId>
