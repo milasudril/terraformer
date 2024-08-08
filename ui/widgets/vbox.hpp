@@ -114,8 +114,19 @@ namespace terraformer::ui::widgets
 			return mbe_handlers[i](widgets[i], event);
 		}
 
-		void theme_updated(object_dict const& new_theme) const
+		void theme_updated(object_dict const& new_theme)
 		{
+			{
+				auto ptr = static_cast<float const*>(new_theme/"ui"/"panels"/0/"margins"/"x");
+				assert(ptr != nullptr);
+				m_margin_x = *ptr;
+			}
+			{
+				auto ptr = static_cast<float const*>(new_theme/"ui"/"panels"/0/"margins"/"y");
+				assert(ptr != nullptr);
+				m_margin_y = *ptr;
+			}
+
 			using main::theme_updated;
 			theme_updated(m_widgets, new_theme);
 		}
@@ -138,8 +149,10 @@ namespace terraformer::ui::widgets
 
 		// Widget collection stuff
 
-		void update_layout(float margin_x, float margin_y)
+		void update_layout()
 		{
+			auto const margin_x = m_margin_x;
+			auto const margin_y = m_margin_y;
 			auto const widget_pointers = m_widgets.widget_pointers();
 			auto const widget_geometries = m_widgets.widget_geometries();
 			auto const size_constraints_callbacks = m_widgets.size_constraints_callbacks();
@@ -201,6 +214,8 @@ namespace terraformer::ui::widgets
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};
+		float m_margin_x;
+		float m_margin_y;
 		main::widget_size_constraints m_current_size_constraints;
 	};
 }

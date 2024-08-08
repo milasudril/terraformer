@@ -69,7 +69,7 @@ namespace terraformer::ui::main
 
 		void render()
 		{
-			value_of(m_widget_container).update_layout(4.0f, 4.0f);
+			value_of(m_widget_container).update_layout();
 			auto const container_size = value_of(m_widget_container).get_size_constraints();
 
 			value_of(m_widget_container).prepare_for_presentation(
