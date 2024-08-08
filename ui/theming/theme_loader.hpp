@@ -39,29 +39,26 @@ namespace terraformer::ui::theming
 
 		object_dict resources;
 		resources.insert<object_dict>(
-			"ui", std::move(
-				object_dict{}
-					.insert<object_array>("panels", std::move(object_array{}
-					.append<object_dict>(std::move(
-						object_dict{}
-							.insert_link("background_texture", noisy_texture)
-							.insert<rgba_pixel>("background_tint", default_color_scheme.main_panel.background))
-						)
-					)
+			"ui", std::move(object_dict{}
+				.insert<object_array>("panels", std::move(object_array{}
+					.append<object_dict>(std::move(object_dict{}
+						.insert_link("background_texture", noisy_texture)
+						.insert<rgba_pixel>("background_tint", default_color_scheme.main_panel.background)
+						.insert<object_dict>("margins", std::move(object_dict{}
+							.insert<float>("x", 4.0f)
+							.insert<float>("y", 4.0f))
+						))
+					))
 				)
-				.insert<object_dict>("command_area", std::move(
-					object_dict{}
-						.insert<rgba_pixel>("background_tint", default_color_scheme.command_area.background)
-						.insert<rgba_pixel>("text_color", default_color_scheme.command_area.text)
-						.insert_link("font", body_text)
-						.insert<float>("background_intensity", 1.0f)
-					)
+				.insert<object_dict>("command_area", std::move(object_dict{}
+					.insert<rgba_pixel>("background_tint", default_color_scheme.command_area.background)
+					.insert<rgba_pixel>("text_color", default_color_scheme.command_area.text)
+					.insert_link("font", body_text)
+					.insert<float>("background_intensity", 1.0f))
 				)
-				.insert<object_dict>("output_area", std::move(
-					object_dict{}
-						.insert_link("font", body_text)
-						.insert<rgba_pixel>("text_color", default_color_scheme.output_area.text)
-					)
+				.insert<object_dict>("output_area", std::move(object_dict{}
+					.insert_link("font", body_text)
+					.insert<rgba_pixel>("text_color", default_color_scheme.output_area.text))
 				)
 				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
 				.insert<unsigned int>("widget_inner_margin", 4)
