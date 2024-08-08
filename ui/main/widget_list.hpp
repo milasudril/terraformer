@@ -14,7 +14,7 @@ namespace terraformer::ui::main
 		using cursor_enter_leave_callback = void (*)(void*, cursor_enter_leave_event const&);
 		using cursor_position_callback = void (*)(void*, cursor_motion_event const&);
 		using mouse_button_callback = void (*)(void*, mouse_button_event const&);
-		using size_constraints_callback = widget_size_constraints (*)(void const*);
+		using update_geometry_callback = widget_size_constraints (*)(void*);
 		using size_callback = void (*)(void*, fb_size);
 		using theme_updated_callback = void (*)(void*, object_dict const&);
 
@@ -31,7 +31,7 @@ namespace terraformer::ui::main
 			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
-			size_constraints_callback,
+			update_geometry_callback,
 			size_callback,
 			theme_updated_callback
 		>;
@@ -71,8 +71,8 @@ namespace terraformer::ui::main
 				[](void* obj, mouse_button_event const& mbe) -> void {
 					static_cast<Widget*>(obj)->handle_event(mbe);
 				},
-				[](void const* obj) -> widget_size_constraints {
-					return static_cast<Widget const*>(obj)->get_size_constraints();
+				[](void* obj) -> widget_size_constraints {
+					return static_cast<Widget*>(obj)->update_geometry();
 				},
 				[](void* obj, fb_size size) {
 					static_cast<Widget*>(obj)->handle_event(size);
@@ -127,7 +127,7 @@ namespace terraformer::ui::main
 		auto mouse_button_callbacks() const
 		{ return m_objects.template get<5 + 2*sizeof...(WidgetRenderingResult)>(); }
 
-		auto size_constraints_callbacks() const
+		auto update_geometry_callbacks() const
 		{ return m_objects.template get<6 + 2*sizeof...(WidgetRenderingResult)>(); }
 
 		auto size_callbacks() const

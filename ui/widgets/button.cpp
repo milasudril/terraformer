@@ -66,10 +66,10 @@ void terraformer::ui::widgets::button::regenerate_textures()
 	m_dirty_bits |= gpu_textures_dirty;
 }
 
-terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button::get_size_constraints() const
+terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button::update_geometry()
 {
 	if(m_dirty_bits & text_dirty)
-	{ const_cast<button*>(this)->regenerate_text_mask(); }
+	{ regenerate_text_mask(); }
 
 	return main::widget_size_constraints{
 		.width{

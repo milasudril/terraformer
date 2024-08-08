@@ -115,7 +115,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(cme) } -> std::same_as<void>;
 		{ obj.handle_event(mbe) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
-		{ obj.get_size_constraints() } -> same_as_unqual<widget_size_constraints>;
+		{ obj.update_geometry() } -> same_as_unqual<widget_size_constraints>;
 		{ obj.theme_updated(resources) } -> std::same_as<void>;
 	};
 
@@ -127,7 +127,7 @@ namespace terraformer::ui::main
 		void handle_event(cursor_motion_event const&) const { }
 		void handle_event(mouse_button_event const&) const { }
 		void handle_event(fb_size) const { }
-		[[nodiscard]] widget_size_constraints get_size_constraints() const
+		[[nodiscard]] widget_size_constraints update_geometry() const
 		{ return widget_size_constraints{}; }
 		void theme_updated(object_dict const&) const {}
 	};

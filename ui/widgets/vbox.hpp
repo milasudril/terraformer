@@ -131,9 +131,6 @@ namespace terraformer::ui::widgets
 			theme_updated(m_widgets, new_theme);
 		}
 
-		main::widget_size_constraints const& get_size_constraints() const
-		{ return m_current_size_constraints; }
-
 		main::fb_size handle_event(main::fb_size size)
 		{
 			return size;
@@ -146,16 +143,13 @@ namespace terraformer::ui::widgets
 			show_widgets<0>(std::forward<Renderer>(renderer), m_widgets);
 		}
 
-
-		// Widget collection stuff
-
-		void update_layout()
+		main::widget_size_constraints update_geometry()
 		{
 			auto const margin_x = m_margin_x;
 			auto const margin_y = m_margin_y;
 			auto const widget_pointers = m_widgets.widget_pointers();
 			auto const widget_geometries = m_widgets.widget_geometries();
-			auto const size_constraints_callbacks = m_widgets.size_constraints_callbacks();
+			auto const update_geometries = m_widgets.update_geometry_callbacks();
 			auto const widget_visibilities = m_widgets.widget_visibilities();
 			auto const size_callbacks = m_widgets.size_callbacks();
 			auto const n = std::size(m_widgets);
@@ -166,7 +160,7 @@ namespace terraformer::ui::widgets
 			{
 				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
 				{
-					auto const constraints = size_constraints_callbacks[k](widget_pointers[k]);
+					auto const constraints = update_geometries[k](widget_pointers[k]);
 					widget_geometries[k].where = location{
 						margin_x,
 						-height,
@@ -188,7 +182,7 @@ namespace terraformer::ui::widgets
 				}
 			}
 
-			m_current_size_constraints = main::widget_size_constraints{
+			return main::widget_size_constraints{
 				.width{
 					.min = min_width + 2.0f*margin_x,
 					.max = std::max(min_width, max_width) + 2.0f*margin_x
@@ -216,7 +210,6 @@ namespace terraformer::ui::widgets
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};
 		float m_margin_x;
 		float m_margin_y;
-		main::widget_size_constraints m_current_size_constraints;
 	};
 }
 

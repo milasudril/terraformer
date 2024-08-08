@@ -24,11 +24,11 @@ namespace terraformer::ui::main
 
 		template<auto WindowId>
 		void handle_mouse_button_event(mouse_button_event const& event)
-		{ value_of(m_widget_container).handle_event(event); }
+		{ value_of(m_widget_collection).handle_event(event); }
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(cursor_motion_event const& event)
-		{ value_of(m_widget_container).handle_event(event); }
+		{ value_of(m_widget_collection).handle_event(event); }
 
 		template<auto WindowId>
 		void window_is_closing()
@@ -44,7 +44,7 @@ namespace terraformer::ui::main
 		{
 			if(!m_theme_is_up_to_date) [[unlikely]]
 			{
-				value_of(m_widget_container).theme_updated(m_resources);
+				value_of(m_widget_collection).theme_updated(m_resources);
 				m_theme_is_up_to_date = true;
 			}
 
@@ -54,7 +54,7 @@ namespace terraformer::ui::main
 			value_of(m_frame_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
-			value_of(m_widget_container).handle_event(size);
+			value_of(m_widget_collection).handle_event(size);
 		}
 
 		template<class Viewport, class ... Overlay>
@@ -69,10 +69,9 @@ namespace terraformer::ui::main
 
 		void render()
 		{
-			value_of(m_widget_container).update_layout();
-			auto const container_size = value_of(m_widget_container).get_size_constraints();
+			auto const box_size = value_of(m_widget_collection).update_geometry();
 
-			value_of(m_widget_container).prepare_for_presentation(
+			value_of(m_widget_collection).prepare_for_presentation(
 				m_output_rectangle,
 				widget_instance_info{
 					.section_level = 0,
@@ -84,18 +83,18 @@ namespace terraformer::ui::main
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},
 				scaling{
-					container_size.width.min,
-					container_size.height.min,
+					box_size.width.min,
+					box_size.height.min,
 					1.0f
 				},
 				m_output_rectangle
 			);
-			value_of(m_widget_container).show_widgets(value_of(m_content_renderer));
-		//	value_of(m_widget_container).decorate_widgets(value_of(m_frame_renderer), textures, look);
+			value_of(m_widget_collection).show_widgets(value_of(m_content_renderer));
+		//	value_of(m_widget_collection).decorate_widgets(value_of(m_frame_renderer), textures, look);
 		}
 
 		object_dict m_resources;
-		WidgetContainer m_widget_container;
+		WidgetContainer m_widget_collection;
 		WindowController m_window_controller;
 		ContentRenderer m_content_renderer;
 		FrameRenderer m_frame_renderer;

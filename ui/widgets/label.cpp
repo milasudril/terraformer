@@ -37,10 +37,10 @@ void terraformer::ui::widgets::label::regenerate_textures()
 	m_dirty_bits |= gpu_textures_dirty;
 }
 
-terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::get_size_constraints() const
+terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::update_geometry()
 {
 	if(m_dirty_bits & text_dirty)
-	{ const_cast<label*>(this)->regenerate_text_mask(); }
+	{ regenerate_text_mask(); }
 
 	return main::widget_size_constraints{
 		.width{

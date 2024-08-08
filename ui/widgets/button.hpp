@@ -86,7 +86,7 @@ namespace terraformer::ui::widgets
 			}
 		}
 
-		main::widget_size_constraints get_size_constraints() const;
+		main::widget_size_constraints update_geometry();
 
 		void handle_event(main::fb_size size)
 		{
@@ -182,7 +182,7 @@ namespace terraformer::ui::widgets
 
 		using button::handle_event;
 		using button::prepare_for_presentation;
-		using button::get_size_constraints;
+		using button::update_geometry;
 		using button::text;
 		using button::value;
 		using button::theme_updated;
