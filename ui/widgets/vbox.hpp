@@ -47,7 +47,7 @@ namespace terraformer::ui::widgets
 				background_color,
 			};
 
- 			prepare_widgets_for_presentation<0>(
+ 			prepare_widgets_for_presentation(
 				m_widgets,
 				main::widget_instance_info{
 					.section_level = instance_info.section_level,
@@ -140,7 +140,7 @@ namespace terraformer::ui::widgets
 		void show_widgets(Renderer&& renderer)
 		{
 			using main::show_widgets;
-			show_widgets<0>(std::forward<Renderer>(renderer), m_widgets);
+			show_widgets(std::forward<Renderer>(renderer), m_widgets);
 		}
 
 		main::widget_size_constraints update_geometry()

@@ -7,7 +7,7 @@
 
 namespace terraformer::ui::main
 {
-	template<class ... WidgetRenderingResult>
+	template<class WidgetRenderingResult>
 	class widget_list
 	{
 	public:
@@ -20,14 +20,14 @@ namespace terraformer::ui::main
 
 		using widget_array = multi_array<
 			void*,
-			WidgetRenderingResult...,
+			WidgetRenderingResult,
 			widget_visibility,
 			widget_geometry,
 			void (*)(void* obj,
 				WidgetRenderingResult& rect,
 				widget_instance_info const& instance_info,
 				object_dict const& render_resources
-			)...,
+			),
 			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
@@ -41,7 +41,7 @@ namespace terraformer::ui::main
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
 		template<class Widget>
-		requires widget<Widget, WidgetRenderingResult...>
+		requires widget<Widget, WidgetRenderingResult>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -50,7 +50,7 @@ namespace terraformer::ui::main
 		{
 			m_objects.push_back(
 				&w.get(),
-				WidgetRenderingResult{}...,
+				WidgetRenderingResult{},
 				initial_visibility,
 				initial_geometry,
 				[](
@@ -60,11 +60,10 @@ namespace terraformer::ui::main
 					object_dict const& render_resources
 				) -> void {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(rect, instance_info, render_resources);
-				}...,
+				},
 				[](void* obj, cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
-
 				[](void* obj, cursor_motion_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
@@ -94,63 +93,60 @@ namespace terraformer::ui::main
 		auto widget_pointers() const
 		{ return m_objects.template get<0>(); }
 
-		template<size_t Index>
 		auto output_rectangles() const
-		{ return m_objects.template get<1 + Index>(); }
+		{ return m_objects.template get<1>(); }
 
-		template<size_t Index>
 		auto output_rectangles()
-		{ return m_objects.template get<1 + Index>(); }
+		{ return m_objects.template get<1>(); }
 
 		auto widget_visibilities() const
-		{ return m_objects.template get<1 + sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<2>(); }
 
 		auto widget_visibilities()
-		{ return m_objects.template get<1 + sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<2>(); }
 
 		auto widget_geometries() const
-		{ return m_objects.template get<2 + sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<3>(); }
 
 		auto widget_geometries()
-		{ return m_objects.template get<2 + sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<3>(); }
 
-		template<size_t OutputIndex>
 		auto render_callbacks() const
-		{ return m_objects.template get<3 + sizeof...(WidgetRenderingResult) + OutputIndex>(); }
+		{ return m_objects.template get<4>(); }
 
 		auto cursor_enter_leave_callbacks() const
-		{ return m_objects.template get<3 + 2*sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<5>(); }
 
 		auto cursor_motion_callbacks() const
-		{ return m_objects.template get<4 + 2*sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<6>(); }
 
 		auto mouse_button_callbacks() const
-		{ return m_objects.template get<5 + 2*sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<7>(); }
 
 		auto update_geometry_callbacks() const
-		{ return m_objects.template get<6 + 2*sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<8>(); }
 
 		auto size_callbacks() const
-		{ return m_objects.template get<7 + 2*sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<9>(); }
 
 		auto const theme_updated_callbacks() const
-		{ return m_objects.template get<8 + 2*sizeof...(WidgetRenderingResult)>(); }
+		{ return m_objects.template get<10>(); }
 
 	private:
 		widget_array m_objects;
 	};
 
-	template<size_t OutputIndex, class ...WidgetRenderingResult>
+	template<class WidgetRenderingResult>
 	void prepare_widgets_for_presentation(
-		widget_list<WidgetRenderingResult...>& widgets,
+		widget_list<WidgetRenderingResult>& widgets,
  		widget_instance_info const& widget_instance,
 		object_dict const& render_resources
 	)
 	{
-		auto const render_callbacks = widgets.template render_callbacks<OutputIndex>();
+		auto const render_callbacks = widgets.render_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
 		auto const widget_visibilities = widgets.widget_visibilities();
-		auto output_rectangles = widgets.template output_rectangles<OutputIndex>();
+		auto output_rectangles = widgets.output_rectangles();
 
 		auto const n = std::size(widgets);
 		for(auto k = widgets.first_element_index(); k != n; ++k)
@@ -170,12 +166,12 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<size_t OutputIndex, class Renderer, class ...WidgetRenderingResult>
-	void show_widgets(Renderer&& renderer, widget_list<WidgetRenderingResult...> const& widgets)
+	template<class Renderer, class WidgetRenderingResult>
+	void show_widgets(Renderer&& renderer, widget_list<WidgetRenderingResult> const& widgets)
 	{
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const widget_visibilities = widgets.widget_visibilities();
-		auto const output_rects = widgets.template output_rectangles<OutputIndex>();
+		auto const output_rects = widgets.output_rectangles();
 
 		auto const n = std::size(widgets);
 		for(auto k  = widgets.first_element_index(); k != n; ++k)

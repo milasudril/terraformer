@@ -161,7 +161,7 @@ namespace terraformer::ui::widgets
 		}
 
 	private:
-		using widget_list = main::widget_list<TextureRepo, WidgetRenderingResult>;
+		using widget_list = main::widget_list<WidgetRenderingResult>;
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};
