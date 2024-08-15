@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_LABEL_HPP
 #define TERRAFORMER_UI_WIDGETS_LABEL_HPP
 
-#include "./generic_texture.hpp"
+#include "ui/main/generic_texture.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
@@ -72,7 +72,7 @@ namespace terraformer::ui::widgets
 		unsigned int m_border_thickness = 0;
 		shared_const_any m_font;
 
-		generic_unique_texture m_foreground;
+		main::generic_unique_texture m_foreground;
 
 		main::fb_size m_current_size;
 		image m_foreground_host;

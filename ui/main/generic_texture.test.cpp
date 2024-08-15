@@ -6,7 +6,7 @@
 
 TESTCASE(terraformer_generic_texture_default_state)
 {
-	terraformer::ui::widgets::generic_shared_texture texture;
+	terraformer::ui::main::generic_shared_texture texture;
 	EXPECT_EQ(texture.get_if<int>(), nullptr);
 	EXPECT_EQ(texture.get(), false);
 	EXPECT_EQ(texture.get_const(), false);
@@ -29,7 +29,7 @@ namespace
 
 TESTCASE(terraformer_generic_texture_create_and_reset)
 {
-	terraformer::ui::widgets::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
+	terraformer::ui::main::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
 	EXPECT_EQ(texture.get_if<dummy_texture<1>>(), nullptr);
 	EXPECT_EQ(texture.get(), true);
 	EXPECT_EQ(texture.get_const(), true);
@@ -65,7 +65,7 @@ TESTCASE(terraformer_generic_texture_create_and_reset)
 
 TESTCASE(terraformer_generic_texture_create_and_assign_other)
 {
-	terraformer::ui::widgets::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
+	terraformer::ui::main::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
 	EXPECT_EQ(texture.get_if<dummy_texture<1>>(), nullptr);
 	EXPECT_EQ(texture.get(), true);
 	EXPECT_EQ(texture.get_const(), true);

@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 #define TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 
-#include "./generic_texture.hpp"
+#include "ui/main/generic_texture.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
@@ -111,9 +111,9 @@ namespace terraformer::ui::widgets
 		shared_const_any m_font;
 		float m_background_intensity;
 
-		generic_unique_texture m_background_released;
-		generic_unique_texture m_background_pressed;
-		generic_unique_texture m_foreground;
+		main::generic_unique_texture m_background_released;
+		main::generic_unique_texture m_background_pressed;
+		main::generic_unique_texture m_foreground;
 
 		main::fb_size m_current_size;
 		image m_background_released_host;

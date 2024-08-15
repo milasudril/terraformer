@@ -1,12 +1,12 @@
-#ifndef TERRAFORMER_UI_WIDGETS_GENERIC_TEXTURE_HPP
-#define TERRAFORMER_UI_WIDGETS_GENERIC_TEXTURE_HPP
+#ifndef TERRAFORMER_UI_MAIN_GENERIC_TEXTURE_HPP
+#define TERRAFORMER_UI_MAIN_GENERIC_TEXTURE_HPP
 
 #include "lib/any/unique_any.hpp"
 #include "lib/any/shared_any.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "lib/common/span_2d.hpp"
 
-namespace terraformer::ui::widgets
+namespace terraformer::ui::main
 {
 	template<class LifetimeManager>
 	class generic_texture
