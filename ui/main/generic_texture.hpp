@@ -8,7 +8,7 @@
 
 namespace terraformer::ui::main
 {
-	template<class LifetimeManager>
+	template<class PointerType>
 	class generic_texture
 	{
 	public:
@@ -49,7 +49,7 @@ namespace terraformer::ui::main
 		}
 
 		size_t use_count() const noexcept
-		requires controls_shared_resource<LifetimeManager>
+		requires controls_shared_resource<typename PointerType::holder>
 		{ return m_pointer.use_count(); }
 
 		operator bool() const noexcept
@@ -62,12 +62,12 @@ namespace terraformer::ui::main
 		{ m_upload(m_pointer.get(), pixels); }
 
 	private:
-		any_smart_pointer<LifetimeManager> m_pointer;
+		PointerType m_pointer;
 		void (*m_upload)(any_pointer_to_mutable, span_2d<rgba_pixel const>) = nullptr;
 	};
 
-	using generic_unique_texture = generic_texture<unique_any_holder<false>>;
-	using generic_shared_texture = generic_texture<shared_any_holder<false>>;
+	using generic_unique_texture = generic_texture<any_smart_pointer<unique_any_holder<false>>>;
+	using generic_shared_texture = generic_texture<any_smart_pointer<shared_any_holder<false>>>;
 }
 
 #endif
