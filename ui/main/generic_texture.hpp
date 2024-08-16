@@ -14,6 +14,15 @@ namespace terraformer::ui::main
 	public:
 		generic_texture() = default;
 
+		using callback = void (*)(any_pointer_to_mutable, span_2d<rgba_pixel const>);
+
+		explicit generic_texture(any_pointer_to_mutable ptr, callback upload_function)
+		requires std::is_same_v<PointerType, any_pointer_to_mutable>:
+			m_pointer{ptr},
+			m_upload{upload_function}
+		{
+		}
+
 		template<class T, class ... Args>
 		requires(!std::is_same_v<std::remove_const_t<T>, generic_texture>)
 		explicit generic_texture(std::type_identity<T>, Args&&... args):
@@ -26,9 +35,23 @@ namespace terraformer::ui::main
 		{}
 
 		template<class T>
+		requires(std::is_same_v<PointerType, any_pointer_to_mutable>)
+		explicit generic_texture(T* ptr):
+			m_pointer{ptr},
+			m_upload{
+				[](any_pointer_to_mutable ptr, span_2d<rgba_pixel const> pixels){
+					ptr.get_if<T>()->upload(pixels);
+				}
+			}
+		{}
+
+		template<class T>
 		generic_texture& operator=(T&& src)
 		{
-			*this = generic_texture{std::type_identity<T>{}, std::forward<T>(src)};
+			if constexpr(std::is_same_v<PointerType, any_pointer_to_mutable>)
+			{ *this = generic_texture{std::forward<T>(src)}; }
+			else
+			{ *this = generic_texture{std::type_identity<T>{}, std::forward<T>(src)}; }
 			return *this;
 		};
 
@@ -36,11 +59,29 @@ namespace terraformer::ui::main
 		T* get_if() const noexcept
 		{ return m_pointer.template get_if<T>(); }
 
-		auto get() const noexcept
-		{ return m_pointer.get(); }
+		auto get_stored_any() const noexcept
+		{
+			if constexpr (std::is_same_v<PointerType, any_pointer_to_mutable>)
+			{ return m_pointer; }
+			else
+			{ return m_pointer.get(); }
+		}
 
-		auto get_const() const noexcept
-		{ return m_pointer.get_const(); }
+		auto get() const noexcept
+		{
+			return generic_texture<any_pointer_to_mutable>{
+				get_stored_any(),
+				m_upload
+			};
+		}
+
+		auto get_stored_any_const() const noexcept
+		{
+			if constexpr (std::is_same_v<PointerType, any_pointer_to_mutable>)
+			{ return any_pointer_to_const{m_pointer}; }
+			else
+			{ return m_pointer.get_const(); }
+		}
 
 		void reset() noexcept
 		{
@@ -56,18 +97,19 @@ namespace terraformer::ui::main
 		{ return static_cast<bool>(m_pointer); }
 
 		intptr_t object_id() const
-		{ return m_pointer.object_id(); }
+		{  return m_pointer.object_id(); }
 
 		void upload(span_2d<rgba_pixel const> pixels)
-		{ m_upload(m_pointer.get(), pixels); }
+		{ m_upload(get_stored_any(), pixels); }
 
 	private:
 		PointerType m_pointer;
-		void (*m_upload)(any_pointer_to_mutable, span_2d<rgba_pixel const>) = nullptr;
+		callback m_upload = nullptr;
 	};
 
 	using generic_unique_texture = generic_texture<any_smart_pointer<unique_any_holder<false>>>;
 	using generic_shared_texture = generic_texture<any_smart_pointer<shared_any_holder<false>>>;
+	using generic_texture_pointer = generic_texture<any_pointer_to_mutable>;
 }
 
 #endif

@@ -136,22 +136,22 @@ namespace terraformer::ui::widgets
 		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 		{ regenerate_textures(); }
 
-		output_rect.foreground = m_foreground.get_const();
+		output_rect.foreground = m_foreground.get_stored_any_const();
 		if(!output_rect.foreground)
 		{
 			m_foreground = output_rect.create_texture();
-			output_rect.foreground = m_foreground.get_const();
+			output_rect.foreground = m_foreground.get_stored_any_const();
 			m_dirty_bits |= gpu_textures_dirty;
 		}
 
 		output_rect.background = (display_state == state::released)?
-			m_background_released.get() : m_background_pressed.get_const();
+			m_background_released.get_stored_any_const() : m_background_pressed.get_stored_any_const();
 		if(!output_rect.background)
 		{
 			m_background_released = output_rect.create_texture();
 			m_background_pressed = output_rect.create_texture();
 			output_rect.background = (display_state == state::released)?
-				m_background_released.get() : m_background_pressed.get_const();
+				m_background_released.get_stored_any_const() : m_background_pressed.get_stored_any_const();
 			m_dirty_bits |= gpu_textures_dirty;
 		}
 

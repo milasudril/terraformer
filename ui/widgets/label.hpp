@@ -88,11 +88,11 @@ namespace terraformer::ui::widgets
 		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 		{ regenerate_textures(); }
 
-		output_rect.foreground = m_foreground.get_const();
+		output_rect.foreground = m_foreground.get_stored_any_const();
 		if(!output_rect.foreground)
 		{
 			m_foreground = output_rect.create_texture();
-			output_rect.foreground = m_foreground.get_const();
+			output_rect.foreground = m_foreground.get_stored_any_const();
 			m_dirty_bits |= gpu_textures_dirty;
 		}
 

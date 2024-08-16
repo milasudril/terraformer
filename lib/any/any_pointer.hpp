@@ -3,6 +3,8 @@
 
 #include <type_traits>
 #include <typeindex>
+#include <cstdint>
+#include <bit>
 
 namespace terraformer
 {
@@ -58,6 +60,9 @@ namespace terraformer
 
 		auto type() const
 		{ return m_type; }
+
+		intptr_t object_id() const
+		{ return std::bit_cast<intptr_t>(m_pointer); }
 
 	private:
 		pointer_type m_pointer = nullptr;
