@@ -91,7 +91,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 
 	EXPECT_EQ(my_button.value(), false);
 	output_rect<dummy_texture<0>> rect{};
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(
 		inspect_button_state(rect.background->img.pixels()),
@@ -108,7 +108,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 	);
 
 	EXPECT_EQ(my_button.value(), false);
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(
 		inspect_button_state(rect.background->img.pixels()),
@@ -125,7 +125,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 	);
 
 	EXPECT_EQ(my_button.value(), false);
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 1);
 	EXPECT_EQ(
 		inspect_button_state(rect.background->img.pixels()),
@@ -151,7 +151,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 
 	my_button.value(true);
 	output_rect<dummy_texture<0>> rect{};
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(
@@ -169,7 +169,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 		}
 	);
 
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(
@@ -185,7 +185,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 			.modifiers = {}
 		}
 	);
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 1);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(
@@ -214,7 +214,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 	);
 	EXPECT_EQ(my_button.value(), false);
 	output_rect<dummy_texture<0>> rect{};
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
 		inspect_button_state(rect.background->img.pixels()),
@@ -243,7 +243,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 
 	auto const resources = create_render_resources();
 	output_rect<dummy_texture<0>> rect{};
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
 		inspect_button_state(rect.background->img.pixels()),
@@ -259,7 +259,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 		}
 	);
 
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
@@ -294,7 +294,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 			.modifiers = {}
 		}
 	);
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
@@ -306,7 +306,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		.where = terraformer::ui::main::cursor_position{},
 		.direction = terraformer::ui::main::cursor_enter_leave::leave
 	});
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
@@ -318,7 +318,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		.where = terraformer::ui::main::cursor_position{},
 		.direction = terraformer::ui::main::cursor_enter_leave::enter
 	});
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
@@ -345,7 +345,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	});
 
 	output_rect<dummy_texture<0>> rect{};
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
 		EXPECT_EQ(
@@ -361,7 +361,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 			.modifiers = {}
 		}
 	);
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(
@@ -372,7 +372,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		.where = terraformer::ui::main::cursor_position{},
 		.direction = terraformer::ui::main::cursor_enter_leave::leave
 	});
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
 	my_button.handle_event(terraformer::ui::main::cursor_enter_leave_event{
@@ -383,7 +383,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		.where = terraformer::ui::main::cursor_position{},
 		.direction = terraformer::ui::main::cursor_enter_leave::enter
 	});
-	my_button.prepare_for_presentation(rect, terraformer::ui::main::widget_instance_info{});
+	my_button.prepare_for_presentation(rect);
 	EXPECT_EQ(my_button.value(), true);
 	my_button.handle_event(terraformer::ui::main::cursor_enter_leave_event{
 		.where = terraformer::ui::main::cursor_position{},

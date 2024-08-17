@@ -20,10 +20,7 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
- 		void prepare_for_presentation(
-			WidgetRenderingResult& output_rect,
-			main::widget_instance_info const& instance_info
-		)
+ 		void prepare_for_presentation(WidgetRenderingResult& output_rect)
 		{
 			output_rect.foreground_tints = std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
@@ -41,13 +38,7 @@ namespace terraformer::ui::widgets
 				m_background_tint,
 			};
 
- 			prepare_widgets_for_presentation(
-				m_widgets,
-				main::widget_instance_info{
-					.section_level = instance_info.section_level,
-					.paragraph_index = 0
-				}
-			);
+ 			prepare_widgets_for_presentation(m_widgets);
 		}
 
 		void handle_event(main::cursor_enter_leave_event const&)

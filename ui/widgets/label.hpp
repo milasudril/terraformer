@@ -36,10 +36,7 @@ namespace terraformer::ui::widgets
 		void regenerate_textures();
 
 		template<class OutputRectangle>
-		void prepare_for_presentation(
-			OutputRectangle& output_rect,
-			main::widget_instance_info const&
-		);
+		void prepare_for_presentation(OutputRectangle& output_rect);
 
 		void handle_event(main::cursor_enter_leave_event const&)
 		{ }
@@ -80,10 +77,7 @@ namespace terraformer::ui::widgets
 	};
 
 	template<class OutputRectangle>
-	void label::prepare_for_presentation(
-		OutputRectangle& output_rect,
-		main::widget_instance_info const&
-	)
+	void label::prepare_for_presentation(OutputRectangle& output_rect)
 	{
 		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 		{ regenerate_textures(); }

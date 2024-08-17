@@ -17,16 +17,14 @@ namespace terraformer::ui::main
 		using update_geometry_callback = widget_size_constraints (*)(void*);
 		using size_callback = void (*)(void*, fb_size);
 		using theme_updated_callback = void (*)(void*, object_dict const&);
+		using prepare_for_presentation_callback = void (*)(void*, WidgetRenderingResult&);
 
 		using widget_array = multi_array<
 			void*,
 			WidgetRenderingResult,
 			widget_visibility,
 			widget_geometry,
-			void (*)(void* obj,
-				WidgetRenderingResult& rect,
-				widget_instance_info const& instance_info
-			),
+			prepare_for_presentation_callback,
 			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
@@ -52,12 +50,8 @@ namespace terraformer::ui::main
 				WidgetRenderingResult{},
 				initial_visibility,
 				initial_geometry,
-				[](
-					void* obj,
-					WidgetRenderingResult& rect,
-					widget_instance_info const& instance_info
-				) -> void {
-					return static_cast<Widget*>(obj)->prepare_for_presentation(rect, instance_info);
+				[](void* obj, WidgetRenderingResult& result) -> void {
+					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
 				},
 				[](void* obj, cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
@@ -135,10 +129,7 @@ namespace terraformer::ui::main
 	};
 
 	template<class WidgetRenderingResult>
-	void prepare_widgets_for_presentation(
-		widget_list<WidgetRenderingResult>& widgets,
- 		widget_instance_info const& widget_instance
-	)
+	void prepare_widgets_for_presentation(widget_list<WidgetRenderingResult>& widgets)
 	{
 		auto const render_callbacks = widgets.render_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
@@ -149,16 +140,7 @@ namespace terraformer::ui::main
 		for(auto k = widgets.first_element_index(); k != n; ++k)
 		{
 			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
-			{
-				render_callbacks[k](
-					widget_pointers[k],
-					output_rectangles[k],
-					widget_instance_info{
-						.section_level = widget_instance.section_level,
-						.paragraph_index = k.get()
-					}
-				);
-			}
+			{ render_callbacks[k](widget_pointers[k], output_rectangles[k] ); }
 		}
 	}
 

@@ -71,13 +71,7 @@ namespace terraformer::ui::main
 		{
 			auto const box_size = value_of(m_widget_collection).update_geometry();
 
-			value_of(m_widget_collection).prepare_for_presentation(
-				m_output_rectangle,
-				widget_instance_info{
-					.section_level = 0,
-					.paragraph_index = 0
-				}
-			);
+			value_of(m_widget_collection).prepare_for_presentation(m_output_rectangle);
 			value_of(m_content_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},

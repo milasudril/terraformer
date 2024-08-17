@@ -46,10 +46,7 @@ namespace terraformer::ui::widgets
 		void regenerate_textures();
 
 		template<class OutputRectangle>
-		void prepare_for_presentation(
-			OutputRectangle& output_rect,
-			main::widget_instance_info const&
-		);
+		void prepare_for_presentation(OutputRectangle& output_rect);
 
 		void handle_event(main::cursor_enter_leave_event const& cle)
 		{
@@ -126,10 +123,7 @@ namespace terraformer::ui::widgets
 	};
 
 	template<class OutputRectangle>
-	void button::prepare_for_presentation(
-		OutputRectangle& output_rect,
-		main::widget_instance_info const&
-	)
+	void button::prepare_for_presentation(OutputRectangle& output_rect)
 	{
 		auto const display_state = m_temp_state.value_or(m_value);
 
