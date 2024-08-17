@@ -130,6 +130,42 @@ namespace terraformer::ui::main
 		widget_array m_objects;
 	};
 
+	inline auto find(cursor_position pos, span<widget_geometry const> geoms)
+	{
+		return std::ranges::find_if(
+			geoms,
+			[pos](auto const& obj) {
+				return inside(pos, obj);
+			}
+		);
+	}
+
+	template<class ... WidgetRenderingResult>
+	auto find(cursor_position pos, widget_list<WidgetRenderingResult...> const& widgets)
+	{
+		using wl = widget_list<WidgetRenderingResult...>;
+		auto const i = find(pos, widgets.widget_geometries());
+		if(i == std::end(widgets.widget_geometries()))
+		{ return wl::npos; }
+
+		return typename wl::index_type{
+			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
+		};
+	}
+
+	template<class ... WidgetRenderingResult>
+	void theme_updated(widget_list<WidgetRenderingResult...> const& widgets, object_dict const& dict)
+	{
+		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
+		auto const widget_pointers = widgets.widget_pointers();
+
+		auto const n = std::size(widgets);
+		for(auto k  = widgets.first_element_index(); k != n; ++k)
+		{ theme_updated_callbacks[k](widget_pointers[k], dict); }
+	}
+
+
+
 	template<class WidgetRenderingResult>
 	class widgets_to_render_list
 	{
@@ -255,39 +291,6 @@ namespace terraformer::ui::main
 		}
 	}
 
-	inline auto find(cursor_position pos, span<widget_geometry const> geoms)
-	{
-		return std::ranges::find_if(
-			geoms,
-			[pos](auto const& obj) {
-				return inside(pos, obj);
-			}
-		);
-	}
-
-	template<class ... WidgetRenderingResult>
-	auto find(cursor_position pos, widget_list<WidgetRenderingResult...> const& widgets)
-	{
-		using wl = widget_list<WidgetRenderingResult...>;
-		auto const i = find(pos, widgets.widget_geometries());
-		if(i == std::end(widgets.widget_geometries()))
-		{ return wl::npos; }
-
-		return typename wl::index_type{
-			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
-		};
-	}
-
-	template<class ... WidgetRenderingResult>
-	void theme_updated(widget_list<WidgetRenderingResult...> const& widgets, object_dict const& dict)
-	{
-		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
-		auto const widget_pointers = widgets.widget_pointers();
-
-		auto const n = std::size(widgets);
-		for(auto k  = widgets.first_element_index(); k != n; ++k)
-		{ theme_updated_callbacks[k](widget_pointers[k], dict); }
-	}
 }
 
 #endif
