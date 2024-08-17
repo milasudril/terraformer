@@ -58,6 +58,7 @@ terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::
 void terraformer::ui::widgets::label::theme_updated(object_dict const& render_resources)
 {
 	auto const ui = render_resources/"ui";
+	assert(!ui.is_null());
 	auto const margin = (ui/"widget_inner_margin").get_if<unsigned int const>();
 	auto const border_thickness = (ui/"3d_border_thickness").get_if<unsigned int const>();
 
@@ -65,10 +66,15 @@ void terraformer::ui::widgets::label::theme_updated(object_dict const& render_re
 	assert(border_thickness != nullptr);
 	m_margin = *margin + *border_thickness;
 	m_border_thickness = *border_thickness;
+	m_background = ui.dup("null_texture");
+	assert(m_background);
 
 	auto const output_area = ui/"output_area";
 	assert(!output_area.is_null());
 	m_font = output_area.dup("font");
 	assert(m_font);
 	m_dirty_bits |= host_textures_dirty | text_dirty;
+	auto const fg_tint = (output_area/"text_color").get_if<rgba_pixel const>();
+	assert(fg_tint != nullptr);
+	m_fg_tint = *fg_tint;
 }

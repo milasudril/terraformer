@@ -38,8 +38,7 @@ namespace terraformer::ui::widgets
 		template<class OutputRectangle>
 		void prepare_for_presentation(
 			OutputRectangle& output_rect,
-			main::widget_instance_info const&,
-			object_dict const& render_resources
+			main::widget_instance_info const&
 		);
 
 		void handle_event(main::cursor_enter_leave_event const&)
@@ -71,6 +70,8 @@ namespace terraformer::ui::widgets
 		unsigned int m_margin = 0;
 		unsigned int m_border_thickness = 0;
 		shared_const_any m_font;
+		shared_const_any m_background;
+		rgba_pixel m_fg_tint;
 
 		main::generic_unique_texture m_foreground;
 
@@ -81,8 +82,7 @@ namespace terraformer::ui::widgets
 	template<class OutputRectangle>
 	void label::prepare_for_presentation(
 		OutputRectangle& output_rect,
-		main::widget_instance_info const&,
-		object_dict const& render_resources
+		main::widget_instance_info const&
 	)
 	{
 		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
@@ -96,16 +96,14 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= gpu_textures_dirty;
 		}
 
-		output_rect.background = render_resources/"ui"/"null_texture";
+		output_rect.background = m_background.get();
 		if(m_dirty_bits & gpu_textures_dirty)
 		{
 			m_foreground.upload(std::as_const(m_foreground_host).pixels());
 			m_dirty_bits &= ~gpu_textures_dirty;
 		}
 
-		auto const fg_tint = (render_resources/"ui"/"output_area"/"text_color").get_if<rgba_pixel const>();
-		assert(fg_tint != nullptr);
-		output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
+		output_rect.foreground_tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
 	}
 }
 

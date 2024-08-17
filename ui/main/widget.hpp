@@ -98,7 +98,7 @@ namespace terraformer::ui::main
 		return scaling{preliminary_width, constraints.height.min, 1.0f};
 	}
 
-	template<class T, class ... OutputRectangle>
+	template<class T, class OutputRectangle>
 	concept widget = requires(
 		T& obj,
 		fb_size size,
@@ -107,10 +107,10 @@ namespace terraformer::ui::main
 		mouse_button_event const& mbe,
 		widget_instance_info const& instance_info,
 		object_dict const& resources,
-		OutputRectangle&... surface
+		OutputRectangle& surface
 	)
 	{
-		{ (..., obj.prepare_for_presentation(surface, instance_info, resources)) } -> std::same_as<void>;
+		{ obj.prepare_for_presentation(surface, instance_info) } -> std::same_as<void>;
 		{ obj.handle_event(cele) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<void>;
 		{ obj.handle_event(mbe) } -> std::same_as<void>;
@@ -122,7 +122,7 @@ namespace terraformer::ui::main
 	struct widget_with_default_actions
 	{
 		template<class OutputRectangle>
-		void prepare_for_presentation(OutputRectangle&&, widget_instance_info const&, object_dict const&) const {}
+		void prepare_for_presentation(OutputRectangle&&, widget_instance_info const&) const {}
 		void handle_event(cursor_enter_leave_event const&);
 		void handle_event(cursor_motion_event const&) const { }
 		void handle_event(mouse_button_event const&) const { }

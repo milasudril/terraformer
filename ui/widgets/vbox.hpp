@@ -52,8 +52,7 @@ namespace terraformer::ui::widgets
 				main::widget_instance_info{
 					.section_level = instance_info.section_level,
 					.paragraph_index = 0
-				},
-				resources
+				}
 			);
 		}
 

@@ -103,4 +103,11 @@ void terraformer::ui::widgets::button::theme_updated(object_dict const& render_r
 	assert(background_intensity != nullptr);
 	m_background_intensity = *background_intensity;
 	m_dirty_bits |= host_textures_dirty | text_dirty;
+
+	auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
+	auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
+	assert(bg_tint != nullptr);
+	assert(fg_tint != nullptr);
+	m_bg_tint = *bg_tint;
+	m_fg_tint = *fg_tint;
 }

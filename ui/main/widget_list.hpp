@@ -25,8 +25,7 @@ namespace terraformer::ui::main
 			widget_geometry,
 			void (*)(void* obj,
 				WidgetRenderingResult& rect,
-				widget_instance_info const& instance_info,
-				object_dict const& render_resources
+				widget_instance_info const& instance_info
 			),
 			cursor_enter_leave_callback,
 			cursor_position_callback,
@@ -56,10 +55,9 @@ namespace terraformer::ui::main
 				[](
 					void* obj,
 					WidgetRenderingResult& rect,
-					widget_instance_info const& instance_info,
-					object_dict const& render_resources
+					widget_instance_info const& instance_info
 				) -> void {
-					return static_cast<Widget*>(obj)->prepare_for_presentation(rect, instance_info, render_resources);
+					return static_cast<Widget*>(obj)->prepare_for_presentation(rect, instance_info);
 				},
 				[](void* obj, cursor_enter_leave_event const& event) -> void{
 					static_cast<Widget*>(obj)->handle_event(event);
@@ -139,8 +137,7 @@ namespace terraformer::ui::main
 	template<class WidgetRenderingResult>
 	void prepare_widgets_for_presentation(
 		widget_list<WidgetRenderingResult>& widgets,
- 		widget_instance_info const& widget_instance,
-		object_dict const& render_resources
+ 		widget_instance_info const& widget_instance
 	)
 	{
 		auto const render_callbacks = widgets.render_callbacks();
@@ -159,8 +156,7 @@ namespace terraformer::ui::main
 					widget_instance_info{
 						.section_level = widget_instance.section_level,
 						.paragraph_index = k.get()
-					},
-					render_resources
+					}
 				);
 			}
 		}

@@ -48,8 +48,7 @@ namespace terraformer::ui::widgets
 		template<class OutputRectangle>
 		void prepare_for_presentation(
 			OutputRectangle& output_rect,
-			main::widget_instance_info const&,
-			object_dict const& render_resources
+			main::widget_instance_info const&
 		);
 
 		void handle_event(main::cursor_enter_leave_event const& cle)
@@ -110,6 +109,8 @@ namespace terraformer::ui::widgets
 		unsigned int m_border_thickness = 0;
 		shared_const_any m_font;
 		float m_background_intensity;
+		rgba_pixel m_bg_tint;
+		rgba_pixel m_fg_tint;
 
 		main::generic_unique_texture m_background_released;
 		main::generic_unique_texture m_background_pressed;
@@ -127,8 +128,7 @@ namespace terraformer::ui::widgets
 	template<class OutputRectangle>
 	void button::prepare_for_presentation(
 		OutputRectangle& output_rect,
-		main::widget_instance_info const&,
-		object_dict const& render_resources
+		main::widget_instance_info const&
 	)
 	{
 		auto const display_state = m_temp_state.value_or(m_value);
@@ -163,13 +163,8 @@ namespace terraformer::ui::widgets
 			m_dirty_bits &= ~gpu_textures_dirty;
 		}
 
-		auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
-		auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
-		assert(bg_tint != nullptr);
-		assert(fg_tint != nullptr);
-
-		output_rect.background_tints = std::array{*bg_tint, *bg_tint, *bg_tint, *bg_tint};
-		output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
+		output_rect.background_tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
+		output_rect.foreground_tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
 	}
 
 	class toggle_button:private button
