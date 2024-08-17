@@ -70,6 +70,7 @@ namespace terraformer::ui::main
 		void render()
 		{
 			auto const box_size = value_of(m_widget_collection).update_geometry();
+			auto const widgets_to_render = value_of(m_widget_collection).collect_widgets_to_render();
 
 			value_of(m_widget_collection).prepare_for_presentation(m_output_rectangle);
 			value_of(m_content_renderer).render(

@@ -172,34 +172,17 @@ namespace terraformer::ui::main
 	public:
 		using widget_array = multi_array<
 			void*,
+			prepare_for_presentation_callback<WidgetRenderingResult>,
 			WidgetRenderingResult,
-			widget_geometry,
-			prepare_for_presentation_callback<WidgetRenderingResult>
+			widget_geometry
 		>;
 
 		using index_type = typename widget_array::index_type;
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		template<class Widget>
-		requires widget<Widget, WidgetRenderingResult>
-		widgets_to_render_list& append(
-			std::reference_wrapper<Widget> w,
-			widget_geometry const& initial_geometry,
-			widget_visibility initial_visibility = widget_visibility::visible
-		)
-		{
-			m_objects.push_back(
-				&w.get(),
-				WidgetRenderingResult{},
-				initial_geometry,
-				[](void* obj, WidgetRenderingResult& result) -> void {
-					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
-				}
-			);
-
-			return *this;
-		}
+		explicit widgets_to_render_list(widget_list<WidgetRenderingResult> const& from)
+		{ collect_widgets(from, m_objects); }
 
 		constexpr auto first_element_index() const
 		{ return m_objects.first_element_index(); }
@@ -226,29 +209,27 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<4>(); }
 
 	private:
-		widget_array m_objects;
-	};
-
-	template<class WidgetRenderingResult>
-	void collect_widgets(
-		widget_list<WidgetRenderingResult> const& from,
-		widgets_to_render_list<WidgetRenderingResult>& to
-	)
-	{
-		auto const widget_pointers = from.widget_pointers();
-		auto const widget_visibilities = from.widget_visibilities();
-		auto const children_callbacks = from.children_callbacks();
-
-		auto const n = std::size(from);
-		for(auto k = from.first_element_index(); k != n; ++k)
+		static void collect_widgets(widget_list<WidgetRenderingResult> const& from, widget_array& to)
 		{
-			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
+			auto const widget_pointers = from.widget_pointers();
+			auto const widget_visibilities = from.widget_visibilities();
+			// TODO: auto const children_callbacks = from.children_callbacks();
+			auto const render_callbacks = from.render_callbacks();
+			auto const widget_geometries = from.widget_geometries();
+
+			auto const n = std::size(from);
+			for(auto k = from.first_element_index(); k != n; ++k)
 			{
-				to.append(from.get_rendering_params(k));
-				collect_widgets(children_callbacks[k](widget_pointers[k]), to);
+				if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
+				{
+					to.push_back(widget_pointers[k], render_callbacks[k], WidgetRenderingResult{}, widget_geometries[k]);
+					// TODO: collect_widgets(children_callbacks[k](widget_pointers[k]), to);
+				}
 			}
 		}
-	}
+
+		widget_array m_objects;
+	};
 
 	template<class WidgetRenderingResult>
 	void prepare_widgets_for_presentation(widget_list<WidgetRenderingResult>& widgets)

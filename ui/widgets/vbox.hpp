@@ -44,6 +44,10 @@ namespace terraformer::ui::widgets
 		void handle_event(main::cursor_enter_leave_event const&)
 		{ }
 
+		main::widgets_to_render_list<WidgetRenderingResult> collect_widgets_to_render() const
+		{
+			return main::widgets_to_render_list{m_widgets};
+		}
 
 		void handle_event(main::cursor_motion_event const& event)
 		{
