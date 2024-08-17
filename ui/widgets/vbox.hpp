@@ -22,13 +22,9 @@ namespace terraformer::ui::widgets
 
  		void prepare_for_presentation(
 			WidgetRenderingResult& output_rect,
-			main::widget_instance_info const& instance_info,
-			object_dict const& resources
+			main::widget_instance_info const& instance_info
 		)
 		{
-			auto const panel = resources/"ui"/"panels"/0;
-			output_rect.background = panel/"background_texture";
-			output_rect.foreground = resources/"ui"/"null_texture";
 			output_rect.foreground_tints = std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
@@ -36,15 +32,13 @@ namespace terraformer::ui::widgets
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
 			};
 
-			auto const background_color_ptr = (panel/"background_tint").get_if<rgba_pixel const>();
-			auto const background_color = background_color_ptr != nullptr?
-				*background_color_ptr : rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
-
+			output_rect.foreground = m_foreground.get();
+			output_rect.background = m_background.get();
 			output_rect.background_tints = std::array{
-				background_color,
-				background_color,
-				background_color,
-				background_color,
+				m_background_tint,
+				m_background_tint,
+				m_background_tint,
+				m_background_tint,
 			};
 
  			prepare_widgets_for_presentation(
@@ -115,16 +109,26 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(object_dict const& new_theme)
 		{
+			auto const panel = new_theme/"ui"/"panels"/0;
+			assert(!panel.is_null());
+
 			{
-				auto ptr = static_cast<float const*>(new_theme/"ui"/"panels"/0/"margins"/"x");
+				auto const ptr = static_cast<float const*>(panel/"margins"/"x");
 				assert(ptr != nullptr);
 				m_margin_x = *ptr;
 			}
 			{
-				auto ptr = static_cast<float const*>(new_theme/"ui"/"panels"/0/"margins"/"y");
+				auto const ptr = static_cast<float const*>(panel/"margins"/"y");
 				assert(ptr != nullptr);
 				m_margin_y = *ptr;
 			}
+
+			m_background = panel.dup("background_texture");
+			m_foreground = (new_theme/"ui").dup("null_texture");
+
+			auto const background_color_ptr = (panel/"background_tint").get_if<rgba_pixel const>();
+			m_background_tint = background_color_ptr != nullptr?
+				*background_color_ptr : rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 
 			using main::theme_updated;
 			theme_updated(m_widgets, new_theme);
@@ -209,6 +213,11 @@ namespace terraformer::ui::widgets
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};
 		float m_margin_x;
 		float m_margin_y;
+
+		shared_const_any m_background;
+		shared_const_any m_foreground;
+		rgba_pixel m_background_tint;
+
 	};
 }
 

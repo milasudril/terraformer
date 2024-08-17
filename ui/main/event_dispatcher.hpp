@@ -76,8 +76,7 @@ namespace terraformer::ui::main
 				widget_instance_info{
 					.section_level = 0,
 					.paragraph_index = 0
-				},
-				m_resources
+				}
 			);
 			value_of(m_content_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
