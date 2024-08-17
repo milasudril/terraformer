@@ -4,7 +4,7 @@
 
 #include <testfwk/testfwk.hpp>
 
-TESTCASE(terraformer_generic_texture_default_state)
+TESTCASE(terraformer_ui_main_generic_texture_default_state)
 {
 	terraformer::ui::main::generic_shared_texture texture;
 	EXPECT_EQ(texture.get_if<int>(), nullptr);
@@ -27,7 +27,7 @@ namespace
 	};
 }
 
-TESTCASE(terraformer_generic_texture_create_and_reset)
+TESTCASE(terraformer_ui_main_generic_texture_create_and_reset)
 {
 	terraformer::ui::main::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
 	EXPECT_EQ(texture.get_if<dummy_texture<1>>(), nullptr);
@@ -63,7 +63,7 @@ TESTCASE(terraformer_generic_texture_create_and_reset)
 	EXPECT_EQ(texture.object_id(), 0);
 }
 
-TESTCASE(terraformer_generic_texture_create_and_assign_other)
+TESTCASE(terraformer_ui_main_generic_texture_create_and_assign_other)
 {
 	terraformer::ui::main::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
 	EXPECT_EQ(texture.get_if<dummy_texture<1>>(), nullptr);
@@ -95,7 +95,7 @@ TESTCASE(terraformer_generic_texture_create_and_assign_other)
 	EXPECT_NE(texture.get_if<dummy_texture<1>>(), nullptr);
 }
 
-TESTCASE(terraformer_generic_texture_pointer)
+TESTCASE(terraformer_ui_main_generic_texture_pointer)
 {
 	dummy_texture<0> ref_to;
 	terraformer::ui::main::generic_texture_pointer texture{&ref_to};
@@ -128,7 +128,7 @@ TESTCASE(terraformer_generic_texture_pointer)
 	EXPECT_EQ(texture.get_if<dummy_texture<1>>(), &other_obj);
 }
 
-TESTCASE(terraformer_generic_texture_get_pointer)
+TESTCASE(terraformer_ui_main_generic_texture_get_pointer)
 {
 	terraformer::ui::main::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
 
@@ -144,7 +144,7 @@ TESTCASE(terraformer_generic_texture_get_pointer)
 	EXPECT_EQ(value->pixels.data(), pixels.data());
 }
 
-TESTCASE(terraformer_generic_texture_get_pointer_to_const)
+TESTCASE(terraformer_ui_main_generic_texture_get_pointer_to_const)
 {
 	terraformer::ui::main::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
 
