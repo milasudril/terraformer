@@ -259,44 +259,6 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<class WidgetRenderingResult>
-	void prepare_widgets_for_presentation(widget_list<WidgetRenderingResult>& widgets)
-	{
-		auto const render_callbacks = widgets.render_callbacks();
-		auto const widget_pointers = widgets.widget_pointers();
-		auto const widget_visibilities = widgets.widget_visibilities();
-		auto output_rectangles = widgets.output_rectangles();
-
-		auto const n = std::size(widgets);
-		for(auto k = widgets.first_element_index(); k != n; ++k)
-		{
-			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
-			{ render_callbacks[k](widget_pointers[k], output_rectangles[k] ); }
-		}
-	}
-
-	template<class Renderer, class WidgetRenderingResult>
-	void show_widgets(Renderer&& renderer, widget_list<WidgetRenderingResult> const& widgets)
-	{
-		auto const widget_geometries = widgets.widget_geometries();
-		auto const widget_visibilities = widgets.widget_visibilities();
-		auto const output_rects = widgets.output_rectangles();
-
-		auto const n = std::size(widgets);
-		for(auto k  = widgets.first_element_index(); k != n; ++k)
-		{
-			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
-			{
-				renderer.render(
-					widget_geometries[k].where,
-					widget_geometries[k].origin,
-					widget_geometries[k].size,
-					output_rects[k]
-				);
-			}
-		}
-	}
-
 	template<class Renderer, class ...WidgetRenderingResult, class StyleGenerator>
 	void decorate_widgets(Renderer&& renderer,
 		widget_list<WidgetRenderingResult...> const& widgets,
