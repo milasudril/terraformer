@@ -14,6 +14,7 @@
 #include <ranges>
 #include <cstdio>
 #include <stdexcept>
+#include <functional>
 
 namespace terraformer
 {

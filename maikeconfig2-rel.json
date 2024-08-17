@@ -19,7 +19,7 @@
 				{
 					"config":
 					{
-						"cflags": ["-O3", "-g", "-ffast-math", "-ftree-vectorize"]
+						"cflags": ["-O3", "-g", "-ffast-math", "-fno-finite-math-only", "-ftree-vectorize"]
 					}
 				}
 			},
@@ -29,7 +29,7 @@
 				{
 					"config":
 					{
-						"cflags": ["-O3", "-g", "-ffast-math", "-ftree-vectorize"]
+						"cflags": ["-O3", "-g", "-ffast-math", "-fno-finite-math-only", "-ftree-vectorize"]
 					}
 				}
 			}
