@@ -14,19 +14,11 @@ namespace terraformer::ui::main
 	public:
 		generic_texture() = default;
 
-		using callback = void (*)(any_pointer_to_mutable, span_2d<rgba_pixel const>);
-
-		explicit generic_texture(any_pointer_to_mutable ptr, callback upload_function)
-		requires std::is_same_v<PointerType, any_pointer_to_mutable>:
-			m_pointer{ptr},
-			m_upload{upload_function}
-		{
-		}
-
-		explicit generic_texture(any_pointer_to_const ptr, callback upload_function)
-		requires std::is_same_v<PointerType, any_pointer_to_const>:
-			m_pointer{ptr},
-			m_upload{upload_function}
+		template<class Dummy = void>
+		generic_texture(generic_texture<any_pointer_to_mutable> other) requires
+		(std::is_same_v<PointerType, any_pointer_to_const>):
+			m_pointer{other.m_pointer},
+			m_upload{other.m_upload}
 		{
 		}
 
@@ -74,8 +66,14 @@ namespace terraformer::ui::main
 		};
 
 		template<class T>
+		requires(!std::is_same_v<PointerType, any_pointer_to_const>)
 		T* get_if() const noexcept
 		{ return m_pointer.template get_if<T>(); }
+
+		template<class T>
+		requires(std::is_same_v<PointerType, any_pointer_to_const>)
+		T const* get_if() const noexcept
+		{ return m_pointer.template get_if<T const>(); }
 
 		auto get_stored_any() const noexcept
 		{
@@ -131,8 +129,27 @@ namespace terraformer::ui::main
 		{ m_upload(get_stored_any(), pixels); }
 
 	private:
+		template<typename> friend class generic_texture;
+
+		using callback = void (*)(any_pointer_to_mutable, span_2d<rgba_pixel const>);
+
+		explicit generic_texture(any_pointer_to_mutable ptr, callback upload_function)
+		requires std::is_same_v<PointerType, any_pointer_to_mutable>:
+			m_pointer{ptr},
+			m_upload{upload_function}
+		{
+		}
+
+		explicit generic_texture(any_pointer_to_const ptr, callback upload_function)
+		requires std::is_same_v<PointerType, any_pointer_to_const>:
+			m_pointer{ptr},
+			m_upload{upload_function}
+		{
+		}
+
 		PointerType m_pointer;
 		callback m_upload = nullptr;
+
 	};
 
 	using generic_unique_texture = generic_texture<any_smart_pointer<unique_any_holder<false>>>;

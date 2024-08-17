@@ -10,7 +10,7 @@ namespace terraformer::ui::main
 	public:
 		template<class T>
 		explicit widget_rendering_result(std::reference_wrapper<T> obj):
-			m_vtable{s_vt<T>},
+			m_vtable{&s_vt<T>},
 			m_pointer{&obj.get()}
 		{}
 
