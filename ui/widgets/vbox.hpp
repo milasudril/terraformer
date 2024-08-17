@@ -38,7 +38,7 @@ namespace terraformer::ui::widgets
 				m_background_tint,
 			};
 
- 			prepare_widgets_for_presentation(m_widgets);
+ 		//	prepare_widgets_for_presentation(m_widgets);
 		}
 
 		void handle_event(main::cursor_enter_leave_event const&)

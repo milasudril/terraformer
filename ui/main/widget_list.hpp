@@ -164,8 +164,6 @@ namespace terraformer::ui::main
 		{ theme_updated_callbacks[k](widget_pointers[k], dict); }
 	}
 
-
-
 	template<class WidgetRenderingResult>
 	class widgets_to_render_list
 	{
@@ -194,10 +192,10 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<0>(); }
 
 		auto output_rectangles() const
-		{ return m_objects.template get<1>(); }
+		{ return m_objects.template get<2>(); }
 
 		auto output_rectangles()
-		{ return m_objects.template get<1>(); }
+		{ return m_objects.template get<2>(); }
 
 		auto widget_geometries() const
 		{ return m_objects.template get<3>(); }
@@ -206,7 +204,7 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<3>(); }
 
 		auto render_callbacks() const
-		{ return m_objects.template get<4>(); }
+		{ return m_objects.template get<1>(); }
 
 	private:
 		static void collect_widgets(widget_list<WidgetRenderingResult> const& from, widget_array& to)
@@ -230,6 +228,36 @@ namespace terraformer::ui::main
 
 		widget_array m_objects;
 	};
+
+	template<class WidgetRenderingResult>
+	void prepare_for_presentation(widgets_to_render_list<WidgetRenderingResult>& widgets)
+	{
+		auto const render_callbacks = widgets.render_callbacks();
+		auto const widget_pointers = widgets.widget_pointers();
+		auto output_rectangles = widgets.output_rectangles();
+
+		auto const n = std::size(widgets);
+		for(auto k = widgets.first_element_index(); k != n; ++k)
+		{ render_callbacks[k](widget_pointers[k], output_rectangles[k]); }
+	}
+
+	template<class Renderer, class WidgetRenderingResult>
+	void show_widgets(Renderer&& renderer, widgets_to_render_list<WidgetRenderingResult> const& widgets)
+	{
+		auto const widget_geometries = widgets.widget_geometries();
+		auto const output_rects = widgets.output_rectangles();
+
+		auto const n = std::size(widgets);
+		for(auto k  = widgets.first_element_index(); k != n; ++k)
+		{
+			renderer.render(
+				widget_geometries[k].where,
+				widget_geometries[k].origin,
+				widget_geometries[k].size,
+				output_rects[k]
+			);
+		}
+	}
 
 	template<class WidgetRenderingResult>
 	void prepare_widgets_for_presentation(widget_list<WidgetRenderingResult>& widgets)

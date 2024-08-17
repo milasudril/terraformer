@@ -70,9 +70,10 @@ namespace terraformer::ui::main
 		void render()
 		{
 			auto const box_size = value_of(m_widget_collection).update_geometry();
-			auto const widgets_to_render = value_of(m_widget_collection).collect_widgets_to_render();
-
 			value_of(m_widget_collection).prepare_for_presentation(m_output_rectangle);
+			auto widgets_to_render = value_of(m_widget_collection).collect_widgets_to_render();
+			prepare_for_presentation(widgets_to_render);
+
 			value_of(m_content_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},
@@ -83,8 +84,7 @@ namespace terraformer::ui::main
 				},
 				m_output_rectangle
 			);
-			value_of(m_widget_collection).show_widgets(value_of(m_content_renderer));
-		//	value_of(m_widget_collection).decorate_widgets(value_of(m_frame_renderer), textures, look);
+			show_widgets(value_of(m_content_renderer), widgets_to_render);
 		}
 
 		object_dict m_resources;
