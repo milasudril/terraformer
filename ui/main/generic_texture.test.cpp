@@ -143,3 +143,11 @@ TESTCASE(terraformer_generic_texture_get_pointer)
 	EXPECT_EQ(value->pixels.height(), 2);
 	EXPECT_EQ(value->pixels.data(), pixels.data());
 }
+
+TESTCASE(terraformer_generic_texture_get_pointer_to_const)
+{
+	terraformer::ui::main::generic_shared_texture texture{std::type_identity<dummy_texture<0>>{}};
+
+	auto ptr = texture.get_const();
+	EXPECT_NE(ptr, false);
+}

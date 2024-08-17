@@ -23,6 +23,13 @@ namespace terraformer::ui::main
 		{
 		}
 
+		explicit generic_texture(any_pointer_to_const ptr, callback upload_function)
+		requires std::is_same_v<PointerType, any_pointer_to_const>:
+			m_pointer{ptr},
+			m_upload{upload_function}
+		{
+		}
+
 		template<class T, class ... Args>
 		requires(!std::is_same_v<std::remove_const_t<T>, generic_texture>)
 		explicit generic_texture(std::type_identity<T>, Args&&... args):
@@ -37,6 +44,17 @@ namespace terraformer::ui::main
 		template<class T>
 		requires(std::is_same_v<PointerType, any_pointer_to_mutable>)
 		explicit generic_texture(T* ptr):
+			m_pointer{ptr},
+			m_upload{
+				[](any_pointer_to_mutable ptr, span_2d<rgba_pixel const> pixels){
+					ptr.get_if<T>()->upload(pixels);
+				}
+			}
+		{}
+
+		template<class T>
+		requires(std::is_same_v<PointerType, any_pointer_to_const>)
+		explicit generic_texture(T const* ptr):
 			m_pointer{ptr},
 			m_upload{
 				[](any_pointer_to_mutable ptr, span_2d<rgba_pixel const> pixels){
@@ -61,7 +79,9 @@ namespace terraformer::ui::main
 
 		auto get_stored_any() const noexcept
 		{
-			if constexpr (std::is_same_v<PointerType, any_pointer_to_mutable>)
+			if constexpr (std::is_same_v<PointerType, any_pointer_to_mutable>
+				|| std::is_same_v<PointerType, any_pointer_to_const>
+			)
 			{ return m_pointer; }
 			else
 			{ return m_pointer.get(); }
@@ -71,6 +91,14 @@ namespace terraformer::ui::main
 		{
 			return generic_texture<any_pointer_to_mutable>{
 				get_stored_any(),
+				m_upload
+			};
+		}
+
+		auto get_const() const noexcept
+		{
+			return generic_texture<any_pointer_to_const>{
+				get_stored_any_const(),
 				m_upload
 			};
 		}
@@ -110,6 +138,7 @@ namespace terraformer::ui::main
 	using generic_unique_texture = generic_texture<any_smart_pointer<unique_any_holder<false>>>;
 	using generic_shared_texture = generic_texture<any_smart_pointer<shared_any_holder<false>>>;
 	using generic_texture_pointer = generic_texture<any_pointer_to_mutable>;
+	using generic_texture_pointer_const = generic_texture<any_pointer_to_const>;
 }
 
 #endif
