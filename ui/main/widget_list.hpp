@@ -230,6 +230,27 @@ namespace terraformer::ui::main
 	};
 
 	template<class WidgetRenderingResult>
+	void collect_widgets(
+		widget_list<WidgetRenderingResult> const& from,
+		widgets_to_render_list<WidgetRenderingResult>& to
+	)
+	{
+		auto const widget_pointers = from.widget_pointers();
+		auto const widget_visibilities = from.widget_visibilities();
+		auto const children_callbacks = from.children_callbacks();
+
+		auto const n = std::size(from);
+		for(auto k = from.first_element_index(); k != n; ++k)
+		{
+			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
+			{
+				to.append(from.get_rendering_params(k));
+				collect_widgets(children_callbacks[k](widget_pointers[k]), to);
+			}
+		}
+	}
+
+	template<class WidgetRenderingResult>
 	void prepare_widgets_for_presentation(widget_list<WidgetRenderingResult>& widgets)
 	{
 		auto const render_callbacks = widgets.render_callbacks();
