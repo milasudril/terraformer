@@ -8,6 +8,9 @@
 namespace terraformer::ui::main
 {
 	template<class WidgetRenderingResult>
+	using prepare_for_presentation_callback = void (*)(void*, WidgetRenderingResult&);
+
+	template<class WidgetRenderingResult>
 	class widget_list
 	{
 	public:
@@ -17,14 +20,13 @@ namespace terraformer::ui::main
 		using update_geometry_callback = widget_size_constraints (*)(void*);
 		using size_callback = void (*)(void*, fb_size);
 		using theme_updated_callback = void (*)(void*, object_dict const&);
-		using prepare_for_presentation_callback = void (*)(void*, WidgetRenderingResult&);
 
 		using widget_array = multi_array<
 			void*,
 			WidgetRenderingResult,
 			widget_visibility,
 			widget_geometry,
-			prepare_for_presentation_callback,
+			prepare_for_presentation_callback<WidgetRenderingResult>,
 			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
@@ -123,6 +125,69 @@ namespace terraformer::ui::main
 
 		auto const theme_updated_callbacks() const
 		{ return m_objects.template get<10>(); }
+
+	private:
+		widget_array m_objects;
+	};
+
+	template<class WidgetRenderingResult>
+	class widgets_to_render_list
+	{
+	public:
+		using widget_array = multi_array<
+			void*,
+			WidgetRenderingResult,
+			widget_geometry,
+			prepare_for_presentation_callback<WidgetRenderingResult>
+		>;
+
+		using index_type = typename widget_array::index_type;
+
+		static constexpr index_type npos{static_cast<size_t>(-1)};
+
+		template<class Widget>
+		requires widget<Widget, WidgetRenderingResult>
+		widgets_to_render_list& append(
+			std::reference_wrapper<Widget> w,
+			widget_geometry const& initial_geometry,
+			widget_visibility initial_visibility = widget_visibility::visible
+		)
+		{
+			m_objects.push_back(
+				&w.get(),
+				WidgetRenderingResult{},
+				initial_geometry,
+				[](void* obj, WidgetRenderingResult& result) -> void {
+					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
+				}
+			);
+
+			return *this;
+		}
+
+		constexpr auto first_element_index() const
+		{ return m_objects.first_element_index(); }
+
+		auto size() const
+		{ return std::size(m_objects); }
+
+		auto widget_pointers() const
+		{ return m_objects.template get<0>(); }
+
+		auto output_rectangles() const
+		{ return m_objects.template get<1>(); }
+
+		auto output_rectangles()
+		{ return m_objects.template get<1>(); }
+
+		auto widget_geometries() const
+		{ return m_objects.template get<3>(); }
+
+		auto widget_geometries()
+		{ return m_objects.template get<3>(); }
+
+		auto render_callbacks() const
+		{ return m_objects.template get<4>(); }
 
 	private:
 		widget_array m_objects;
