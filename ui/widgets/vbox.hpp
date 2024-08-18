@@ -37,8 +37,6 @@ namespace terraformer::ui::widgets
 				m_background_tint,
 				m_background_tint,
 			};
-
- 		//	prepare_widgets_for_presentation(m_widgets);
 		}
 
 		void handle_event(main::cursor_enter_leave_event const&)
@@ -133,14 +131,6 @@ namespace terraformer::ui::widgets
 		{
 			return size;
 		}
-
-		template<class Renderer>
-		void show_widgets(Renderer&& renderer)
-		{
-			using main::show_widgets;
-			show_widgets(std::forward<Renderer>(renderer), m_widgets);
-		}
-
 		main::widget_size_constraints update_geometry()
 		{
 			auto const margin_x = m_margin_x;
