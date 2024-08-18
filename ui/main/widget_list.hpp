@@ -258,31 +258,6 @@ namespace terraformer::ui::main
 			);
 		}
 	}
-
-	template<class Renderer, class ...WidgetRenderingResult, class StyleGenerator>
-	void decorate_widgets(Renderer&& renderer,
-		widget_list<WidgetRenderingResult...> const& widgets,
-		StyleGenerator&& style
-	)
-	{
-		auto const widget_geometries = widgets.widget_geometries();
-		auto const widget_visibilities = widgets.widget_visibilities();
-
-		auto const n = std::size(widgets);
-		for(auto k  = widgets.first_element_index(); k != n; ++k)
-		{
-			if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
-			{
-				renderer.render(
-					widget_geometries[k].where,
-					widget_geometries[k].origin,
-					widget_geometries[k].size,
-					style(k)
-				);
-			}
-		}
-	}
-
 }
 
 #endif
