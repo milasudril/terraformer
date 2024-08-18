@@ -23,7 +23,6 @@ namespace terraformer::ui::main
 
 		using widget_array = multi_array<
 			void*,
-			WidgetRenderingResult,
 			widget_visibility,
 			widget_geometry,
 			prepare_for_presentation_callback<WidgetRenderingResult>,
@@ -49,7 +48,6 @@ namespace terraformer::ui::main
 		{
 			m_objects.push_back(
 				&w.get(),
-				WidgetRenderingResult{},
 				initial_visibility,
 				initial_geometry,
 				[](void* obj, WidgetRenderingResult& result) -> void {
@@ -87,44 +85,38 @@ namespace terraformer::ui::main
 		auto widget_pointers() const
 		{ return m_objects.template get<0>(); }
 
-		auto output_rectangles() const
-		{ return m_objects.template get<1>(); }
-
-		auto output_rectangles()
-		{ return m_objects.template get<1>(); }
-
 		auto widget_visibilities() const
-		{ return m_objects.template get<2>(); }
+		{ return m_objects.template get<1>(); }
 
 		auto widget_visibilities()
-		{ return m_objects.template get<2>(); }
+		{ return m_objects.template get<1>(); }
 
 		auto widget_geometries() const
-		{ return m_objects.template get<3>(); }
+		{ return m_objects.template get<2>(); }
 
 		auto widget_geometries()
-		{ return m_objects.template get<3>(); }
+		{ return m_objects.template get<2>(); }
 
 		auto render_callbacks() const
-		{ return m_objects.template get<4>(); }
+		{ return m_objects.template get<3>(); }
 
 		auto cursor_enter_leave_callbacks() const
-		{ return m_objects.template get<5>(); }
+		{ return m_objects.template get<4>(); }
 
 		auto cursor_motion_callbacks() const
-		{ return m_objects.template get<6>(); }
+		{ return m_objects.template get<5>(); }
 
 		auto mouse_button_callbacks() const
-		{ return m_objects.template get<7>(); }
+		{ return m_objects.template get<6>(); }
 
 		auto update_geometry_callbacks() const
-		{ return m_objects.template get<8>(); }
+		{ return m_objects.template get<7>(); }
 
 		auto size_callbacks() const
-		{ return m_objects.template get<9>(); }
+		{ return m_objects.template get<8>(); }
 
 		auto const theme_updated_callbacks() const
-		{ return m_objects.template get<10>(); }
+		{ return m_objects.template get<9>(); }
 
 	private:
 		widget_array m_objects;
