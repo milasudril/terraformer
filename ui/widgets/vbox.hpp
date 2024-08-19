@@ -44,7 +44,7 @@ namespace terraformer::ui::widgets
 
 		main::widgets_to_render_list<WidgetRenderingResult> collect_widgets_to_render() const
 		{
-			return main::widgets_to_render_list{m_widgets};
+			return main::widgets_to_render_list<WidgetRenderingResult>{m_widgets};
 		}
 
 		void handle_event(main::cursor_motion_event const& event)
@@ -192,7 +192,7 @@ namespace terraformer::ui::widgets
 		{ }
 
 	private:
-		using widget_list = main::widget_list<WidgetRenderingResult>;
+		using widget_list = main::widget_list;
 
 		widget_list m_widgets;
 		widget_list::index_type m_cursor_widget_index{widget_list::npos};

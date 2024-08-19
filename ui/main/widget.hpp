@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_MAIN_WIDGET_HPP
 
 #include "./events.hpp"
+#include "./widget_rendering_result.hpp"
 
 #include "ui/theming/widget_look.hpp"
 #include "lib/common/object_tree.hpp"
@@ -98,7 +99,7 @@ namespace terraformer::ui::main
 		return scaling{preliminary_width, constraints.height.min, 1.0f};
 	}
 
-	template<class T, class OutputRectangle>
+	template<class T>
 	concept widget = requires(
 		T& obj,
 		fb_size size,
@@ -107,7 +108,7 @@ namespace terraformer::ui::main
 		mouse_button_event const& mbe,
 		widget_instance_info const&,
 		object_dict const& resources,
-		OutputRectangle& surface
+		widget_rendering_result surface
 	)
 	{
 		{ obj.prepare_for_presentation(surface) } -> std::same_as<void>;
@@ -121,8 +122,7 @@ namespace terraformer::ui::main
 
 	struct widget_with_default_actions
 	{
-		template<class OutputRectangle>
-		void prepare_for_presentation(OutputRectangle&&) const {}
+		void prepare_for_presentation(widget_rendering_result) const {}
 		void handle_event(cursor_enter_leave_event const&);
 		void handle_event(cursor_motion_event const&) const { }
 		void handle_event(mouse_button_event const&) const { }
@@ -134,7 +134,7 @@ namespace terraformer::ui::main
 
 	namespace
 	{
-		static_assert(widget<widget_with_default_actions, double>);
+		static_assert(widget<widget_with_default_actions>);
 	}
 }
 

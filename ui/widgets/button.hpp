@@ -45,8 +45,7 @@ namespace terraformer::ui::widgets
 
 		void regenerate_textures();
 
-		template<class OutputRectangle>
-		void prepare_for_presentation(OutputRectangle& output_rect);
+		void prepare_for_presentation(main::widget_rendering_result output_rect);
 
 		void handle_event(main::cursor_enter_leave_event const& cle)
 		{
@@ -122,30 +121,29 @@ namespace terraformer::ui::widgets
 		std::optional<state> m_temp_state;
 	};
 
-	template<class OutputRectangle>
-	void button::prepare_for_presentation(OutputRectangle& output_rect)
+	inline void button::prepare_for_presentation(main::widget_rendering_result output_rect)
 	{
 		auto const display_state = m_temp_state.value_or(m_value);
 
 		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 		{ regenerate_textures(); }
 
-		output_rect.foreground = m_foreground.get_stored_any_const();
-		if(!output_rect.foreground)
+		if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
 		{
 			m_foreground = output_rect.create_texture();
-			output_rect.foreground = m_foreground.get_stored_any_const();
+			(void)output_rect.set_foreground(m_foreground.get());
 			m_dirty_bits |= gpu_textures_dirty;
 		}
-
-		output_rect.background = (display_state == state::released)?
-			m_background_released.get_stored_any_const() : m_background_pressed.get_stored_any_const();
-		if(!output_rect.background)
+;
+		if(
+			output_rect.set_background( (display_state == state::released)?
+			m_background_released.get() : m_background_pressed.get())!=main::set_texture_result::success
+		) [[unlikely]]
 		{
 			m_background_released = output_rect.create_texture();
 			m_background_pressed = output_rect.create_texture();
-			output_rect.background = (display_state == state::released)?
-				m_background_released.get_stored_any_const() : m_background_pressed.get_stored_any_const();
+			output_rect.set_background((display_state == state::released)?
+				m_background_released.get() : m_background_pressed.get());
 			m_dirty_bits |= gpu_textures_dirty;
 		}
 
@@ -157,8 +155,8 @@ namespace terraformer::ui::widgets
 			m_dirty_bits &= ~gpu_textures_dirty;
 		}
 
-		output_rect.background_tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
-		output_rect.foreground_tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
+		output_rect.set_background_tints(std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint});
+		output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
 	}
 
 	class toggle_button:private button

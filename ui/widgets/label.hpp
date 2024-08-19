@@ -14,8 +14,6 @@ namespace terraformer::ui::widgets
 	class label
 	{
 	public:
-		enum class state{released, pressed};
-
 		template<class StringType>
 		label& text(StringType&& str)
 		{
@@ -35,8 +33,7 @@ namespace terraformer::ui::widgets
 
 		void regenerate_textures();
 
-		template<class OutputRectangle>
-		void prepare_for_presentation(OutputRectangle& output_rect);
+		void prepare_for_presentation(main::widget_rendering_result output_rect);
 
 		void handle_event(main::cursor_enter_leave_event const&)
 		{ }
@@ -76,28 +73,27 @@ namespace terraformer::ui::widgets
 		image m_foreground_host;
 	};
 
-	template<class OutputRectangle>
-	void label::prepare_for_presentation(OutputRectangle& output_rect)
+	inline void label::prepare_for_presentation(main::widget_rendering_result output_rect)
 	{
 		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 		{ regenerate_textures(); }
 
-		output_rect.foreground = m_foreground.get_stored_any_const();
-		if(!output_rect.foreground)
+		if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
 		{
 			m_foreground = output_rect.create_texture();
-			output_rect.foreground = m_foreground.get_stored_any_const();
+			output_rect.set_foreground(m_foreground.get());
 			m_dirty_bits |= gpu_textures_dirty;
 		}
 
-		output_rect.background = m_background.get();
+		(void)output_rect.set_foreground(m_background.get_if<main::generic_shared_texture const>()->get());
+
 		if(m_dirty_bits & gpu_textures_dirty)
 		{
 			m_foreground.upload(std::as_const(m_foreground_host).pixels());
 			m_dirty_bits &= ~gpu_textures_dirty;
 		}
 
-		output_rect.foreground_tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
+		output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
 	}
 }
 

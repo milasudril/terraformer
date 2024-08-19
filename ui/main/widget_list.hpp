@@ -7,10 +7,8 @@
 
 namespace terraformer::ui::main
 {
-	template<class WidgetRenderingResult>
-	using prepare_for_presentation_callback = void (*)(void*, WidgetRenderingResult&);
+	using prepare_for_presentation_callback = void (*)(void*, widget_rendering_result);
 
-	template<class WidgetRenderingResult>
 	class widget_list
 	{
 	public:
@@ -25,7 +23,7 @@ namespace terraformer::ui::main
 			void*,
 			widget_visibility,
 			widget_geometry,
-			prepare_for_presentation_callback<WidgetRenderingResult>,
+			prepare_for_presentation_callback,
 			cursor_enter_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
@@ -39,7 +37,7 @@ namespace terraformer::ui::main
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
 		template<class Widget>
-		requires widget<Widget, WidgetRenderingResult>
+		requires widget<Widget>
 		widget_list& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -50,7 +48,7 @@ namespace terraformer::ui::main
 				&w.get(),
 				initial_visibility,
 				initial_geometry,
-				[](void* obj, WidgetRenderingResult& result) -> void {
+				[](void* obj, widget_rendering_result result) -> void {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
 				},
 				[](void* obj, cursor_enter_leave_event const& event) -> void{
@@ -132,10 +130,9 @@ namespace terraformer::ui::main
 		);
 	}
 
-	template<class ... WidgetRenderingResult>
-	auto find(cursor_position pos, widget_list<WidgetRenderingResult...> const& widgets)
+	inline auto find(cursor_position pos, widget_list const& widgets)
 	{
-		using wl = widget_list<WidgetRenderingResult...>;
+		using wl = widget_list;
 		auto const i = find(pos, widgets.widget_geometries());
 		if(i == std::end(widgets.widget_geometries()))
 		{ return wl::npos; }
@@ -145,8 +142,7 @@ namespace terraformer::ui::main
 		};
 	}
 
-	template<class ... WidgetRenderingResult>
-	void theme_updated(widget_list<WidgetRenderingResult...> const& widgets, object_dict const& dict)
+	void theme_updated(widget_list const& widgets, object_dict const& dict)
 	{
 		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
@@ -162,7 +158,7 @@ namespace terraformer::ui::main
 	public:
 		using widget_array = multi_array<
 			void*,
-			prepare_for_presentation_callback<WidgetRenderingResult>,
+			prepare_for_presentation_callback,
 			WidgetRenderingResult,
 			widget_geometry
 		>;
@@ -171,7 +167,7 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		explicit widgets_to_render_list(widget_list<WidgetRenderingResult> const& from)
+		explicit widgets_to_render_list(widget_list const& from)
 		{ collect_widgets(from, m_objects); }
 
 		constexpr auto first_element_index() const
@@ -199,7 +195,7 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<1>(); }
 
 	private:
-		static void collect_widgets(widget_list<WidgetRenderingResult> const& from, widget_array& to)
+		static void collect_widgets(widget_list const& from, widget_array& to)
 		{
 			auto const widget_pointers = from.widget_pointers();
 			auto const widget_visibilities = from.widget_visibilities();
@@ -230,7 +226,7 @@ namespace terraformer::ui::main
 
 		auto const n = std::size(widgets);
 		for(auto k = widgets.first_element_index(); k != n; ++k)
-		{ render_callbacks[k](widget_pointers[k], output_rectangles[k]); }
+		{ render_callbacks[k](widget_pointers[k], widget_rendering_result{std::ref(output_rectangles[k])}); }
 	}
 
 	template<class Renderer, class WidgetRenderingResult>

@@ -19,11 +19,17 @@ namespace
 	{
 		using texture_type = dummy_texture<0>;
 
-		void set_background(texture_type const* val)
-		{ background = val; }
+		auto set_background(texture_type const* val)
+		{
+			background = val;
+			return terraformer::ui::main::set_texture_result::success;
+		}
 
-		void set_foreground(texture_type const* val)
-		{ foreground = val; }
+		auto set_foreground(texture_type const* val)
+		{
+			foreground = val;
+			return terraformer::ui::main::set_texture_result::success;
+		}
 
 		void set_background_tints(std::array<terraformer::rgba_pixel, 4> const& vals)
 		{ background_tints = vals;}

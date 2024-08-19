@@ -5,6 +5,8 @@
 
 namespace terraformer::ui::main
 {
+	enum class set_texture_result{success, incompatible};
+
 	class widget_rendering_result
 	{
 	public:
@@ -17,11 +19,11 @@ namespace terraformer::ui::main
 		generic_unique_texture create_texture()
 		{ return m_vtable->create_texture(); }
 
-		void set_background(generic_texture_pointer_const texture)
-		{ m_vtable->set_background(m_pointer, texture); }
+		set_texture_result set_background(generic_texture_pointer_const texture)
+		{ return m_vtable->set_background(m_pointer, texture); }
 
-		void set_foreground(generic_texture_pointer_const texture)
-		{ m_vtable->set_foreground(m_pointer, texture); }
+		set_texture_result set_foreground(generic_texture_pointer_const texture)
+		{ return m_vtable->set_foreground(m_pointer, texture); }
 
 		void set_background_tints(std::array<rgba_pixel, 4> const& vals)
 		{ m_vtable->set_background_tints(m_pointer, vals); }
@@ -33,8 +35,8 @@ namespace terraformer::ui::main
 		struct vtable
 		{
 			generic_unique_texture (*create_texture)();
-			void (*set_background)(void*, generic_texture_pointer_const texture);
-			void (*set_foreground)(void*, generic_texture_pointer_const texture);
+			set_texture_result (*set_background)(void*, generic_texture_pointer_const texture);
+			set_texture_result (*set_foreground)(void*, generic_texture_pointer_const texture);
 			void (*set_background_tints)(void*, std::array<rgba_pixel, 4> const&);
 			void (*set_foreground_tints)(void*, std::array<rgba_pixel, 4> const&);
 		};
@@ -45,10 +47,10 @@ namespace terraformer::ui::main
 				return generic_unique_texture{std::type_identity<typename T::texture_type>{}};
 			},
 			.set_background = [](void* obj, generic_texture_pointer_const texture){
-				static_cast<T*>(obj)->set_background(texture.get_if<typename T::texture_type>());
+				return static_cast<T*>(obj)->set_background(texture.get_if<typename T::texture_type>());
 			},
 			.set_foreground = [](void* obj, generic_texture_pointer_const texture){
-				static_cast<T*>(obj)->set_foreground(texture.get_if<typename T::texture_type>());
+				return static_cast<T*>(obj)->set_foreground(texture.get_if<typename T::texture_type>());
 			},
 			.set_background_tints = [](void* obj, std::array<rgba_pixel, 4> const& vals){
 				static_cast<T*>(obj)->set_background_tints(vals);
