@@ -13,11 +13,13 @@ namespace terraformer::ui::theming
 	object_dict load_default_resources()
 	{
 		shared_any noisy_texture{
+			std::type_identity<main::generic_unique_texture>{},
 			std::type_identity<TextureType>{},
 			generate_noisy_texture<TextureType>()
 		};
 
 		shared_any white_texture{
+			std::type_identity<main::generic_unique_texture>{},
 			std::type_identity<TextureType>{},
 			generate_white_texture<TextureType>()
 		};
@@ -63,8 +65,9 @@ namespace terraformer::ui::theming
 				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
 				.insert<unsigned int>("widget_inner_margin", 4)
 				.insert<unsigned int>("3d_border_thickness", 2)
-				.insert<TextureType>(
+				.insert<main::generic_unique_texture>(
 					"null_texture",
+					std::type_identity<TextureType>{},
 					generate_transparent_texture<TextureType>()
 				)
 			)

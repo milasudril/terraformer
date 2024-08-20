@@ -20,23 +20,22 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
- 		void prepare_for_presentation(WidgetRenderingResult& output_rect)
+ 		void prepare_for_presentation(main::widget_rendering_result output_rect)
 		{
-			output_rect.foreground_tints = std::array{
+			output_rect.set_foreground(m_foreground.get_if<main::generic_unique_texture const>()->get());
+			output_rect.set_background(m_background.get_if<main::generic_unique_texture const>()->get());
+			output_rect.set_foreground_tints(std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
-			};
-
-			output_rect.foreground = m_foreground.get();
-			output_rect.background = m_background.get();
-			output_rect.background_tints = std::array{
+			});
+			output_rect.set_background_tints(std::array{
 				m_background_tint,
 				m_background_tint,
 				m_background_tint,
 				m_background_tint,
-			};
+			});
 		}
 
 		void handle_event(main::cursor_enter_leave_event const&)

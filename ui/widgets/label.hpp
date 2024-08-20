@@ -85,7 +85,7 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= gpu_textures_dirty;
 		}
 
-		(void)output_rect.set_foreground(m_background.get_if<main::generic_shared_texture const>()->get());
+		(void)output_rect.set_background(m_background.get_if<main::generic_unique_texture const>()->get());
 
 		if(m_dirty_bits & gpu_textures_dirty)
 		{
