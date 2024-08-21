@@ -7,12 +7,9 @@
 
 namespace terraformer::ui::widgets
 {
-	template<class WidgetRenderingResult>
 	class vbox
 	{
 	public:
-		using output_rectangle = WidgetRenderingResult;
-
 		template<class Widget>
 		vbox& append(Widget&& widget)
 		{
@@ -41,6 +38,7 @@ namespace terraformer::ui::widgets
 		void handle_event(main::cursor_enter_leave_event const&)
 		{ }
 
+		template<class WidgetRenderingResult>
 		main::widgets_to_render_list<WidgetRenderingResult> collect_widgets_to_render() const
 		{
 			return main::widgets_to_render_list<WidgetRenderingResult>{m_widgets};
@@ -181,14 +179,6 @@ namespace terraformer::ui::widgets
 				.aspect_ratio = std::nullopt
 			};
 		}
-
-		template<class Renderer>
-		void decorate_widgets(
-			Renderer&&,
-			main::widget_instance_info const& instance_info,
-			object_dict const& resources
-		)
-		{ }
 
 	private:
 		using widget_list = main::widget_list;

@@ -83,9 +83,7 @@ int main(int, char**)
 			else
 			{ foo.value(u8"Value is false");}
 		});
-	terraformer::ui::widgets::vbox<
-		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
-	> my_vbox;
+	terraformer::ui::widgets::vbox my_vbox;
 
 	my_vbox.append(std::ref(foo));
 	my_vbox.append(std::ref(bar));
