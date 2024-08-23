@@ -2,27 +2,13 @@
 #define TERRAFORMER_MULTI_ARRAY_HPP
 
 #include "./memory_block.hpp"
-#include "./span.hpp"
-#include "lib/common/tuple.hpp"
+#include "./multi_span.hpp"
 
 #include <type_traits>
 #include <cassert>
 
 namespace terraformer
 {
-	template<class ... T>
-	struct multi_array_tag
-	{
-		template<class U>
-		requires std::disjunction_v<std::is_same<U, T>...>
-		static consteval auto match_tag()
-		{ return std::type_identity<U>{}; }
-
-		static consteval void convert(T const&...){}
-
-		static constexpr auto type_count = sizeof...(T);
-	};
-
 	template<size_t Index, class T>
 	struct type_at{};
 
@@ -214,6 +200,7 @@ namespace terraformer
 		explicit multi_array(size_type size) noexcept
 		{ resize(size); }
 
+
 		multi_array(multi_array&& other) noexcept:
 			m_storage{std::exchange(other.m_storage, storage_type{})},
 			m_size{std::exchange(other.m_size, size_type{})},
@@ -327,6 +314,32 @@ namespace terraformer
 			using sel_attribute_type = attribute_type<AttributeIndex>;
 			auto const ptr = m_storage[AttributeIndex].template interpret_as<sel_attribute_type>();
 			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
+		}
+
+		auto get_attributes() noexcept
+		{
+			return multi_span<T...>{
+				std::apply(
+					[](auto const&... args){
+						return tuple{args.template interpret_as<T>()...};
+					},
+					m_storage
+				),
+				m_size
+			};
+		}
+
+		auto get_attributes() const noexcept
+		{
+			return multi_span<T const...>{
+				std::apply(
+					[](auto const&... args){
+						return tuple{args.template interpret_as<T const>()...};
+					},
+					m_storage
+				),
+				m_size
+			};
 		}
 
 		void truncate_from(index_type index) noexcept

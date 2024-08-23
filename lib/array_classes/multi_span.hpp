@@ -1,0 +1,103 @@
+#ifndef TERRAFORMER_MULTI_SPAN_HPP
+#define TERRAFORMER_MULTI_SPAN_HPP
+
+#include "./span.hpp"
+#include "lib/common/tuple.hpp"
+
+#include <type_traits>
+#include <cassert>
+
+namespace terraformer
+{
+	template<class ... T>
+	struct multi_array_tag
+	{
+		template<class U>
+		requires std::disjunction_v<std::is_same<U, T>...>
+		static consteval auto match_tag()
+		{ return std::type_identity<U>{}; }
+
+		static consteval void convert(T const&...){}
+
+		static constexpr auto type_count = sizeof...(T);
+	};
+
+	template<size_t StartAt, class ArrayTag, class StorageTuple, class Head, class ... Args>
+	void assign_values(
+		StorageTuple const& dest,
+		array_index<ArrayTag> offset,
+		Head&& head,
+		Args&&... args
+	)
+	{
+		if constexpr(StartAt != ArrayTag::type_count)
+		{
+			auto obj = dest.template get<StartAt>() + offset.get();
+			*obj = std::forward<Head>(head);
+			if constexpr(sizeof...(args) != 0)
+			{ assign_values<StartAt + 1>(dest, offset, std::forward<Args>(args)...); }
+		}
+	}
+
+	template<class ... T>
+	class multi_span
+	{
+	public:
+		using storage_type = tuple<T*...>;
+		using size_type = array_size<multi_array_tag<std::remove_const_t<T>...>>;
+		using index_type = array_index<multi_array_tag<std::remove_const_t<T>...>>;
+
+		template<size_t Index>
+		using attribute_type = std::tuple_element_t<Index, tuple<T...>>;
+
+		multi_span() noexcept = default;
+
+		explicit multi_span(T*... pointers, size_t size) noexcept:
+			m_storage{pointers...},
+			m_size{size}
+		{}
+
+		explicit multi_span(storage_type const& pointers, size_type size) noexcept:
+			m_storage{pointers},
+			m_size{size}
+		{}
+
+		constexpr auto first_element_index() const noexcept
+		{ return index_type{}; }
+
+		constexpr auto last_element_index() const noexcept
+		{ return index_type{(m_size - size_type{1}).get()}; }
+
+		auto size() const noexcept
+		{ return m_size; }
+
+		auto empty() const noexcept
+		{ return m_size.get() == 0; }
+
+		template<size_t From, class ... Arg>
+		void assign(index_type index, Arg&&... args)
+		{ assign_values<From>(m_storage, index, std::forward<Arg>(args)...); }
+
+		template<size_t AttributeIndex>
+		auto get() const noexcept
+		{
+			using sel_attribute_type = attribute_type<AttributeIndex> const;
+			auto const ptr = std::get<AttributeIndex>(m_storage);
+			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
+		}
+
+		template<size_t AttributeIndex>
+		auto get() noexcept
+		{
+			using sel_attribute_type = attribute_type<AttributeIndex>;
+			auto const ptr = m_storage.template get<AttributeIndex>();
+			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
+		}
+
+	private:
+		storage_type m_storage{};
+		size_type m_size{};
+	};
+}
+
+#endif
