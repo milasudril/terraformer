@@ -126,10 +126,9 @@ namespace terraformer::ui::widgets
 			theme_updated(m_widgets, new_theme);
 		}
 
-		main::fb_size handle_event(main::fb_size size)
-		{
-			return size;
-		}
+		void handle_event(main::fb_size)
+		{ }
+
 		main::widget_size_constraints update_geometry()
 		{
 			auto const margin_x = m_margin_x;

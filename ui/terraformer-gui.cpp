@@ -88,6 +88,10 @@ int main(int, char**)
 	my_vbox.append(std::ref(foo));
 	my_vbox.append(std::ref(bar));
 
+
+	terraformer::ui::widgets::vbox my_outer_vbox;
+	my_outer_vbox.append(std::ref(my_vbox));
+
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		terraformer::ui::theming::load_default_resources<terraformer::ui::drawing_api::gl_texture>(),
 		std::ref(my_vbox),
