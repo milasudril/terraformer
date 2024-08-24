@@ -109,7 +109,7 @@ namespace terraformer::ui::main
 	using update_geometry_callback = widget_size_constraints (*)(void*);
 	using size_callback = void (*)(void*, fb_size);
 	using theme_updated_callback = void (*)(void*, object_dict const&);
-	using get_childred_callback = widget_collection_view (*)(void*);
+	using get_children_callback = widget_collection_view (*)(void*);
 
 	class widget_collection_view
 	{
@@ -124,7 +124,8 @@ namespace terraformer::ui::main
 			mouse_button_callback const,
 			update_geometry_callback const,
 			size_callback const,
-			theme_updated_callback const
+			theme_updated_callback const,
+			get_children_callback const
 		>;
 
 		using index_type = typename widget_span::index_type;
@@ -154,6 +155,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.update_geometry() } -> same_as_unqual<widget_size_constraints>;
 		{ obj.theme_updated(resources) } -> std::same_as<void>;
+		{ obj.get_children() } -> std::same_as<widget_collection_view>;
 	};
 
 	struct widget_with_default_actions
@@ -166,6 +168,8 @@ namespace terraformer::ui::main
 		[[nodiscard]] widget_size_constraints update_geometry() const
 		{ return widget_size_constraints{}; }
 		void theme_updated(object_dict const&) const {}
+		widget_collection_view get_children() const
+		{ return widget_collection_view{}; }
 	};
 
 	namespace

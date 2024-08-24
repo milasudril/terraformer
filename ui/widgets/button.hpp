@@ -91,6 +91,9 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(object_dict const& render_resources);
 
+		main::widget_collection_view get_children() const
+		{ return main::widget_collection_view{}; }
+
 	private:
 		move_only_function<void(button&)> m_on_activated =
 			move_only_function<void(button&)>{no_operation_tag{}};
@@ -173,6 +176,7 @@ namespace terraformer::ui::widgets
 		using button::text;
 		using button::value;
 		using button::theme_updated;
+		using button::get_children;
 
 		template<class Function>
 		toggle_button& on_value_changed(Function&& func)

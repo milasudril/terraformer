@@ -28,16 +28,16 @@ namespace terraformer::ui::main
 				&w.get(),
 				initial_visibility,
 				initial_geometry,
-				[](void* obj, widget_rendering_result result) -> void {
+				[](void* obj, widget_rendering_result result) {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
 				},
-				[](void* obj, cursor_enter_leave_event const& event) -> void{
+				[](void* obj, cursor_enter_leave_event const& event) {
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
-				[](void* obj, cursor_motion_event const& event) -> void{
+				[](void* obj, cursor_motion_event const& event) {
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
-				[](void* obj, mouse_button_event const& mbe) -> void {
+				[](void* obj, mouse_button_event const& mbe) {
 					static_cast<Widget*>(obj)->handle_event(mbe);
 				},
 				[](void* obj) -> widget_size_constraints {
@@ -48,6 +48,9 @@ namespace terraformer::ui::main
 				},
 				[](void* obj, object_dict const& new_theme) {
 					static_cast<Widget*>(obj)->theme_updated(new_theme);
+				},
+				[](void* obj){
+					return static_cast<Widget*>(obj)->get_children();
 				}
 			);
 

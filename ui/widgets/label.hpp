@@ -54,6 +54,9 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(object_dict const& render_resources);
 
+		main::widget_collection_view get_children() const
+		{ return main::widget_collection_view{}; }
+
 	private:
 		std::basic_string<char8_t> m_text;
 		basic_image<uint8_t> m_rendered_text;
