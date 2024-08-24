@@ -132,8 +132,12 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-	private:
+		widget_collection_view() = default;
 
+		explicit widget_collection_view(widget_span const& span): m_span{span}{}
+
+	private:
+		widget_span m_span;
 	};
 
 	template<class T>

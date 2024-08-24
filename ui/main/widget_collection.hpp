@@ -99,6 +99,9 @@ namespace terraformer::ui::main
 		auto const theme_updated_callbacks() const
 		{ return m_objects.template get<9>(); }
 
+		auto get_attributes() const
+		{ return widget_collection_view{m_objects.get_attributes()}; }
+
 	private:
 		widget_array m_objects;
 	};
