@@ -145,19 +145,94 @@ namespace terraformer::ui::main
 
 		explicit widget_collection_ref_impl(widget_span const& span): m_span{span}{}
 
+		constexpr auto first_element_index() const
+		{ return m_span.first_element_index(); }
+
+		auto size() const
+		{ return std::size(m_span); }
+
+		auto widget_pointers() const
+		{ return m_span.template get<0>(); }
+
+		auto widget_visibilities() const
+		{ return m_span.template get<1>(); }
+
+		auto widget_visibilities()
+		{ return m_span.template get<1>(); }
+
+		auto widget_geometries() const
+		{ return m_span.template get<2>(); }
+
+		auto widget_geometries()
+		{ return m_span.template get<2>(); }
+
+		auto render_callbacks() const
+		{ return m_span.template get<3>(); }
+
+		auto cursor_enter_leave_callbacks() const
+		{ return m_span.template get<4>(); }
+
+		auto cursor_motion_callbacks() const
+		{ return m_span.template get<5>(); }
+
+		auto mouse_button_callbacks() const
+		{ return m_span.template get<6>(); }
+
+		auto update_geometry_callbacks() const
+		{ return m_span.template get<7>(); }
+
+		auto size_callbacks() const
+		{ return m_span.template get<8>(); }
+
+		auto theme_updated_callbacks() const
+		{ return m_span.template get<9>(); }
+
+		auto get_children_const_callbacks()
+		{ return m_span.template get<10>(); }
+
+		auto get_children_const_callbacks() const
+		{ return m_span.template get<11>(); }
+
 	private:
 		widget_span m_span;
 	};
 
-	struct widget_collection_ref : widget_collection_ref_impl<false>
+	inline auto find(cursor_position pos, span<widget_geometry const> geoms)
 	{
-		using widget_collection_ref_impl<false>::widget_collection_ref_impl;
-	};
+		return std::ranges::find_if(
+			geoms,
+			[pos](auto const& obj) {
+				return inside(pos, obj);
+			}
+		);
+	}
+
+	struct widget_collection_ref : widget_collection_ref_impl<false>
+	{ using widget_collection_ref_impl<false>::widget_collection_ref_impl; };
 
 	struct widget_collection_view : widget_collection_ref_impl<true>
+	{ using widget_collection_ref_impl<true>::widget_collection_ref_impl; };
+
+	inline auto find(cursor_position pos, widget_collection_view const& widgets)
 	{
-		using widget_collection_ref_impl<true>::widget_collection_ref_impl;
-	};
+		auto const i = find(pos, widgets.widget_geometries());
+		if(i == std::end(widgets.widget_geometries()))
+		{ return widget_collection_view::npos; }
+
+		return widget_collection_view::index_type{
+			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
+		};
+	}
+
+	inline void theme_updated(widget_collection_view const& widgets, object_dict const& dict)
+	{
+		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
+		auto const widget_pointers = widgets.widget_pointers();
+
+		auto const n = std::size(widgets);
+		for(auto k  = widgets.first_element_index(); k != n; ++k)
+		{ theme_updated_callbacks[k](widget_pointers[k], dict); }
+	}
 
 	template<class T>
 	concept widget = requires(

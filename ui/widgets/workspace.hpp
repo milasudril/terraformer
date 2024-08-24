@@ -59,8 +59,9 @@ namespace terraformer::ui::widgets
 			auto const old_index = m_cursor_widget_index;
 			m_cursor_widget_index = i;
 
-			auto const widgets = m_widgets.widget_pointers();
-			auto const cele_handlers = m_widgets.cursor_enter_leave_callbacks();
+			auto const children = m_widgets.get_attributes();
+			auto const widgets = children.widget_pointers();
+			auto const cele_handlers = children.cursor_enter_leave_callbacks();
 			if(i != old_index && old_index != widget_collection::npos)
 			{
 				cele_handlers[old_index](
@@ -86,7 +87,7 @@ namespace terraformer::ui::widgets
 				);
 			}
 
- 			auto const cme_handlers = m_widgets.cursor_motion_callbacks();
+ 			auto const cme_handlers = children.cursor_motion_callbacks();
 
 			cme_handlers[i](widgets[i], event);
 		}
@@ -95,13 +96,13 @@ namespace terraformer::ui::widgets
 		{
 			// TODO: event.where must be converted to widget coordinates
 			// TODO: Separate frame from the widget itself
-
-			auto const i = find(event.where, m_widgets);
+			auto const children = std::as_const(m_widgets).get_attributes();
+			auto const i = find(event.where, children);
 			if(i == widget_collection::npos)
 			{ return; }
 
-			auto const widgets = m_widgets.widget_pointers();
-			auto const mbe_handlers = m_widgets.mouse_button_callbacks();
+			auto const widgets = children.widget_pointers();
+			auto const mbe_handlers = children.mouse_button_callbacks();
 
 			mbe_handlers[i](widgets[i], event);
 		}
@@ -109,12 +110,13 @@ namespace terraformer::ui::widgets
 		main::fb_size handle_event(main::fb_size size)
 		{
 			// TODO: The available size should not include any decorations (frames, scrollbars etc)
-			auto const size_callbacks = m_widgets.size_callbacks();
-			auto const widget_pointers = m_widgets.widget_pointers();
-			auto const widget_visibilities = m_widgets.widget_visibilities();
-			auto const widget_geometries = m_widgets.widget_geometries();
-			auto const n = std::size(m_widgets);
-			for(auto k = m_widgets.first_element_index(); k != n; ++k)
+			auto const children = m_widgets.get_attributes();
+			auto const size_callbacks = children.size_callbacks();
+			auto const widget_pointers = children.widget_pointers();
+			auto const widget_visibilities = children.widget_visibilities();
+			auto const widget_geometries = children.widget_geometries();
+			auto const n = std::size(children);
+			for(auto k = children.first_element_index(); k != n; ++k)
 			{
 				// TODO: Maybe size needs to be propagated to invisible widgets
 				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]

@@ -60,48 +60,6 @@ namespace terraformer::ui::main
 			return *this;
 		}
 
-		constexpr auto first_element_index() const
-		{ return m_objects.first_element_index(); }
-
-		auto size() const
-		{ return std::size(m_objects); }
-
-		auto widget_pointers() const
-		{ return m_objects.template get<0>(); }
-
-		auto widget_visibilities() const
-		{ return m_objects.template get<1>(); }
-
-		auto widget_visibilities()
-		{ return m_objects.template get<1>(); }
-
-		auto widget_geometries() const
-		{ return m_objects.template get<2>(); }
-
-		auto widget_geometries()
-		{ return m_objects.template get<2>(); }
-
-		auto render_callbacks() const
-		{ return m_objects.template get<3>(); }
-
-		auto cursor_enter_leave_callbacks() const
-		{ return m_objects.template get<4>(); }
-
-		auto cursor_motion_callbacks() const
-		{ return m_objects.template get<5>(); }
-
-		auto mouse_button_callbacks() const
-		{ return m_objects.template get<6>(); }
-
-		auto update_geometry_callbacks() const
-		{ return m_objects.template get<7>(); }
-
-		auto size_callbacks() const
-		{ return m_objects.template get<8>(); }
-
-		auto const theme_updated_callbacks() const
-		{ return m_objects.template get<9>(); }
-
 		auto get_attributes()
 		{ return widget_collection_ref{m_objects.attributes()}; }
 
@@ -112,37 +70,11 @@ namespace terraformer::ui::main
 		widget_array m_objects;
 	};
 
-	inline auto find(cursor_position pos, span<widget_geometry const> geoms)
-	{
-		return std::ranges::find_if(
-			geoms,
-			[pos](auto const& obj) {
-				return inside(pos, obj);
-			}
-		);
-	}
-
 	inline auto find(cursor_position pos, widget_collection const& widgets)
-	{
-		using wl = widget_collection;
-		auto const i = find(pos, widgets.widget_geometries());
-		if(i == std::end(widgets.widget_geometries()))
-		{ return wl::npos; }
-
-		return typename wl::index_type{
-			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
-		};
-	}
+	{ return find(pos, widgets.get_attributes());}
 
 	void theme_updated(widget_collection const& widgets, object_dict const& dict)
-	{
-		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
-		auto const widget_pointers = widgets.widget_pointers();
-
-		auto const n = std::size(widgets);
-		for(auto k  = widgets.first_element_index(); k != n; ++k)
-		{ theme_updated_callbacks[k](widget_pointers[k], dict); }
-	}
+	{ theme_updated(widgets.get_attributes(), dict); }
 
 	template<class WidgetRenderingResult>
 	class widgets_to_render_list
@@ -160,7 +92,7 @@ namespace terraformer::ui::main
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
 		explicit widgets_to_render_list(widget_collection const& from)
-		{ collect_widgets(from, m_objects); }
+		{ collect_widgets(from.get_attributes(), m_objects); }
 
 		constexpr auto first_element_index() const
 		{ return m_objects.first_element_index(); }
@@ -187,7 +119,7 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<1>(); }
 
 	private:
-		static void collect_widgets(widget_collection const& from, widget_array& to)
+		static void collect_widgets(widget_collection_view const& from, widget_array& to)
 		{
 			auto const widget_pointers = from.widget_pointers();
 			auto const widget_visibilities = from.widget_visibilities();

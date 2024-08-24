@@ -52,8 +52,9 @@ namespace terraformer::ui::widgets
 			auto const old_index = m_cursor_widget_index;
 			m_cursor_widget_index = i;
 
-			auto const widgets = m_widgets.widget_pointers();
-			auto const cele_handlers = m_widgets.cursor_enter_leave_callbacks();
+			auto const children = get_children();
+			auto const widgets = children.widget_pointers();
+			auto const cele_handlers = children.cursor_enter_leave_callbacks();
 			if(i != old_index && old_index != widget_collection::npos)
 			{
 				cele_handlers[old_index](
@@ -79,7 +80,7 @@ namespace terraformer::ui::widgets
 				);
 			}
 
- 			auto const cme_handlers = m_widgets.cursor_motion_callbacks();
+ 			auto const cme_handlers = children.cursor_motion_callbacks();
 
 			return cme_handlers[i](widgets[i], event);
 		}
@@ -87,12 +88,13 @@ namespace terraformer::ui::widgets
 		void handle_event(main::mouse_button_event const& event)
 		{
 			// TODO: event.where must be converted to widget coordinates
-			auto const i = find(event.where, m_widgets);
+			auto const i = find(event.where, std::as_const(*this).get_children());
 			if(i == widget_collection::npos)
 			{ return; }
 
-			auto const widgets = m_widgets.widget_pointers();
-			auto const mbe_handlers = m_widgets.mouse_button_callbacks();
+			auto const children = get_children();
+			auto const widgets = children.widget_pointers();
+			auto const mbe_handlers = children.mouse_button_callbacks();
 
 			return mbe_handlers[i](widgets[i], event);
 		}
@@ -132,16 +134,17 @@ namespace terraformer::ui::widgets
 		{
 			auto const margin_x = m_margin_x;
 			auto const margin_y = m_margin_y;
-			auto const widget_pointers = m_widgets.widget_pointers();
-			auto const widget_geometries = m_widgets.widget_geometries();
-			auto const update_geometries = m_widgets.update_geometry_callbacks();
-			auto const widget_visibilities = m_widgets.widget_visibilities();
-			auto const size_callbacks = m_widgets.size_callbacks();
-			auto const n = std::size(m_widgets);
+			auto const children = get_children();
+			auto const widget_pointers = children.widget_pointers();
+			auto const widget_geometries = children.widget_geometries();
+			auto const update_geometries = children.update_geometry_callbacks();
+			auto const widget_visibilities = children.widget_visibilities();
+			auto const size_callbacks = children.size_callbacks();
+			auto const n = std::size(children);
 			auto min_width = 0.0f;
 			auto max_width = std::numeric_limits<float>::infinity();
 			auto height = margin_y;
-			for(auto k = m_widgets.first_element_index(); k != n; ++k)
+			for(auto k = children.first_element_index(); k != n; ++k)
 			{
 				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
 				{
@@ -181,6 +184,9 @@ namespace terraformer::ui::widgets
 		}
 
 		main::widget_collection_ref get_children()
+		{ return m_widgets.get_attributes(); }
+
+		main::widget_collection_view get_children() const
 		{ return m_widgets.get_attributes(); }
 
 	private:
