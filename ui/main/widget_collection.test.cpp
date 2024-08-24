@@ -1,6 +1,6 @@
-//	{"target":{"name": "widget_list.test"}}
+//	{"target":{"name": "widget_collection.test"}}
 
-#include "./widget_list.hpp"
+#include "./widget_collection.hpp"
 
 #include <testfwk/testfwk.hpp>
 
@@ -50,9 +50,9 @@ namespace
 	};
 }
 
-TESTCASE(terraformer_ui_main_widget_list_append_stuff)
+TESTCASE(terraformer_ui_main_widget_collection_append_stuff)
 {
-	terraformer::ui::main::widget_list<dummy_surface> widgets;
+	terraformer::ui::main::widget_collection<dummy_surface> widgets;
 	EXPECT_EQ(std::size(widgets).get(), 0);
 
 	dummy_widget<0> widget_0;
@@ -316,9 +316,9 @@ TESTCASE(terraformer_ui_main_widget_list_append_stuff)
 	}
 }
 
-TESTCASE(terraformer_ui_main_widget_list_render_widgets)
+TESTCASE(terraformer_ui_main_widget_collection_render_widgets)
 {
-	terraformer::ui::main::widget_list<dummy_surface> widgets;
+	terraformer::ui::main::widget_collection<dummy_surface> widgets;
 
 	dummy_widget<0> widget_0;
 	dummy_widget<1> widget_1;
@@ -401,9 +401,9 @@ namespace
 	};
 }
 
-TESTCASE(terraformer_ui_main_widget_list_show_widgets)
+TESTCASE(terraformer_ui_main_widget_collection_show_widgets)
 {
-	terraformer::ui::main::widget_list<dummy_surface> widgets;
+	terraformer::ui::main::widget_collection<dummy_surface> widgets;
 
 	dummy_widget<0> widget_0;
 	dummy_widget<1> widget_1;
@@ -450,9 +450,9 @@ TESTCASE(terraformer_ui_main_widget_list_show_widgets)
 	EXPECT_EQ(renderer.callcount, 2);
 }
 
-TESTCASE(terraformer_ui_main_widget_list_find_widget_by_cursor_position)
+TESTCASE(terraformer_ui_main_widget_collection_find_widget_by_cursor_position)
 {
-	terraformer::ui::main::widget_list<dummy_surface> widgets;
+	terraformer::ui::main::widget_collection<dummy_surface> widgets;
 
 	dummy_widget<0> widget_0;
 	dummy_widget<1> widget_1;

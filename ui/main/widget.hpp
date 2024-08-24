@@ -99,6 +99,24 @@ namespace terraformer::ui::main
 		return scaling{preliminary_width, constraints.height.min, 1.0f};
 	}
 
+	class widget_collection_view;
+
+	using prepare_for_presentation_callback = void (*)(void*, widget_rendering_result);
+	using cursor_enter_leave_callback = void (*)(void*, cursor_enter_leave_event const&);
+	using cursor_position_callback = void (*)(void*, cursor_motion_event const&);
+	using mouse_button_callback = void (*)(void*, mouse_button_event const&);
+	using update_geometry_callback = widget_size_constraints (*)(void*);
+	using size_callback = void (*)(void*, fb_size);
+	using theme_updated_callback = void (*)(void*, object_dict const&);
+	using get_childred_callback = widget_collection_view (*)(void*);
+
+	class widget_collection_view
+	{
+	public:
+	private:
+
+	};
+
 	template<class T>
 	concept widget = requires(
 		T& obj,

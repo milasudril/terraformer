@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_VBOX_HPP
 #define TERRAFORMER_UI_WIDGETS_VBOX_HPP
 
-#include "ui/main/widget_list.hpp"
+#include "ui/main/widget_collection.hpp"
 
 #include <functional>
 
@@ -54,7 +54,7 @@ namespace terraformer::ui::widgets
 
 			auto const widgets = m_widgets.widget_pointers();
 			auto const cele_handlers = m_widgets.cursor_enter_leave_callbacks();
-			if(i != old_index && old_index != widget_list::npos)
+			if(i != old_index && old_index != widget_collection::npos)
 			{
 				cele_handlers[old_index](
 					widgets[old_index],
@@ -65,7 +65,7 @@ namespace terraformer::ui::widgets
 				);
 			}
 
-			if(i == widget_list::npos)
+			if(i == widget_collection::npos)
 			{ return; }
 
 			if(i != old_index)
@@ -88,7 +88,7 @@ namespace terraformer::ui::widgets
 		{
 			// TODO: event.where must be converted to widget coordinates
 			auto const i = find(event.where, m_widgets);
-			if(i == widget_list::npos)
+			if(i == widget_collection::npos)
 			{ return; }
 
 			auto const widgets = m_widgets.widget_pointers();
@@ -181,10 +181,10 @@ namespace terraformer::ui::widgets
 		}
 
 	private:
-		using widget_list = main::widget_list;
+		using widget_collection = main::widget_collection;
 
-		widget_list m_widgets;
-		widget_list::index_type m_cursor_widget_index{widget_list::npos};
+		widget_collection m_widgets;
+		widget_collection::index_type m_cursor_widget_index{widget_collection::npos};
 		float m_margin_x;
 		float m_margin_y;
 

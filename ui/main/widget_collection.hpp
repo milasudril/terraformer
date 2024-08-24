@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_UI_MAIN_WIDGET_LIST_HPP
-#define TERRAFORMER_UI_MAIN_WIDGET_LIST_HPP
+#ifndef TERRAFORMER_UI_MAIN_WIDGET_COLLECTION_HPP
+#define TERRAFORMER_UI_MAIN_WIDGET_COLLECTION_HPP
 
 #include "./widget.hpp"
 #include "lib/array_classes/multi_array.hpp"
@@ -7,18 +7,9 @@
 
 namespace terraformer::ui::main
 {
-	using prepare_for_presentation_callback = void (*)(void*, widget_rendering_result);
-
-	class widget_list
+	class widget_collection
 	{
 	public:
-		using cursor_enter_leave_callback = void (*)(void*, cursor_enter_leave_event const&);
-		using cursor_position_callback = void (*)(void*, cursor_motion_event const&);
-		using mouse_button_callback = void (*)(void*, mouse_button_event const&);
-		using update_geometry_callback = widget_size_constraints (*)(void*);
-		using size_callback = void (*)(void*, fb_size);
-		using theme_updated_callback = void (*)(void*, object_dict const&);
-
 		using widget_array = multi_array<
 			void*,
 			widget_visibility,
@@ -38,7 +29,7 @@ namespace terraformer::ui::main
 
 		template<class Widget>
 		requires widget<Widget>
-		widget_list& append(
+		widget_collection& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
 			widget_visibility initial_visibility = widget_visibility::visible
@@ -130,9 +121,9 @@ namespace terraformer::ui::main
 		);
 	}
 
-	inline auto find(cursor_position pos, widget_list const& widgets)
+	inline auto find(cursor_position pos, widget_collection const& widgets)
 	{
-		using wl = widget_list;
+		using wl = widget_collection;
 		auto const i = find(pos, widgets.widget_geometries());
 		if(i == std::end(widgets.widget_geometries()))
 		{ return wl::npos; }
@@ -142,7 +133,7 @@ namespace terraformer::ui::main
 		};
 	}
 
-	void theme_updated(widget_list const& widgets, object_dict const& dict)
+	void theme_updated(widget_collection const& widgets, object_dict const& dict)
 	{
 		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
@@ -167,7 +158,7 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		explicit widgets_to_render_list(widget_list const& from)
+		explicit widgets_to_render_list(widget_collection const& from)
 		{ collect_widgets(from, m_objects); }
 
 		constexpr auto first_element_index() const
@@ -195,7 +186,7 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<1>(); }
 
 	private:
-		static void collect_widgets(widget_list const& from, widget_array& to)
+		static void collect_widgets(widget_collection const& from, widget_array& to)
 		{
 			auto const widget_pointers = from.widget_pointers();
 			auto const widget_visibilities = from.widget_visibilities();
