@@ -101,6 +101,7 @@ namespace terraformer::ui::main
 	}
 
 	class widget_collection_ref;
+	class widget_collection_view;
 
 	using prepare_for_presentation_callback = void (*)(void*, widget_rendering_result);
 	using cursor_enter_leave_callback = void (*)(void*, cursor_enter_leave_event const&);
@@ -110,6 +111,7 @@ namespace terraformer::ui::main
 	using size_callback = void (*)(void*, fb_size);
 	using theme_updated_callback = void (*)(void*, object_dict const&);
 	using get_children_callback = widget_collection_ref (*)(void*);
+	using get_children_const_callback = widget_collection_view (*)(void const*);
 
 	template<bool IsConst>
 	class widget_collection_ref_impl
@@ -126,7 +128,8 @@ namespace terraformer::ui::main
 			update_geometry_callback,
 			size_callback,
 			theme_updated_callback,
-			get_children_callback
+			get_children_callback,
+			get_children_const_callback
 		>;
 
 		using widget_span = std::conditional_t<IsConst,
@@ -176,6 +179,7 @@ namespace terraformer::ui::main
 		{ obj.update_geometry() } -> same_as_unqual<widget_size_constraints>;
 		{ obj.theme_updated(resources) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
+		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
 	};
 
 	struct widget_with_default_actions
@@ -185,11 +189,17 @@ namespace terraformer::ui::main
 		void handle_event(cursor_motion_event const&) const { }
 		void handle_event(mouse_button_event const&) const { }
 		void handle_event(fb_size) const { }
+
 		[[nodiscard]] widget_size_constraints update_geometry() const
 		{ return widget_size_constraints{}; }
+
 		void theme_updated(object_dict const&) const {}
-		widget_collection_ref get_children() const
+
+		[[nodiscard]] widget_collection_ref get_children()
 		{ return widget_collection_ref{}; }
+
+		[[nodiscard]] widget_collection_view get_children() const
+		{ return widget_collection_view{}; }
 	};
 
 	namespace
