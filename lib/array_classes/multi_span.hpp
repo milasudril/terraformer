@@ -81,14 +81,6 @@ namespace terraformer
 		template<size_t AttributeIndex>
 		auto get() const noexcept
 		{
-			using sel_attribute_type = attribute_type<AttributeIndex> const;
-			auto const ptr = std::get<AttributeIndex>(m_storage);
-			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
-		}
-
-		template<size_t AttributeIndex>
-		auto get() noexcept
-		{
 			using sel_attribute_type = attribute_type<AttributeIndex>;
 			auto const ptr = m_storage.template get<AttributeIndex>();
 			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
