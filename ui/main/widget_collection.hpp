@@ -10,20 +10,9 @@ namespace terraformer::ui::main
 	class widget_collection
 	{
 	public:
-		using widget_array = multi_array<
-			void*,
-			widget_visibility,
-			widget_geometry,
-			prepare_for_presentation_callback,
-			cursor_enter_leave_callback,
-			cursor_position_callback,
-			mouse_button_callback,
-			update_geometry_callback,
-			size_callback,
-			theme_updated_callback
-		>;
+		using widget_array = compatible_multi_array_t<widget_collection_view::widget_span>;
 
-		using index_type = typename widget_array::index_type;
+		using index_type = widget_array::index_type;
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
