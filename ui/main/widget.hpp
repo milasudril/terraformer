@@ -187,7 +187,7 @@ namespace terraformer::ui::main
 		auto theme_updated_callbacks() const
 		{ return m_span.template get<9>(); }
 
-		auto get_children_const_callbacks()
+		auto get_children_callbacks()
 		{ return m_span.template get<10>(); }
 
 		auto get_children_const_callbacks() const

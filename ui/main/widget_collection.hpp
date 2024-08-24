@@ -123,7 +123,7 @@ namespace terraformer::ui::main
 		{
 			auto const widget_pointers = from.widget_pointers();
 			auto const widget_visibilities = from.widget_visibilities();
-			// TODO: auto const children_callbacks = from.children_callbacks();
+			auto const children_callbacks = from.get_children_const_callbacks();
 			auto const render_callbacks = from.render_callbacks();
 			auto const widget_geometries = from.widget_geometries();
 
@@ -133,7 +133,7 @@ namespace terraformer::ui::main
 				if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
 				{
 					to.push_back(widget_pointers[k], render_callbacks[k], WidgetRenderingResult{}, widget_geometries[k]);
-					// TODO: collect_widgets(children_callbacks[k](widget_pointers[k]), to);
+					collect_widgets(children_callbacks[k](widget_pointers[k]), to);
 				}
 			}
 		}
