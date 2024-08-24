@@ -535,4 +535,11 @@ TESTCASE(terraformer_multi_array_get_attribs_const)
 	EXPECT_EQ(std::begin(span.get<0>()), std::begin(array.get<0>()));
 	EXPECT_EQ(std::begin(span.get<1>()), std::begin(array.get<1>()));
 	EXPECT_EQ(std::begin(span.get<2>()), std::begin(array.get<2>()));
+
+	static_assert(
+		std::is_same_v<
+			terraformer::compatible_multi_array_t<decltype(span)>,
+			my_array_type
+		>
+	);
 }

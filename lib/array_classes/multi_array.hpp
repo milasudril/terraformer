@@ -385,6 +385,18 @@ namespace terraformer
 		size_type m_size{};
  		size_type m_capacity{};
 	};
+
+	template<class>
+	struct compatible_multi_array;
+
+	template<class ... T>
+	struct compatible_multi_array<multi_span<T...>>
+	{
+		using type = multi_array<std::remove_const_t<T>...>;
+	};
+
+	template<class ... T>
+	using compatible_multi_array_t = compatible_multi_array<T...>::type;
 }
 
 #endif
