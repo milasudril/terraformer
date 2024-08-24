@@ -111,10 +111,11 @@ namespace terraformer::ui::main
 	using theme_updated_callback = void (*)(void*, object_dict const&);
 	using get_children_callback = widget_collection_ref (*)(void*);
 
-	class widget_collection_ref
+	template<bool IsConst>
+	class widget_collection_ref_impl
 	{
 	public:
-		using widget_span = multi_span<
+		using widget_span_raw = multi_span<
 			void*,
 			widget_visibility,
 			widget_geometry,
@@ -128,16 +129,31 @@ namespace terraformer::ui::main
 			get_children_callback
 		>;
 
+		using widget_span = std::conditional_t<IsConst,
+			multi_span_const_t<widget_span_raw>,
+			widget_span_raw
+		>;
+
 		using index_type = typename widget_span::index_type;
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		widget_collection_ref() = default;
+		widget_collection_ref_impl() = default;
 
-		explicit widget_collection_ref(widget_span const& span): m_span{span}{}
+		explicit widget_collection_ref_impl(widget_span const& span): m_span{span}{}
 
 	private:
 		widget_span m_span;
+	};
+
+	struct widget_collection_ref : widget_collection_ref_impl<false>
+	{
+		using widget_collection_ref_impl<false>::widget_collection_ref_impl;
+	};
+
+	struct widget_collection_view : widget_collection_ref_impl<true>
+	{
+		using widget_collection_ref_impl<true>::widget_collection_ref_impl;
 	};
 
 	template<class T>

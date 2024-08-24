@@ -90,6 +90,18 @@ namespace terraformer
 		storage_type m_storage{};
 		size_type m_size{};
 	};
+
+	template<class>
+	struct multi_span_const;
+
+	template<class ... T>
+	struct multi_span_const<multi_span<T...>>
+	{
+		using type = multi_span<T const...>;
+	};
+
+	template<class ... T>
+	using multi_span_const_t = multi_span_const<T...>::type;
 }
 
 #endif
