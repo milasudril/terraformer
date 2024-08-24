@@ -8,6 +8,7 @@
 #include "lib/common/object_tree.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
+#include "lib/array_classes/multi_span.hpp"
 
 
 #include <utility>
@@ -113,6 +114,23 @@ namespace terraformer::ui::main
 	class widget_collection_view
 	{
 	public:
+		using widget_span = multi_span<
+			void* const,
+			widget_visibility const,
+			widget_geometry const,
+			prepare_for_presentation_callback const,
+			cursor_enter_leave_callback const,
+			cursor_position_callback const,
+			mouse_button_callback const,
+			update_geometry_callback const,
+			size_callback const,
+			theme_updated_callback const
+		>;
+
+		using index_type = typename widget_span::index_type;
+
+		static constexpr index_type npos{static_cast<size_t>(-1)};
+
 	private:
 
 	};
