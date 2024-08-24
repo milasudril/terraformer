@@ -101,6 +101,7 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(object_dict const& new_theme)
 		{
+			static size_t odd_even = 0;
 			auto const panel = new_theme/"ui"/"panels"/0;
 			assert(!panel.is_null());
 
@@ -124,6 +125,10 @@ namespace terraformer::ui::widgets
 
 			using main::theme_updated;
 			theme_updated(m_widgets, new_theme);
+
+
+			m_background_tint *= (odd_even%2)? 0.75f : 1.0f;
+			++odd_even;
 		}
 
 		void handle_event(main::fb_size)
