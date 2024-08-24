@@ -100,7 +100,7 @@ namespace terraformer::ui::main
 		return scaling{preliminary_width, constraints.height.min, 1.0f};
 	}
 
-	class widget_collection_view;
+	class widget_collection_ref;
 
 	using prepare_for_presentation_callback = void (*)(void*, widget_rendering_result);
 	using cursor_enter_leave_callback = void (*)(void*, cursor_enter_leave_event const&);
@@ -109,32 +109,32 @@ namespace terraformer::ui::main
 	using update_geometry_callback = widget_size_constraints (*)(void*);
 	using size_callback = void (*)(void*, fb_size);
 	using theme_updated_callback = void (*)(void*, object_dict const&);
-	using get_children_callback = widget_collection_view (*)(void*);
+	using get_children_callback = widget_collection_ref (*)(void*);
 
-	class widget_collection_view
+	class widget_collection_ref
 	{
 	public:
 		using widget_span = multi_span<
-			void* const,
-			widget_visibility const,
-			widget_geometry const,
-			prepare_for_presentation_callback const,
-			cursor_enter_leave_callback const,
-			cursor_position_callback const,
-			mouse_button_callback const,
-			update_geometry_callback const,
-			size_callback const,
-			theme_updated_callback const,
-			get_children_callback const
+			void*,
+			widget_visibility,
+			widget_geometry,
+			prepare_for_presentation_callback,
+			cursor_enter_leave_callback,
+			cursor_position_callback,
+			mouse_button_callback,
+			update_geometry_callback,
+			size_callback,
+			theme_updated_callback,
+			get_children_callback
 		>;
 
 		using index_type = typename widget_span::index_type;
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		widget_collection_view() = default;
+		widget_collection_ref() = default;
 
-		explicit widget_collection_view(widget_span const& span): m_span{span}{}
+		explicit widget_collection_ref(widget_span const& span): m_span{span}{}
 
 	private:
 		widget_span m_span;
@@ -159,7 +159,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.update_geometry() } -> same_as_unqual<widget_size_constraints>;
 		{ obj.theme_updated(resources) } -> std::same_as<void>;
-		{ obj.get_children() } -> std::same_as<widget_collection_view>;
+		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 	};
 
 	struct widget_with_default_actions
@@ -172,8 +172,8 @@ namespace terraformer::ui::main
 		[[nodiscard]] widget_size_constraints update_geometry() const
 		{ return widget_size_constraints{}; }
 		void theme_updated(object_dict const&) const {}
-		widget_collection_view get_children() const
-		{ return widget_collection_view{}; }
+		widget_collection_ref get_children() const
+		{ return widget_collection_ref{}; }
 	};
 
 	namespace

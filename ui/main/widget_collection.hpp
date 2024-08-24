@@ -10,7 +10,7 @@ namespace terraformer::ui::main
 	class widget_collection
 	{
 	public:
-		using widget_array = compatible_multi_array_t<widget_collection_view::widget_span>;
+		using widget_array = compatible_multi_array_t<widget_collection_ref::widget_span>;
 
 		using index_type = widget_array::index_type;
 
@@ -99,8 +99,8 @@ namespace terraformer::ui::main
 		auto const theme_updated_callbacks() const
 		{ return m_objects.template get<9>(); }
 
-		auto get_attributes() const
-		{ return widget_collection_view{m_objects.attributes()}; }
+		auto get_attributes()
+		{ return widget_collection_ref{m_objects.attributes()}; }
 
 	private:
 		widget_array m_objects;

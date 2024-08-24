@@ -180,7 +180,7 @@ namespace terraformer::ui::widgets
 			};
 		}
 
-		main::widget_collection_view get_children() const
+		main::widget_collection_ref get_children()
 		{ return m_widgets.get_attributes(); }
 
 	private:

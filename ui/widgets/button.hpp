@@ -91,8 +91,8 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(object_dict const& render_resources);
 
-		main::widget_collection_view get_children() const
-		{ return main::widget_collection_view{}; }
+		main::widget_collection_ref get_children() const
+		{ return main::widget_collection_ref{}; }
 
 	private:
 		move_only_function<void(button&)> m_on_activated =
