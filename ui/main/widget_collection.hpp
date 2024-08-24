@@ -100,7 +100,7 @@ namespace terraformer::ui::main
 		{ return m_objects.template get<9>(); }
 
 		auto get_attributes() const
-		{ return widget_collection_view{m_objects.get_attributes()}; }
+		{ return widget_collection_view{m_objects.attributes()}; }
 
 	private:
 		widget_array m_objects;

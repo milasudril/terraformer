@@ -505,7 +505,7 @@ TESTCASE(terraformer_multi_array_get_attribs)
 	array.push_back(2, 1.5, "Kaka");
 	array.push_back(3, 3.5, "Bulle");
 
-	auto span = array.get_attributes();
+	auto span = array.attributes();
 	EXPECT_EQ(std::size(span), std::size(array));
 	EXPECT_EQ(std::begin(span.get<0>()), std::begin(array.get<0>()));
 	EXPECT_EQ(std::begin(span.get<1>()), std::begin(array.get<1>()));
@@ -530,7 +530,7 @@ TESTCASE(terraformer_multi_array_get_attribs_const)
 	array.push_back(2, 1.5, "Kaka");
 	array.push_back(3, 3.5, "Bulle");
 
-	auto span = std::as_const(array).get_attributes();
+	auto span = std::as_const(array).attributes();
 	EXPECT_EQ(std::size(span), std::size(array));
 	EXPECT_EQ(std::begin(span.get<0>()), std::begin(array.get<0>()));
 	EXPECT_EQ(std::begin(span.get<1>()), std::begin(array.get<1>()));
