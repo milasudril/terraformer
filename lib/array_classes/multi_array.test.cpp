@@ -543,3 +543,34 @@ TESTCASE(terraformer_multi_array_get_attribs_const)
 		>
 	);
 }
+
+TESTCASE(terraformer_multi_array_index_operator)
+{
+	using my_array_type = terraformer::multi_array<int, double, std::string>;
+
+	my_array_type array;
+	array.push_back(1, 0.5, "A long string that should trigger malloc");
+	array.push_back(2, 1.5, "Kaka");
+	array.push_back(3, 3.5, "Bulle");
+
+	auto items = array[array.first_element_index() + 1];
+	static_assert(std::is_same_v<decltype(items), terraformer::tuple<int&, double&, std::string&>>);
+	EXPECT_EQ(items.template get<0>(), 2);
+	EXPECT_EQ(items.template get<1>(), 1.5);
+	EXPECT_EQ(items.template get<2>(), "Kaka");
+
+	auto items_const = std::as_const(array)[array.first_element_index() + 1];
+	static_assert(
+		std::is_same_v<
+			decltype(items_const),
+			terraformer::tuple<int const&, double const&, std::string const&>
+		>
+	);
+	EXPECT_EQ(items_const.template get<0>(), 2);
+	EXPECT_EQ(items_const.template get<1>(), 1.5);
+	EXPECT_EQ(items_const.template get<2>(), "Kaka");
+
+	EXPECT_EQ(&items_const.template get<0>(), &items.template get<0>());
+	EXPECT_EQ(&items_const.template get<1>(), &items.template get<1>());
+	EXPECT_EQ(&items_const.template get<2>(), &items.template get<2>());
+}

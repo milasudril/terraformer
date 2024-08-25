@@ -191,6 +191,8 @@ namespace terraformer
 		using storage_type = std::array<memory_block, sizeof...(T)>;
 		using size_type = array_size<multi_array_tag<T...>>;
 		using index_type = array_index<multi_array_tag<T...>>;
+		using reference = tuple<T&...>;
+		using const_reference = tuple<T const&...>;
 
 		template<size_t Index>
 		using attribute_type = std::tuple_element_t<Index, tuple<T...>>;
@@ -347,6 +349,30 @@ namespace terraformer
 			destroy(m_storage, index, size_type{m_size.get() - index.get()});
 			m_size = size_type{index};
 		}
+
+		reference operator[](index_type index) noexcept
+		{
+			assert(index < m_size);
+			return std::apply(
+				[index](auto const&... args) {
+					return tuple<T&...>{*(args.template interpret_as<T>() + index.get())...};
+				},
+				m_storage
+			);
+		}
+
+		const_reference operator[](index_type index) const noexcept
+		{
+			assert(index < m_size);
+
+			return std::apply(
+				[index](auto const&... args) {
+					return tuple<T const&...>{*(args.template interpret_as<T const>() + index.get())...};
+				},
+				m_storage
+			);
+		}
+
 
 		template<class ... Arg>
 		requires std::is_same_v<multi_array_tag<std::remove_cvref_t<Arg>...>, multi_array_tag<T...>>
