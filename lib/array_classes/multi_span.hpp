@@ -46,6 +46,7 @@ namespace terraformer
 		using storage_type = tuple<T*...>;
 		using size_type = array_size<multi_array_tag<std::remove_const_t<T>...>>;
 		using index_type = array_index<multi_array_tag<std::remove_const_t<T>...>>;
+		using reference = tuple<T&...>;
 
 		template<size_t Index>
 		using attribute_type = std::tuple_element_t<Index, tuple<T...>>;
@@ -54,6 +55,16 @@ namespace terraformer
 
 		explicit multi_span(T*... pointers, size_t size) noexcept:
 			m_storage{pointers...},
+			m_size{size}
+		{}
+
+		explicit multi_span(T*... pointers, size_type size) noexcept:
+			m_storage{pointers...},
+			m_size{size}
+		{}
+
+		explicit multi_span(storage_type const& pointers, size_t size) noexcept:
+			m_storage{pointers},
 			m_size{size}
 		{}
 
@@ -86,10 +97,27 @@ namespace terraformer
 			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
 		}
 
+		reference operator[](index_type index) const noexcept
+		{
+			assert(index < m_size);
+			return terraformer::apply(
+				[index](auto const&... args) {
+					return tuple<T&...>{*(args + index.get())...};
+				},
+				m_storage
+			);
+		}
+
 	private:
 		storage_type m_storage{};
 		size_type m_size{};
 	};
+
+	template<class ... T>
+	multi_span(T*..., size_t) -> multi_span<T...>;
+
+	template<class ... T>
+	multi_span(tuple<T*...>, size_t) -> multi_span<T...>;
 
 	template<class>
 	struct multi_span_const;
