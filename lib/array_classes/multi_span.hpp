@@ -63,14 +63,23 @@ namespace terraformer
 			m_size{size}
 		{}
 
-		explicit multi_span(storage_type const& pointers, size_t size) noexcept:
-			m_storage{pointers},
+		explicit multi_span(storage_type const& storage, size_t size) noexcept:
+			m_storage{storage},
 			m_size{size}
 		{}
 
-		explicit multi_span(storage_type const& pointers, size_type size) noexcept:
-			m_storage{pointers},
+		explicit multi_span(storage_type const& storage, size_type size) noexcept:
+			m_storage{storage},
 			m_size{size}
+		{}
+
+		template<class = void>
+		requires(... && std::is_const_v<T>)
+		explicit multi_span(multi_span<std::remove_const_t<T>...> span):
+			m_storage{terraformer::apply([](auto const&... args){
+				return tuple{static_cast<T*>(args)...};
+			}, span.pointers())},
+			m_size{span.size()}
 		{}
 
 		constexpr auto first_element_index() const noexcept
@@ -107,6 +116,9 @@ namespace terraformer
 				m_storage
 			);
 		}
+
+		auto const& pointers() const noexcept
+		{ return m_storage; }
 
 	private:
 		storage_type m_storage{};
