@@ -120,6 +120,7 @@ namespace terraformer::ui::main
 		using widget_span_raw = multi_span<
 			void*,
 			widget_visibility,
+			widget_size_constraints,
 			widget_geometry,
 			prepare_for_presentation_callback,
 			cursor_enter_leave_callback,
@@ -160,38 +161,44 @@ namespace terraformer::ui::main
 		auto widget_visibilities()
 		{ return m_span.template get<1>(); }
 
+		auto size_constraints()
+		{ return m_span.template get<2>(); }
+
+		auto size_constraints() const
+		{ return m_span.template get<2>(); }
+
 		auto widget_geometries() const
-		{ return m_span.template get<2>(); }
-
-		auto widget_geometries()
-		{ return m_span.template get<2>(); }
-
-		auto render_callbacks() const
 		{ return m_span.template get<3>(); }
 
-		auto cursor_enter_leave_callbacks() const
+		auto widget_geometries()
+		{ return m_span.template get<3>(); }
+
+		auto render_callbacks() const
 		{ return m_span.template get<4>(); }
 
-		auto cursor_motion_callbacks() const
+		auto cursor_enter_leave_callbacks() const
 		{ return m_span.template get<5>(); }
 
-		auto mouse_button_callbacks() const
+		auto cursor_motion_callbacks() const
 		{ return m_span.template get<6>(); }
 
-		auto update_geometry_callbacks() const
+		auto mouse_button_callbacks() const
 		{ return m_span.template get<7>(); }
 
-		auto size_callbacks() const
+		auto update_geometry_callbacks() const
 		{ return m_span.template get<8>(); }
 
-		auto theme_updated_callbacks() const
+		auto size_callbacks() const
 		{ return m_span.template get<9>(); }
 
-		auto get_children_callbacks()
+		auto theme_updated_callbacks() const
 		{ return m_span.template get<10>(); }
 
-		auto get_children_const_callbacks() const
+		auto get_children_callbacks()
 		{ return m_span.template get<11>(); }
+
+		auto get_children_const_callbacks() const
+		{ return m_span.template get<12>(); }
 
 	private:
 		widget_span m_span;

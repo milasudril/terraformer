@@ -27,6 +27,7 @@ namespace terraformer::ui::main
 			m_objects.push_back(
 				&w.get(),
 				initial_visibility,
+				widget_size_constraints{},
 				initial_geometry,
 				[](void* obj, widget_rendering_result result) {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
