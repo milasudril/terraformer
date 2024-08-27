@@ -100,8 +100,43 @@ namespace terraformer::ui::main
 		return scaling{preliminary_width, constraints.height.min, 1.0f};
 	}
 
-	class widget_collection_ref;
-	class widget_collection_view;
+	struct widget_collection_ref;
+	struct widget_collection_view;
+
+	template<class T>
+	concept layout_policy = requires(T obj, widget_collection_view& widgets)
+	{
+		{std::as_const(obj).update_widget_locations(widgets)} -> std::same_as<widget_size_constraints>;
+	};
+
+	class layout_policy_ref
+	{
+	public:
+		layout_policy_ref():
+			m_update_widget_locations{
+				[](void const*, widget_collection_view&){
+					return widget_size_constraints{};
+				}
+			}
+		{}
+
+		template<layout_policy LayoutPolicy>
+		explicit layout_policy_ref(std::reference_wrapper<LayoutPolicy> policy):
+			m_handle{&policy.get()},
+			m_update_widget_locations{
+				[](void const* handle, widget_collection_view& widgets){
+					return static_cast<LayoutPolicy*>(handle)->update_widget_locations(widgets);
+				}
+			}
+		{}
+
+		widget_size_constraints update_widget_locations(widget_collection_view& widgets) const
+		{ return m_update_widget_locations(m_handle, widgets); }
+
+	private:
+		void const* m_handle;
+		widget_size_constraints (*m_update_widget_locations)(void const*, widget_collection_view&);
+	};
 
 	using prepare_for_presentation_callback = void (*)(void*, widget_rendering_result);
 	using cursor_enter_leave_callback = void (*)(void*, cursor_enter_leave_event const&);
