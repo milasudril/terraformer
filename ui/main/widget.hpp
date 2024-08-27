@@ -57,6 +57,38 @@ namespace terraformer::ui::main
 		std::optional<float> aspect_ratio;
 	};
 
+	constexpr widget_size_constraints max(widget_size_constraints const& a, widget_size_constraints const& b)
+	{
+		auto const w_min = std::max(a.width.min, b.width.min);
+		auto const w_max_temp = std::min(a.width.max, b.width.max);
+		auto const w_max = w_max_temp < w_min ? w_min : w_max_temp;
+
+		auto const h_min = std::max(a.height.min, b.height.min);
+		auto const h_max_temp = std::min(a.height.max, b.height.max);
+		auto const h_max = h_max_temp < h_min ? h_min : h_max_temp;
+
+		std::optional<float> aspect_ratio{};
+		if(a.aspect_ratio.has_value() || b.aspect_ratio.has_value())
+		{
+			auto const n = static_cast<int>(a.aspect_ratio.has_value()) + static_cast<int>(b.aspect_ratio.has_value());
+			aspect_ratio = (n == 1)?
+					a.aspect_ratio.value_or(1.0) * b.aspect_ratio.value_or(1.0f):
+					std::sqrt((*a.aspect_ratio) * (*b.aspect_ratio));
+		}
+
+		return widget_size_constraints{
+			.width{
+				.min = w_min,
+				.max = w_max
+			},
+			.height{
+				.min = h_min,
+				.max = h_max
+			},
+			.aspect_ratio = aspect_ratio
+		};
+	}
+
 	inline scaling minimize_height(widget_size_constraints const& constraints)
 	{
 		auto const preliminary_height = constraints.height.min;
@@ -104,7 +136,7 @@ namespace terraformer::ui::main
 	struct widget_collection_view;
 
 	template<class T>
-	concept layout_policy = requires(T obj, widget_collection_view& widgets)
+	concept layout_policy = requires(T obj, widget_collection_ref& widgets)
 	{
 		{std::as_const(obj).update_widget_locations(widgets)} -> std::same_as<widget_size_constraints>;
 	};
@@ -114,7 +146,7 @@ namespace terraformer::ui::main
 	public:
 		layout_policy_ref():
 			m_update_widget_locations{
-				[](void const*, widget_collection_view&){
+				[](void const*, widget_collection_ref&){
 					return widget_size_constraints{};
 				}
 			}
@@ -124,18 +156,18 @@ namespace terraformer::ui::main
 		explicit layout_policy_ref(std::reference_wrapper<LayoutPolicy> policy):
 			m_handle{&policy.get()},
 			m_update_widget_locations{
-				[](void const* handle, widget_collection_view& widgets){
+				[](void const* handle, widget_collection_ref& widgets){
 					return static_cast<LayoutPolicy*>(handle)->update_widget_locations(widgets);
 				}
 			}
 		{}
 
-		widget_size_constraints update_widget_locations(widget_collection_view& widgets) const
+		widget_size_constraints update_widget_locations(widget_collection_ref& widgets) const
 		{ return m_update_widget_locations(m_handle, widgets); }
 
 	private:
 		void const* m_handle;
-		widget_size_constraints (*m_update_widget_locations)(void const*, widget_collection_view&);
+		widget_size_constraints (*m_update_widget_locations)(void const*, widget_collection_ref&);
 	};
 
 	using prepare_for_presentation_callback = void (*)(void*, widget_rendering_result);
@@ -153,7 +185,7 @@ namespace terraformer::ui::main
 	class widget_collection_ref_impl
 	{
 	public:
-		using widget_span_raw = multi_span<
+		using widget_span_mutable = multi_span<
 			void*,
 			widget_visibility,
 			widget_size_constraints,
@@ -170,9 +202,11 @@ namespace terraformer::ui::main
 			get_layout_callback
 		>;
 
+		using widget_span_const = multi_span_const_t<widget_span_mutable>;
+
 		using widget_span = std::conditional_t<IsConst,
-			multi_span_const_t<widget_span_raw>,
-			widget_span_raw
+			widget_span_const,
+			widget_span_mutable
 		>;
 
 		using index_type = typename widget_span::index_type;
@@ -237,8 +271,11 @@ namespace terraformer::ui::main
 		auto get_children_const_callbacks() const
 		{ return m_span.template get<12>(); }
 
-		auto get_layout() const
+		auto get_layout_callbacks() const
 		{ return m_span.template get<13>(); }
+
+		auto get_span() const
+		{ return m_span; }
 
 	private:
 		widget_span m_span;
@@ -254,11 +291,19 @@ namespace terraformer::ui::main
 		);
 	}
 
-	struct widget_collection_ref : widget_collection_ref_impl<false>
-	{ using widget_collection_ref_impl<false>::widget_collection_ref_impl; };
-
 	struct widget_collection_view : widget_collection_ref_impl<true>
 	{ using widget_collection_ref_impl<true>::widget_collection_ref_impl; };
+
+	struct widget_collection_ref : widget_collection_ref_impl<false>
+	{
+		using widget_collection_ref_impl<false>::widget_collection_ref_impl;
+
+		widget_collection_view as_view() const
+		{
+			return widget_collection_view{widget_span_const{get_span()}};
+		}
+	};
+
 
 	inline auto find(cursor_position pos, widget_collection_view const& widgets)
 	{
@@ -269,6 +314,21 @@ namespace terraformer::ui::main
 		return widget_collection_view::index_type{
 			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
 		};
+	}
+
+	inline auto find_recursive(cursor_position pos, widget_collection_view const& widgets)
+	{
+		auto const i = find(pos, widgets);
+		if(i == widget_collection_view::npos)
+		{ return widget_collection_view::npos; }
+
+		auto const widget_pointers = widgets.widget_pointers();
+		auto const get_children_callbacks = widgets.get_children_const_callbacks();
+		auto const j = find_recursive(pos, get_children_callbacks[i](widget_pointers[i]));
+		if(j == widget_collection_view::npos)
+		{ return i; }
+
+		return j;
 	}
 
 	inline void theme_updated(widget_collection_view const& widgets, object_dict const& dict)
@@ -304,6 +364,78 @@ namespace terraformer::ui::main
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
 		{ std::as_const(obj).get_layout() } -> std::same_as<layout_policy_ref>;
 	};
+
+	class root_widget
+	{
+	public:
+		explicit root_widget(widget_collection_ref& widgets, widget_collection_ref::index_type index):
+			m_widget{widgets.widget_pointers()[index]},
+			m_children{widgets.get_children_callbacks()[index](m_widget)},
+			m_update_geometry{widgets.update_geometry_callbacks()[index]},
+			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
+		{}
+
+		root_widget() = default;
+
+		template<widget Widget>
+		explicit root_widget(std::reference_wrapper<Widget> w):
+			m_widget{&w.get()},
+			m_children{w.get().get_children()},
+			m_update_geometry{
+				[](void* obj) {
+					return static_cast<Widget*>(obj)->update_geometry();
+				}
+			},
+			m_layout{w.get().get_layout()}
+		{}
+
+		widget_size_constraints update_geometry()
+		{ return m_update_geometry(m_widget); }
+
+		widget_collection_ref& children()
+		{ return m_children; }
+
+		widget_size_constraints run_layout()
+		{ return m_layout.update_widget_locations(m_children); }
+
+	private:
+		void* m_widget = nullptr;
+		widget_collection_ref m_children;
+		update_geometry_callback m_update_geometry = [](void*){return widget_size_constraints{};};
+		layout_policy_ref m_layout;
+	};
+
+	inline widget_size_constraints update_geometry(root_widget&& root)
+	{
+		auto const initial_constriants = root.update_geometry();
+		auto& children = root.children();
+		auto const widget_visibilities = children.widget_visibilities();
+		auto const widget_size_constraints = children.size_constraints();
+		auto const n = std::size(children);
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{
+			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
+			{ widget_size_constraints[k] = update_geometry(root_widget{children, k}); }
+		}
+
+		auto const contraints_from_layout = root.run_layout();
+
+		auto const widget_pointers = children.widget_pointers();
+		auto const size_callbacks = children.size_callbacks();
+		auto const widget_geometries = children.widget_geometries();
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{
+			size_callbacks[k](
+				widget_pointers[k],
+				main::fb_size {
+					.width = static_cast<int>(widget_geometries[k].size[0]),
+					.height = static_cast<int>(widget_geometries[k].size[1])
+				}
+			);
+		}
+
+		return max(initial_constriants, contraints_from_layout);
+	}
 
 	struct widget_with_default_actions
 	{

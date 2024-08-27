@@ -7,6 +7,54 @@
 
 namespace terraformer::ui::widgets
 {
+	struct vbox_layout
+	{
+		main::widget_size_constraints update_widget_locations(main::widget_collection_ref& widgets) const
+		{
+			auto const size_constraints = std::as_const(widgets).size_constraints();
+			auto const widget_geometries = widgets.widget_geometries();
+			auto const widget_visibilities = widgets.widget_visibilities();
+
+			auto const n = std::size(widgets);
+			auto min_width = 0.0f;
+			auto max_width = std::numeric_limits<float>::infinity();
+			auto height = margin_y;
+
+			for(auto k = widgets.first_element_index(); k != n; ++k)
+			{
+				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
+				{
+					auto const& constraints = size_constraints[k];
+					widget_geometries[k].where = location{
+						margin_x,
+						-height,
+						0.0f
+					};
+					widget_geometries[k].origin = terraformer::location{-1.0f, 1.0f, 0.0f};
+					widget_geometries[k].size = minimize_height(constraints);
+					min_width = std::max(min_width, widget_geometries[k].size[0]);
+					max_width = std::min(max_width, constraints.width.max);
+					height += widget_geometries[k].size[1] + 4.0f;
+				}
+			}
+
+			return main::widget_size_constraints{
+				.width{
+					.min = min_width + 2.0f*margin_x,
+					.max = std::max(min_width, max_width) + 2.0f*margin_x
+				},
+				.height{
+					.min = height,
+					.max = std::numeric_limits<float>::infinity()
+				},
+				.aspect_ratio = std::nullopt
+			};
+		}
+
+		float margin_x;
+		float margin_y;
+	};
+
 	class vbox
 	{
 	public:
@@ -108,12 +156,13 @@ namespace terraformer::ui::widgets
 			{
 				auto const ptr = static_cast<float const*>(panel/"margins"/"x");
 				assert(ptr != nullptr);
-				m_margin_x = *ptr;
+				layout.margin_x = *ptr;
 			}
+
 			{
 				auto const ptr = static_cast<float const*>(panel/"margins"/"y");
 				assert(ptr != nullptr);
-				m_margin_y = *ptr;
+				layout.margin_y = *ptr;
 			}
 
 			m_background = panel.dup("background_texture");
@@ -135,60 +184,10 @@ namespace terraformer::ui::widgets
 		{ }
 
 		main::widget_size_constraints update_geometry()
-		{
-			auto const margin_x = m_margin_x;
-			auto const margin_y = m_margin_y;
-			auto const children = get_children();
-			auto const widget_pointers = children.widget_pointers();
-			auto const widget_geometries = children.widget_geometries();
-			auto const update_geometries = children.update_geometry_callbacks();
-			auto const widget_visibilities = children.widget_visibilities();
-			auto const size_callbacks = children.size_callbacks();
-			auto const n = std::size(children);
-			auto min_width = 0.0f;
-			auto max_width = std::numeric_limits<float>::infinity();
-			auto height = margin_y;
-			for(auto k = children.first_element_index(); k != n; ++k)
-			{
-				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
-				{
-					auto const constraints = update_geometries[k](widget_pointers[k]);
-					widget_geometries[k].where = location{
-						margin_x,
-						-height,
-						0.0f
-					};
-					widget_geometries[k].origin = terraformer::location{-1.0f, 1.0f, 0.0f};
-					widget_geometries[k].size = minimize_height(constraints);
-					min_width = std::max(min_width, widget_geometries[k].size[0]);
-					max_width = std::min(max_width, constraints.width.max);
-					height += widget_geometries[k].size[1] + 4.0f;
-
-					size_callbacks[k](
-						widget_pointers[k],
-						main::fb_size {
-							.width = static_cast<int>(widget_geometries[k].size[0]),
-							.height = static_cast<int>(widget_geometries[k].size[1])
-						}
-					);
-				}
-			}
-
-			return main::widget_size_constraints{
-				.width{
-					.min = min_width + 2.0f*margin_x,
-					.max = std::max(min_width, max_width) + 2.0f*margin_x
-				},
-				.height{
-					.min = height,
-					.max = std::numeric_limits<float>::infinity()
-				},
-				.aspect_ratio = std::nullopt
-			};
-		}
+		{ return main::widget_size_constraints{}; }
 
 		main::layout_policy_ref get_layout() const
-		{ return main::layout_policy_ref{}; }
+		{ return main::layout_policy_ref{std::ref(layout)}; }
 
 		main::widget_collection_ref get_children()
 		{ return m_widgets.get_attributes(); }
@@ -201,13 +200,11 @@ namespace terraformer::ui::widgets
 
 		widget_collection m_widgets;
 		widget_collection::index_type m_cursor_widget_index{widget_collection::npos};
-		float m_margin_x;
-		float m_margin_y;
+		vbox_layout layout;
 
 		shared_const_any m_background;
 		shared_const_any m_foreground;
 		rgba_pixel m_background_tint;
-
 	};
 }
 
