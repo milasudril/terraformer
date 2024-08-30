@@ -91,6 +91,9 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(object_dict const& render_resources);
 
+		main::layout_policy_ref get_layout() const
+		{ return main::layout_policy_ref{}; }
+
 		main::widget_collection_ref get_children()
 		{ return main::widget_collection_ref{}; }
 
@@ -179,6 +182,7 @@ namespace terraformer::ui::widgets
 		using button::text;
 		using button::value;
 		using button::theme_updated;
+		using button::get_layout;
 		using button::get_children;
 
 		template<class Function>

@@ -54,6 +54,9 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(object_dict const& render_resources);
 
+		main::layout_policy_ref get_layout() const
+		{ return main::layout_policy_ref{}; }
+
 		main::widget_collection_ref get_children()
 		{ return main::widget_collection_ref{}; }
 

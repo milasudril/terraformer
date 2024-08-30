@@ -147,6 +147,7 @@ namespace terraformer::ui::main
 	using theme_updated_callback = void (*)(void*, object_dict const&);
 	using get_children_callback = widget_collection_ref (*)(void*);
 	using get_children_const_callback = widget_collection_view (*)(void const*);
+	using get_layout_callback = layout_policy_ref (*)(void const*);
 
 	template<bool IsConst>
 	class widget_collection_ref_impl
@@ -165,7 +166,8 @@ namespace terraformer::ui::main
 			size_callback,
 			theme_updated_callback,
 			get_children_callback,
-			get_children_const_callback
+			get_children_const_callback,
+			get_layout_callback
 		>;
 
 		using widget_span = std::conditional_t<IsConst,
@@ -235,6 +237,9 @@ namespace terraformer::ui::main
 		auto get_children_const_callbacks() const
 		{ return m_span.template get<12>(); }
 
+		auto get_layout() const
+		{ return m_span.template get<13>(); }
+
 	private:
 		widget_span m_span;
 	};
@@ -297,6 +302,7 @@ namespace terraformer::ui::main
 		{ obj.theme_updated(resources) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
+		{ std::as_const(obj).get_layout() } -> std::same_as<layout_policy_ref>;
 	};
 
 	struct widget_with_default_actions
@@ -317,6 +323,9 @@ namespace terraformer::ui::main
 
 		[[nodiscard]] widget_collection_view get_children() const
 		{ return widget_collection_view{}; }
+
+		[[nodiscard]] layout_policy_ref get_layout() const
+		{ return layout_policy_ref{}; }
 	};
 
 	namespace

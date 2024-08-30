@@ -187,6 +187,9 @@ namespace terraformer::ui::widgets
 			};
 		}
 
+		main::layout_policy_ref get_layout() const
+		{ return main::layout_policy_ref{}; }
+
 		main::widget_collection_ref get_children()
 		{ return m_widgets.get_attributes(); }
 
