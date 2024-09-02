@@ -308,7 +308,7 @@ namespace terraformer::ui::main
 	inline auto find(cursor_position pos, widget_collection_view const& widgets)
 	{
 		auto const i = find(pos, widgets.widget_geometries());
-		if(i == std::end(widgets.widget_geometries()))
+		if(i == std::end(widgets.widget_geometries())) [[likely]]
 		{ return widget_collection_view::npos; }
 
 		return widget_collection_view::index_type{
@@ -316,18 +316,33 @@ namespace terraformer::ui::main
 		};
 	}
 
-	inline auto find_recursive(cursor_position pos, widget_collection_view const& widgets)
+	struct find_recursive_result
 	{
-		auto const i = find(pos, widgets);
-		if(i == widget_collection_view::npos)
-		{ return widget_collection_view::npos; }
+		widget_collection_ref widget_collection;
+		widget_collection_view::index_type index;
+	};
 
+	inline auto find_recursive(cursor_position pos, widget_collection_ref&& widgets)
+	{
+		// Is pos within any widget at this level
+		auto const i = find(pos, widgets.as_view());
+		if(i == widget_collection_view::npos) [[likely]]
+		{
+			// No, return empty
+			return find_recursive_result{widget_collection_ref{}, widget_collection_view::npos};
+		}
+
+		// Is pos within any child widget
 		auto const widget_pointers = widgets.widget_pointers();
-		auto const get_children_callbacks = widgets.get_children_const_callbacks();
+		auto const get_children_callbacks = widgets.get_children_callbacks();
 		auto const j = find_recursive(pos, get_children_callbacks[i](widget_pointers[i]));
-		if(j == widget_collection_view::npos)
-		{ return i; }
+		if(j.index == widget_collection_view::npos) [[unlikely]]
+		{
+			// No, return the widget at current level
+			return find_recursive_result{widgets, i};
+		}
 
+		// Yes, return the widget at child level
 		return j;
 	}
 
