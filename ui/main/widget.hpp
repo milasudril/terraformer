@@ -340,6 +340,14 @@ namespace terraformer::ui::main
 		return j;
 	}
 
+	template<class Widget>
+	auto find_recursive(cursor_position pos, Widget& widget)
+	{
+		// TODO: Where is widget?
+		// TODO: What size is widget?
+		return find_recursive(pos, widget.get_children());
+	}
+
 	inline void theme_updated(widget_collection_view const& widgets, object_dict const& dict)
 	{
 		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();

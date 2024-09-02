@@ -133,18 +133,9 @@ namespace terraformer::ui::widgets
 			return cme_handlers[i](widgets[i], event);
 		}
 
-		void handle_event(main::mouse_button_event const& event)
+		void handle_event(main::mouse_button_event const&)
 		{
-			// TODO: event.where must be converted to widget coordinates
-			auto const i = find(event.where, std::as_const(*this).get_children());
-			if(i == widget_collection::npos)
-			{ return; }
-
-			auto const children = get_children();
-			auto const widgets = children.widget_pointers();
-			auto const mbe_handlers = children.mouse_button_callbacks();
-
-			return mbe_handlers[i](widgets[i], event);
+			printf("Clicked in the void\n");
 		}
 
 		void theme_updated(object_dict const& new_theme)
