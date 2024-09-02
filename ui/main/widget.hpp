@@ -229,12 +229,6 @@ namespace terraformer::ui::main
 		auto widget_visibilities() const
 		{ return m_span.template get<1>(); }
 
-		auto widget_visibilities()
-		{ return m_span.template get<1>(); }
-
-		auto size_constraints()
-		{ return m_span.template get<2>(); }
-
 		auto size_constraints() const
 		{ return m_span.template get<2>(); }
 
@@ -265,7 +259,7 @@ namespace terraformer::ui::main
 		auto theme_updated_callbacks() const
 		{ return m_span.template get<10>(); }
 
-		auto get_children_callbacks()
+		auto get_children_callbacks() const
 		{ return m_span.template get<11>(); }
 
 		auto get_children_const_callbacks() const
@@ -322,7 +316,7 @@ namespace terraformer::ui::main
 		widget_collection_view::index_type index;
 	};
 
-	inline auto find_recursive(cursor_position pos, widget_collection_ref&& widgets)
+	inline auto find_recursive(cursor_position pos, widget_collection_ref const& widgets)
 	{
 		// Is pos within any widget at this level
 		auto const i = find(pos, widgets.as_view());
