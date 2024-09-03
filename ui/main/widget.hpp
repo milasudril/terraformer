@@ -233,6 +233,10 @@ namespace terraformer::ui::main
 		auto widget_visibilities() const
 		{ return m_span.template get_by_type<widget_visibility>(); }
 
+		template<class EventType>
+		auto event_callbacks() const
+		{ return m_span.template get_by_type<event_callback_t<EventType>>(); }
+
 		auto size_constraints() const
 		{ return m_span.template get_by_type<widget_size_constraints>(); }
 

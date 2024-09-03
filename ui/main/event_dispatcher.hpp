@@ -33,7 +33,7 @@ namespace terraformer::ui::main
 			}
 
 			auto const widget_pointers = res.widget_collection.widget_pointers();
-			auto const mbe_callbacks = res.widget_collection.mouse_button_callbacks();
+			auto const mbe_callbacks = res.widget_collection.template event_callbacks<mouse_button_event const&>();
 			mbe_callbacks[res.index](widget_pointers[res.index], event);
 
 		//	value_of(m_widget_collection).handle_event(event);
