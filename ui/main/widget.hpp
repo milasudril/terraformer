@@ -228,49 +228,46 @@ namespace terraformer::ui::main
 		{ return std::size(m_span); }
 
 		auto widget_pointers() const
-		{ return m_span.template get<0>(); }
+		{ return m_span.template get_by_type<void*>(); }
 
 		auto widget_visibilities() const
-		{ return m_span.template get<1>(); }
+		{ return m_span.template get_by_type<widget_visibility>(); }
 
 		auto size_constraints() const
-		{ return m_span.template get<2>(); }
+		{ return m_span.template get_by_type<widget_size_constraints>(); }
 
 		auto widget_geometries() const
-		{ return m_span.template get<3>(); }
-
-		auto widget_geometries()
-		{ return m_span.template get<3>(); }
+		{ return m_span.template get_by_type<widget_geometry>(); }
 
 		auto render_callbacks() const
-		{ return m_span.template get<4>(); }
+		{ return m_span.template get_by_type<prepare_for_presentation_callback>(); }
 
 		auto cursor_enter_leave_callbacks() const
-		{ return m_span.template get<5>(); }
+		{ return m_span.template get_by_type<cursor_enter_leave_callback>(); }
 
 		auto cursor_motion_callbacks() const
-		{ return m_span.template get<6>(); }
+		{ return m_span.template get_by_type<cursor_position_callback>(); }
 
 		auto mouse_button_callbacks() const
-		{ return m_span.template get<7>(); }
+		{ return m_span.template get_by_type<mouse_button_callback>(); }
 
 		auto update_geometry_callbacks() const
-		{ return m_span.template get<8>(); }
+		{ return m_span.template get_by_type<update_geometry_callback>(); }
 
 		auto size_callbacks() const
-		{ return m_span.template get<9>(); }
+		{ return m_span.template get_by_type<size_callback>(); }
 
 		auto theme_updated_callbacks() const
-		{ return m_span.template get<10>(); }
+		{ return m_span.template get_by_type<theme_updated_callback>(); }
 
 		auto get_children_callbacks() const
-		{ return m_span.template get<11>(); }
+		{ return m_span.template get_by_type<get_children_callback>(); }
 
 		auto get_children_const_callbacks() const
-		{ return m_span.template get<12>(); }
+		{ return m_span.template get_by_type<get_children_const_callback>(); }
 
 		auto get_layout_callbacks() const
-		{ return m_span.template get<13>(); }
+		{ return m_span.template get_by_type<get_layout_callback>(); }
 
 		auto get_span() const
 		{ return m_span; }

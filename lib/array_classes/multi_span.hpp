@@ -106,6 +106,10 @@ namespace terraformer
 			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
 		}
 
+		template<class Type>
+		auto get_by_type() const noexcept
+		{ return get<get_index_from_type<Type, std::remove_const_t<T>...>()>(); }
+
 		reference operator[](index_type index) const noexcept
 		{
 			assert(index < m_size);
