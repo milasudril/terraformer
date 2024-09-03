@@ -170,13 +170,17 @@ namespace terraformer::ui::main
 		widget_size_constraints (*m_update_widget_locations)(void const*, widget_collection_ref&);
 	};
 
-	using prepare_for_presentation_callback = void (*)(void*, widget_rendering_result);
-	using cursor_enter_leave_callback = void (*)(void*, cursor_enter_leave_event const&);
-	using cursor_position_callback = void (*)(void*, cursor_motion_event const&);
-	using mouse_button_callback = void (*)(void*, mouse_button_event const&);
+	template<class EventType>
+	using event_callback_t = void (*)(void*, EventType);
+
+	using cursor_enter_leave_callback = event_callback_t<cursor_enter_leave_event const&>;
+	using cursor_position_callback = event_callback_t<cursor_motion_event const&>;
+	using mouse_button_callback = event_callback_t<mouse_button_event const&>;
+	using size_callback = event_callback_t<fb_size>;
+	using prepare_for_presentation_callback = event_callback_t<widget_rendering_result>;
+	using theme_updated_callback = event_callback_t<object_dict const&>;
+
 	using update_geometry_callback = widget_size_constraints (*)(void*);
-	using size_callback = void (*)(void*, fb_size);
-	using theme_updated_callback = void (*)(void*, object_dict const&);
 	using get_children_callback = widget_collection_ref (*)(void*);
 	using get_children_const_callback = widget_collection_view (*)(void const*);
 	using get_layout_callback = layout_policy_ref (*)(void const*);
