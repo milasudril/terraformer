@@ -92,51 +92,11 @@ namespace terraformer::ui::widgets
 			return main::widgets_to_render_list<WidgetRenderingResult>{m_widgets};
 		}
 
-		void handle_event(main::cursor_motion_event const& event)
-		{
-			// TODO: event.where must be converted to widget coordinates
-
-			auto const i = find(event.where, m_widgets);
-			auto const old_index = m_cursor_widget_index;
-			m_cursor_widget_index = i;
-
-			auto const children = get_children();
-			auto const widgets = children.widget_pointers();
-			auto const cele_handlers = children.cursor_enter_leave_callbacks();
-			if(i != old_index && old_index != widget_collection::npos)
-			{
-				cele_handlers[old_index](
-					widgets[old_index],
-					main::cursor_enter_leave_event{
-						.where = event.where,
-						.direction = main::cursor_enter_leave::leave
-					}
-				);
-			}
-
-			if(i == widget_collection::npos)
-			{ return; }
-
-			if(i != old_index)
-			{
-				cele_handlers[i](
-					widgets[i],
-					main::cursor_enter_leave_event{
-						.where = event.where,
-						.direction = main::cursor_enter_leave::enter
-					}
-				);
-			}
-
- 			auto const cme_handlers = children.cursor_motion_callbacks();
-
-			return cme_handlers[i](widgets[i], event);
-		}
+		void handle_event(main::cursor_motion_event const& )
+		{ }
 
 		void handle_event(main::mouse_button_event const&)
-		{
-			printf("Clicked in the void\n");
-		}
+		{  }
 
 		void theme_updated(object_dict const& new_theme)
 		{

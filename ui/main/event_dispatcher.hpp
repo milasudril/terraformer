@@ -27,22 +27,18 @@ namespace terraformer::ui::main
 		{
 			auto res = find_recursive(event.where, value_of(m_widget_collection));
 			if(res.index == widget_collection_view::npos)
-			{
-				printf("Nothing hit\n");
-				return;
-			}
-
-			auto const widget_pointers = res.widget_collection.widget_pointers();
-			auto const mbe_callbacks = res.widget_collection.template event_callbacks<mouse_button_event const&>();
-			mbe_callbacks[res.index](widget_pointers[res.index], event);
-
-		//	value_of(m_widget_collection).handle_event(event);
-
+			{ return; }
+			dispatch(event, res);
 		}
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(cursor_motion_event const& event)
-		{ value_of(m_widget_collection).handle_event(event); }
+		{
+			auto res = find_recursive(event.where, value_of(m_widget_collection));
+			if(res.index == widget_collection_view::npos)
+			{ return; }
+			dispatch(event, res);
+		}
 
 		template<auto WindowId>
 		void window_is_closing()

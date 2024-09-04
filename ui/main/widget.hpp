@@ -321,6 +321,14 @@ namespace terraformer::ui::main
 		widget_collection_view::index_type index;
 	};
 
+	template<class EventType>
+	void dispatch(EventType&& e, find_recursive_result const& res)
+	{
+		auto const widgets = res.widget_collection.widget_pointers();
+		auto const callbacks = res.widget_collection.template event_callbacks<EventType>();
+		callbacks[res.index](widgets[res.index], std::forward<EventType>(e));
+	}
+
 	inline auto find_recursive(cursor_position pos, widget_collection_ref const& widgets)
 	{
 		// Is pos within any widget at this level
