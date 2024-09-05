@@ -186,21 +186,23 @@ namespace terraformer
 	template <class T, class... Rest>
 	inline constexpr auto is_unique_v<T, Rest...> = std::bool_constant<(!std::is_same_v<T, Rest> && ...) && is_unique_v<Rest...>>{};
 
-	template <class T, size_t Index, size_t Count, class Head, class... Tail>
-	requires (Index < Count)
+	template <class T, size_t Index, class Head, class ... Tail>
 	constexpr auto get_index_from_type_impl()
 	{
 		if constexpr (std::is_same_v<T, Head>)
 		{ return Index; }
 		else
-		{ return get_index_from_type_impl<T, Index + 1, Count, Tail...>(); }
+		if constexpr (sizeof...(Tail) == 0)
+		{ return Index + 1; }
+		else
+		{ return get_index_from_type_impl<T, Index + 1, Tail...>(); }
 	}
 
-	template <class T, class Head, class... Tail>
+	template <class T, class... Args>
 	constexpr auto get_index_from_type()
 	{
-		static_assert(is_unique_v<Head, Tail...>, "Type not unique");
-		return get_index_from_type_impl<T, 0, 1 + sizeof...(Tail), Head, Tail...>();
+		static_assert(is_unique_v<Args...>, "Type not unique");
+		return get_index_from_type_impl<T, 0, Args...>();
 	}
 }
 
