@@ -235,7 +235,12 @@ namespace terraformer::ui::main
 
 		template<class EventType>
 		auto event_callbacks() const
-		{ return m_span.template get_by_type<event_callback_t<EventType>>(); }
+		{
+			if constexpr(m_span.template has_type<event_callback_t<EventType>>())
+			{ return m_span.template get_by_type<event_callback_t<EventType>>(); }
+			else
+			{ return m_span.template get_by_type<event_callback_t<EventType const&>>(); }
+		}
 
 		auto size_constraints() const
 		{ return m_span.template get_by_type<widget_size_constraints>(); }

@@ -107,6 +107,13 @@ namespace terraformer
 		}
 
 		template<class Type>
+		static constexpr auto has_type()
+		{
+			return get_index_from_type<Type, std::remove_const_t<T>...>() != sizeof...(T);
+		}
+
+		template<class Type>
+		requires(has_type<Type>())
 		auto get_by_type() const noexcept
 		{ return get<get_index_from_type<Type, std::remove_const_t<T>...>()>(); }
 

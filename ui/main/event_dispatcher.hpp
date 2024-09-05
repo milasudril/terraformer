@@ -38,6 +38,8 @@ namespace terraformer::ui::main
 			if(res.index == widget_collection_view::npos)
 			{ return; }
 			dispatch(event, res);
+
+			dispatch(cursor_enter_leave_event{}, res);
 		}
 
 		template<auto WindowId>
