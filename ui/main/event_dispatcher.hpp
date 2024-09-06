@@ -6,6 +6,8 @@
 
 #include "lib/common/value_accessor.hpp"
 
+constinit size_t event_count = 0;
+
 namespace terraformer::ui::main
 {
 	template<
@@ -26,20 +28,20 @@ namespace terraformer::ui::main
 		void handle_mouse_button_event(mouse_button_event const& event)
 		{
 			auto res = find_recursive(event.where, value_of(m_widget_collection));
-			if(res.index == widget_collection_view::npos)
-			{ return; }
-			dispatch(event, res);
+			if(!try_dispatch(event, res))
+			{ printf("mbe in the void %zu\n", event_count); }
+			
+			++event_count;
 		}
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(cursor_motion_event const& event)
 		{
 			auto res = find_recursive(event.where, value_of(m_widget_collection));
-			if(res.index == widget_collection_view::npos)
-			{ return; }
-			dispatch(event, res);
-
-			dispatch(cursor_enter_leave_event{}, res);
+			if(!try_dispatch(event, res))
+			{ printf("cme in the void %zu\n", event_count); }
+			
+			++event_count;
 		}
 
 		template<auto WindowId>

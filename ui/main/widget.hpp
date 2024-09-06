@@ -336,14 +336,22 @@ namespace terraformer::ui::main
 		
 		bool operator!=(find_recursive_result const& other) const
 		{ return !(*this == other); }
+		
+		[[nodiscard]] bool empty() const
+		{ return index == widget_collection_ref::npos; }
 	};
 
 	template<class EventType>
-	void dispatch(EventType&& e, find_recursive_result const& res)
+	bool try_dispatch(EventType&& e, find_recursive_result const& res)
 	{
+		if(res.empty())
+		{ return false; }
+			
 		auto const widgets = res.widget_collection.widget_pointers();
 		auto const callbacks = res.widget_collection.template event_callbacks<EventType>();
 		callbacks[res.index](widgets[res.index], std::forward<EventType>(e));
+		
+		return true;
 	}
 
 	inline auto find_recursive(cursor_position pos, widget_collection_ref const& widgets)
