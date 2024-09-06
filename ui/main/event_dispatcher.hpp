@@ -38,6 +38,17 @@ namespace terraformer::ui::main
 		void handle_cursor_motion_event(cursor_motion_event const& event)
 		{
 			auto res = find_recursive(event.where, value_of(m_widget_collection));
+			if(res != m_hot_widget)
+			{ 
+				if(!try_dispatch(cursor_enter_leave_event{}, m_hot_widget))
+				{ printf("cursor left the void %zu\n", event_count); }
+				
+				if(!try_dispatch(cursor_enter_leave_event{}, res))
+				{ printf("cursor entered the void %zu\n", event_count); }
+				
+				m_hot_widget = res;
+			}
+			
 			if(!try_dispatch(event, res))
 			{ printf("cme in the void %zu\n", event_count); }
 			
@@ -109,7 +120,10 @@ namespace terraformer::ui::main
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
 		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle{};
+		
 		bool m_theme_is_up_to_date = false;
+		find_recursive_result m_hot_widget{};
+		
 	};
 }
 

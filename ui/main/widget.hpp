@@ -328,8 +328,8 @@ namespace terraformer::ui::main
 
 	struct find_recursive_result
 	{
-		widget_collection_ref widget_collection;
-		widget_collection_view::index_type index;
+		widget_collection_ref widget_collection{};
+		widget_collection_view::index_type index{widget_collection_ref::npos};;
 		
 		bool operator==(find_recursive_result const& other) const
 		{ return is_same(widget_collection, other.widget_collection) && index == other.index; }
