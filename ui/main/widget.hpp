@@ -284,6 +284,11 @@ namespace terraformer::ui::main
 	private:
 		widget_span m_span;
 	};
+	
+	template<bool IsConstA, bool IsConstB>
+	bool is_same(widget_collection_ref_impl<IsConstA> const& a,
+		widget_collection_ref_impl<IsConstB> const& b)
+	{ return std::data(a.widget_pointers()) == std::data(b.widget_pointers()); }
 
 	inline auto find(cursor_position pos, span<widget_geometry const> geoms)
 	{
@@ -307,7 +312,8 @@ namespace terraformer::ui::main
 			return widget_collection_view{widget_span_const{get_span()}};
 		}
 	};
-
+	
+	
 
 	inline auto find(cursor_position pos, widget_collection_view const& widgets)
 	{
@@ -324,6 +330,12 @@ namespace terraformer::ui::main
 	{
 		widget_collection_ref widget_collection;
 		widget_collection_view::index_type index;
+		
+		bool operator==(find_recursive_result const& other) const
+		{ return is_same(widget_collection, other.widget_collection) && index == other.index; }
+		
+		bool operator!=(find_recursive_result const& other) const
+		{ return !(*this == other); }
 	};
 
 	template<class EventType>
