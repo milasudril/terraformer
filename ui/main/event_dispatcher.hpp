@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
 
 #include "./widget.hpp"
+#include "./widgets_to_render_collection.hpp"
 #include "./events.hpp"
 #include "./widget_collection.hpp"
 
@@ -103,7 +104,7 @@ namespace terraformer::ui::main
 			auto const box_size = update_geometry(root_widget{m_widget_collection});
 			value_of(m_widget_collection)
 				.prepare_for_presentation(widget_rendering_result{std::ref(m_output_rectangle)});
-			main::widgets_to_render_list<WidgetRenderingResult>
+			main::widgets_to_render_collection<WidgetRenderingResult>
 				widgets_to_render{std::as_const(value_of(m_widget_collection)).get_children()};
 			prepare_for_presentation(widgets_to_render);
 

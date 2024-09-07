@@ -305,8 +305,6 @@ namespace terraformer::ui::main
 			return widget_collection_view{widget_span_const{get_span()}};
 		}
 	};
-	
-	
 
 	inline auto find(cursor_position pos, widget_collection_view const& widgets)
 	{
