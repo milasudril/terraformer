@@ -492,13 +492,7 @@ namespace terraformer::ui::main
 		auto const n = std::size(children);
 		auto const widget_geometries = children.widget_geometries();
 		for(auto k = children.first_element_index(); k != n; ++k)
-		{
-			widget_geometries[k].where += root_offset;
-/*			apply_offests(
-				root_widget{children, k},
-				widget_geometries[k].where - location{0.0f, 0.0f, 0.0f}
-			);*/
-		}
+		{ widget_geometries[k].where += root_offset; }
 		
 		for(auto k = children.first_element_index(); k != n; ++k)
 		{
