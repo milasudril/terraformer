@@ -228,8 +228,12 @@ namespace terraformer::ui::wsapi
 				);
 			}
 
-			if constexpr (requires(main::cursor_enter_leave_event const& event){
-				{eh.get().handle_cursor_enter_leave_event(event)}->std::same_as<void>;
+			// TODO: Use disjuncion between cee and cle so it is an error to only include one of them
+			if constexpr (requires(
+				main::cursor_enter_event const& cee,
+				main::cursor_leave_event const& cle){
+				{eh.get().handle_cursor_enter_event(cee)}->std::same_as<void>;
+				{eh.get().handle_cursor_leave_event(cle)}->std::same_as<void>;
 			})
 			{
 				glfwSetCursorEnterCallback(
@@ -237,14 +241,26 @@ namespace terraformer::ui::wsapi
 					[](GLFWwindow* window, int direction){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						assert(direction == GLFW_TRUE || direction == GLFW_FALSE);
-						call_and_catch<WindowId>(
-							&EventHandler::template handle_cursor_enter_leave_event<WindowId>,
-							*event_handler,
-							main::cursor_enter_leave_event{
-								.where = get_cursor_position(window),
-								.direction = direction == GLFW_TRUE? main::cursor_enter_leave::enter : main::cursor_enter_leave::leave
-							}
-						);
+						if(direction == GLFW_TRUE)
+						{
+							call_and_catch<WindowId>(
+								&EventHandler::template handle_cursor_enter_event<WindowId>,
+								*event_handler,
+								main::cursor_enter_event{
+									.where = get_cursor_position(window)
+								}
+							);
+						}
+						else
+						{
+							call_and_catch<WindowId>(
+								&EventHandler::template handle_cursor_leave_event<WindowId>,
+								*event_handler,
+								main::cursor_leave_event{
+									.where = get_cursor_position(window)
+								}
+							);
+						}
 					}
 				);
 			}

@@ -329,9 +329,8 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		terraformer::ui::widgets::button::state::pressed
 	);
 
-	my_button.handle_event(terraformer::ui::main::cursor_enter_leave_event{
+	my_button.handle_event(terraformer::ui::main::cursor_leave_event{
 		.where = terraformer::ui::main::cursor_position{},
-		.direction = terraformer::ui::main::cursor_enter_leave::leave
 	});
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 0);
@@ -341,9 +340,8 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		terraformer::ui::widgets::button::state::released
 	);
 
-	my_button.handle_event(terraformer::ui::main::cursor_enter_leave_event{
+	my_button.handle_event(terraformer::ui::main::cursor_enter_event{
 		.where = terraformer::ui::main::cursor_position{},
-		.direction = terraformer::ui::main::cursor_enter_leave::enter
 	});
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 0);
@@ -395,26 +393,22 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		inspect_button_state(rect.background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
-	my_button.handle_event(terraformer::ui::main::cursor_enter_leave_event{
+	my_button.handle_event(terraformer::ui::main::cursor_leave_event{
 		.where = terraformer::ui::main::cursor_position{},
-		.direction = terraformer::ui::main::cursor_enter_leave::leave
 	});
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
-	my_button.handle_event(terraformer::ui::main::cursor_enter_leave_event{
-		.where = terraformer::ui::main::cursor_position{},
-		.direction = terraformer::ui::main::cursor_enter_leave::leave
+	my_button.handle_event(terraformer::ui::main::cursor_leave_event{
+		.where = terraformer::ui::main::cursor_position{}
 	});
-	my_button.handle_event(terraformer::ui::main::cursor_enter_leave_event{
-		.where = terraformer::ui::main::cursor_position{},
-		.direction = terraformer::ui::main::cursor_enter_leave::enter
+	my_button.handle_event(terraformer::ui::main::cursor_enter_event{
+		.where = terraformer::ui::main::cursor_position{}
 	});
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(my_button.value(), true);
-	my_button.handle_event(terraformer::ui::main::cursor_enter_leave_event{
-		.where = terraformer::ui::main::cursor_position{},
-		.direction = terraformer::ui::main::cursor_enter_leave::leave
+	my_button.handle_event(terraformer::ui::main::cursor_leave_event{
+		.where = terraformer::ui::main::cursor_position{}
 	});
 	EXPECT_EQ(callcount, 0);
 }

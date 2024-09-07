@@ -32,7 +32,10 @@ namespace terraformer::ui::main
 				[](void* obj, widget_rendering_result result) {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
 				},
-				[](void* obj, cursor_enter_leave_event const& event) {
+				[](void* obj, cursor_enter_event const& event) {
+					static_cast<Widget*>(obj)->handle_event(event);
+				},
+				[](void* obj, cursor_leave_event const& event) {
 					static_cast<Widget*>(obj)->handle_event(event);
 				},
 				[](void* obj, cursor_motion_event const& event) {

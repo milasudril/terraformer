@@ -7,7 +7,6 @@
 #include "./drawing_api/frame_renderer.hpp"
 #include "./drawing_api/single_quad_renderer.hpp"
 #include "./main/event_dispatcher.hpp"
-#include "./widgets/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./widgets/label.hpp"
 #include "./widgets/button.hpp"

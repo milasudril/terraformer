@@ -47,18 +47,11 @@ namespace terraformer::ui::widgets
 
 		void prepare_for_presentation(main::widget_rendering_result output_rect);
 
-		void handle_event(main::cursor_enter_leave_event const& cle)
-		{
-			switch(cle.direction)
-			{
-				case main::cursor_enter_leave::leave:
-					m_temp_state = std::nullopt;
-					break;
-
-				case main::cursor_enter_leave::enter:
-					break;
-			}
-		}
+		void handle_event(main::cursor_enter_event const&)
+		{ }
+		
+		void handle_event(main::cursor_leave_event const&)
+		{ m_temp_state = std::nullopt; }
 
 		void handle_event(main::cursor_motion_event const&)
 		{ }

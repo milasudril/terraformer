@@ -83,7 +83,10 @@ namespace terraformer::ui::widgets
 			});
 		}
 
-		void handle_event(main::cursor_enter_leave_event const&)
+		void handle_event(main::cursor_enter_event const&)
+		{ }
+		
+		void handle_event(main::cursor_leave_event const&)
 		{ }
 
 		template<class WidgetRenderingResult>

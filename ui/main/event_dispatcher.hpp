@@ -40,10 +40,10 @@ namespace terraformer::ui::main
 			auto res = find_recursive(event.where, value_of(m_widget_collection));
 			if(res != m_hot_widget)
 			{ 
-				if(!try_dispatch(cursor_enter_leave_event{}, m_hot_widget))
+				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
 				{ printf("cursor left the void %zu\n", event_count); }
 				
-				if(!try_dispatch(cursor_enter_leave_event{}, res))
+				if(!try_dispatch(cursor_enter_event{.where = event.where}, res))
 				{ printf("cursor entered the void %zu\n", event_count); }
 				
 				m_hot_widget = res;
@@ -60,8 +60,12 @@ namespace terraformer::ui::main
 		{ value_of(m_window_controller).template window_is_closing<WindowId>(); }
 
 		template<auto WindowId>
-		void handle_cursor_enter_leave_event(cursor_enter_leave_event const& event)
-		{ value_of(m_window_controller).template cursor_at_window_boundary<WindowId>(event); }
+		void handle_cursor_enter_event(cursor_enter_event const& event)
+		{ value_of(m_window_controller).template handle_event<WindowId>(event); }
+		
+		template<auto WindowId>
+		void handle_cursor_leave_event(cursor_leave_event const& event)
+		{ value_of(m_window_controller).template handle_event<WindowId>(event); }
 
 
 		template<auto WindowId>

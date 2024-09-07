@@ -46,12 +46,14 @@ namespace terraformer::ui::main
 		cursor_position where;
 	};
 
-	enum class cursor_enter_leave:int{enter, leave};
-
-	struct cursor_enter_leave_event
+	struct cursor_enter_event
 	{
 		cursor_position where;
-		cursor_enter_leave direction;
+	};
+	
+	struct cursor_leave_event
+	{
+		cursor_position where;
 	};
 
 	struct error_message

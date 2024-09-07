@@ -173,7 +173,8 @@ namespace terraformer::ui::main
 	template<class EventType>
 	using event_callback_t = void (*)(void*, EventType);
 
-	using cursor_enter_leave_callback = event_callback_t<cursor_enter_leave_event const&>;
+	using cursor_enter_callback = event_callback_t<cursor_enter_event const&>;
+	using cursor_leave_callback = event_callback_t<cursor_leave_event const&>;
 	using cursor_position_callback = event_callback_t<cursor_motion_event const&>;
 	using mouse_button_callback = event_callback_t<mouse_button_event const&>;
 	using size_callback = event_callback_t<fb_size>;
@@ -195,7 +196,8 @@ namespace terraformer::ui::main
 			widget_size_constraints,
 			widget_geometry,
 			prepare_for_presentation_callback,
-			cursor_enter_leave_callback,
+			cursor_enter_callback,
+			cursor_leave_callback,
 			cursor_position_callback,
 			mouse_button_callback,
 			update_geometry_callback,
@@ -250,15 +252,6 @@ namespace terraformer::ui::main
 
 		auto render_callbacks() const
 		{ return m_span.template get_by_type<prepare_for_presentation_callback>(); }
-
-		auto cursor_enter_leave_callbacks() const
-		{ return m_span.template get_by_type<cursor_enter_leave_callback>(); }
-
-		auto cursor_motion_callbacks() const
-		{ return m_span.template get_by_type<cursor_position_callback>(); }
-
-		auto mouse_button_callbacks() const
-		{ return m_span.template get_by_type<mouse_button_callback>(); }
 
 		auto update_geometry_callbacks() const
 		{ return m_span.template get_by_type<update_geometry_callback>(); }
@@ -401,7 +394,8 @@ namespace terraformer::ui::main
 	concept widget = requires(
 		T& obj,
 		fb_size size,
-		cursor_enter_leave_event const& cele,
+		cursor_enter_event const& cee,
+		cursor_leave_event const& cle,
 		cursor_motion_event const& cme,
 		mouse_button_event const& mbe,
 		widget_instance_info const&,
@@ -410,7 +404,8 @@ namespace terraformer::ui::main
 	)
 	{
 		{ obj.prepare_for_presentation(surface) } -> std::same_as<void>;
-		{ obj.handle_event(cele) } -> std::same_as<void>;
+		{ obj.handle_event(cee) } -> std::same_as<void>;
+		{ obj.handle_event(cle) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<void>;
 		{ obj.handle_event(mbe) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
@@ -496,7 +491,8 @@ namespace terraformer::ui::main
 	struct widget_with_default_actions
 	{
 		void prepare_for_presentation(widget_rendering_result) const {}
-		void handle_event(cursor_enter_leave_event const&);
+		void handle_event(cursor_enter_event const&) {}
+		void handle_event(cursor_leave_event const&) {}
 		void handle_event(cursor_motion_event const&) const { }
 		void handle_event(mouse_button_event const&) const { }
 		void handle_event(fb_size) const { }
