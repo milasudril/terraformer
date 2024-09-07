@@ -102,6 +102,7 @@ namespace terraformer::ui::main
 		{
 			using WidgetRenderingResult = typename dereferenced_type<ContentRenderer>::input_rectangle;
 			auto const box_size = update_geometry(root_widget{m_widget_collection});
+			apply_offsets(root_widget{m_widget_collection}, displacement{0.0f, 0.0f, 0.0f});
 			value_of(m_widget_collection)
 				.prepare_for_presentation(widget_rendering_result{std::ref(m_output_rectangle)});
 			main::widgets_to_render_collection<WidgetRenderingResult>

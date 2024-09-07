@@ -485,6 +485,29 @@ namespace terraformer::ui::main
 
 		return max(initial_constriants, contraints_from_layout);
 	}
+	
+	inline void apply_offsets(root_widget&& root, displacement root_offset)
+	{
+		auto& children = root.children();
+		auto const n = std::size(children);
+		auto const widget_geometries = children.widget_geometries();
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{
+			widget_geometries[k].where += root_offset;
+/*			apply_offests(
+				root_widget{children, k},
+				widget_geometries[k].where - location{0.0f, 0.0f, 0.0f}
+			);*/
+		}
+		
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{
+			apply_offsets(
+				root_widget{children, k},
+				widget_geometries[k].where - location{0.0f, 0.0f, 0.0f}
+			);
+		}
+	}
 
 	struct widget_with_default_actions
 	{
