@@ -3,6 +3,7 @@
 
 #include "./widget.hpp"
 #include "./events.hpp"
+#include "./widget_collection.hpp"
 
 #include "lib/common/value_accessor.hpp"
 
@@ -100,8 +101,10 @@ namespace terraformer::ui::main
 		{
 			using WidgetRenderingResult = typename dereferenced_type<ContentRenderer>::input_rectangle;
 			auto const box_size = update_geometry(root_widget{m_widget_collection});
-			value_of(m_widget_collection).prepare_for_presentation(widget_rendering_result{std::ref(m_output_rectangle)});
-			auto widgets_to_render = value_of(m_widget_collection).template collect_widgets_to_render<WidgetRenderingResult>();
+			value_of(m_widget_collection)
+				.prepare_for_presentation(widget_rendering_result{std::ref(m_output_rectangle)});
+			main::widgets_to_render_list<WidgetRenderingResult>
+				widgets_to_render{std::as_const(value_of(m_widget_collection)).get_children()};
 			prepare_for_presentation(widgets_to_render);
 
 			value_of(m_content_renderer).render(

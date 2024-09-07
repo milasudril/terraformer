@@ -98,8 +98,8 @@ namespace terraformer::ui::main
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		explicit widgets_to_render_list(widget_collection const& from)
-		{ collect_widgets(from.get_attributes(), m_objects); }
+		explicit widgets_to_render_list(widget_collection_view const& from)
+		{ collect_widgets(from, m_objects); }
 
 		constexpr auto first_element_index() const
 		{ return m_objects.first_element_index(); }
