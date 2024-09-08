@@ -454,7 +454,7 @@ namespace terraformer::ui::main
 		layout_policy_ref m_layout;
 	};
 
-	inline widget_size_constraints update_geometry(root_widget&& root)
+	inline widget_size_constraints update_geometry(root_widget& root)
 	{
 		auto const initial_constriants = root.update_geometry();
 		auto& children = root.children();
@@ -464,29 +464,18 @@ namespace terraformer::ui::main
 		for(auto k = children.first_element_index(); k != n; ++k)
 		{
 			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
-			{ widget_size_constraints[k] = update_geometry(root_widget{children, k}); }
+			{ 
+				root_widget next_root{children, k};
+				widget_size_constraints[k] = update_geometry(next_root); 
+			}
 		}
 
 		auto const contraints_from_layout = root.run_layout();
 
-		auto const widget_pointers = children.widget_pointers();
-		auto const size_callbacks = children.size_callbacks();
-		auto const widget_geometries = children.widget_geometries();
-		for(auto k = children.first_element_index(); k != n; ++k)
-		{
-			size_callbacks[k](
-				widget_pointers[k],
-				main::fb_size {
-					.width = static_cast<int>(widget_geometries[k].size[0]),
-					.height = static_cast<int>(widget_geometries[k].size[1])
-				}
-			);
-		}
-
 		return max(initial_constriants, contraints_from_layout);
 	}
-	
-	inline void confirm_sizes(root_widget&& root)
+
+	inline void confirm_sizes(root_widget& root)
 	{	
 		auto children = root.children();
 		auto const widget_pointers = children.widget_pointers();
@@ -512,11 +501,14 @@ namespace terraformer::ui::main
 		for(auto k = children.first_element_index(); k!=n; ++k)
 		{
 			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
-			{ confirm_sizes(root_widget{children, k}); }
+			{ 
+				root_widget next_root{children, k};
+				confirm_sizes(next_root); 
+			}
 		}
 	}
 	
-	inline void apply_offsets(root_widget&& root, displacement root_offset)
+	inline void apply_offsets(root_widget& root, displacement root_offset)
 	{
 		auto& children = root.children();
 		auto const n = std::size(children);
@@ -526,8 +518,9 @@ namespace terraformer::ui::main
 		
 		for(auto k = children.first_element_index(); k != n; ++k)
 		{
+			root_widget next_root{children, k};
 			apply_offsets(
-				root_widget{children, k},
+				next_root,
 				widget_geometries[k].where - location{0.0f, 0.0f, 0.0f}
 			);
 		}
