@@ -486,6 +486,36 @@ namespace terraformer::ui::main
 		return max(initial_constriants, contraints_from_layout);
 	}
 	
+	inline void confirm_sizes(root_widget&& root)
+	{	
+		auto children = root.children();
+		auto const widget_pointers = children.widget_pointers();
+		auto const size_callbacks = children.size_callbacks();
+		auto const widget_geometries = children.widget_geometries();
+		auto const n = std::size(children);
+		auto const widget_visibilities = children.widget_visibilities();
+		
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{
+			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
+			{
+				size_callbacks[k](
+					widget_pointers[k],
+					main::fb_size {
+						.width = static_cast<int>(widget_geometries[k].size[0]),
+						.height = static_cast<int>(widget_geometries[k].size[1])
+					}
+				);
+			}
+		}
+		
+		for(auto k = children.first_element_index(); k!=n; ++k)
+		{
+			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
+			{ confirm_sizes(root_widget{children, k}); }
+		}
+	}
+	
 	inline void apply_offsets(root_widget&& root, displacement root_offset)
 	{
 		auto& children = root.children();
