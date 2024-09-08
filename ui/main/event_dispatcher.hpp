@@ -62,6 +62,7 @@ namespace terraformer::ui::main
 		{ value_of(m_window_controller).template window_is_closing<WindowId>(); }
 
 		template<auto WindowId>
+		
 		void handle_cursor_enter_event(cursor_enter_event const& event)
 		{ value_of(m_window_controller).template handle_event<WindowId>(event); }
 		
@@ -102,8 +103,15 @@ namespace terraformer::ui::main
 		{
 			using WidgetRenderingResult = typename dereferenced_type<ContentRenderer>::input_rectangle;
 			root_widget root{m_widget_collection};
-			auto const box_size = update_geometry(root);
-			confirm_sizes(root);
+			// TODO: Pick width/height based on window size
+			auto const box_size = minimize_width(update_geometry(root));
+			confirm_sizes(
+				root,
+				fb_size{
+					.width = static_cast<int>(box_size[0]),
+					.height = static_cast<int>(box_size[1])
+				}
+			);
 			apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
 			value_of(m_widget_collection)
 				.prepare_for_presentation(widget_rendering_result{std::ref(m_output_rectangle)});
@@ -114,11 +122,7 @@ namespace terraformer::ui::main
 			value_of(m_content_renderer).render(
 				location{0.0f, 0.0f, 0.0f},
 				location{-1.0f, 1.0f, 0.0f},
-				scaling{
-					box_size.width.min,
-					box_size.height.min,
-					1.0f
-				},
+				box_size,
 				m_output_rectangle
 			);
 			show_widgets(value_of(m_content_renderer), widgets_to_render);

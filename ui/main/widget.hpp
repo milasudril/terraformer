@@ -421,6 +421,7 @@ namespace terraformer::ui::main
 			m_widget{widgets.widget_pointers()[index]},
 			m_children{widgets.get_children_callbacks()[index](m_widget)},
 			m_update_geometry{widgets.update_geometry_callbacks()[index]},
+			m_size_confirmed{widgets.event_callbacks<fb_size>()[index]},
 			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
 		{}
 
@@ -438,11 +439,14 @@ namespace terraformer::ui::main
 			m_layout{w.get().get_layout()}
 		{}
 
-		widget_size_constraints update_geometry()
-		{ return m_update_geometry(m_widget); }
-
 		widget_collection_ref& children()
 		{ return m_children; }
+
+		widget_size_constraints update_geometry()
+		{ return m_update_geometry(m_widget); }
+		
+		void confirm_size(fb_size size)
+		{ m_size_confirmed(m_widget, size); }
 
 		widget_size_constraints run_layout()
 		{ return m_layout.update_widget_locations(m_children); }
@@ -451,6 +455,7 @@ namespace terraformer::ui::main
 		void* m_widget = nullptr;
 		widget_collection_ref m_children;
 		update_geometry_callback m_update_geometry = [](void*){return widget_size_constraints{};};
+		event_callback_t<fb_size> m_size_confirmed =[](void*, fb_size){};
 		layout_policy_ref m_layout;
 	};
 
@@ -475,35 +480,25 @@ namespace terraformer::ui::main
 		return max(initial_constriants, contraints_from_layout);
 	}
 
-	inline void confirm_sizes(root_widget& root)
+	inline void confirm_sizes(root_widget& root, fb_size size)
 	{	
+		root.confirm_size(size);
 		auto children = root.children();
-		auto const widget_pointers = children.widget_pointers();
-		auto const size_callbacks = children.size_callbacks();
+		auto const widget_visibilities = children.widget_visibilities();
 		auto const widget_geometries = children.widget_geometries();
 		auto const n = std::size(children);
-		auto const widget_visibilities = children.widget_visibilities();
-		
-		for(auto k = children.first_element_index(); k != n; ++k)
-		{
-			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
-			{
-				size_callbacks[k](
-					widget_pointers[k],
-					main::fb_size {
-						.width = static_cast<int>(widget_geometries[k].size[0]),
-						.height = static_cast<int>(widget_geometries[k].size[1])
-					}
-				);
-			}
-		}
-		
 		for(auto k = children.first_element_index(); k!=n; ++k)
 		{
 			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
 			{ 
 				root_widget next_root{children, k};
-				confirm_sizes(next_root); 
+				confirm_sizes(
+					next_root, 
+					fb_size{
+						.width = static_cast<int>(widget_geometries[k].size[0]),
+						.height = static_cast<int>(widget_geometries[k].size[1])
+					}
+				);
 			}
 		}
 	}
