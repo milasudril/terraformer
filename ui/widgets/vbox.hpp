@@ -131,7 +131,7 @@ namespace terraformer::ui::widgets
 		void handle_event(main::fb_size)
 		{ }
 
-		main::widget_size_constraints update_geometry()
+		main::widget_size_constraints compute_size_constraints()
 		{ return main::widget_size_constraints{}; }
 
 		main::layout_policy_ref get_layout() const

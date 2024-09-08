@@ -47,7 +47,7 @@ namespace terraformer::ui::widgets
 		void handle_event(main::mouse_button_event const&)
 		{ }
 
-		main::widget_size_constraints update_geometry();
+		main::widget_size_constraints compute_size_constraints();
 
 		void handle_event(main::fb_size size)
 		{

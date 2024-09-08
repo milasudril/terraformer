@@ -427,7 +427,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_cme)
 	EXPECT_EQ(callcount, 0);
 }
 
-TESTCASE(terraformer_ui_widgets_button_update_geometry)
+TESTCASE(terraformer_ui_widgets_button_compute_size_constraints)
 {
 	terraformer::ui::widgets::button my_button;
 	auto callcount = 0;
@@ -439,10 +439,10 @@ TESTCASE(terraformer_ui_widgets_button_update_geometry)
 	.text(u8"")
 	.theme_updated(create_render_resources());
 
-	auto const res_a = my_button.update_geometry();
+	auto const res_a = my_button.compute_size_constraints();
 
 	my_button.text(u8"Hello, World");
-	auto const res_b = my_button.update_geometry();
+	auto const res_b = my_button.compute_size_constraints();
 
 	EXPECT_LT(res_a.width.min, res_b.width.min);
 	EXPECT_EQ(res_a.width.max, std::numeric_limits<float>::infinity());
@@ -450,7 +450,7 @@ TESTCASE(terraformer_ui_widgets_button_update_geometry)
 	EXPECT_EQ(res_a.aspect_ratio, std::nullopt);
 	EXPECT_EQ(res_b.aspect_ratio, std::nullopt);
 
-	auto const res_c = my_button.update_geometry();
+	auto const res_c = my_button.compute_size_constraints();
 	EXPECT_EQ(res_b.width.min, res_c.width.min);
 	EXPECT_EQ(res_c.aspect_ratio, std::nullopt);
 

@@ -37,7 +37,7 @@ void terraformer::ui::widgets::label::regenerate_textures()
 	m_dirty_bits |= gpu_textures_dirty;
 }
 
-terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::update_geometry()
+terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::compute_size_constraints()
 {
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }

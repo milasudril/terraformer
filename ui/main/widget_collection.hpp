@@ -45,7 +45,7 @@ namespace terraformer::ui::main
 					static_cast<Widget*>(obj)->handle_event(mbe);
 				},
 				[](void* obj) -> widget_size_constraints {
-					return static_cast<Widget*>(obj)->update_geometry();
+					return static_cast<Widget*>(obj)->compute_size_constraints();
 				},
 				[](void* obj, fb_size size) {
 					static_cast<Widget*>(obj)->handle_event(size);
