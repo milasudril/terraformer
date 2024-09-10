@@ -417,7 +417,10 @@ namespace terraformer::ui::main
 	class root_widget
 	{
 	public:
-		explicit root_widget(widget_collection_ref& widgets, widget_collection_ref::index_type index):
+		explicit root_widget(
+			widget_collection_ref const& widgets,
+			widget_collection_ref::index_type index
+		):
 			m_widget{widgets.widget_pointers()[index]},
 			m_children{widgets.get_children_callbacks()[index](m_widget)},
 			m_compute_size_contraints{widgets.compute_size_constraints_callbacks()[index]},

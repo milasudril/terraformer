@@ -105,7 +105,7 @@ namespace terraformer::ui::main
 		void render()
 		{
 			using WidgetRenderingResult = typename dereferenced_type<ContentRenderer>::input_rectangle;
-			root_widget root{m_root};
+			root_widget root{m_root_collection.get_attributes(), m_root_collection.first_element_index()};
 			// TODO: Pick width/height based on window size
 			auto const box_size = minimize_width(compute_size_constraints(root));
 			confirm_sizes(
