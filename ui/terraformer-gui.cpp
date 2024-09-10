@@ -88,7 +88,7 @@ int main(int, char**)
 	my_vbox.append(std::ref(bar));
 
 	terraformer::ui::widgets::vbox my_outer_vbox;
-	
+
 	terraformer::ui::widgets::button ok;
 	ok.text(u8"Ok");
 	my_outer_vbox.append(std::ref(ok));
@@ -104,6 +104,11 @@ int main(int, char**)
 		terraformer::ui::drawing_api::frame_renderer{},
 		error_handler{}
 	};
+	event_dispatcher.m_root_collection.append(
+		std::ref(my_outer_vbox),
+		terraformer::ui::main::widget_geometry{},
+		terraformer::ui::main::widget_visibility::visible
+	);
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(

@@ -29,7 +29,7 @@ namespace terraformer::ui::main
 		template<auto WindowId>
 		void handle_mouse_button_event(mouse_button_event const& event)
 		{
-			auto res = find_recursive(event.where, value_of(m_root));
+			auto res = find_recursive(event.where, m_root_collection.get_attributes());
 			if(!try_dispatch(event, res))
 			{ printf("mbe in the void %zu\n", event_count); }
 
@@ -39,26 +39,23 @@ namespace terraformer::ui::main
 		template<auto WindowId>
 		void handle_cursor_motion_event(cursor_motion_event const& event)
 		{
-			if(inside(event.where, m_root_geometry))
+			auto res = find_recursive(event.where, m_root_collection.get_attributes());
+			if(res != m_hot_widget)
 			{
-				auto res = find_recursive(event.where, value_of(m_root));
-				if(res != m_hot_widget)
-				{
-					if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
-					{ printf("cursor left the void %zu\n", event_count); }
+				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
+				{ printf("cursor left the void %zu\n", event_count); }
 
-					if(!try_dispatch(cursor_enter_event{.where = event.where}, res))
-					{ printf("cursor entered the void %zu\n", event_count); }
+				if(!try_dispatch(cursor_enter_event{.where = event.where}, res))
+				{ printf("cursor entered the void %zu\n", event_count); }
 
-					m_hot_widget = res;
-				}
+				m_hot_widget = res;
+			}
 
-				if(!try_dispatch(event, res))
-				{
-					value_of(m_root).handle_event(event);
-					printf("cme in the void %zu\n", event_count);
+			if(!try_dispatch(event, res))
+			{
+				value_of(m_root).handle_event(event);
+				printf("cme in the void %zu\n", event_count);
 
-				}
 			}
 			++event_count;
 		}
@@ -118,7 +115,7 @@ namespace terraformer::ui::main
 					.height = static_cast<int>(box_size[1])
 				}
 			);
-			m_root_geometry = widget_geometry{
+			m_root_collection.get_attributes().widget_geometries().front() = widget_geometry{
 				.where = location{0.0f, 0.0f, 0.0f},
 				.origin = location{-1.0f, 1.0f, 0.0f},
 				.size = box_size
@@ -149,7 +146,7 @@ namespace terraformer::ui::main
 
 		bool m_theme_is_up_to_date = false;
 		find_recursive_result m_hot_widget{};
-		widget_geometry m_root_geometry{};
+		widget_collection m_root_collection{};
 
 	};
 }
