@@ -464,7 +464,7 @@ namespace terraformer::ui::main
 		layout_policy_ref m_layout;
 	};
 
-	inline widget_size_constraints update_geometry(root_widget& root)
+	inline widget_size_constraints compute_size_constraints(root_widget& root)
 	{
 		auto const initial_constriants = root.compute_size_constraints();
 		auto& children = root.children();
@@ -476,7 +476,7 @@ namespace terraformer::ui::main
 			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
 			{
 				root_widget next_root{children, k};
-				widget_size_constraints[k] = update_geometry(next_root);
+				widget_size_constraints[k] = compute_size_constraints(next_root);
 			}
 		}
 
