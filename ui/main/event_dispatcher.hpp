@@ -13,7 +13,7 @@ constinit size_t event_count = 0;
 namespace terraformer::ui::main
 {
 	template<
-		class WidgetContainer,
+		class Widget,
 		class WindowController,
 		class ContentRenderer,
 		class FrameRenderer,
@@ -29,31 +29,37 @@ namespace terraformer::ui::main
 		template<auto WindowId>
 		void handle_mouse_button_event(mouse_button_event const& event)
 		{
-			auto res = find_recursive(event.where, value_of(m_widget_collection));
+			auto res = find_recursive(event.where, value_of(m_root));
 			if(!try_dispatch(event, res))
 			{ printf("mbe in the void %zu\n", event_count); }
-			
+
 			++event_count;
 		}
 
 		template<auto WindowId>
 		void handle_cursor_motion_event(cursor_motion_event const& event)
 		{
-			auto res = find_recursive(event.where, value_of(m_widget_collection));
-			if(res != m_hot_widget)
-			{ 
-				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
-				{ printf("cursor left the void %zu\n", event_count); }
-				
-				if(!try_dispatch(cursor_enter_event{.where = event.where}, res))
-				{ printf("cursor entered the void %zu\n", event_count); }
-				
-				m_hot_widget = res;
+			if(inside(event.where, m_root_geometry))
+			{
+				auto res = find_recursive(event.where, value_of(m_root));
+				if(res != m_hot_widget)
+				{
+					if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
+					{ printf("cursor left the void %zu\n", event_count); }
+
+					if(!try_dispatch(cursor_enter_event{.where = event.where}, res))
+					{ printf("cursor entered the void %zu\n", event_count); }
+
+					m_hot_widget = res;
+				}
+
+				if(!try_dispatch(event, res))
+				{
+					value_of(m_root).handle_event(event);
+					printf("cme in the void %zu\n", event_count);
+
+				}
 			}
-			
-			if(!try_dispatch(event, res))
-			{ printf("cme in the void %zu\n", event_count); }
-			
 			++event_count;
 		}
 
@@ -62,10 +68,10 @@ namespace terraformer::ui::main
 		{ value_of(m_window_controller).template window_is_closing<WindowId>(); }
 
 		template<auto WindowId>
-		
+
 		void handle_cursor_enter_event(cursor_enter_event const& event)
 		{ value_of(m_window_controller).template handle_event<WindowId>(event); }
-		
+
 		template<auto WindowId>
 		void handle_cursor_leave_event(cursor_leave_event const& event)
 		{ value_of(m_window_controller).template handle_event<WindowId>(event); }
@@ -76,7 +82,7 @@ namespace terraformer::ui::main
 		{
 			if(!m_theme_is_up_to_date) [[unlikely]]
 			{
-				value_of(m_widget_collection).theme_updated(m_resources);
+				value_of(m_root).theme_updated(m_resources);
 				m_theme_is_up_to_date = true;
 			}
 
@@ -86,7 +92,7 @@ namespace terraformer::ui::main
 			value_of(m_frame_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
-			value_of(m_widget_collection).handle_event(size);
+			value_of(m_root).handle_event(size);
 		}
 
 		template<class Viewport, class ... Overlay>
@@ -102,7 +108,7 @@ namespace terraformer::ui::main
 		void render()
 		{
 			using WidgetRenderingResult = typename dereferenced_type<ContentRenderer>::input_rectangle;
-			root_widget root{m_widget_collection};
+			root_widget root{m_root};
 			// TODO: Pick width/height based on window size
 			auto const box_size = minimize_width(update_geometry(root));
 			confirm_sizes(
@@ -112,11 +118,16 @@ namespace terraformer::ui::main
 					.height = static_cast<int>(box_size[1])
 				}
 			);
+			m_root_geometry = widget_geometry{
+				.where = location{0.0f, 0.0f, 0.0f},
+				.origin = location{-1.0f, 1.0f, 0.0f},
+				.size = box_size
+			};
 			apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
-			value_of(m_widget_collection)
+			value_of(m_root)
 				.prepare_for_presentation(widget_rendering_result{std::ref(m_output_rectangle)});
 			main::widgets_to_render_collection<WidgetRenderingResult>
-				widgets_to_render{std::as_const(value_of(m_widget_collection)).get_children()};
+				widgets_to_render{std::as_const(value_of(m_root)).get_children()};
 			prepare_for_presentation(widgets_to_render);
 
 			value_of(m_content_renderer).render(
@@ -129,16 +140,17 @@ namespace terraformer::ui::main
 		}
 
 		object_dict m_resources;
-		WidgetContainer m_widget_collection;
+		Widget m_root;
 		WindowController m_window_controller;
 		ContentRenderer m_content_renderer;
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
 		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle{};
-		
+
 		bool m_theme_is_up_to_date = false;
 		find_recursive_result m_hot_widget{};
-		
+		widget_geometry m_root_geometry{};
+
 	};
 }
 

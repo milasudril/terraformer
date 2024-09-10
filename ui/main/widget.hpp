@@ -277,7 +277,7 @@ namespace terraformer::ui::main
 	private:
 		widget_span m_span;
 	};
-	
+
 	template<bool IsConstA, bool IsConstB>
 	bool is_same(widget_collection_ref_impl<IsConstA> const& a,
 		widget_collection_ref_impl<IsConstB> const& b)
@@ -320,14 +320,14 @@ namespace terraformer::ui::main
 	struct find_recursive_result
 	{
 		widget_collection_ref widget_collection{};
-		widget_collection_view::index_type index{widget_collection_ref::npos};;
-		
+		widget_collection_view::index_type index{widget_collection_ref::npos};
+
 		bool operator==(find_recursive_result const& other) const
 		{ return is_same(widget_collection, other.widget_collection) && index == other.index; }
-		
+
 		bool operator!=(find_recursive_result const& other) const
 		{ return !(*this == other); }
-		
+
 		[[nodiscard]] bool empty() const
 		{ return index == widget_collection_ref::npos; }	};
 
@@ -336,11 +336,11 @@ namespace terraformer::ui::main
 	{
 		if(res.empty())
 		{ return false; }
-			
+
 		auto const widgets = res.widget_collection.widget_pointers();
 		auto const callbacks = res.widget_collection.template event_callbacks<EventType>();
 		callbacks[res.index](widgets[res.index], std::forward<EventType>(e));
-		
+
 		return true;
 	}
 
@@ -449,7 +449,7 @@ namespace terraformer::ui::main
 
 		widget_size_constraints compute_size_constraints()
 		{ return m_compute_size_contraints(m_widget); }
-		
+
 		void confirm_size(fb_size size)
 		{ m_size_confirmed(m_widget, size); }
 
@@ -474,9 +474,9 @@ namespace terraformer::ui::main
 		for(auto k = children.first_element_index(); k != n; ++k)
 		{
 			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
-			{ 
+			{
 				root_widget next_root{children, k};
-				widget_size_constraints[k] = update_geometry(next_root); 
+				widget_size_constraints[k] = update_geometry(next_root);
 			}
 		}
 
@@ -486,7 +486,7 @@ namespace terraformer::ui::main
 	}
 
 	inline void confirm_sizes(root_widget& root, fb_size size)
-	{	
+	{
 		root.confirm_size(size);
 		auto children = root.children();
 		auto const widget_visibilities = children.widget_visibilities();
@@ -495,10 +495,10 @@ namespace terraformer::ui::main
 		for(auto k = children.first_element_index(); k!=n; ++k)
 		{
 			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
-			{ 
+			{
 				root_widget next_root{children, k};
 				confirm_sizes(
-					next_root, 
+					next_root,
 					fb_size{
 						.width = static_cast<int>(widget_geometries[k].size[0]),
 						.height = static_cast<int>(widget_geometries[k].size[1])
@@ -507,7 +507,7 @@ namespace terraformer::ui::main
 			}
 		}
 	}
-	
+
 	inline void apply_offsets(root_widget& root, displacement root_offset)
 	{
 		auto& children = root.children();
@@ -515,7 +515,7 @@ namespace terraformer::ui::main
 		auto const widget_geometries = children.widget_geometries();
 		for(auto k = children.first_element_index(); k != n; ++k)
 		{ widget_geometries[k].where += root_offset; }
-		
+
 		for(auto k = children.first_element_index(); k != n; ++k)
 		{
 			root_widget next_root{children, k};
