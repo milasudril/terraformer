@@ -74,7 +74,7 @@ namespace terraformer::ui::main
 		{
 			if(!m_theme_is_up_to_date) [[unlikely]]
 			{
-				value_of(m_root).theme_updated(m_resources);
+				theme_updated(std::as_const(m_root_collection).get_attributes(), m_resources);
 				m_theme_is_up_to_date = true;
 			}
 
@@ -84,7 +84,8 @@ namespace terraformer::ui::main
 			value_of(m_frame_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
-			value_of(m_root).handle_event(size);
+
+			// TODO: Should update size here as well
 		}
 
 		template<class Viewport, class ... Overlay>
