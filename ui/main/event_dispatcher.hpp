@@ -13,7 +13,6 @@ constinit size_t event_count = 0;
 namespace terraformer::ui::main
 {
 	template<
-		class Widget,
 		class WindowController,
 		class ContentRenderer,
 		class FrameRenderer,
@@ -128,7 +127,6 @@ namespace terraformer::ui::main
 		}
 
 		object_dict m_resources;
-		Widget m_root;
 		WindowController m_window_controller;
 		ContentRenderer m_content_renderer;
 		FrameRenderer m_frame_renderer;
@@ -136,6 +134,9 @@ namespace terraformer::ui::main
 
 		bool m_theme_is_up_to_date = false;
 		find_recursive_result m_hot_widget{};
+
+		// TODO: Currently, a collection is used here, even though only one widget can be supported.
+		// A widget collection is currently necessary to set m_hot_widget properly
 		widget_collection m_root_collection{};
 
 	};

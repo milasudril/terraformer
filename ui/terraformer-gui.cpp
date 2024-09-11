@@ -98,7 +98,6 @@ int main(int, char**)
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		terraformer::ui::theming::load_default_resources<terraformer::ui::drawing_api::gl_texture>(),
-		std::ref(my_outer_vbox),
 		window_controller{},
 		terraformer::ui::drawing_api::single_quad_renderer{},
 		terraformer::ui::drawing_api::frame_renderer{},
