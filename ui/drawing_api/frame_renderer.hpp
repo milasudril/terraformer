@@ -41,9 +41,10 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(5, rect.thickness)
 				.set_uniform(6, rect.tints)
 				.bind();
-
+#if 0
 			assert(rect.texture != nullptr);
 			rect.texture->bind(0);
+#endif
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles_repeatedly(2);
@@ -214,7 +215,8 @@ in vec4 tint;
 
 void main()
 {
-	fragment_color = texture(tex, uv)*tint;
+// TODO: fragment_color = texture(tex, uv)*tint;
+	fragment_color = vec4(1.0f, 0.0f, 0.0f, 1.0);
 })"}
 		};
 	};

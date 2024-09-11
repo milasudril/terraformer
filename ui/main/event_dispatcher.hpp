@@ -124,6 +124,21 @@ namespace terraformer::ui::main
 			prepare_for_presentation(widgets_to_render);
 
 			show_widgets(value_of(m_content_renderer), widgets_to_render);
+			if(m_hot_widget != find_recursive_result{})
+			{
+				auto const& geometry = m_hot_widget.geometry();
+				using Frame = typename FrameRenderer::input_rectangle;
+				m_frame_renderer.render(
+					geometry.where + 2.0f*displacement{-1.0f, 1.0f, 0.0f},
+					geometry.origin,
+					geometry.size + 4.0f*scaling{1.0f, 1.0f, 0.0f},
+					Frame{
+						.thickness = 2.0f,
+						.texture = nullptr,
+						.tints = std::array<rgba_pixel, 8>{}
+					}
+				);
+			}
 		}
 
 		object_dict m_resources;

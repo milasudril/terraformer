@@ -329,7 +329,13 @@ namespace terraformer::ui::main
 		{ return !(*this == other); }
 
 		[[nodiscard]] bool empty() const
-		{ return index == widget_collection_ref::npos; }	};
+		{ return index == widget_collection_ref::npos; }
+
+		widget_geometry geometry() const
+		{
+			return widget_collection.widget_geometries()[index];
+		}
+	};
 
 	template<class EventType>
 	bool try_dispatch(EventType&& e, find_recursive_result const& res)
@@ -366,16 +372,6 @@ namespace terraformer::ui::main
 
 		// Yes, return the widget at child level
 		return j;
-	}
-
-	template<class Widget>
-	auto find_recursive(cursor_position pos, Widget& widget)
-	{
-		// TODO: If inside widget, but not in any children, return result pointing to widget
-		// * Where is widget?
-		// * What size is widget?
-		// * Also need to construct a widget_collection_ref in order to have a valid return value
-		return find_recursive(pos, widget.get_children());
 	}
 
 	inline void theme_updated(widget_collection_view const& widgets, object_dict const& dict)
