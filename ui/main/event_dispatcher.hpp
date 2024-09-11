@@ -52,11 +52,7 @@ namespace terraformer::ui::main
 			}
 
 			if(!try_dispatch(event, res))
-			{
-				value_of(m_root).handle_event(event);
-				printf("cme in the void %zu\n", event_count);
-
-			}
+			{ printf("cme in the void %zu\n", event_count); }
 			++event_count;
 		}
 
@@ -65,7 +61,6 @@ namespace terraformer::ui::main
 		{ value_of(m_window_controller).template window_is_closing<WindowId>(); }
 
 		template<auto WindowId>
-
 		void handle_cursor_enter_event(cursor_enter_event const& event)
 		{ value_of(m_window_controller).template handle_event<WindowId>(event); }
 
