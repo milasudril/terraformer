@@ -115,24 +115,19 @@ namespace terraformer::ui::main
 					.height = static_cast<int>(box_size[1])
 				}
 			);
+
 			m_root_collection.get_attributes().widget_geometries().front() = widget_geometry{
 				.where = location{0.0f, 0.0f, 0.0f},
 				.origin = location{-1.0f, 1.0f, 0.0f},
 				.size = box_size
 			};
 			apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
-			value_of(m_root)
-				.prepare_for_presentation(widget_rendering_result{std::ref(m_output_rectangle)});
+
 			main::widgets_to_render_collection<WidgetRenderingResult>
-				widgets_to_render{std::as_const(value_of(m_root)).get_children()};
+				widgets_to_render{std::as_const(m_root_collection).get_attributes()};
+
 			prepare_for_presentation(widgets_to_render);
 
-			value_of(m_content_renderer).render(
-				location{0.0f, 0.0f, 0.0f},
-				location{-1.0f, 1.0f, 0.0f},
-				box_size,
-				m_output_rectangle
-			);
 			show_widgets(value_of(m_content_renderer), widgets_to_render);
 		}
 
@@ -142,7 +137,6 @@ namespace terraformer::ui::main
 		ContentRenderer m_content_renderer;
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
-		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle{};
 
 		bool m_theme_is_up_to_date = false;
 		find_recursive_result m_hot_widget{};
