@@ -33,6 +33,20 @@ namespace terraformer::ui::main
 		[[nodiscard]] constexpr bool operator!=(widget_geometry const&) const = default;
 	};
 
+	enum class focus_indicator_mode:uint16_t{automatic, always_hidden, always_visible};
+
+	struct widget_state
+	{
+		uint16_t collapsed:1;
+		uint16_t hidden:1;
+		uint16_t maximized:1;
+		uint16_t disabled:1;
+		uint16_t mbe_sensitive:1;
+		uint16_t kbe_sensitive:1;
+		focus_indicator_mode cursor_focus_indicator_mode:2;
+		focus_indicator_mode kbd_focus_indicator_mode:2;
+	};
+
 	[[nodiscard]] inline bool inside(cursor_position pos, widget_geometry const& box)
 	{
 		auto const r = 0.5*box.size;
