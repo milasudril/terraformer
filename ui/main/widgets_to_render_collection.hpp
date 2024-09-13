@@ -51,7 +51,7 @@ namespace terraformer::ui::main
 		static void collect_widgets(widget_collection_view const& from, widget_array& to)
 		{
 			auto const widget_pointers = from.widget_pointers();
-			auto const widget_visibilities = from.widget_visibilities();
+			auto const widget_states = from.widget_states();
 			auto const children_callbacks = from.get_children_const_callbacks();
 			auto const render_callbacks = from.render_callbacks();
 			auto const widget_geometries = from.widget_geometries();
@@ -59,7 +59,7 @@ namespace terraformer::ui::main
 			auto const n = std::size(from);
 			for(auto k = from.first_element_index(); k != n; ++k)
 			{
-				if(widget_visibilities[k] == widget_visibility::visible) [[likely]]
+				if(!widget_states[k].collapsed) [[likely]]
 				{
 					to.push_back(widget_pointers[k], render_callbacks[k], WidgetRenderingResult{}, widget_geometries[k]);
 					collect_widgets(children_callbacks[k](widget_pointers[k]), to);
@@ -81,7 +81,7 @@ namespace terraformer::ui::main
 		for(auto k = widgets.first_element_index(); k != n; ++k)
 		{ render_callbacks[k](widget_pointers[k], widget_rendering_result{std::ref(output_rectangles[k])}); }
 	}
-	
+
 	template<class Renderer, class WidgetRenderingResult>
 	void show_widgets(Renderer&& renderer, widgets_to_render_collection<WidgetRenderingResult> const& widgets)
 	{

@@ -105,8 +105,7 @@ int main(int, char**)
 	};
 	event_dispatcher.m_root_collection.append(
 		std::ref(my_outer_vbox),
-		terraformer::ui::main::widget_geometry{},
-		terraformer::ui::main::widget_visibility::visible
+		terraformer::ui::main::widget_geometry{}
 	);
 
 	mainwin.set_event_handler<0>(std::ref(event_dispatcher));

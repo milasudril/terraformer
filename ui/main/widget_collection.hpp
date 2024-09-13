@@ -21,12 +21,12 @@ namespace terraformer::ui::main
 		widget_collection& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
-			widget_visibility initial_visibility = widget_visibility::visible
+			widget_state initial_state = widget_state{}
 		)
 		{
 			m_objects.push_back(
 				&w.get(),
-				initial_visibility,
+				initial_state,
 				widget_size_constraints{},
 				initial_geometry,
 				[](void* obj, widget_rendering_result result) {

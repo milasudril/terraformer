@@ -13,7 +13,7 @@ namespace terraformer::ui::widgets
 		{
 			auto const size_constraints = std::as_const(widgets).size_constraints();
 			auto const widget_geometries = widgets.widget_geometries();
-			auto const widget_visibilities = widgets.widget_visibilities();
+			auto const widget_states = widgets.widget_states();
 
 			auto const n = std::size(widgets);
 			auto min_width = 0.0f;
@@ -22,7 +22,7 @@ namespace terraformer::ui::widgets
 
 			for(auto k = widgets.first_element_index(); k != n; ++k)
 			{
-				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
+				if(!widget_states[k].collapsed) [[likely]]
 				{
 					auto const& constraints = size_constraints[k];
 					widget_geometries[k].where = location{
@@ -85,7 +85,7 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::cursor_enter_event const&)
 		{ }
-		
+
 		void handle_event(main::cursor_leave_event const&)
 		{ }
 

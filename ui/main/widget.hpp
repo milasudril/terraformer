@@ -56,8 +56,6 @@ namespace terraformer::ui::main
 		return std::abs(dr[0]) < r[0] && std::abs(dr[1]) < r[1];
 	}
 
-	enum class widget_visibility:int{visible, not_rendered, collapsed};
-
 	struct widget_size_range
 	{
 		float min = 0.0f;
@@ -206,7 +204,7 @@ namespace terraformer::ui::main
 	public:
 		using widget_span_mutable = multi_span<
 			void*,
-			widget_visibility,
+			widget_state,
 			widget_size_constraints,
 			widget_geometry,
 			prepare_for_presentation_callback,
@@ -246,8 +244,8 @@ namespace terraformer::ui::main
 		auto widget_pointers() const
 		{ return m_span.template get_by_type<void*>(); }
 
-		auto widget_visibilities() const
-		{ return m_span.template get_by_type<widget_visibility>(); }
+		auto widget_states() const
+		{ return m_span.template get_by_type<widget_state>(); }
 
 		template<class EventType>
 		auto event_callbacks() const
@@ -481,12 +479,12 @@ namespace terraformer::ui::main
 	{
 		auto const initial_constriants = root.compute_size_constraints();
 		auto& children = root.children();
-		auto const widget_visibilities = children.widget_visibilities();
+		auto const widget_states = children.widget_states();
 		auto const widget_size_constraints = children.size_constraints();
 		auto const n = std::size(children);
 		for(auto k = children.first_element_index(); k != n; ++k)
 		{
-			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
+			if(!widget_states[k].collapsed) [[likely]]
 			{
 				root_widget next_root{children, k};
 				widget_size_constraints[k] = compute_size_constraints(next_root);
@@ -502,12 +500,12 @@ namespace terraformer::ui::main
 	{
 		root.confirm_size(size);
 		auto children = root.children();
-		auto const widget_visibilities = children.widget_visibilities();
+		auto const widget_states = children.widget_states();
 		auto const widget_geometries = children.widget_geometries();
 		auto const n = std::size(children);
 		for(auto k = children.first_element_index(); k!=n; ++k)
 		{
-			if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
+			if(!widget_states[k].collapsed) [[likely]]
 			{
 				root_widget next_root{children, k};
 				confirm_sizes(
