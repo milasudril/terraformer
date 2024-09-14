@@ -50,7 +50,7 @@ namespace terraformer::ui::main
 	{
 		cursor_position where;
 	};
-	
+
 	struct cursor_leave_event
 	{
 		cursor_position where;
@@ -60,5 +60,8 @@ namespace terraformer::ui::main
 	{
 		std::string description;
 	};
+
+	struct window_close_event
+	{};
 }
 #endif

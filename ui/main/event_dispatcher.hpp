@@ -21,12 +21,12 @@ namespace terraformer::ui::main
 	struct event_dispatcher
 	{
 	public:
-		template<auto WindowId>
-		void error_detected(error_message const& msg) noexcept
-		{ value_of(m_error_handler).template error_detected<WindowId>(msg); }
+		template<class Tag>
+		void handle_event(Tag, error_message const& msg) noexcept
+		{ value_of(m_error_handler).handle_event(Tag{}, msg); }
 
-		template<auto WindowId>
-		void handle_mouse_button_event(mouse_button_event const& event)
+		template<class Tag>
+		void handle_event(Tag, mouse_button_event const& event)
 		{
 			auto res = find_recursive(event.where, m_root_collection.get_attributes());
 			if(!try_dispatch(event, res))
@@ -35,8 +35,8 @@ namespace terraformer::ui::main
 			++event_count;
 		}
 
-		template<auto WindowId>
-		void handle_cursor_motion_event(cursor_motion_event const& event)
+		template<class Tag>
+		void handle_event(Tag, cursor_motion_event const& event)
 		{
 			auto res = find_recursive(event.where, m_root_collection.get_attributes());
 			if(res != m_hot_widget)
@@ -55,21 +55,21 @@ namespace terraformer::ui::main
 			++event_count;
 		}
 
-		template<auto WindowId>
-		void window_is_closing()
-		{ value_of(m_window_controller).template window_is_closing<WindowId>(); }
+		template<class Tag>
+		void handle_event(Tag, window_close_event event)
+		{ value_of(m_window_controller).handle_event(Tag{}, event); }
 
-		template<auto WindowId>
-		void handle_cursor_enter_event(cursor_enter_event const& event)
-		{ value_of(m_window_controller).template handle_event<WindowId>(event); }
+		template<class Tag>
+		void handle_event(Tag, cursor_enter_event const& event)
+		{ value_of(m_window_controller).handle_event(Tag{}, event); }
 
-		template<auto WindowId>
-		void handle_cursor_leave_event(cursor_leave_event const& event)
-		{ value_of(m_window_controller).template handle_event<WindowId>(event); }
+		template<class Tag>
+		void handle_event(Tag, cursor_leave_event const& event)
+		{ value_of(m_window_controller).handle_event(Tag{}, event); }
 
 
-		template<auto WindowId>
-		void framebuffer_size_changed(fb_size size)
+		template<class Tag>
+		void handle_event(Tag, fb_size size)
 		{
 			if(!m_theme_is_up_to_date) [[unlikely]]
 			{

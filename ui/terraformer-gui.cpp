@@ -16,11 +16,17 @@
 
 namespace
 {
+	struct mainwin_tag
+	{};
+
 	struct window_controller
 	{
-		template<auto>
-		void window_is_closing()
+		void handle_event(mainwin_tag, terraformer::ui::main::window_close_event)
 		{ should_exit = true; }
+
+		template<class ... T>
+		void handle_event(T&&...)
+		{}
 
 		bool main_loop_should_exit(auto&&...) const
 		{ return should_exit; }
@@ -30,14 +36,13 @@ namespace
 
 	struct error_handler
 	{
-		template<auto>
-		void error_detected(terraformer::ui::main::error_message const& msg) noexcept
+		void handle_event(mainwin_tag, terraformer::ui::main::error_message const& msg) noexcept
 		{
 			fprintf(stderr, "%s\n", msg.description.c_str());
 		}
 	};
 
-void MessageCallback( GLenum,
+	void MessageCallback( GLenum,
 									GLenum type,
 									GLuint,
 									GLenum severity,
@@ -49,6 +54,7 @@ void MessageCallback( GLenum,
 						( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
 							type, severity, message );
 	}
+
 }
 
 int main(int, char**)
@@ -108,7 +114,7 @@ int main(int, char**)
 		terraformer::ui::main::widget_geometry{}
 	);
 
-	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
+	mainwin.set_event_handler<mainwin_tag>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(
 		std::ref(event_dispatcher),
 		std::ref(mainwin)
