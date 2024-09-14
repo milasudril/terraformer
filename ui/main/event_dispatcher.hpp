@@ -124,7 +124,7 @@ namespace terraformer::ui::main
 			prepare_for_presentation(widgets_to_render);
 
 			show_widgets(value_of(m_content_renderer), widgets_to_render);
-			if(m_hot_widget != find_recursive_result{} && m_hot_widget.is_mbe_sensitive())
+			if(m_hot_widget != find_recursive_result{} && m_hot_widget.state().has_cursor_focus_indicator())
 			{
 				auto const& geometry = m_hot_widget.geometry();
 				using Frame = typename FrameRenderer::input_rectangle;

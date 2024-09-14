@@ -45,6 +45,18 @@ namespace terraformer::ui::main
 		uint16_t kbe_sensitive:1;
 		focus_indicator_mode cursor_focus_indicator_mode:2;
 		focus_indicator_mode kbd_focus_indicator_mode:2;
+
+		bool has_cursor_focus_indicator() const
+		{
+			return (cursor_focus_indicator_mode == focus_indicator_mode::automatic && mbe_sensitive)
+				|| cursor_focus_indicator_mode == focus_indicator_mode::always_visible;
+		}
+
+		bool has_keyboard_focus_indicator() const
+		{
+			return (kbd_focus_indicator_mode == focus_indicator_mode::automatic && kbe_sensitive)
+				|| kbd_focus_indicator_mode == focus_indicator_mode::always_visible;
+		}
 	};
 
 	[[nodiscard]] inline bool inside(cursor_position pos, widget_geometry const& box)
@@ -348,10 +360,8 @@ namespace terraformer::ui::main
 			return widget_collection.widget_geometries()[index];
 		}
 
-		bool is_mbe_sensitive() const
-		{
-			return widget_collection.widget_states()[index].mbe_sensitive;
-		}
+		widget_state state() const
+		{ return widget_collection.widget_states()[index]; }
 	};
 
 	template<class EventType>
