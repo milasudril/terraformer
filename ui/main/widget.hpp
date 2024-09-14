@@ -347,6 +347,11 @@ namespace terraformer::ui::main
 		{
 			return widget_collection.widget_geometries()[index];
 		}
+
+		bool is_mbe_sensitive() const
+		{
+			return widget_collection.widget_states()[index].mbe_sensitive;
+		}
 	};
 
 	template<class EventType>
@@ -539,17 +544,17 @@ namespace terraformer::ui::main
 
 	struct widget_with_default_actions
 	{
-		void prepare_for_presentation(widget_rendering_result) const {}
+		void prepare_for_presentation(widget_rendering_result) {}
 		void handle_event(cursor_enter_event const&) {}
 		void handle_event(cursor_leave_event const&) {}
-		void handle_event(cursor_motion_event const&) const { }
-		void handle_event(mouse_button_event const&) const { }
-		void handle_event(fb_size) const { }
+		void handle_event(cursor_motion_event const&) {}
+		void handle_event(mouse_button_event const&) {}
+		void handle_event(fb_size) {}
 
-		[[nodiscard]] widget_size_constraints compute_size_constraints() const
+		[[nodiscard]] widget_size_constraints compute_size_constraints()
 		{ return widget_size_constraints{}; }
 
-		void theme_updated(object_dict const&) const {}
+		void theme_updated(object_dict const&) {}
 
 		[[nodiscard]] widget_collection_ref get_children()
 		{ return widget_collection_ref{}; }
@@ -561,9 +566,24 @@ namespace terraformer::ui::main
 		{ return layout_policy_ref{}; }
 	};
 
-	namespace
+	static_assert(widget<widget_with_default_actions>);
+
+	template<widget Widget>
+	auto make_default_widget_state()
 	{
-		static_assert(widget<widget_with_default_actions>);
+		return widget_state{
+			.collapsed = false,
+			.hidden = false,
+			.maximized = false,
+			.disabled = false,
+			.mbe_sensitive = !compare_with_fallback(
+				resolve_overload<mouse_button_event const&>(&widget_with_default_actions::handle_event),
+				resolve_overload<mouse_button_event const&>(&Widget::handle_event)
+			),
+			.kbe_sensitive = false,
+			.cursor_focus_indicator_mode = focus_indicator_mode::automatic,
+			.kbd_focus_indicator_mode = focus_indicator_mode::automatic
+		};
 	}
 }
 

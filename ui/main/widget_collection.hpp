@@ -21,7 +21,7 @@ namespace terraformer::ui::main
 		widget_collection& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
-			widget_state initial_state = widget_state{}
+			widget_state initial_state = make_default_widget_state<Widget>()
 		)
 		{
 			m_objects.push_back(

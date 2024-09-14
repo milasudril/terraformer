@@ -55,9 +55,12 @@ namespace terraformer::ui::widgets
 		float margin_y;
 	};
 
-	class vbox
+	class vbox:public main::widget_with_default_actions
 	{
 	public:
+		using widget_with_default_actions::handle_event;
+		using widget_with_default_actions::compute_size_constraints;
+
 		template<class Widget>
 		vbox& append(Widget&& widget)
 		{
@@ -82,18 +85,6 @@ namespace terraformer::ui::widgets
 				m_background_tint,
 			});
 		}
-
-		void handle_event(main::cursor_enter_event const&)
-		{ }
-
-		void handle_event(main::cursor_leave_event const&)
-		{ }
-
-		void handle_event(main::cursor_motion_event const& )
-		{ }
-
-		void handle_event(main::mouse_button_event const&)
-		{  }
 
 		void theme_updated(object_dict const& new_theme)
 		{
@@ -127,12 +118,6 @@ namespace terraformer::ui::widgets
 			m_background_tint *= (odd_even%2)? 0.75f : 1.0f;
 			++odd_even;
 		}
-
-		void handle_event(main::fb_size)
-		{ }
-
-		main::widget_size_constraints compute_size_constraints()
-		{ return main::widget_size_constraints{}; }
 
 		main::layout_policy_ref get_layout() const
 		{ return main::layout_policy_ref{std::ref(layout)}; }
