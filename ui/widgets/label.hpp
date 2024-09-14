@@ -11,9 +11,11 @@
 
 namespace terraformer::ui::widgets
 {
-	class label
+	class label:public main::widget_with_default_actions
 	{
 	public:
+		using widget_with_default_actions::handle_event;
+
 		template<class StringType>
 		label& text(StringType&& str)
 		{
@@ -35,18 +37,6 @@ namespace terraformer::ui::widgets
 
 		void prepare_for_presentation(main::widget_rendering_result output_rect);
 
-		void handle_event(main::cursor_enter_event const&)
-		{ }
-		
-		void handle_event(main::cursor_leave_event const&)
-		{ }
-
-		void handle_event(main::cursor_motion_event const&)
-		{ }
-
-		void handle_event(main::mouse_button_event const&)
-		{ }
-
 		main::widget_size_constraints compute_size_constraints();
 
 		void handle_event(main::fb_size size)
@@ -55,16 +45,7 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= host_textures_dirty;
 		}
 
-		void theme_updated(object_dict const& render_resources);
-
-		main::layout_policy_ref get_layout() const
-		{ return main::layout_policy_ref{}; }
-
-		main::widget_collection_ref get_children()
-		{ return main::widget_collection_ref{}; }
-
-		main::widget_collection_view get_children() const
-		{ return main::widget_collection_view{}; }
+		void theme_updated(const terraformer::object_dict&);
 
 	private:
 		std::basic_string<char8_t> m_text;
