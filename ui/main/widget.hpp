@@ -17,12 +17,6 @@
 
 namespace terraformer::ui::main
 {
-	struct widget_instance_info
-	{
-		size_t section_level;
-		size_t paragraph_index;
-	};
-
 	struct widget_geometry
 	{
 		location where;
@@ -32,6 +26,15 @@ namespace terraformer::ui::main
 		[[nodiscard]] constexpr bool operator==(widget_geometry const&) const = default;
 		[[nodiscard]] constexpr bool operator!=(widget_geometry const&) const = default;
 	};
+
+	[[nodiscard]] inline bool inside(cursor_position pos, widget_geometry const& box)
+	{
+		auto const r = 0.5*box.size;
+		auto const offset_to_origin = (location{0.0f, 0.0f, 0.0f} - box.origin).apply(r);
+		auto const object_midpoint = box.where + offset_to_origin;
+		auto const dr = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - object_midpoint;
+		return std::abs(dr[0]) < r[0] && std::abs(dr[1]) < r[1];
+	}
 
 	enum class focus_indicator_mode:uint16_t{automatic, always_hidden, always_visible};
 
@@ -58,15 +61,6 @@ namespace terraformer::ui::main
 				|| kbd_focus_indicator_mode == focus_indicator_mode::always_visible;
 		}
 	};
-
-	[[nodiscard]] inline bool inside(cursor_position pos, widget_geometry const& box)
-	{
-		auto const r = 0.5*box.size;
-		auto const offset_to_origin = (location{0.0f, 0.0f, 0.0f} - box.origin).apply(r);
-		auto const object_midpoint = box.where + offset_to_origin;
-		auto const dr = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - object_midpoint;
-		return std::abs(dr[0]) < r[0] && std::abs(dr[1]) < r[1];
-	}
 
 	struct widget_size_range
 	{
@@ -400,6 +394,12 @@ namespace terraformer::ui::main
 		// Yes, return the widget at child level
 		return j;
 	}
+
+	struct widget_instance_info
+	{
+		size_t section_level;
+		size_t paragraph_index;
+	};
 
 	inline void theme_updated(widget_collection_view const& widgets, object_dict const& dict)
 	{
