@@ -66,3 +66,17 @@ TESTCASE(terraformer_ui_theming_fixed_intensity_colormap_get_lut)
 		printf("%s\n", to_string(lut[k]).c_str());
 	}
 }
+
+TESTCASE(terraformer_ui_theming_fixed_intensity_colormap_call)
+{
+	// TODO: Add verdict
+	using fic = terraformer::ui::theming::fixed_intensity_colormap;
+
+	auto const& lut = fic::get_lut();
+	auto const n = 2*std::size(lut);
+	for(size_t k = 0; k != n; ++k)
+	{
+		auto const t = static_cast<float>(k)/static_cast<float>(n);
+		printf("%s\n", to_string(fic{}(t)).c_str());
+	}
+}

@@ -46,7 +46,7 @@ namespace terraformer::ui::theming
 
 	 rgba_pixel operator()(float t) const;
 
-	 static std::array<rgba_pixel, 7> const& get_lut();
+	 static std::array<rgba_pixel, 6> const& get_lut();
 	};
 }
 #endif

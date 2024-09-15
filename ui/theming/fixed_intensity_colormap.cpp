@@ -1,21 +1,22 @@
 //@	{"target": {"name":"fixed_intensity_colormap.o"}}
 
 #include "./fixed_intensity_colormap.hpp"
+#include "lib/math_utils/interp.hpp"
+#include "lib/math_utils/boundary_sampling_policies.hpp"
 
 namespace
 {
-	constexpr std::array<terraformer::rgba_pixel, 7> generate_lut()
+	constexpr std::array<terraformer::rgba_pixel, 6> generate_lut()
 	{
 		using fic = terraformer::ui::theming::fixed_intensity_colormap;
 
-		std::array<terraformer::rgba_pixel, 7> ret{
+		std::array<terraformer::rgba_pixel, 6> ret{
 			fic::normalize(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f}),
 			terraformer::rgba_pixel{},
 			fic::normalize(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}),
-			fic::max_blue_compensate_with_other(0.0f),
-			fic::max_blue_compensate_with_other(0.5f),
 			fic::max_blue_compensate_with_other(1.0f),
-			fic::normalize(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f})
+			fic::max_blue_compensate_with_other(0.5f),
+			fic::max_blue_compensate_with_other(0.0f)
 		};
 		ret[1] = 0.5f*(ret[0] + ret[2]);
 
@@ -30,14 +31,15 @@ namespace
 	constexpr auto lut = generate_lut();
 }
 
-std::array<terraformer::rgba_pixel, 7> const& terraformer::ui::theming::fixed_intensity_colormap::get_lut()
+std::array<terraformer::rgba_pixel, 6> const& terraformer::ui::theming::fixed_intensity_colormap::get_lut()
 {
 	return lut;
 }
 
-terraformer::rgba_pixel terraformer::ui::theming::fixed_intensity_colormap::operator()(float) const
+terraformer::rgba_pixel terraformer::ui::theming::fixed_intensity_colormap::operator()(float t) const
 {
-	return rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f};
+	auto const& lut = get_lut();
+	return interp(get_lut(), static_cast<float>(std::size(lut))*t, wrap_around_at_boundary{});
 }
 
 #if 0
