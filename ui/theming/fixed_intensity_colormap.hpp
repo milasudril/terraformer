@@ -1,31 +1,29 @@
-//@	{"dependencies_extra":[{"ref":"./fixed_intensity_colormap.o", "rel":"implementation"}]}
-
 #ifndef TERRAFORMER_UI_THEMING_HPP
 #define TERRAFORMER_UI_THEMING_HPP
 
 #include "lib/pixel_store/rgba_pixel.hpp"
-
+#include "lib/math_utils/interp.hpp"
+#include "lib/math_utils/boundary_sampling_policies.hpp"
 #include <array>
 
 namespace terraformer::ui::theming
 {
-	class fixed_intensity_colormap
+	namespace fixed_intensity_colormap_helpers
 	{
-	public:
-		static constexpr terraformer::rgba_pixel::storage_type const weights{
+		constexpr terraformer::rgba_pixel::storage_type const weights{
 			0.5673828125f,
 			1.0f,
 			0.060546875f,
 			0.0f
 		};
 
-		static constexpr auto get_max_intensity()
+		constexpr auto get_max_intensity()
 		{
 			auto const maxvals = rgba_pixel::storage_type{1.0f, 1.0f, 1.0f, 0.0f}*weights;
 			return (maxvals[0] + maxvals[1] + maxvals[2])/3.0f;
 		}
 
-		static constexpr terraformer::rgba_pixel max_blue_compensate_with_other(float rg_factor)
+		constexpr terraformer::rgba_pixel max_blue_compensate_with_other(float rg_factor)
 		{
 			auto const b = 1.0f;
 			auto const input_intensity = weights[2]*b;
@@ -36,7 +34,7 @@ namespace terraformer::ui::theming
 			return rgba_pixel{r, g, b, 0.0f};
 		}
 
-		static constexpr rgba_pixel normalize(rgba_pixel x)
+		constexpr rgba_pixel normalize(rgba_pixel x)
 		{
 			auto const vec = x.value();
 			auto const scaled_vals = vec*weights;
@@ -44,9 +42,34 @@ namespace terraformer::ui::theming
 			return x*get_max_intensity()/input_intensity;
 		}
 
-	 rgba_pixel operator()(float t) const;
+		constexpr std::array<rgba_pixel, 6> generate_lut()
+		{
+			std::array<terraformer::rgba_pixel, 6> ret{
+				normalize(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f}),
+				terraformer::rgba_pixel{},
+				normalize(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}),
+				max_blue_compensate_with_other(1.0f),
+				max_blue_compensate_with_other(0.5f),
+				max_blue_compensate_with_other(0.0f)
+			};
+			ret[1] = 0.5f*(ret[0] + ret[2]);
 
-	 static std::array<rgba_pixel, 6> const& get_lut();
+			for(size_t k = 0; k != std::size(ret); ++k)
+			{
+				ret[k] = terraformer::rgba_pixel{ret[k].red(), ret[k].green(), ret[k].blue()};
+			}
+
+			return ret;
+		}
+	}
+
+	class fixed_intensity_colormap
+	{
+	public:
+		rgba_pixel operator()(float t) const
+		{ return interp(lut, static_cast<float>(std::size(lut))*t, wrap_around_at_boundary{}); }
+
+		static constexpr std::array<rgba_pixel, 6> lut = fixed_intensity_colormap_helpers::generate_lut();
 	};
 }
 #endif
