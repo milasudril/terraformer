@@ -152,7 +152,7 @@ void test_palette(Colormap const& cmap)
 
 	print_header(2, "List of all 4-color combination");
 	dump_all_four_color_combos(colors);
-	puts("<p>These groups of four colors should favor any particular index</p>");
+	puts("<p>These groups of four colors should not favor any particular index</p>");
 
 	print_header(2, "List of all 3-color combination");
 	puts("<p>The primary color should work together with the secondary colors, "
