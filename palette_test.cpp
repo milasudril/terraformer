@@ -73,6 +73,16 @@ void dump_four_color_combination(std::span<terraformer::rgba_pixel const> colors
 	make_colored_cell(make_html_color(colors[(3*step + offset)%n]), (3*step + offset)%n);
 	puts("</tr>");
 	puts("</table>");
+
+	puts("<table>");
+	puts("<tr>");
+	make_colored_cell(make_html_color(colors[(0 + offset)%n]), (0 + offset)%n);
+	make_colored_cell(make_html_color(colors[(1*step + offset)%n]), (1*step + offset)%n);
+	puts("</tr><tr>");
+	make_colored_cell(make_html_color(colors[(3*step + offset)%n]), (3*step + offset)%n);
+	make_colored_cell(make_html_color(colors[(2*step + offset)%n]), (2*step + offset)%n);
+	puts("</tr>");
+	puts("</table>");
 }
 
 void dump_all_four_color_combos(std::span<terraformer::rgba_pixel const> colors)
