@@ -42,9 +42,9 @@ namespace terraformer::ui::theming
 			return x*get_max_intensity()/input_intensity;
 		}
 
-		constexpr std::array<rgba_pixel, 6> generate_lut()
+		constexpr auto generate_lut()
 		{
-			std::array<terraformer::rgba_pixel, 6> ret{
+			std::array ret{
 				normalize(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f}),
 				terraformer::rgba_pixel{},
 				normalize(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}),
@@ -52,7 +52,7 @@ namespace terraformer::ui::theming
 				max_blue_compensate_with_other(0.5f),
 				max_blue_compensate_with_other(0.0f)
 			};
-			ret[1] = 0.5f*(ret[0] + ret[2]);
+			ret[1] = 0.5f*ret[0] + 0.5f*ret[2];
 
 			for(size_t k = 0; k != std::size(ret); ++k)
 			{
@@ -69,7 +69,7 @@ namespace terraformer::ui::theming
 		rgba_pixel operator()(float t) const
 		{ return interp(lut, static_cast<float>(std::size(lut))*t, wrap_around_at_boundary{}); }
 
-		static constexpr std::array<rgba_pixel, 6> lut = fixed_intensity_colormap_helpers::generate_lut();
+		static constexpr auto lut = fixed_intensity_colormap_helpers::generate_lut();
 	};
 }
 #endif
