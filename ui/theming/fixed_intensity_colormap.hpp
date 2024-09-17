@@ -23,6 +23,13 @@ namespace terraformer::ui::theming
 			return (maxvals[0] + maxvals[1] + maxvals[2])/3.0f;
 		}
 
+		constexpr auto intensity(rgba_pixel input)
+		{
+			auto const vec = input.value();
+			auto const scaled_vals = vec*weights;
+			return scaled_vals[0] + scaled_vals[1] + scaled_vals[2];
+		}
+
 		constexpr terraformer::rgba_pixel max_blue_compensate_with_other(float rg_factor)
 		{
 			auto const b = 1.0f;
@@ -36,10 +43,7 @@ namespace terraformer::ui::theming
 
 		constexpr rgba_pixel normalize(rgba_pixel x)
 		{
-			auto const vec = x.value();
-			auto const scaled_vals = vec*weights;
-			auto const input_intensity = scaled_vals[0] + scaled_vals[1] + scaled_vals[2];
-			return x*get_max_intensity()/input_intensity;
+			return x*get_max_intensity()/intensity(x);
 		}
 
 		constexpr auto generate_lut()
