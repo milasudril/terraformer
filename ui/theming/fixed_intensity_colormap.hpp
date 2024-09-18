@@ -33,7 +33,30 @@ namespace terraformer::ui::theming
 
 		constexpr rgba_pixel normalize(rgba_pixel x, float target_intensity = 0.5f)
 		{
-			return x*target_intensity/intensity(x);
+			auto const tmp = x*target_intensity/intensity(x);
+
+			auto const maxval = max_color_value(tmp);
+			if(maxval > 1.0f)
+			{
+				auto const tmp_fullscale = tmp/maxval;
+				// inner_product(t*white + (1 - t)*tmp_fullscale, weights) = target_intensity
+				//
+				// inner_product(t*white, weights) + inner_product((1 - t)*tmp_fullscale, weights) =
+				// t*inner_product(white, weights) + (1 - t)*inner_product(tmp_fullscale, weights) =
+				// t*(inner_product(white, weights) - inner_product(tmp_fullscale, weights))
+				//      + inner_product(tmp_fullscale, weights)
+				//
+				// t*(intensity(white) - intensity(tmp_fullscale)) = target_intensity - intensity(tmp_fullscale)
+				// t = (target_intensity - intensity(tmp_fullscale))/(intensity(white) - intensity(tmp_fullscale))
+				//
+				auto const input_intensity = intensity(tmp_fullscale);
+				auto const white = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
+				auto const intensity_white = intensity(white);
+				auto const t  = (target_intensity - input_intensity)/(intensity_white - input_intensity);
+
+				return t*white + (1.0f - t)*tmp_fullscale;
+			}
+			return tmp;
 		}
 
 		constexpr auto generate_lut()
