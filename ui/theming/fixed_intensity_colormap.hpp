@@ -18,11 +18,7 @@ namespace terraformer::ui::theming
 		};
 
 		constexpr auto intensity(rgba_pixel input)
-		{
-			auto const vec = input.value();
-			auto const scaled_vals = vec*weights;
-			return scaled_vals[0] + scaled_vals[1] + scaled_vals[2];
-		}
+		{ return intensity(input, weights); }
 
 		constexpr terraformer::rgba_pixel max_blue_compensate_with_other(float rg_factor, float target_intensity = 0.5f)
 		{

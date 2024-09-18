@@ -149,6 +149,16 @@ namespace terraformer
 
 	inline auto to_string(rgba_pixel const& x)
 	{ return to_string(x.value()); }
+
+	constexpr auto intensity(rgba_pixel x, rgba_pixel::storage_type weights)
+	{
+		auto const v = x.value()*weights;
+
+		// NOTE: Alpha channel does not affect intensity;
+		return v[0] + v[1] + v[2];
+	}
+
+
 }
 
 template<>
