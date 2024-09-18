@@ -158,7 +158,8 @@ namespace terraformer
 		return v[0] + v[1] + v[2];
 	}
 
-
+	constexpr auto max_color_val(rgba_pixel x)
+	{ return std::max(std::max(x.red(), x.green()), x.blue()); }
 }
 
 template<>
