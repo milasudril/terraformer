@@ -27,9 +27,9 @@ struct html_color
 html_color make_html_color(terraformer::rgba_pixel input)
 {
 	return html_color{
-		.r = static_cast<uint8_t>(255.0f*std::pow(input.red(), 1.0f/2.2f)),
-		.g = static_cast<uint8_t>(255.0f*std::pow(input.green(), 1.0f/2.2f)),
-		.b = static_cast<uint8_t>(255.0f*std::pow(input.blue(), 1.0f/2.2f))
+		.r = static_cast<uint8_t>(255.0f*std::pow(std::min(input.red(), 1.0f), 1.0f/2.2f)),
+		.g = static_cast<uint8_t>(255.0f*std::pow(std::min(input.green(), 1.0f), 1.0f/2.2f)),
+		.b = static_cast<uint8_t>(255.0f*std::pow(std::min(input.blue(), 1.0f), 1.0f/2.2f))
 	};
 }
 
@@ -46,13 +46,13 @@ void make_colored_cell(html_color rgb, size_t index, size_t colspan = 1)
 	);
 }
 
-void dump_color_array(std::span<terraformer::rgba_pixel const> colors)
+void dump_color_array(std::span<terraformer::rgba_pixel const> colors, float gain = 1.0f)
 {
 	puts("<table>");
 	puts("<tr>");
 	for(size_t k = 0; k != std::size(colors); ++k)
 	{
-		make_colored_cell(make_html_color(colors[k]), k);
+		make_colored_cell(make_html_color(gain*colors[k]), k);
 	
 	}
 	puts("</tr>");
@@ -152,7 +152,9 @@ void test_palette(Colormap const& cmap)
 	auto const colors = generate_palette(cmap);
 
 	print_header(2, "List of all colors");
+	dump_color_array(colors, 2.0f);
 	dump_color_array(colors);
+	dump_color_array(colors, 0.5f);
 	puts("<p>These colors should appear</p>");
 	puts("<ul>");
 	puts("<li>Equally bright</li>");
