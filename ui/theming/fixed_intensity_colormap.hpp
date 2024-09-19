@@ -77,13 +77,12 @@ namespace terraformer::ui::theming
 			std::array ret{
 				normalize_blend_white(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f}),
 				terraformer::rgba_pixel{},
-				terraformer::rgba_pixel{},
 				normalize_blend_white(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}),
-				max_blue_compensate_with_other(0.66667f),
-				max_blue_compensate_with_other(0.33333f)
+				max_blue_compensate_with_other(1.0f),
+				max_blue_compensate_with_other(0.5f),
+				max_blue_compensate_with_other(0.0f)
 			};
-			ret[2] = 0.36f*ret[0] + 0.64f*ret[3];
-			ret[1] = 0.5f*ret[2] + 0.5f*ret[0];
+			ret[1] = 0.5f*ret[0] + 0.5f*ret[2];
 
 			for(size_t k = 0; k != std::size(ret); ++k)
 			{
