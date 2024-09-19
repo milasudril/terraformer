@@ -17,6 +17,16 @@ palette generate_palette(Colormap const& cmap)
 	return ret;
 }
 
+palette brighten(palette const& colors, float amount)
+{
+	palette ret{};
+	for(size_t k = 0; k != std::size(ret); ++k)
+	{
+		ret[k] = terraformer::ui::theming::fixed_intensity_colormap_helpers::brighten(colors[k], amount);
+	}
+	return ret;
+}
+
 struct html_color
 {
 	uint8_t r;
@@ -46,13 +56,13 @@ void make_colored_cell(html_color rgb, size_t index, size_t colspan = 1)
 	);
 }
 
-void dump_color_array(std::span<terraformer::rgba_pixel const> colors, float gain = 1.0f)
+void dump_color_array(std::span<terraformer::rgba_pixel const> colors)
 {
 	puts("<table>");
 	puts("<tr>");
 	for(size_t k = 0; k != std::size(colors); ++k)
 	{
-		make_colored_cell(make_html_color(gain*colors[k]), k);
+		make_colored_cell(make_html_color(colors[k]), k);
 	
 	}
 	puts("</tr>");
@@ -150,11 +160,11 @@ template<class Colormap>
 void test_palette(Colormap const& cmap)
 {
 	auto const colors = generate_palette(cmap);
+	auto const bright_colors = brighten(colors, 1.0f);
 
 	print_header(2, "List of all colors");
-	dump_color_array(colors, 2.0f);
+	dump_color_array(bright_colors);
 	dump_color_array(colors);
-	dump_color_array(colors, 0.5f);
 	puts("<p>These colors should appear</p>");
 	puts("<ul>");
 	puts("<li>Equally bright</li>");

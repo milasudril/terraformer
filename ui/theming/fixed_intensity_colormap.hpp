@@ -31,7 +31,20 @@ namespace terraformer::ui::theming
 			return rgba_pixel{r, g, b, 0.0f};
 		}
 
-		constexpr rgba_pixel normalize(rgba_pixel x, float target_intensity = 0.5f)
+		constexpr rgba_pixel brighten(rgba_pixel x, float target_intensity = 0.5f)
+		{
+			auto const input_intensity = intensity(x);
+			auto const white = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
+			auto const intensity_white = intensity(white);
+			auto const t  = (target_intensity - input_intensity)/(intensity_white - input_intensity);
+
+			return t*white + (1.0f - t)*x;
+
+		//	return amount*rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f} + (1.0f - amount)*x;
+
+		}
+
+		constexpr rgba_pixel normalize_blend_white(rgba_pixel x, float target_intensity = 0.5f)
 		{
 			auto const tmp = x*target_intensity/intensity(x);
 
@@ -62,10 +75,10 @@ namespace terraformer::ui::theming
 		constexpr auto generate_lut()
 		{
 			std::array ret{
-				normalize(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f}),
+				normalize_blend_white(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f}),
 				terraformer::rgba_pixel{},
 				terraformer::rgba_pixel{},
-				normalize(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}),
+				normalize_blend_white(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}),
 				max_blue_compensate_with_other(0.66667f),
 				max_blue_compensate_with_other(0.33333f)
 			};
