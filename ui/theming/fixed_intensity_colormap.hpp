@@ -65,8 +65,8 @@ namespace terraformer::ui::theming
 				normalize_blend_white(terraformer::rgba_pixel{1.0f, 0.333f, 0.0f, 0.0f}),
 				normalize_blend_white(terraformer::rgba_pixel{1.0f, 1.0f, 0.0f, 0.0f}),
 				normalize_blend_white(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}),
-				normalize_blend_white(terraformer::rgba_pixel{0.0f, 0.5f, 1.0f, 0.0f}),
-				normalize_blend_white(terraformer::rgba_pixel{0.5f, 0.0f, 1.0f, 0.0f}),
+				normalize_blend_white(terraformer::rgba_pixel{0.0f, 0.25f, 1.0f, 0.0f}),
+				normalize_blend_white(terraformer::rgba_pixel{0.333f, 0.0f, 1.0f, 0.0f}),
 			};
 
 			for(size_t k = 0; k != std::size(ret); ++k)
