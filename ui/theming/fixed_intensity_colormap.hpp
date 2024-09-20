@@ -20,17 +20,6 @@ namespace terraformer::ui::theming
 		constexpr auto intensity(rgba_pixel input)
 		{ return intensity(input, weights); }
 
-		constexpr terraformer::rgba_pixel max_blue_compensate_with_other(float rg_factor, float target_intensity = 0.5f)
-		{
-			auto const b = 1.0f;
-			auto const input_intensity = weights[2]*b;
-			auto const leftover = target_intensity - input_intensity;
-			auto const r = (1.0f - rg_factor)*leftover/weights[0];
-			auto const g = rg_factor*leftover;
-
-			return rgba_pixel{r, g, b, 0.0f};
-		}
-
 		constexpr rgba_pixel brighten(rgba_pixel x, float target_intensity = 0.5f)
 		{
 			auto const input_intensity = intensity(x);
@@ -39,9 +28,6 @@ namespace terraformer::ui::theming
 			auto const t  = (target_intensity - input_intensity)/(intensity_white - input_intensity);
 
 			return t*white + (1.0f - t)*x;
-
-		//	return amount*rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f} + (1.0f - amount)*x;
-
 		}
 
 		constexpr rgba_pixel normalize_blend_white(rgba_pixel x, float target_intensity = 0.5f)
