@@ -17,12 +17,22 @@ palette generate_palette(Colormap const& cmap)
 	return ret;
 }
 
-palette brighten(palette const& colors, float amount)
+palette brighten(palette const& colors, float target_intensity)
 {
 	palette ret{};
 	for(size_t k = 0; k != std::size(ret); ++k)
 	{
-		ret[k] = terraformer::ui::theming::fixed_intensity_colormap_helpers::brighten(colors[k], amount);
+		ret[k] = terraformer::ui::theming::fixed_intensity_colormap_helpers::brighten(colors[k], target_intensity);
+	}
+	return ret;
+}
+
+palette darken(palette const& colors, float target_intensity)
+{
+	palette ret{};
+	for(size_t k = 0; k != std::size(ret); ++k)
+	{
+		ret[k] = terraformer::ui::theming::fixed_intensity_colormap_helpers::normalize_blend_white(colors[k], target_intensity);
 	}
 	return ret;
 }
@@ -160,11 +170,13 @@ template<class Colormap>
 void test_palette(Colormap const& cmap)
 {
 	auto const colors = generate_palette(cmap);
+	auto const dark_colors = darken(colors, 0.25);
 	auto const bright_colors = brighten(colors, 1.0f);
 
 	print_header(2, "List of all colors");
 	dump_color_array(bright_colors);
 	dump_color_array(colors);
+	dump_color_array(dark_colors);
 	puts("<p>These colors should appear</p>");
 	puts("<ul>");
 	puts("<li>Equally bright</li>");
