@@ -1,90 +1,57 @@
 #ifndef TERRAFORMER_UI_THEMING_HPP
 #define TERRAFORMER_UI_THEMING_HPP
 
-#include "lib/pixel_store/rgba_pixel.hpp"
+#include "lib/pixel_store/intensity.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include <array>
 
 namespace terraformer::ui::theming
 {
-	namespace fixed_intensity_colormap_helpers
-	{
-		constexpr terraformer::rgba_pixel::storage_type const weights{
-			0.5673828125f,
-			1.0f,
-			0.060546875f,
-			0.0f
-		};
-
-		constexpr auto intensity(rgba_pixel input)
-		{ return intensity(input, weights); }
-
-		constexpr rgba_pixel brighten(rgba_pixel x, float target_intensity = 0.5f)
-		{
-			auto const input_intensity = intensity(x);
-			auto const white = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
-			auto const intensity_white = intensity(white);
-			auto const t  = (target_intensity - input_intensity)/(intensity_white - input_intensity);
-
-			return t*white + (1.0f - t)*x;
-		}
-
-		constexpr rgba_pixel normalize_blend_white(rgba_pixel x, float target_intensity = 0.5f)
-		{
-			auto const tmp = x*target_intensity/intensity(x);
-
-			auto const maxval = max_color_value(tmp);
-			if(maxval > 1.0f)
-			{
-				auto const tmp_fullscale = tmp/maxval;
-				// inner_product(t*white + (1 - t)*tmp_fullscale, weights) = target_intensity
-				//
-				// inner_product(t*white, weights) + inner_product((1 - t)*tmp_fullscale, weights) =
-				// t*inner_product(white, weights) + (1 - t)*inner_product(tmp_fullscale, weights) =
-				// t*(inner_product(white, weights) - inner_product(tmp_fullscale, weights))
-				//      + inner_product(tmp_fullscale, weights)
-				//
-				// t*(intensity(white) - intensity(tmp_fullscale)) = target_intensity - intensity(tmp_fullscale)
-				// t = (target_intensity - intensity(tmp_fullscale))/(intensity(white) - intensity(tmp_fullscale))
-				//
-				auto const input_intensity = intensity(tmp_fullscale);
-				auto const white = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
-				auto const intensity_white = intensity(white);
-				auto const t  = (target_intensity - input_intensity)/(intensity_white - input_intensity);
-
-				return t*white + (1.0f - t)*tmp_fullscale;
-			}
-			return tmp;
-		}
-
-		constexpr auto generate_lut()
-		{
-			std::array ret{
-				normalize_blend_white(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f}),
-				normalize_blend_white(terraformer::rgba_pixel{1.0f, 0.333f, 0.0f, 0.0f}),
-				normalize_blend_white(terraformer::rgba_pixel{1.0f, 1.0f, 0.0f, 0.0f}),
-				normalize_blend_white(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}),
-				normalize_blend_white(terraformer::rgba_pixel{0.0f, 0.25f, 1.0f, 0.0f}),
-				normalize_blend_white(terraformer::rgba_pixel{0.333f, 0.0f, 1.0f, 0.0f}),
-			};
-
-			for(size_t k = 0; k != std::size(ret); ++k)
-			{
-				ret[k] = terraformer::rgba_pixel{ret[k].red(), ret[k].green(), ret[k].blue()};
-			}
-
-			return ret;
-		}
-	}
+	using perceived_intensity = terraformer::intensity<0.5673828125f, 1.0f, 0.060546875f>;
 
 	class fixed_intensity_colormap
 	{
 	public:
-		rgba_pixel operator()(float t) const
-		{ return interp(lut, static_cast<float>(std::size(lut))*t, wrap_around_at_boundary{}); }
+		constexpr explicit fixed_intensity_colormap(perceived_intensity intensity):
+			m_lut{
+				normalize(basic_colors[0], intensity),
+				normalize(basic_colors[1], intensity),
+				normalize(basic_colors[2], intensity),
+				normalize(basic_colors[3], intensity),
+				normalize(basic_colors[4], intensity),
+				normalize(basic_colors[5], intensity),
+			}
+		{}
 
-		static constexpr auto lut = fixed_intensity_colormap_helpers::generate_lut();
+		static constexpr auto make_pastels(
+			fixed_intensity_colormap const& src,
+			perceived_intensity intensity
+		)
+		{
+			fixed_intensity_colormap ret{};
+			for(size_t k = 0; k != std::size(basic_colors); ++k)
+			{ ret.m_lut[k] = brighten(src.m_lut[k], intensity); }
+
+			return ret;
+		}
+
+		constexpr rgba_pixel operator()(float t) const
+		{ return interp(m_lut, static_cast<float>(std::size(m_lut))*t, wrap_around_at_boundary{}); }
+
+	private:
+		fixed_intensity_colormap() = default;
+
+		static constexpr std::array basic_colors{
+			terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f},
+			terraformer::rgba_pixel{1.0f, 0.333f, 0.0f, 0.0f},
+			terraformer::rgba_pixel{1.0f, 1.0f, 0.0f, 0.0f},
+			terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f},
+			terraformer::rgba_pixel{0.0f, 0.25f, 1.0f, 0.0f},
+			terraformer::rgba_pixel{0.333f, 0.0f, 1.0f, 0.0f},
+		};
+
+		std::array<terraformer::rgba_pixel, std::size(basic_colors)> m_lut;
 	};
 }
 #endif

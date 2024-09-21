@@ -1,6 +1,6 @@
 //@	{"target":{"name":"fixed_intensity_colormap.test"}}
 
-//#include "./fixed_intensity_colormap.hpp"
+#include "./fixed_intensity_colormap.hpp"
 
 #include <testfwk/testfwk.hpp>
 
