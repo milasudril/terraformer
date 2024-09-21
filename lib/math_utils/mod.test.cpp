@@ -5,6 +5,7 @@
 #include <testfwk/testfwk.hpp>
 
 #include <unordered_map>
+#include <array>
 
 TESTCASE(terraformer_mod_float)
 {

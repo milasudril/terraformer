@@ -37,6 +37,8 @@
                             "-Wconversion",
                             "-Wno-psabi",
                             "-Wsuggest-override",
+                            "-Wno-error=maybe-uninitialized",
+                            "-Wno-error=uninitialized",
                             "-I.",
                             "-fconcepts-diagnostics-depth=2"
                         ],
@@ -67,6 +69,8 @@
                             "-Wsuggest-override",
                             "-Wno-psabi",
                             "-Werror",
+                            "-Wno-error=maybe-uninitialized",
+                            "-Wno-error=uninitialized",
                             "-fconcepts-diagnostics-depth=2"
                         ],
                         "iquote": [

@@ -13,6 +13,7 @@
 #include <string>
 #include <ranges>
 #include <cstdio>
+#include <functional>
 
 namespace terraformer
 {

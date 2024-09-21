@@ -4,6 +4,8 @@
 
 #include <testfwk/testfwk.hpp>
 
+#include <array>
+
 TESTCASE(terraformer_second_order_lp_filter_resonant_step_response)
 {
 	terraformer::second_order_lp_filter f{
