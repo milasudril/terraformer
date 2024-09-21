@@ -13,27 +13,7 @@ palette generate_palette(Colormap const& cmap)
 		auto const t = static_cast<float>(k)/std::size(ret);
 		ret[k] = cmap(t);
 	}
-	
-	return ret;
-}
 
-palette brighten(palette const& colors, float target_intensity)
-{
-	palette ret{};
-	for(size_t k = 0; k != std::size(ret); ++k)
-	{
-		ret[k] = terraformer::ui::theming::fixed_intensity_colormap_helpers::brighten(colors[k], target_intensity);
-	}
-	return ret;
-}
-
-palette darken(palette const& colors, float target_intensity)
-{
-	palette ret{};
-	for(size_t k = 0; k != std::size(ret); ++k)
-	{
-		ret[k] = terraformer::ui::theming::fixed_intensity_colormap_helpers::normalize_blend_white(colors[k], target_intensity);
-	}
 	return ret;
 }
 
@@ -73,7 +53,7 @@ void dump_color_array(std::span<terraformer::rgba_pixel const> colors)
 	for(size_t k = 0; k != std::size(colors); ++k)
 	{
 		make_colored_cell(make_html_color(colors[k]), k);
-	
+
 	}
 	puts("</tr>");
 	puts("</table>");
@@ -166,18 +146,20 @@ void dump_all_three_color_combos(std::span<terraformer::rgba_pixel const> colors
 	puts("</table>");
 }
 
-template<class Colormap>
-void test_palette(Colormap const& cmap)
+void test_palette()
 {
-	auto const colors = generate_palette(cmap);
-	auto const dark_colors = darken(colors, 0.25);
-	auto const bright_colors = brighten(colors, 1.0f);
+	using colormap = terraformer::ui::theming::fixed_intensity_colormap;
+	using intensity = terraformer::ui::theming::perceptual_color_intensity;
+
+	auto const colors = generate_palette(colormap{intensity{0.5f}});
+	auto const bright_colors = generate_palette(colormap::make_pastels(colormap{intensity{0.5f}}, intensity{1.0f}));
+	auto const dark_colors = generate_palette(colormap{intensity{0.25f}});
 
 	print_header(2, "List of all colors");
 	dump_color_array(bright_colors);
 	dump_color_array(colors);
 	dump_color_array(dark_colors);
-	puts("<p>These colors should appear</p>");
+	puts("<p>Within one row, these colors should appear</p>");
 	puts("<ul>");
 	puts("<li>Equally bright</li>");
 	puts("<li>Equally saturated</li>");
@@ -198,5 +180,5 @@ void test_palette(Colormap const& cmap)
 int main()
 {
 	print_header(1, "Testing color palette");
-	test_palette(terraformer::ui::theming::fixed_intensity_colormap{});
+	test_palette();
 }

@@ -8,12 +8,12 @@
 
 namespace terraformer::ui::theming
 {
-	using perceived_intensity = terraformer::intensity<0.5673828125f, 1.0f, 0.060546875f>;
+	using perceptual_color_intensity = terraformer::intensity<0.5673828125f, 1.0f, 0.060546875f>;
 
 	class fixed_intensity_colormap
 	{
 	public:
-		constexpr explicit fixed_intensity_colormap(perceived_intensity intensity):
+		constexpr explicit fixed_intensity_colormap(perceptual_color_intensity intensity):
 			m_lut{
 				normalize(basic_colors[0], intensity),
 				normalize(basic_colors[1], intensity),
@@ -26,7 +26,7 @@ namespace terraformer::ui::theming
 
 		static constexpr auto make_pastels(
 			fixed_intensity_colormap const& src,
-			perceived_intensity intensity
+			perceptual_color_intensity intensity
 		)
 		{
 			fixed_intensity_colormap ret{};
@@ -37,7 +37,7 @@ namespace terraformer::ui::theming
 		}
 
 		constexpr rgba_pixel operator()(float t) const
-		{ return interp(m_lut, static_cast<float>(std::size(m_lut))*t, wrap_around_at_boundary{}); }
+		{ return interp(m_lut, static_cast<float>(std::size(m_lut))*t, wrap_around_at_boundary{}) + rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}; }
 
 	private:
 		fixed_intensity_colormap() = default;

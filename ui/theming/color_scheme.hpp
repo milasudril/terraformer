@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
 #define TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
 
-#include "./whi.hpp"
+#include "./fixed_intensity_colormap.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 
 #include <array>
@@ -40,6 +40,7 @@ namespace terraformer::ui::theming
 		twocolor_gradient resource_usage_colors;
 
 		std::array<rgba_pixel, 12> misc_dark_colors;
+		std::array<rgba_pixel, 12> misc_mid_colors;
 		std::array<rgba_pixel, 12> misc_bright_colors;
 	};
 
@@ -48,41 +49,60 @@ namespace terraformer::ui::theming
 	static_assert(max_val*std::exp2(0.0f*rate) == max_val);
 	static_assert(max_val*std::exp2(4.0f*rate) == 0.5f);
 
-	template<class Generator>
-	constexpr auto generate_default_palette(Generator&& gen)
+	template<size_t N, class Generator>
+	constexpr auto sample_colormap(Generator&& gen)
 	{
-		std::array<rgba_pixel, 12> ret{};
+		std::array<rgba_pixel, N> ret{};
 
 		for(size_t k = 0; k != std::size(ret); ++k)
-		{
-			auto const hue = static_cast<float>((7*k)%std::size(ret))/static_cast<float>(std::size(ret));
-
-			ret[k] = gen(hue, 1.0f);
-		}
+		{ ret[k] = gen(static_cast<float>(k)/static_cast<float>(std::size(ret))); }
 
 		return ret;
 	}
 
-	constexpr auto default_dark_palette = generate_default_palette(make_rgba_pixel_from_whi);
-	constexpr auto default_bright_palette = generate_default_palette(make_rgba_pixel_from_whi_inv);
+	constexpr fixed_intensity_colormap mid_colors{perceptual_color_intensity{0.5f}};
+	constexpr auto bright_colors = fixed_intensity_colormap::make_pastels(mid_colors, perceptual_color_intensity{1.0f});
+	constexpr fixed_intensity_colormap dark_colors{perceptual_color_intensity{0.25f}};
+
+	constexpr auto default_dark_palette = sample_colormap<12>(bright_colors);
+	constexpr auto default_mid_palette = sample_colormap<12>(mid_colors);
+	constexpr auto default_bright_palette = sample_colormap<12>(dark_colors);
 
 	constexpr auto error_hue = 0.0f;
 	constexpr auto warning_hue = 1.0f/6.0f;
-	constexpr auto worker_busy_hue = 0.0f;
-	constexpr auto worker_ready_hue = 1.0f/3.0f;
+	constexpr auto result_pending_hue = 1.0f/3.0f;
+	constexpr auto ready_hue = 1.0f/2.0f;
+	constexpr auto info_hue = 2.0f/3.0f;
+	constexpr auto all_resources_busy_hue = 1.0f/12.0f;
+	constexpr auto all_resources_free_hue = 1.0f/2.0f;
 
-	constexpr auto default_dark_error_color = make_rgba_pixel_from_whi(error_hue, 1.0f);
-	constexpr auto default_bright_error_color = make_rgba_pixel_from_whi(error_hue, 1.0f);
-	constexpr auto default_dark_warning_color = make_rgba_pixel_from_whi(warning_hue, 1.0f);
-	constexpr auto default_bright_warning_color = make_rgba_pixel_from_whi_inv(warning_hue, 1.0f);
-	constexpr auto default_dark_worker_busy_color = make_rgba_pixel_from_whi(worker_busy_hue, 1.0f);
-	constexpr auto default_bright_worker_busy_color = make_rgba_pixel_from_whi_inv(worker_busy_hue, 1.0f);
-	constexpr auto default_dark_worker_ready_color = make_rgba_pixel_from_whi(worker_ready_hue, 1.0f);
-	constexpr auto default_bright_worker_ready_color = make_rgba_pixel_from_whi_inv(worker_ready_hue, 1.0f);
-	constexpr auto default_dark_resources_free_color = default_dark_worker_ready_color;
-	constexpr auto default_bright_resources_free_color = default_bright_worker_ready_color;
-	constexpr auto default_dark_resources_used_color = default_dark_worker_busy_color;
-	constexpr auto default_bright_resources_used_color = default_bright_worker_busy_color;
+	constexpr auto default_dark_error_color = dark_colors(error_hue);
+	constexpr auto default_mid_error_color = mid_colors(error_hue);
+	constexpr auto default_bright_error_color = bright_colors(error_hue);
+
+	constexpr auto default_dark_warning_color = dark_colors(warning_hue);
+	constexpr auto default_mid_warning_color = mid_colors(warning_hue);
+	constexpr auto default_bright_warning_color = bright_colors(warning_hue);
+
+	constexpr auto default_dark_result_pending_color = dark_colors(result_pending_hue);
+	constexpr auto default_mid_result_pending_color = mid_colors(result_pending_hue);
+	constexpr auto default_bright_result_pending_color = bright_colors(result_pending_hue);
+
+	constexpr auto default_dark_ready_color = dark_colors(ready_hue);
+	constexpr auto default_mid_ready_color = mid_colors(ready_hue);
+	constexpr auto default_bright_ready_color = bright_colors(ready_hue);
+
+	constexpr auto default_dark_info_color = dark_colors(info_hue);
+	constexpr auto default_mid_info_color = mid_colors(info_hue);
+	constexpr auto default_bright_info_color = bright_colors(info_hue);
+
+	constexpr auto default_dark_all_resources_busy_color = dark_colors(all_resources_busy_hue);
+	constexpr auto default_mid_all_resources_busy_color = mid_colors(all_resources_busy_hue);
+	constexpr auto default_bright_all_resources_busy_color = bright_colors(all_resources_busy_hue);
+
+	constexpr auto default_dark_all_resources_free_color = dark_colors(all_resources_free_hue);
+	constexpr auto default_mid_all_resources_free_color = mid_colors(all_resources_free_hue);
+	constexpr auto default_bright_all_resources_free_color = bright_colors(all_resources_free_hue);
 
 	constexpr color_scheme default_color_scheme{
 		.main_panel{
@@ -185,20 +205,21 @@ namespace terraformer::ui::theming
 				1.0f
 			}
 		},
-		.cursor_color = make_rgba_pixel_from_whi(2.0f/3.0f, 1.0f),
+		.cursor_color = mid_colors(1.0f/3.0f),
 		.interactive_frame_color = rgba_pixel{0.666f, 0.666f, 0.666f, 1.0f},
 		.selection_color = default_bright_warning_color,
-		.mouse_focus_color = make_rgba_pixel_from_whi(3.0f/4.0f, 1.0f),
-		.keyboard_focus_color = make_rgba_pixel_from_whi(7.0f/12.0f, 1.0f),
+		.mouse_focus_color = mid_colors(11.0f/12.0f),
+		.keyboard_focus_color = mid_colors(9.0f/12.0f),
 		.progress_colors{
-			.begin = default_dark_worker_busy_color,
-			.end = default_dark_worker_ready_color
+			.begin = default_mid_result_pending_color,
+			.end = default_mid_ready_color
 		},
 		.resource_usage_colors{
-			.begin = default_dark_resources_free_color,
-			.end = default_dark_resources_used_color
+			.begin = default_mid_all_resources_free_color,
+			.end = default_mid_all_resources_busy_color
 		},
 		.misc_dark_colors = default_dark_palette,
+		.misc_mid_colors = default_mid_palette,
 		.misc_bright_colors = default_bright_palette
 	};
 }
