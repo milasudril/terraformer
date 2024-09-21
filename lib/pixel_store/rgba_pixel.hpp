@@ -9,9 +9,9 @@ namespace terraformer
 	class rgba_pixel
 	{
 	public:
-		using StorageType = geosimd::vec_t<float, 4>;
+		using storage_type = geosimd::vec_t<float, 4>;
 
-		constexpr explicit rgba_pixel(StorageType value): m_value{value} {}
+		constexpr explicit rgba_pixel(storage_type value): m_value{value} {}
 
 		constexpr explicit rgba_pixel(float r, float g, float b, float a = 1.0f)
 			: m_value{r, g, b, a}
@@ -46,7 +46,7 @@ namespace terraformer
 			return *this;
 		}
 
-		constexpr rgba_pixel& value(StorageType val)
+		constexpr rgba_pixel& value(storage_type val)
 		{
 			m_value = val;
 			return *this;
@@ -105,7 +105,7 @@ namespace terraformer
 		constexpr bool operator!=(rgba_pixel const&) const = default;
 
 	private:
-		StorageType m_value;
+		storage_type m_value;
 	};
 
 	constexpr auto operator/(rgba_pixel a, float c)
