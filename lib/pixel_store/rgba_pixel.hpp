@@ -144,6 +144,11 @@ namespace terraformer
 
 	constexpr rgba_pixel white() { return rgba_pixel{1.0f, 1.0f, 1.0f}; }
 
+	constexpr auto max_color_value(rgba_pixel x)
+	{
+		return std::max(x.red(), std::max(x.green(), x.blue()));
+	}
+
 	inline auto to_string(rgba_pixel const& x)
 	{ return to_string(x.value()); }
 }
