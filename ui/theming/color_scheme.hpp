@@ -12,7 +12,6 @@ namespace terraformer::ui::theming
 	{
 		rgba_pixel background;
 		rgba_pixel text;
-		rgba_pixel border;
 	};
 
 	struct twocolor_gradient
@@ -117,12 +116,6 @@ namespace terraformer::ui::theming
 				0.0f,
 				0.0f,
 				1.0f
-			},
-			.border = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
 			}
 		},
 		.other_panel{
@@ -133,12 +126,6 @@ namespace terraformer::ui::theming
 				1.0f
 			},
 			.text = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			},
-			.border = rgba_pixel{
 				0.0f,
 				0.0f,
 				0.0f,
@@ -157,12 +144,6 @@ namespace terraformer::ui::theming
 				0.0f,
 				0.0f,
 				1.0f
-			},
-			.border = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
 			}
 		},
 		.command_area{
@@ -177,12 +158,6 @@ namespace terraformer::ui::theming
 				0.0f,
 				0.0f,
 				1.0f
-			},
-			.border = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
 			}
 		},
 		.output_area{
@@ -193,12 +168,6 @@ namespace terraformer::ui::theming
 				1.0f
 			},
 			.text = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			},
-			.border = rgba_pixel{
 				0.0f,
 				0.0f,
 				0.0f,
