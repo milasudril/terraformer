@@ -8,6 +8,11 @@
 
 namespace terraformer::ui::theming
 {
+	struct panel_colors
+	{
+		rgba_pixel background;
+	};
+
 	struct widget_colors
 	{
 		rgba_pixel background;
@@ -49,8 +54,8 @@ namespace terraformer::ui::theming
 
 	struct color_scheme
 	{
-		widget_colors main_panel;
-		widget_colors other_panel;
+		panel_colors main_panel;
+		panel_colors other_panel;
 		widget_colors input_area;
 		widget_colors command_area;
 		widget_colors output_area;
@@ -134,14 +139,7 @@ namespace terraformer::ui::theming
 				std::exp2(rate*3.0f),
 				std::exp2(rate*3.0f),
 				1.0f
-			},
-			.text = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			},
-			.selection_color = default_bright_warning_color
+			}
 		},
 		.other_panel{
 			.background = rgba_pixel{
@@ -149,14 +147,7 @@ namespace terraformer::ui::theming
 				std::exp2(rate*4.0f),
 				std::exp2(rate*4.0f),
 				1.0f
-			},
-			.text = rgba_pixel{
-				0.0f,
-				0.0f,
-				0.0f,
-				1.0f
-			},
-			.selection_color = default_bright_warning_color
+			}
 		},
 		.input_area{
 			.background = rgba_pixel{

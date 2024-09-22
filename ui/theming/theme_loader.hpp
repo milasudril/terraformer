@@ -12,7 +12,7 @@ namespace terraformer::ui::theming
 {
 	struct panel_look
 	{
-		widget_colors colors;
+		panel_colors colors;
 		main::generic_shared_texture background_texture;
 		float padding;
 	};
