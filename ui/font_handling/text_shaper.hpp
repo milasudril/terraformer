@@ -33,7 +33,7 @@ namespace terraformer::ui::font_handling
 	class font
 	{
 	public:
-		explicit font(char const* filename):
+		explicit font(std::filesystem::path const& filename):
 			m_renderer{std::make_unique<glyph_renderer>(filename)},
 			m_handle{make_font(*m_renderer)}
 		{}
