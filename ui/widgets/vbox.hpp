@@ -20,6 +20,7 @@ namespace terraformer::ui::widgets
 			auto max_width = std::numeric_limits<float>::infinity();
 			auto height = margin_y;
 
+
 			for(auto k = widgets.first_element_index(); k != n; ++k)
 			{
 				if(!widget_states[k].collapsed) [[likely]]
@@ -34,7 +35,7 @@ namespace terraformer::ui::widgets
 					widget_geometries[k].size = minimize_height(constraints);
 					min_width = std::max(min_width, widget_geometries[k].size[0]);
 					max_width = std::min(max_width, constraints.width.max);
-					height += widget_geometries[k].size[1] + 4.0f;
+					height += widget_geometries[k].size[1] + margin_y;
 				}
 			}
 

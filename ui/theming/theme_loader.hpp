@@ -2,6 +2,7 @@
 #define TERRAFORER_UI_THIMING_THEME_LOADER_HPP
 
 #include "./texture_generators.hpp"
+#include "ui/main/generic_texture.hpp"
 #include "./color_scheme.hpp"
 #include "ui/font_handling/font_mapper.hpp"
 #include "ui/font_handling/text_shaper.hpp"
@@ -9,6 +10,38 @@
 
 namespace terraformer::ui::theming
 {
+	struct panel_look
+	{
+		widget_colors colors;
+		main::generic_shared_texture background_texture;
+		float padding;
+	};
+
+	struct widget_look
+	{
+		widget_colors colors;
+		float padding;
+		std::shared_ptr<font_handling::font const> font;
+	};
+
+	struct event_routing_look
+	{
+		event_routing_colors colors;
+		float border_thickness;
+	};
+
+	struct ui_config
+	{
+		panel_look main_panel;
+		panel_look other_panel;
+		widget_look input_area;
+		widget_look command_area;
+		widget_look output_area;
+		status_colors status_indicator;
+		event_routing_look cursor_kbd_tracking;
+		palettes misc_colors;
+	};
+
 	template<class TextureType>
 	object_dict load_default_resources()
 	{
