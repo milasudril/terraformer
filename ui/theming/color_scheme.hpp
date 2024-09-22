@@ -40,6 +40,13 @@ namespace terraformer::ui::theming
 		rgba_pixel keyboard_focus_color;
 	};
 
+	struct palettes
+	{
+		std::array<rgba_pixel, 12> dark;
+		std::array<rgba_pixel, 12> mid;
+		std::array<rgba_pixel, 12> bright;
+	};
+
 	struct color_scheme
 	{
 		widget_colors main_panel;
@@ -52,9 +59,7 @@ namespace terraformer::ui::theming
 
 		event_routing_colors event_dispatcher_state;
 
-		std::array<rgba_pixel, 12> misc_dark_colors;
-		std::array<rgba_pixel, 12> misc_mid_colors;
-		std::array<rgba_pixel, 12> misc_bright_colors;
+		palettes misc_colors;
 	};
 
 	constexpr auto max_val = 1.0f;
@@ -218,9 +223,11 @@ namespace terraformer::ui::theming
 			.mouse_focus_color = mid_colors(11.0f/12.0f),
 			.keyboard_focus_color = mid_colors(9.0f/12.0f)
 		},
-		.misc_dark_colors = default_dark_palette,
-		.misc_mid_colors = default_mid_palette,
-		.misc_bright_colors = default_bright_palette
+		.misc_colors{
+			.dark = default_dark_palette,
+			.mid = default_mid_palette,
+			.bright = default_bright_palette
+		}
 	};
 }
 

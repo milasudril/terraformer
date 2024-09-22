@@ -32,13 +32,6 @@ namespace terraformer::ui::theming
 			std::move(font_handling::font{fontfile.c_str()}.set_font_size(11))
 		};
 
-		object_array misc_dark_colors;
-		auto const colors = default_color_scheme.misc_dark_colors;
-		for(size_t k = 0; k != std::size(colors); ++k)
-		{
-			misc_dark_colors.append<rgba_pixel>(colors[k]);
-		}
-
 		object_dict resources;
 		resources.insert<object_dict>(
 			"ui", std::move(object_dict{}
@@ -62,7 +55,6 @@ namespace terraformer::ui::theming
 					.insert_link("font", body_text)
 					.insert<rgba_pixel>("text_color", default_color_scheme.output_area.text))
 				)
-				.insert<object_array>("misc_dark_colors", std::move(misc_dark_colors))
 				.insert<unsigned int>("widget_inner_margin", 4)
 				.insert<unsigned int>("3d_border_thickness", 2)
 				.insert<main::generic_unique_texture>(
