@@ -33,6 +33,13 @@ namespace terraformer::ui::theming
 		rgba_pixel info_indication;
 	};
 
+	struct event_routing_colors
+	{
+		rgba_pixel cursor_color;
+		rgba_pixel mouse_focus_color;
+		rgba_pixel keyboard_focus_color;
+	};
+
 	struct color_scheme
 	{
 		widget_colors main_panel;
@@ -43,9 +50,7 @@ namespace terraformer::ui::theming
 
 		status_colors status_indicator;
 
-		rgba_pixel cursor_color;
-		rgba_pixel mouse_focus_color;
-		rgba_pixel keyboard_focus_color;
+		event_routing_colors event_dispatcher_state;
 
 		std::array<rgba_pixel, 12> misc_dark_colors;
 		std::array<rgba_pixel, 12> misc_mid_colors;
@@ -208,12 +213,11 @@ namespace terraformer::ui::theming
 			.ok_indication = default_mid_ready_color,
 			.info_indication = default_mid_info_color
 		},
-
-
-		.cursor_color = mid_colors(1.0f/3.0f),
-		.mouse_focus_color = mid_colors(11.0f/12.0f),
-		.keyboard_focus_color = mid_colors(9.0f/12.0f),
-
+		.event_dispatcher_state{
+			.cursor_color = mid_colors(1.0f/3.0f),
+			.mouse_focus_color = mid_colors(11.0f/12.0f),
+			.keyboard_focus_color = mid_colors(9.0f/12.0f)
+		},
 		.misc_dark_colors = default_dark_palette,
 		.misc_mid_colors = default_mid_palette,
 		.misc_bright_colors = default_bright_palette
