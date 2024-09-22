@@ -8,7 +8,7 @@
 
 namespace terraformer::ui::theming
 {
-	struct color_set
+	struct widget_colors
 	{
 		rgba_pixel background;
 		rgba_pixel text;
@@ -22,11 +22,11 @@ namespace terraformer::ui::theming
 
 	struct color_scheme
 	{
-		color_set main_panel;
-		color_set other_panel;
-		color_set input_area;
-		color_set command_area;
-		color_set output_area;
+		widget_colors main_panel;
+		widget_colors other_panel;
+		widget_colors input_area;
+		widget_colors command_area;
+		widget_colors output_area;
 
 		rgba_pixel cursor_color;
 		rgba_pixel selection_color;
