@@ -20,6 +20,18 @@ namespace terraformer::ui::theming
 		rgba_pixel end;
 	};
 
+	struct status_colors
+	{
+		twocolor_gradient progress_meter;
+		twocolor_gradient resource_usage_meter;
+
+		rgba_pixel error_indication;
+		rgba_pixel warning_indication;
+		rgba_pixel progress_indication;
+		rgba_pixel ok_indication;
+		rgba_pixel info_indication;
+	};
+
 	struct color_scheme
 	{
 		widget_colors main_panel;
@@ -28,13 +40,12 @@ namespace terraformer::ui::theming
 		widget_colors command_area;
 		widget_colors output_area;
 
+		status_colors status_indicator;
+
 		rgba_pixel cursor_color;
 		rgba_pixel selection_color;
 		rgba_pixel mouse_focus_color;
 		rgba_pixel keyboard_focus_color;
-
-		twocolor_gradient progress_colors;
-		twocolor_gradient resource_usage_colors;
 
 		std::array<rgba_pixel, 12> misc_dark_colors;
 		std::array<rgba_pixel, 12> misc_mid_colors;
@@ -68,6 +79,7 @@ namespace terraformer::ui::theming
 	constexpr auto error_hue = 0.0f;
 	constexpr auto warning_hue = 1.0f/6.0f;
 	constexpr auto result_pending_hue = 1.0f/3.0f;
+	constexpr auto ok_hue = 1.0f/2.0f;
 	constexpr auto ready_hue = 1.0f/2.0f;
 	constexpr auto info_hue = 2.0f/3.0f;
 	constexpr auto all_resources_busy_hue = 1.0f/12.0f;
@@ -84,6 +96,10 @@ namespace terraformer::ui::theming
 	constexpr auto default_dark_result_pending_color = dark_colors(result_pending_hue);
 	constexpr auto default_mid_result_pending_color = mid_colors(result_pending_hue);
 	constexpr auto default_bright_result_pending_color = bright_colors(result_pending_hue);
+
+	constexpr auto default_dark_ok_color = dark_colors(ok_hue);
+	constexpr auto default_mid_ok_color = mid_colors(ok_hue);
+	constexpr auto default_bright_ok_color = bright_colors(ok_hue);
 
 	constexpr auto default_dark_ready_color = dark_colors(ready_hue);
 	constexpr auto default_mid_ready_color = mid_colors(ready_hue);
@@ -172,18 +188,28 @@ namespace terraformer::ui::theming
 				1.0f
 			}
 		},
+		.status_indicator{
+			.progress_meter{
+				.begin = default_mid_result_pending_color,
+				.end = default_mid_ready_color
+			},
+			.resource_usage_meter{
+				.begin = default_mid_all_resources_free_color,
+				.end = default_mid_all_resources_busy_color
+			},
+			.error_indication = default_mid_error_color,
+			.warning_indication = default_mid_warning_color,
+			.progress_indication = default_mid_result_pending_color,
+			.ok_indication = default_mid_ready_color,
+			.info_indication = default_mid_info_color
+		},
+
+
 		.cursor_color = mid_colors(1.0f/3.0f),
 		.selection_color = default_bright_warning_color,
 		.mouse_focus_color = mid_colors(11.0f/12.0f),
 		.keyboard_focus_color = mid_colors(9.0f/12.0f),
-		.progress_colors{
-			.begin = default_mid_result_pending_color,
-			.end = default_mid_ready_color
-		},
-		.resource_usage_colors{
-			.begin = default_mid_all_resources_free_color,
-			.end = default_mid_all_resources_busy_color
-		},
+
 		.misc_dark_colors = default_dark_palette,
 		.misc_mid_colors = default_mid_palette,
 		.misc_bright_colors = default_bright_palette
