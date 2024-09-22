@@ -4,7 +4,6 @@
 #include "./events.hpp"
 #include "./widget_rendering_result.hpp"
 
-#include "ui/theming/widget_look.hpp"
 #include "lib/common/object_tree.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
