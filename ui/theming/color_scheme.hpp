@@ -12,6 +12,7 @@ namespace terraformer::ui::theming
 	{
 		rgba_pixel background;
 		rgba_pixel text;
+		rgba_pixel selection_color;
 	};
 
 	struct twocolor_gradient
@@ -43,7 +44,6 @@ namespace terraformer::ui::theming
 		status_colors status_indicator;
 
 		rgba_pixel cursor_color;
-		rgba_pixel selection_color;
 		rgba_pixel mouse_focus_color;
 		rgba_pixel keyboard_focus_color;
 
@@ -130,7 +130,8 @@ namespace terraformer::ui::theming
 				0.0f,
 				0.0f,
 				1.0f
-			}
+			},
+			.selection_color = default_bright_warning_color
 		},
 		.other_panel{
 			.background = rgba_pixel{
@@ -144,7 +145,8 @@ namespace terraformer::ui::theming
 				0.0f,
 				0.0f,
 				1.0f
-			}
+			},
+			.selection_color = default_bright_warning_color
 		},
 		.input_area{
 			.background = rgba_pixel{
@@ -158,7 +160,8 @@ namespace terraformer::ui::theming
 				0.0f,
 				0.0f,
 				1.0f
-			}
+			},
+			.selection_color = default_bright_warning_color
 		},
 		.command_area{
 			.background = rgba_pixel{
@@ -172,7 +175,8 @@ namespace terraformer::ui::theming
 				0.0f,
 				0.0f,
 				1.0f
-			}
+			},
+			.selection_color = default_bright_warning_color
 		},
 		.output_area{
 			.background = rgba_pixel{
@@ -186,7 +190,8 @@ namespace terraformer::ui::theming
 				0.0f,
 				0.0f,
 				1.0f
-			}
+			},
+			.selection_color = default_bright_warning_color
 		},
 		.status_indicator{
 			.progress_meter{
@@ -206,7 +211,6 @@ namespace terraformer::ui::theming
 
 
 		.cursor_color = mid_colors(1.0f/3.0f),
-		.selection_color = default_bright_warning_color,
 		.mouse_focus_color = mid_colors(11.0f/12.0f),
 		.keyboard_focus_color = mid_colors(9.0f/12.0f),
 
