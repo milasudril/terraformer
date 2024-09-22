@@ -21,6 +21,7 @@ namespace terraformer::ui::theming
 	{
 		widget_colors colors;
 		float padding;
+		float border_thickness;
 		std::shared_ptr<font_handling::font const> font;
 	};
 
