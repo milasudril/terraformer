@@ -152,7 +152,7 @@ void test_palette()
 	using intensity = terraformer::ui::theming::perceptual_color_intensity;
 
 	auto const colors = generate_palette(colormap{intensity{0.5f}});
-	auto const bright_colors = generate_palette(colormap::make_pastels(colormap{intensity{0.5f}}, intensity{1.0f}));
+	auto const bright_colors = generate_palette(colormap::make_pastels(colormap{intensity{0.5f}}, intensity{0.75f}));
 	auto const dark_colors = generate_palette(colormap{intensity{0.25f}});
 
 	print_header(2, "List of all colors");
