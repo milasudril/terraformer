@@ -39,7 +39,7 @@ namespace terraformer::ui::theming
 		widget_look command_area;
 		widget_look output_area;
 		status_colors status_indicator;
-		event_routing_look cursor_kbd_tracking;
+		event_routing_look mouse_kbd_tracking;
 		palettes misc_colors;
 	};
 
@@ -93,8 +93,8 @@ namespace terraformer::ui::theming
 				.font = body_text
 			},
 			.status_indicator = color_scheme.status_indicator,
-			.cursor_kbd_tracking{
-				.colors = color_scheme.cursor_kbd_tracking,
+			.mouse_kbd_tracking{
+				.colors = color_scheme.mouse_kbd_tracking,
 				.border_thickness = 2.0f
 			},
 			.misc_colors = color_scheme.misc_colors

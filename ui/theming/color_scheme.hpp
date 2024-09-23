@@ -62,7 +62,7 @@ namespace terraformer::ui::theming
 
 		status_colors status_indicator;
 
-		event_routing_colors cursor_kbd_tracking;
+		event_routing_colors mouse_kbd_tracking;
 
 		palettes misc_colors;
 	};
@@ -209,7 +209,7 @@ namespace terraformer::ui::theming
 			.ok_indication = default_mid_ready_color,
 			.info_indication = default_mid_info_color
 		},
-		.cursor_kbd_tracking{
+		.mouse_kbd_tracking{
 			.cursor_color = mid_colors(1.0f/3.0f),
 			.mouse_focus_color = mid_colors(11.0f/12.0f),
 			.keyboard_focus_color = mid_colors(9.0f/12.0f)
