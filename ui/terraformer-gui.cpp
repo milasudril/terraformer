@@ -101,6 +101,8 @@ int main(int, char**)
 
 	my_outer_vbox.append(std::ref(my_vbox));
 
+	auto const theme = terraformer::ui::theming::load_default_config<terraformer::ui::drawing_api::gl_texture>();
+
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		terraformer::ui::theming::load_default_resources<terraformer::ui::drawing_api::gl_texture>(),

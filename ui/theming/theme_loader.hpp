@@ -44,6 +44,64 @@ namespace terraformer::ui::theming
 	};
 
 	template<class TextureType>
+	ui_config load_default_config()
+	{
+		main::generic_shared_texture const noisy_texture{
+			std::type_identity<TextureType>{},
+			generate_noisy_texture<TextureType>()
+		};
+
+		main::generic_shared_texture white_texture{
+			std::type_identity<TextureType>{},
+			generate_white_texture<TextureType>()
+		};
+
+		font_handling::font_mapper fonts;
+		auto const fontfile = fonts.get_path("sans-serif");
+		auto const body_text = std::make_shared<font_handling::font>(fontfile);
+		body_text->set_font_size(11);
+
+		auto const& color_scheme = default_color_scheme;
+
+		return ui_config{
+			.main_panel{
+				.colors = color_scheme.main_panel,
+				.background_texture = noisy_texture,
+				.padding = 4.0f
+			},
+			.other_panel{
+				.colors = color_scheme.other_panel,
+				.background_texture = noisy_texture,
+				.padding = 4.0f
+			},
+			.input_area{
+				.colors = color_scheme.input_area,
+				.padding = 2.0f,
+				.border_thickness = 2.0f,
+				.font = body_text
+			},
+			.command_area{
+				.colors = color_scheme.command_area,
+				.padding = 2.0f,
+				.border_thickness = 2.0f,
+				.font = body_text
+			},
+			.output_area{
+				.colors = color_scheme.output_area,
+				.padding = 2.0f,
+				.border_thickness = 0.0f,
+				.font = body_text
+			},
+			.status_indicator = color_scheme.status_indicator,
+			.cursor_kbd_tracking{
+				.colors = color_scheme.cursor_kbd_tracking,
+				.border_thickness = 2.0f
+			},
+			.misc_colors = color_scheme.misc_colors
+		};
+	}
+
+	template<class TextureType>
 	object_dict load_default_resources()
 	{
 		shared_any noisy_texture{
