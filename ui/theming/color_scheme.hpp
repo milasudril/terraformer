@@ -2,70 +2,10 @@
 #define TERRAFORMER_UI_THEMING_COLOR_SCHEME_HPP
 
 #include "./fixed_intensity_colormap.hpp"
-#include "lib/pixel_store/rgba_pixel.hpp"
-
-#include <array>
+#include "ui/main/config.hpp"
 
 namespace terraformer::ui::theming
 {
-	struct panel_colors
-	{
-		rgba_pixel background;
-	};
-
-	struct widget_colors
-	{
-		rgba_pixel background;
-		rgba_pixel text;
-		rgba_pixel selection_color;
-	};
-
-	struct twocolor_gradient
-	{
-		rgba_pixel begin;
-		rgba_pixel end;
-	};
-
-	struct status_colors
-	{
-		twocolor_gradient progress_meter;
-		twocolor_gradient resource_usage_meter;
-
-		rgba_pixel error_indication;
-		rgba_pixel warning_indication;
-		rgba_pixel progress_indication;
-		rgba_pixel ok_indication;
-		rgba_pixel info_indication;
-	};
-
-	struct event_routing_colors
-	{
-		rgba_pixel cursor_color;
-		rgba_pixel mouse_focus_color;
-		rgba_pixel keyboard_focus_color;
-	};
-
-	struct palettes
-	{
-		std::array<rgba_pixel, 12> dark;
-		std::array<rgba_pixel, 12> mid;
-		std::array<rgba_pixel, 12> bright;
-	};
-
-	struct color_scheme
-	{
-		panel_colors main_panel;
-		panel_colors other_panel;
-		widget_colors input_area;
-		widget_colors command_area;
-		widget_colors output_area;
-
-		status_colors status_indicator;
-
-		event_routing_colors mouse_kbd_tracking;
-
-		palettes misc_colors;
-	};
 
 	constexpr auto max_val = 1.0f;
 	constexpr auto rate = (-1.0f - std::log2(max_val))/4.0f;
@@ -132,7 +72,7 @@ namespace terraformer::ui::theming
 	constexpr auto default_mid_all_resources_free_color = mid_colors(all_resources_free_hue);
 	constexpr auto default_bright_all_resources_free_color = bright_colors(all_resources_free_hue);
 
-	constexpr color_scheme default_color_scheme{
+	constexpr main::color_scheme default_color_scheme{
 		.main_panel{
 			.background = rgba_pixel{
 				std::exp2(rate*3.0f),
