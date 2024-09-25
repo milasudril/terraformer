@@ -82,7 +82,7 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= host_textures_dirty;
 		}
 
-		void theme_updated(object_dict const& render_resources);
+		void theme_updated(main::config const& cfg);
 
 		main::layout_policy_ref get_layout() const
 		{ return main::layout_policy_ref{}; }
@@ -105,8 +105,7 @@ namespace terraformer::ui::widgets
 		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
 		unsigned int m_margin = 0;
 		unsigned int m_border_thickness = 0;
-		shared_const_any m_font;
-		float m_background_intensity;
+		std::shared_ptr<font_handling::font const> m_font;
 		rgba_pixel m_bg_tint;
 		rgba_pixel m_fg_tint;
 

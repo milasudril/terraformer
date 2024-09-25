@@ -4,9 +4,6 @@
 
 void terraformer::ui::widgets::button::regenerate_text_mask()
 {
-	auto const font = m_font.get_if<font_handling::font const>();
-	assert(font != nullptr);
-
 	font_handling::text_shaper shaper{};
 
 	// TODO: Add support for different scripts, direction, and languages
@@ -14,7 +11,7 @@ void terraformer::ui::widgets::button::regenerate_text_mask()
 		.with(hb_script_t::HB_SCRIPT_LATIN)
 		.with(hb_direction_t::HB_DIRECTION_LTR)
 		.with(hb_language_from_string("en-UE", -1))
-		.run(*font);
+		.run(*m_font);
 
 	m_rendered_text = render(result);
 	m_dirty_bits &= ~text_dirty;
@@ -26,34 +23,27 @@ void terraformer::ui::widgets::button::regenerate_textures()
 	if(m_dirty_bits & text_dirty) [[unlikely]]
 	{ regenerate_text_mask(); }
 
-	auto const background_intensity = m_background_intensity;
-	{
-		auto const val = background_intensity;
-		m_background_released_host = generate(
-			drawing_api::beveled_rectangle{
-				.width = static_cast<uint32_t>(m_current_size.width),
-				.height = static_cast<uint32_t>(m_current_size.height),
-				.border_thickness = m_border_thickness,
-				.upper_left_color = rgba_pixel{val, val, val, 1.0f},
-				.lower_right_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
-				.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
-			}
-		);
-	}
+	m_background_released_host = generate(
+		drawing_api::beveled_rectangle{
+			.width = static_cast<uint32_t>(m_current_size.width),
+			.height = static_cast<uint32_t>(m_current_size.height),
+			.border_thickness = m_border_thickness,
+			.upper_left_color = m_bg_tint,
+			.lower_right_color = 0.25f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.75f},
+			.fill_color = 0.5f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.5f},
+		}
+	);
 
-	{
-		auto const val = background_intensity;
-		m_background_pressed_host = generate(
-			drawing_api::beveled_rectangle{
-				.width = static_cast<uint32_t>(m_current_size.width),
-				.height = static_cast<uint32_t>(m_current_size.height),
-				.border_thickness = m_border_thickness,
-				.upper_left_color = 0.25f*rgba_pixel{val, val, val, 4.0f},
-				.lower_right_color = rgba_pixel{val, val, val, 1.0f},
-				.fill_color = 0.5f*rgba_pixel{val, val, val, 2.0f}
-			}
-		);
-	}
+	m_background_pressed_host = generate(
+		drawing_api::beveled_rectangle{
+			.width = static_cast<uint32_t>(m_current_size.width),
+			.height = static_cast<uint32_t>(m_current_size.height),
+			.border_thickness = m_border_thickness,
+			.upper_left_color = 0.25f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.75f},
+			.lower_right_color = m_bg_tint,
+			.fill_color = 0.5f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.5f},
+		}
+	);
 
 	m_foreground_host = drawing_api::convert_mask(
 		static_cast<uint32_t>(m_current_size.width),
@@ -84,30 +74,12 @@ terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button:
 	};
 }
 
-void terraformer::ui::widgets::button::theme_updated(object_dict const& render_resources)
+void terraformer::ui::widgets::button::theme_updated(main::config const& cfg)
 {
-	auto const ui = render_resources/"ui";
-	auto const margin = (ui/"widget_inner_margin").get_if<unsigned int const>();
-	auto const border_thickness = (ui/"3d_border_thickness").get_if<unsigned int const>();
-
-	assert(margin != nullptr);
-	assert(border_thickness != nullptr);
-	m_margin = *margin + *border_thickness;
-	m_border_thickness = *border_thickness;
-
-	auto const command_area = ui/"command_area";
-	assert(!command_area.is_null());
-	m_font = command_area.dup("font");
-	assert(m_font);
-	auto const background_intensity = (command_area/"background_intensity").get_if<float const>();
-	assert(background_intensity != nullptr);
-	m_background_intensity = *background_intensity;
+	m_margin = static_cast<uint32_t>(cfg.command_area.padding + cfg.command_area.border_thickness);
+	m_font = cfg.command_area.font;
+	m_bg_tint = cfg.command_area.colors.background;
+	m_fg_tint = cfg.command_area.colors.foreground;
+	m_border_thickness = static_cast<uint32_t>(cfg.command_area.border_thickness);
 	m_dirty_bits |= host_textures_dirty | text_dirty;
-
-	auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
-	auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
-	assert(bg_tint != nullptr);
-	assert(fg_tint != nullptr);
-	m_bg_tint = *bg_tint;
-	m_fg_tint = *fg_tint;
 }

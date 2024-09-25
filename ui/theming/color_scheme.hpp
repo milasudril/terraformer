@@ -96,7 +96,7 @@ namespace terraformer::ui::theming
 				std::exp2(rate*0.0f),
 				1.0f
 			},
-			.text = rgba_pixel{
+			.foreground = rgba_pixel{
 				0.0f,
 				0.0f,
 				0.0f,
@@ -111,7 +111,7 @@ namespace terraformer::ui::theming
 				std::exp2(rate*1.0f),
 				1.0f
 			},
-			.text = rgba_pixel{
+			.foreground = rgba_pixel{
 				0.0f,
 				0.0f,
 				0.0f,
@@ -126,7 +126,7 @@ namespace terraformer::ui::theming
 				std::exp2(rate*2.0f),
 				1.0f
 			},
-			.text = rgba_pixel{
+			.foreground = rgba_pixel{
 				0.0f,
 				0.0f,
 				0.0f,

@@ -4,9 +4,6 @@
 
 void terraformer::ui::widgets::label::regenerate_text_mask()
 {
-	auto const font = m_font.get_if<font_handling::font const>();
-	assert(font != nullptr);
-
 	font_handling::text_shaper shaper{};
 
 	// TODO: Add support for different scripts, direction, and languages
@@ -14,7 +11,7 @@ void terraformer::ui::widgets::label::regenerate_text_mask()
 		.with(hb_script_t::HB_SCRIPT_LATIN)
 		.with(hb_direction_t::HB_DIRECTION_LTR)
 		.with(hb_language_from_string("en-UE", -1))
-		.run(*font);
+		.run(*m_font);
 
 	m_rendered_text = render(result);
 	m_dirty_bits &= ~text_dirty;
@@ -55,26 +52,10 @@ terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::
 	};
 }
 
-void terraformer::ui::widgets::label::theme_updated(object_dict const& render_resources)
+void terraformer::ui::widgets::label::theme_updated(main::config const& cfg)
 {
-	auto const ui = render_resources/"ui";
-	assert(!ui.is_null());
-	auto const margin = (ui/"widget_inner_margin").get_if<unsigned int const>();
-	auto const border_thickness = (ui/"3d_border_thickness").get_if<unsigned int const>();
-
-	assert(margin != nullptr);
-	assert(border_thickness != nullptr);
-	m_margin = *margin + *border_thickness;
-	m_border_thickness = *border_thickness;
-	m_background = ui.dup("null_texture");
-	assert(m_background);
-
-	auto const output_area = ui/"output_area";
-	assert(!output_area.is_null());
-	m_font = output_area.dup("font");
-	assert(m_font);
+	m_margin = static_cast<uint32_t>(cfg.output_area.padding + cfg.output_area.border_thickness);
+	m_font = cfg.output_area.font;
 	m_dirty_bits |= host_textures_dirty | text_dirty;
-	auto const fg_tint = (output_area/"text_color").get_if<rgba_pixel const>();
-	assert(fg_tint != nullptr);
-	m_fg_tint = *fg_tint;
+	m_fg_tint = cfg.output_area.colors.foreground;
 }

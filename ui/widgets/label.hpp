@@ -45,7 +45,7 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= host_textures_dirty;
 		}
 
-		void theme_updated(const terraformer::object_dict&);
+		void theme_updated(const main::config& cfg);
 
 	private:
 		std::basic_string<char8_t> m_text;
@@ -56,8 +56,7 @@ namespace terraformer::ui::widgets
 		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
 		unsigned int m_margin = 0;
 		unsigned int m_border_thickness = 0;
-		shared_const_any m_font;
-		shared_const_any m_background;
+		std::shared_ptr<font_handling::font const> m_font;
 		rgba_pixel m_fg_tint;
 
 		main::generic_unique_texture m_foreground;
@@ -77,8 +76,6 @@ namespace terraformer::ui::widgets
 			output_rect.set_foreground(m_foreground.get());
 			m_dirty_bits |= gpu_textures_dirty;
 		}
-
-		(void)output_rect.set_background(m_background.get_if<main::generic_unique_texture const>()->get());
 
 		if(m_dirty_bits & gpu_textures_dirty)
 		{

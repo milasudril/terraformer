@@ -73,7 +73,7 @@ namespace terraformer::ui::main
 		{
 			if(!m_theme_is_up_to_date) [[unlikely]]
 			{
-				theme_updated(std::as_const(m_root_collection).get_attributes(), m_resources);
+				theme_updated(std::as_const(m_root_collection).get_attributes(), m_cfg);
 				m_theme_is_up_to_date = true;
 			}
 
@@ -141,7 +141,7 @@ namespace terraformer::ui::main
 			}
 		}
 
-		object_dict m_resources;
+		config m_cfg;
 		WindowController m_window_controller;
 		ContentRenderer m_content_renderer;
 		FrameRenderer m_frame_renderer;

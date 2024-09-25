@@ -2,7 +2,10 @@
 #define TERRAFORMER_UI_MAIN_CONFIG_HPP
 
 #include "lib/pixel_store/rgba_pixel.hpp"
+#include "ui/font_handling/text_shaper.hpp"
+
 #include <array>
+#include <memory>
 
 namespace terraformer::ui::main
 {
@@ -14,7 +17,7 @@ namespace terraformer::ui::main
 	struct widget_colors
 	{
 		rgba_pixel background;
-		rgba_pixel text;
+		rgba_pixel foreground;
 		rgba_pixel selection_color;
 	};
 
@@ -65,7 +68,7 @@ namespace terraformer::ui::main
 		palettes misc_colors;
 	};
 
-		struct panel_look
+	struct panel_look
 	{
 		panel_colors colors;
 		main::generic_shared_texture background_texture;

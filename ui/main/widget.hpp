@@ -3,6 +3,7 @@
 
 #include "./events.hpp"
 #include "./widget_rendering_result.hpp"
+#include "./config.hpp"
 
 #include "lib/common/object_tree.hpp"
 #include "lib/common/spaces.hpp"
@@ -196,7 +197,7 @@ namespace terraformer::ui::main
 	using mouse_button_callback = event_callback_t<mouse_button_event const&>;
 	using size_callback = event_callback_t<fb_size>;
 	using prepare_for_presentation_callback = event_callback_t<widget_rendering_result>;
-	using theme_updated_callback = event_callback_t<object_dict const&>;
+	using theme_updated_callback = event_callback_t<config const&>;
 
 	using compute_size_constraints_callback = widget_size_constraints (*)(void*);
 	using get_children_callback = widget_collection_ref (*)(void*);
@@ -400,7 +401,7 @@ namespace terraformer::ui::main
 		size_t paragraph_index;
 	};
 
-	inline void theme_updated(widget_collection_view const& widgets, object_dict const& dict)
+	inline void theme_updated(widget_collection_view const& widgets, config const& dict)
 	{
 		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
@@ -419,7 +420,7 @@ namespace terraformer::ui::main
 		cursor_motion_event const& cme,
 		mouse_button_event const& mbe,
 		widget_instance_info const&,
-		object_dict const& resources,
+		config const& cfg,
 		widget_rendering_result surface
 	)
 	{
@@ -430,7 +431,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(mbe) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.compute_size_constraints() } -> same_as_unqual<widget_size_constraints>;
-		{ obj.theme_updated(resources) } -> std::same_as<void>;
+		{ obj.theme_updated(cfg) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
 		{ std::as_const(obj).get_layout() } -> std::same_as<layout_policy_ref>;
@@ -563,7 +564,7 @@ namespace terraformer::ui::main
 		[[nodiscard]] widget_size_constraints compute_size_constraints()
 		{ return widget_size_constraints{}; }
 
-		void theme_updated(object_dict const&) {}
+		void theme_updated(config const&) {}
 
 		[[nodiscard]] widget_collection_ref get_children()
 		{ return widget_collection_ref{}; }

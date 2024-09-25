@@ -50,7 +50,7 @@ namespace terraformer::ui::main
 				[](void* obj, fb_size size) {
 					static_cast<Widget*>(obj)->handle_event(size);
 				},
-				[](void* obj, object_dict const& new_theme) {
+				[](void* obj, config const& new_theme) {
 					static_cast<Widget*>(obj)->theme_updated(new_theme);
 				},
 				[](void* obj){
@@ -83,8 +83,8 @@ namespace terraformer::ui::main
 	inline auto find(cursor_position pos, widget_collection const& widgets)
 	{ return find(pos, widgets.get_attributes());}
 
-	void theme_updated(widget_collection const& widgets, object_dict const& dict)
-	{ theme_updated(widgets.get_attributes(), dict); }
+	void theme_updated(widget_collection const& widgets, config const& cfg)
+	{ theme_updated(widgets.get_attributes(), cfg); }
 }
 
 #endif

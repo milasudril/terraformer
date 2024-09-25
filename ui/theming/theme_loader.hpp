@@ -56,7 +56,7 @@ namespace terraformer::ui::theming
 			},
 			.output_area{
 				.colors = color_scheme.output_area,
-				.padding = 2.0f,
+				.padding = 4.0f,
 				.border_thickness = 0.0f,
 				.font = body_text
 			},
@@ -107,13 +107,13 @@ namespace terraformer::ui::theming
 				)
 				.insert<object_dict>("command_area", std::move(object_dict{}
 					.insert<rgba_pixel>("background_tint", default_color_scheme.command_area.background)
-					.insert<rgba_pixel>("text_color", default_color_scheme.command_area.text)
+					.insert<rgba_pixel>("text_color", default_color_scheme.command_area.foreground)
 					.insert_link("font", body_text)
 					.insert<float>("background_intensity", 1.0f))
 				)
 				.insert<object_dict>("output_area", std::move(object_dict{}
 					.insert_link("font", body_text)
-					.insert<rgba_pixel>("text_color", default_color_scheme.output_area.text))
+					.insert<rgba_pixel>("text_color", default_color_scheme.output_area.foreground))
 				)
 				.insert<unsigned int>("widget_inner_margin", 4)
 				.insert<unsigned int>("3d_border_thickness", 2)

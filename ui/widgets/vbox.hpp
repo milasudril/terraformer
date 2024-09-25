@@ -71,8 +71,7 @@ namespace terraformer::ui::widgets
 
  		void prepare_for_presentation(main::widget_rendering_result output_rect)
 		{
-			output_rect.set_foreground(m_foreground.get_if<main::generic_unique_texture const>()->get());
-			output_rect.set_background(m_background.get_if<main::generic_unique_texture const>()->get());
+			output_rect.set_background(m_background.get());
 			output_rect.set_foreground_tints(std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
@@ -87,37 +86,19 @@ namespace terraformer::ui::widgets
 			});
 		}
 
-		void theme_updated(object_dict const& new_theme)
+		void theme_updated(main::config const& new_theme)
 		{
 			static size_t odd_even = 0;
-			auto const panel = new_theme/"ui"/"panels"/0;
-			assert(!panel.is_null());
+			auto const& panel = odd_even == 0? new_theme.main_panel : new_theme.other_panel;
+			layout.margin_x = panel.padding;
+			layout.margin_y = panel.padding;
+			m_background = panel.background_texture;
+			m_background_tint = panel.colors.background;
+			++odd_even;
 
-			{
-				auto const ptr = static_cast<float const*>(panel/"margins"/"x");
-				assert(ptr != nullptr);
-				layout.margin_x = *ptr;
-			}
-
-			{
-				auto const ptr = static_cast<float const*>(panel/"margins"/"y");
-				assert(ptr != nullptr);
-				layout.margin_y = *ptr;
-			}
-
-			m_background = panel.dup("background_texture");
-			m_foreground = (new_theme/"ui").dup("null_texture");
-
-			auto const background_color_ptr = (panel/"background_tint").get_if<rgba_pixel const>();
-			m_background_tint = background_color_ptr != nullptr?
-				*background_color_ptr : rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
-
+			// TODO: Recursion should happen in framework, similarly to other event routing
 			using main::theme_updated;
 			theme_updated(m_widgets, new_theme);
-
-
-			m_background_tint *= (odd_even%2)? 0.75f : 1.0f;
-			++odd_even;
 		}
 
 		main::layout_policy_ref get_layout() const
@@ -136,8 +117,7 @@ namespace terraformer::ui::widgets
 		widget_collection::index_type m_cursor_widget_index{widget_collection::npos};
 		vbox_layout layout;
 
-		shared_const_any m_background;
-		shared_const_any m_foreground;
+		main::generic_shared_texture m_background;
 		rgba_pixel m_background_tint;
 	};
 }
