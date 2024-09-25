@@ -63,7 +63,7 @@ namespace terraformer::ui::theming
 			.status_indicator = color_scheme.status_indicator,
 			.mouse_kbd_tracking{
 				.colors = color_scheme.mouse_kbd_tracking,
-				.border_thickness = 2.0f
+				.border_thickness = 4.0f
 			},
 			.misc_colors = color_scheme.misc_colors
 		};
