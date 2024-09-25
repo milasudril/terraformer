@@ -215,8 +215,8 @@ in vec4 tint;
 
 void main()
 {
-// TODO: fragment_color = texture(tex, uv)*tint;
-	fragment_color = vec4(1.0f, 0.0f, 0.0f, 1.0);
+	//TODO: fragment_color = texture(tex, uv)*tint;
+	fragment_color = tint;
 })"}
 		};
 	};

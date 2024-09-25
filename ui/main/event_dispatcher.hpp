@@ -127,15 +127,26 @@ namespace terraformer::ui::main
 			if(m_hot_widget != find_recursive_result{} && m_hot_widget.state().has_cursor_focus_indicator())
 			{
 				auto const& geometry = m_hot_widget.geometry();
+				auto const color = m_cfg.mouse_kbd_tracking.colors.mouse_focus_color;
+				auto const border_thickness = m_cfg.mouse_kbd_tracking.border_thickness;
 				using Frame = typename FrameRenderer::input_rectangle;
 				m_frame_renderer.render(
-					geometry.where + 2.0f*displacement{-1.0f, 1.0f, 0.0f},
+					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
 					geometry.origin,
-					geometry.size + 4.0f*scaling{1.0f, 1.0f, 0.0f},
+					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
 					Frame{
-						.thickness = 2.0f,
+						.thickness = border_thickness,
 						.texture = nullptr,
-						.tints = std::array<rgba_pixel, 8>{}
+						.tints = std::array{
+							color,
+							color,
+							color,
+							color,
+							color,
+							color,
+							color,
+							color
+						}
 					}
 				);
 			}
