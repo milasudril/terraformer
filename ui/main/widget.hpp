@@ -401,14 +401,19 @@ namespace terraformer::ui::main
 		size_t paragraph_index;
 	};
 
-	inline void theme_updated(widget_collection_view const& widgets, config const& dict)
+	inline void theme_updated(widget_collection_view const& widgets, config const& cfg)
 	{
 		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
+		auto const get_children_callbacks = widgets.get_children_const_callbacks();
 
 		auto const n = std::size(widgets);
 		for(auto k  = widgets.first_element_index(); k != n; ++k)
-		{ theme_updated_callbacks[k](widget_pointers[k], dict); }
+		{
+			theme_updated_callbacks[k](widget_pointers[k], cfg);
+			auto const children = get_children_callbacks[k](widget_pointers[k]);
+			theme_updated(children, cfg);
+		}
 	}
 
 	template<class T>

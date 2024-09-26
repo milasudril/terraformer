@@ -95,10 +95,6 @@ namespace terraformer::ui::widgets
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
 			++odd_even;
-
-			// TODO: Recursion should happen in framework, similarly to other event routing
-			using main::theme_updated;
-			theme_updated(m_widgets, new_theme);
 		}
 
 		main::layout_policy_ref get_layout() const
