@@ -84,6 +84,7 @@ namespace terraformer::ui::widgets
 				m_background_tint,
 				m_background_tint,
 			});
+			output_rect.set_foreground(m_foreground.get());
 		}
 
 		void theme_updated(main::config const& new_theme)
@@ -94,6 +95,7 @@ namespace terraformer::ui::widgets
 			layout.margin_y = panel.padding;
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
+			m_foreground = new_theme.misc_textures.null;
 			++odd_even;
 		}
 
@@ -114,6 +116,7 @@ namespace terraformer::ui::widgets
 		vbox_layout layout;
 
 		main::generic_shared_texture m_background;
+		main::generic_shared_texture m_foreground;
 		rgba_pixel m_background_tint;
 	};
 }

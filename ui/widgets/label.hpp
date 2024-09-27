@@ -60,6 +60,7 @@ namespace terraformer::ui::widgets
 		rgba_pixel m_fg_tint;
 
 		main::generic_unique_texture m_foreground;
+		main::generic_shared_texture m_background;
 
 		main::fb_size m_current_size;
 		image m_foreground_host;
@@ -84,6 +85,7 @@ namespace terraformer::ui::widgets
 		}
 
 		output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
+		output_rect.set_background(m_background.get());
 	}
 }
 

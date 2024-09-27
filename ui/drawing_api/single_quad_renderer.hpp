@@ -16,13 +16,6 @@ namespace terraformer::ui::drawing_api
 	class single_quad_renderer
 	{
 	public:
-		static gl_texture generate_transparent_texture()
-		{
-			terraformer::image img{16, 16};
-			img(0, 0) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f};
-			return std::move(gl_texture{}.upload(std::as_const(img).pixels()));
-		}
-
 		struct fg_bg_separator
 		{
 			location begin;
@@ -89,10 +82,11 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(9, rect.foreground_tints)
 				.bind();
 
-			auto const background = rect.background == nullptr? &m_null_texture : rect.background;
-			auto const foreground = rect.foreground == nullptr? &m_null_texture : rect.foreground;
-			background->bind(0);
-			foreground->bind(1);
+			assert(rect.background != nullptr);
+			assert(rect.foreground != nullptr);
+
+			rect.background->bind(0);
+			rect.foreground->bind(1);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles();
@@ -175,8 +169,6 @@ void main()
 	fragment_color = fg + bg*(1 - fg.w);
 })"}
 		};
-
-		gl_texture m_null_texture{generate_transparent_texture()};
 	};
 }
 

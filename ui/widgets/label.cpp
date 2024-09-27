@@ -58,4 +58,5 @@ void terraformer::ui::widgets::label::theme_updated(main::config const& cfg)
 	m_font = cfg.output_area.font;
 	m_dirty_bits |= host_textures_dirty | text_dirty;
 	m_fg_tint = cfg.output_area.colors.foreground;
+	m_background = cfg.misc_textures.null;
 }
