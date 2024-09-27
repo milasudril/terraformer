@@ -60,3 +60,26 @@ void terraformer::ui::widgets::label::theme_updated(main::config const& cfg)
 	m_fg_tint = cfg.output_area.colors.foreground;
 	m_background = cfg.misc_textures.null;
 }
+
+
+void terraformer::ui::widgets::label::prepare_for_presentation(main::widget_rendering_result output_rect)
+{
+	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
+	{ regenerate_textures(); }
+
+	if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
+	{
+		m_foreground = output_rect.create_texture();
+		output_rect.set_foreground(m_foreground.get());
+		m_dirty_bits |= gpu_textures_dirty;
+	}
+
+	if(m_dirty_bits & gpu_textures_dirty)
+	{
+		m_foreground.upload(std::as_const(m_foreground_host).pixels());
+		m_dirty_bits &= ~gpu_textures_dirty;
+	}
+
+	output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
+	output_rect.set_background(m_background.get());
+}
