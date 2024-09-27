@@ -153,6 +153,12 @@ namespace terraformer::ui::main
 	struct widget_collection_ref;
 	struct widget_collection_view;
 
+	struct widget_instance_info
+	{
+		size_t section_level;
+		size_t paragraph_index;
+	};
+
 	template<class T>
 	concept layout_policy = requires(T obj, widget_collection_ref& widgets)
 	{
@@ -188,8 +194,8 @@ namespace terraformer::ui::main
 		widget_size_constraints (*m_update_widget_locations)(void const*, widget_collection_ref&);
 	};
 
-	template<class EventType>
-	using event_callback_t = void (*)(void*, EventType);
+	template<class EventType, class ... Args>
+	using event_callback_t = void (*)(void*, EventType, Args...);
 
 	using cursor_enter_callback = event_callback_t<cursor_enter_event const&>;
 	using cursor_leave_callback = event_callback_t<cursor_leave_event const&>;
@@ -197,7 +203,7 @@ namespace terraformer::ui::main
 	using mouse_button_callback = event_callback_t<mouse_button_event const&>;
 	using size_callback = event_callback_t<fb_size>;
 	using prepare_for_presentation_callback = event_callback_t<widget_rendering_result>;
-	using theme_updated_callback = event_callback_t<config const&>;
+	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
 
 	using compute_size_constraints_callback = widget_size_constraints (*)(void*);
 	using get_children_callback = widget_collection_ref (*)(void*);
@@ -395,24 +401,36 @@ namespace terraformer::ui::main
 		return j;
 	}
 
-	struct widget_instance_info
-	{
-		size_t section_level;
-		size_t paragraph_index;
-	};
-
-	inline void theme_updated(widget_collection_view const& widgets, config const& cfg)
+	inline void theme_updated(
+		widget_collection_view const& widgets,
+		config const& cfg,
+		widget_instance_info instance_info = widget_instance_info{}
+	)
 	{
 		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
 		auto const get_children_callbacks = widgets.get_children_const_callbacks();
 
 		auto const n = std::size(widgets);
-		for(auto k  = widgets.first_element_index(); k != n; ++k)
+		for(auto k = widgets.first_element_index(); k != n; ++k)
 		{
-			theme_updated_callbacks[k](widget_pointers[k], cfg);
+			theme_updated_callbacks[k](
+				widget_pointers[k],
+				cfg,
+				widget_instance_info{
+					.section_level = instance_info.section_level,
+					.paragraph_index = k.get()
+				}
+			);
 			auto const children = get_children_callbacks[k](widget_pointers[k]);
-			theme_updated(children, cfg);
+			theme_updated(
+				children,
+				cfg,
+				widget_instance_info{
+					.section_level = instance_info.section_level + 1,
+					.paragraph_index = 0
+				}
+			);
 		}
 	}
 
@@ -426,7 +444,8 @@ namespace terraformer::ui::main
 		mouse_button_event const& mbe,
 		widget_instance_info const&,
 		config const& cfg,
-		widget_rendering_result surface
+		widget_rendering_result surface,
+		widget_instance_info instance_info
 	)
 	{
 		{ obj.prepare_for_presentation(surface) } -> std::same_as<void>;
@@ -436,7 +455,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(mbe) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.compute_size_constraints() } -> same_as_unqual<widget_size_constraints>;
-		{ obj.theme_updated(cfg) } -> std::same_as<void>;
+		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
 		{ std::as_const(obj).get_layout() } -> std::same_as<layout_policy_ref>;
@@ -569,7 +588,7 @@ namespace terraformer::ui::main
 		[[nodiscard]] widget_size_constraints compute_size_constraints()
 		{ return widget_size_constraints{}; }
 
-		void theme_updated(config const&) {}
+		void theme_updated(config const&, widget_instance_info) {}
 
 		[[nodiscard]] widget_collection_ref get_children()
 		{ return widget_collection_ref{}; }

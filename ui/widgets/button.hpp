@@ -82,7 +82,7 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= host_textures_dirty;
 		}
 
-		void theme_updated(main::config const& cfg);
+		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
 		main::layout_policy_ref get_layout() const
 		{ return main::layout_policy_ref{}; }

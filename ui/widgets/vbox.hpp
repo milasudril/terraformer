@@ -87,16 +87,16 @@ namespace terraformer::ui::widgets
 			output_rect.set_foreground(m_foreground.get());
 		}
 
-		void theme_updated(main::config const& new_theme)
+		void theme_updated(main::config const& new_theme, main::widget_instance_info instance_info)
 		{
-			static size_t odd_even = 0;
-			auto const& panel = odd_even == 0? new_theme.main_panel : new_theme.other_panel;
+			auto const& panel = instance_info.section_level%2 == 0?
+				new_theme.main_panel :
+				new_theme.other_panel;
 			layout.margin_x = panel.padding;
 			layout.margin_y = panel.padding;
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
 			m_foreground = new_theme.misc_textures.null;
-			++odd_even;
 		}
 
 		main::layout_policy_ref get_layout() const

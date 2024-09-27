@@ -52,7 +52,7 @@ terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::
 	};
 }
 
-void terraformer::ui::widgets::label::theme_updated(main::config const& cfg)
+void terraformer::ui::widgets::label::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
 	m_margin = static_cast<uint32_t>(cfg.output_area.padding + cfg.output_area.border_thickness);
 	m_font = cfg.output_area.font;

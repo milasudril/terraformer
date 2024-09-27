@@ -74,7 +74,7 @@ terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button:
 	};
 }
 
-void terraformer::ui::widgets::button::theme_updated(main::config const& cfg)
+void terraformer::ui::widgets::button::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
 	m_margin = static_cast<uint32_t>(cfg.command_area.padding + cfg.command_area.border_thickness);
 	m_font = cfg.command_area.font;

@@ -45,7 +45,7 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= host_textures_dirty;
 		}
 
-		void theme_updated(const main::config& cfg);
+		void theme_updated(const main::config& cfg, main::widget_instance_info);
 
 	private:
 		std::basic_string<char8_t> m_text;

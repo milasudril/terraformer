@@ -50,8 +50,8 @@ namespace terraformer::ui::main
 				[](void* obj, fb_size size) {
 					static_cast<Widget*>(obj)->handle_event(size);
 				},
-				[](void* obj, config const& new_theme) {
-					static_cast<Widget*>(obj)->theme_updated(new_theme);
+				[](void* obj, config const& new_theme, widget_instance_info instance_info) {
+					static_cast<Widget*>(obj)->theme_updated(new_theme, instance_info);
 				},
 				[](void* obj){
 					return static_cast<Widget*>(obj)->get_children();
