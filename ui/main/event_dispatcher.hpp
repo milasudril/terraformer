@@ -136,7 +136,7 @@ namespace terraformer::ui::main
 					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
 					Frame{
 						.thickness = border_thickness,
-						.texture = nullptr,
+						.texture = m_cfg.misc_textures.white.get_if<typename Frame::texture_type>(),
 						.tints = std::array{
 							0.0f*color,
 							0.0f*color,
