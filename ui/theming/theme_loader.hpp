@@ -19,9 +19,24 @@ namespace terraformer::ui::theming
 			generate_noisy_texture<TextureType>()
 		};
 
-		main::generic_shared_texture white_texture{
+		main::generic_shared_texture const white_texture{
 			std::type_identity<TextureType>{},
 			generate_white_texture<TextureType>()
+		};
+
+		main::generic_shared_texture const test_pattern{
+			std::type_identity<TextureType>{},
+			generate_test_pattern<TextureType>()
+		};
+
+		main::generic_shared_texture const null_texture{
+			std::type_identity<TextureType>{},
+			generate_transparent_texture<TextureType>()
+		};
+
+		main::generic_shared_texture const black_texture{
+			std::type_identity<TextureType>{},
+			generate_black_texture<TextureType>()
 		};
 
 		font_handling::font_mapper fonts;
@@ -65,7 +80,13 @@ namespace terraformer::ui::theming
 				.colors = color_scheme.mouse_kbd_tracking,
 				.border_thickness = 4.0f
 			},
-			.misc_colors = color_scheme.misc_colors
+			.misc_colors = color_scheme.misc_colors,
+			.misc_textures{
+				.null = null_texture,
+				.black = black_texture,
+				.white = white_texture,
+				.test_pattern = test_pattern
+			}
 		};
 	}
 

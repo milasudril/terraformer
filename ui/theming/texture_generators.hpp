@@ -129,6 +129,14 @@ namespace terraformer::ui::theming
 		img(0, 0) = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
 	}
+
+	template<class DrawingSurface>
+	auto generate_black_texture()
+	{
+		terraformer::image img{1, 1};
+		img(0, 0) = rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f};
+		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
+	}
 };
 
 #endif

@@ -89,6 +89,14 @@ namespace terraformer::ui::main
 		float border_thickness;
 	};
 
+	struct stock_textures
+	{
+		generic_shared_texture null;
+		generic_shared_texture black;
+		generic_shared_texture white;
+		generic_shared_texture test_pattern;
+	};
+
 	struct config
 	{
 		panel_look main_panel;
@@ -99,6 +107,7 @@ namespace terraformer::ui::main
 		status_colors status_indicator;
 		event_routing_look mouse_kbd_tracking;
 		palettes misc_colors;
+		stock_textures misc_textures;
 	};
 }
 #endif
