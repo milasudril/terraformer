@@ -58,7 +58,7 @@ namespace terraformer
 		target_intensity = std::clamp(target_intensity, input_intensity, intensity_white);
 		auto const t  = (target_intensity - input_intensity)/(intensity_white - input_intensity);
 
-		return t*white() + (1.0f - t)*input;
+		return t*rgba_pixel{1.0f, 1.0f, 1.0f, 0.0f} + (1.0f - t)*input;
 	}
 
 	template<float RedWeight, float GreenWeight, float BlueWeight>

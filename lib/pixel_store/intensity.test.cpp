@@ -50,9 +50,9 @@ TESTCASE(terraformer_intensity_different_weights)
 TESTCASE(terraformer_intensity_brighten)
 {
 	using intensity = terraformer::intensity<1.0f, 1.0f, 1.0f>;
-	auto const res = brighten(terraformer::rgba_pixel{0.0f, 0.0f, 1.0f}, intensity{2.0f});
+	auto const res = brighten(terraformer::rgba_pixel{0.0f, 0.0f, 1.0f, 0.0f}, intensity{2.0f});
 	EXPECT_EQ(intensity{res}, intensity{2.0f});
-	EXPECT_EQ(res, (terraformer::rgba_pixel{0.5f, 0.5f, 1.0f}));
+	EXPECT_EQ(res, (terraformer::rgba_pixel{0.5f, 0.5f, 1.0f, 0.0f}));
 }
 
 TESTCASE(terraformer_intensity_brighten_input_brighter_than_target)
@@ -66,9 +66,9 @@ TESTCASE(terraformer_intensity_brighten_input_brighter_than_target)
 TESTCASE(terraformer_intensity_brighten_target_out_of_range)
 {
 	using intensity = terraformer::intensity<1.0f, 1.0f, 1.0f>;
-	auto const res = brighten(terraformer::rgba_pixel{1.0f, 0.0f, 1.0f}, intensity{4.0f});
+	auto const res = brighten(terraformer::rgba_pixel{1.0f, 0.0f, 1.0f, 0.0f}, intensity{4.0f});
 	EXPECT_EQ(intensity{res}, intensity{3.0f});
-	EXPECT_EQ(res, (terraformer::rgba_pixel{1.0f, 1.0f, 1.0f}));
+	EXPECT_EQ(res, (terraformer::rgba_pixel{1.0f, 1.0f, 1.0f, 0.0f}));
 }
 
 TESTCASE(terraformer_intensity_normalize_target_darker_than_max)
