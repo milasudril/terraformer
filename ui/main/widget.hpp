@@ -63,6 +63,16 @@ namespace terraformer::ui::main
 	template<class EventType, class ... Args>
 	using event_callback_t = void (*)(void*, EventType, Args...);
 
+	struct widget_width_request
+	{
+		std::optional<float> height;
+	};
+
+	struct widget_height_request
+	{
+		std::optional<float> width;
+	};
+
 	using cursor_enter_callback = event_callback_t<cursor_enter_event const&>;
 	using cursor_leave_callback = event_callback_t<cursor_leave_event const&>;
 	using cursor_position_callback = event_callback_t<cursor_motion_event const&>;
@@ -72,6 +82,8 @@ namespace terraformer::ui::main
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
 
 	using compute_size_constraints_callback = widget_size_constraints (*)(void*);
+	using compute_width_for_height_callback = scaling (*)(void*, widget_width_request);
+	using compute_height_for_width_callback = scaling (*)(void*, widget_height_request);
 	using get_children_callback = widget_collection_ref (*)(void*);
 	using get_children_const_callback = widget_collection_view (*)(void const*);
 	using get_layout_callback = layout_policy_ref (*)(void const*);
@@ -91,6 +103,8 @@ namespace terraformer::ui::main
 			cursor_position_callback,
 			mouse_button_callback,
 			compute_size_constraints_callback,
+			compute_width_for_height_callback,
+			compute_height_for_width_callback,
 			size_callback,
 			theme_updated_callback,
 			get_children_callback,
@@ -145,6 +159,12 @@ namespace terraformer::ui::main
 
 		auto compute_size_constraints_callbacks() const
 		{ return m_span.template get_by_type<compute_size_constraints_callback>(); }
+
+		auto compute_width_for_height_callbacks() const
+		{ return m_span.template get_by_type<compute_width_for_height_callback>(); }
+
+		auto compute_height_for_width_callbacks() const
+		{ return m_span.template get_by_type<compute_height_for_width_callback>(); }
 
 		auto size_callbacks() const
 		{ return m_span.template get_by_type<size_callback>(); }
@@ -311,7 +331,9 @@ namespace terraformer::ui::main
 		widget_instance_info const&,
 		config const& cfg,
 		widget_rendering_result surface,
-		widget_instance_info instance_info
+		widget_instance_info instance_info,
+		widget_width_request w_req,
+		widget_height_request h_req
 	)
 	{
 		{ obj.prepare_for_presentation(surface) } -> std::same_as<void>;
@@ -325,6 +347,8 @@ namespace terraformer::ui::main
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
 		{ std::as_const(obj).get_layout() } -> std::same_as<layout_policy_ref>;
+		{ obj.compute_size(w_req) } -> std::same_as<scaling>;
+		{ obj.compute_size(h_req) } -> std::same_as<scaling>;
 	};
 
 	class root_widget
@@ -464,6 +488,12 @@ namespace terraformer::ui::main
 
 		[[nodiscard]] layout_policy_ref get_layout() const
 		{ return layout_policy_ref{}; }
+
+		[[nodiscard]] scaling compute_size(widget_width_request) const
+		{ return scaling{}; }
+
+		[[nodiscard]] scaling compute_size(widget_height_request) const
+		{ return scaling{}; }
 	};
 
 	static_assert(widget<widget_with_default_actions>);

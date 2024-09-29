@@ -12,7 +12,7 @@
 
 namespace terraformer::ui::widgets
 {
-	class button
+	class button:public main::widget_with_default_actions
 	{
 	public:
 		enum class state{released, pressed};
@@ -176,6 +176,7 @@ namespace terraformer::ui::widgets
 		using button::theme_updated;
 		using button::get_layout;
 		using button::get_children;
+		using button::compute_size;
 
 		template<class Function>
 		toggle_button& on_value_changed(Function&& func)
