@@ -40,13 +40,13 @@ terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::
 	{ regenerate_text_mask(); }
 
 	return main::widget_size_constraints{
-		.width{
-			.min = static_cast<float>(m_rendered_text.width() + 2*m_margin),
-			.max = std::numeric_limits<float>::infinity()
+		.width = main::widget_size_range{
+			static_cast<float>(m_rendered_text.width() + 2*m_margin),
+			std::numeric_limits<float>::infinity()
 		},
-		.height{
-			.min = static_cast<float>(m_rendered_text.height() + 2*m_margin),
-			.max = std::numeric_limits<float>::infinity()
+		.height = main::widget_size_range{
+			static_cast<float>(m_rendered_text.height() + 2*m_margin),
+			std::numeric_limits<float>::infinity()
 		},
 		.aspect_ratio = std::nullopt
 	};

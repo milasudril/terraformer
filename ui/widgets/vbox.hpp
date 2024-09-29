@@ -34,19 +34,19 @@ namespace terraformer::ui::widgets
 					widget_geometries[k].origin = terraformer::location{-1.0f, 1.0f, 0.0f};
 					widget_geometries[k].size = minimize_height(constraints);
 					min_width = std::max(min_width, widget_geometries[k].size[0]);
-					max_width = std::min(max_width, constraints.width.max);
+					max_width = std::min(max_width, constraints.width.max());
 					height += widget_geometries[k].size[1] + margin_y;
 				}
 			}
 
 			return main::widget_size_constraints{
-				.width{
-					.min = min_width + 2.0f*margin_x,
-					.max = std::max(min_width, max_width) + 2.0f*margin_x
+				.width = main::widget_size_range{
+					min_width + 2.0f*margin_x,
+					std::max(min_width, max_width) + 2.0f*margin_x
 				},
-				.height{
-					.min = height,
-					.max = std::numeric_limits<float>::infinity()
+				.height = main::widget_size_range{
+					height,
+					std::numeric_limits<float>::infinity()
 				},
 				.aspect_ratio = std::nullopt
 			};

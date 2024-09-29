@@ -26,13 +26,8 @@ namespace terraformer::ui::main
 
 	constexpr widget_size_constraints max(widget_size_constraints const& a, widget_size_constraints const& b)
 	{
-		auto const w_min = std::max(a.width.min, b.width.min);
-		auto const w_max_temp = std::min(a.width.max, b.width.max);
-		auto const w_max = w_max_temp < w_min ? w_min : w_max_temp;
-
-		auto const h_min = std::max(a.height.min, b.height.min);
-		auto const h_max_temp = std::min(a.height.max, b.height.max);
-		auto const h_max = h_max_temp < h_min ? h_min : h_max_temp;
+		auto const width_range = merge(a.width, b.width);
+		auto const height_range = merge(a.height, b.height);
 
 		std::optional<float> aspect_ratio{};
 		if(a.aspect_ratio.has_value() || b.aspect_ratio.has_value())
@@ -44,59 +39,53 @@ namespace terraformer::ui::main
 		}
 
 		return widget_size_constraints{
-			.width{
-				.min = w_min,
-				.max = w_max
-			},
-			.height{
-				.min = h_min,
-				.max = h_max
-			},
+			.width = width_range,
+			.height = height_range,
 			.aspect_ratio = aspect_ratio
 		};
 	}
 
 	inline scaling minimize_height(widget_size_constraints const& constraints)
 	{
-		auto const preliminary_height = constraints.height.min;
+		auto const preliminary_height = constraints.height.min();
 		if(constraints.aspect_ratio.has_value())
 		{
 			auto const width = std::clamp(
 				*constraints.aspect_ratio*preliminary_height,
-				constraints.width.min,
-				constraints.width.max
+				constraints.width.min(),
+				constraints.width.max()
 			);
 
 			auto const new_height = width/(*constraints.aspect_ratio);
-			if(new_height < constraints.height.min || new_height > constraints.height.max)
+			if(new_height < constraints.height.min() || new_height > constraints.height.max())
 			{ throw std::runtime_error{"Impossible size constraint"}; }
 
 			return scaling{width, new_height, 1.0f};
 		}
 
-		return scaling{constraints.width.min, preliminary_height, 1.0f};
+		return scaling{constraints.width.min(), preliminary_height, 1.0f};
 	};
 
 	inline scaling minimize_width(widget_size_constraints const& constraints)
 	{
-		auto const preliminary_width = constraints.width.min;
+		auto const preliminary_width = constraints.width.min();
 		if(constraints.aspect_ratio.has_value())
 		{
 			auto const height = std::clamp(
 				preliminary_width/(*constraints.aspect_ratio),
-				constraints.height.min,
-				constraints.height.max
+				constraints.height.min(),
+				constraints.height.max()
 			);
 
 			auto const new_width = height*(*constraints.aspect_ratio);
 
-			if(new_width < constraints.width.min || new_width > constraints.width.max)
+			if(new_width < constraints.width.min() || new_width > constraints.width.max())
 			{ throw std::runtime_error{"Impossible size constraint"}; }
 
 			return scaling{new_width, height, 1.0f};
 		}
 
-		return scaling{preliminary_width, constraints.height.min, 1.0f};
+		return scaling{preliminary_width, constraints.height.min(), 1.0f};
 	}
 
 	struct widget_collection_ref;
