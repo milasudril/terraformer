@@ -28,6 +28,7 @@ namespace terraformer::ui::main
 				&w.get(),
 				initial_state,
 				widget_size_constraints{},
+				scaling{},
 				initial_geometry,
 				[](void* obj, widget_rendering_result result) {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(result);

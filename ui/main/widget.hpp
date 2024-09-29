@@ -96,6 +96,7 @@ namespace terraformer::ui::main
 			void*,
 			widget_state,
 			widget_size_constraints,
+			scaling,
 			widget_geometry,
 			prepare_for_presentation_callback,
 			cursor_enter_callback,
@@ -150,6 +151,9 @@ namespace terraformer::ui::main
 
 		auto size_constraints() const
 		{ return m_span.template get_by_type<widget_size_constraints>(); }
+
+		auto sizes() const
+		{ return m_span.template get_by_type<scaling>(); }
 
 		auto widget_geometries() const
 		{ return m_span.template get_by_type<widget_geometry>(); }
@@ -402,6 +406,12 @@ namespace terraformer::ui::main
 		widget_size_constraints compute_size_constraints()
 		{ return m_compute_size_contraints(m_widget); }
 
+		scaling compute_size(widget_height_request req)
+		{ return m_compute_size_given_width(m_widget, req); }
+
+		scaling compute_size(widget_width_request req)
+		{ return m_compute_size_given_height(m_widget, req); }
+
 		void confirm_size(fb_size size)
 		{ m_size_confirmed(m_widget, size); }
 
@@ -437,6 +447,29 @@ namespace terraformer::ui::main
 		auto const contraints_from_layout = root.run_layout();
 
 		return merge(initial_constriants, contraints_from_layout);
+	}
+
+	inline scaling compute_size(root_widget& root)
+	{
+		// TODO: Decide which dimension to minimize. Should be determined by parent
+		auto const initial_size = root.compute_size(widget_width_request{});
+		auto& children = root.children();
+		auto const widget_states = children.widget_states();
+		auto const sizes = children.sizes();
+		auto const n = std::size(children);
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{
+			if(!widget_states[k].collapsed) [[likely]]
+			{
+				root_widget next_root{children, k};
+				sizes[k] = compute_size(next_root);
+			}
+		}
+
+		// TODO:	auto const contraints_from_layout = root.run_layout();
+		// return merge(initial_constriants, contraints_from_layout);
+
+		return initial_size;
 	}
 
 	inline void confirm_sizes(root_widget& root, fb_size size)
