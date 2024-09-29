@@ -1,7 +1,10 @@
 #ifndef TERRAFORMER_UI_MAIN_WIDGET_HPP
 #define TERRAFORMER_UI_MAIN_WIDGET_HPP
 
+#include "./widget_size_range.hpp"
+#include "./widget_state.hpp"
 #include "./widget_geometry.hpp"
+#include "./widget_state.hpp"
 #include "./widget_rendering_result.hpp"
 #include "./config.hpp"
 
@@ -14,38 +17,6 @@
 
 namespace terraformer::ui::main
 {
-	enum class focus_indicator_mode:uint16_t{automatic, always_hidden, always_visible};
-
-	struct widget_state
-	{
-		uint16_t collapsed:1;
-		uint16_t hidden:1;
-		uint16_t maximized:1;
-		uint16_t disabled:1;
-		uint16_t mbe_sensitive:1;
-		uint16_t kbe_sensitive:1;
-		focus_indicator_mode cursor_focus_indicator_mode:2;
-		focus_indicator_mode kbd_focus_indicator_mode:2;
-
-		bool has_cursor_focus_indicator() const
-		{
-			return (cursor_focus_indicator_mode == focus_indicator_mode::automatic && mbe_sensitive)
-				|| cursor_focus_indicator_mode == focus_indicator_mode::always_visible;
-		}
-
-		bool has_keyboard_focus_indicator() const
-		{
-			return (kbd_focus_indicator_mode == focus_indicator_mode::automatic && kbe_sensitive)
-				|| kbd_focus_indicator_mode == focus_indicator_mode::always_visible;
-		}
-	};
-
-	struct widget_size_range
-	{
-		float min = 0.0f;
-		float max = std::numeric_limits<float>::infinity();
-	};
-
 	struct widget_size_constraints
 	{
 		widget_size_range width;
