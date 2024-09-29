@@ -60,6 +60,7 @@ namespace terraformer::ui::widgets
 	public:
 		using widget_with_default_actions::handle_event;
 		using widget_with_default_actions::compute_size_constraints;
+		using widget_with_default_actions::compute_size;
 
 		template<class Widget>
 		vbox& append(Widget&& widget)

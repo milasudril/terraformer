@@ -51,6 +51,32 @@ terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::
 	};
 }
 
+terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_width_request)
+{
+	// TODO: Use height to find required width (multi-line)
+	if(m_dirty_bits & text_dirty)
+	{ regenerate_text_mask(); }
+
+	return scaling{
+		static_cast<float>(m_rendered_text.width() + 2*m_margin),
+		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		1.0f
+	};
+}
+
+terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_height_request)
+{
+// TODO: Use height to find required width (multi-line)
+	if(m_dirty_bits & text_dirty)
+	{ regenerate_text_mask(); }
+
+	return scaling{
+		static_cast<float>(m_rendered_text.width() + 2*m_margin),
+		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		1.0f
+	};
+}
+
 void terraformer::ui::widgets::label::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
 	m_margin = static_cast<uint32_t>(cfg.output_area.padding + cfg.output_area.border_thickness);

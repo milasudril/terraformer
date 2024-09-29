@@ -82,8 +82,8 @@ namespace terraformer::ui::main
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
 
 	using compute_size_constraints_callback = widget_size_constraints (*)(void*);
-	using compute_width_for_height_callback = scaling (*)(void*, widget_width_request);
-	using compute_height_for_width_callback = scaling (*)(void*, widget_height_request);
+	using compute_size_given_height_callback = scaling (*)(void*, widget_width_request);
+	using compute_size_given_width_callback = scaling (*)(void*, widget_height_request);
 	using get_children_callback = widget_collection_ref (*)(void*);
 	using get_children_const_callback = widget_collection_view (*)(void const*);
 	using get_layout_callback = layout_policy_ref (*)(void const*);
@@ -103,8 +103,8 @@ namespace terraformer::ui::main
 			cursor_position_callback,
 			mouse_button_callback,
 			compute_size_constraints_callback,
-			compute_width_for_height_callback,
-			compute_height_for_width_callback,
+			compute_size_given_height_callback,
+			compute_size_given_width_callback,
 			size_callback,
 			theme_updated_callback,
 			get_children_callback,
@@ -157,14 +157,14 @@ namespace terraformer::ui::main
 		auto render_callbacks() const
 		{ return m_span.template get_by_type<prepare_for_presentation_callback>(); }
 
-		auto compute_size_constraints_callbacks() const
+		[[deprecated("Replace with height for width and vice versa")]]  auto compute_size_constraints_callbacks() const
 		{ return m_span.template get_by_type<compute_size_constraints_callback>(); }
 
-		auto compute_width_for_height_callbacks() const
-		{ return m_span.template get_by_type<compute_width_for_height_callback>(); }
+		auto compute_size_given_height_callbacks() const
+		{ return m_span.template get_by_type<compute_size_given_height_callback>(); }
 
-		auto compute_height_for_width_callbacks() const
-		{ return m_span.template get_by_type<compute_height_for_width_callback>(); }
+		auto compute_size_given_width_callbacks() const
+		{ return m_span.template get_by_type<compute_size_given_width_callback>(); }
 
 		auto size_callbacks() const
 		{ return m_span.template get_by_type<size_callback>(); }
@@ -361,6 +361,8 @@ namespace terraformer::ui::main
 			m_widget{widgets.widget_pointers()[index]},
 			m_children{widgets.get_children_callbacks()[index](m_widget)},
 			m_compute_size_contraints{widgets.compute_size_constraints_callbacks()[index]},
+			m_compute_size_given_width{widgets.compute_size_given_width_callbacks()[index]},
+			m_compute_size_given_height{widgets.compute_size_given_height_callbacks()[index]},
 			m_size_confirmed{widgets.event_callbacks<fb_size>()[index]},
 			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
 		{}
@@ -374,6 +376,16 @@ namespace terraformer::ui::main
 			m_compute_size_contraints{
 				[](void* obj) {
 					return static_cast<Widget*>(obj)->compute_size_constraints();
+				}
+			},
+			m_compute_size_given_width{
+				[](void* obj, widget_height_request req){
+					return static_cast<Widget*>(obj)->compute_size_given_width(req);
+				}
+			},
+			m_compute_size_given_height{
+				[](void* obj, widget_width_request req){
+					return static_cast<Widget*>(obj)->compute_size_given_height(req);
 				}
 			},
 			m_size_confirmed{
@@ -400,7 +412,9 @@ namespace terraformer::ui::main
 		void* m_widget = nullptr;
 		widget_collection_ref m_children;
 		compute_size_constraints_callback m_compute_size_contraints = [](void*){return widget_size_constraints{};};
-		event_callback_t<fb_size> m_size_confirmed =[](void*, fb_size){};
+		compute_size_given_width_callback m_compute_size_given_width = [](void*, widget_height_request){return scaling{};};
+		compute_size_given_height_callback m_compute_size_given_height = [](void*, widget_width_request){return scaling{};};
+		event_callback_t<fb_size> m_size_confirmed = [](void*, fb_size){};
 		layout_policy_ref m_layout;
 	};
 

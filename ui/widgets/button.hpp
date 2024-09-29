@@ -76,6 +76,10 @@ namespace terraformer::ui::widgets
 
 		main::widget_size_constraints compute_size_constraints();
 
+		scaling compute_size(main::widget_width_request req);
+
+		scaling compute_size(main::widget_height_request req);
+
 		void handle_event(main::fb_size size)
 		{
 			m_current_size = size;
