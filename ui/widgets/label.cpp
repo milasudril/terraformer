@@ -49,7 +49,7 @@ terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_
 
 terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_height_request)
 {
-// TODO: Use height to find required width (multi-line)
+// TODO: Use width to find required height (multi-line)
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
