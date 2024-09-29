@@ -39,6 +39,11 @@ namespace terraformer::ui::main
 				[](void const*, widget_collection_ref&){
 					return widget_size_constraints{};
 				}
+			},
+			m_update_widget_locations_new{
+				[](void const*, widget_collection_ref&){
+					return scaling{};
+				}
 			}
 		{}
 
@@ -49,15 +54,24 @@ namespace terraformer::ui::main
 				[](void const* handle, widget_collection_ref& widgets){
 					return static_cast<LayoutPolicy*>(handle)->update_widget_locations(widgets);
 				}
+			},
+			m_update_widget_locations_new{
+				[](void const* handle, widget_collection_ref& widgets){
+					return static_cast<LayoutPolicy*>(handle)->update_widget_locations_new(widgets);
+				}
 			}
 		{}
 
 		widget_size_constraints update_widget_locations(widget_collection_ref& widgets) const
 		{ return m_update_widget_locations(m_handle, widgets); }
 
+		scaling update_widget_locations_new(widget_collection_ref& widgets) const
+		{ return m_update_widget_locations_new(m_handle, widgets); }
+
 	private:
 		void const* m_handle;
 		widget_size_constraints (*m_update_widget_locations)(void const*, widget_collection_ref&);
+		scaling (*m_update_widget_locations_new)(void const*, widget_collection_ref&);
 	};
 
 	template<class EventType, class ... Args>
@@ -418,6 +432,9 @@ namespace terraformer::ui::main
 		widget_size_constraints run_layout()
 		{ return m_layout.update_widget_locations(m_children); }
 
+		scaling run_layout_new()
+		{ return m_layout.update_widget_locations_new(m_children); }
+
 	private:
 		void* m_widget = nullptr;
 		widget_collection_ref m_children;
@@ -466,10 +483,13 @@ namespace terraformer::ui::main
 			}
 		}
 
-		// TODO:	auto const contraints_from_layout = root.run_layout();
-		// return merge(initial_constriants, contraints_from_layout);
+		auto const size_from_layout = root.run_layout_new();
 
-		return initial_size;
+		return scaling{
+			std::max(initial_size[0], size_from_layout[0]),
+			std::max(initial_size[1], size_from_layout[1]),
+			std::max(initial_size[2], size_from_layout[2])
+		};
 	}
 
 	inline void confirm_sizes(root_widget& root, fb_size size)
