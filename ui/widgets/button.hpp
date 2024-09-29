@@ -74,8 +74,6 @@ namespace terraformer::ui::widgets
 			}
 		}
 
-		main::widget_size_constraints compute_size_constraints();
-
 		scaling compute_size(main::widget_width_request req);
 
 		scaling compute_size(main::widget_height_request req);
@@ -174,7 +172,6 @@ namespace terraformer::ui::widgets
 
 		using button::handle_event;
 		using button::prepare_for_presentation;
-		using button::compute_size_constraints;
 		using button::text;
 		using button::value;
 		using button::theme_updated;

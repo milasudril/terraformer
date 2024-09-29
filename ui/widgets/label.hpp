@@ -37,8 +37,6 @@ namespace terraformer::ui::widgets
 
 		void prepare_for_presentation(main::widget_rendering_result output_rect);
 
-		main::widget_size_constraints compute_size_constraints();
-
 		scaling compute_size(main::widget_width_request req);
 
 		scaling compute_size(main::widget_height_request req);

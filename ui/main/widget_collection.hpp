@@ -27,7 +27,6 @@ namespace terraformer::ui::main
 			m_objects.push_back(
 				&w.get(),
 				initial_state,
-				widget_size_constraints{},
 				scaling{},
 				initial_geometry,
 				[](void* obj, widget_rendering_result result) {
@@ -44,9 +43,6 @@ namespace terraformer::ui::main
 				},
 				[](void* obj, mouse_button_event const& mbe) {
 					static_cast<Widget*>(obj)->handle_event(mbe);
-				},
-				[](void* obj) -> widget_size_constraints {
-					return static_cast<Widget*>(obj)->compute_size_constraints();
 				},
 				[](void* obj, widget_width_request req) -> scaling{
 					return static_cast<Widget*>(obj)->compute_size(req);

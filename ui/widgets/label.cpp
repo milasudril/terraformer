@@ -34,23 +34,6 @@ void terraformer::ui::widgets::label::regenerate_textures()
 	m_dirty_bits |= gpu_textures_dirty;
 }
 
-terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::compute_size_constraints()
-{
-	if(m_dirty_bits & text_dirty)
-	{ regenerate_text_mask(); }
-
-	return main::widget_size_constraints{
-		.width = main::widget_size_range{
-			static_cast<float>(m_rendered_text.width() + 2*m_margin),
-			std::numeric_limits<float>::infinity()
-		},
-		.height = main::widget_size_range{
-			static_cast<float>(m_rendered_text.height() + 2*m_margin),
-			std::numeric_limits<float>::infinity()
-		}
-	};
-}
-
 terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_width_request)
 {
 	// TODO: Use height to find required width (multi-line)
