@@ -398,7 +398,7 @@ namespace terraformer::ui::main
 
 		auto const contraints_from_layout = root.run_layout();
 
-		return max(initial_constriants, contraints_from_layout);
+		return merge(initial_constriants, contraints_from_layout);
 	}
 
 	inline void confirm_sizes(root_widget& root, fb_size size)

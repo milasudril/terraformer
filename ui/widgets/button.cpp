@@ -69,8 +69,7 @@ terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::button:
 		.height = main::widget_size_range{
 			static_cast<float>(m_rendered_text.height() + 2*m_margin),
 			std::numeric_limits<float>::infinity()
-		},
-		.aspect_ratio = std::nullopt
+		}
 	};
 }
 

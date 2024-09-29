@@ -47,8 +47,7 @@ namespace terraformer::ui::widgets
 				.height = main::widget_size_range{
 					height,
 					std::numeric_limits<float>::infinity()
-				},
-				.aspect_ratio = std::nullopt
+				}
 			};
 		}
 
