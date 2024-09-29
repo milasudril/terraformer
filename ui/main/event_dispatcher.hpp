@@ -101,7 +101,7 @@ namespace terraformer::ui::main
 		{
 			root_widget root{m_root_collection.get_attributes(), m_root_collection.first_element_index()};
 			// TODO: Pick width/height based on window size
-			auto const box_size = minimize_width(compute_size_constraints(root));
+			auto const box_size = compute_size(root);
 			confirm_sizes(
 				root,
 				fb_size{
