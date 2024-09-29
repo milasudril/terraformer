@@ -1,10 +1,10 @@
-//@	{"target":{"name":"widget.test"}}
+//@	{"target":{"name":"widget_size_constraints.test"}}
 
-#include "./widget.hpp"
+#include "./widget_size_constraints.hpp"
 
 #include <testfwk/testfwk.hpp>
 
-TESTCASE(terraformer_ui_main_widget_size_minimize_height)
+TESTCASE(terraformer_ui_main_widget_size_constraints_minimize_height)
 {
 	terraformer::ui::main::widget_size_constraints const size{
 		.width = terraformer::ui::main::widget_size_range{32.0f, 256.0f},
@@ -16,7 +16,7 @@ TESTCASE(terraformer_ui_main_widget_size_minimize_height)
 	EXPECT_EQ(scaling[1], 16.0f);
 }
 
-TESTCASE(terraformer_ui_main_widget_size_minimize_width)
+TESTCASE(terraformer_ui_main_widget_size_constraints_minimize_width)
 {
 	terraformer::ui::main::widget_size_constraints const size{
 		.width = terraformer::ui::main::widget_size_range{32.0f, 256.0f},
