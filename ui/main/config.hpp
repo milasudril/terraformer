@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_UI_MAIN_CONFIG_HPP
 #define TERRAFORMER_UI_MAIN_CONFIG_HPP
 
+#include "./generic_texture.hpp"
+
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 
