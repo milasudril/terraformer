@@ -1,28 +1,33 @@
 //@	{"target":{"name":"widget_collection_ref.o"}}
 
 #include "./widget_collection_ref.hpp"
+#include <vector>
 
 terraformer::ui::main::find_recursive_result
 terraformer::ui::main::find_recursive(cursor_position pos, widget_collection_ref const& widgets)
 {
-	// Is pos within any widget at this level
-	auto const i = find(pos, widgets.as_view());
-	if(i == widget_collection_view::npos) [[likely]]
+	std::vector<widget_collection_ref> contexts;
+	contexts.reserve(16);
+	contexts.push_back(widgets);
+
+	find_recursive_result retval{widget_collection_ref{}, widget_collection_view::npos};
+
+	while(!contexts.empty())
 	{
-		// No, return empty
-		return find_recursive_result{widget_collection_ref{}, widget_collection_view::npos};
+		auto const current_context = contexts.back();
+		contexts.pop_back();
+
+		auto const i = find(pos, current_context.as_view());
+		if(i == widget_collection_view::npos)
+		{ continue; }
+
+		retval.widget_collection = current_context;
+		retval.index = i;
+
+		auto const widget_pointers = current_context.widget_pointers();
+		auto const get_children_callbacks = current_context.get_children_callbacks();
+		contexts.push_back(get_children_callbacks[i](widget_pointers[i]));
 	}
 
-	// Is pos within any child widget
-	auto const widget_pointers = widgets.widget_pointers();
-	auto const get_children_callbacks = widgets.get_children_callbacks();
-	auto const j = find_recursive(pos, get_children_callbacks[i](widget_pointers[i]));
-	if(j.index == widget_collection_view::npos) [[unlikely]]
-	{
-		// No, return the widget at current level
-		return find_recursive_result{widgets, i};
-	}
-
-	// Yes, return the widget at child level
-	return j;
+	return retval;
 }
