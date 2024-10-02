@@ -222,27 +222,44 @@ namespace terraformer::ui::main
 		};
 	}
 
-	struct find_recursive_result
+	class find_recursive_result
 	{
-		widget_collection_ref widget_collection{};
-		widget_collection_view::index_type index{widget_collection_ref::npos};
+	public:
+		find_recursive_result() = default;
+
+		explicit find_recursive_result(
+			widget_collection_ref const& widgets,
+			widget_collection_view::index_type index
+		):m_widgets{widgets},
+			m_index{index}
+		{}
 
 		bool operator==(find_recursive_result const& other) const
-		{ return is_same(widget_collection, other.widget_collection) && index == other.index; }
+		{ return is_same(m_widgets, other.m_widgets) && m_index == other.m_index; }
 
 		bool operator!=(find_recursive_result const& other) const
 		{ return !(*this == other); }
 
 		[[nodiscard]] bool empty() const
-		{ return index == widget_collection_ref::npos; }
+		{ return m_index == widget_collection_ref::npos; }
 
 		widget_geometry geometry() const
 		{
-			return widget_collection.widget_geometries()[index];
+			return m_widgets.widget_geometries()[m_index];
 		}
 
 		widget_state state() const
-		{ return widget_collection.widget_states()[index]; }
+		{ return m_widgets.widget_states()[m_index]; }
+
+		auto widgets() const
+		{ return m_widgets; }
+
+		auto index() const
+		{ return m_index; }
+
+	private:
+		widget_collection_ref m_widgets{};
+		widget_collection_view::index_type m_index{widget_collection_ref::npos};
 	};
 
 	template<class EventType>
@@ -251,9 +268,9 @@ namespace terraformer::ui::main
 		if(res.empty())
 		{ return false; }
 
-		auto const widgets = res.widget_collection.widget_pointers();
-		auto const callbacks = res.widget_collection.template event_callbacks<EventType>();
-		callbacks[res.index](widgets[res.index], std::forward<EventType>(e));
+		auto const widgets = res.widgets().widget_pointers();
+		auto const callbacks = res.widgets().template event_callbacks<EventType>();
+		callbacks[res.index()](widgets[res.index()], std::forward<EventType>(e));
 
 		return true;
 	}

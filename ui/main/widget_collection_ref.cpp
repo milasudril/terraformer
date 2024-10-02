@@ -21,13 +21,15 @@ terraformer::ui::main::find_recursive(cursor_position pos, widget_collection_ref
 		if(i == widget_collection_view::npos)
 		{ continue; }
 
-		retval.widget_collection = current_context;
-		retval.index = i;
+		retval = find_recursive_result{current_context, i};
+		printf("/%zu", i.get());
 
 		auto const widget_pointers = current_context.widget_pointers();
 		auto const get_children_callbacks = current_context.get_children_callbacks();
 		contexts.push_back(get_children_callbacks[i](widget_pointers[i]));
 	}
+
+	puts("");
 
 	return retval;
 }
