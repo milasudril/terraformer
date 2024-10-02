@@ -101,6 +101,9 @@ namespace terraformer
 			m_size = new_size;
 		}
 
+		void pop_back()
+		{ truncate_from(index_type{(m_size - size_type{1}).get()}); }
+
 		void clear() noexcept
 		{
 			std::destroy(begin(), end());

@@ -1,13 +1,14 @@
 //@	{"target":{"name":"widget_collection_ref.o"}}
 
 #include "./widget_collection_ref.hpp"
-#include <vector>
+
+#include "lib/array_classes/single_array.hpp"
 
 terraformer::ui::main::find_recursive_result
 terraformer::ui::main::find_recursive(cursor_position pos, widget_collection_ref const& widgets)
 {
-	std::vector<widget_collection_ref> contexts;
-	contexts.reserve(16);
+	single_array<widget_collection_ref> contexts;
+	contexts.reserve(decltype(contexts)::size_type{16});
 	contexts.push_back(widgets);
 
 	find_recursive_result retval{widget_collection_ref{}, widget_collection_view::npos};
