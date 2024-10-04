@@ -39,8 +39,10 @@ namespace terraformer::ui::main
 		void handle_event(Tag, cursor_motion_event const& event)
 		{
 			auto res = find_recursive(event.where, m_root_collection.get_attributes());
+
 			if(res != m_hot_widget)
 			{
+				printf("%zd\n", res.global_index().get());
 				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
 				{ printf("cursor left the void %zu\n", event_count); }
 

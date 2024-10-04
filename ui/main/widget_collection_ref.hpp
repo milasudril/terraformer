@@ -229,9 +229,11 @@ namespace terraformer::ui::main
 
 		explicit find_recursive_result(
 			widget_collection_ref const& widgets,
-			widget_collection_view::index_type index
+			widget_collection_ref::index_type index,
+			widget_collection_ref::index_type global_index
 		):m_widgets{widgets},
-			m_index{index}
+			m_index{index},
+			m_global_index{global_index}
 		{}
 
 		bool operator==(find_recursive_result const& other) const
@@ -257,9 +259,13 @@ namespace terraformer::ui::main
 		auto index() const
 		{ return m_index; }
 
+		auto global_index() const
+		{ return m_global_index; }
+
 	private:
 		widget_collection_ref m_widgets{};
-		widget_collection_view::index_type m_index{widget_collection_ref::npos};
+		widget_collection_ref::index_type m_index{widget_collection_ref::npos};
+		widget_collection_ref::index_type m_global_index{widget_collection_ref::npos};
 	};
 
 	template<class EventType>

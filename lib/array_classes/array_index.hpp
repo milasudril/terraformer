@@ -152,6 +152,13 @@ namespace terraformer
 	{ return base -= offset; }
 
 	template<class T, class Rep>
+	constexpr auto operator-(array_index<T, Rep> a, array_index<T, Rep> b) noexcept
+	{
+		using offset_type = typename array_index<T, Rep>::offset_type;
+		return static_cast<offset_type>(a.get()) - static_cast<offset_type>(b.get());
+	}
+
+	template<class T, class Rep>
 	constexpr auto& deref(T* ptr, array_index<T, Rep> index) noexcept
 	{ return ptr[index.get()]; }
 
