@@ -18,9 +18,29 @@ namespace terraformer::ui::main
 		class FrameRenderer,
 		class ErrorHandler
 	>
-	struct event_dispatcher
+	class event_dispatcher
 	{
 	public:
+		template<class Cfg, class Wc, class Cr, class Fr, class Eh, widget Widget>
+		explicit event_dispatcher(
+			Cfg&& cfg,
+			Wc&& wc,
+			Cr&& cr,
+			Fr&& fr,
+			Eh&& eh,
+			std::reference_wrapper<Widget> root
+		):
+		m_config{std::forward<Cfg>(cfg)},
+		m_window_controller{std::forward<Wc>(wc)},
+		m_content_renderer{std::forward<Cr>(cr)},
+		m_frame_renderer{std::forward<Fr>(fr)},
+		m_error_handler{std::forward<Eh>(eh)}
+		{
+			m_root_collection.append(root, widget_geometry{});
+			m_flat_collection = flatten(m_root_collection.get_attributes());
+			theme_updated(std::as_const(m_root_collection).get_attributes(), m_config);
+		}
+
 		template<class Tag>
 		void handle_event(Tag, error_message const& msg) noexcept
 		{ value_of(m_error_handler).handle_event(Tag{}, msg); }
@@ -79,12 +99,6 @@ namespace terraformer::ui::main
 		template<class Tag>
 		void handle_event(Tag, fb_size size)
 		{
-			if(!m_theme_is_up_to_date) [[unlikely]]
-			{
-				theme_updated(std::as_const(m_root_collection).get_attributes(), m_cfg);
-				m_theme_is_up_to_date = true;
-			}
-
 			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
@@ -135,8 +149,8 @@ namespace terraformer::ui::main
 			if(m_hot_widget != find_recursive_result{} /*&& m_hot_widget.state().has_cursor_focus_indicator()*/)
 			{
 				auto const& geometry = m_hot_widget.geometry();
-				auto const color = m_cfg.mouse_kbd_tracking.colors.mouse_focus_color;
-				auto const border_thickness = m_cfg.mouse_kbd_tracking.border_thickness;
+				auto const color = m_config.mouse_kbd_tracking.colors.mouse_focus_color;
+				auto const border_thickness = m_config.mouse_kbd_tracking.border_thickness;
 				using Frame = typename FrameRenderer::input_rectangle;
 				m_frame_renderer.render(
 					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
@@ -144,7 +158,7 @@ namespace terraformer::ui::main
 					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
 					Frame{
 						.thickness = border_thickness,
-						.texture = m_cfg.misc_textures.white.get_if<typename Frame::texture_type>(),
+						.texture = m_config.misc_textures.white.get_if<typename Frame::texture_type>(),
 						.tints = std::array{
 							0.0f*color,
 							0.0f*color,
@@ -160,21 +174,24 @@ namespace terraformer::ui::main
 			}
 		}
 
-		config m_cfg;
+	private:
+		config m_config;
 		WindowController m_window_controller;
 		ContentRenderer m_content_renderer;
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
-
-		bool m_theme_is_up_to_date = false;
-		find_recursive_result m_hot_widget{};
+		find_recursive_result m_hot_widget;
 
 		// TODO: Currently, a collection is used here, even though only one widget can be supported.
 		// A widget collection is currently necessary to set m_hot_widget properly
-		widget_collection m_root_collection{};
-		widget_collection m_flat_collection{};
+		widget_collection m_root_collection;
+		widget_collection m_flat_collection;
 
 	};
+
+		template<class Cfg, class Wc, class Cr, class Fr, class Eh, widget Widget>
+		event_dispatcher(Cfg&&, Wc&&, Cr&&, Fr&&, Eh&&, std::reference_wrapper<Widget> root) ->
+			event_dispatcher<Wc, Cr, Fr, Eh>;
 }
 
 

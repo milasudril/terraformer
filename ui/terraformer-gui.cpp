@@ -111,12 +111,9 @@ int main(int, char**)
 		window_controller{},
 		terraformer::ui::drawing_api::single_quad_renderer{},
 		terraformer::ui::drawing_api::frame_renderer{},
-		error_handler{}
+		error_handler{},
+		std::ref(my_outer_vbox)
 	};
-	event_dispatcher.m_root_collection.append(
-		std::ref(my_outer_vbox),
-		terraformer::ui::main::widget_geometry{}
-	);
 
 	mainwin.set_event_handler<mainwin_tag>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(
