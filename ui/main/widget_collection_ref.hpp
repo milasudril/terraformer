@@ -119,6 +119,8 @@ namespace terraformer::ui::main
 
 		using index_type = typename widget_span::index_type;
 
+		using reference = typename widget_span::reference;
+
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
 		widget_collection_ref_impl() = default;

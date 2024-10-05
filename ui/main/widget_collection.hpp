@@ -105,6 +105,8 @@ namespace terraformer::ui::main
 	inline auto find(find_recursive_result const& res, widget_collection const& widgets)
 	{ return find(res, widgets.get_attributes()); }
 
+	void flatten(widget_collection_ref::reference const& widget, widget_collection& result);
+
 	widget_collection flatten(widget_collection_ref const& widgets);
 }
 

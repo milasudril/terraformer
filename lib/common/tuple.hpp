@@ -204,6 +204,12 @@ namespace terraformer
 		static_assert(is_unique_v<Args...>, "Type not unique");
 		return get_index_from_type_impl<T, 0, Args...>();
 	}
+
+	template<class T, class ... Args>
+	constexpr auto get_value_from_type(tuple<Args...> const& t)
+	{
+		return t.template get<get_index_from_type<T, Args...>()>();
+	}
 }
 
 namespace std

@@ -4,24 +4,36 @@
 
 #include "lib/array_classes/single_array.hpp"
 
+void terraformer::ui::main::flatten(
+	widget_collection_ref::reference const& element,
+	widget_collection& ret
+)
+{
+	single_array<widget_collection_ref::reference> contexts;
+	contexts.push_back(element);
+	while(!contexts.empty())
+	{
+		auto const current = contexts.back();
+		contexts.pop_back();
+		ret.append(current);
+
+		auto const ptr = get_value_from_type<void*&>(current);
+		auto const get_children = get_value_from_type<get_children_callback&>(current);
+		auto const children = get_children(ptr);
+		for(auto k = children.first_element_index(); k != std::size(children); ++k)
+		{
+			// TODO: Implement a better way to loop backwards
+			auto const index = widget_collection_ref::index_type{std::size(children).get() - 1 - k.get()};
+			contexts.push_back(children.extract(index));
+		}
+	}
+}
+
+
 terraformer::ui::main::widget_collection terraformer::ui::main::flatten(widget_collection_ref const& root)
 {
 	widget_collection ret;
-	single_array<widget_collection_ref> contexts;
-	contexts.push_back(root);
-	while(!contexts.empty())
-	{
-		auto const current_context = contexts.back();
-		contexts.pop_back();
-
-		for(auto k = current_context.first_element_index(); k != std::size(current_context); ++k)
-		{
-			ret.append(current_context.extract(k));
-			auto const widget_pointers = current_context.widget_pointers();
-			auto const get_children_callbacks = current_context.get_children_callbacks();
-			contexts.push_back(get_children_callbacks[k](widget_pointers[k]));
-		}
-	}
-
+	for(auto k = root.first_element_index(); k != std::size(root); ++k)
+	{ flatten(root.extract(k), ret); }
 	return ret;
 }
