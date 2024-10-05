@@ -29,6 +29,13 @@ namespace terraformer::ui::main
 		void handle_event(Tag, mouse_button_event const& event)
 		{
 			auto res = find_recursive(event.where, m_root_collection.get_attributes());
+			m_flat_collection = flatten(m_root_collection.get_attributes());
+			printf("%zu %p %p\n",
+				res.global_index().get(),
+				res.widgets().widget_pointers()[res.index()],
+				m_flat_collection.get_attributes().widget_pointers()[res.global_index()]
+			);
+
 			if(!try_dispatch(event, res))
 			{ printf("mbe in the void %zu\n", event_count); }
 
@@ -42,7 +49,6 @@ namespace terraformer::ui::main
 
 			if(res != m_hot_widget)
 			{
-				printf("%zd\n", res.global_index().get());
 				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
 				{ printf("cursor left the void %zu\n", event_count); }
 
@@ -126,7 +132,7 @@ namespace terraformer::ui::main
 			prepare_for_presentation(widgets_to_render);
 
 			show_widgets(value_of(m_content_renderer), widgets_to_render);
-			if(m_hot_widget != find_recursive_result{} && m_hot_widget.state().has_cursor_focus_indicator())
+			if(m_hot_widget != find_recursive_result{} /*&& m_hot_widget.state().has_cursor_focus_indicator()*/)
 			{
 				auto const& geometry = m_hot_widget.geometry();
 				auto const color = m_cfg.mouse_kbd_tracking.colors.mouse_focus_color;
@@ -166,6 +172,7 @@ namespace terraformer::ui::main
 		// TODO: Currently, a collection is used here, even though only one widget can be supported.
 		// A widget collection is currently necessary to set m_hot_widget properly
 		widget_collection m_root_collection{};
+		widget_collection m_flat_collection{};
 
 	};
 }

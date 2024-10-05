@@ -98,9 +98,13 @@ int main(int, char**)
 
 	terraformer::ui::widgets::button ok;
 	ok.text(u8"Ok");
-	my_outer_vbox.append(std::ref(ok));
 
+	terraformer::ui::widgets::button cancel;
+	cancel.text(u8"Cancel");
+
+	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
+	my_outer_vbox.append(std::ref(cancel));
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		terraformer::ui::theming::load_default_config<terraformer::ui::drawing_api::gl_texture>(),
