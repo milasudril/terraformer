@@ -179,6 +179,9 @@ namespace terraformer::ui::main
 		auto get_span() const
 		{ return m_span; }
 
+		auto extract(index_type k) const
+		{ return m_span[k]; }
+
 	private:
 		widget_span m_span;
 	};

@@ -1,3 +1,5 @@
+//@	{"dependencies_extra":[{"ref":"./widget_collection.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_UI_MAIN_WIDGET_COLLECTION_HPP
 #define TERRAFORMER_UI_MAIN_WIDGET_COLLECTION_HPP
 
@@ -70,6 +72,17 @@ namespace terraformer::ui::main
 			return *this;
 		}
 
+		widget_collection& append(widget_collection_ref::widget_span::reference const& val)
+		{
+			apply(
+				[&objects = m_objects]<class... T>(T&&... vals){
+					objects.push_back(std::forward<T>(vals)...);
+				},
+				val
+			);
+			return *this;
+		}
+
 		auto get_attributes()
 		{ return widget_collection_ref{m_objects.attributes()}; }
 
@@ -86,8 +99,10 @@ namespace terraformer::ui::main
 	inline auto find(cursor_position pos, widget_collection const& widgets)
 	{ return find(pos, widgets.get_attributes());}
 
-	void theme_updated(widget_collection const& widgets, config const& cfg)
+	inline void theme_updated(widget_collection const& widgets, config const& cfg)
 	{ theme_updated(widgets.get_attributes(), cfg); }
+
+	widget_collection flatten(widget_collection_ref const& widgets);
 }
 
 #endif
