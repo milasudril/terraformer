@@ -220,9 +220,7 @@ namespace terraformer::ui::main
 		if(i == std::end(widgets.widget_geometries())) [[likely]]
 		{ return widget_collection_view::npos; }
 
-		return widget_collection_view::index_type{
-			static_cast<size_t>(i - std::begin(widgets.widget_geometries()))
-		};
+		return widgets.first_element_index() + (i - std::begin(widgets.widget_geometries()));
 	}
 
 	class find_recursive_result
@@ -249,9 +247,10 @@ namespace terraformer::ui::main
 		{ return m_index == widget_collection_ref::npos; }
 
 		widget_geometry geometry() const
-		{
-			return m_widgets.widget_geometries()[m_index];
-		}
+		{ return m_widgets.widget_geometries()[m_index]; }
+
+		auto pointer() const
+		{ return m_widgets.widget_pointers()[m_index]; }
 
 		widget_state state() const
 		{ return m_widgets.widget_states()[m_index]; }
@@ -285,6 +284,18 @@ namespace terraformer::ui::main
 	}
 
 	find_recursive_result find_recursive(cursor_position pos, widget_collection_ref const& widgets);
+
+	inline auto find(find_recursive_result const& res, widget_collection_view const& widgets)
+	{
+		auto const i = std::ranges::find(widgets.widget_pointers(), res.pointer());
+		if(i == std::end(widgets.widget_pointers()))
+		{ return widget_collection_view::npos; }
+
+		return widgets.first_element_index() + (i - std::begin(widgets.widget_pointers()));
+	}
+
+	inline auto find(find_recursive_result const& res, widget_collection_ref const& widgets)
+	{ return find(res, widgets.as_view()); }
 
 	inline void theme_updated(
 		widget_collection_view const& widgets,

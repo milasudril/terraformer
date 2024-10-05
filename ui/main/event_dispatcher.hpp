@@ -48,16 +48,17 @@ namespace terraformer::ui::main
 		template<class Tag>
 		void handle_event(Tag, mouse_button_event const& event)
 		{
-			auto res = find_recursive(event.where, m_root_collection.get_attributes());
-			m_flat_collection = flatten(m_root_collection.get_attributes());
-			printf("%zu %p %p\n",
-				res.global_index().get(),
-				res.widgets().widget_pointers()[res.index()],
-				m_flat_collection.get_attributes().widget_pointers()[res.global_index()]
-			);
+			auto const res = find_recursive(event.where, m_root_collection.get_attributes());
 
 			if(!try_dispatch(event, res))
-			{ printf("mbe in the void %zu\n", event_count); }
+			{
+				m_keyboard_widget = widget_collection::npos;
+				printf("mbe in the void %zu\n", event_count);
+			}
+			else
+			{ m_keyboard_widget = find(res, m_flat_collection); }
+
+			printf("%zu\n", m_keyboard_widget.get());
 
 			++event_count;
 		}
@@ -65,7 +66,7 @@ namespace terraformer::ui::main
 		template<class Tag>
 		void handle_event(Tag, cursor_motion_event const& event)
 		{
-			auto res = find_recursive(event.where, m_root_collection.get_attributes());
+			auto const res = find_recursive(event.where, m_root_collection.get_attributes());
 
 			if(res != m_hot_widget)
 			{
@@ -181,6 +182,7 @@ namespace terraformer::ui::main
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
 		find_recursive_result m_hot_widget;
+		widget_collection::index_type m_keyboard_widget{widget_collection::npos};
 
 		// TODO: Currently, a collection is used here, even though only one widget can be supported.
 		// A widget collection is currently necessary to set m_hot_widget properly

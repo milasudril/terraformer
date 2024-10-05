@@ -102,6 +102,9 @@ namespace terraformer::ui::main
 	inline void theme_updated(widget_collection const& widgets, config const& cfg)
 	{ theme_updated(widgets.get_attributes(), cfg); }
 
+	inline auto find(find_recursive_result const& res, widget_collection const& widgets)
+	{ return find(res, widgets.get_attributes()); }
+
 	widget_collection flatten(widget_collection_ref const& widgets);
 }
 

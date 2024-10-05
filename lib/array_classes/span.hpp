@@ -3,6 +3,8 @@
 
 #include "./array_index.hpp"
 
+#include <ranges>
+
 namespace terraformer
 {
 	template<class T, class IndexType = array_index<std::remove_const_t<T>>, class SizeType = array_size<std::remove_const_t<T>>>
@@ -70,5 +72,8 @@ namespace terraformer
 		T* m_end = nullptr;
 	};
 }
+
+template<class T, class IndexType, class SizeType>
+constexpr bool std::ranges::enable_borrowed_range<terraformer::span<T, IndexType, SizeType>> = true;
 
 #endif
