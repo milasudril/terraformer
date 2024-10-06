@@ -14,6 +14,8 @@ namespace terraformer
 		using index_type = IndexType;
 		using size_type = SizeType;
 
+		static constexpr index_type npos{static_cast<size_t>(-1)};
+
 		explicit span() = default;
 
 		explicit span(T* begin, T* end):m_begin{begin}, m_end{end}
@@ -25,7 +27,7 @@ namespace terraformer
 		constexpr auto end() const
 		{ return m_end; }
 
-		constexpr auto first_element_index() const
+		static constexpr auto first_element_index()
 		{ return index_type{}; }
 
 		constexpr auto last_element_index() const

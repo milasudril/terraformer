@@ -45,9 +45,9 @@ namespace terraformer::ui::main
 		);
 
 		if(i == std::end(widgets))
-		{ return widget_collection_view::npos; }
+		{ return span<widget_reference const>::npos; }
 
-		return widget_collection_view::first_element_index() + (i - std::begin(widgets));
+		return span<widget_reference const>::first_element_index() + (i - std::begin(widgets));
 	}
 }
 
