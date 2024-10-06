@@ -67,8 +67,11 @@ namespace terraformer::ui::widgets
 						break;
 
 					case main::mouse_button_action::release:
-						m_temp_state.reset();
-						m_on_activated(*this);
+						if(m_temp_state.has_value())
+						{
+							m_temp_state.reset();
+							m_on_activated(*this);
+						}
 						break;
 				}
 			}
