@@ -22,7 +22,6 @@ void terraformer::ui::main::flatten(
 		auto const children = get_children(ptr);
 		for(auto k = children.first_element_index(); k != std::size(children); ++k)
 		{
-			// TODO: Implement a better way to loop backwards
 			auto const index = children.first_element_index() + (children.last_element_index() - k);
 			contexts.push_back(children.extract(index));
 		}
