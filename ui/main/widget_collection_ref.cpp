@@ -54,29 +54,52 @@ void terraformer::ui::main::theme_updated(
 	widget_instance_info instance_info
 )
 {
-	auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
-	auto const widget_pointers = widgets.widget_pointers();
-	auto const get_children_callbacks = widgets.get_children_const_callbacks();
-
-	auto const n = std::size(widgets);
-	for(auto k = widgets.first_element_index(); k != n; ++k)
+	struct context
 	{
-		theme_updated_callbacks[k](
-			widget_pointers[k],
-			cfg,
-			widget_instance_info{
-				.section_level = instance_info.section_level,
-				.paragraph_index = k.get()
-			}
-		);
-		auto const children = get_children_callbacks[k](widget_pointers[k]);
-		theme_updated(
-			children,
-			cfg,
-			widget_instance_info{
-				.section_level = instance_info.section_level + 1,
-				.paragraph_index = 0
-			}
-		);
+		widget_collection_view widgets;
+		widget_instance_info instance_info;
+	};
+
+	single_array<context> contexts;
+	contexts.reserve(decltype(contexts)::size_type{16});
+	contexts.push_back(
+		context{
+			.widgets = widgets,
+			.instance_info = instance_info
+		}
+	);
+
+	while(!contexts.empty())
+	{
+		auto const current_context = contexts.back();
+		contexts.pop_back();
+
+		auto const theme_updated_callbacks = current_context.widgets.theme_updated_callbacks();
+		auto const widget_pointers = current_context.widgets.widget_pointers();
+		auto const get_children_callbacks = current_context.widgets.get_children_const_callbacks();
+
+		auto const n = std::size(current_context.widgets);
+		for(auto k = widgets.first_element_index(); k != n; ++k)
+		{
+			theme_updated_callbacks[k](
+				widget_pointers[k],
+				cfg,
+				widget_instance_info{
+					.section_level = current_context.instance_info.section_level,
+					.paragraph_index = k.get()
+				}
+			);
+
+			auto const children = get_children_callbacks[k](widget_pointers[k]);
+			contexts.push_back(
+				context{
+					.widgets = children,
+					.instance_info{
+						.section_level = instance_info.section_level + 1,
+						.paragraph_index = 0
+					}
+				}
+			);
+		}
 	}
 }
