@@ -180,10 +180,6 @@ namespace terraformer::ui::main
 			if(m_keyboard_widget != single_array<widget_reference>::npos)
 			{
 				auto const global_index = m_keyboard_widget;
-#if 0
-				m_flat_collection.first_element_index()
-					+ (m_keyboard_widget - widget_collection_view::first_element_index());
-#endif
 				auto const& keyboard_focus_item = m_flat_collection[global_index];
 
 				auto const flat_attribs = keyboard_focus_item.collection();
