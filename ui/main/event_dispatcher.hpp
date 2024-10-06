@@ -53,10 +53,12 @@ namespace terraformer::ui::main
 
 			if(!try_dispatch(event, res))
 			{
-				m_keyboard_widget = single_array<widget_reference>::npos;
+				if(event.action == mouse_button_action::press)
+				{ m_keyboard_widget = single_array<widget_reference>::npos; }
 				printf("mbe in the void %zu\n", event_count);
 			}
 			else
+			if(event.action == mouse_button_action::press)
 			{ m_keyboard_widget = find(res, m_flat_collection); }
 
 			printf("%zu\n", m_keyboard_widget.get());
