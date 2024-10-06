@@ -25,8 +25,6 @@ terraformer::ui::main::find_recursive(cursor_position pos, widget_collection_ref
 		widget_collection_view::npos
 	};
 
-	widget_collection_ref::index_type global_index{0};
-
 	while(!contexts.empty())
 	{
 		auto const current_context = contexts.back();
