@@ -173,6 +173,36 @@ namespace terraformer::ui::main
 					}
 				);
 			}
+
+			if(m_keyboard_widget != widget_collection::npos)
+			{
+				auto const flat_attribs = m_flat_collection.get_attributes();
+				auto const geoms = flat_attribs.widget_geometries();
+				auto const& geometry = geoms[m_keyboard_widget];
+				auto const color = m_config.mouse_kbd_tracking.colors.keyboard_focus_color;
+				auto const border_thickness =  m_config.mouse_kbd_tracking.border_thickness;
+
+				using Frame = typename FrameRenderer::input_rectangle;
+				m_frame_renderer.render(
+					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
+					geometry.origin,
+					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
+					Frame{
+						.thickness = border_thickness,
+						.texture = m_config.misc_textures.white.get_if<typename Frame::texture_type>(),
+						.tints = std::array{
+							0.0f*color,
+							0.0f*color,
+							0.0f*color,
+							0.0f*color,
+							color,
+							color,
+							color,
+							color
+						}
+					}
+				);
+			}
 		}
 
 	private:
