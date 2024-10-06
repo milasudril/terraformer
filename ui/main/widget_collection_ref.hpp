@@ -296,37 +296,10 @@ namespace terraformer::ui::main
 	inline auto find(find_recursive_result const& res, widget_collection_ref const& widgets)
 	{ return find(res, widgets.as_view()); }
 
-	inline void theme_updated(
+	 void theme_updated(
 		widget_collection_view const& widgets,
 		config const& cfg,
 		widget_instance_info instance_info = widget_instance_info{}
-	)
-	{
-		auto const theme_updated_callbacks = widgets.theme_updated_callbacks();
-		auto const widget_pointers = widgets.widget_pointers();
-		auto const get_children_callbacks = widgets.get_children_const_callbacks();
-
-		auto const n = std::size(widgets);
-		for(auto k = widgets.first_element_index(); k != n; ++k)
-		{
-			theme_updated_callbacks[k](
-				widget_pointers[k],
-				cfg,
-				widget_instance_info{
-					.section_level = instance_info.section_level,
-					.paragraph_index = k.get()
-				}
-			);
-			auto const children = get_children_callbacks[k](widget_pointers[k]);
-			theme_updated(
-				children,
-				cfg,
-				widget_instance_info{
-					.section_level = instance_info.section_level + 1,
-					.paragraph_index = 0
-				}
-			);
-		}
-	}
+	);
 }
 #endif
