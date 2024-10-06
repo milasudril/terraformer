@@ -130,6 +130,9 @@ namespace terraformer::ui::main
 		constexpr auto first_element_index() const
 		{ return m_span.first_element_index(); }
 
+		constexpr auto last_element_index() const
+		{ return m_span.last_element_index(); }
+
 		auto size() const
 		{ return std::size(m_span); }
 

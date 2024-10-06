@@ -23,7 +23,7 @@ void terraformer::ui::main::flatten(
 		for(auto k = children.first_element_index(); k != std::size(children); ++k)
 		{
 			// TODO: Implement a better way to loop backwards
-			auto const index = widget_collection_ref::index_type{std::size(children).get() - 1 - k.get()};
+			auto const index = children.first_element_index() + (children.last_element_index() - k);
 			contexts.push_back(children.extract(index));
 		}
 	}
