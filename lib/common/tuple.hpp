@@ -179,6 +179,37 @@ namespace terraformer
 	{
 		return !(b == a);
 	}
+
+	template <class...>
+	inline constexpr auto is_unique_v = std::true_type{};
+
+	template <class T, class... Rest>
+	inline constexpr auto is_unique_v<T, Rest...> = std::bool_constant<(!std::is_same_v<T, Rest> && ...) && is_unique_v<Rest...>>{};
+
+	template <class T, size_t Index, class Head, class ... Tail>
+	constexpr auto get_index_from_type_impl()
+	{
+		if constexpr (std::is_same_v<T, Head>)
+		{ return Index; }
+		else
+		if constexpr (sizeof...(Tail) == 0)
+		{ return Index + 1; }
+		else
+		{ return get_index_from_type_impl<T, Index + 1, Tail...>(); }
+	}
+
+	template <class T, class... Args>
+	constexpr auto get_index_from_type()
+	{
+		static_assert(is_unique_v<Args...>, "Type not unique");
+		return get_index_from_type_impl<T, 0, Args...>();
+	}
+
+	template<class T, class ... Args>
+	constexpr auto get_value_from_type(tuple<Args...> const& t)
+	{
+		return t.template get<get_index_from_type<T, Args...>()>();
+	}
 }
 
 namespace std

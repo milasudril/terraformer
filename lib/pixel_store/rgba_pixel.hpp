@@ -10,10 +10,10 @@ namespace terraformer
 	class rgba_pixel
 	{
 	public:
-		using StorageType = geosimd::vec_t<float, 4>;
+		using storage_type = geosimd::vec_t<float, 4>;
 		using value_type = float;
 
-		constexpr explicit rgba_pixel(StorageType value): m_value{value} {}
+		constexpr explicit rgba_pixel(storage_type value): m_value{value} {}
 
 		constexpr explicit rgba_pixel(float r, float g, float b, float a = 1.0f)
 			: m_value{r, g, b, a}
@@ -48,7 +48,7 @@ namespace terraformer
 			return *this;
 		}
 
-		constexpr rgba_pixel& value(StorageType val)
+		constexpr rgba_pixel& value(storage_type val)
 		{
 			m_value = val;
 			return *this;
@@ -107,7 +107,7 @@ namespace terraformer
 		constexpr bool operator!=(rgba_pixel const&) const = default;
 
 	private:
-		StorageType m_value;
+		storage_type m_value;
 	};
 
 	constexpr auto operator/(rgba_pixel a, float c)
@@ -145,6 +145,9 @@ namespace terraformer
 	constexpr rgba_pixel yellow() { return rgba_pixel{1.0f, 1.0f, 0.0f}; }
 
 	constexpr rgba_pixel white() { return rgba_pixel{1.0f, 1.0f, 1.0f}; }
+
+	constexpr auto max_color_value(rgba_pixel x)
+	{ return std::max(x.red(), std::max(x.green(), x.blue())); }
 
 	inline auto to_string(rgba_pixel const& x)
 	{ return to_string(x.value()); }

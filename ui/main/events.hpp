@@ -3,6 +3,7 @@
 
 #include "lib/common/bitmask_enum.hpp"
 #include <string>
+#include <cstdint>
 
 namespace terraformer::ui::main
 {
@@ -46,18 +47,23 @@ namespace terraformer::ui::main
 		cursor_position where;
 	};
 
-	enum class cursor_enter_leave:int{enter, leave};
-
-	struct cursor_enter_leave_event
+	struct cursor_enter_event
 	{
 		cursor_position where;
-		cursor_enter_leave direction;
+	};
+
+	struct cursor_leave_event
+	{
+		cursor_position where;
 	};
 
 	struct error_message
 	{
 		std::string description;
 	};
+
+	struct window_close_event
+	{};
 
 	struct typing_event
 	{

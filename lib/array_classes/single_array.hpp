@@ -13,6 +13,7 @@ namespace terraformer
 		using size_type = array_size<T>;
 		using index_type = array_index<T>;
 		using value_type = T;
+		static constexpr index_type npos{static_cast<size_t>(-1)};
 
 		single_array() noexcept= default;
 
@@ -45,7 +46,7 @@ namespace terraformer
 		~single_array() noexcept
 		{ clear(); }
 
-		constexpr auto first_element_index() const noexcept
+		static constexpr auto first_element_index() noexcept
 		{ return index_type{}; }
 
 		constexpr auto last_element_index() const noexcept
@@ -100,6 +101,9 @@ namespace terraformer
 			std::construct_at(m_storage.interpret_as<T>() + m_size.get(), std::forward<Arg>(elem));
 			m_size = new_size;
 		}
+
+		void pop_back()
+		{ truncate_from(index_type{(m_size - size_type{1}).get()}); }
 
 		void clear() noexcept
 		{

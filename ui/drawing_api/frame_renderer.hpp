@@ -15,6 +15,8 @@ namespace terraformer::ui::drawing_api
 	public:
 		struct input_rectangle
 		{
+			using texture_type = gl_texture;
+
 			float thickness;
 			gl_texture const* texture;
 			std::array<rgba_pixel, 8> tints;

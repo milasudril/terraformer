@@ -5,6 +5,9 @@
 #include "./gl_shader.hpp"
 #include "./gl_texture.hpp"
 #include "ui/main/events.hpp"
+#include "ui/main/widget_rendering_result.hpp"
+
+#include "lib/pixel_store/image.hpp"
 
 #include <cassert>
 
@@ -21,8 +24,34 @@ namespace terraformer::ui::drawing_api
 
 		struct input_rectangle
 		{
-			gl_texture const* background;
-			gl_texture const* foreground;
+			using texture_type = gl_texture;
+
+			auto set_background(texture_type const* texture)
+			{
+				if(texture == nullptr)
+				{ return main::set_texture_result::incompatible; }
+
+				background = texture;
+				return main::set_texture_result::success;
+			}
+
+			auto set_foreground(texture_type const* texture)
+			{
+				if(texture == nullptr)
+				{ return main::set_texture_result::incompatible; }
+
+				foreground = texture;
+				return main::set_texture_result::success;
+			}
+
+			void set_background_tints(std::array<rgba_pixel, 4> const& vals)
+			{ background_tints = vals; }
+
+			void set_foreground_tints(std::array<rgba_pixel, 4> const& vals)
+			{ foreground_tints = vals; }
+
+			texture_type const* background;
+			texture_type const* foreground;
 			std::array<rgba_pixel, 4> background_tints;
 			std::array<rgba_pixel, 4> foreground_tints;
 			struct fg_bg_separator fg_bg_separator;
@@ -54,9 +83,9 @@ namespace terraformer::ui::drawing_api
 				.bind();
 
 			assert(rect.background != nullptr);
-			rect.background->bind(0);
-
 			assert(rect.foreground != nullptr);
+
+			rect.background->bind(0);
 			rect.foreground->bind(1);
 
 			m_mesh.bind();

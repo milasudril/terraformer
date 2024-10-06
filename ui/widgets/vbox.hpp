@@ -1,17 +1,59 @@
 #ifndef TERRAFORMER_UI_WIDGETS_VBOX_HPP
 #define TERRAFORMER_UI_WIDGETS_VBOX_HPP
 
-#include "ui/main/widget_list.hpp"
+#include "ui/main/widget_collection.hpp"
 
 #include <functional>
 
 namespace terraformer::ui::widgets
 {
-	template<class WidgetRenderingResult>
-	class vbox
+	struct vbox_layout
+	{
+		scaling update_widget_locations(main::widget_collection_ref& widgets) const
+		{
+			auto const sizes = std::as_const(widgets).sizes();
+			auto const widget_geometries = widgets.widget_geometries();
+			auto const widget_states = widgets.widget_states();
+
+			auto const n = std::size(widgets);
+			auto min_width = 0.0f;
+			auto max_width = std::numeric_limits<float>::infinity();
+			auto height = margin_y;
+
+			for(auto k = widgets.first_element_index(); k != n; ++k)
+			{
+				if(!widget_states[k].collapsed) [[likely]]
+				{
+					auto const& size = sizes[k];
+					widget_geometries[k].where = location{
+						margin_x,
+						-height,
+						0.0f
+					};
+					widget_geometries[k].origin = terraformer::location{-1.0f, 1.0f, 0.0f};
+					widget_geometries[k].size = size;
+					min_width = std::max(min_width, size[0]);
+					max_width = std::min(max_width, size[0]);
+					height += widget_geometries[k].size[1] + margin_y;
+				}
+			}
+
+			return scaling{
+				min_width + 2.0f*margin_x,
+				height,
+				1.0f
+			};
+		}
+
+		float margin_x;
+		float margin_y;
+	};
+
+	class vbox:public main::widget_with_default_actions
 	{
 	public:
-		using output_rectangle = WidgetRenderingResult;
+		using widget_with_default_actions::handle_event;
+		using widget_with_default_actions::compute_size;
 
 		template<class Widget>
 		vbox& append(Widget&& widget)
@@ -20,226 +62,55 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
- 		void prepare_for_presentation(
-			WidgetRenderingResult& output_rect,
-			main::widget_instance_info const& instance_info,
-			object_dict const& resources
-		)
+ 		void prepare_for_presentation(main::widget_rendering_result output_rect)
 		{
-			auto const panel = resources/"ui"/"panels"/0;
-			output_rect.background = panel/"background_texture";
-			output_rect.foreground = resources/"ui"/"null_texture";
-			output_rect.foreground_tints = std::array{
+			output_rect.set_background(m_background.get());
+			output_rect.set_foreground_tints(std::array{
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
-			};
-
-			auto const background_color_ptr = (panel/"background_tint").get_if<rgba_pixel const>();
-			auto const background_color = background_color_ptr != nullptr?
-				*background_color_ptr : rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
-
-			output_rect.background_tints = std::array{
-				background_color,
-				background_color,
-				background_color,
-				background_color,
-			};
-
- 			prepare_widgets_for_presentation<0>(
-				m_widgets,
-				main::widget_instance_info{
-					.section_level = instance_info.section_level,
-					.paragraph_index = 0
-				},
-				resources
-			);
+			});
+			output_rect.set_background_tints(std::array{
+				m_background_tint,
+				m_background_tint,
+				m_background_tint,
+				m_background_tint,
+			});
+			output_rect.set_foreground(m_foreground.get());
 		}
 
-		void handle_event(main::cursor_enter_leave_event const&)
-		{ }
-
-		void handle_event(main::cursor_motion_event const& event)
+		void theme_updated(main::config const& new_theme, main::widget_instance_info instance_info)
 		{
-			// TODO: event.where must be converted to widget coordinates
-
-			auto const i = find(event.where, m_widgets);
-			auto const old_index = m_cursor_widget_index;
-			m_cursor_widget_index = i;
-
-			auto const widgets = m_widgets.widget_pointers();
-			auto const cele_handlers = m_widgets.cursor_enter_leave_callbacks();
-			if(i != old_index && old_index != widget_list::npos)
-			{
-				cele_handlers[old_index](
-					widgets[old_index],
-					main::cursor_enter_leave_event{
-						.where = event.where,
-						.direction = main::cursor_enter_leave::leave
-					}
-				);
-			}
-
-			if(i == widget_list::npos)
-			{ return; }
-
-			if(i != old_index)
-			{
-				cele_handlers[i](
-					widgets[i],
-					main::cursor_enter_leave_event{
-						.where = event.where,
-						.direction = main::cursor_enter_leave::enter
-					}
-				);
-			}
-
- 			auto const cme_handlers = m_widgets.cursor_motion_callbacks();
-
-			cme_handlers[i](widgets[i], event);
+			auto const& panel = instance_info.section_level%2 == 0?
+				new_theme.main_panel :
+				new_theme.other_panel;
+			layout.margin_x = panel.padding;
+			layout.margin_y = panel.padding;
+			m_background = panel.background_texture;
+			m_background_tint = panel.colors.background;
+			m_foreground = new_theme.misc_textures.null;
 		}
 
-		void handle_event(main::mouse_button_event const& event)
-		{
-			// TODO: event.where must be converted to widget coordinates
-			auto const i = find(event.where, m_widgets);
-			if(i == widget_list::npos)
-			{ return; }
+		main::layout_policy_ref get_layout() const
+		{ return main::layout_policy_ref{std::ref(layout)}; }
 
-			auto const widgets = m_widgets.widget_pointers();
-			auto const mbe_handlers = m_widgets.mouse_button_callbacks();
+		main::widget_collection_ref get_children()
+		{ return m_widgets.get_attributes(); }
 
-			mbe_handlers[i](widgets[i], event);
-		}
-
-		void handle_event(main::typing_event const&)
-		{ }
-
-		void handle_event(main::keyboard_button_event const& kbe)
-		{
-			if(kbe.action == main::keyboard_button_action::release)
-			{ return; }
-
-			if(m_widgets.empty())
-			{ return; }
-
-			auto const dir = get_navigation_direction(kbe);
-			if(dir == 0)
-			{ return; }
-
-			m_current_widget = activate_next_widget(m_widgets, m_current_widget.index, dir);
-
-			printf("Current widget is %zu\n", m_current_widget.index);
-		}
-
-		void theme_updated(object_dict const& new_theme) const
-		{
-			using main::theme_updated;
-			theme_updated(m_widgets, new_theme);
-		}
-
-		main::widget_size_constraints const& get_size_constraints() const
-		{ return m_current_size_constraints; }
-
-		main::fb_size handle_event(main::fb_size size)
-		{
-			return size;
-		}
-
-		template<class T>
-		bool grab_should_be_released(T const&) const
-		{ return true; }
-
-		main::input_device_grab activate()
-		{
-			if(!m_current_widget.grab.has_any_device())
-			{ m_current_widget = activate_first_widget(m_widgets); }
-			else
-			{
-				m_current_widget = activate_next_widget(m_widgets, m_current_widget.index, 1);
-				printf("%zu\n", m_current_widget.index);
-			}
-
-			m_current_widget.grab.set_return_widget(*this);
-			return m_current_widget.grab;
-		//	return main::input_device_grab{*this, main::input_device_mask::default_keyboard};
-		}
-
-		// Widget collection stuff
-
-		template<class Renderer>
-		void show_widgets(Renderer&& renderer)
-		{
-			using main::show_widgets;
-			show_widgets<0>(std::forward<Renderer>(renderer), m_widgets);
-		}
-
-		void update_layout(float margin_x, float margin_y)
-		{
-			auto const widget_pointers = m_widgets.widget_pointers();
-			auto const widget_geometries = m_widgets.widget_geometries();
-			auto const size_constraints_callbacks = m_widgets.size_constraints_callbacks();
-			auto const widget_visibilities = m_widgets.widget_visibilities();
-			auto const size_callbacks = m_widgets.size_callbacks();
-			auto const n = std::size(m_widgets);
-			auto min_width = 0.0f;
-			auto max_width = std::numeric_limits<float>::infinity();
-			auto height = margin_y;
-			for(auto k = m_widgets.first_element_index(); k != n; ++k)
-			{
-				if(widget_visibilities[k] == main::widget_visibility::visible) [[likely]]
-				{
-					auto const constraints = size_constraints_callbacks[k](widget_pointers[k]);
-					widget_geometries[k].where = location{
-						margin_x,
-						-height,
-						0.0f
-					};
-					widget_geometries[k].origin = terraformer::location{-1.0f, 1.0f, 0.0f};
-					widget_geometries[k].size = minimize_height(constraints);
-					min_width = std::max(min_width, widget_geometries[k].size[0]);
-					max_width = std::min(max_width, constraints.width.max);
-					height += widget_geometries[k].size[1] + 4.0f;
-
-					size_callbacks[k](
-						widget_pointers[k],
-						main::fb_size {
-							.width = static_cast<int>(widget_geometries[k].size[0]),
-							.height = static_cast<int>(widget_geometries[k].size[1])
-						}
-					);
-				}
-			}
-
-			m_current_size_constraints = main::widget_size_constraints{
-				.width{
-					.min = min_width + 2.0f*margin_x,
-					.max = std::max(min_width, max_width) + 2.0f*margin_x
-				},
-				.height{
-					.min = height,
-					.max = std::numeric_limits<float>::infinity()
-				},
-				.aspect_ratio = std::nullopt
-			};
-		}
-
-		template<class Renderer>
-		void decorate_widgets(
-			Renderer&&,
-			main::widget_instance_info const& instance_info,
-			object_dict const& resources
-		)
-		{ }
+		main::widget_collection_view get_children() const
+		{ return m_widgets.get_attributes(); }
 
 	private:
-		using widget_list = main::widget_list<WidgetRenderingResult>;
+		using widget_collection = main::widget_collection;
 
-		widget_list m_widgets;
-		widget_list::index_type m_cursor_widget_index{widget_list::npos};
-		main::activated_widget m_current_widget;
-		main::widget_size_constraints m_current_size_constraints;
+		widget_collection m_widgets;
+		widget_collection::index_type m_cursor_widget_index{widget_collection::npos};
+		vbox_layout layout;
+
+		main::generic_shared_texture m_background;
+		main::generic_shared_texture m_foreground;
+		rgba_pixel m_background_tint;
 	};
 }
 

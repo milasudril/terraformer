@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 #define TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 
-#include "./generic_texture.hpp"
+#include "ui/main/generic_texture.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
@@ -12,7 +12,7 @@
 
 namespace terraformer::ui::widgets
 {
-	class button
+	class button:public main::widget_with_default_actions
 	{
 	public:
 		enum class state{released, pressed};
@@ -45,25 +45,13 @@ namespace terraformer::ui::widgets
 
 		void regenerate_textures();
 
-		template<class OutputRectangle>
-		void prepare_for_presentation(
-			OutputRectangle& output_rect,
-			main::widget_instance_info const&,
-			object_dict const& render_resources
-		);
+		void prepare_for_presentation(main::widget_rendering_result output_rect);
 
-		void handle_event(main::cursor_enter_leave_event const& cle)
-		{
-			switch(cle.direction)
-			{
-				case main::cursor_enter_leave::leave:
-					m_temp_state = std::nullopt;
-					break;
+		void handle_event(main::cursor_enter_event const&)
+		{ }
 
-				case main::cursor_enter_leave::enter:
-					break;
-			}
-		}
+		void handle_event(main::cursor_leave_event const&)
+		{ m_temp_state = std::nullopt; }
 
 		void handle_event(main::cursor_motion_event const&)
 		{ }
@@ -79,48 +67,19 @@ namespace terraformer::ui::widgets
 						break;
 
 					case main::mouse_button_action::release:
-						m_temp_state.reset();
-						m_on_activated(*this);
+						if(m_temp_state.has_value())
+						{
+							m_temp_state.reset();
+							m_on_activated(*this);
+						}
 						break;
 				}
 			}
 		}
 
-		void handle_event(main::typing_event const&)
-		{ }
+		scaling compute_size(main::widget_width_request req);
 
-		void handle_event(main::keyboard_button_event const& kbe)
-		{
-			if(kbe.button == 32)
-			{
-				switch(kbe.action)
-				{
-					case main::keyboard_button_action::press:
-						m_temp_state = state::pressed;
-						break;
-					case main::keyboard_button_action::release:
-						m_temp_state.reset();
-						m_on_activated(*this);
-						break;
-					case main::keyboard_button_action::repeat:
-						break;
-				}
-			}
-		}
-
-		bool grab_should_be_released(main::keyboard_button_event const& kbe) const
-		{ return kbe.button != 32; }
-
-		template<class T>
-		bool grab_should_be_released(T const&) const
-		{ return true; }
-
-		main::input_device_grab activate()
-		{
-			return main::input_device_grab{*this, main::input_device_mask::default_keyboard};
-		}
-
-		main::widget_size_constraints get_size_constraints() const;
+		scaling compute_size(main::widget_height_request req);
 
 		void handle_event(main::fb_size size)
 		{
@@ -128,7 +87,16 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= host_textures_dirty;
 		}
 
-		void theme_updated(object_dict const& render_resources);
+		void theme_updated(main::config const& cfg, main::widget_instance_info);
+
+		main::layout_policy_ref get_layout() const
+		{ return main::layout_policy_ref{}; }
+
+		main::widget_collection_ref get_children()
+		{ return main::widget_collection_ref{}; }
+
+		main::widget_collection_view get_children() const
+		{ return main::widget_collection_view{}; }
 
 	private:
 		move_only_function<void(button&)> m_on_activated =
@@ -142,12 +110,13 @@ namespace terraformer::ui::widgets
 		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
 		unsigned int m_margin = 0;
 		unsigned int m_border_thickness = 0;
-		shared_const_any m_font;
-		float m_background_intensity;
+		std::shared_ptr<font_handling::font const> m_font;
+		rgba_pixel m_bg_tint;
+		rgba_pixel m_fg_tint;
 
-		generic_unique_texture m_background_released;
-		generic_unique_texture m_background_pressed;
-		generic_unique_texture m_foreground;
+		main::generic_unique_texture m_background_released;
+		main::generic_unique_texture m_background_pressed;
+		main::generic_unique_texture m_foreground;
 
 		main::fb_size m_current_size;
 		image m_background_released_host;
@@ -158,34 +127,29 @@ namespace terraformer::ui::widgets
 		std::optional<state> m_temp_state;
 	};
 
-	template<class OutputRectangle>
-	void button::prepare_for_presentation(
-		OutputRectangle& output_rect,
-		main::widget_instance_info const&,
-		object_dict const& render_resources
-	)
+	inline void button::prepare_for_presentation(main::widget_rendering_result output_rect)
 	{
 		auto const display_state = m_temp_state.value_or(m_value);
 
 		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 		{ regenerate_textures(); }
 
-		output_rect.foreground = m_foreground.get_const();
-		if(!output_rect.foreground)
+		if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
 		{
 			m_foreground = output_rect.create_texture();
-			output_rect.foreground = m_foreground.get_const();
+			(void)output_rect.set_foreground(m_foreground.get());
 			m_dirty_bits |= gpu_textures_dirty;
 		}
-
-		output_rect.background = (display_state == state::released)?
-			m_background_released.get() : m_background_pressed.get_const();
-		if(!output_rect.background)
+;
+		if(
+			output_rect.set_background( (display_state == state::released)?
+			m_background_released.get() : m_background_pressed.get())!=main::set_texture_result::success
+		) [[unlikely]]
 		{
 			m_background_released = output_rect.create_texture();
 			m_background_pressed = output_rect.create_texture();
-			output_rect.background = (display_state == state::released)?
-				m_background_released.get() : m_background_pressed.get_const();
+			output_rect.set_background((display_state == state::released)?
+				m_background_released.get() : m_background_pressed.get());
 			m_dirty_bits |= gpu_textures_dirty;
 		}
 
@@ -197,13 +161,8 @@ namespace terraformer::ui::widgets
 			m_dirty_bits &= ~gpu_textures_dirty;
 		}
 
-		auto const bg_tint = (render_resources/"ui"/"command_area"/"background_tint").get_if<rgba_pixel const>();
-		auto const fg_tint = (render_resources/"ui"/"command_area"/"text_color").get_if<rgba_pixel const>();
-		assert(bg_tint != nullptr);
-		assert(fg_tint != nullptr);
-
-		output_rect.background_tints = std::array{*bg_tint, *bg_tint, *bg_tint, *bg_tint};
-		output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
+		output_rect.set_background_tints(std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint});
+		output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
 	}
 
 	class toggle_button:private button
@@ -216,12 +175,12 @@ namespace terraformer::ui::widgets
 
 		using button::handle_event;
 		using button::prepare_for_presentation;
-		using button::get_size_constraints;
 		using button::text;
 		using button::value;
 		using button::theme_updated;
-		using button::grab_should_be_released;
-		using button::activate;
+		using button::get_layout;
+		using button::get_children;
+		using button::compute_size;
 
 		template<class Function>
 		toggle_button& on_value_changed(Function&& func)

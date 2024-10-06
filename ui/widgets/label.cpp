@@ -4,9 +4,6 @@
 
 void terraformer::ui::widgets::label::regenerate_text_mask()
 {
-	auto const font = m_font.get_if<font_handling::font const>();
-	assert(font != nullptr);
-
 	font_handling::text_shaper shaper{};
 
 	// TODO: Add support for different scripts, direction, and languages
@@ -14,7 +11,7 @@ void terraformer::ui::widgets::label::regenerate_text_mask()
 		.with(hb_script_t::HB_SCRIPT_LATIN)
 		.with(hb_direction_t::HB_DIRECTION_LTR)
 		.with(hb_language_from_string("en-UE", -1))
-		.run(*font);
+		.run(*m_font);
 
 	m_rendered_text = render(result);
 	m_dirty_bits &= ~text_dirty;
@@ -37,38 +34,60 @@ void terraformer::ui::widgets::label::regenerate_textures()
 	m_dirty_bits |= gpu_textures_dirty;
 }
 
-terraformer::ui::main::widget_size_constraints terraformer::ui::widgets::label::get_size_constraints() const
+terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_width_request)
 {
+	// TODO: Use height to find required width (multi-line)
 	if(m_dirty_bits & text_dirty)
-	{ const_cast<label*>(this)->regenerate_text_mask(); }
+	{ regenerate_text_mask(); }
 
-	return main::widget_size_constraints{
-		.width{
-			.min = static_cast<float>(m_rendered_text.width() + 2*m_margin),
-			.max = std::numeric_limits<float>::infinity()
-		},
-		.height{
-			.min = static_cast<float>(m_rendered_text.height() + 2*m_margin),
-			.max = std::numeric_limits<float>::infinity()
-		},
-		.aspect_ratio = std::nullopt
+	return scaling{
+		static_cast<float>(m_rendered_text.width() + 2*m_margin),
+		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		1.0f
 	};
 }
 
-void terraformer::ui::widgets::label::theme_updated(object_dict const& render_resources)
+terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_height_request)
 {
-	auto const ui = render_resources/"ui";
-	auto const margin = (ui/"widget_inner_margin").get_if<unsigned int const>();
-	auto const border_thickness = (ui/"3d_border_thickness").get_if<unsigned int const>();
+// TODO: Use width to find required height (multi-line)
+	if(m_dirty_bits & text_dirty)
+	{ regenerate_text_mask(); }
 
-	assert(margin != nullptr);
-	assert(border_thickness != nullptr);
-	m_margin = *margin + *border_thickness;
-	m_border_thickness = *border_thickness;
+	return scaling{
+		static_cast<float>(m_rendered_text.width() + 2*m_margin),
+		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		1.0f
+	};
+}
 
-	auto const output_area = ui/"output_area";
-	assert(!output_area.is_null());
-	m_font = output_area.dup("font");
-	assert(m_font);
+void terraformer::ui::widgets::label::theme_updated(main::config const& cfg, main::widget_instance_info)
+{
+	m_margin = static_cast<uint32_t>(cfg.output_area.padding + cfg.output_area.border_thickness);
+	m_font = cfg.output_area.font;
 	m_dirty_bits |= host_textures_dirty | text_dirty;
+	m_fg_tint = cfg.output_area.colors.foreground;
+	m_background = cfg.misc_textures.null;
+}
+
+
+void terraformer::ui::widgets::label::prepare_for_presentation(main::widget_rendering_result output_rect)
+{
+	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
+	{ regenerate_textures(); }
+
+	if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
+	{
+		m_foreground = output_rect.create_texture();
+		output_rect.set_foreground(m_foreground.get());
+		m_dirty_bits |= gpu_textures_dirty;
+	}
+
+	if(m_dirty_bits & gpu_textures_dirty)
+	{
+		m_foreground.upload(std::as_const(m_foreground_host).pixels());
+		m_dirty_bits &= ~gpu_textures_dirty;
+	}
+
+	output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
+	output_rect.set_background(m_background.get());
 }

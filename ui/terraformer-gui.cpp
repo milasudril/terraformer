@@ -7,7 +7,6 @@
 #include "./drawing_api/frame_renderer.hpp"
 #include "./drawing_api/single_quad_renderer.hpp"
 #include "./main/event_dispatcher.hpp"
-#include "./widgets/workspace.hpp"
 #include "./wsapi/native_window.hpp"
 #include "./widgets/label.hpp"
 #include "./widgets/button.hpp"
@@ -17,11 +16,17 @@
 
 namespace
 {
+	struct mainwin_tag
+	{};
+
 	struct window_controller
 	{
-		template<auto>
-		void window_is_closing()
+		void handle_event(mainwin_tag, terraformer::ui::main::window_close_event)
 		{ should_exit = true; }
+
+		template<class ... T>
+		void handle_event(T&&...)
+		{}
 
 		bool main_loop_should_exit(auto&&...) const
 		{ return should_exit; }
@@ -31,14 +36,13 @@ namespace
 
 	struct error_handler
 	{
-		template<auto>
-		void error_detected(terraformer::ui::main::error_message const& msg) noexcept
+		void handle_event(mainwin_tag, terraformer::ui::main::error_message const& msg) noexcept
 		{
 			fprintf(stderr, "%s\n", msg.description.c_str());
 		}
 	};
 
-void MessageCallback( GLenum,
+	void MessageCallback( GLenum,
 									GLenum type,
 									GLuint,
 									GLenum severity,
@@ -50,6 +54,7 @@ void MessageCallback( GLenum,
 						( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
 							type, severity, message );
 	}
+
 }
 
 int main(int, char**)
@@ -68,7 +73,8 @@ int main(int, char**)
 
 	glEnable(GL_CULL_FACE);
 	glEnable(GL_BLEND);
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
+	glBlendFuncSeparate(GL_ONE, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback( MessageCallback, 0 );
 
@@ -83,28 +89,33 @@ int main(int, char**)
 			else
 			{ foo.value(u8"Value is false");}
 		});
-	terraformer::ui::widgets::vbox<
-		terraformer::ui::drawing_api::single_quad_renderer::input_rectangle
-	> my_vbox;
-
-	terraformer::ui::widgets::button kaka;
-	kaka.text(u8"Kaka");
+	terraformer::ui::widgets::vbox my_vbox;
 
 	my_vbox.append(std::ref(foo));
 	my_vbox.append(std::ref(bar));
-	my_vbox.append(std::ref(kaka));
+
+	terraformer::ui::widgets::vbox my_outer_vbox;
+
+	terraformer::ui::widgets::button ok;
+	ok.text(u8"Ok");
+
+	terraformer::ui::widgets::button cancel;
+	cancel.text(u8"Cancel");
+
+	my_outer_vbox.append(std::ref(ok));
+	my_outer_vbox.append(std::ref(my_vbox));
+	my_outer_vbox.append(std::ref(cancel));
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
-		terraformer::ui::theming::load_default_resources<terraformer::ui::drawing_api::gl_texture>(),
-		std::ref(my_vbox),
+		terraformer::ui::theming::load_default_config<terraformer::ui::drawing_api::gl_texture>(),
 		window_controller{},
 		terraformer::ui::drawing_api::single_quad_renderer{},
 		terraformer::ui::drawing_api::frame_renderer{},
-		error_handler{}
+		error_handler{},
+		std::ref(my_outer_vbox)
 	};
-	event_dispatcher.activate(my_vbox);
 
-	mainwin.set_event_handler<0>(std::ref(event_dispatcher));
+	mainwin.set_event_handler<mainwin_tag>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(
 		std::ref(event_dispatcher),
 		std::ref(mainwin)

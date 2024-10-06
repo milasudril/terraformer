@@ -14,6 +14,7 @@
 
 #include <stdexcept>
 #include <cassert>
+#include <filesystem>
 
 namespace terraformer::ui::font_handling
 {
@@ -60,9 +61,11 @@ namespace terraformer::ui::font_handling
 		glyph_renderer():m_face{nullptr}
 		{ m_loaded_glyphs.reserve(4); }
 
-		explicit glyph_renderer(char const* filename)
+		explicit glyph_renderer(char const* filename) = delete;
+
+		explicit glyph_renderer(std::filesystem::path const& filename)
 		{
-			auto const res = FT_New_Face(m_loader.handle(), filename, 0, &m_face);
+			auto const res = FT_New_Face(m_loader.handle(), filename.c_str(), 0, &m_face);
 			if(res != FT_Err_Ok)
 			{ throw std::runtime_error{get_ft_error_message(res)}; }
 		}

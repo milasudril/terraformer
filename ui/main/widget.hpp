@@ -1,300 +1,221 @@
 #ifndef TERRAFORMER_UI_MAIN_WIDGET_HPP
 #define TERRAFORMER_UI_MAIN_WIDGET_HPP
 
-#include "./events.hpp"
+#include "./widget_collection_ref.hpp"
 
-#include "ui/theming/widget_look.hpp"
-#include "lib/common/object_tree.hpp"
-#include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
-#include "lib/common/bitmask_enum.hpp"
-#include "lib/any/unique_any.hpp"
+#include "lib/array_classes/multi_span.hpp"
 
 #include <utility>
 #include <type_traits>
-#include <optional>
 
 namespace terraformer::ui::main
 {
-	struct widget_instance_info
-	{
-		size_t section_level;
-		size_t paragraph_index;
-	};
-
-	struct widget_geometry
-	{
-		location where;
-		location origin;
-		scaling size;
-
-		[[nodiscard]] constexpr bool operator==(widget_geometry const&) const = default;
-		[[nodiscard]] constexpr bool operator!=(widget_geometry const&) const = default;
-	};
-
-	[[nodiscard]] inline bool inside(cursor_position pos, widget_geometry const& box)
-	{
-		auto const r = 0.5*box.size;
-		auto const offset_to_origin = (location{0.0f, 0.0f, 0.0f} - box.origin).apply(r);
-		auto const object_midpoint = box.where + offset_to_origin;
-		auto const dr = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - object_midpoint;
-		return std::abs(dr[0]) < r[0] && std::abs(dr[1]) < r[1];
-	}
-
-	enum class widget_visibility:int{visible, not_rendered, collapsed};
-
-	struct widget_size_range
-	{
-		float min = 0.0f;
-		float max = std::numeric_limits<float>::infinity();
-	};
-
-	struct widget_size_constraints
-	{
-		widget_size_range width;
-		widget_size_range height;
-		std::optional<float> aspect_ratio;
-	};
-
-	inline scaling minimize_height(widget_size_constraints const& constraints)
-	{
-		auto const preliminary_height = constraints.height.min;
-		if(constraints.aspect_ratio.has_value())
-		{
-			auto const width = std::clamp(
-				*constraints.aspect_ratio*preliminary_height,
-				constraints.width.min,
-				constraints.width.max
-			);
-
-			auto const new_height = width/(*constraints.aspect_ratio);
-			if(new_height < constraints.height.min || new_height > constraints.height.max)
-			{ throw std::runtime_error{"Impossible size constraint"}; }
-
-			return scaling{width, new_height, 1.0f};
-		}
-
-		return scaling{constraints.width.min, preliminary_height, 1.0f};
-	};
-
-	inline scaling minimize_width(widget_size_constraints const& constraints)
-	{
-		auto const preliminary_width = constraints.width.min;
-		if(constraints.aspect_ratio.has_value())
-		{
-			auto const height = std::clamp(
-				preliminary_width/(*constraints.aspect_ratio),
-				constraints.height.min,
-				constraints.height.max
-			);
-
-			auto const new_width = height*(*constraints.aspect_ratio);
-
-			if(new_width < constraints.width.min || new_width > constraints.width.max)
-			{ throw std::runtime_error{"Impossible size constraint"}; }
-
-			return scaling{new_width, height, 1.0f};
-		}
-
-		return scaling{preliminary_width, constraints.height.min, 1.0f};
-	}
-
-	class input_device_grab;
-
 	template<class T>
-	concept input_event_sink = requires(
-		T& obj,
-		cursor_motion_event const& cme,
-		mouse_button_event const& mbe,
-		typing_event const& te,
-		keyboard_button_event const& kbe,
-		input_device_grab& current_grab
-	)
-	{
-		{ obj.handle_event(cme) } -> std::same_as<void>;
-		{ obj.handle_event(mbe) } -> std::same_as<void>;
-		{ obj.handle_event(te) } -> std::same_as<void>;
-		{ obj.handle_event(kbe) } -> std::same_as<void>;
-		{ std::as_const(obj).grab_should_be_released(cme) } -> std::same_as<bool>;
-		{ std::as_const(obj).grab_should_be_released(mbe) } -> std::same_as<bool>;
-		{ std::as_const(obj).grab_should_be_released(te) } -> std::same_as<bool>;
-		{ std::as_const(obj).grab_should_be_released(kbe) } -> std::same_as<bool>;
-	};
-
-	template<class T>
-	using event_callback = void (*)(void*, T const&);
-
-	template<class T>
-	using release_grab_callback = bool (*)(void const*, T const&);
-
-	using cursor_motion_event_callback = event_callback<cursor_motion_event>;
-	using mouse_button_event_callback = event_callback<mouse_button_event>;
-	using typing_event_callback = event_callback<typing_event>;
-	using keyboard_button_event_callback = event_callback<keyboard_button_event>;
-
-	enum class input_device_mask:unsigned int {
-		none = 0x0,
-		default_keyboard = 0x1,
-		default_mouse = 0x2
-	};
-
-	consteval void enable_bitmask_operators(input_device_mask){}
-
-	class input_device_grab
-	{
-	public:
-		struct widget_vtable
-		{
-			cursor_motion_event_callback on_cursor_moved;
-			mouse_button_event_callback on_mouse_button_activated;
-			typing_event_callback on_typing;
-			keyboard_button_event_callback on_keyboard_button_activated;
-
-			release_grab_callback<cursor_motion_event> grab_should_be_released_by_cme;
-			release_grab_callback<mouse_button_event> grab_should_be_released_by_mbe;
-			release_grab_callback<typing_event> grab_should_be_released_by_te;
-			release_grab_callback<keyboard_button_event> grab_should_be_released_by_kbe;
-		};
-
-		template<class T>
-		requires input_event_sink<T>
-		static constexpr auto make_widget_vtable()
-		{
-			return widget_vtable{
-				.on_cursor_moved = [](void* widget_ptr, cursor_motion_event const& event) {
-					return static_cast<T*>(widget_ptr)->handle_event(event);
-				},
-				.on_mouse_button_activated = [](void* widget_ptr, mouse_button_event const& event) {
-					return static_cast<T*>(widget_ptr)->handle_event(event);
-				},
-				.on_typing = [](void* widget_ptr, typing_event const& event) {
-					return static_cast<T*>(widget_ptr)->handle_event(event);
-				},
-				.on_keyboard_button_activated = [](void* widget_ptr, keyboard_button_event const& event){
-					return static_cast<T*>(widget_ptr)->handle_event(event);
-				},
-				.grab_should_be_released_by_cme = [](void const* widget_ptr, cursor_motion_event const& event){
-					return static_cast<T const*>(widget_ptr)->grab_should_be_released(event);
-				},
-				.grab_should_be_released_by_mbe = [](void const* widget_ptr, mouse_button_event const& event){
-					return static_cast<T const*>(widget_ptr)->grab_should_be_released(event);
-				},
-				.grab_should_be_released_by_te = [](void const* widget_ptr, typing_event const& event){
-					return static_cast<T const*>(widget_ptr)->grab_should_be_released(event);
-				},
-				.grab_should_be_released_by_kbe = [](void const* widget_ptr, keyboard_button_event const& event){
-					return static_cast<T const*>(widget_ptr)->grab_should_be_released(event);
-				}
-			};
-		}
-
-		template<class T>
-		static constexpr widget_vtable vt = make_widget_vtable<T>();
-
-		input_device_grab() = default;
-
-		template<class T>
-		requires input_event_sink<T>
-		explicit input_device_grab(T& widget, input_device_mask grab_devices):
-			m_widget_pointer{&widget},
-			m_vtable{&vt<T>},
-			m_active_devices{grab_devices}
-		{}
-
-		void handle_event(cursor_motion_event const& event) const
-		{ m_vtable->on_cursor_moved(m_widget_pointer, event); }
-
-		void handle_event(mouse_button_event const& event) const
-		{ m_vtable->on_mouse_button_activated(m_widget_pointer, event); }
-
-		void handle_event(typing_event const& event) const
-		{ m_vtable->on_typing(m_widget_pointer, event); }
-
-		void handle_event(keyboard_button_event const& event) const
-		{ m_vtable->on_keyboard_button_activated(m_widget_pointer, event); }
-
-		bool has_device(input_device_mask device) const
-		{ return static_cast<bool>(m_active_devices & device); }
-
-		bool has_any_device() const
-		{ return m_active_devices != input_device_mask::none; }
-
-		bool should_be_released(cursor_motion_event const& event) const
-		{ return m_vtable->grab_should_be_released_by_cme(m_widget_pointer, event); }
-
-		bool should_be_released(mouse_button_event const& event) const
-		{ return m_vtable->grab_should_be_released_by_mbe(m_widget_pointer, event); }
-
-		bool should_be_released(typing_event const& event) const
-		{ return m_vtable->grab_should_be_released_by_te(m_widget_pointer, event); }
-
-		bool should_be_released(keyboard_button_event const& event) const
-		{ return m_vtable->grab_should_be_released_by_kbe(m_widget_pointer, event); }
-
-		template<class T>
-		input_device_grab& set_return_widget(T& widget)
-		{
-			m_return_widget = &widget;
-			m_return_widget_func = [](void* widget){
-				return static_cast<T*>(widget)->activate();
-			};
-			return *this;
-		}
-
-		input_device_grab release() const
-		{ return m_return_widget_func(m_return_widget); }
-
-	private:
-		void* m_widget_pointer = nullptr;
-		widget_vtable const* m_vtable = nullptr;
-		input_device_mask m_active_devices = input_device_mask::none;
-
-		void* m_return_widget = nullptr;
-		input_device_grab (*m_return_widget_func)(void*);
-	};
-
-	template<class T, class ... OutputRectangle>
-	concept widget = input_event_sink<T> && requires(
+	concept widget = requires(
 		T& obj,
 		fb_size size,
-		cursor_enter_leave_event const& cele,
-		widget_instance_info const& instance_info,
-		object_dict const& resources,
-		OutputRectangle&... surface
+		cursor_enter_event const& cee,
+		cursor_leave_event const& cle,
+		cursor_motion_event const& cme,
+		mouse_button_event const& mbe,
+		widget_instance_info const&,
+		config const& cfg,
+		widget_rendering_result surface,
+		widget_instance_info instance_info,
+		widget_width_request w_req,
+		widget_height_request h_req
 	)
 	{
-		{ (..., obj.prepare_for_presentation(surface, instance_info, resources)) } -> std::same_as<void>;
-		{ obj.activate() } -> std::same_as<input_device_grab>;
-		{ obj.handle_event(cele) } -> std::same_as<void>;
+		{ obj.prepare_for_presentation(surface) } -> std::same_as<void>;
+		{ obj.handle_event(cee) } -> std::same_as<void>;
+		{ obj.handle_event(cle) } -> std::same_as<void>;
+		{ obj.handle_event(cme) } -> std::same_as<void>;
+		{ obj.handle_event(mbe) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
-		{ obj.get_size_constraints() } -> same_as_unqual<widget_size_constraints>;
-		{ obj.theme_updated(resources) } -> std::same_as<void>;
+		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
+		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
+		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
+		{ std::as_const(obj).get_layout() } -> std::same_as<layout_policy_ref>;
+		{ obj.compute_size(w_req) } -> std::same_as<scaling>;
+		{ obj.compute_size(h_req) } -> std::same_as<scaling>;
 	};
 
+	class root_widget
+	{
+	public:
+		explicit root_widget(
+			widget_collection_ref const& widgets,
+			widget_collection_ref::index_type index
+		):
+			m_widget{widgets.widget_pointers()[index]},
+			m_children{widgets.get_children_callbacks()[index](m_widget)},
+			m_compute_size_given_width{widgets.compute_size_given_width_callbacks()[index]},
+			m_compute_size_given_height{widgets.compute_size_given_height_callbacks()[index]},
+			m_size_confirmed{widgets.event_callbacks<fb_size>()[index]},
+			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
+		{}
+
+		root_widget() = default;
+
+		template<widget Widget>
+		explicit root_widget(std::reference_wrapper<Widget> w):
+			m_widget{&w.get()},
+			m_children{w.get().get_children()},
+			m_compute_size_given_width{
+				[](void* obj, widget_height_request req){
+					return static_cast<Widget*>(obj)->compute_size_given_width(req);
+				}
+			},
+			m_compute_size_given_height{
+				[](void* obj, widget_width_request req){
+					return static_cast<Widget*>(obj)->compute_size_given_height(req);
+				}
+			},
+			m_size_confirmed{
+				[](void* obj, fb_size size) {
+					return static_cast<Widget*>(obj)->handle_event(size);
+				}
+			},
+			m_layout{w.get().get_layout()}
+		{}
+
+		widget_collection_ref& children()
+		{ return m_children; }
+
+		scaling compute_size(widget_height_request req)
+		{ return m_compute_size_given_width(m_widget, req); }
+
+		scaling compute_size(widget_width_request req)
+		{ return m_compute_size_given_height(m_widget, req); }
+
+		void confirm_size(fb_size size)
+		{ m_size_confirmed(m_widget, size); }
+
+		scaling run_layout()
+		{ return m_layout.update_widget_locations(m_children); }
+
+	private:
+		void* m_widget = nullptr;
+		widget_collection_ref m_children;
+		compute_size_given_width_callback m_compute_size_given_width = [](void*, widget_height_request){return scaling{};};
+		compute_size_given_height_callback m_compute_size_given_height = [](void*, widget_width_request){return scaling{};};
+		event_callback_t<fb_size> m_size_confirmed = [](void*, fb_size){};
+		layout_policy_ref m_layout;
+	};
+
+	inline scaling compute_size(root_widget& root)
+	{
+		// TODO: Decide which dimension to minimize. Should be determined by parent
+		auto const initial_size = root.compute_size(widget_width_request{});
+		auto& children = root.children();
+		auto const widget_states = children.widget_states();
+		auto const sizes = children.sizes();
+		auto const n = std::size(children);
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{
+			if(!widget_states[k].collapsed) [[likely]]
+			{
+				root_widget next_root{children, k};
+				sizes[k] = compute_size(next_root);
+			}
+		}
+
+		auto const size_from_layout = root.run_layout();
+
+		return scaling{
+			std::max(initial_size[0], size_from_layout[0]),
+			std::max(initial_size[1], size_from_layout[1]),
+			std::max(initial_size[2], size_from_layout[2])
+		};
+	}
+
+	inline void confirm_sizes(root_widget& root, fb_size size)
+	{
+		root.confirm_size(size);
+		auto children = root.children();
+		auto const widget_states = children.widget_states();
+		auto const widget_geometries = children.widget_geometries();
+		auto const n = std::size(children);
+		for(auto k = children.first_element_index(); k!=n; ++k)
+		{
+			if(!widget_states[k].collapsed) [[likely]]
+			{
+				root_widget next_root{children, k};
+				confirm_sizes(
+					next_root,
+					fb_size{
+						.width = static_cast<int>(widget_geometries[k].size[0]),
+						.height = static_cast<int>(widget_geometries[k].size[1])
+					}
+				);
+			}
+		}
+	}
+
+	inline void apply_offsets(root_widget& root, displacement root_offset)
+	{
+		auto& children = root.children();
+		auto const n = std::size(children);
+		auto const widget_geometries = children.widget_geometries();
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{ widget_geometries[k].where += root_offset; }
+
+		for(auto k = children.first_element_index(); k != n; ++k)
+		{
+			root_widget next_root{children, k};
+			apply_offsets(
+				next_root,
+				widget_geometries[k].where - location{0.0f, 0.0f, 0.0f}
+			);
+		}
+	}
 
 	struct widget_with_default_actions
 	{
-		template<class OutputRectangle>
-		void prepare_for_presentation(OutputRectangle&&, widget_instance_info const&, object_dict const&) const {}
+		void prepare_for_presentation(widget_rendering_result) {}
+		void handle_event(cursor_enter_event const&) {}
+		void handle_event(cursor_leave_event const&) {}
+		void handle_event(cursor_motion_event const&) {}
+		void handle_event(mouse_button_event const&) {}
+		void handle_event(fb_size) {}
 
-		template<class EventType>
-		void handle_event(EventType const&) const {}
+		void theme_updated(config const&, widget_instance_info) {}
 
-		input_device_grab activate() const
-		{ return input_device_grab{}; }
+		[[nodiscard]] widget_collection_ref get_children()
+		{ return widget_collection_ref{}; }
 
-		template<class EventType>
-		bool grab_should_be_released(EventType const&) const { return true; }
+		[[nodiscard]] widget_collection_view get_children() const
+		{ return widget_collection_view{}; }
 
-		[[nodiscard]] widget_size_constraints get_size_constraints() const
-		{ return widget_size_constraints{}; }
+		[[nodiscard]] layout_policy_ref get_layout() const
+		{ return layout_policy_ref{}; }
 
-		void theme_updated(object_dict const&) const {}
+		[[nodiscard]] scaling compute_size(widget_width_request) const
+		{ return scaling{}; }
+
+		[[nodiscard]] scaling compute_size(widget_height_request) const
+		{ return scaling{}; }
 	};
 
-	namespace
+	static_assert(widget<widget_with_default_actions>);
+
+	template<widget Widget>
+	auto make_default_widget_state()
 	{
-		static_assert(widget<widget_with_default_actions, double>);
+		return widget_state{
+			.collapsed = false,
+			.hidden = false,
+			.maximized = false,
+			.disabled = false,
+			.mbe_sensitive = !compare_with_fallback(
+				resolve_overload<mouse_button_event const&>(&widget_with_default_actions::handle_event),
+				resolve_overload<mouse_button_event const&>(&Widget::handle_event)
+			),
+			.kbe_sensitive = false,
+			.cursor_focus_indicator_mode = focus_indicator_mode::automatic,
+			.kbd_focus_indicator_mode = focus_indicator_mode::automatic
+		};
 	}
 }
 

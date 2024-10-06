@@ -57,3 +57,10 @@ TESTCASE(terraformer_tuple_of_one_element)
 	terraformer::tuple x{1};
 }
 
+TESTCASE(terraformer_get_index_from_type)
+{
+	static_assert(terraformer::get_index_from_type<int, int>() == 0);
+	static_assert(terraformer::get_index_from_type<double, int, double>() == 1);
+	static_assert(terraformer::get_index_from_type<char, int, double>() == 2);
+}
+

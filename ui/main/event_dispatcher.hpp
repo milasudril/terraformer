@@ -2,104 +2,115 @@
 #define TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
 
 #include "./widget.hpp"
+#include "./widgets_to_render_collection.hpp"
 #include "./events.hpp"
+#include "./widget_collection.hpp"
+#include "./widget_reference.hpp"
 
 #include "lib/common/value_accessor.hpp"
+
+constinit size_t event_count = 0;
 
 namespace terraformer::ui::main
 {
 	template<
-		class WidgetContainer,
 		class WindowController,
 		class ContentRenderer,
 		class FrameRenderer,
 		class ErrorHandler
 	>
-	struct event_dispatcher
+	class event_dispatcher
 	{
 	public:
-		template<auto WindowId>
-		void error_detected(error_message const& msg) noexcept
-		{ value_of(m_error_handler).template error_detected<WindowId>(msg); }
-
-		template<auto WindowId>
-		void handle_mouse_button_event(mouse_button_event const& event)
+		template<class Cfg, class Wc, class Cr, class Fr, class Eh, widget Widget>
+		explicit event_dispatcher(
+			Cfg&& cfg,
+			Wc&& wc,
+			Cr&& cr,
+			Fr&& fr,
+			Eh&& eh,
+			std::reference_wrapper<Widget> root
+		):
+		m_config{std::forward<Cfg>(cfg)},
+		m_window_controller{std::forward<Wc>(wc)},
+		m_content_renderer{std::forward<Cr>(cr)},
+		m_frame_renderer{std::forward<Fr>(fr)},
+		m_error_handler{std::forward<Eh>(eh)}
 		{
-			if(m_current_grab.has_device(input_device_mask::default_mouse))
-			{ m_current_grab.handle_event(event); }
-			else
-			{ value_of(m_widget_container).handle_event(event); }
+			m_root_collection.append(root, widget_geometry{});
+			m_flat_collection = flatten(std::as_const(m_root_collection).get_attributes());
+			theme_updated(std::as_const(m_root_collection).get_attributes(), m_config);
 		}
 
-		template<auto WindowId>
-		void handle_cursor_motion_event(cursor_motion_event const& event)
-		{
-			if(m_current_grab.has_device(input_device_mask::default_mouse))
-			{ m_current_grab.handle_event(event); }
-			else
-			{ value_of(m_widget_container).handle_event(event); }
-		}
+		template<class Tag>
+		void handle_event(Tag, error_message const& msg) noexcept
+		{ value_of(m_error_handler).handle_event(Tag{}, msg); }
 
-		template<auto WindowId>
-		void handle_typing_event(typing_event const& event)
+		template<class Tag>
+		void handle_event(Tag, mouse_button_event const& event)
 		{
-			if(m_current_grab.has_device(input_device_mask::default_keyboard))
-			{ m_current_grab.handle_event(event); }
-			else
-			{ value_of(m_widget_container).handle_event(event); }
-		}
+			auto const res = find_recursive(event.where, m_root_collection.get_attributes());
 
-		template<auto WindowId>
-		void handle_keyboard_button_event(keyboard_button_event const& event)
-		{
-			if(m_current_grab.has_device(input_device_mask::default_keyboard))
+			if(!try_dispatch(event, res))
 			{
-				if(event.button == 256 ||
-					(
-						event.action != main::keyboard_button_action::release &&
-						get_navigation_direction(event) != 0 &&
-						m_current_grab.should_be_released(event)
-					)
-				)
-				{
-					// TODO: Consider navigation direction
-					m_current_grab = m_current_grab.release();
-				}
-
-				value_of(m_current_grab).handle_event(event);
+				if(event.action == mouse_button_action::press)
+				{ m_keyboard_widget = flat_widget_collection_view::npos; }
+				printf("mbe in the void %zu\n", event_count);
 			}
 			else
-			{ value_of(m_widget_container).handle_event(event); }
+			if(event.action == mouse_button_action::press)
+			{ m_keyboard_widget = find(res, m_flat_collection); }
+
+			printf("%zu\n", m_keyboard_widget.get());
+
+			++event_count;
 		}
 
-		template<auto WindowId>
-		void window_is_closing()
-		{ value_of(m_window_controller).template window_is_closing<WindowId>(); }
-
-		template<auto WindowId>
-		void handle_cursor_enter_leave_event(cursor_enter_leave_event const& event)
-		{ value_of(m_window_controller).template cursor_at_window_boundary<WindowId>(event); }
-
-		template<class Widget>
-		void activate(Widget& widget)
-		{ m_current_grab = widget.activate(); }
-
-		template<auto WindowId>
-		void framebuffer_size_changed(fb_size size)
+		template<class Tag>
+		void handle_event(Tag, cursor_motion_event const& event)
 		{
-			if(!m_theme_is_up_to_date) [[unlikely]]
+			auto const res = find_recursive(event.where, m_root_collection.get_attributes());
+
+			if(res != m_hot_widget)
 			{
-				value_of(m_widget_container).theme_updated(m_resources);
-				m_theme_is_up_to_date = true;
+				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
+				{ printf("cursor left the void %zu\n", event_count); }
+
+				if(!try_dispatch(cursor_enter_event{.where = event.where}, res))
+				{ printf("cursor entered the void %zu\n", event_count); }
+
+				m_hot_widget = res;
 			}
 
+			if(!try_dispatch(event, res))
+			{ printf("cme in the void %zu\n", event_count); }
+			++event_count;
+		}
+
+		template<class Tag>
+		void handle_event(Tag, window_close_event event)
+		{ value_of(m_window_controller).handle_event(Tag{}, event); }
+
+		template<class Tag>
+		void handle_event(Tag, cursor_enter_event const& event)
+		{ value_of(m_window_controller).handle_event(Tag{}, event); }
+
+		template<class Tag>
+		void handle_event(Tag, cursor_leave_event const& event)
+		{ value_of(m_window_controller).handle_event(Tag{}, event); }
+
+
+		template<class Tag>
+		void handle_event(Tag, fb_size size)
+		{
 			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
 			value_of(m_frame_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
-			value_of(m_widget_container).handle_event(size);
+
+			// TODO: Should update size here as well
 		}
 
 		template<class Viewport, class ... Overlay>
@@ -114,42 +125,112 @@ namespace terraformer::ui::main
 
 		void render()
 		{
-			value_of(m_widget_container).update_layout(4.0f, 4.0f);
-			auto const container_size = value_of(m_widget_container).get_size_constraints();
+			root_widget root{m_root_collection.get_attributes(), m_root_collection.first_element_index()};
+			// TODO: Pick width/height based on window size
+			auto const box_size = compute_size(root);
+			confirm_sizes(
+				root,
+				fb_size{
+					.width = static_cast<int>(box_size[0]),
+					.height = static_cast<int>(box_size[1])
+				}
+			);
 
-			value_of(m_widget_container).prepare_for_presentation(
-				m_output_rectangle,
-				widget_instance_info{
-					.section_level = 0,
-					.paragraph_index = 0
-				},
-				m_resources
-			);
-			value_of(m_content_renderer).render(
-				location{0.0f, 0.0f, 0.0f},
-				location{-1.0f, 1.0f, 0.0f},
-				scaling{
-					container_size.width.min,
-					container_size.height.min,
-					1.0f
-				},
-				m_output_rectangle
-			);
-			value_of(m_widget_container).show_widgets(value_of(m_content_renderer));
-		//	value_of(m_widget_container).decorate_widgets(value_of(m_frame_renderer), textures, look);
+			m_root_collection.get_attributes().widget_geometries().front() = widget_geometry{
+				.where = location{0.0f, 0.0f, 0.0f},
+				.origin = location{-1.0f, 1.0f, 0.0f},
+				.size = box_size
+			};
+			apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
+
+			using WidgetRenderingResult = typename dereferenced_type<ContentRenderer>::input_rectangle;
+			main::widgets_to_render_collection<WidgetRenderingResult>
+				widgets_to_render{std::as_const(m_root_collection).get_attributes()};
+
+			prepare_for_presentation(widgets_to_render);
+
+			show_widgets(value_of(m_content_renderer), widgets_to_render);
+			if(m_hot_widget != find_recursive_result{} /*&& m_hot_widget.state().has_cursor_focus_indicator()*/)
+			{
+				auto const& geometry = m_hot_widget.geometry();
+				auto const color = m_config.mouse_kbd_tracking.colors.mouse_focus_color;
+				auto const border_thickness = m_config.mouse_kbd_tracking.border_thickness;
+				using Frame = typename FrameRenderer::input_rectangle;
+				m_frame_renderer.render(
+					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
+					geometry.origin,
+					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
+					Frame{
+						.thickness = border_thickness,
+						.texture = m_config.misc_textures.white.get_if<typename Frame::texture_type>(),
+						.tints = std::array{
+							0.0f*color,
+							0.0f*color,
+							0.0f*color,
+							0.0f*color,
+							color,
+							color,
+							color,
+							color
+						}
+					}
+				);
+			}
+
+			if(m_keyboard_widget != flat_widget_collection_view::npos)
+			{
+				auto const global_index = m_keyboard_widget;
+				auto const address_array = m_flat_collection.attributes().get_by_type<widget_tree_address>();
+				auto const& keyboard_focus_item = address_array[global_index];
+
+				auto const flat_attribs = keyboard_focus_item.collection();
+				auto const local_index = keyboard_focus_item.index();
+				auto const geoms = flat_attribs.widget_geometries();
+				auto const& geometry = geoms[local_index];
+				auto const color = m_config.mouse_kbd_tracking.colors.keyboard_focus_color;
+				auto const border_thickness =  m_config.mouse_kbd_tracking.border_thickness;
+
+				using Frame = typename FrameRenderer::input_rectangle;
+				m_frame_renderer.render(
+					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
+					geometry.origin,
+					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
+					Frame{
+						.thickness = border_thickness,
+						.texture = m_config.misc_textures.white.get_if<typename Frame::texture_type>(),
+						.tints = std::array{
+							0.0f*color,
+							0.0f*color,
+							0.0f*color,
+							0.0f*color,
+							color,
+							color,
+							color,
+							color
+						}
+					}
+				);
+			}
 		}
 
-		object_dict m_resources;
-		WidgetContainer m_widget_container;
+	private:
+		config m_config;
 		WindowController m_window_controller;
 		ContentRenderer m_content_renderer;
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
-		typename dereferenced_type<ContentRenderer>::input_rectangle m_output_rectangle{};
-		bool m_theme_is_up_to_date = false;
+		find_recursive_result m_hot_widget;
+		flat_widget_collection_view::index_type m_keyboard_widget{flat_widget_collection_view::npos};
 
-		input_device_grab m_current_grab{};
+		// TODO: Currently, a collection is used here, even though only one widget can be supported.
+		// A widget collection is currently necessary to set m_hot_widget properly
+		widget_collection m_root_collection;
+		flat_widget_collection_view m_flat_collection;
 	};
+
+		template<class Cfg, class Wc, class Cr, class Fr, class Eh, widget Widget>
+		event_dispatcher(Cfg&&, Wc&&, Cr&&, Fr&&, Eh&&, std::reference_wrapper<Widget> root) ->
+			event_dispatcher<Wc, Cr, Fr, Eh>;
 }
 
 

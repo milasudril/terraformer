@@ -14,6 +14,7 @@
 #include <ranges>
 #include <cstdio>
 #include <stdexcept>
+#include <functional>
 
 namespace terraformer
 {
@@ -106,6 +107,21 @@ namespace terraformer
 		{ throw std::runtime_error{"Value out of range"}; }
 
 		return result;
+	}
+
+	template<class... Args, class RetType, class Class>
+	constexpr auto resolve_overload(RetType (Class::*func)(Args...))
+	{
+    return func;
+	}
+
+	template<class A, class B>
+	constexpr bool compare_with_fallback(A const& a, B const& b)
+	{
+		if constexpr(std::equality_comparable_with<A, B>)
+		{ return a == b; }
+		else
+		{ return false;}
 	}
 
 }

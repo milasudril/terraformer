@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_LABEL_HPP
 #define TERRAFORMER_UI_WIDGETS_LABEL_HPP
 
-#include "./generic_texture.hpp"
+#include "ui/main/generic_texture.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
@@ -11,10 +11,10 @@
 
 namespace terraformer::ui::widgets
 {
-	class label
+	class label:public main::widget_with_default_actions
 	{
 	public:
-		enum class state{released, pressed};
+		using widget_with_default_actions::handle_event;
 
 		template<class StringType>
 		label& text(StringType&& str)
@@ -35,25 +35,11 @@ namespace terraformer::ui::widgets
 
 		void regenerate_textures();
 
-		template<class OutputRectangle>
-		void prepare_for_presentation(
-			OutputRectangle& output_rect,
-			main::widget_instance_info const&,
-			object_dict const& render_resources
-		);
+		void prepare_for_presentation(main::widget_rendering_result output_rect);
 
-		template<class T>
-		void handle_event(T const&) const
-		{ }
+		scaling compute_size(main::widget_width_request req);
 
-		template<class T>
-		bool grab_should_be_released(T const&) const
-		{ return true; }
-
-		main::input_device_grab activate() const
-		{ return main::input_device_grab{}; }
-
-		main::widget_size_constraints get_size_constraints() const;
+		scaling compute_size(main::widget_height_request req);
 
 		void handle_event(main::fb_size size)
 		{
@@ -61,7 +47,7 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= host_textures_dirty;
 		}
 
-		void theme_updated(object_dict const& render_resources);
+		void theme_updated(const main::config& cfg, main::widget_instance_info);
 
 	private:
 		std::basic_string<char8_t> m_text;
@@ -72,43 +58,15 @@ namespace terraformer::ui::widgets
 		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
 		unsigned int m_margin = 0;
 		unsigned int m_border_thickness = 0;
-		shared_const_any m_font;
+		std::shared_ptr<font_handling::font const> m_font;
+		rgba_pixel m_fg_tint;
 
-		generic_unique_texture m_foreground;
+		main::generic_unique_texture m_foreground;
+		main::generic_shared_texture m_background;
 
 		main::fb_size m_current_size;
 		image m_foreground_host;
 	};
-
-	template<class OutputRectangle>
-	void label::prepare_for_presentation(
-		OutputRectangle& output_rect,
-		main::widget_instance_info const&,
-		object_dict const& render_resources
-	)
-	{
-		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
-		{ regenerate_textures(); }
-
-		output_rect.foreground = m_foreground.get_const();
-		if(!output_rect.foreground)
-		{
-			m_foreground = output_rect.create_texture();
-			output_rect.foreground = m_foreground.get_const();
-			m_dirty_bits |= gpu_textures_dirty;
-		}
-
-		output_rect.background = render_resources/"ui"/"null_texture";
-		if(m_dirty_bits & gpu_textures_dirty)
-		{
-			m_foreground.upload(std::as_const(m_foreground_host).pixels());
-			m_dirty_bits &= ~gpu_textures_dirty;
-		}
-
-		auto const fg_tint = (render_resources/"ui"/"output_area"/"text_color").get_if<rgba_pixel const>();
-		assert(fg_tint != nullptr);
-		output_rect.foreground_tints = std::array{*fg_tint, *fg_tint, *fg_tint, *fg_tint};
-	}
 }
 
 #endif
