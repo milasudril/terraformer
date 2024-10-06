@@ -80,27 +80,9 @@ namespace terraformer::ui::main
 	struct keyboard_button_event
 	{
 		int button;
+		int raw_button;
 		keyboard_button_action action;
 		modifier_keys modifiers;
 	};
-
-	constexpr int get_navigation_direction(keyboard_button_event const& kbe)
-	{
-		constexpr auto tab = 258;
-		if(kbe.button == tab)
-		{
-			switch(kbe.modifiers & ~(main::modifier_keys::numlock | main::modifier_keys::capslock))
-			{
-				case main::modifier_keys::shift:
-					return -1;
-					break;
-				case main::modifier_keys::none:
-					return 1;
-				default:
-					return 0;
-			}
-		}
-		return 0;
-	}
 }
 #endif

@@ -9,10 +9,30 @@
 
 #include "lib/common/value_accessor.hpp"
 
-constinit size_t event_count = 0;
-
 namespace terraformer::ui::main
 {
+	constexpr int get_form_navigation_step_size(keyboard_button_event const& kbe)
+	{
+		constexpr auto tab = 258;
+		if(
+			kbe.button == tab &&
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+		)
+		{
+			switch(kbe.modifiers & ~(main::modifier_keys::numlock | main::modifier_keys::capslock))
+			{
+				case main::modifier_keys::shift:
+					return -1;
+					break;
+				case main::modifier_keys::none:
+					return 1;
+				default:
+					return 0;
+			}
+		}
+		return 0;
+	}
+
 	template<
 		class WindowController,
 		class ContentRenderer,
@@ -55,15 +75,11 @@ namespace terraformer::ui::main
 			{
 				if(event.action == mouse_button_action::press)
 				{ m_keyboard_widget = flat_widget_collection_view::npos; }
-				printf("mbe in the void %zu\n", event_count);
+				printf("mbe in the void\n");
 			}
 			else
 			if(event.action == mouse_button_action::press)
 			{ m_keyboard_widget = find(res, m_flat_collection); }
-
-			printf("%zu\n", m_keyboard_widget.get());
-
-			++event_count;
 		}
 
 		template<class Tag>
@@ -74,18 +90,48 @@ namespace terraformer::ui::main
 			if(res != m_hot_widget)
 			{
 				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
-				{ printf("cursor left the void %zu\n", event_count); }
+				{ printf("cursor left the void\n"); }
 
 				if(!try_dispatch(cursor_enter_event{.where = event.where}, res))
-				{ printf("cursor entered the void %zu\n", event_count); }
+				{ printf("cursor entered the void\n"); }
 
 				m_hot_widget = res;
 			}
 
 			if(!try_dispatch(event, res))
-			{ printf("cme in the void %zu\n", event_count); }
-			++event_count;
+			{ printf("cme in the void\n"); }
 		}
+
+		template<class Tag>
+		void handle_event(Tag, keyboard_button_event const& event)
+		{
+			auto const nav_step = get_form_navigation_step_size(event);
+			if(m_keyboard_widget == flat_widget_collection_view::npos) [[unlikely]]
+			{
+				m_keyboard_widget = [this](auto nav_step) {
+					switch(nav_step)
+					{
+						case -1:
+							return m_flat_collection.last_element_index();
+						case 0:
+							return flat_widget_collection_view::npos;
+						case 1:
+							return flat_widget_collection_view::first_element_index();
+					}
+					return flat_widget_collection_view::npos;
+				}(nav_step);
+				return;
+			}
+
+			m_keyboard_widget += nav_step;
+
+			if(m_keyboard_widget == flat_widget_collection_view::npos)
+			{ m_keyboard_widget = m_flat_collection.last_element_index(); }
+
+			if(m_keyboard_widget == m_flat_collection.last_element_index() + 1)
+			{ m_keyboard_widget = flat_widget_collection_view::first_element_index(); }
+		}
+
 
 		template<class Tag>
 		void handle_event(Tag, window_close_event event)

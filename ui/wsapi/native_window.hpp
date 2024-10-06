@@ -114,6 +114,21 @@ namespace terraformer::ui::wsapi
 		return ret;
 	}
 
+	constexpr main::keyboard_button_action to_keyboard_button_action(int action)
+	{
+		switch(action)
+		{
+			case GLFW_PRESS:
+				return main::keyboard_button_action::press;
+			case GLFW_RELEASE:
+				return main::keyboard_button_action::release;
+			case GLFW_REPEAT:
+				return main::keyboard_button_action::repeat;
+			default:
+				return main::keyboard_button_action::release;
+		}
+	}
+
 	template<class T, class Tag, class EventType>
 	concept can_handle_event = std::is_empty_v<Tag> && requires(T& obj, EventType&& event)
 	{
@@ -260,6 +275,25 @@ namespace terraformer::ui::wsapi
 								}
 							);
 						}
+					}
+				);
+			}
+
+			if constexpr (can_handle_event<EventHandler, WindowTag, main::keyboard_button_event>)
+			{
+				glfwSetKeyCallback(
+					m_window.get(),
+					[](GLFWwindow* window, int key, int scancode, int action, int mods){
+						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+						dispatch_event<WindowTag>(
+							*event_handler,
+							main::keyboard_button_event{
+								.button = key,
+								.raw_button = scancode,
+								.action = to_keyboard_button_action(action),
+								.modifiers = to_keymask(mods)
+							}
+						);
 					}
 				);
 			}
