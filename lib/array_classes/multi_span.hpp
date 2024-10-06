@@ -82,7 +82,7 @@ namespace terraformer
 			m_size{span.size()}
 		{}
 
-		constexpr auto first_element_index() const noexcept
+		static constexpr auto first_element_index() noexcept
 		{ return index_type{}; }
 
 		constexpr auto last_element_index() const noexcept

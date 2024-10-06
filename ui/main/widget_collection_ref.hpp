@@ -127,8 +127,8 @@ namespace terraformer::ui::main
 
 		explicit widget_collection_ref_impl(widget_span const& span): m_span{span}{}
 
-		constexpr auto first_element_index() const
-		{ return m_span.first_element_index(); }
+		static constexpr auto first_element_index()
+		{ return widget_span::first_element_index(); }
 
 		constexpr auto last_element_index() const
 		{ return m_span.last_element_index(); }
@@ -284,19 +284,7 @@ namespace terraformer::ui::main
 
 	find_recursive_result find_recursive(cursor_position pos, widget_collection_ref const& widgets);
 
-	inline auto find(find_recursive_result const& res, widget_collection_view const& widgets)
-	{
-		auto const i = std::ranges::find(widgets.widget_pointers(), res.pointer());
-		if(i == std::end(widgets.widget_pointers()))
-		{ return widget_collection_view::npos; }
-
-		return widgets.first_element_index() + (i - std::begin(widgets.widget_pointers()));
-	}
-
-	inline auto find(find_recursive_result const& res, widget_collection_ref const& widgets)
-	{ return find(res, widgets.as_view()); }
-
-	 void theme_updated(
+	void theme_updated(
 		widget_collection_view const& widgets,
 		config const& cfg,
 		widget_instance_info instance_info = widget_instance_info{}

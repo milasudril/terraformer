@@ -5,6 +5,7 @@
 #include "./widgets_to_render_collection.hpp"
 #include "./events.hpp"
 #include "./widget_collection.hpp"
+#include "./widget_reference.hpp"
 
 #include "lib/common/value_accessor.hpp"
 
@@ -37,7 +38,7 @@ namespace terraformer::ui::main
 		m_error_handler{std::forward<Eh>(eh)}
 		{
 			m_root_collection.append(root, widget_geometry{});
-			m_flat_collection = flatten(m_root_collection.get_attributes());
+			m_flat_collection = flatten(std::as_const(m_root_collection).get_attributes());
 			theme_updated(std::as_const(m_root_collection).get_attributes(), m_config);
 		}
 
@@ -176,9 +177,14 @@ namespace terraformer::ui::main
 
 			if(m_keyboard_widget != widget_collection::npos)
 			{
-				auto const flat_attribs = m_flat_collection.get_attributes();
+				auto const global_index = m_flat_collection.first_element_index()
+					+ (m_keyboard_widget - widget_collection_view::first_element_index());
+				auto const& keyboard_focus_item = m_flat_collection[global_index];
+
+				auto const flat_attribs = keyboard_focus_item.collection();
+				auto const local_index = keyboard_focus_item.index();
 				auto const geoms = flat_attribs.widget_geometries();
-				auto const& geometry = geoms[m_keyboard_widget];
+				auto const& geometry = geoms[local_index];
 				auto const color = m_config.mouse_kbd_tracking.colors.keyboard_focus_color;
 				auto const border_thickness =  m_config.mouse_kbd_tracking.border_thickness;
 
@@ -217,7 +223,7 @@ namespace terraformer::ui::main
 		// TODO: Currently, a collection is used here, even though only one widget can be supported.
 		// A widget collection is currently necessary to set m_hot_widget properly
 		widget_collection m_root_collection;
-		widget_collection m_flat_collection;
+		single_array<widget_reference> m_flat_collection;
 
 	};
 

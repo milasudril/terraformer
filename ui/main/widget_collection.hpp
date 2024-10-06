@@ -1,5 +1,3 @@
-//@	{"dependencies_extra":[{"ref":"./widget_collection.o", "rel":"implementation"}]}
-
 #ifndef TERRAFORMER_UI_MAIN_WIDGET_COLLECTION_HPP
 #define TERRAFORMER_UI_MAIN_WIDGET_COLLECTION_HPP
 
@@ -101,13 +99,6 @@ namespace terraformer::ui::main
 
 	inline void theme_updated(widget_collection const& widgets, config const& cfg)
 	{ theme_updated(widgets.get_attributes(), cfg); }
-
-	inline auto find(find_recursive_result const& res, widget_collection const& widgets)
-	{ return find(res, widgets.get_attributes()); }
-
-	void flatten(widget_collection_ref::reference const& widget, widget_collection& result);
-
-	widget_collection flatten(widget_collection_ref const& widgets);
 }
 
 #endif
