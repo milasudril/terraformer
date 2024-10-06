@@ -229,10 +229,10 @@ namespace terraformer
 		~multi_array() noexcept
 		{ clear(); }
 
-		constexpr auto first_element_index() const noexcept
+		static constexpr auto first_element_index() noexcept
 		{ return index_type{}; }
 
-		constexpr auto last_element_index() const noexcept
+		auto last_element_index() const noexcept
 		{ return index_type{(m_size - size_type{1}).get()}; }
 
 		auto size() const noexcept

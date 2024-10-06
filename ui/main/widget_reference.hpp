@@ -9,10 +9,10 @@
 
 namespace terraformer::ui::main
 {
-	class widget_reference
+	class widget_tree_address
 	{
 	public:
-		explicit widget_reference(widget_collection_view collection, widget_collection_view::index_type index):
+		explicit widget_tree_address(widget_collection_view collection, widget_collection_view::index_type index):
 			m_collection{collection},
 			m_index{index}
 		{}
@@ -28,27 +28,50 @@ namespace terraformer::ui::main
 		widget_collection_view::index_type m_index;
 	};
 
-	void flatten(widget_reference const& widget, single_array<widget_reference>& ret);
-
-	single_array<widget_reference> flatten(widget_collection_view const& widgets);
-
-	inline auto find(find_recursive_result const& res, span<widget_reference const> widgets)
+	class flat_widget_collection_view
 	{
-		auto const i = std::ranges::find_if(
-			widgets,
-			[what = res.pointer()](auto const& item){
-				auto const widget_pointers = item.collection().widget_pointers();
-				auto const index = item.index();
+	public:
+		using widget_array = multi_array<void const*, widget_tree_address>;
+		using widget_span = multi_span<void const* const, widget_tree_address const>;
+		using index_type = widget_array::index_type;
+		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-				return widget_pointers[index] == what;
-			}
-		);
+		static constexpr auto first_element_index()
+		{ return widget_array::first_element_index(); }
 
-		if(i == std::end(widgets))
-		{ return span<widget_reference const>::npos; }
+		auto last_element_index() const
+		{ return m_array.last_element_index(); }
 
-		return span<widget_reference const>::first_element_index() + (i - std::begin(widgets));
+		flat_widget_collection_view& append(void const* pointer, widget_tree_address const& address)
+		{
+			m_array.push_back(pointer, address);
+			return *this;
+		}
+
+		auto attributes() const
+		{ return m_array.attributes(); }
+
+	private:
+		widget_array m_array;
+	};
+
+	void flatten(widget_tree_address const& widget, flat_widget_collection_view& ret);
+
+	flat_widget_collection_view flatten(widget_collection_view const& widgets);
+
+	inline auto find(find_recursive_result const& res, flat_widget_collection_view::widget_span span)
+	{
+		auto const widget_pointers = span.get_by_type<void const*>();
+		auto const i = std::ranges::find(widget_pointers, res.pointer());
+
+		if(i == std::end(widget_pointers))
+		{ return flat_widget_collection_view::npos; }
+
+		return flat_widget_collection_view::first_element_index() + (i - std::begin(widget_pointers));
 	}
+
+	inline auto find(find_recursive_result const& res, flat_widget_collection_view const& widgets)
+	{ return find(res, widgets.attributes()); }
 }
 
 #endif

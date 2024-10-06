@@ -54,7 +54,7 @@ namespace terraformer::ui::main
 			if(!try_dispatch(event, res))
 			{
 				if(event.action == mouse_button_action::press)
-				{ m_keyboard_widget = single_array<widget_reference>::npos; }
+				{ m_keyboard_widget = flat_widget_collection_view::npos; }
 				printf("mbe in the void %zu\n", event_count);
 			}
 			else
@@ -177,10 +177,11 @@ namespace terraformer::ui::main
 				);
 			}
 
-			if(m_keyboard_widget != single_array<widget_reference>::npos)
+			if(m_keyboard_widget != flat_widget_collection_view::npos)
 			{
 				auto const global_index = m_keyboard_widget;
-				auto const& keyboard_focus_item = m_flat_collection[global_index];
+				auto const address_array = m_flat_collection.attributes().get_by_type<widget_tree_address>();
+				auto const& keyboard_focus_item = address_array[global_index];
 
 				auto const flat_attribs = keyboard_focus_item.collection();
 				auto const local_index = keyboard_focus_item.index();
@@ -219,13 +220,12 @@ namespace terraformer::ui::main
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
 		find_recursive_result m_hot_widget;
-		single_array<widget_reference>::index_type m_keyboard_widget{single_array<widget_reference>::npos};
+		flat_widget_collection_view::index_type m_keyboard_widget{flat_widget_collection_view::npos};
 
 		// TODO: Currently, a collection is used here, even though only one widget can be supported.
 		// A widget collection is currently necessary to set m_hot_widget properly
 		widget_collection m_root_collection;
-		single_array<widget_reference> m_flat_collection;
-
+		flat_widget_collection_view m_flat_collection;
 	};
 
 		template<class Cfg, class Wc, class Cr, class Fr, class Eh, widget Widget>
