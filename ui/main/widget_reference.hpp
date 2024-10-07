@@ -31,7 +31,11 @@ namespace terraformer::ui::main
 	class flat_widget_collection_view
 	{
 	public:
-		using widget_span = multi_span<void const* const, widget_tree_address const>;
+		using widget_span = multi_span<
+			void const* const,
+			widget_tree_address const,
+			keyboard_button_callback const
+		>;
 		using widget_array = compatible_multi_array_t<widget_span>;
 
 		using index_type = widget_array::index_type;
@@ -43,9 +47,10 @@ namespace terraformer::ui::main
 		auto last_element_index() const
 		{ return m_array.last_element_index(); }
 
-		flat_widget_collection_view& append(void const* pointer, widget_tree_address const& address)
+		template<class ... Args>
+		flat_widget_collection_view& append(Args&&... args)
 		{
-			m_array.push_back(pointer, address);
+			m_array.push_back(std::forward<Args>(args)...);
 			return *this;
 		}
 
