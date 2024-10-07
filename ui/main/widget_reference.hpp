@@ -32,7 +32,7 @@ namespace terraformer::ui::main
 	{
 	public:
 		using widget_span = multi_span<
-			void const* const,
+			void* const,
 			widget_tree_address const,
 			keyboard_button_callback const
 		>;
@@ -67,7 +67,7 @@ namespace terraformer::ui::main
 
 	inline auto find(find_recursive_result const& res, flat_widget_collection_view::widget_span span)
 	{
-		auto const widget_pointers = span.get_by_type<void const*>();
+		auto const widget_pointers = span.get_by_type<void*>();
 		auto const i = std::ranges::find(widget_pointers, res.pointer());
 
 		if(i == std::end(widget_pointers))
