@@ -79,8 +79,7 @@ namespace terraformer::ui::main
 
 	struct keyboard_button_event
 	{
-		int button;
-		int raw_button;
+		int scancode;
 		keyboard_button_action action;
 		modifier_keys modifiers;
 	};

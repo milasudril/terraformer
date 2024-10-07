@@ -283,13 +283,12 @@ namespace terraformer::ui::wsapi
 			{
 				glfwSetKeyCallback(
 					m_window.get(),
-					[](GLFWwindow* window, int key, int scancode, int action, int mods){
+					[](GLFWwindow* window, int, int scancode, int action, int mods){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						dispatch_event<WindowTag>(
 							*event_handler,
 							main::keyboard_button_event{
-								.button = key,
-								.raw_button = scancode,
+								.scancode = scancode - 8,
 								.action = to_keyboard_button_action(action),
 								.modifiers = to_keymask(mods)
 							}

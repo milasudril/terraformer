@@ -13,9 +13,9 @@ namespace terraformer::ui::main
 {
 	constexpr int get_form_navigation_step_size(keyboard_button_event const& kbe)
 	{
-		constexpr auto tab = 258;
+		constexpr auto tab = 0x0f;
 		if(
-			kbe.button == tab &&
+			kbe.scancode == tab &&
 			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
 		)
 		{
