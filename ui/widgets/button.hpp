@@ -15,6 +15,8 @@ namespace terraformer::ui::widgets
 	class button:public main::widget_with_default_actions
 	{
 	public:
+		using widget_with_default_actions::handle_event;
+
 		enum class state{released, pressed};
 
 		template<class Function>

@@ -44,6 +44,9 @@ namespace terraformer::ui::main
 				[](void* obj, mouse_button_event const& mbe) {
 					static_cast<Widget*>(obj)->handle_event(mbe);
 				},
+				[](void* obj, keyboard_button_event const& kbe) {
+					static_cast<Widget*>(obj)->handle_event(kbe);
+				},
 				[](void* obj, widget_width_request req) -> scaling{
 					return static_cast<Widget*>(obj)->compute_size(req);
 				},

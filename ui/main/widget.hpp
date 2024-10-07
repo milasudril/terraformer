@@ -19,6 +19,7 @@ namespace terraformer::ui::main
 		cursor_leave_event const& cle,
 		cursor_motion_event const& cme,
 		mouse_button_event const& mbe,
+		keyboard_button_event const& kbe,
 		widget_instance_info const&,
 		config const& cfg,
 		widget_rendering_result surface,
@@ -32,6 +33,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(cle) } -> std::same_as<void>;
 		{ obj.handle_event(cme) } -> std::same_as<void>;
 		{ obj.handle_event(mbe) } -> std::same_as<void>;
+		{ obj.handle_event(kbe) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
@@ -178,6 +180,7 @@ namespace terraformer::ui::main
 		void handle_event(cursor_leave_event const&) {}
 		void handle_event(cursor_motion_event const&) {}
 		void handle_event(mouse_button_event const&) {}
+		void handle_event(keyboard_button_event const&) {}
 		void handle_event(fb_size) {}
 
 		void theme_updated(config const&, widget_instance_info) {}
@@ -212,7 +215,10 @@ namespace terraformer::ui::main
 				resolve_overload<mouse_button_event const&>(&widget_with_default_actions::handle_event),
 				resolve_overload<mouse_button_event const&>(&Widget::handle_event)
 			),
-			.kbe_sensitive = false,
+			.kbe_sensitive = !compare_with_fallback(
+				resolve_overload<keyboard_button_event const&>(&widget_with_default_actions::handle_event),
+				resolve_overload<keyboard_button_event const&>(&Widget::handle_event)
+			),
 			.cursor_focus_indicator_mode = focus_indicator_mode::automatic,
 			.kbd_focus_indicator_mode = focus_indicator_mode::automatic
 		};
