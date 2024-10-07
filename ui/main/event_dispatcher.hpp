@@ -106,6 +106,15 @@ namespace terraformer::ui::main
 		void handle_event(Tag, keyboard_button_event const& event)
 		{
 			auto const nav_step = get_form_navigation_step_size(event);
+			if(nav_step == 0 && m_keyboard_widget != flat_widget_collection_view::npos)
+			{
+				auto const attribs = m_flat_collection.attributes();
+				auto const pointers = attribs.get_by_type<void*>();
+				auto const callbacks = attribs.get_by_type<keyboard_button_callback>();
+				callbacks[m_keyboard_widget](pointers[m_keyboard_widget], event);
+				return;
+			}
+
 			if(m_keyboard_widget == flat_widget_collection_view::npos) [[unlikely]]
 			{
 				m_keyboard_widget = [this](auto nav_step) {

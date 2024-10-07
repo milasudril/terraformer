@@ -79,6 +79,30 @@ namespace terraformer::ui::widgets
 			}
 		}
 
+		void handle_event(main::keyboard_button_event const& kbe)
+		{
+			if(kbe.scancode == 0x39)
+			{
+				switch(kbe.action)
+				{
+					case main::keyboard_button_action::press:
+						m_temp_state = state::pressed;
+						break;
+
+					case main::keyboard_button_action::release:
+						if(m_temp_state.has_value())
+						{
+							m_temp_state.reset();
+							m_on_activated(*this);
+						}
+						break;
+
+					case main::keyboard_button_action::repeat:
+						break;
+				}
+			}
+		}
+
 		scaling compute_size(main::widget_width_request req);
 
 		scaling compute_size(main::widget_height_request req);
