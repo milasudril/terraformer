@@ -83,5 +83,11 @@ namespace terraformer::ui::main
 		keyboard_button_action action;
 		modifier_keys modifiers;
 	};
+
+	struct keyboard_focus_enter_event
+	{};
+
+	struct keyboard_focus_leave_event
+	{};
 }
 #endif

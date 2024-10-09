@@ -18,18 +18,25 @@ namespace terraformer::ui::main
 		focus_indicator_mode cursor_focus_indicator_mode:2;
 		focus_indicator_mode kbd_focus_indicator_mode:2;
 
-		bool has_cursor_focus_indicator() const
-		{
-			return (cursor_focus_indicator_mode == focus_indicator_mode::automatic && mbe_sensitive)
-				|| cursor_focus_indicator_mode == focus_indicator_mode::always_visible;
-		}
+		constexpr bool accepts_mouse_input() const
+		{ return !(disabled || hidden || collapsed) && mbe_sensitive; }
 
-		bool has_keyboard_focus_indicator() const
+		constexpr bool accepts_keyboard_input() const
+		{ return !(disabled || hidden || collapsed) && kbe_sensitive; }
+
+		constexpr bool has_keyboard_focus_indicator() const
 		{
 			return (kbd_focus_indicator_mode == focus_indicator_mode::automatic && kbe_sensitive)
 				|| kbd_focus_indicator_mode == focus_indicator_mode::always_visible;
 		}
+
+		constexpr bool has_cursor_focus_indicator() const
+		{
+			return (cursor_focus_indicator_mode == focus_indicator_mode::automatic && mbe_sensitive)
+				|| cursor_focus_indicator_mode == focus_indicator_mode::always_visible;
+		}
 	};
+
 }
 
 #endif

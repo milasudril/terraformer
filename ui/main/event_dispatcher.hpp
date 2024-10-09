@@ -5,7 +5,7 @@
 #include "./widgets_to_render_collection.hpp"
 #include "./events.hpp"
 #include "./widget_collection.hpp"
-#include "./widget_reference.hpp"
+#include "./keyboard_navigation_controller.hpp"
 
 #include "lib/common/value_accessor.hpp"
 
@@ -205,7 +205,8 @@ namespace terraformer::ui::main
 			prepare_for_presentation(widgets_to_render);
 
 			show_widgets(value_of(m_content_renderer), widgets_to_render);
-			if(m_hot_widget != find_recursive_result{} /*&& m_hot_widget.state().has_cursor_focus_indicator()*/)
+			if(m_hot_widget != find_recursive_result{}
+				&& m_hot_widget.state().has_cursor_focus_indicator())
 			{
 				auto const& geometry = m_hot_widget.geometry();
 				auto const color = m_config.mouse_kbd_tracking.colors.mouse_focus_color;

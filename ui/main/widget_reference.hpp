@@ -34,7 +34,8 @@ namespace terraformer::ui::main
 		using widget_span = multi_span<
 			void* const,
 			widget_tree_address const,
-			keyboard_button_callback const
+			keyboard_button_callback const,
+			std::reference_wrapper<widget_state const> const
 		>;
 		using widget_array = compatible_multi_array_t<widget_span>;
 

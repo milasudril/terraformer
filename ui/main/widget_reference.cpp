@@ -14,11 +14,12 @@ void terraformer::ui::main::flatten(widget_tree_address const& widget, flat_widg
 		auto const index = current.index();
 		auto const widget_pointers = current.collection().widget_pointers();
 		auto const kbe_callbacks = current.collection().event_callbacks<keyboard_button_event>();
+		auto const widget_states = current.collection().widget_states();
 		auto const ptr = widget_pointers[index];
-		ret.append(ptr, current, kbe_callbacks[index]);
+		ret.append(ptr, current, kbe_callbacks[index], widget_states[index]);
 
 		auto const get_children = current.collection().get_children_const_callbacks();
-		auto const children = get_children[index](widget_pointers[index]);
+		auto const children = get_children[index](ptr);
 		for(auto k = children.first_element_index(); k != std::size(children); ++k)
 		{
 			auto const index = children.first_element_index() + (children.last_element_index() - k);
