@@ -97,8 +97,8 @@ namespace terraformer::ui::main
 		widget_array m_objects;
 	};
 
-	inline auto find(cursor_position pos, widget_collection const& widgets)
-	{ return find(pos, widgets.get_attributes());}
+	inline auto find_recursive(cursor_position pos, widget_collection& widgets)
+	{ return find_recursive(pos, widgets.get_attributes());}
 
 	inline void theme_updated(widget_collection const& widgets, config const& cfg)
 	{ theme_updated(widgets.get_attributes(), cfg); }

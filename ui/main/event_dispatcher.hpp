@@ -59,7 +59,7 @@ namespace terraformer::ui::main
 		{
 			m_root_collection.append(root, widget_geometry{});
 			m_flat_collection = flatten(std::as_const(m_root_collection).get_attributes());
-			theme_updated(std::as_const(m_root_collection).get_attributes(), m_config);
+			theme_updated(m_root_collection, m_config);
 		}
 
 		template<class Tag>
@@ -69,7 +69,7 @@ namespace terraformer::ui::main
 		template<class Tag>
 		void handle_event(Tag, mouse_button_event const& event)
 		{
-			auto const res = find_recursive(event.where, m_root_collection.get_attributes());
+			auto const res = find_recursive(event.where, m_root_collection);
 
 			if(!try_dispatch(event, res))
 			{
@@ -85,7 +85,7 @@ namespace terraformer::ui::main
 		template<class Tag>
 		void handle_event(Tag, cursor_motion_event const& event)
 		{
-			auto const res = find_recursive(event.where, m_root_collection.get_attributes());
+			auto const res = find_recursive(event.where, m_root_collection);
 
 			if(res != m_hot_widget)
 			{
