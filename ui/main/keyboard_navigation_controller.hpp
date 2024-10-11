@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_MAIN_KEYBOARD_NAVIGATION_CONTROLLER_HPP
 #define TERRAFORMER_UI_MAIN_KEYBOARD_NAVIGATION_CONTROLLER_HPP
 
-#include "./widget_reference.hpp"
+#include "./flat_widget_collection.hpp"
 
 namespace terraformer::ui::main
 {
@@ -11,7 +11,7 @@ namespace terraformer::ui::main
 		keyboard_navigation_controller() = default;
 
 		explicit keyboard_navigation_controller(
-			flat_widget_collection_view::widget_span widgets,
+			flat_widget_collection_view widgets,
 			int search_direction
 		):
 			m_widgets{widgets}
@@ -20,7 +20,7 @@ namespace terraformer::ui::main
 		void step(int dir)
 		{
 			auto next_index = m_index;
-			auto const widget_states = m_widgets.get_by_type<std::reference_wrapper<widget_state const>>();
+			auto const widget_states = m_widgets.widget_states();
 			for(auto k = m_widgets.first_element_index(); k != std::size(m_widgets); ++k)
 			{
 				next_index += dir;
@@ -54,7 +54,7 @@ namespace terraformer::ui::main
 		{ return m_widgets; }
 
 	private:
-		flat_widget_collection_view::widget_span m_widgets;
+		flat_widget_collection_view m_widgets;
 		flat_widget_collection_view::index_type m_index{flat_widget_collection_view::npos};
 	};
 }

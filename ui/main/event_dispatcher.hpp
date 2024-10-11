@@ -74,7 +74,7 @@ namespace terraformer::ui::main
 			if(!try_dispatch(event, res))
 			{
 				if(event.action == mouse_button_action::press)
-				{ m_keyboard_widget = flat_widget_collection_view::npos; }
+				{ m_keyboard_widget = flat_widget_collection::npos; }
 				printf("mbe in the void\n");
 			}
 			else
@@ -106,16 +106,16 @@ namespace terraformer::ui::main
 		void handle_event(Tag, keyboard_button_event const& event)
 		{
 			auto const nav_step = get_form_navigation_step_size(event);
-			if(nav_step == 0 && m_keyboard_widget != flat_widget_collection_view::npos)
+			if(nav_step == 0 && m_keyboard_widget != flat_widget_collection::npos)
 			{
 				auto const attribs = m_flat_collection.attributes();
-				auto const pointers = attribs.get_by_type<void*>();
-				auto const callbacks = attribs.get_by_type<keyboard_button_callback>();
+				auto const pointers = attribs.widget_pointers();
+				auto const callbacks = attribs.event_callbacks<keyboard_button_event>();
 				callbacks[m_keyboard_widget](pointers[m_keyboard_widget], event);
 				return;
 			}
 
-			if(m_keyboard_widget == flat_widget_collection_view::npos) [[unlikely]]
+			if(m_keyboard_widget == flat_widget_collection::npos) [[unlikely]]
 			{
 				m_keyboard_widget = [this](auto nav_step) {
 					switch(nav_step)
@@ -123,22 +123,22 @@ namespace terraformer::ui::main
 						case -1:
 							return m_flat_collection.last_element_index();
 						case 0:
-							return flat_widget_collection_view::npos;
+							return flat_widget_collection::npos;
 						case 1:
-							return flat_widget_collection_view::first_element_index();
+							return flat_widget_collection::first_element_index();
 					}
-					return flat_widget_collection_view::npos;
+					return flat_widget_collection::npos;
 				}(nav_step);
 				return;
 			}
 
 			m_keyboard_widget += nav_step;
 
-			if(m_keyboard_widget == flat_widget_collection_view::npos)
+			if(m_keyboard_widget == flat_widget_collection::npos)
 			{ m_keyboard_widget = m_flat_collection.last_element_index(); }
 
 			if(m_keyboard_widget == m_flat_collection.last_element_index() + 1)
-			{ m_keyboard_widget = flat_widget_collection_view::first_element_index(); }
+			{ m_keyboard_widget = flat_widget_collection::first_element_index(); }
 		}
 
 
@@ -233,10 +233,10 @@ namespace terraformer::ui::main
 				);
 			}
 
-			if(m_keyboard_widget != flat_widget_collection_view::npos)
+			if(m_keyboard_widget != flat_widget_collection::npos)
 			{
 				auto const global_index = m_keyboard_widget;
-				auto const address_array = m_flat_collection.attributes().get_by_type<widget_tree_address>();
+				auto const address_array = m_flat_collection.attributes().addresses();
 				auto const& keyboard_focus_item = address_array[global_index];
 
 				auto const flat_attribs = keyboard_focus_item.collection();
@@ -276,12 +276,12 @@ namespace terraformer::ui::main
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
 		find_recursive_result m_hot_widget;
-		flat_widget_collection_view::index_type m_keyboard_widget{flat_widget_collection_view::npos};
+		flat_widget_collection::index_type m_keyboard_widget{flat_widget_collection::npos};
 
 		// TODO: Currently, a collection is used here, even though only one widget can be supported.
 		// A widget collection is currently necessary to set m_hot_widget properly
 		widget_collection m_root_collection;
-		flat_widget_collection_view m_flat_collection;
+		flat_widget_collection m_flat_collection;
 	};
 
 		template<class Cfg, class Wc, class Cr, class Fr, class Eh, widget Widget>

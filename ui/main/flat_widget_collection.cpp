@@ -1,8 +1,8 @@
-//@	{"target":{"name":"widget_reference.o"}}
+//@	{"target":{"name":"flat_widget_collection.o"}}
 
-#include "./widget_reference.hpp"
+#include "./flat_widget_collection.hpp"
 
-void terraformer::ui::main::flatten(widget_tree_address const& widget, flat_widget_collection_view& ret)
+void terraformer::ui::main::flatten(widget_tree_address const& widget, flat_widget_collection& ret)
 {
 	single_array<widget_tree_address> contexts;
 	contexts.push_back(widget);
@@ -29,10 +29,10 @@ void terraformer::ui::main::flatten(widget_tree_address const& widget, flat_widg
 }
 
 
-terraformer::ui::main::flat_widget_collection_view
+terraformer::ui::main::flat_widget_collection
 terraformer::ui::main::flatten(widget_collection_view const& root)
 {
-	flat_widget_collection_view ret;
+	flat_widget_collection ret;
 	for(auto k = root.first_element_index(); k != std::size(root); ++k)
 	{ flatten(widget_tree_address{root, k}, ret); }
 	return ret;
