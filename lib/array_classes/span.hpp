@@ -74,28 +74,32 @@ namespace terraformer
 		T* m_end = nullptr;
 	};
 
-	enum class search_direction{backward = -1, forward = 1};
+	enum class span_search_direction{backward = -1, forward = 1};
 
 	template<class T, class IndexType, class SizeType, class Predicate>
 	IndexType find_next_wrap_around(
 		span<T, IndexType, SizeType> span,
-		IndexType offset,
-		search_direction dir,
+		IndexType start_offset,
+		span_search_direction dir,
 		Predicate pred
 	)
 	{
 		if(span.empty()) [[unlikely]]
 		{ return decltype(span)::npos; }
 
-		auto const step = (dir == search_direction::backward)? -1 : 1;
+		auto const step = (dir == span_search_direction::backward)? -1 : 1;
 
-		auto const last_index = (dir == search_direction::backward)?
+		auto const last_index = (dir == span_search_direction::backward)?
 			span.first_element_index() :
 			span.last_element_index();
 
-		auto const first_index = (dir == search_direction::backward)?
+		auto const first_index = (dir == span_search_direction::backward)?
 			span.last_element_index() :
 			span.first_element_index();
+
+		auto offset = (start_offset == decltype(span)::npos)?
+			first_index :
+			((start_offset == last_index)? first_index : start_offset + step);
 
 		for(auto k = span.first_element_index(); k != std::size(span); ++k)
 		{
