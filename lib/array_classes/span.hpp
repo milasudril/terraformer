@@ -87,34 +87,27 @@ namespace terraformer
 		if(span.empty()) [[unlikely]]
 		{ return decltype(span)::npos; }
 
-		switch(dir)
+		auto const step = (dir == search_direction::backward)? -1 : 1;
+
+		auto const last_index = (dir == search_direction::backward)?
+			span.first_element_index() :
+			span.last_element_index();
+
+		auto const first_index = (dir == search_direction::backward)?
+			span.last_element_index() :
+			span.first_element_index();
+
+		for(auto k = span.first_element_index(); k != std::size(span); ++k)
 		{
-			case search_direction::forward:
-				for(auto k = span.first_element_index(); k != std::size(span); ++k)
-				{
-					if(pred(span[offset]))
-					{ return offset; }
+			if(pred(span[offset]))
+			{ return offset; }
 
-					if(offset == span.last_element_index()) [[unlikely]]
-					{ offset = span.first_element_index(); }
-					else
-					{ ++offset; }
-				}
-				break;
-
-			case search_direction::backward:
-				for(auto k = span.first_element_index(); k != std::size(span); ++k)
-				{
-					if(pred(span[offset]))
-					{ return offset; }
-
-					if(offset == span.first_element_index()) [[unlikely]]
-					{ offset = span.last_element_index(); }
-					else
-					{ --offset; }
-				}
-				break;
+			if(offset == last_index) [[unlikely]]
+			{ offset = first_index; }
+			else
+			{ offset += step; }
 		}
+
 		return decltype(span)::npos;
 	}
 }
