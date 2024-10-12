@@ -102,10 +102,7 @@ namespace terraformer
 			if(pred(span[offset]))
 			{ return offset; }
 
-			if(offset == last_index) [[unlikely]]
-			{ offset = first_index; }
-			else
-			{ offset += step; }
+			offset = (offset == last_index)? first_index :  offset + step;
 		}
 
 		return decltype(span)::npos;
