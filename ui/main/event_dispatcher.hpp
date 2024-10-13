@@ -132,24 +132,7 @@ namespace terraformer::ui::main
 				return;
 			}
 
-			// TODO: Write wrapper function that activates "next_widget"
-			if(m_keyboard_widget != flat_widget_collection::npos)
-			{
-				auto const attribs = m_flat_collection.attributes();
-				auto const pointers = attribs.widget_pointers();
-				auto const callbacks = attribs.event_callbacks<keyboard_focus_leave_event>();
-				{ callbacks[m_keyboard_widget](pointers[m_keyboard_widget], keyboard_focus_leave_event{}); }
-			}
-
-			if(next_widget != flat_widget_collection::npos)
-			{
-				auto const attribs = m_flat_collection.attributes();
-				auto const pointers = attribs.widget_pointers();
-				auto const callbacks = attribs.event_callbacks<keyboard_focus_enter_event>();
-				{ callbacks[next_widget](pointers[next_widget], keyboard_focus_enter_event{}); }
-			}
-
-			m_keyboard_widget = next_widget;
+			set_keyboard_focus(next_widget);
 		}
 
 
@@ -187,6 +170,28 @@ namespace terraformer::ui::main
 			(...,overlay());
 			value_of(viewport).swap_buffers();
 			return value_of(m_window_controller).main_loop_should_exit(viewport);
+		}
+
+		void set_keyboard_focus(flat_widget_collection::index_type new_widget)
+		{
+			if(m_keyboard_widget != flat_widget_collection::npos)
+			{
+				auto const attribs = m_flat_collection.attributes();
+				auto const pointers = attribs.widget_pointers();
+				auto const callbacks = attribs.event_callbacks<keyboard_focus_leave_event>();
+				{ callbacks[m_keyboard_widget](pointers[m_keyboard_widget], keyboard_focus_leave_event{}); }
+			}
+
+			if(new_widget>= m_flat_collection.first_element_index() &&
+				new_widget < std::size(m_flat_collection))
+			{
+				auto const attribs = m_flat_collection.attributes();
+				auto const pointers = attribs.widget_pointers();
+				auto const callbacks = attribs.event_callbacks<keyboard_focus_enter_event>();
+				{ callbacks[new_widget](pointers[new_widget], keyboard_focus_enter_event{}); }
+			}
+
+			m_keyboard_widget = new_widget;
 		}
 
 		void render()

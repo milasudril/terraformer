@@ -112,6 +112,9 @@ namespace terraformer::ui::main
 		auto last_element_index() const
 		{ return m_array.last_element_index(); }
 
+		auto size() const
+		{ return m_array.size(); }
+
 	private:
 		widget_array m_array;
 	};
