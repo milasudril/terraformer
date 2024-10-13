@@ -78,7 +78,12 @@ namespace terraformer::ui::main
 			}
 			else
 			if(event.action == mouse_button_action::press)
-			{ m_keyboard_widget = find(res, m_flat_collection); }
+			{
+				if(res.state().accepts_keyboard_input())
+				{ m_keyboard_widget = find(res, m_flat_collection);  }
+				else
+				{ m_keyboard_widget = flat_widget_collection::npos; }
+			}
 		}
 
 		template<class Tag>
