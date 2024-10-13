@@ -11,7 +11,7 @@
 
 namespace terraformer::ui::main
 {
-	constexpr int get_form_navigation_step_size(keyboard_button_event const& kbe)
+	constexpr span_search_direction get_form_navigation_step_size(keyboard_button_event const& kbe)
 	{
 		constexpr auto tab = 0x0f;
 		if(
@@ -22,15 +22,14 @@ namespace terraformer::ui::main
 			switch(kbe.modifiers & ~(main::modifier_keys::numlock | main::modifier_keys::capslock))
 			{
 				case main::modifier_keys::shift:
-					return -1;
-					break;
+					return span_search_direction::backwards;
 				case main::modifier_keys::none:
-					return 1;
+					return span_search_direction::forwards;
 				default:
-					return 0;
+					return span_search_direction::stay;
 			}
 		}
-		return 0;
+		return span_search_direction::stay;
 	}
 
 	template<
@@ -106,7 +105,16 @@ namespace terraformer::ui::main
 		void handle_event(Tag, keyboard_button_event const& event)
 		{
 			auto const nav_step = get_form_navigation_step_size(event);
-			if(nav_step == 0 && m_keyboard_widget != flat_widget_collection::npos)
+			m_keyboard_widget = find_next_wrap_around(
+				m_flat_collection.attributes().widget_states(),
+				m_keyboard_widget,
+				nav_step,
+				[](auto item){
+					return item.get().accepts_keyboard_input();
+				}
+			);
+
+			if(nav_step == span_search_direction::stay && m_keyboard_widget != flat_widget_collection::npos)
 			{
 				auto const attribs = m_flat_collection.attributes();
 				auto const pointers = attribs.widget_pointers();
@@ -114,31 +122,6 @@ namespace terraformer::ui::main
 				callbacks[m_keyboard_widget](pointers[m_keyboard_widget], event);
 				return;
 			}
-
-			if(m_keyboard_widget == flat_widget_collection::npos) [[unlikely]]
-			{
-				m_keyboard_widget = [this](auto nav_step) {
-					switch(nav_step)
-					{
-						case -1:
-							return m_flat_collection.last_element_index();
-						case 0:
-							return flat_widget_collection::npos;
-						case 1:
-							return flat_widget_collection::first_element_index();
-					}
-					return flat_widget_collection::npos;
-				}(nav_step);
-				return;
-			}
-
-			m_keyboard_widget += nav_step;
-
-			if(m_keyboard_widget == flat_widget_collection::npos)
-			{ m_keyboard_widget = m_flat_collection.last_element_index(); }
-
-			if(m_keyboard_widget == m_flat_collection.last_element_index() + 1)
-			{ m_keyboard_widget = flat_widget_collection::first_element_index(); }
 		}
 
 
