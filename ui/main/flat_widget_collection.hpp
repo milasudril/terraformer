@@ -34,8 +34,10 @@ namespace terraformer::ui::main
 		using widget_span = multi_span<
 			void* const,
 			widget_tree_address const,
+			std::reference_wrapper<widget_state const> const,
 			keyboard_button_callback const,
-			std::reference_wrapper<widget_state const> const
+			keyboard_focus_enter_callback const,
+			keyboard_focus_leave_callback const
 		>;
 
 		using index_type = widget_span::index_type;

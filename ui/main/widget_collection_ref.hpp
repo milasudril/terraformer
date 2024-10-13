@@ -78,6 +78,8 @@ namespace terraformer::ui::main
 	using cursor_position_callback = event_callback_t<cursor_motion_event const&>;
 	using mouse_button_callback = event_callback_t<mouse_button_event const&>;
 	using keyboard_button_callback = event_callback_t<keyboard_button_event const&>;
+	using keyboard_focus_enter_callback = event_callback_t<keyboard_focus_enter_event>;
+	using keyboard_focus_leave_callback = event_callback_t<keyboard_focus_leave_event>;
 	using size_callback = event_callback_t<fb_size>;
 	using prepare_for_presentation_callback = event_callback_t<widget_rendering_result>;
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
@@ -103,6 +105,8 @@ namespace terraformer::ui::main
 			cursor_position_callback,
 			mouse_button_callback,
 			keyboard_button_callback,
+			keyboard_focus_enter_callback,
+			keyboard_focus_leave_callback,
 			compute_size_given_height_callback,
 			compute_size_given_width_callback,
 			size_callback,

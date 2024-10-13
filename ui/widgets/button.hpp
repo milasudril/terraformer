@@ -103,6 +103,16 @@ namespace terraformer::ui::widgets
 			}
 		}
 
+		void handle_event(main::keyboard_focus_enter_event)
+		{
+			puts("Hej");
+		}
+
+		void handle_event(main::keyboard_focus_leave_event)
+		{
+			puts("Hejdå");
+		}
+
 		scaling compute_size(main::widget_width_request req);
 
 		scaling compute_size(main::widget_height_request req);

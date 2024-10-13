@@ -70,6 +70,7 @@ namespace terraformer::ui::main
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 
+			// TODO: Dispatch keyboard focus enter/leave events
 			if(!try_dispatch(event, res))
 			{
 				if(event.action == mouse_button_action::press)
@@ -80,7 +81,10 @@ namespace terraformer::ui::main
 			if(event.action == mouse_button_action::press)
 			{
 				if(res.state().accepts_keyboard_input())
-				{ m_keyboard_widget = find(res, m_flat_collection);  }
+				{
+					m_keyboard_widget = find(res, m_flat_collection);
+
+				}
 				else
 				{ m_keyboard_widget = flat_widget_collection::npos; }
 			}
@@ -110,7 +114,7 @@ namespace terraformer::ui::main
 		void handle_event(Tag, keyboard_button_event const& event)
 		{
 			auto const nav_step = get_form_navigation_step_size(event);
-			m_keyboard_widget = find_next_wrap_around(
+			auto const next_widget = find_next_wrap_around(
 				m_flat_collection.attributes().widget_states(),
 				m_keyboard_widget,
 				nav_step,
@@ -119,7 +123,7 @@ namespace terraformer::ui::main
 				}
 			);
 
-			if(nav_step == span_search_direction::stay && m_keyboard_widget != flat_widget_collection::npos)
+			if(next_widget == m_keyboard_widget && m_keyboard_widget != flat_widget_collection::npos)
 			{
 				auto const attribs = m_flat_collection.attributes();
 				auto const pointers = attribs.widget_pointers();
@@ -127,6 +131,25 @@ namespace terraformer::ui::main
 				callbacks[m_keyboard_widget](pointers[m_keyboard_widget], event);
 				return;
 			}
+
+			// TODO: Write wrapper function that activates "next_widget"
+			if(m_keyboard_widget != flat_widget_collection::npos)
+			{
+				auto const attribs = m_flat_collection.attributes();
+				auto const pointers = attribs.widget_pointers();
+				auto const callbacks = attribs.event_callbacks<keyboard_focus_leave_event>();
+				{ callbacks[m_keyboard_widget](pointers[m_keyboard_widget], keyboard_focus_leave_event{}); }
+			}
+
+			if(next_widget != flat_widget_collection::npos)
+			{
+				auto const attribs = m_flat_collection.attributes();
+				auto const pointers = attribs.widget_pointers();
+				auto const callbacks = attribs.event_callbacks<keyboard_focus_enter_event>();
+				{ callbacks[next_widget](pointers[next_widget], keyboard_focus_enter_event{}); }
+			}
+
+			m_keyboard_widget = next_widget;
 		}
 
 
