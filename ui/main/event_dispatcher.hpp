@@ -170,6 +170,9 @@ namespace terraformer::ui::main
 
 		void set_keyboard_focus(flat_widget_collection::index_type new_widget)
 		{
+			if(new_widget == m_keyboard_widget)
+			{ return; }
+
 			if(m_keyboard_widget != flat_widget_collection::npos)
 			{
 				auto const attribs = m_flat_collection.attributes();
