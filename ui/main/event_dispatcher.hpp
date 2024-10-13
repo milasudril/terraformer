@@ -70,7 +70,6 @@ namespace terraformer::ui::main
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 
-			// TODO: Dispatch keyboard focus enter/leave events
 			if(!try_dispatch(event, res))
 			{
 				if(event.action == mouse_button_action::press)
@@ -81,10 +80,7 @@ namespace terraformer::ui::main
 			if(event.action == mouse_button_action::press)
 			{
 				if(res.state().accepts_keyboard_input())
-				{
-					m_keyboard_widget = find(res, m_flat_collection);
-
-				}
+				{ set_keyboard_focus(find(res, m_flat_collection)); }
 				else
 				{ m_keyboard_widget = flat_widget_collection::npos; }
 			}
