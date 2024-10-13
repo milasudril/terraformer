@@ -49,14 +49,8 @@ namespace terraformer::ui::widgets
 
 		void prepare_for_presentation(main::widget_rendering_result output_rect);
 
-		void handle_event(main::cursor_enter_event const&)
-		{ }
-
 		void handle_event(main::cursor_leave_event const&)
 		{ m_temp_state = std::nullopt; }
-
-		void handle_event(main::cursor_motion_event const&)
-		{ }
 
 		void handle_event(main::mouse_button_event const& mbe)
 		{
@@ -103,15 +97,8 @@ namespace terraformer::ui::widgets
 			}
 		}
 
-		void handle_event(main::keyboard_focus_enter_event)
-		{
-			puts("Hej");
-		}
-
 		void handle_event(main::keyboard_focus_leave_event)
-		{
-			puts("Hejdå");
-		}
+		{ m_temp_state = std::nullopt; }
 
 		scaling compute_size(main::widget_width_request req);
 
