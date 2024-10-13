@@ -87,6 +87,23 @@ namespace terraformer::ui::main
 		widget_span m_span;
 	};
 
+	template<class EventType>
+	bool try_dispatch(
+		EventType&& e,
+		flat_widget_collection_view const& view,
+		flat_widget_collection_view::index_type index
+	)
+	{
+		if(index == flat_widget_collection_view::npos)
+		{ return false; }
+
+		auto const widgets = view.widget_pointers();
+		auto const callbacks = view.template event_callbacks<EventType>();
+		callbacks[index](widgets[index], std::forward<EventType>(e));
+
+		return true;
+	}
+
 	class flat_widget_collection
 	{
 	public:

@@ -119,16 +119,13 @@ namespace terraformer::ui::main
 				}
 			);
 
-			if(next_widget == m_keyboard_widget && m_keyboard_widget != flat_widget_collection::npos)
+			if(next_widget == m_keyboard_widget)
 			{
-				auto const attribs = m_flat_collection.attributes();
-				auto const pointers = attribs.widget_pointers();
-				auto const callbacks = attribs.event_callbacks<keyboard_button_event>();
-				callbacks[m_keyboard_widget](pointers[m_keyboard_widget], event);
-				return;
+				if(!try_dispatch(event, m_flat_collection.attributes(), next_widget))
+				{ printf("kbe in the void\n"); }
 			}
-
-			set_keyboard_focus(next_widget);
+			else
+			{ set_keyboard_focus(next_widget); }
 		}
 
 
@@ -170,25 +167,13 @@ namespace terraformer::ui::main
 
 		void set_keyboard_focus(flat_widget_collection::index_type new_widget)
 		{
-			if(new_widget == m_keyboard_widget)
+			if(new_widget == m_keyboard_widget ||
+				!(new_widget >= m_flat_collection.first_element_index() &&
+				new_widget < std::size(m_flat_collection))
+			)
 			{ return; }
 
-			if(m_keyboard_widget != flat_widget_collection::npos)
-			{
-				auto const attribs = m_flat_collection.attributes();
-				auto const pointers = attribs.widget_pointers();
-				auto const callbacks = attribs.event_callbacks<keyboard_focus_leave_event>();
-				{ callbacks[m_keyboard_widget](pointers[m_keyboard_widget], keyboard_focus_leave_event{}); }
-			}
-
-			if(new_widget>= m_flat_collection.first_element_index() &&
-				new_widget < std::size(m_flat_collection))
-			{
-				auto const attribs = m_flat_collection.attributes();
-				auto const pointers = attribs.widget_pointers();
-				auto const callbacks = attribs.event_callbacks<keyboard_focus_enter_event>();
-				{ callbacks[new_widget](pointers[new_widget], keyboard_focus_enter_event{}); }
-			}
+			try_dispatch(keyboard_focus_enter_event{}, m_flat_collection.attributes(), new_widget);
 
 			m_keyboard_widget = new_widget;
 		}
