@@ -5,7 +5,7 @@
 #include "./widgets_to_render_collection.hpp"
 #include "./events.hpp"
 #include "./widget_collection.hpp"
-#include "./keyboard_navigation_controller.hpp"
+#include "./flat_widget_collection.hpp"
 
 #include "lib/common/value_accessor.hpp"
 
