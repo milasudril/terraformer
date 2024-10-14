@@ -296,6 +296,22 @@ namespace terraformer::ui::wsapi
 					}
 				);
 			}
+
+			if constexpr (can_handle_event<EventHandler, WindowTag, main::typing_event>)
+			{
+				glfwSetCharCallback(
+					m_window.get(),
+					[](GLFWwindow* window, uint32_t codepoint) {
+						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
+						dispatch_event<WindowTag>(
+							*event_handler,
+							main::typing_event{
+								.codepoint = codepoint
+							}
+						);
+					}
+				);
+			}
 		}
 
 		void set_window_title(char const* title)
