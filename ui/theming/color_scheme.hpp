@@ -151,8 +151,8 @@ namespace terraformer::ui::theming
 		},
 		.mouse_kbd_tracking{
 			.cursor_color = mid_colors(1.0f/3.0f),
-			.mouse_focus_color = mid_colors(11.0f/12.0f),
-			.keyboard_focus_color = mid_colors(9.0f/12.0f)
+			.mouse_focus_color = mid_colors(9.0f/12.0f),
+			.keyboard_focus_color = mid_colors(11.0f/12.0f)
 		},
 		.misc_colors{
 			.dark = default_dark_palette,
