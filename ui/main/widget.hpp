@@ -27,7 +27,8 @@ namespace terraformer::ui::main
 		widget_width_request w_req,
 		widget_height_request h_req,
 		keyboard_focus_enter_event kfe,
-		keyboard_focus_leave_event kfl
+		keyboard_focus_leave_event kfl,
+		typing_event te
 	)
 	{
 		{ obj.prepare_for_presentation(surface) } -> std::same_as<void>;
@@ -38,6 +39,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(kbe) } -> std::same_as<void>;
 		{ obj.handle_event(kfe) } -> std::same_as<void>;
 		{ obj.handle_event(kfl) } -> std::same_as<void>;
+		{ obj.handle_event(te) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
@@ -188,6 +190,7 @@ namespace terraformer::ui::main
 		void handle_event(fb_size) {}
 		void handle_event(keyboard_focus_enter_event){}
 		void handle_event(keyboard_focus_leave_event){}
+		void handle_event(typing_event){}
 
 		void theme_updated(config const&, widget_instance_info) {}
 

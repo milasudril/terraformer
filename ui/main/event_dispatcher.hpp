@@ -128,6 +128,13 @@ namespace terraformer::ui::main
 			{ set_keyboard_focus(next_widget); }
 		}
 
+		template<class Tag>
+		void handle_event(Tag, typing_event event)
+		{
+			if(!try_dispatch(event, m_flat_collection.attributes(), m_keyboard_widget))
+			{ printf("%08x\n", event.codepoint); }
+		}
+
 
 		template<class Tag>
 		void handle_event(Tag, window_close_event event)

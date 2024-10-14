@@ -47,6 +47,9 @@ namespace terraformer::ui::main
 				[](void* obj, keyboard_button_event const& kbe) {
 					static_cast<Widget*>(obj)->handle_event(kbe);
 				},
+				[](void* obj, typing_event te){
+					static_cast<Widget*>(obj)->handle_event(te);
+				},
 				[](void* obj, keyboard_focus_enter_event kfe) {
 					static_cast<Widget*>(obj)->handle_event(kfe);
 				},

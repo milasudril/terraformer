@@ -36,6 +36,7 @@ namespace terraformer::ui::main
 			widget_tree_address const,
 			std::reference_wrapper<widget_state const> const,
 			keyboard_button_callback const,
+			typing_callback const,
 			keyboard_focus_enter_callback const,
 			keyboard_focus_leave_callback const
 		>;
@@ -98,7 +99,7 @@ namespace terraformer::ui::main
 		{ return false; }
 
 		auto const widgets = view.widget_pointers();
-		auto const callbacks = view.template event_callbacks<EventType>();
+		auto const callbacks = view.template event_callbacks<std::remove_cvref_t<EventType>>();
 		callbacks[index](widgets[index], std::forward<EventType>(e));
 
 		return true;
