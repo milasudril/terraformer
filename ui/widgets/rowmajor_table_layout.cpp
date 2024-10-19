@@ -3,38 +3,44 @@
 #include "./rowmajor_table_layout.hpp"
 
 terraformer::scaling
-terraformer::ui::widgets::rowmajor_table_layout::	update_widget_locations(
+terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 	main::widget_collection_ref& widgets
 ) const
 {
-	auto const sizes = std::as_const(widgets).sizes();
 	auto const widget_geometries = widgets.widget_geometries();
+	auto x_offset = margin_x;
+	auto y_offset = margin_y;
 
 	auto const n = std::size(widgets);
-	auto min_width = 0.0f;
-	auto max_width = std::numeric_limits<float>::infinity();
-	auto height = margin_y;
-
+	auto const* const cols = m_colwidths.get();
+	size_t col = 0;
+	auto const colcount = m_colcount;
+	auto row = m_rowheights.first_element_index();
+	auto const rowcount = std::size(m_rowheights);
+	
 	for(auto k = widgets.first_element_index(); k != n; ++k)
 	{
-		// NOTE: It is assumed that size is 0 if widget is collapsed
-		auto const& size = sizes[k];
 		widget_geometries[k].where = location{
-			margin_x,
-			-height,
-			0.0f
+			x_offset,
+			-y_offset,
+			0.0f,
 		};
-		widget_geometries[k].origin = terraformer::location{-1.0f, 1.0f, 0.0f};
-		widget_geometries[k].size = size;
-		min_width = std::max(min_width, size[0]);
-		max_width = std::min(max_width, size[0]);
-		height += widget_geometries[k].size[1] + margin_y;
-	}
+		x_offset += cols[col] + margin_x;
+		y_offset += m_rowheights[row] + margin_y;
 
+		++col;
+		if(col == colcount)
+		{
+			col = 0;
+			++row;
+			if(row == rowcount)
+			{ break; }
+		}
+	}
 	return scaling{
-		min_width + 2.0f*margin_x,
-		height,
-		1.0f
+		x_offset,
+		y_offset,
+		1.0f,
 	};
 }
 
