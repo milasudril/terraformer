@@ -48,8 +48,8 @@ terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 	puts("=================");
 	
 	return scaling{
-		x_offset,
-		y_offset,
+		m_width + static_cast<float>(colcount + 1)*margin_x,
+		m_height + static_cast<float>(rowcount.get() + 1)*margin_y,
 		1.0f,
 	};
 }
@@ -82,4 +82,7 @@ void terraformer::ui::widgets::rowmajor_table_layout::minimize_cell_sizes(
 	}
 	if(col != 0 && n != widgets.first_element_index())
 	{ m_rowheights.push_back(max_height); }
+	
+	m_height = std::accumulate(std::begin(m_rowheights), std::end(m_rowheights), 0.0f);
+	m_width = std::accumulate(cols, cols + colcount, 0.0f);
 }

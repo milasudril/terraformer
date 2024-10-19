@@ -31,6 +31,8 @@ namespace terraformer::ui::widgets
 		size_t m_colcount;
 		mutable std::unique_ptr<float[]> m_colwidths;
 		mutable single_array<float> m_rowheights;
+		mutable float m_width;
+		mutable float m_height;
 	};
 }
 
