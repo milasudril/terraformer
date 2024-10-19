@@ -20,10 +20,13 @@ namespace terraformer::ui::widgets
 		{}
 			
 		scaling update_widget_locations(main::widget_collection_ref& widgets) const;
+		
+		void minimize_cell_sizes(main::widget_collection_view const& widgets);
 
 		float margin_x;
 		
 		float margin_y;
+
 	private:
 		size_t m_colcount;
 		std::unique_ptr<float[]> m_colwidths;

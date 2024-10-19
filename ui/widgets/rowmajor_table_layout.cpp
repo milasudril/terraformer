@@ -40,3 +40,31 @@ terraformer::ui::widgets::rowmajor_table_layout::	update_widget_locations(
 		1.0f
 	};
 }
+
+void terraformer::ui::widgets::rowmajor_table_layout::minimize_cell_sizes(
+	main::widget_collection_view const& widgets
+)
+{
+	auto const sizes = widgets.sizes();
+	auto const n = std::size(widgets);
+	auto cols = m_colwidths.get();
+	auto const colcount = m_colcount;
+	std::fill_n(cols, colcount, 0.0f); 
+	m_rowheights.clear();
+	auto max_height = 0.0f;
+	size_t col = 0;
+	for(auto k = widgets.first_element_index(); k != n; ++k)
+	{
+		// NOTE: It is assumed that size is 0 if widget is collapsed
+		cols[col] = std::max(sizes[k][0], cols[col]);
+		max_height = std::max(sizes[k][1], max_height);
+		
+		++col;
+		if(col == colcount)
+		{
+			col = 0;
+			m_rowheights.push_back(max_height);
+			max_height = 0.0f;
+		}
+	}
+}
