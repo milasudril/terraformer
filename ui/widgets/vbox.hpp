@@ -1,54 +1,14 @@
 #ifndef TERRAFORMER_UI_WIDGETS_VBOX_HPP
 #define TERRAFORMER_UI_WIDGETS_VBOX_HPP
 
+#include "./rowmajor_table_layout.hpp"
+
 #include "ui/main/widget_collection.hpp"
 
 #include <functional>
 
 namespace terraformer::ui::widgets
 {
-	struct vbox_layout
-	{
-		scaling update_widget_locations(main::widget_collection_ref& widgets) const
-		{
-			auto const sizes = std::as_const(widgets).sizes();
-			auto const widget_geometries = widgets.widget_geometries();
-			auto const widget_states = widgets.widget_states();
-
-			auto const n = std::size(widgets);
-			auto min_width = 0.0f;
-			auto max_width = std::numeric_limits<float>::infinity();
-			auto height = margin_y;
-
-			for(auto k = widgets.first_element_index(); k != n; ++k)
-			{
-				if(!widget_states[k].collapsed) [[likely]]
-				{
-					auto const& size = sizes[k];
-					widget_geometries[k].where = location{
-						margin_x,
-						-height,
-						0.0f
-					};
-					widget_geometries[k].origin = terraformer::location{-1.0f, 1.0f, 0.0f};
-					widget_geometries[k].size = size;
-					min_width = std::max(min_width, size[0]);
-					max_width = std::min(max_width, size[0]);
-					height += widget_geometries[k].size[1] + margin_y;
-				}
-			}
-
-			return scaling{
-				min_width + 2.0f*margin_x,
-				height,
-				1.0f
-			};
-		}
-
-		float margin_x;
-		float margin_y;
-	};
-
 	class vbox:public main::widget_with_default_actions
 	{
 	public:
@@ -87,6 +47,7 @@ namespace terraformer::ui::widgets
 				new_theme.other_panel;
 			layout.margin_x = panel.padding;
 			layout.margin_y = panel.padding;
+			//layout.minimize_cell_sizes(std::as_const(m_widgets).get_attributes());
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
 			m_foreground = new_theme.misc_textures.null;
@@ -106,7 +67,7 @@ namespace terraformer::ui::widgets
 
 		widget_collection m_widgets;
 		widget_collection::index_type m_cursor_widget_index{widget_collection::npos};
-		vbox_layout layout;
+		rowmajor_table_layout layout{1};
 
 		main::generic_shared_texture m_background;
 		main::generic_shared_texture m_foreground;
