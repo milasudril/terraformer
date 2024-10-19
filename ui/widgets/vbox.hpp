@@ -47,7 +47,6 @@ namespace terraformer::ui::widgets
 				new_theme.other_panel;
 			layout.margin_x = panel.padding;
 			layout.margin_y = panel.padding;
-			//layout.minimize_cell_sizes(std::as_const(m_widgets).get_attributes());
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
 			m_foreground = new_theme.misc_textures.null;
