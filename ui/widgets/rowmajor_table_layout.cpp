@@ -80,4 +80,6 @@ void terraformer::ui::widgets::rowmajor_table_layout::minimize_cell_sizes(
 			max_height = 0.0f;
 		}
 	}
+	if(col != 0 && n != widgets.first_element_index())
+	{ m_rowheights.push_back(max_height); }
 }
