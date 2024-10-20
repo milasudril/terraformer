@@ -154,7 +154,6 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 	);
 }
 
-#if 0
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_true)
 {
 	terraformer::ui::widgets::button my_button;
@@ -164,7 +163,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
 	}).
-	theme_updated(create_render_resources());
+	theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
 
 	my_button.handle_event(terraformer::ui::main::fb_size{
 		.width = 20,
@@ -224,7 +223,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 		.width = 20,
 		.height = 14
 	});
-	my_button.theme_updated(create_render_resources());
+	my_button.theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
 
 	my_button.handle_event(
 		terraformer::ui::main::mouse_button_event{
@@ -259,7 +258,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
 	})
-	.theme_updated(create_render_resources());
+	.theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(callcount, 0);
 
@@ -299,7 +298,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
 	})
-	.theme_updated(create_render_resources());
+	.theme_updated(create_render_resources(),  terraformer::ui::main::widget_instance_info{});
 	my_button.handle_event(terraformer::ui::main::fb_size{
 		.width = 20,
 		.height = 14
@@ -357,7 +356,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		EXPECT_EQ(&button, &my_button);
 	})
 	.value(true)
-	.theme_updated(create_render_resources());
+	.theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
 
 	my_button.handle_event(terraformer::ui::main::fb_size{
 		.width = 20,
@@ -432,24 +431,17 @@ TESTCASE(terraformer_ui_widgets_button_compute_size_constraints)
 		EXPECT_EQ(&button, &my_button);
 	})
 	.text(u8"")
-	.theme_updated(create_render_resources());
+	.theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
 
-	auto const res_a = my_button.compute_size_constraints();
+	auto const res_a = my_button.compute_size(terraformer::ui::main::widget_width_request{});
 
 	my_button.text(u8"Hello, World");
-	auto const res_b = my_button.compute_size_constraints();
+	auto const res_b = my_button.compute_size(terraformer::ui::main::widget_width_request{});
 
-	EXPECT_LT(res_a.width.min, res_b.width.min);
-	EXPECT_EQ(res_a.width.max, std::numeric_limits<float>::infinity());
-	EXPECT_EQ(res_b.width.max, std::numeric_limits<float>::infinity());
-	EXPECT_EQ(res_a.aspect_ratio, std::nullopt);
-	EXPECT_EQ(res_b.aspect_ratio, std::nullopt);
+	EXPECT_LT(res_a[0], res_b[0]);
 
-	auto const res_c = my_button.compute_size_constraints();
-	EXPECT_EQ(res_b.width.min, res_c.width.min);
-	EXPECT_EQ(res_c.aspect_ratio, std::nullopt);
-
-
+	auto const res_c = my_button.compute_size(terraformer::ui::main::widget_width_request{});
+	EXPECT_EQ(res_b[0], res_c[0]);
 	EXPECT_EQ(callcount, 0);
 }
 
@@ -471,6 +463,16 @@ TESTCASE(terraformer_ui_widgets_toggle_button_on_value_changed)
 		EXPECT_EQ(callcount, 0);
 	}
 
+	my_button.handle_event(
+		terraformer::ui::main::mouse_button_event{
+			.where = terraformer::ui::main::cursor_position{},
+			.button = 0,
+			.action = terraformer::ui::main::mouse_button_action::press,
+			.modifiers = {}
+		}
+	);
+	EXPECT_EQ(callcount, 0);
+	
 	my_button.handle_event(
 		terraformer::ui::main::mouse_button_event{
 			.where = terraformer::ui::main::cursor_position{},
@@ -499,4 +501,3 @@ TESTCASE(terraformer_ui_widgets_toggle_button_text)
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 }
-#endif
