@@ -21,7 +21,7 @@ namespace terraformer::ui::widgets
 			
 		scaling update_widget_locations(main::widget_collection_ref& widgets) const;
 		
-		void minimize_cell_sizes(main::widget_collection_ref const& widgets) const;
+		void minimize_cell_sizes(main::widget_collection_ref const& widgets);
 
 		float margin_x;
 		
@@ -29,10 +29,10 @@ namespace terraformer::ui::widgets
 
 	private:
 		size_t m_colcount;
-		mutable std::unique_ptr<float[]> m_colwidths;
-		mutable single_array<float> m_rowheights;
-		mutable float m_width;
-		mutable float m_height;
+		std::unique_ptr<float[]> m_colwidths;
+		single_array<float> m_rowheights;
+		float m_width;
+		float m_height;
 	};
 }
 

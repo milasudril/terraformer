@@ -54,7 +54,7 @@ terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 
 void terraformer::ui::widgets::rowmajor_table_layout::minimize_cell_sizes(
 	main::widget_collection_ref const& widgets
-) const
+)
 {
 	auto const sizes = widgets.sizes();
 	auto const n = std::size(widgets);
