@@ -30,11 +30,11 @@ terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 		widget_geometries[k].size = sizes[k];
 		widget_geometries[k].origin = location{-1.0f, 1.0f, 0.0f};
 
-		x_offset += cols[col] + margin_x;
+		x_offset += cols[col];
 		++col;
 		if(col == colcount)
 		{
-			y_offset += m_rowheights[row] + margin_y;
+			y_offset += m_rowheights[row];
 			++row;
 			if(row == rowcount)
 			{ break; }
@@ -46,8 +46,8 @@ terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 	puts("=================");
 	
 	return scaling{
-		m_width + static_cast<float>(colcount + 1)*margin_x,
-		m_height + static_cast<float>(rowcount.get() + 1)*margin_y,
+		m_width,
+		m_height,
 		1.0f,
 	};
 }
@@ -67,8 +67,8 @@ void terraformer::ui::widgets::rowmajor_table_layout::minimize_cell_sizes(
 	for(auto k = widgets.first_element_index(); k != n; ++k)
 	{
 		// NOTE: It is assumed that size is 0 if widget is collapsed
-		cols[col] = std::max(sizes[k][0], cols[col]);
-		max_height = std::max(sizes[k][1], max_height);
+		cols[col] = std::max(sizes[k][0] + margin_x, cols[col]);
+		max_height = std::max(sizes[k][1] + margin_y, max_height);
 		
 		++col;
 		if(col == colcount)
@@ -81,6 +81,6 @@ void terraformer::ui::widgets::rowmajor_table_layout::minimize_cell_sizes(
 	if(col != 0 && n != widgets.first_element_index())
 	{ m_rowheights.push_back(max_height); }
 	
-	m_height = std::accumulate(std::begin(m_rowheights), std::end(m_rowheights), 0.0f);
-	m_width = std::accumulate(cols, cols + colcount, 0.0f);
+	m_height = std::accumulate(std::begin(m_rowheights), std::end(m_rowheights), margin_y);
+	m_width = std::accumulate(cols, cols + colcount, margin_x);
 }
