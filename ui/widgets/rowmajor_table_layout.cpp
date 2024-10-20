@@ -6,9 +6,7 @@ terraformer::scaling
 terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 	main::widget_collection_ref& widgets
 ) const
-{
-	minimize_cell_sizes(widgets);
-	
+{	
 	auto const sizes = widgets.sizes();
 	auto const widget_geometries = widgets.widget_geometries();
 	auto x_offset = margin_x;

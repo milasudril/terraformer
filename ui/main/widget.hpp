@@ -101,7 +101,10 @@ namespace terraformer::ui::main
 		{ m_size_confirmed(m_widget, size); }
 
 		scaling run_layout()
-		{ return m_layout.update_widget_locations(m_children); }
+		{ 
+			m_layout.minimize_cell_sizes(m_children);
+			return m_layout.update_widget_locations(m_children); 
+		}
 
 	private:
 		void* m_widget = nullptr;
