@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_VBOX_HPP
 #define TERRAFORMER_UI_WIDGETS_VBOX_HPP
 
-#include "./rowmajor_table_layout.hpp"
+#include "ui/layouts/rowmajor_table_layout.hpp"
 
 #include "ui/main/widget_collection.hpp"
 
