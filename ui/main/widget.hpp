@@ -102,6 +102,7 @@ namespace terraformer::ui::main
 
 		scaling run_layout()
 		{ 
+			// TODO: Cell minimization and widget positioning should be separate
 			m_layout.minimize_cell_sizes(m_children);
 			return m_layout.update_widget_locations(m_children); 
 		}
