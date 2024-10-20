@@ -1,7 +1,7 @@
-//@	{"dependencies_extra":[{"ref":"./rowmajor_table_layout.o", "rel":"implementation"}]}
+//@	{"dependencies_extra":[{"ref":"./rowmajor_table.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_UI_LAYOUTS_ROWMAJOR_TABLE_LAYOUT_HPP
-#define TERRAFORMER_UI_LAYOUTS_ROWMAJOR_TABLE_LAYOUT_HPP
+#ifndef TERRAFORMER_UI_LAYOUTS_ROWMAJOR_TABLE_HPP
+#define TERRAFORMER_UI_LAYOUTS_ROWMAJOR_TABLE_HPP
 
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
@@ -11,10 +11,10 @@
 
 namespace terraformer::ui::layouts
 {
-	class rowmajor_table_layout
+	class rowmajor_table
 	{
 	public:
-		explicit rowmajor_table_layout(size_t colcount):
+		explicit rowmajor_table(size_t colcount):
 			m_colcount{colcount},
 			m_colwidths{std::make_unique<float[]>(colcount)}
 		{}

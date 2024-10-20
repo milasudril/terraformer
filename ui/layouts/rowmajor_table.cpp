@@ -1,9 +1,9 @@
-//@	{"target":{"name":"rowmajor_table_layout.o"}}
+//@	{"target":{"name":"rowmajor_table.o"}}
 
-#include "./rowmajor_table_layout.hpp"
+#include "./rowmajor_table.hpp"
 
 terraformer::scaling
-terraformer::ui::layouts::rowmajor_table_layout::update_widget_locations(
+terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 	main::widget_collection_ref& widgets
 ) const
 {	
@@ -49,7 +49,7 @@ terraformer::ui::layouts::rowmajor_table_layout::update_widget_locations(
 	};
 }
 
-void terraformer::ui::layouts::rowmajor_table_layout::minimize_cell_sizes(
+void terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
 	main::widget_collection_ref const& widgets
 )
 {

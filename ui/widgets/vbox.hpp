@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_VBOX_HPP
 #define TERRAFORMER_UI_WIDGETS_VBOX_HPP
 
-#include "ui/layouts/rowmajor_table_layout.hpp"
+#include "ui/layouts/rowmajor_table.hpp"
 
 #include "ui/main/widget_collection.hpp"
 
@@ -66,7 +66,7 @@ namespace terraformer::ui::widgets
 
 		widget_collection m_widgets;
 		widget_collection::index_type m_cursor_widget_index{widget_collection::npos};
-		layouts::rowmajor_table_layout layout{2};
+		layouts::rowmajor_table layout{2};
 
 		main::generic_shared_texture m_background;
 		main::generic_shared_texture m_foreground;
