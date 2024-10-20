@@ -21,7 +21,6 @@ terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 	
 	for(auto k = widgets.first_element_index(); k != n; ++k)
 	{
-		printf("Putting (%zu, %zu) at (%.8g, %.8g)\n", row.get(), col, x_offset, y_offset);
 		widget_geometries[k].where = location{
 			x_offset,
 			-y_offset,
@@ -42,8 +41,6 @@ terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 			x_offset = margin_x;
 		}
 	}
-	
-	puts("=================");
 	
 	return scaling{
 		m_width,
