@@ -36,6 +36,8 @@ namespace terraformer::ui::main
 				|| cursor_focus_indicator_mode == focus_indicator_mode::always_visible;
 		}
 	};
+	
+	static_assert(sizeof(widget_state) == sizeof(uint16_t));
 
 }
 
