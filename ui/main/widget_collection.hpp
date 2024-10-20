@@ -74,8 +74,8 @@ namespace terraformer::ui::main
 				[](void const* obj){
 					return static_cast<Widget const*>(obj)->get_children();
 				},
-				[](void const* obj){
-					return static_cast<Widget const*>(obj)->get_layout();
+				[](void* obj){
+					return static_cast<Widget*>(obj)->get_layout();
 				}
 			);
 

@@ -44,7 +44,7 @@ namespace terraformer::ui::main
 		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
-		{ std::as_const(obj).get_layout() } -> std::same_as<layout_policy_ref>;
+		{ obj.get_layout() } -> std::same_as<layout_policy_ref>;
 		{ obj.compute_size(w_req) } -> std::same_as<scaling>;
 		{ obj.compute_size(h_req) } -> std::same_as<scaling>;
 	};

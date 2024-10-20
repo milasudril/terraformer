@@ -52,7 +52,7 @@ namespace terraformer::ui::widgets
 			m_foreground = new_theme.misc_textures.null;
 		}
 
-		main::layout_policy_ref get_layout() const
+		main::layout_policy_ref get_layout()
 		{ return main::layout_policy_ref{std::ref(layout)}; }
 
 		main::widget_collection_ref get_children()
