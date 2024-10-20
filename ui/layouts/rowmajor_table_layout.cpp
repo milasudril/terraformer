@@ -3,7 +3,7 @@
 #include "./rowmajor_table_layout.hpp"
 
 terraformer::scaling
-terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
+terraformer::ui::layouts::rowmajor_table_layout::update_widget_locations(
 	main::widget_collection_ref& widgets
 ) const
 {	
@@ -49,7 +49,7 @@ terraformer::ui::widgets::rowmajor_table_layout::update_widget_locations(
 	};
 }
 
-void terraformer::ui::widgets::rowmajor_table_layout::minimize_cell_sizes(
+void terraformer::ui::layouts::rowmajor_table_layout::minimize_cell_sizes(
 	main::widget_collection_ref const& widgets
 )
 {

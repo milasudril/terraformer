@@ -1,7 +1,7 @@
 //@	{"dependencies_extra":[{"ref":"./rowmajor_table_layout.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_UI_WIDGETS_ROWMAJOR_TABLE_LAYOUT_HPP
-#define TERRAFORMER_UI_WIDGETS_ROWMAJOR_TABLE_LAYOUT_HPP
+#ifndef TERRAFORMER_UI_LAYOUTS_ROWMAJOR_TABLE_LAYOUT_HPP
+#define TERRAFORMER_UI_LAYOUTS_ROWMAJOR_TABLE_LAYOUT_HPP
 
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
@@ -9,7 +9,7 @@
 
 #include <memory>
 
-namespace terraformer::ui::widgets
+namespace terraformer::ui::layouts
 {
 	class rowmajor_table_layout
 	{
