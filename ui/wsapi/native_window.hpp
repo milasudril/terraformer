@@ -4,6 +4,7 @@
 #include "./context.hpp"
 #include "ui/main/events.hpp"
 #include "lib/common/bitmask_enum.hpp"
+#include "ui/main/window_ref.hpp"
 
 #define GLFW_INCLUDE_NONE
 
@@ -16,6 +17,13 @@
 #include <cstdio>
 #include <functional>
 #include <cassert>
+
+template<>
+struct terraformer::ui::main::window_traits<GLFWwindow>
+{
+	static void set_title(GLFWwindow& window, char const* new_title)
+	{ glfwSetWindowTitle(&window, new_title); }
+};
 
 namespace terraformer::ui::wsapi
 {
@@ -130,9 +138,9 @@ namespace terraformer::ui::wsapi
 	}
 
 	template<class T, class Tag, class EventType>
-	concept can_handle_event = std::is_empty_v<Tag> && requires(T& obj, EventType&& event)
+	concept can_handle_event = std::is_empty_v<Tag> && requires(T& obj, EventType&& event, main::window_ref window)
 	{
-		{obj.handle_event(Tag{}, std::forward<EventType>(event))} -> std::same_as<void>;
+		{obj.handle_event(Tag{}, window, std::forward<EventType>(event))} -> std::same_as<void>;
 	};
 
 	template<class RenderContextConfiguration = no_api_config>
@@ -188,7 +196,7 @@ namespace terraformer::ui::wsapi
 					m_window.get(),
 					[](GLFWwindow* window){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-						dispatch_event<WindowTag>(*event_handler, main::window_close_event{});
+						dispatch_event<WindowTag>(*event_handler, *window, main::window_close_event{});
  					}
 				);
 			}
@@ -199,10 +207,10 @@ namespace terraformer::ui::wsapi
 					m_window.get(),
 					[](GLFWwindow* window, int w, int h){
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
-						dispatch_event<WindowTag>(*event_handler, main::fb_size{w, h});
+						dispatch_event<WindowTag>(*event_handler, *window, main::fb_size{w, h});
 					}
 				);
-				dispatch_event<WindowTag>(eh.get(), get_fb_size());
+				dispatch_event<WindowTag>(eh.get(), *m_window.get(), get_fb_size());
 			}
 
 			if constexpr (can_handle_event<EventHandler, WindowTag, main::mouse_button_event>)
@@ -214,6 +222,7 @@ namespace terraformer::ui::wsapi
 						assert(action == GLFW_PRESS || action == GLFW_RELEASE);
 						dispatch_event<WindowTag>(
 							*event_handler,
+							*window,
 							main::mouse_button_event{
 								.where = get_cursor_position(window),
 								.button = button,
@@ -234,6 +243,7 @@ namespace terraformer::ui::wsapi
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						dispatch_event<WindowTag>(
 							*event_handler,
+							*window,
 							main::cursor_motion_event{
 								.where{
 									.x = x,
@@ -261,6 +271,7 @@ namespace terraformer::ui::wsapi
 						{
 							dispatch_event<WindowTag>(
 								*event_handler,
+								*window,
 								main::cursor_enter_event{
 									.where = get_cursor_position(window)
 								}
@@ -270,6 +281,7 @@ namespace terraformer::ui::wsapi
 						{
 							dispatch_event<WindowTag>(
 								*event_handler,
+								*window,
 								main::cursor_leave_event{
 									.where = get_cursor_position(window)
 								}
@@ -287,6 +299,7 @@ namespace terraformer::ui::wsapi
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						dispatch_event<WindowTag>(
 							*event_handler,
+							*window,
 							main::keyboard_button_event{
 								.scancode = scancode - 8,
 								.action = to_keyboard_button_action(action),
@@ -305,6 +318,7 @@ namespace terraformer::ui::wsapi
 						auto event_handler = static_cast<EventHandler*>(glfwGetWindowUserPointer(window));
 						dispatch_event<WindowTag>(
 							*event_handler,
+							*window,
 							main::typing_event{
 								.codepoint = codepoint
 							}
@@ -345,14 +359,14 @@ namespace terraformer::ui::wsapi
 		};
 
 		template<class WindowTag, class EventHandler, class... Args>
-		static void dispatch_event(EventHandler& eh, Args&&... args)
+		static void dispatch_event(EventHandler& eh, GLFWwindow& window, Args&&... args)
 		{
 			try
-			{ eh.handle_event(WindowTag{}, std::forward<Args>(args)...); }
+			{ eh.handle_event(WindowTag{}, main::window_ref{window}, std::forward<Args>(args)...); }
 			catch(std::exception const& e)
-			{ eh.handle_event(WindowTag{}, main::error_message{e.what()}); }
+			{ eh.handle_event(WindowTag{}, main::window_ref{window}, main::error_message{e.what()}); }
 			catch(char const* msg)
-			{ eh.handle_event(WindowTag{}, main::error_message{msg}); }
+			{ eh.handle_event(WindowTag{}, main::window_ref{window}, main::error_message{msg}); }
 			catch(...)
 			{
 				fprintf(stderr, "Caught unknown exception\n");

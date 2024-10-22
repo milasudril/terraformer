@@ -6,6 +6,7 @@
 #include "./events.hpp"
 #include "./widget_collection.hpp"
 #include "./flat_widget_collection.hpp"
+#include "./window_ref.hpp"
 
 #include "lib/common/value_accessor.hpp"
 
@@ -62,11 +63,11 @@ namespace terraformer::ui::main
 		}
 
 		template<class Tag>
-		void handle_event(Tag, error_message const& msg) noexcept
+		void handle_event(Tag, window_ref, error_message const& msg) noexcept
 		{ value_of(m_error_handler).handle_event(Tag{}, msg); }
 
 		template<class Tag>
-		void handle_event(Tag, mouse_button_event const& event)
+		void handle_event(Tag, window_ref, mouse_button_event const& event)
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 
@@ -87,7 +88,7 @@ namespace terraformer::ui::main
 		}
 
 		template<class Tag>
-		void handle_event(Tag, cursor_motion_event const& event)
+		void handle_event(Tag, window_ref, cursor_motion_event const& event)
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 
@@ -107,7 +108,7 @@ namespace terraformer::ui::main
 		}
 
 		template<class Tag>
-		void handle_event(Tag, keyboard_button_event const& event)
+		void handle_event(Tag, window_ref, keyboard_button_event const& event)
 		{
 			auto const nav_step = get_form_navigation_step_size(event);
 			auto const next_widget = find_next_wrap_around(
@@ -129,7 +130,7 @@ namespace terraformer::ui::main
 		}
 
 		template<class Tag>
-		void handle_event(Tag, typing_event event)
+		void handle_event(Tag, window_ref, typing_event event)
 		{
 			if(!try_dispatch(event, m_flat_collection.attributes(), m_keyboard_widget))
 			{ printf("%08x\n", event.codepoint); }
@@ -137,20 +138,20 @@ namespace terraformer::ui::main
 
 
 		template<class Tag>
-		void handle_event(Tag, window_close_event event)
+		void handle_event(Tag, window_ref, window_close_event event)
 		{ value_of(m_window_controller).handle_event(Tag{}, event); }
 
 		template<class Tag>
-		void handle_event(Tag, cursor_enter_event const& event)
+		void handle_event(Tag, window_ref, cursor_enter_event const& event)
 		{ value_of(m_window_controller).handle_event(Tag{}, event); }
 
 		template<class Tag>
-		void handle_event(Tag, cursor_leave_event const& event)
+		void handle_event(Tag, window_ref, cursor_leave_event const& event)
 		{ value_of(m_window_controller).handle_event(Tag{}, event); }
 
 
 		template<class Tag>
-		void handle_event(Tag, fb_size size)
+		void handle_event(Tag, window_ref, fb_size size)
 		{
 			value_of(m_content_renderer)
 				.set_viewport(0, 0, size.width, size.height)
