@@ -83,11 +83,17 @@ int main(int, char**)
 	terraformer::ui::widgets::toggle_button bar;
 	bar.text(u8"Click me!")
 		.value(false)
-		.on_value_changed([&foo](auto const& obj){
+		.on_value_changed([&foo](auto const& obj, terraformer::ui::main::window_ref window, auto){
 			if(obj.value())
-			{ foo.value(u8"Value is true");}
+			{
+				foo.value(u8"Value is true");
+				window.set_title("True");
+			}
 			else
-			{ foo.value(u8"Value is false");}
+			{
+				foo.value(u8"Value is false");
+				window.set_title("False");
+			}
 		});
 	terraformer::ui::widgets::vbox my_vbox;
 

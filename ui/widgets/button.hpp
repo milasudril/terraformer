@@ -52,7 +52,7 @@ namespace terraformer::ui::widgets
 		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller)
 		{ m_temp_state = std::nullopt; }
 
-		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller)
+		void handle_event(main::mouse_button_event const& mbe, main::window_ref window, main::ui_controller ui_ctrl)
 		{
 			if(mbe.button == 0)
 			{
@@ -66,14 +66,14 @@ namespace terraformer::ui::widgets
 						if(m_temp_state.has_value())
 						{
 							m_temp_state.reset();
-							m_on_activated(*this);
+							m_on_activated(*this, window, ui_ctrl);
 						}
 						break;
 				}
 			}
 		}
 
-		void handle_event(main::keyboard_button_event const& kbe, main::window_ref, main::ui_controller)
+		void handle_event(main::keyboard_button_event const& kbe, main::window_ref window, main::ui_controller ui_ctrl)
 		{
 			if(kbe.scancode == 0x39)
 			{
@@ -87,7 +87,7 @@ namespace terraformer::ui::widgets
 						if(m_temp_state.has_value())
 						{
 							m_temp_state.reset();
-							m_on_activated(*this);
+							m_on_activated(*this, window, ui_ctrl);
 						}
 						break;
 
@@ -122,8 +122,8 @@ namespace terraformer::ui::widgets
 		{ return main::widget_collection_view{}; }
 
 	private:
-		move_only_function<void(button&)> m_on_activated =
-			move_only_function<void(button&)>{no_operation_tag{}};
+		move_only_function<void(button&, main::window_ref, main::ui_controller)> m_on_activated =
+			move_only_function<void(button&, main::window_ref, main::ui_controller)>{no_operation_tag{}};
 
 		std::basic_string<char8_t> m_text;
 		basic_image<uint8_t> m_rendered_text;
@@ -208,9 +208,9 @@ namespace terraformer::ui::widgets
 		template<class Function>
 		toggle_button& on_value_changed(Function&& func)
 		{
-			button::on_activated([cb = std::forward<Function>(func)](button& src){
-				on_activated_callback(src);
-				cb(static_cast<toggle_button&>(src));
+			button::on_activated([cb = std::forward<Function>(func)](button& src, main::window_ref window, main::ui_controller ui_ctrl){
+				on_activated_callback(src, window, ui_ctrl);
+				cb(static_cast<toggle_button&>(src), window, ui_ctrl);
 			});
 			return *this;
 		}
@@ -229,7 +229,7 @@ namespace terraformer::ui::widgets
 		}
 
 	private:
-		static void on_activated_callback(button& source)
+		static void on_activated_callback(button& source, main::window_ref, main::ui_controller)
 		{ source.value(!source.value()); }
 	};
 }
