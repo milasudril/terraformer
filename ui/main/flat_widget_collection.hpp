@@ -66,13 +66,13 @@ namespace terraformer::ui::main
 		auto widget_states() const
 		{ return m_span.template get_by_type<std::reference_wrapper<widget_state const>>(); }
 
-		template<class EventType>
+		template<class EventType, class ... Args>
 		auto event_callbacks() const
 		{
-			if constexpr(m_span.template has_type<event_callback_t<EventType>>())
-			{ return m_span.template get_by_type<event_callback_t<EventType>>(); }
+			if constexpr(m_span.template has_type<event_callback_t<EventType, Args...>>())
+			{ return m_span.template get_by_type<event_callback_t<EventType, Args...>>(); }
 			else
-			{ return m_span.template get_by_type<event_callback_t<EventType const&>>(); }
+			{ return m_span.template get_by_type<event_callback_t<EventType const&, Args...>>(); }
 		}
 
 		auto get_span() const
@@ -88,19 +88,20 @@ namespace terraformer::ui::main
 		widget_span m_span;
 	};
 
-	template<class EventType>
+	template<class EventType, class... Args>
 	bool try_dispatch(
 		EventType&& e,
 		flat_widget_collection_view const& view,
-		flat_widget_collection_view::index_type index
+		flat_widget_collection_view::index_type index,
+		Args&&... args
 	)
 	{
 		if(index == flat_widget_collection_view::npos)
 		{ return false; }
 
 		auto const widgets = view.widget_pointers();
-		auto const callbacks = view.template event_callbacks<std::remove_cvref_t<EventType>>();
-		callbacks[index](widgets[index], std::forward<EventType>(e));
+		auto const callbacks = view.template event_callbacks<std::remove_cvref_t<EventType>, std::remove_cvref_t<Args>...>();
+		callbacks[index](widgets[index], std::forward<EventType>(e), std::forward<Args>(args)...);
 
 		return true;
 	}

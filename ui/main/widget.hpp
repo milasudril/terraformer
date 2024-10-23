@@ -28,18 +28,20 @@ namespace terraformer::ui::main
 		widget_height_request h_req,
 		keyboard_focus_enter_event kfe,
 		keyboard_focus_leave_event kfl,
-		typing_event te
+		typing_event te,
+		window_ref wr,
+		ui_controller ui_ctrl
 	)
 	{
 		{ obj.prepare_for_presentation(surface) } -> std::same_as<void>;
-		{ obj.handle_event(cee) } -> std::same_as<void>;
-		{ obj.handle_event(cle) } -> std::same_as<void>;
-		{ obj.handle_event(cme) } -> std::same_as<void>;
-		{ obj.handle_event(mbe) } -> std::same_as<void>;
-		{ obj.handle_event(kbe) } -> std::same_as<void>;
-		{ obj.handle_event(kfe) } -> std::same_as<void>;
-		{ obj.handle_event(kfl) } -> std::same_as<void>;
-		{ obj.handle_event(te) } -> std::same_as<void>;
+		{ obj.handle_event(cee, wr, ui_ctrl) } -> std::same_as<void>;
+		{ obj.handle_event(cle, wr, ui_ctrl) } -> std::same_as<void>;
+		{ obj.handle_event(cme, wr, ui_ctrl) } -> std::same_as<void>;
+		{ obj.handle_event(mbe, wr, ui_ctrl) } -> std::same_as<void>;
+		{ obj.handle_event(kbe, wr, ui_ctrl) } -> std::same_as<void>;
+		{ obj.handle_event(kfe, wr, ui_ctrl) } -> std::same_as<void>;
+		{ obj.handle_event(kfl, wr, ui_ctrl) } -> std::same_as<void>;
+		{ obj.handle_event(te, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
 		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
@@ -101,10 +103,10 @@ namespace terraformer::ui::main
 		{ m_size_confirmed(m_widget, size); }
 
 		scaling run_layout()
-		{ 
+		{
 			// TODO: Cell minimization and widget positioning should be separate
 			m_layout.minimize_cell_sizes(m_children);
-			return m_layout.update_widget_locations(m_children); 
+			return m_layout.update_widget_locations(m_children);
 		}
 
 	private:
@@ -186,15 +188,15 @@ namespace terraformer::ui::main
 	struct widget_with_default_actions
 	{
 		void prepare_for_presentation(widget_rendering_result) {}
-		void handle_event(cursor_enter_event const&) {}
-		void handle_event(cursor_leave_event const&) {}
-		void handle_event(cursor_motion_event const&) {}
-		void handle_event(mouse_button_event const&) {}
-		void handle_event(keyboard_button_event const&) {}
+		void handle_event(cursor_enter_event const&, window_ref, ui_controller) {}
+		void handle_event(cursor_leave_event const&, window_ref, ui_controller) {}
+		void handle_event(cursor_motion_event const&, window_ref, ui_controller) {}
+		void handle_event(mouse_button_event const&, window_ref, ui_controller) {}
+		void handle_event(keyboard_button_event const&, window_ref, ui_controller) {}
+		void handle_event(keyboard_focus_enter_event, window_ref, ui_controller){}
+		void handle_event(keyboard_focus_leave_event, window_ref, ui_controller){}
+		void handle_event(typing_event, window_ref, ui_controller){}
 		void handle_event(fb_size) {}
-		void handle_event(keyboard_focus_enter_event){}
-		void handle_event(keyboard_focus_leave_event){}
-		void handle_event(typing_event){}
 
 		void theme_updated(config const&, widget_instance_info) {}
 

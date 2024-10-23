@@ -68,11 +68,11 @@ namespace terraformer::ui::main
 		{ value_of(m_error_handler).handle_event(Tag{}, msg); }
 
 		template<class Tag>
-		void handle_event(Tag, window_ref, mouse_button_event const& event)
+		void handle_event(Tag, window_ref window, mouse_button_event const& event)
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 
-			if(!try_dispatch(event, res))
+			if(!try_dispatch(event, res, window, ui_controller{*this}))
 			{
 				if(event.action == mouse_button_action::press)
 				{ m_keyboard_widget = flat_widget_collection::npos; }
@@ -82,34 +82,34 @@ namespace terraformer::ui::main
 			if(event.action == mouse_button_action::press)
 			{
 				if(res.state().accepts_keyboard_input())
-				{ set_keyboard_focus(find(res, m_flat_collection)); }
+				{ set_keyboard_focus(find(res, m_flat_collection), window); }
 				else
 				{ m_keyboard_widget = flat_widget_collection::npos; }
 			}
 		}
 
 		template<class Tag>
-		void handle_event(Tag, window_ref, cursor_motion_event const& event)
+		void handle_event(Tag, window_ref window, cursor_motion_event const& event)
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 
 			if(res != m_hot_widget)
 			{
-				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget))
+				if(!try_dispatch(cursor_leave_event{.where = event.where}, m_hot_widget, window, ui_controller{*this}))
 				{ printf("cursor left the void\n"); }
 
-				if(!try_dispatch(cursor_enter_event{.where = event.where}, res))
+				if(!try_dispatch(cursor_enter_event{.where = event.where}, res, window, ui_controller{*this}))
 				{ printf("cursor entered the void\n"); }
 
 				m_hot_widget = res;
 			}
 
-			if(!try_dispatch(event, res))
+			if(!try_dispatch(event, res, window, ui_controller{*this}))
 			{ printf("cme in the void\n"); }
 		}
 
 		template<class Tag>
-		void handle_event(Tag, window_ref, keyboard_button_event const& event)
+		void handle_event(Tag, window_ref window, keyboard_button_event const& event)
 		{
 			auto const nav_step = get_form_navigation_step_size(event);
 			auto const next_widget = find_next_wrap_around(
@@ -123,17 +123,17 @@ namespace terraformer::ui::main
 
 			if(next_widget == m_keyboard_widget)
 			{
-				if(!try_dispatch(event, m_flat_collection.attributes(), next_widget))
+				if(!try_dispatch(event, m_flat_collection.attributes(), next_widget, window, ui_controller{*this}))
 				{ printf("kbe in the void\n"); }
 			}
 			else
-			{ set_keyboard_focus(next_widget); }
+			{ set_keyboard_focus(next_widget, window); }
 		}
 
 		template<class Tag>
-		void handle_event(Tag, window_ref, typing_event event)
+		void handle_event(Tag, window_ref window, typing_event event)
 		{
-			if(!try_dispatch(event, m_flat_collection.attributes(), m_keyboard_widget))
+			if(!try_dispatch(event, m_flat_collection.attributes(), m_keyboard_widget, window, ui_controller{*this}))
 			{ printf("%08x\n", event.codepoint); }
 		}
 
@@ -173,7 +173,7 @@ namespace terraformer::ui::main
 			return value_of(m_window_controller).main_loop_should_exit(viewport);
 		}
 
-		void set_keyboard_focus(flat_widget_collection::index_type new_widget)
+		void set_keyboard_focus(flat_widget_collection::index_type new_widget, window_ref window)
 		{
 			if(new_widget == m_keyboard_widget ||
 				!(new_widget >= m_flat_collection.first_element_index() &&
@@ -181,14 +181,14 @@ namespace terraformer::ui::main
 			)
 			{ return; }
 
-			try_dispatch(keyboard_focus_enter_event{}, m_flat_collection.attributes(), new_widget);
+			try_dispatch(keyboard_focus_enter_event{}, m_flat_collection.attributes(), new_widget, window, ui_controller{*this});
 
 			m_keyboard_widget = new_widget;
 		}
 
 		void theme_updated(config&& new_config)
 		{
-			theme_updated(m_root_collection, new_config);
+			main::theme_updated(m_root_collection, new_config);
 			m_config = std::move(new_config);
 		}
 

@@ -13,10 +13,10 @@ void terraformer::ui::main::flatten(widget_tree_address const& widget, flat_widg
 
 		auto const index = current.index();
 		auto const widget_pointers = current.collection().widget_pointers();
-		auto const kbe_callbacks = current.collection().event_callbacks<keyboard_button_event>();
-		auto const kfe_callbacks = current.collection().event_callbacks<keyboard_focus_enter_event>();
-		auto const kfl_callbacks = current.collection().event_callbacks<keyboard_focus_leave_event>();
-		auto const typing_callbacks = current.collection().event_callbacks<typing_event>();
+		auto const kbe_callbacks = current.collection().event_callbacks<keyboard_button_event, window_ref, ui_controller>();
+		auto const kfe_callbacks = current.collection().event_callbacks<keyboard_focus_enter_event, window_ref, ui_controller>();
+		auto const kfl_callbacks = current.collection().event_callbacks<keyboard_focus_leave_event, window_ref, ui_controller>();
+		auto const typing_callbacks = current.collection().event_callbacks<typing_event, window_ref, ui_controller>();
 		auto const widget_states = current.collection().widget_states();
 		auto const ptr = widget_pointers[index];
 		ret.append(

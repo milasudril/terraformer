@@ -32,29 +32,29 @@ namespace terraformer::ui::main
 				[](void* obj, widget_rendering_result result) {
 					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
 				},
-				[](void* obj, cursor_enter_event const& event) {
-					static_cast<Widget*>(obj)->handle_event(event);
+				[](void* obj, cursor_enter_event const& event, window_ref wr, ui_controller ui_ctrl) {
+					static_cast<Widget*>(obj)->handle_event(event, wr, ui_ctrl);
 				},
-				[](void* obj, cursor_leave_event const& event) {
-					static_cast<Widget*>(obj)->handle_event(event);
+				[](void* obj, cursor_leave_event const& event, window_ref wr, ui_controller ui_ctrl) {
+					static_cast<Widget*>(obj)->handle_event(event, wr, ui_ctrl);
 				},
-				[](void* obj, cursor_motion_event const& event) {
-					static_cast<Widget*>(obj)->handle_event(event);
+				[](void* obj, cursor_motion_event const& event, window_ref wr, ui_controller ui_ctrl) {
+					static_cast<Widget*>(obj)->handle_event(event, wr, ui_ctrl);
 				},
-				[](void* obj, mouse_button_event const& mbe) {
-					static_cast<Widget*>(obj)->handle_event(mbe);
+				[](void* obj, mouse_button_event const& mbe, window_ref wr, ui_controller ui_ctrl) {
+					static_cast<Widget*>(obj)->handle_event(mbe, wr, ui_ctrl);
 				},
-				[](void* obj, keyboard_button_event const& kbe) {
-					static_cast<Widget*>(obj)->handle_event(kbe);
+				[](void* obj, keyboard_button_event const& kbe, window_ref wr, ui_controller ui_ctrl) {
+					static_cast<Widget*>(obj)->handle_event(kbe, wr, ui_ctrl);
 				},
-				[](void* obj, typing_event te){
-					static_cast<Widget*>(obj)->handle_event(te);
+				[](void* obj, typing_event te, window_ref wr, ui_controller ui_ctrl){
+					static_cast<Widget*>(obj)->handle_event(te, wr, ui_ctrl);
 				},
-				[](void* obj, keyboard_focus_enter_event kfe) {
-					static_cast<Widget*>(obj)->handle_event(kfe);
+				[](void* obj, keyboard_focus_enter_event kfe, window_ref wr, ui_controller ui_ctrl) {
+					static_cast<Widget*>(obj)->handle_event(kfe, wr, ui_ctrl);
 				},
-				[](void* obj, keyboard_focus_leave_event kle) {
-					static_cast<Widget*>(obj)->handle_event(kle);
+				[](void* obj, keyboard_focus_leave_event kle, window_ref wr, ui_controller ui_ctrl) {
+					static_cast<Widget*>(obj)->handle_event(kle, wr, ui_ctrl);
 				},
 				[](void* obj, widget_width_request req) -> scaling{
 					return static_cast<Widget*>(obj)->compute_size(req);

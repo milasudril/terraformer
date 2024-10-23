@@ -8,6 +8,8 @@
 #include "./widget_rendering_result.hpp"
 #include "./widget_state.hpp"
 #include "./widget_geometry.hpp"
+#include "./ui_controller.hpp"
+#include "./window_ref.hpp"
 
 #include <concepts>
 #include <utility>
@@ -57,12 +59,12 @@ namespace terraformer::ui::main
 				[](void* handle, widget_collection_ref const& widgets) {
 					static_cast<LayoutPolicy*>(handle)->minimize_cell_sizes(widgets);
 				}
-			}			
+			}
 		{}
 
 		scaling update_widget_locations(widget_collection_ref& widgets) const
 		{ return m_update_widget_locations(m_handle, widgets); }
-		
+
 		void minimize_cell_sizes(widget_collection_ref const& widgets) const
 		{ m_minimize_cell_sizes(m_handle, widgets); }
 
@@ -85,14 +87,14 @@ namespace terraformer::ui::main
 		std::optional<float> width;
 	};
 
-	using cursor_enter_callback = event_callback_t<cursor_enter_event const&>;
-	using cursor_leave_callback = event_callback_t<cursor_leave_event const&>;
-	using cursor_position_callback = event_callback_t<cursor_motion_event const&>;
-	using mouse_button_callback = event_callback_t<mouse_button_event const&>;
-	using keyboard_button_callback = event_callback_t<keyboard_button_event const&>;
-	using typing_callback = event_callback_t<typing_event>;
-	using keyboard_focus_enter_callback = event_callback_t<keyboard_focus_enter_event>;
-	using keyboard_focus_leave_callback = event_callback_t<keyboard_focus_leave_event>;
+	using cursor_enter_callback = event_callback_t<cursor_enter_event const&, window_ref, ui_controller>;
+	using cursor_leave_callback = event_callback_t<cursor_leave_event const&, window_ref, ui_controller>;
+	using cursor_position_callback = event_callback_t<cursor_motion_event const&, window_ref, ui_controller>;
+	using mouse_button_callback = event_callback_t<mouse_button_event const&, window_ref, ui_controller>;
+	using keyboard_button_callback = event_callback_t<keyboard_button_event const&, window_ref, ui_controller>;
+	using typing_callback = event_callback_t<typing_event, window_ref, ui_controller>;
+	using keyboard_focus_enter_callback = event_callback_t<keyboard_focus_enter_event, window_ref, ui_controller>;
+	using keyboard_focus_leave_callback = event_callback_t<keyboard_focus_leave_event, window_ref, ui_controller>;
 	using size_callback = event_callback_t<fb_size>;
 	using prepare_for_presentation_callback = event_callback_t<widget_rendering_result>;
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
@@ -162,13 +164,13 @@ namespace terraformer::ui::main
 		auto widget_states() const
 		{ return m_span.template get_by_type<widget_state>(); }
 
-		template<class EventType>
+		template<class EventType, class ... Args>
 		auto event_callbacks() const
 		{
-			if constexpr(m_span.template has_type<event_callback_t<EventType>>())
-			{ return m_span.template get_by_type<event_callback_t<EventType>>(); }
+			if constexpr(m_span.template has_type<event_callback_t<EventType, Args...>>())
+			{ return m_span.template get_by_type<event_callback_t<EventType, Args...>>(); }
 			else
-			{ return m_span.template get_by_type<event_callback_t<EventType const&>>(); }
+			{ return m_span.template get_by_type<event_callback_t<EventType const&, Args...>>(); }
 		}
 
 		auto sizes() const
@@ -289,15 +291,15 @@ namespace terraformer::ui::main
 		widget_collection_ref::index_type m_index{widget_collection_ref::npos};
 	};
 
-	template<class EventType>
-	bool try_dispatch(EventType&& e, find_recursive_result const& res)
+	template<class EventType, class ... Args>
+	bool try_dispatch(EventType&& e, find_recursive_result const& res, Args&&... args)
 	{
 		if(res.empty())
 		{ return false; }
 
 		auto const widgets = res.widgets().widget_pointers();
-		auto const callbacks = res.widgets().template event_callbacks<EventType>();
-		callbacks[res.index()](widgets[res.index()], std::forward<EventType>(e));
+		auto const callbacks = res.widgets().template event_callbacks<std::remove_cvref_t<EventType>, std::remove_cvref_t<Args>...>();
+		callbacks[res.index()](widgets[res.index()], std::forward<EventType>(e), std::forward<Args>(args)...);
 
 		return true;
 	}
