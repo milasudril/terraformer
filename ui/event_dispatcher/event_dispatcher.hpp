@@ -1,12 +1,12 @@
 #ifndef TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
 #define TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
 
-#include "./widget.hpp"
-#include "./widgets_to_render_collection.hpp"
-#include "./events.hpp"
-#include "./widget_collection.hpp"
-#include "./flat_widget_collection.hpp"
-#include "./window_ref.hpp"
+#include "ui/main/widget.hpp"
+#include "ui/main/widgets_to_render_collection.hpp"
+#include "ui/main/events.hpp"
+#include "ui/main/widget_collection.hpp"
+#include "ui/main/flat_widget_collection.hpp"
+#include "ui/main/window_ref.hpp"
 
 #include "lib/common/value_accessor.hpp"
 
