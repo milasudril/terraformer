@@ -7,6 +7,7 @@
 #include "ui/main/widget_collection.hpp"
 #include "ui/main/flat_widget_collection.hpp"
 #include "ui/main/window_ref.hpp"
+#include "ui/main/ui_controller.hpp"
 
 #include "lib/common/value_accessor.hpp"
 
@@ -59,7 +60,7 @@ namespace terraformer::ui::main
 		{
 			m_root_collection.append(root, widget_geometry{});
 			m_flat_collection = flatten(std::as_const(m_root_collection).get_attributes());
-			theme_updated(m_root_collection, m_config);
+			main::theme_updated(m_root_collection, m_config);
 		}
 
 		template<class Tag>
@@ -149,7 +150,6 @@ namespace terraformer::ui::main
 		void handle_event(Tag, window_ref, cursor_leave_event const& event)
 		{ value_of(m_window_controller).handle_event(Tag{}, event); }
 
-
 		template<class Tag>
 		void handle_event(Tag, window_ref, fb_size size)
 		{
@@ -184,6 +184,12 @@ namespace terraformer::ui::main
 			try_dispatch(keyboard_focus_enter_event{}, m_flat_collection.attributes(), new_widget);
 
 			m_keyboard_widget = new_widget;
+		}
+
+		void theme_updated(config&& new_config)
+		{
+			theme_updated(m_root_collection, new_config);
+			m_config = std::move(new_config);
 		}
 
 		void render()
