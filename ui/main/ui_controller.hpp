@@ -29,6 +29,9 @@ namespace terraformer::ui::main
 		void theme_updated(config&& new_config)
 		{ m_vtable->theme_updated(m_handle, std::move(new_config)); }
 
+		void* handle() const
+		{ return m_handle; }
+
 	private:
 		ui_controller_vtable const* m_vtable;
 		void* m_handle;

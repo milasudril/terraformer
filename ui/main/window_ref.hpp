@@ -32,6 +32,9 @@ namespace terraformer::ui::main
 		void set_title(char const* new_title)
 		{ m_vtable->set_title(m_handle, new_title); }
 
+		void* handle() const
+		{ return m_handle; }
+
 	private:
 		struct window_ref_vtable const* m_vtable;
 		void* m_handle;

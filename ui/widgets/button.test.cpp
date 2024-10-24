@@ -5,7 +5,7 @@
 
 #include "lib/pixel_store/image_io.hpp"
 #include <testfwk/testfwk.hpp>
-#if 0
+
 namespace
 {
 	template<int N>
@@ -15,6 +15,21 @@ namespace
 		void upload(terraformer::span_2d<terraformer::rgba_pixel const> pixels)
 		{
 			img = terraformer::image{pixels};
+		}
+	};
+
+	struct dummy_window
+	{
+		std::string title;
+	};
+
+	struct dummy_ui_controller
+	{
+		terraformer::ui::main::config cfg;
+
+		void theme_updated(terraformer::ui::main::config&& new_config)
+		{
+			cfg = std::move(new_config);
 		}
 	};
 
@@ -94,14 +109,32 @@ namespace
 	}
 };
 
+template<>
+struct terraformer::ui::main::window_traits<dummy_window>
+{
+	static void set_title(dummy_window& window, char const* new_title)
+	{
+		window.title = new_title;
+	}
+};
+
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_false)
 {
 	terraformer::ui::widgets::button my_button;
 	auto callcount = 0;
 
-	my_button.on_activated([&callcount, &my_button](auto& button){
+	dummy_window window{};
+	dummy_ui_controller ui_ctrl{};
+
+	my_button.on_activated([&callcount, &my_button, &window, &ui_ctrl](
+		auto& button,
+		terraformer::ui::main::window_ref win_ref,
+		terraformer::ui::main::ui_controller ui_ctrl_ref
+	){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
+		EXPECT_EQ(win_ref.handle(), &window);
+		EXPECT_EQ(ui_ctrl_ref.handle(), &ui_ctrl);
 	}).
 	theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
 
@@ -125,7 +158,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 
 	EXPECT_EQ(my_button.value(), false);
@@ -142,7 +177,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::release,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 
 	EXPECT_EQ(my_button.value(), false);
@@ -158,10 +195,18 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 {
 	terraformer::ui::widgets::button my_button;
 	auto callcount = 0;
+	dummy_window window{};
+	dummy_ui_controller ui_ctrl{};
 
-	my_button.on_activated([&callcount, &my_button](auto& button){
+	my_button.on_activated([&callcount, &my_button, &window, &ui_ctrl](
+		auto& button,
+		terraformer::ui::main::window_ref win_ref,
+		terraformer::ui::main::ui_controller ui_ctrl_ref
+	){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
+		EXPECT_EQ(win_ref.handle(), &window);
+		EXPECT_EQ(ui_ctrl_ref.handle(), &ui_ctrl);
 	}).
 	theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
 
@@ -187,7 +232,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
@@ -204,7 +251,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::release,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 1);
@@ -218,6 +267,8 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 {
 	terraformer::ui::widgets::button my_button;
+	dummy_window window{};
+	dummy_ui_controller ui_ctrl{};
 
 	my_button.handle_event(terraformer::ui::main::fb_size{
 		.width = 20,
@@ -231,7 +282,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::release,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 	EXPECT_EQ(my_button.value(), false);
 	output_rect<dummy_texture<0>> rect{};
@@ -246,6 +299,8 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 {
 	terraformer::ui::widgets::button my_button;
+	dummy_window window{};
+	dummy_ui_controller ui_ctrl{};
 
 	my_button.handle_event(terraformer::ui::main::fb_size{
 		.width = 20,
@@ -254,9 +309,15 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 
 	auto callcount = 0;
 
-	my_button.on_activated([&callcount, &my_button](auto& button){
+	my_button.on_activated([&callcount, &my_button, &window, &ui_ctrl](
+		auto& button,
+		terraformer::ui::main::window_ref win_ref,
+		terraformer::ui::main::ui_controller ui_ctrl_ref
+	){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
+		EXPECT_EQ(win_ref.handle(), &window);
+		EXPECT_EQ(ui_ctrl_ref.handle(), &ui_ctrl);
 	})
 	.theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
 	EXPECT_EQ(my_button.value(), false);
@@ -277,7 +338,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 			.button = 1,
 			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
@@ -293,10 +356,18 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 {
 	terraformer::ui::widgets::button my_button;
 	auto callcount = 0;
+	dummy_window window{};
+	dummy_ui_controller ui_ctrl{};
 
-	my_button.on_activated([&callcount, &my_button](auto& button){
+	my_button.on_activated([&callcount, &my_button, &window, &ui_ctrl](
+		auto& button,
+		terraformer::ui::main::window_ref win_ref,
+		terraformer::ui::main::ui_controller ui_ctrl_ref
+	){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
+		EXPECT_EQ(win_ref.handle(), &window);
+		EXPECT_EQ(ui_ctrl_ref.handle(), &ui_ctrl);
 	})
 	.theme_updated(create_render_resources(),  terraformer::ui::main::widget_instance_info{});
 	my_button.handle_event(terraformer::ui::main::fb_size{
@@ -313,7 +384,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 0);
@@ -323,9 +396,13 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		terraformer::ui::widgets::button::state::pressed
 	);
 
-	my_button.handle_event(terraformer::ui::main::cursor_leave_event{
-		.where = terraformer::ui::main::cursor_position{},
-	});
+	my_button.handle_event(
+		terraformer::ui::main::cursor_leave_event{
+			.where = terraformer::ui::main::cursor_position{},
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
+	);
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
@@ -334,9 +411,13 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		terraformer::ui::widgets::button::state::released
 	);
 
-	my_button.handle_event(terraformer::ui::main::cursor_enter_event{
-		.where = terraformer::ui::main::cursor_position{},
-	});
+	my_button.handle_event(
+		terraformer::ui::main::cursor_enter_event{
+			.where = terraformer::ui::main::cursor_position{}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
+	);
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
@@ -346,14 +427,23 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	);
 }
 
+
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter_value_true)
 {
 	terraformer::ui::widgets::button my_button;
 	auto callcount = 0;
+	dummy_window window{};
+	dummy_ui_controller ui_ctrl{};
 
-	my_button.on_activated([&callcount, &my_button](auto& button){
+	my_button.on_activated([&callcount, &my_button, &window, &ui_ctrl](
+		auto& button,
+		terraformer::ui::main::window_ref win_ref,
+		terraformer::ui::main::ui_controller ui_ctrl_ref
+	){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
+		EXPECT_EQ(win_ref.handle(), &window);
+		EXPECT_EQ(ui_ctrl_ref.handle(), &ui_ctrl);
 	})
 	.value(true)
 	.theme_updated(create_render_resources(), terraformer::ui::main::widget_instance_info{});
@@ -378,7 +468,9 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(my_button.value(), true);
@@ -387,23 +479,39 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 		inspect_button_state(rect.background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
-	my_button.handle_event(terraformer::ui::main::cursor_leave_event{
-		.where = terraformer::ui::main::cursor_position{},
-	});
+	my_button.handle_event(
+		terraformer::ui::main::cursor_leave_event{
+			.where = terraformer::ui::main::cursor_position{},
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
+	);
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
-	my_button.handle_event(terraformer::ui::main::cursor_leave_event{
-		.where = terraformer::ui::main::cursor_position{}
-	});
-	my_button.handle_event(terraformer::ui::main::cursor_enter_event{
-		.where = terraformer::ui::main::cursor_position{}
-	});
+	my_button.handle_event(
+		terraformer::ui::main::cursor_leave_event{
+			.where = terraformer::ui::main::cursor_position{}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
+	);
+	my_button.handle_event(
+		terraformer::ui::main::cursor_enter_event{
+			.where = terraformer::ui::main::cursor_position{}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
+	);
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(my_button.value(), true);
-	my_button.handle_event(terraformer::ui::main::cursor_leave_event{
-		.where = terraformer::ui::main::cursor_position{}
-	});
+	my_button.handle_event(
+		terraformer::ui::main::cursor_leave_event{
+			.where = terraformer::ui::main::cursor_position{}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
+	);
 	EXPECT_EQ(callcount, 0);
 }
 
@@ -411,13 +519,25 @@ TESTCASE(terraformer_ui_widgets_button_handle_cme)
 {
 	terraformer::ui::widgets::button my_button;
 	auto callcount = 0;
+	dummy_window window{};
+	dummy_ui_controller ui_ctrl{};
 
-	my_button.on_activated([&callcount, &my_button](auto& button){
+	my_button.on_activated([&callcount, &my_button, &window, &ui_ctrl](
+		auto& button,
+		terraformer::ui::main::window_ref win_ref,
+		terraformer::ui::main::ui_controller ui_ctrl_ref
+	){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
+		EXPECT_EQ(win_ref.handle(), &window);
+		EXPECT_EQ(ui_ctrl_ref.handle(), &ui_ctrl);
 	});
 
-	my_button.handle_event(terraformer::ui::main::cursor_motion_event{});
+	my_button.handle_event(
+		terraformer::ui::main::cursor_motion_event{},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
+	);
 	EXPECT_EQ(callcount, 0);
 }
 
@@ -426,7 +546,11 @@ TESTCASE(terraformer_ui_widgets_button_compute_size_constraints)
 	terraformer::ui::widgets::button my_button;
 	auto callcount = 0;
 
-	my_button.on_activated([&callcount, &my_button](auto& button){
+	my_button.on_activated([&callcount, &my_button](
+		auto& button,
+		terraformer::ui::main::window_ref,
+		terraformer::ui::main::ui_controller
+	){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
 	})
@@ -449,9 +573,18 @@ TESTCASE(terraformer_ui_widgets_toggle_button_on_value_changed)
 {
 	terraformer::ui::widgets::toggle_button my_button{};
 	auto callcount = 0;
-	my_button.on_value_changed([&callcount, &my_button](auto& button){
+	dummy_window window{};
+	dummy_ui_controller ui_ctrl{};
+
+	my_button.on_value_changed([&callcount, &my_button, &window, &ui_ctrl](
+		auto& button,
+		terraformer::ui::main::window_ref win_ref,
+		terraformer::ui::main::ui_controller ui_ctrl_ref
+	){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
+		EXPECT_EQ(win_ref.handle(), &window);
+		EXPECT_EQ(ui_ctrl_ref.handle(), &ui_ctrl);
 	});
 
 	EXPECT_EQ(my_button.value(), false);
@@ -469,7 +602,9 @@ TESTCASE(terraformer_ui_widgets_toggle_button_on_value_changed)
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::press,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 	EXPECT_EQ(callcount, 0);
 
@@ -479,7 +614,9 @@ TESTCASE(terraformer_ui_widgets_toggle_button_on_value_changed)
 			.button = 0,
 			.action = terraformer::ui::main::mouse_button_action::release,
 			.modifiers = {}
-		}
+		},
+		terraformer::ui::main::window_ref{window},
+		terraformer::ui::main::ui_controller{ui_ctrl}
 	);
 	EXPECT_EQ(callcount, 1);
 }
@@ -488,7 +625,8 @@ TESTCASE(terraformer_ui_widgets_toggle_button_text)
 {
 	terraformer::ui::widgets::toggle_button my_button{};
 	auto callcount = 0;
-	my_button.on_value_changed([&callcount, &my_button](auto& button){
+	my_button.on_value_changed([&callcount, &my_button](auto& button, terraformer::ui::main::window_ref,
+		terraformer::ui::main::ui_controller){
 		++callcount;
 		EXPECT_EQ(&button, &my_button);
 	});
@@ -501,4 +639,3 @@ TESTCASE(terraformer_ui_widgets_toggle_button_text)
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 }
-#endif
