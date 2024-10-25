@@ -27,10 +27,7 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 	std::optional<displaced_curve::index_type> selected_branch_point;
 #pragma GCC diagnostic pop
-	for(auto k = displaced_points.first_element_index() + 1;
-		k != displaced_points.last_element_index();
-		++k
-	)
+	for(auto k : displaced_points.element_indices())
 	{
 		if(l != std::size(x_intercepts.zeros) && k == displaced_curve::index_type{x_intercepts.zeros[l]})
 		{

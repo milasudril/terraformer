@@ -6,6 +6,7 @@
 #include "lib/common/tuple.hpp"
 
 #include <type_traits>
+#include <ranges>
 
 namespace terraformer
 {
@@ -167,11 +168,13 @@ namespace terraformer
 		~multi_array() noexcept
 		{ clear(); }
 
-		constexpr auto first_element_index() const noexcept
-		{ return index_type{}; }
+		auto element_indices(size_t skip = 0) const
+		{ return std::ranges::iota_view{index_type{} + skip, index_type{} + m_size.get()}; }
 
+#if 0
 		constexpr auto last_element_index() const noexcept
 		{ return index_type{(m_size - size_type{1}).get()}; }
+#endif
 
 		auto size() const noexcept
 		{ return m_size; }
@@ -188,7 +191,7 @@ namespace terraformer
 			{
 				auto new_storage = generate_mem_blocks(new_capacity);
 				uninitialized_move(m_storage, new_storage, m_size);
-				destroy(m_storage, first_element_index(), m_size);
+				destroy(m_storage, index_type{}, m_size);
 				m_storage = std::move(new_storage);
 				m_capacity = new_capacity;
 			}
@@ -211,7 +214,7 @@ namespace terraformer
 
 		void clear() noexcept
 		{
-			destroy(m_storage, first_element_index(), m_size);
+			destroy(m_storage, index_type{}, m_size);
 			m_size = size_type{};
 		}
 

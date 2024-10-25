@@ -166,10 +166,7 @@ void terraformer::ridge_tree::update_elevations(
 		auto const parent = current_trunk.parent;
 		if(parent == ridge_tree_trunk::no_parent)
 		{
-			for(auto k = current_trunk.branches.first_element_index();
-				k != std::size(current_trunk.branches);
-				++k
-			)
+			for(auto k : current_trunk.branches.element_indices())
 			{
 				auto const polynomial = create_polynomial(
 					curve_lengths[k].back(),
@@ -194,10 +191,7 @@ void terraformer::ridge_tree::update_elevations(
 		auto const parent_curve_index = current_trunk.parent_curve_index;
 		auto const parent_curve = parent_curves[parent_curve_index].points();
 
-		for(auto k = current_trunk.branches.first_element_index();
-			k != std::size(current_trunk.branches);
-			++k
-		)
+		for(auto k : current_trunk.branches.element_indices())
 		{
 			auto const point_on_parent = parent_curve[start_index[k]];
 			elevation const z_0{point_on_parent[2]};
@@ -225,10 +219,7 @@ void terraformer::ridge_tree::update_elevations(
 		auto const branches_at = std::as_const(current_trunk.branches).get<2>();
 		auto const curve_lengths = std::as_const(current_trunk.branches).get<3>();
 
-		for(auto k = current_trunk.branches.first_element_index();
-			k != std::size(current_trunk.branches);
-			++k
-		)
+		for(auto k : current_trunk.branches.element_indices())
 		{
 			auto const elevation_profile = generate_elevation_profile(
 				curve_lengths[k],

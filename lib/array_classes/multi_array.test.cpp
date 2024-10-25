@@ -125,7 +125,7 @@ TESTCASE(terraformer_multi_array_push_back)
 	auto const first_array = array.get<0>();
 	auto const second_array = array.get<1>();
 
-	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	for(auto k : array.element_indices())
 	{
 		EXPECT_EQ(static_cast<size_t>(static_cast<holder<int>>(first_array[k]).value()), k.get());
 		EXPECT_EQ(static_cast<holder<double>>(second_array[k]).value(), 0.5*static_cast<double>(k.get()));
@@ -169,7 +169,7 @@ TESTCASE(terraformer_multi_array_resize_grow_and_shrink)
 	EXPECT_EQ(array.size().get(), 16);
 	auto const first_array = array.get<0>();
 	auto const second_array = array.get<1>();
-	for(auto k = array.first_element_index() + 4; k != std::size(array); ++k)
+	for(auto k : array.element_indices(4))
 	{
 		EXPECT_EQ(static_cast<size_t>(static_cast<holder<int>>(first_array[k]).value()), 0);
 		EXPECT_EQ(static_cast<holder<double>>(second_array[k]).value(), 0.0);

@@ -80,6 +80,7 @@ namespace terraformer
 	{
 	public:
 		using offset_type = std::make_signed_t<Rep>;
+		using difference_type = std::make_signed_t<Rep>;
 		using rep = Rep;
 		using tag = T;
 

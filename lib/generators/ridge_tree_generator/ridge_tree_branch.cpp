@@ -283,7 +283,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	auto const normals = branch_points.get<1>();
 	auto const vertex_index = branch_points.get<2>();
 
-	for(auto k = branch_points.first_element_index(); k != std::size(branch_points); ++k)
+	for(auto k : branch_points.element_indices())
 	{
 		auto const base_curve = generate_branch_base_curve(
 			points[k],
