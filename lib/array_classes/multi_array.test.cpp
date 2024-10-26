@@ -125,7 +125,7 @@ TESTCASE(terraformer_multi_array_push_back)
 	auto const first_array = array.get<0>();
 	auto const second_array = array.get<1>();
 
-	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	for(auto k : array.element_indices())
 	{
 		EXPECT_EQ(static_cast<size_t>(static_cast<holder<int>>(first_array[k]).value()), k.get());
 		EXPECT_EQ(static_cast<holder<double>>(second_array[k]).value(), 0.5*static_cast<double>(k.get()));
@@ -169,7 +169,7 @@ TESTCASE(terraformer_multi_array_resize_grow_and_shrink)
 	EXPECT_EQ(array.size().get(), 16);
 	auto const first_array = array.get<0>();
 	auto const second_array = array.get<1>();
-	for(auto k = array.first_element_index() + 4; k != std::size(array); ++k)
+	for(auto k : array.element_indices(4))
 	{
 		EXPECT_EQ(static_cast<size_t>(static_cast<holder<int>>(first_array[k]).value()), 0);
 		EXPECT_EQ(static_cast<holder<double>>(second_array[k]).value(), 0.0);
@@ -317,7 +317,7 @@ TESTCASE(terraformer_multi_array_insert_at_begin)
 
 	auto const ints = array.get<0>();
 	auto const doubles = array.get<1>();
-	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	for(auto k : array.element_indices())
 	{
 		auto const expected_value = std::size(array).get() - k.get() - 1;
 		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
@@ -343,7 +343,7 @@ TESTCASE(terraformer_multi_array_insert_at_end)
 
 	auto const ints = array.get<0>();
 	auto const doubles = array.get<1>();
-	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	for(auto k : array.element_indices())
 	{
 		auto const expected_value = k.get();
 		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
@@ -387,7 +387,7 @@ TESTCASE(terraformer_multi_array_insert_somewhere)
 
 	auto const ints = array.get<0>();
 	auto const doubles = array.get<1>();
-	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	for(auto k : array.element_indices())
 	{
 		auto const expected_value = k.get();
 		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
@@ -436,7 +436,7 @@ TESTCASE(terraformer_multi_array_insert_somewhere_with_one_reservation)
 
 	auto const ints = array.get<0>();
 	auto const doubles = array.get<1>();
-	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	for(auto k : array.element_indices())
 	{
 		auto const expected_value = k.get();
 		EXPECT_EQ(static_cast<holder<size_t>>(ints[k]).value(), expected_value);
@@ -511,7 +511,7 @@ TESTCASE(terraformer_multi_array_get_attribs)
 	EXPECT_EQ(std::begin(span.get<1>()), std::begin(array.get<1>()));
 	EXPECT_EQ(std::begin(span.get<2>()), std::begin(array.get<2>()));
 
-	auto const index_to_change = span.first_element_index() + 1;
+	auto const index_to_change = span.element_indices().front() + 1;
 	span.assign<0>(index_to_change, 4, 4.5, "A new value");
 	EXPECT_EQ(span.get<0>()[index_to_change], 4);
 	EXPECT_EQ(span.get<1>()[index_to_change], 4.5);
@@ -553,13 +553,13 @@ TESTCASE(terraformer_multi_array_index_operator)
 	array.push_back(2, 1.5, "Kaka");
 	array.push_back(3, 3.5, "Bulle");
 
-	auto items = array[array.first_element_index() + 1];
+	auto items = array[my_array_type::index_type{} + 1];
 	static_assert(std::is_same_v<decltype(items), terraformer::tuple<int&, double&, std::string&>>);
 	EXPECT_EQ(items.template get<0>(), 2);
 	EXPECT_EQ(items.template get<1>(), 1.5);
 	EXPECT_EQ(items.template get<2>(), "Kaka");
 
-	auto items_const = std::as_const(array)[array.first_element_index() + 1];
+	auto items_const = std::as_const(array)[my_array_type::index_type{} + 1];
 	static_assert(
 		std::is_same_v<
 			decltype(items_const),

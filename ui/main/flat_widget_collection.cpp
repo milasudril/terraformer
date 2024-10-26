@@ -31,9 +31,10 @@ void terraformer::ui::main::flatten(widget_tree_address const& widget, flat_widg
 
 		auto const get_children = current.collection().get_children_const_callbacks();
 		auto const children = get_children[index](ptr);
-		for(auto k = children.first_element_index(); k != std::size(children); ++k)
+		auto const indices = children.element_indices();
+		for(auto k : indices)
 		{
-			auto const index = children.first_element_index() + (children.last_element_index() - k);
+			auto const index = indices.front() + (indices.back() - k);
 			contexts.push_back(widget_tree_address{children, index});
 		}
 	}
@@ -44,7 +45,7 @@ terraformer::ui::main::flat_widget_collection
 terraformer::ui::main::flatten(widget_collection_view const& root)
 {
 	flat_widget_collection ret;
-	for(auto k = root.first_element_index(); k != std::size(root); ++k)
+	for(auto k : root.element_indices())
 	{ flatten(widget_tree_address{root, k}, ret); }
 	return ret;
 }

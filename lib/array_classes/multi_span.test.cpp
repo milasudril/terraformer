@@ -20,7 +20,7 @@ TESTCASE(terraformer_multi_span_access_element_by_index)
 		std::size(array_0)
 	};
 
-	auto item = span[span.first_element_index() + 1];
+	auto item = span[span.element_indices().front() + 1];
 	EXPECT_EQ(&item.template get<0>(), &array_0[1]);
 	EXPECT_EQ(&item.template get<1>(), &array_1[1]);
 	EXPECT_EQ(&item.template get<2>(), &array_2[1]);

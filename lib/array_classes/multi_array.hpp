@@ -229,11 +229,8 @@ namespace terraformer
 		~multi_array() noexcept
 		{ clear(); }
 
-		static constexpr auto first_element_index() noexcept
-		{ return index_type{}; }
-
-		auto last_element_index() const noexcept
-		{ return index_type{(m_size - size_type{1}).get()}; }
+		auto element_indices(size_t skip = 0) const
+		{ return index_range{index_type{} + skip, index_type{} + m_size.get()}; }
 
 		auto size() const noexcept
 		{ return m_size; }
@@ -250,7 +247,7 @@ namespace terraformer
 			{
 				auto new_storage = generate_mem_blocks(new_capacity);
 				uninitialized_move(m_storage, new_storage, m_size);
-				destroy(m_storage, first_element_index(), m_size);
+				destroy(m_storage, index_type{}, m_size);
 				m_storage = std::move(new_storage);
 				m_capacity = new_capacity;
 			}
@@ -278,7 +275,7 @@ namespace terraformer
 
 		void clear() noexcept
 		{
-			destroy(m_storage, first_element_index(), m_size);
+			destroy(m_storage, index_type{}, m_size);
 			m_size = size_type{};
 		}
 

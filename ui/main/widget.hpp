@@ -125,8 +125,7 @@ namespace terraformer::ui::main
 		auto& children = root.children();
 		auto const widget_states = children.widget_states();
 		auto const sizes = children.sizes();
-		auto const n = std::size(children);
-		for(auto k = children.first_element_index(); k != n; ++k)
+		for(auto k : children.element_indices())
 		{
 			if(!widget_states[k].collapsed) [[likely]]
 			{
@@ -150,8 +149,7 @@ namespace terraformer::ui::main
 		auto children = root.children();
 		auto const widget_states = children.widget_states();
 		auto const widget_geometries = children.widget_geometries();
-		auto const n = std::size(children);
-		for(auto k = children.first_element_index(); k!=n; ++k)
+		for(auto k : children.element_indices())
 		{
 			if(!widget_states[k].collapsed) [[likely]]
 			{
@@ -170,12 +168,11 @@ namespace terraformer::ui::main
 	inline void apply_offsets(root_widget& root, displacement root_offset)
 	{
 		auto& children = root.children();
-		auto const n = std::size(children);
 		auto const widget_geometries = children.widget_geometries();
-		for(auto k = children.first_element_index(); k != n; ++k)
+		for(auto k : children.element_indices())
 		{ widget_geometries[k].where += root_offset; }
 
-		for(auto k = children.first_element_index(); k != n; ++k)
+		for(auto k : children.element_indices())
 		{
 			root_widget next_root{children, k};
 			apply_offsets(

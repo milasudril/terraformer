@@ -51,11 +51,8 @@ namespace terraformer::ui::main
 
 		explicit flat_widget_collection_view(widget_span const& span): m_span{span}{}
 
-		static constexpr auto first_element_index()
-		{ return widget_span::first_element_index(); }
-
-		auto last_element_index() const
-		{ return m_span.last_element_index(); }
+		auto element_indices() const
+		{ return m_span.element_indices(); }
 
 		auto size() const
 		{ return std::size(m_span); }
@@ -125,11 +122,8 @@ namespace terraformer::ui::main
 		auto attributes() const
 		{ return flat_widget_collection_view{m_array.attributes()}; }
 
-		static constexpr auto first_element_index()
-		{ return widget_array::first_element_index(); }
-
-		auto last_element_index() const
-		{ return m_array.last_element_index(); }
+		auto element_indices()
+		{ return m_array.element_indices(); }
 
 		auto size() const
 		{ return m_array.size(); }
@@ -150,7 +144,7 @@ namespace terraformer::ui::main
 		if(i == std::end(widget_pointers))
 		{ return flat_widget_collection_view::npos; }
 
-		return span.first_element_index() + (i - std::begin(widget_pointers));
+		return span.element_indices().front() + (i - std::begin(widget_pointers));
 	}
 
 	inline auto find(find_recursive_result const& res, flat_widget_collection const& widgets)

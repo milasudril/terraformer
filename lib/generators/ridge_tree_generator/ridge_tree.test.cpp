@@ -90,10 +90,7 @@ TESTCASE(terraformer_ridge_tree_generate)
 		auto const start_index = current_trunk.branches.get<1>();
 		auto const seed_indices = current_trunk.branches.get<2>();
 
-		for(auto k = current_trunk.branches.first_element_index();
-			k != std::size(current_trunk.branches);
-			++k
-		)
+		for(auto k : current_trunk.branches.element_indices())
 		{
 			EXPECT_LT(start_index[k].get(), std::size(parent_curve).get());
 			auto const point_on_parent = parent_curve[start_index[k]];

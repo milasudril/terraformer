@@ -149,11 +149,8 @@ namespace terraformer::ui::main
 
 		explicit widget_collection_ref_impl(widget_span const& span): m_span{span}{}
 
-		static constexpr auto first_element_index()
-		{ return widget_span::first_element_index(); }
-
-		constexpr auto last_element_index() const
-		{ return m_span.last_element_index(); }
+		auto element_indices() const
+		{ return m_span.element_indices(); }
 
 		auto size() const
 		{ return std::size(m_span); }
@@ -247,7 +244,7 @@ namespace terraformer::ui::main
 		if(i == std::end(widgets.widget_geometries())) [[likely]]
 		{ return widget_collection_view::npos; }
 
-		return widgets.first_element_index() + (i - std::begin(widgets.widget_geometries()));
+		return widgets.element_indices().front() + (i - std::begin(widgets.widget_geometries()));
 	}
 
 	class find_recursive_result

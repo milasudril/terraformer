@@ -23,8 +23,8 @@ namespace terraformer::ui::main
 		explicit widgets_to_render_collection(widget_collection_view const& from)
 		{ collect_widgets(from, m_objects); }
 
-		constexpr auto first_element_index() const
-		{ return m_objects.first_element_index(); }
+		auto element_indices() const
+		{ return m_objects.element_indices(); }
 
 		auto size() const
 		{ return std::size(m_objects); }
@@ -56,8 +56,7 @@ namespace terraformer::ui::main
 			auto const render_callbacks = from.render_callbacks();
 			auto const widget_geometries = from.widget_geometries();
 
-			auto const n = std::size(from);
-			for(auto k = from.first_element_index(); k != n; ++k)
+			for(auto k : from.element_indices())
 			{
 				if(!widget_states[k].collapsed) [[likely]]
 				{
@@ -77,8 +76,7 @@ namespace terraformer::ui::main
 		auto const widget_pointers = widgets.widget_pointers();
 		auto output_rectangles = widgets.output_rectangles();
 
-		auto const n = std::size(widgets);
-		for(auto k = widgets.first_element_index(); k != n; ++k)
+		for(auto k : widgets.element_indices())
 		{ render_callbacks[k](widget_pointers[k], widget_rendering_result{std::ref(output_rectangles[k])}); }
 	}
 
@@ -88,8 +86,7 @@ namespace terraformer::ui::main
 		auto const widget_geometries = widgets.widget_geometries();
 		auto const output_rects = widgets.output_rectangles();
 
-		auto const n = std::size(widgets);
-		for(auto k  = widgets.first_element_index(); k != n; ++k)
+		for(auto k : widgets.element_indices())
 		{
 			renderer.render(
 				widget_geometries[k].where,

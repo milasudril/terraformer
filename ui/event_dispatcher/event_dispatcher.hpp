@@ -176,8 +176,7 @@ namespace terraformer::ui::main
 		void set_keyboard_focus(flat_widget_collection::index_type new_widget, window_ref window)
 		{
 			if(new_widget == m_keyboard_widget ||
-				!(new_widget >= m_flat_collection.first_element_index() &&
-				new_widget < std::size(m_flat_collection))
+				!(new_widget.within(m_flat_collection.element_indices()))
 			)
 			{ return; }
 
@@ -194,7 +193,7 @@ namespace terraformer::ui::main
 
 		void render()
 		{
-			root_widget root{m_root_collection.get_attributes(), m_root_collection.first_element_index()};
+			root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
 			// TODO: Pick width/height based on window size
 			auto const box_size = compute_size(root);
 			confirm_sizes(

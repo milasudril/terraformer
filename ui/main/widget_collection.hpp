@@ -99,8 +99,8 @@ namespace terraformer::ui::main
 		auto get_attributes() const
 		{ return widget_collection_view{m_objects.attributes()}; }
 
-		constexpr auto first_element_index()
-		{ return m_objects.first_element_index(); }
+		auto element_indices()
+		{ return m_objects.element_indices(); }
 
 	private:
 		widget_array m_objects;

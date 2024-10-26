@@ -78,8 +78,7 @@ void terraformer::ui::main::theme_updated(
 		auto const widget_pointers = current_context.widgets.widget_pointers();
 		auto const get_children_callbacks = current_context.widgets.get_children_const_callbacks();
 
-		auto const n = std::size(current_context.widgets);
-		for(auto k = widgets.first_element_index(); k != n; ++k)
+		for(auto k : widgets.element_indices())
 		{
 			theme_updated_callbacks[k](
 				widget_pointers[k],

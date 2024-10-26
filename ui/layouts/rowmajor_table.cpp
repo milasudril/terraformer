@@ -6,20 +6,19 @@ terraformer::scaling
 terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 	main::widget_collection_ref& widgets
 ) const
-{	
+{
 	auto const sizes = widgets.sizes();
 	auto const widget_geometries = widgets.widget_geometries();
 	auto x_offset = margin_x;
 	auto y_offset = margin_y;
 
-	auto const n = std::size(widgets);
 	auto const* const cols = m_colwidths.get();
 	size_t col = 0;
 	auto const colcount = m_colcount;
 	auto row = m_rowheights.first_element_index();
 	auto const rowcount = std::size(m_rowheights);
-	
-	for(auto k = widgets.first_element_index(); k != n; ++k)
+
+	for(auto k : widgets.element_indices())
 	{
 		widget_geometries[k].where = location{
 			x_offset,
@@ -41,7 +40,7 @@ terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 			x_offset = margin_x;
 		}
 	}
-	
+
 	return scaling{
 		m_width,
 		m_height,
@@ -54,19 +53,19 @@ void terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
 )
 {
 	auto const sizes = widgets.sizes();
-	auto const n = std::size(widgets);
 	auto cols = m_colwidths.get();
 	auto const colcount = m_colcount;
-	std::fill_n(cols, colcount, 0.0f); 
+	std::fill_n(cols, colcount, 0.0f);
 	m_rowheights.clear();
 	auto max_height = 0.0f;
 	size_t col = 0;
-	for(auto k = widgets.first_element_index(); k != n; ++k)
+	auto const indices = widgets.element_indices();
+	for(auto k : indices)
 	{
 		// NOTE: It is assumed that size is 0 if widget is collapsed
 		cols[col] = std::max(sizes[k][0] + margin_x, cols[col]);
 		max_height = std::max(sizes[k][1] + margin_y, max_height);
-		
+
 		++col;
 		if(col == colcount)
 		{
@@ -75,9 +74,9 @@ void terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
 			max_height = 0.0f;
 		}
 	}
-	if(col != 0 && n != widgets.first_element_index())
+	if(col != 0 && !indices.empty())
 	{ m_rowheights.push_back(max_height); }
-	
+
 	m_height = std::accumulate(std::begin(m_rowheights), std::end(m_rowheights), margin_y);
 	m_width = std::accumulate(cols, cols + colcount, margin_x);
 }

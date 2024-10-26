@@ -15,15 +15,15 @@ namespace terraformer
 	public:
 		constexpr array_size() noexcept = default;
 
-		constexpr explicit array_size(Rep value) noexcept: m_value{value}{}
+		constexpr explicit array_size(Rep value) noexcept: m_starts_at{value}{}
 
-		constexpr auto get() const noexcept { return m_value; }
+		constexpr auto get() const noexcept { return m_starts_at; }
 
 		constexpr auto operator<=>(array_size const&) const noexcept = default;
 
 		constexpr array_size& operator+=(array_size other)
 		{
-			if(__builtin_add_overflow(m_value, other.get(), &m_value))
+			if(__builtin_add_overflow(m_starts_at, other.get(), &m_starts_at))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
 
 			return *this;
@@ -31,7 +31,7 @@ namespace terraformer
 
 		constexpr array_size& operator-=(array_size other)
 		{
-			if(__builtin_sub_overflow(m_value, other.get(), &m_value))
+			if(__builtin_sub_overflow(m_starts_at, other.get(), &m_starts_at))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
 
 			return *this;
@@ -39,7 +39,7 @@ namespace terraformer
 
 		constexpr array_size& operator*=(Rep factor)
 		{
-			if(__builtin_mul_overflow(m_value, factor, &m_value))
+			if(__builtin_mul_overflow(m_starts_at, factor, &m_starts_at))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
 
 			return *this;
@@ -47,13 +47,13 @@ namespace terraformer
 
 		template<class Other>
 		constexpr explicit operator array_size<Other, Rep>() const noexcept
-		{ return array_size<Other>{m_value}; }
+		{ return array_size<Other>{m_starts_at}; }
 
 		constexpr explicit operator Rep() const
-		{ return m_value; }
+		{ return m_starts_at; }
 
 	private:
-		Rep m_value{};
+		Rep m_starts_at{};
 	};
 
 	template<class Rep = size_t>
@@ -75,11 +75,80 @@ namespace terraformer
 	constexpr auto operator*(Rep c, array_size<T, Rep> a)
 	{ return a *= c; }
 
+	template<class T>
+	class index_range
+	{
+	public:
+		class iterator
+		{
+		public:
+			explicit iterator(T current):m_current{current}{}
+
+			constexpr iterator operator++(int) noexcept
+			{
+				auto tmp = *this;
+				++m_current;
+				return tmp;
+			}
+
+			constexpr iterator& operator++() noexcept
+			{
+				++m_current;
+				return *this;
+			}
+
+			constexpr auto operator<=>(index_range::iterator const&) const noexcept = default;
+
+			constexpr T operator*() const noexcept
+			{ return m_current; }
+
+		private:
+			T m_current;
+		};
+
+		constexpr explicit index_range(T starts_at, T bound) noexcept:
+			m_starts_at{starts_at},
+			m_bound{bound}
+		{}
+
+		constexpr auto begin() const noexcept
+		{ return iterator{m_starts_at}; }
+
+		constexpr auto end() const noexcept
+		{ return iterator{m_bound}; }
+
+		constexpr bool operator==(index_range const&) const noexcept = default;
+		constexpr bool operator!=(index_range const&) const noexcept = default;
+
+		constexpr bool empty() const noexcept
+		{ return m_starts_at != m_bound; }
+
+		constexpr auto size() const noexcept
+		{ return m_bound - m_starts_at; }
+
+		constexpr auto front() const noexcept
+		{ return m_starts_at; }
+
+		constexpr auto back() const noexcept
+		{ return m_bound - 1; }
+
+		constexpr auto bound() const noexcept
+		{ return m_bound; }
+
+		constexpr auto starts_at() const noexcept
+		{ return m_starts_at; }
+
+	private:
+		T m_starts_at;
+		T m_bound;
+	};
+
 	template<class T, class Rep = size_t>
 	class array_index
 	{
 	public:
 		using offset_type = std::make_signed_t<Rep>;
+		using difference_type = std::make_signed_t<Rep>;
 		using rep = Rep;
 		using tag = T;
 
@@ -138,6 +207,9 @@ namespace terraformer
 
 		constexpr explicit operator array_size<T, Rep>() const noexcept
 		{ return array_size<T, Rep>{m_value}; }
+
+		constexpr bool within(index_range<array_index> range) const noexcept
+		{ return *this >= range.starts_at() && *this < range.bound(); }
 
 	private:
 		Rep m_value{};
