@@ -6,7 +6,6 @@
 #include "lib/common/tuple.hpp"
 
 #include <type_traits>
-#include <ranges>
 
 namespace terraformer
 {
@@ -169,7 +168,7 @@ namespace terraformer
 		{ clear(); }
 
 		auto element_indices(size_t skip = 0) const
-		{ return std::ranges::iota_view{index_type{} + skip, index_type{} + m_size.get()}; }
+		{ return index_range{index_type{} + skip, index_type{} + m_size.get()}; }
 
 #if 0
 		constexpr auto last_element_index() const noexcept
