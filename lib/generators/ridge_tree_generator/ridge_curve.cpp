@@ -73,7 +73,8 @@ terraformer::single_array<float> terraformer::generate(
 			1.0f;
 	};
 
-	for(auto k = ret.first_element_index(); k != seg_count; ++k)
+	// TODO: C++23 adjacent_view
+	for(auto k : ret.element_indices())
 	{
 		ret[k] = f(U(rng))
 			*envelope(dx*static_cast<float>(k.get()))
@@ -84,8 +85,8 @@ terraformer::single_array<float> terraformer::generate(
 
 	auto const gain = 2.0f*src.amplitude/(*minmax.max - *minmax.min);
 
-	for(auto k = ret.first_element_index(); k != seg_count; ++k)
-	{ ret[k] *= gain; }
+	for(auto& item : ret)
+	{ item *= gain; }
 
 	return ret;
 }

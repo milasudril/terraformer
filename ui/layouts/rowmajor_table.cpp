@@ -15,7 +15,7 @@ terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 	auto const* const cols = m_colwidths.get();
 	size_t col = 0;
 	auto const colcount = m_colcount;
-	auto row = m_rowheights.first_element_index();
+	auto row = m_rowheights.element_indices().front();
 	auto const rowcount = std::size(m_rowheights);
 
 	for(auto k : widgets.element_indices())

@@ -37,7 +37,7 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	auto const L = integrated_curve_length.back();
 
 	single_array ret{std::size(integrated_curve_length)};
-	for(auto k = ret.first_element_index(); k != std::size(ret); ++k)
+	for(auto k : ret.element_indices())
 	{ ret[k] = std::max(ridge_polynomial(integrated_curve_length[k]/L), 0.0f); }
 
 	return ret;
@@ -110,7 +110,8 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 		noise_array.front() = 0.0f;
 		auto min_val = 2.0f;
 		auto max_val = - min_val;
-		for(auto k = noise_array.first_element_index() + 1; k != std::size(noise_array); ++k)
+		// TODO: C++23 adjacent_view
+		for(auto k : noise_array.element_indices(1))
 		{
 			auto const dt = integrated_curve_length[k] - integrated_curve_length[k - 1];
 			auto const val = noise_gen(U(rng), dt);
@@ -122,8 +123,8 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 		auto const offset_in = 0.5f*(max_val + min_val);
 		auto const amp_in = 0.5f*(max_val - min_val);
 
-		for(auto k = noise_array.first_element_index(); k != std::size(noise_array); ++k)
-		{ noise_array[k] = (noise_array[k] - offset_in)/amp_in; }
+		for(auto& item : noise_array)
+		{ item = (item - offset_in)/amp_in; }
 	}
 
 	single_array ret{std::size(integrated_curve_length)};
@@ -336,22 +337,22 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 
 	// TODO: It would be nice to have different types for a_trim and b_trim
 	single_array<displaced_curve::index_type> a_trim(array_size<displaced_curve::index_type>{outer_count});
-	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
+	for(auto k : a_trim.element_indices())
 	{
 		array_index<displaced_curve> const src_index{k.get()};
 		a_trim[k] = displaced_curve::index_type{std::size(a[src_index])};
 	}
 
 	single_array<displaced_curve::index_type> b_trim(array_size<displaced_curve::index_type>{inner_count});
-	for(auto l = b_trim.first_element_index(); l != std::size(b_trim); ++l)
+	for(auto l : b_trim.element_indices())
 	{
 		array_index<displaced_curve> const src_index{l.get()};
 		b_trim[l] = displaced_curve::index_type{std::size(b[src_index])};
 	}
 
-	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
+	for(auto k : a_trim.element_indices())
 	{
-		for(auto l = b_trim.first_element_index(); l != std::size(b_trim); ++l)
+		for(auto l : b_trim.element_indices())
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
@@ -377,9 +378,9 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 		}
 	}
 
-	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
+	for(auto k : a_trim.element_indices())
 	{
-		for(auto l = a_trim.first_element_index(); l != k; ++l)
+		for(auto l = a_trim.element_indices().front(); l != k; ++l)
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
@@ -406,9 +407,9 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 		}
 	}
 
-	for(auto k = b_trim.first_element_index(); k != std::size(b_trim); ++k)
+	for(auto k : b_trim.element_indices())
 	{
-		for(auto l = b_trim.first_element_index(); l != k; ++l)
+		for(auto l = b_trim.element_indices().front(); l != k; ++l)
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
@@ -433,7 +434,8 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 			);
 		}
 	}
-	for(auto k = a_trim.first_element_index(); k != std::size(a_trim); ++k)
+
+	for(auto k : a_trim.element_indices())
 	{
 		auto const index = a_trim[k];
 		array_index<displaced_curve> const src_index_k{k.get()};
@@ -441,7 +443,7 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 		{ a[src_index_k].truncate_from(index); }
 	}
 
-	for(auto l = b_trim.first_element_index(); l != std::size(b_trim); ++l)
+	for(auto l : b_trim.element_indices())
 	{
 		auto const index = b_trim[l];
 		array_index<displaced_curve> const src_index_l{l.get()};

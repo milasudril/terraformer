@@ -37,9 +37,9 @@
                             "-Wconversion",
                             "-Wno-psabi",
                             "-Wsuggest-override",
+														"-Wno-error=deprecated-declarations",
                             "-I.",
-                            "-fconcepts-diagnostics-depth=3",
-                            "-Wno-error=deprecated-declarations"
+                            "-fconcepts-diagnostics-depth=3"
                         ],
                         "iquote": [
                             "."

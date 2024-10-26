@@ -46,11 +46,8 @@ namespace terraformer
 		~single_array() noexcept
 		{ clear(); }
 
-		static constexpr auto first_element_index() noexcept
-		{ return index_type{}; }
-
-		constexpr auto last_element_index() const noexcept
-		{ return index_type{(m_size - size_type{1}).get()}; }
+		auto element_indices(size_t skip = 0) const noexcept
+		{ return index_range{index_type{} + skip, index_type{} + m_size.get()}; }
 
 		auto size() const noexcept
 		{ return m_size; }

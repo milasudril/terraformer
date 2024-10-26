@@ -15,15 +15,15 @@ namespace terraformer
 	public:
 		constexpr array_size() noexcept = default;
 
-		constexpr explicit array_size(Rep value) noexcept: m_starts_at{value}{}
+		constexpr explicit array_size(Rep value) noexcept: m_value{value}{}
 
-		constexpr auto get() const noexcept { return m_starts_at; }
+		constexpr auto get() const noexcept { return m_value; }
 
 		constexpr auto operator<=>(array_size const&) const noexcept = default;
 
 		constexpr array_size& operator+=(array_size other)
 		{
-			if(__builtin_add_overflow(m_starts_at, other.get(), &m_starts_at))
+			if(__builtin_add_overflow(m_value, other.get(), &m_value))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
 
 			return *this;
@@ -31,7 +31,7 @@ namespace terraformer
 
 		constexpr array_size& operator-=(array_size other)
 		{
-			if(__builtin_sub_overflow(m_starts_at, other.get(), &m_starts_at))
+			if(__builtin_sub_overflow(m_value, other.get(), &m_value))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
 
 			return *this;
@@ -39,7 +39,7 @@ namespace terraformer
 
 		constexpr array_size& operator*=(Rep factor)
 		{
-			if(__builtin_mul_overflow(m_starts_at, factor, &m_starts_at))
+			if(__builtin_mul_overflow(m_value, factor, &m_value))
 			{ throw std::runtime_error{"Arithmetic overflow"}; }
 
 			return *this;
@@ -47,13 +47,13 @@ namespace terraformer
 
 		template<class Other>
 		constexpr explicit operator array_size<Other, Rep>() const noexcept
-		{ return array_size<Other>{m_starts_at}; }
+		{ return array_size<Other>{m_value}; }
 
 		constexpr explicit operator Rep() const
-		{ return m_starts_at; }
+		{ return m_value; }
 
 	private:
-		Rep m_starts_at{};
+		Rep m_value{};
 	};
 
 	template<class Rep = size_t>
