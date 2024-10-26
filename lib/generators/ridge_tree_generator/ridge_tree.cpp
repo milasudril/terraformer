@@ -77,15 +77,15 @@ terraformer::ridge_tree::ridge_tree(
 		);
 	}
 
-	auto current_trunk_index = ret.first_element_index();
-
+	// TODO: Can we use a range-based loop now?
+	auto current_trunk_index = ret.element_indices().front();
 	while(true)
 	{
 		if(current_trunk_index == std::size(ret))
 		{ return; }
 
 		auto& current_trunk = ret[current_trunk_index];
-		auto const next_level_index = current_trunk.level  + 1;
+		auto const next_level_index = current_trunk.level + 1;
 		if(next_level_index == std::size(curve_levels))
 		{
 			++current_trunk_index;
@@ -96,7 +96,7 @@ terraformer::ridge_tree::ridge_tree(
 			std::as_const(current_trunk.branches).get<0>()
 		);
 
-		auto k = next_level_seeds.first_element_index();
+		auto k = next_level_seeds.element_indices().front();
 		for(auto& index_array : current_trunk.branches.get<2>())
 		{
 			index_array = collect_branch_indices(next_level_seeds[k]);
