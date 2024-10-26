@@ -110,9 +110,9 @@ TESTCASE(terraformer_ridge_tree_generate)
 		}
 	}
 	terraformer::curve_set curves;
-	for(auto k = res.first_element_index(); k != std::size(res); ++k)
+	for(auto const& item : res)
 	{
-		for(auto const& curve : res[k].branches.get<0>())
+		for(auto const& curve : item.branches.get<0>())
 		{
 			curves.append(curve.points());
 		}

@@ -42,8 +42,8 @@ namespace terraformer
 		operator span<ridge_tree_trunk const>() const
 		{ return m_value; }
 
-		constexpr auto first_element_index()
-		{ return m_value.first_element_index(); }
+		auto element_indices(size_t skip = 0) const
+		{ return m_value.element_indices(skip); }
 
 		auto size() const
 		{ return std::size(m_value);  }
