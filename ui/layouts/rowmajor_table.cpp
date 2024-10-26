@@ -74,7 +74,7 @@ void terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
 			max_height = 0.0f;
 		}
 	}
-	if(col != 0 && !indices.empty())
+	if(col != 0)
 	{ m_rowheights.push_back(max_height); }
 
 	m_height = std::accumulate(std::begin(m_rowheights), std::end(m_rowheights), margin_y);
