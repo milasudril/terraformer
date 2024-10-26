@@ -85,16 +85,14 @@ TESTCASE(terraformer_flat_map_insert)
 	// Check content (keys)
 	{
 		auto const keys = my_map.keys();
-		for(auto k = keys.first_element_index(); k != std::size(keys); ++k)
-		{
-			EXPECT_EQ(keys[k], static_cast<int>(k.get()));
-		}
+		for(auto k : keys.element_indices())
+		{ EXPECT_EQ(keys[k], static_cast<int>(k.get())); }
 	}
 
 	// Check content (values, assumes keys were correct)
 	{
 		auto const values = my_map.values<0>();
-		for(auto k = values.first_element_index(); k != std::size(values); ++k)
+		for(auto k : values.element_indices())
 		{
 			auto res = my_map.find(static_cast<int>(k.get()));
 			EXPECT_EQ(res.get(), k.get());

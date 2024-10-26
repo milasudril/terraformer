@@ -27,11 +27,8 @@ namespace terraformer
 		constexpr auto end() const
 		{ return m_end; }
 
-		static constexpr auto first_element_index()
-		{ return index_type{}; }
-
-		constexpr auto last_element_index() const
-		{ return index_type{(size() - size_type{1}).get()}; }
+		auto element_indices(size_t skip = 0) const
+		{ return index_range{index_type{} + skip, index_type{} + size().get()}; }
 
 		constexpr auto size() const
 		{ return size_type{static_cast<size_t>(m_end - m_begin)}; }
@@ -91,20 +88,20 @@ namespace terraformer
 		{ return start_offset; }
 
 		auto const step = (dir == span_search_direction::backwards)? -1 : 1;
-
+		auto const indices = span.element_indices();
 		auto const last_index = (dir == span_search_direction::backwards)?
-			span.first_element_index() :
-			span.last_element_index();
+			indices.front() :
+			indices.back();
 
 		auto const first_index = (dir == span_search_direction::backwards)?
-			span.last_element_index() :
-			span.first_element_index();
+			indices.back() :
+			indices.front();
 
 		auto offset = (start_offset == decltype(span)::npos)?
 			first_index :
 			((start_offset == last_index)? first_index : start_offset + step);
 
-		for(auto k = span.first_element_index(); k != std::size(span); ++k)
+		for(size_t k = 0; k != std::size(span).get(); ++k)
 		{
 			if(pred(span[offset]))
 			{ return offset; }

@@ -340,18 +340,16 @@ namespace terraformer
 	template<class Function>
 	void object_array::visit_elements(Function&& f)
 	{
-		auto const n = std::size(*this);
 		span const elems{begin(), end()};
-		for(auto k = elems.first_element_index(); k != n; ++k)
+		for(auto k : elems.element_indices())
 		{ f(k, object_pointer{elems[k].get()}); }
 	}
 
 	template<class Function>
 	void object_array::visit_elements(Function&& f) const
 	{
-		auto const n = std::size(*this);
 		span const elems{begin(), end()};
-		for(auto k = elems.first_element_index(); k != n; ++k)
+		for(auto k : elems.element_indices())
 		{ f(k, object_pointer{elems[k].get_const()}); }
 	}
 

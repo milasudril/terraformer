@@ -26,7 +26,8 @@ namespace terraformer
 			.distance = distance_xy(curve.front(), loc)
 		};
 
-		for(auto k = curve.first_element_index() + 1; k != std::size(curve); ++k)
+		// TODO: C++23 adjacent_view
+		for(auto k : curve.element_indices(1))
 		{
 			auto const d = distance_xy(curve[k], loc);
 			if(d < ret.distance)
@@ -57,7 +58,8 @@ namespace terraformer
 			},
 		};
 
-		for(auto k = curve.first_element_index() + 1; k != std::size(curve); ++k)
+		// TODO: C++23 adjacent_view
+		for(auto k : curve.element_indices(1))
 		{
 			auto const d = distance_xy(curve[k], loc);
 			if(d < ret[1].distance)

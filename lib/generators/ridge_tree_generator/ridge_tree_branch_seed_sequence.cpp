@@ -92,10 +92,8 @@ terraformer::collect_ridge_tree_branch_seeds(span<displaced_curve const> points)
 {
 	single_array<terraformer::ridge_tree_branch_seed_sequence_pair> ret;
 	ret.reserve(static_cast<decltype(ret)::size_type>(std::size(points)));
-	for(auto k = points.first_element_index(); k != std::size(points); ++k)
-	{
-		ret.push_back(collect_ridge_tree_branch_seeds(points[k]));
-	}
+	for(auto point : points)
+	{ ret.push_back(collect_ridge_tree_branch_seeds(point)); }
 	return ret;
 }
 

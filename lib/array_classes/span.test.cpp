@@ -14,7 +14,7 @@ TESTCASE(terraformer_span_test_all_members)
 
 	{
 		size_t l = 0;
-		for(auto k = span.first_element_index(); k != std::size(span); ++k)
+		for(auto k : span.element_indices())
 		{
 			EXPECT_EQ(span[k], data[l]);
 			++l;
@@ -22,7 +22,8 @@ TESTCASE(terraformer_span_test_all_members)
 	}
 
 	{
-		auto l = span.first_element_index();
+		auto l = span.element_indices().front();
+		EXPECT_EQ(l.get(), 0);
 		auto ptr_a = std::data(span);
 		auto ptr_b = std::data(data);
 		while(l != std::size(span))
@@ -55,7 +56,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_empty_span)
 	EXPECT_EQ(
 		find_next_wrap_around(
 			span,
-			span.first_element_index() + 2,
+			span.element_indices().front() + 2,
 			terraformer::span_search_direction::forwards,
 			[](auto){ return true; }
 		),
@@ -65,7 +66,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_empty_span)
 	EXPECT_EQ(
 		find_next_wrap_around(
 			span,
-			span.first_element_index() + 2,
+			span.element_indices().front() + 2,
 			terraformer::span_search_direction::backwards,
 			[](auto){ return true; }
 		),
@@ -78,7 +79,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_no_match)
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	terraformer::span span{std::begin(data), std::end(data)};
 
-	auto offset = span.first_element_index() + 2;
+	auto offset = span.element_indices().front() + 2;
 
 	offset = find_next_wrap_around(
 		span,
@@ -95,7 +96,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_no_match)
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	terraformer::span span{std::begin(data), std::end(data)};
 
-	auto offset = span.first_element_index() + 2;
+	auto offset = span.element_indices().front() + 2;
 
 	offset = find_next_wrap_around(
 		span,
@@ -112,7 +113,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_even)
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	terraformer::span span{std::begin(data), std::end(data)};
 
-	auto offset = span.first_element_index() + 2;
+	auto offset = span.element_indices().front() + 2;
 	auto is_even = [](auto x){ return x % 2 == 0; };
 
 	offset = find_next_wrap_around(
@@ -121,7 +122,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_even)
 		terraformer::span_search_direction::forwards,
 		is_even
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 3);
+	EXPECT_EQ(offset, span.element_indices().front() + 3);
 
 	offset = find_next_wrap_around(
 		span,
@@ -129,7 +130,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_even)
 		terraformer::span_search_direction::forwards,
 		is_even
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 1);
+	EXPECT_EQ(offset, span.element_indices().front() + 1);
 
 	offset = find_next_wrap_around(
 		span,
@@ -137,7 +138,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_even)
 		terraformer::span_search_direction::forwards,
 		is_even
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 3);
+	EXPECT_EQ(offset, span.element_indices().front() + 3);
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_even)
@@ -145,7 +146,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_even)
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	terraformer::span span{std::begin(data), std::end(data)};
 
-	auto offset = span.first_element_index() + 2;
+	auto offset = span.element_indices().front() + 2;
 	auto is_even = [](auto x){ return x % 2 == 0; };
 
 	offset = find_next_wrap_around(
@@ -154,7 +155,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_even)
 		terraformer::span_search_direction::backwards,
 		is_even
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 1);
+	EXPECT_EQ(offset, span.element_indices().front() + 1);
 
 	offset = find_next_wrap_around(
 		span,
@@ -162,7 +163,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_even)
 		terraformer::span_search_direction::backwards,
 		is_even
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 3);
+	EXPECT_EQ(offset, span.element_indices().front() + 3);
 
 	offset = find_next_wrap_around(
 		span,
@@ -170,7 +171,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_even)
 		terraformer::span_search_direction::backwards,
 		is_even
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 1);
+	EXPECT_EQ(offset, span.element_indices().front() + 1);
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_odd)
@@ -178,7 +179,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_odd)
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	terraformer::span span{std::begin(data), std::end(data)};
 
-	auto offset = span.first_element_index() + 2;
+	auto offset = span.element_indices().front() + 2;
 	auto is_odd = [](auto x){ return x % 2 != 0; };
 
 	offset = find_next_wrap_around(
@@ -187,7 +188,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_odd)
 		terraformer::span_search_direction::forwards,
 		is_odd
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 4);
+	EXPECT_EQ(offset, span.element_indices().front() + 4);
 
 	offset = find_next_wrap_around(
 		span,
@@ -195,7 +196,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_odd)
 		terraformer::span_search_direction::forwards,
 		is_odd
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 0);
+	EXPECT_EQ(offset, span.element_indices().front() + 0);
 
 	offset = find_next_wrap_around(
 		span,
@@ -203,7 +204,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_odd)
 		terraformer::span_search_direction::forwards,
 		is_odd
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 2);
+	EXPECT_EQ(offset, span.element_indices().front() + 2);
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_odd)
@@ -211,7 +212,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_odd)
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	terraformer::span span{std::begin(data), std::end(data)};
 
-	auto offset = span.first_element_index() + 2;
+	auto offset = span.element_indices().front() + 2;
 	auto is_odd = [](auto x){ return x % 2 != 0; };
 
 	offset = find_next_wrap_around(
@@ -220,7 +221,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_odd)
 		terraformer::span_search_direction::backwards,
 		is_odd
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 0);
+	EXPECT_EQ(offset, span.element_indices().front() + 0);
 
 	offset = find_next_wrap_around(
 		span,
@@ -228,7 +229,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_odd)
 		terraformer::span_search_direction::backwards,
 		is_odd
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 4);
+	EXPECT_EQ(offset, span.element_indices().front() + 4);
 
 	offset = find_next_wrap_around(
 		span,
@@ -236,7 +237,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_odd)
 		terraformer::span_search_direction::backwards,
 		is_odd
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 2);
+	EXPECT_EQ(offset, span.element_indices().front() + 2);
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all)
@@ -244,7 +245,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all)
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	terraformer::span span{std::begin(data), std::end(data)};
 
-	auto offset = span.first_element_index() + 2;
+	auto offset = span.element_indices().front() + 2;
 	auto always_true = [](auto){ return true; };
 
 	offset = find_next_wrap_around(
@@ -253,7 +254,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all)
 		terraformer::span_search_direction::forwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 3);
+	EXPECT_EQ(offset, span.element_indices().front() + 3);
 
 	offset = find_next_wrap_around(
 		span,
@@ -261,7 +262,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all)
 		terraformer::span_search_direction::forwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 4);
+	EXPECT_EQ(offset, span.element_indices().front() + 4);
 
 	offset = find_next_wrap_around(
 		span,
@@ -269,7 +270,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all)
 		terraformer::span_search_direction::forwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 0);
+	EXPECT_EQ(offset, span.element_indices().front() + 0);
 
 	offset = find_next_wrap_around(
 		span,
@@ -277,7 +278,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all)
 		terraformer::span_search_direction::forwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 1);
+	EXPECT_EQ(offset, span.element_indices().front() + 1);
 
 	offset = find_next_wrap_around(
 		span,
@@ -285,7 +286,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all)
 		terraformer::span_search_direction::forwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 2);
+	EXPECT_EQ(offset, span.element_indices().front() + 2);
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all)
@@ -293,7 +294,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all)
 	std::array<int, 5> data{1, 2, 3, 4, 5};
 	terraformer::span span{std::begin(data), std::end(data)};
 
-	auto offset = span.first_element_index() + 2;
+	auto offset = span.element_indices().front() + 2;
 	auto always_true = [](auto){ return true; };
 
 	offset = find_next_wrap_around(
@@ -302,7 +303,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all)
 		terraformer::span_search_direction::backwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 1);
+	EXPECT_EQ(offset, span.element_indices().front() + 1);
 
 	offset = find_next_wrap_around(
 		span,
@@ -310,7 +311,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all)
 		terraformer::span_search_direction::backwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 0);
+	EXPECT_EQ(offset, span.element_indices().front() + 0);
 
 	offset = find_next_wrap_around(
 		span,
@@ -318,7 +319,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all)
 		terraformer::span_search_direction::backwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 4);
+	EXPECT_EQ(offset, span.element_indices().front() + 4);
 
 	offset = find_next_wrap_around(
 		span,
@@ -326,7 +327,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all)
 		terraformer::span_search_direction::backwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 3);
+	EXPECT_EQ(offset, span.element_indices().front() + 3);
 
 	offset = find_next_wrap_around(
 		span,
@@ -334,7 +335,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all)
 		terraformer::span_search_direction::backwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index() + 2);
+	EXPECT_EQ(offset, span.element_indices().front() + 2);
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all_null_init)
@@ -350,7 +351,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_backwards_match_all_null_in
 		terraformer::span_search_direction::backwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.last_element_index());
+	EXPECT_EQ(offset, span.element_indices().back());
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all_null_init)
@@ -366,7 +367,7 @@ TESTCASE(terraformer_span_find_next_wrap_around_step_forwards_match_all_null_ini
 		terraformer::span_search_direction::forwards,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index());
+	EXPECT_EQ(offset, span.element_indices().front());
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_no_step_null_init)
@@ -394,9 +395,9 @@ TESTCASE(terraformer_span_find_next_wrap_around_no_step_nonnull_init)
 
 	auto offset = find_next_wrap_around(
 		span,
-		span.first_element_index(),
+		span.element_indices().front(),
 		terraformer::span_search_direction::stay,
 		always_true
 	);
-	EXPECT_EQ(offset, span.first_element_index());
+	EXPECT_EQ(offset, span.element_indices().front());
 }

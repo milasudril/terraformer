@@ -69,7 +69,7 @@ namespace terraformer
 
 	inline void replace_z_inplace(span<location> c, span<float const> z_vals)
 	{
-		for(auto k = c.first_element_index() ; k != std::size(c); ++k)
+		for(auto k : c.element_indices())
 		{
 			array_index<float> src_index{k.get()};
 			c[k][2] = z_vals[src_index];

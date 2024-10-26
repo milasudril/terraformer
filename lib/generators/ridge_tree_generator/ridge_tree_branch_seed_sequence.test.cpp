@@ -257,14 +257,14 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_random_data_2)
 
 	{
 		auto const normals = res.left.get<1>();
-		for(auto k = normals.first_element_index(); k != std::size(normals); ++k)
-		{	EXPECT_LT(normals[k][0], 0.0f); }
+		for(auto normal : normals)
+		{	EXPECT_LT(normal[0], 0.0f); }
 	}
 
 	{
 		auto const normals = res.right.get<1>();
-		for(auto k = normals.first_element_index(); k != std::size(normals); ++k)
-		{	EXPECT_GT(normals[k][0], 0.0f); }
+		for(auto normal : normals)
+		{	EXPECT_GT(normal[0], 0.0f); }
 	}
 
 	EXPECT_EQ(std::size(res.left).get(), 4);
