@@ -108,10 +108,10 @@ namespace terraformer
 
 		ridge_tree_closest_point_curves_result ret{
 			.result = curve_closest_point_xy(curves.front().points(), loc),
-			.curve = curves.first_element_index()
+			.curve = curves.element_indices().front()
 		};
 
-		for(auto k = curves.first_element_index() + 1; k != std::size(curves); ++k)
+		for(auto k : curves.element_indices(1))
 		{
 			auto new_res = curve_closest_point_xy(curves[k].points(), loc);
 			if(new_res.distance < 0.0f)
@@ -167,10 +167,10 @@ namespace terraformer
 
 		ridge_tree_closest_point_result ret{
 			.distance_result = closest_point_xy(branches.front(), loc),
-			.branch = branches.first_element_index()
+			.branch = branches.element_indices().front()
 		};
 
-		for(auto k = branches.first_element_index() + 1; k != std::size(branches); ++k)
+		for(auto k : branches.element_indices(1))
 		{
 			auto const res = closest_point_xy(branches[k], loc);
 			if(res.result.distance < 0.0f)

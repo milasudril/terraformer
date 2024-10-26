@@ -14,7 +14,7 @@ TESTCASE(terraformer_span_test_all_members)
 
 	{
 		size_t l = 0;
-		for(auto k = span.first_element_index(); k != std::size(span); ++k)
+		for(auto k : span.element_indices())
 		{
 			EXPECT_EQ(span[k], data[l]);
 			++l;
@@ -22,7 +22,8 @@ TESTCASE(terraformer_span_test_all_members)
 	}
 
 	{
-		auto l = span.first_element_index();
+		auto l = span.element_indices().front();
+		EXPECT_EQ(l.get(), 0);
 		auto ptr_a = std::data(span);
 		auto ptr_b = std::data(data);
 		while(l != std::size(span))

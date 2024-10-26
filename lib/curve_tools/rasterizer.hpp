@@ -149,8 +149,9 @@ namespace terraformer
 		if(curve.empty())
 		{ return; }
 
+		// TODO: C++23 adjacent_view
 		auto prev = curve.front();
-		for(auto k = curve.first_element_index() + 1; k!=std::size(curve); ++k)
+		for(auto k : curve.element_indices(1))
 		{
 			auto const current = curve[k];
 			draw(target_surface, k, geosimd::line_segment{.p1 = prev, .p2 = current}, params, brush, paint_mask);

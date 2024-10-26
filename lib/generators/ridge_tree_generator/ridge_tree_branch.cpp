@@ -129,14 +129,11 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	single_array ret{std::size(integrated_curve_length)};
 	{
 		auto begin_elevation = 0.0f;
-		auto begin_index = integrated_curve_length.first_element_index();
+		auto begin_index = integrated_curve_length.element_indices().front();
 		std::uniform_real_distribution peak_elevation_distribution{0.0f, 1.0f};
-		for(auto k = branch_points.first_element_index();
-			k != std::size(branch_points);
-			++k
-		)
+		for(auto branch_point_index : branch_points)
 		{
-			array_index<float> const end_index{branch_points[k].get()};
+			array_index<float> const end_index{branch_point_index.get()};
 			auto const dl = integrated_curve_length[end_index] - integrated_curve_length[begin_index];
 			auto const end_elevation = peak_elevation_distribution(rng);
 			auto const col_elvation = -peak_elevation_distribution(rng);
@@ -236,9 +233,9 @@ terraformer::displacement terraformer::compute_field(span<displaced_curve const>
 {
 	displacement ret{};
 
-	for(auto k = branches.first_element_index(); k != std::size(branches); ++k)
+	for(auto& branch : branches)
 	{
-		auto const points = branches[k].get<0>();
+		auto const points = branch.get<0>();
 		ret += terraformer::fold_over_line_segments(
 			points,
 			[](auto seg, auto point, auto d02, auto... prev) {
@@ -264,8 +261,8 @@ terraformer::displacement terraformer::compute_field(
 {
 	displacement ret{};
 
-	for(auto k = branch_infos.first_element_index(); k != std::size(branch_infos); ++k)
-	{ ret += compute_field(branch_infos[k].branches.get<0>(), r, min_distance); }
+	for(auto& branch_info : branch_infos)
+	{ ret += compute_field(branch_info.branches.get<0>(), r, min_distance); }
 
 	return ret;
 }

@@ -29,6 +29,7 @@ namespace terraformer
 
 	inline auto curve_running_length_xy(span<location const> locs)
 	{
+		// TODO: C++23 adjacent_view
 		if(locs.empty())
 		{ return single_array<float>{}; }
 
@@ -36,7 +37,7 @@ namespace terraformer
 		auto sum = 0.0f;
 		ret.front() = sum;
 
-		for(auto k = locs.first_element_index() + 1; k != std::size(locs); ++k)
+		for(auto k : locs.element_indices(1))
 		{
 			auto const d = distance_xy(locs[k], locs[k - 1]);
 			sum += d;

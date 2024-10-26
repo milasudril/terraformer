@@ -23,11 +23,8 @@ namespace terraformer
 		constexpr auto end() const
 		{ return m_end; }
 
-		constexpr auto first_element_index() const
-		{ return index_type{}; }
-
-		constexpr auto last_element_index() const
-		{ return index_type{(size() - size_type{1}).get()}; }
+		auto element_indices(size_t skip = 0) const
+		{ return index_range{index_type{} + skip, index_type{} + size().get()}; }
 
 		constexpr auto size() const
 		{ return size_type{static_cast<size_t>(m_end - m_begin)}; }
