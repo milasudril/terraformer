@@ -170,11 +170,6 @@ namespace terraformer
 		auto element_indices(size_t skip = 0) const
 		{ return index_range{index_type{} + skip, index_type{} + m_size.get()}; }
 
-#if 0
-		constexpr auto last_element_index() const noexcept
-		{ return index_type{(m_size - size_type{1}).get()}; }
-#endif
-
 		auto size() const noexcept
 		{ return m_size; }
 
