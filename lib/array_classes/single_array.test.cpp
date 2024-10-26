@@ -52,7 +52,7 @@ TESTCASE(terraformer_single_array_push_back)
 		array.push_back(k);
 	}
 
-	for(auto k = array.first_element_index(); k != std::size(array); ++k)
+	for(auto k : array.element_indices())
 	{ EXPECT_EQ(static_cast<size_t>(static_cast<holder>(array[k]).value()), k.get()); }
 
 	EXPECT_EQ(std::size(array), terraformer::array_size<no_default_constructible_type>{16});
@@ -69,7 +69,7 @@ TESTCASE(terraformer_single_array_push_back)
 
 	{
 		auto span = static_cast<terraformer::span<no_default_constructible_type>>(array);
-		for(auto k = array.first_element_index(); k != std::size(span); ++k)
+		for(auto k : span.element_indices())
 		{ EXPECT_EQ(static_cast<size_t>(static_cast<holder>(array[k]).value()), k.get()); }
 	}
 }
@@ -90,7 +90,7 @@ TESTCASE(terraformer_single_array_resize_grow_and_shrink)
 
 	EXPECT_EQ(array.capacity().get(), 16);
 	EXPECT_EQ(array.size().get(), 16);
-	for(auto k = array.first_element_index() + 4; k != std::size(array); ++k)
+	for(auto k : array.element_indices(4))
 	{ EXPECT_EQ(static_cast<int>(array[k]), 0); }
 
 	array.resize(terraformer::array_size<default_constructible_type>{8});
