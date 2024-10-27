@@ -10,6 +10,7 @@
 #include "./wsapi/native_window.hpp"
 #include "./widgets/label.hpp"
 #include "./widgets/button.hpp"
+#include "./widgets/single_line_text_input.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
@@ -108,9 +109,12 @@ int main(int, char**)
 	terraformer::ui::widgets::button cancel;
 	cancel.text(u8"Cancel");
 
+	terraformer::ui::widgets::single_line_text_input my_input;
+
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
 	my_outer_vbox.append(std::ref(cancel));
+	my_outer_vbox.append(std::ref(my_input));
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		terraformer::ui::theming::load_default_config<terraformer::ui::drawing_api::gl_texture>(),

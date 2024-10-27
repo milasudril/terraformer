@@ -227,9 +227,15 @@ namespace terraformer::ui::main
 				resolve_overload<mouse_button_event const&>(&widget_with_default_actions::handle_event),
 				resolve_overload<mouse_button_event const&>(&Widget::handle_event)
 			),
-			.kbe_sensitive = !compare_with_fallback(
-				resolve_overload<keyboard_button_event const&>(&widget_with_default_actions::handle_event),
-				resolve_overload<keyboard_button_event const&>(&Widget::handle_event)
+			.kbe_sensitive = !(
+				compare_with_fallback(
+					resolve_overload<keyboard_button_event const&>(&widget_with_default_actions::handle_event),
+					resolve_overload<keyboard_button_event const&>(&Widget::handle_event)
+				)
+				&& compare_with_fallback(
+					resolve_overload<typing_event>(&widget_with_default_actions::handle_event),
+					resolve_overload<typing_event>(&Widget::handle_event)
+				)
 			),
 			.cursor_focus_indicator_mode = focus_indicator_mode::automatic,
 			.kbd_focus_indicator_mode = focus_indicator_mode::automatic

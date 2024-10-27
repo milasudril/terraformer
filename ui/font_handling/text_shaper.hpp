@@ -95,6 +95,21 @@ namespace terraformer::ui::font_handling
 			return *this;
 		}
 
+		text_shaper& append(std::basic_string_view<char32_t> buffer)
+		{
+			auto const buffer_length = narrowing_cast<int>(std::size(buffer));
+			auto const text = reinterpret_cast<uint32_t const*>(std::data(buffer));
+
+			if(m_clear_before_append)
+			{
+				hb_buffer_clear_contents(m_handle.get());
+				m_clear_before_append = false;
+			}
+
+			hb_buffer_add_utf32(m_handle.get(), text, buffer_length, 0, buffer_length);
+			return *this;
+		}
+
 		text_shaper& with(hb_direction_t direction)
 		{
 			hb_buffer_set_direction(m_handle.get(), direction);
