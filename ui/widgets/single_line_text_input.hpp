@@ -41,6 +41,22 @@ namespace terraformer::ui::widgets
 				m_dirty_bits |= text_dirty;
 		}
 
+		void handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
+		{
+			if(
+				event.scancode == 0xe &&
+				(event.action == main::keyboard_button_action::press || event.action == main::keyboard_button_action::repeat)
+			)
+			{
+				// TODO: Erase to the left of text cursor
+				if(!m_value.empty())
+				{
+					m_value.pop_back();
+					m_dirty_bits |= text_dirty;
+				}
+			}
+		}
+
 		void regenerate_text_mask();
 
 		void regenerate_textures();
