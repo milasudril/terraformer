@@ -67,7 +67,7 @@ namespace terraformer::ui::main
 
 	struct typing_event
 	{
-		uint32_t codepoint;
+		char32_t codepoint;
 	};
 
 	enum class keyboard_button_action:int
