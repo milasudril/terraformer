@@ -58,8 +58,8 @@ namespace terraformer::ui::theming
 			},
 			.input_area{
 				.colors = color_scheme.input_area,
-				.padding = 2.0f,
-				.border_thickness = 2.0f,
+				.padding = 3.0f,
+				.border_thickness = 1.0f,
 				.font = body_text
 			},
 			.command_area{

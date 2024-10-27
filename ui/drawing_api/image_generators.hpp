@@ -19,6 +19,17 @@ namespace terraformer::ui::drawing_api
 
 	image generate(beveled_rectangle const& params);
 
+	struct flat_rectangle
+	{
+		uint32_t width;
+		uint32_t height;
+		uint32_t border_thickness;
+		rgba_pixel border_color;
+		rgba_pixel fill_color;
+	};
+
+	image generate(flat_rectangle const& params);
+
 	// TODO: It should be possible to center input in output image
 	image convert_mask(uint32_t output_width, uint32_t output_height, span_2d<uint8_t const> input, uint32_t margin);
 }

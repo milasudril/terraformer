@@ -24,13 +24,12 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 	{ regenerate_text_mask(); }
 
 	m_background_host = generate(
-		drawing_api::beveled_rectangle{
+		drawing_api::flat_rectangle{
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
-			.upper_left_color = 0.25f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.75f},
-			.lower_right_color = m_bg_tint,
-			.fill_color = 0.5f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.5f},
+			.border_color = m_fg_tint,
+			.fill_color = m_bg_tint
 		}
 	);
 

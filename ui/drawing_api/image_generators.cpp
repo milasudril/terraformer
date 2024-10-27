@@ -23,6 +23,25 @@ terraformer::image terraformer::ui::drawing_api::generate(beveled_rectangle cons
 	return ret;
 }
 
+terraformer::image terraformer::ui::drawing_api::generate(flat_rectangle const& params)
+{
+	auto const w = params.width;
+	auto const h = params.height;
+	image ret{params.width, params.height};
+	auto const border_thickness = params.border_thickness;
+	auto const border_color = params.border_color;
+	auto const fill_color = params.fill_color;
+
+	for(uint32_t y = 0; y != h; ++y)
+	{
+		for(uint32_t x = 0; x != w; ++x)
+		{
+			ret(x, y) = (x>=border_thickness && x <= w - (border_thickness + 1)) && (y >= border_thickness && y <= h - (border_thickness + 1)) ? fill_color : border_color;
+		}
+	}
+	return ret;
+}
+
 terraformer::image terraformer::ui::drawing_api::convert_mask(
 	uint32_t output_width,
 	uint32_t output_height,
