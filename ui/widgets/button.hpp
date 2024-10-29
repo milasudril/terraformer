@@ -106,6 +106,7 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::fb_size size)
 		{
+			printf("Size changed");
 			m_current_size = size;
 			m_dirty_bits |= host_textures_dirty;
 		}

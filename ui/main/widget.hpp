@@ -63,32 +63,14 @@ namespace terraformer::ui::main
 			m_compute_size_given_width{widgets.compute_size_given_width_callbacks()[index]},
 			m_compute_size_given_height{widgets.compute_size_given_height_callbacks()[index]},
 			m_size_confirmed{widgets.event_callbacks<fb_size>()[index]},
+			m_old_size{
+				.width = static_cast<int>(widgets.widget_geometries()[index].size[0]),
+				.height = static_cast<int>(widgets.widget_geometries()[index].size[1])
+			},
 			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
-		{}
+		{ }
 
 		root_widget() = default;
-
-		template<widget Widget>
-		explicit root_widget(std::reference_wrapper<Widget> w):
-			m_widget{&w.get()},
-			m_children{w.get().get_children()},
-			m_compute_size_given_width{
-				[](void* obj, widget_height_request req){
-					return static_cast<Widget*>(obj)->compute_size_given_width(req);
-				}
-			},
-			m_compute_size_given_height{
-				[](void* obj, widget_width_request req){
-					return static_cast<Widget*>(obj)->compute_size_given_height(req);
-				}
-			},
-			m_size_confirmed{
-				[](void* obj, fb_size size) {
-					return static_cast<Widget*>(obj)->handle_event(size);
-				}
-			},
-			m_layout{w.get().get_layout()}
-		{}
 
 		widget_collection_ref& children()
 		{ return m_children; }
@@ -100,7 +82,10 @@ namespace terraformer::ui::main
 		{ return m_compute_size_given_height(m_widget, req); }
 
 		void confirm_size(fb_size size)
-		{ m_size_confirmed(m_widget, size); }
+		{
+			if(m_old_size != size)
+			{ m_size_confirmed(m_widget, size); }
+		}
 
 		scaling run_layout()
 		{
@@ -115,6 +100,7 @@ namespace terraformer::ui::main
 		compute_size_given_width_callback m_compute_size_given_width = [](void*, widget_height_request){return scaling{};};
 		compute_size_given_height_callback m_compute_size_given_height = [](void*, widget_width_request){return scaling{};};
 		event_callback_t<fb_size> m_size_confirmed = [](void*, fb_size){};
+		fb_size m_old_size{};
 		layout_policy_ref m_layout;
 	};
 
@@ -149,6 +135,7 @@ namespace terraformer::ui::main
 		auto children = root.children();
 		auto const widget_states = children.widget_states();
 		auto const widget_geometries = children.widget_geometries();
+		auto const widget_sizes = children.sizes();
 		for(auto k : children.element_indices())
 		{
 			if(!widget_states[k].collapsed) [[likely]]
@@ -157,10 +144,11 @@ namespace terraformer::ui::main
 				confirm_sizes(
 					next_root,
 					fb_size{
-						.width = static_cast<int>(widget_geometries[k].size[0]),
-						.height = static_cast<int>(widget_geometries[k].size[1])
+						.width = static_cast<int>(widget_sizes[k][0]),
+						.height = static_cast<int>(widget_sizes[k][1])
 					}
 				);
+				widget_geometries[k].size = widget_sizes[k];
 			}
 		}
 	}

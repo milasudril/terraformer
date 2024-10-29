@@ -11,6 +11,9 @@ namespace terraformer::ui::main
 	{
 		int width;
 		int height;
+
+		constexpr bool operator==(fb_size const&) const = default;
+		constexpr bool operator!=(fb_size const&) const = default;
 	};
 
 	struct cursor_position

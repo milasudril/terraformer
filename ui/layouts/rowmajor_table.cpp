@@ -7,7 +7,6 @@ terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 	main::widget_collection_ref& widgets
 ) const
 {
-	auto const sizes = widgets.sizes();
 	auto const widget_geometries = widgets.widget_geometries();
 	auto x_offset = margin_x;
 	auto y_offset = margin_y;
@@ -25,7 +24,6 @@ terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 			-y_offset,
 			0.0f,
 		};
-		widget_geometries[k].size = sizes[k];
 		widget_geometries[k].origin = location{-1.0f, 1.0f, 0.0f};
 
 		x_offset += cols[col];

@@ -109,7 +109,7 @@ terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget
 
 terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget_height_request)
 {
-// TODO: Use width to find required height (multi-line)
+	// TODO: Use width to find required height (multi-line)
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
