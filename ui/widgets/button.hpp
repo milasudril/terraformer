@@ -150,44 +150,6 @@ namespace terraformer::ui::widgets
 		std::optional<state> m_temp_state;
 	};
 
-	inline void button::prepare_for_presentation(main::widget_rendering_result output_rect)
-	{
-		auto const display_state = m_temp_state.value_or(m_value);
-
-		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
-		{ regenerate_textures(); }
-
-		if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
-		{
-			m_foreground = output_rect.create_texture();
-			(void)output_rect.set_foreground(m_foreground.get());
-			m_dirty_bits |= gpu_textures_dirty;
-		}
-;
-		if(
-			output_rect.set_background( (display_state == state::released)?
-			m_background_released.get() : m_background_pressed.get())!=main::set_texture_result::success
-		) [[unlikely]]
-		{
-			m_background_released = output_rect.create_texture();
-			m_background_pressed = output_rect.create_texture();
-			output_rect.set_background((display_state == state::released)?
-				m_background_released.get() : m_background_pressed.get());
-			m_dirty_bits |= gpu_textures_dirty;
-		}
-
-		if(m_dirty_bits & gpu_textures_dirty)
-		{
-			m_background_released.upload(std::as_const(m_background_released_host).pixels());
-			m_background_pressed.upload(std::as_const(m_background_pressed_host).pixels());
-			m_foreground.upload(std::as_const(m_foreground_host).pixels());
-			m_dirty_bits &= ~gpu_textures_dirty;
-		}
-
-		output_rect.set_background_tints(std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint});
-		output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
-	}
-
 	class toggle_button:private button
 	{
 	public:
