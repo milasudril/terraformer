@@ -16,10 +16,11 @@ namespace terraformer::ui::drawing_api
 	class single_quad_renderer
 	{
 	public:
-		struct fg_bg_separator
+		struct layer
 		{
-			location begin;
-			location end;
+			using texture_type = gl_texture;
+			texture_type const* texture;
+			std::array<rgba_pixel, 4> tints;
 		};
 
 		struct input_rectangle
@@ -31,7 +32,7 @@ namespace terraformer::ui::drawing_api
 				if(texture == nullptr)
 				{ return main::set_texture_result::incompatible; }
 
-				background = texture;
+				background.texture = texture;
 				return main::set_texture_result::success;
 			}
 
@@ -40,21 +41,18 @@ namespace terraformer::ui::drawing_api
 				if(texture == nullptr)
 				{ return main::set_texture_result::incompatible; }
 
-				foreground = texture;
+				foreground.texture = texture;
 				return main::set_texture_result::success;
 			}
 
 			void set_background_tints(std::array<rgba_pixel, 4> const& vals)
-			{ background_tints = vals; }
+			{ background.tints = vals; }
 
 			void set_foreground_tints(std::array<rgba_pixel, 4> const& vals)
-			{ foreground_tints = vals; }
+			{ foreground.tints = vals; }
 
-			texture_type const* background;
-			texture_type const* foreground;
-			std::array<rgba_pixel, 4> background_tints;
-			std::array<rgba_pixel, 4> foreground_tints;
-			struct fg_bg_separator fg_bg_separator;
+			layer background;
+			layer foreground;
 
 			static gl_texture create_texture()
 			{ return gl_texture{}; }
@@ -78,15 +76,15 @@ namespace terraformer::ui::drawing_api
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, rect.background_tints)
-				.set_uniform(9, rect.foreground_tints)
+				.set_uniform(5, rect.background.tints)
+				.set_uniform(9, rect.foreground.tints)
 				.bind();
 
-			assert(rect.background != nullptr);
-			assert(rect.foreground != nullptr);
+			assert(rect.background.texture != nullptr);
+			assert(rect.foreground.texture != nullptr);
 
-			rect.background->bind(0);
-			rect.foreground->bind(1);
+			rect.background.texture->bind(0);
+			rect.foreground.texture->bind(1);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles();
@@ -154,7 +152,6 @@ void main()
 out vec4 fragment_color;
 layout (binding = 0) uniform sampler2D background;
 layout (binding = 1) uniform sampler2D foreground;
-layout (location = 13) uniform vec4 fg_bg_separator[2];
 
 in vec2 uv;
 in vec4 background_tint;
