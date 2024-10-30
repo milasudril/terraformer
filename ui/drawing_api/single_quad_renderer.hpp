@@ -32,7 +32,7 @@ namespace terraformer::ui::drawing_api
 				if(texture == nullptr)
 				{ return main::set_texture_result::incompatible; }
 
-				background.texture = texture;
+				background_0.texture = texture;
 				return main::set_texture_result::success;
 			}
 
@@ -41,18 +41,21 @@ namespace terraformer::ui::drawing_api
 				if(texture == nullptr)
 				{ return main::set_texture_result::incompatible; }
 
-				foreground.texture = texture;
+				foreground_0.texture = texture;
 				return main::set_texture_result::success;
 			}
 
 			void set_background_tints(std::array<rgba_pixel, 4> const& vals)
-			{ background.tints = vals; }
+			{ background_0.tints = vals; }
 
 			void set_foreground_tints(std::array<rgba_pixel, 4> const& vals)
-			{ foreground.tints = vals; }
+			{ foreground_0.tints = vals; }
 
-			layer background;
-			layer foreground;
+			layer background_0;
+			texture_type const* layer_mask;
+			layer background_1;
+			layer foreground_0;
+			layer foreground_1;
 
 			static gl_texture create_texture()
 			{ return gl_texture{}; }
@@ -76,15 +79,15 @@ namespace terraformer::ui::drawing_api
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, rect.background.tints)
-				.set_uniform(9, rect.foreground.tints)
+				.set_uniform(5, rect.background_0.tints)
+				.set_uniform(9, rect.foreground_0.tints)
 				.bind();
 
-			assert(rect.background.texture != nullptr);
-			assert(rect.foreground.texture != nullptr);
+			assert(rect.background_0.texture != nullptr);
+			assert(rect.foreground_0.texture != nullptr);
 
-			rect.background.texture->bind(0);
-			rect.foreground.texture->bind(1);
+			rect.background_0.texture->bind(0);
+			rect.foreground_0.texture->bind(1);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles();
