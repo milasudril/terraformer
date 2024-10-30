@@ -73,7 +73,7 @@ void terraformer::ui::widgets::single_line_text_input::theme_updated(main::confi
 {
 	m_margin = static_cast<uint32_t>(cfg.input_area.padding + cfg.input_area.border_thickness);
 	m_font = cfg.input_area.font;
-	m_bg_tint = cfg.input_area.colors.background;
+	m_bg_tint = cfg.input_area.colors.selection_color;
 	m_fg_tint = cfg.input_area.colors.foreground;
 	m_border_thickness = static_cast<uint32_t>(cfg.input_area.border_thickness);
 	m_dirty_bits |= host_textures_dirty | text_dirty;

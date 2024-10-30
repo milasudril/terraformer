@@ -24,12 +24,12 @@ namespace terraformer::ui::theming
 	}
 
 	constexpr fixed_intensity_colormap mid_colors{perceptual_color_intensity{0.5f}};
-	constexpr auto bright_colors = fixed_intensity_colormap::make_pastels(mid_colors, perceptual_color_intensity{0.75f});
+	constexpr auto bright_colors = fixed_intensity_colormap::make_pastels(mid_colors, perceptual_color_intensity{1.0f});
 	constexpr fixed_intensity_colormap dark_colors{perceptual_color_intensity{0.25f}};
 
-	constexpr auto default_dark_palette = sample_colormap<12>(bright_colors);
+	constexpr auto default_dark_palette = sample_colormap<12>(dark_colors);
 	constexpr auto default_mid_palette = sample_colormap<12>(mid_colors);
-	constexpr auto default_bright_palette = sample_colormap<12>(dark_colors);
+	constexpr auto default_bright_palette = sample_colormap<12>(bright_colors);
 
 	constexpr auto error_hue = 0.0f;
 	constexpr auto warning_hue = 1.0f/6.0f;
