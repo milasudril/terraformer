@@ -20,7 +20,7 @@ namespace terraformer::ui::main
 	{
 		rgba_pixel background;
 		rgba_pixel foreground;
-		rgba_pixel selection_color;
+		rgba_pixel selection;
 	};
 
 	struct twocolor_gradient

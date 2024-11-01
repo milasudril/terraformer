@@ -27,35 +27,60 @@ namespace terraformer::ui::drawing_api
 		{
 			using texture_type = gl_texture;
 
-			auto set_background(texture_type const* texture)
+			auto set_widget_background(texture_type const* texture, std::array<rgba_pixel, 4> const& tints)
 			{
 				if(texture == nullptr)
 				{ return main::set_texture_result::incompatible; }
 
-				background_0.texture = texture;
+				widget_background.texture = texture;
+				widget_background.tints = tints;
 				return main::set_texture_result::success;
 			}
 
-			auto set_foreground(texture_type const* texture)
+			auto set_bg_layer_mask(texture_type const* texture)
 			{
 				if(texture == nullptr)
 				{ return main::set_texture_result::incompatible; }
 
-				foreground_0.texture = texture;
+				bg_layer_mask = texture;
 				return main::set_texture_result::success;
 			}
 
-			void set_background_tints(std::array<rgba_pixel, 4> const& vals)
-			{ background_0.tints = vals; }
+			auto set_selection_background(texture_type const* texture, std::array<rgba_pixel, 4> const& tints)
+			{
+				if(texture == nullptr)
+				{ return main::set_texture_result::incompatible; }
 
-			void set_foreground_tints(std::array<rgba_pixel, 4> const& vals)
-			{ foreground_0.tints = vals; }
+				selection_background.texture = texture;
+				selection_background.tints = tints;
+				return main::set_texture_result::success;
+			}
 
-			layer background_0;
-			texture_type const* layer_mask;
-			layer background_1;
-			layer foreground_0;
-			layer foreground_1;
+			auto set_widget_foreground(texture_type const* texture, std::array<rgba_pixel, 4> const& tints)
+			{
+				if(texture == nullptr)
+				{ return main::set_texture_result::incompatible; }
+
+				widget_foreground.texture = texture;
+				widget_foreground.tints = tints;
+				return main::set_texture_result::success;
+			}
+
+			auto set_frame(texture_type const* texture, std::array<rgba_pixel, 4> const& tints)
+			{
+				if(texture == nullptr)
+				{ return main::set_texture_result::incompatible; }
+
+				frame.texture = texture;
+				frame.tints = tints;
+				return main::set_texture_result::success;
+			}
+
+			layer widget_background;
+			texture_type const* bg_layer_mask;
+			layer selection_background;
+			layer widget_foreground;
+			layer frame;
 
 			static gl_texture create_texture()
 			{ return gl_texture{}; }
@@ -79,15 +104,23 @@ namespace terraformer::ui::drawing_api
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, rect.background_0.tints)
-				.set_uniform(9, rect.foreground_0.tints)
+				.set_uniform(5, rect.widget_background.tints)
+				.set_uniform(9, rect.selection_background.tints)
+				.set_uniform(13, rect.widget_foreground.tints)
+				.set_uniform(17, rect.frame.tints)
 				.bind();
 
-			assert(rect.background_0.texture != nullptr);
-			assert(rect.foreground_0.texture != nullptr);
+			assert(rect.widget_background.texture != nullptr);
+			assert(rect.bg_layer_mask != nullptr);
+			assert(rect.selection_background.texture != nullptr);
+			assert(rect.widget_foreground.texture != nullptr);
+			assert(rect.frame.texture != nullptr);
 
-			rect.background_0.texture->bind(0);
-			rect.foreground_0.texture->bind(1);
+			rect.widget_background.texture->bind(0);
+			rect.bg_layer_mask->bind(1);
+			rect.selection_background.texture->bind(2);
+			rect.widget_foreground.texture->bind(3);
+			rect.frame.texture->bind(4);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles();
@@ -120,12 +153,16 @@ layout (location = 1) uniform vec4 model_origin;
 layout (location = 2) uniform vec4 model_size;
 layout (location = 3) uniform vec4 world_location;
 layout (location = 4) uniform vec4 world_scale;
-layout (location = 5) uniform vec4 background_tints[4];
-layout (location = 9) uniform vec4 foreground_tints[4];
+layout (location = 5) uniform vec4 widget_background_tints[4];
+layout (location = 9) uniform vec4 selection_background_tints[4];
+layout (location = 13) uniform vec4 widget_foreground_tints[4];
+layout (location = 17) uniform vec4 frame_tints[4];
 
 out vec2 uv;
-out vec4 background_tint;
-out vec4 foreground_tint;
+out vec4 widget_background_tint;
+out vec4 selection_background_tint;
+out vec4 widget_foreground_tint;
+out vec4 frame_tint;
 
 const vec2 uv_coords[4] = vec2[4](
 	vec2(0.0f, 1.0f),
@@ -147,26 +184,40 @@ void main()
 	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin);
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID];
-	background_tint = background_tints[gl_VertexID];
-	foreground_tint = foreground_tints[gl_VertexID];
+	widget_background_tint = widget_background_tints[gl_VertexID];
+	selection_background_tint = selection_background_tints[gl_VertexID];
+	widget_foreground_tint = widget_foreground_tints[gl_VertexID];
+	frame_tint = frame_tints[gl_VertexID];
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
 out vec4 fragment_color;
-layout (binding = 0) uniform sampler2D background;
-layout (binding = 1) uniform sampler2D foreground;
+layout (binding = 0) uniform sampler2D widget_background;
+layout (binding = 1) uniform sampler2D bg_layer_mask;
+layout (binding = 2) uniform sampler2D selection_background;
+layout (binding = 3) uniform sampler2D widget_foreground;
+layout (binding = 4) uniform sampler2D frame;
 
 in vec2 uv;
-in vec4 background_tint;
-in vec4 foreground_tint;
+in vec4 widget_background_tint;
+in vec4 selection_background_tint;
+in vec4 widget_foreground_tint;
+in vec4 frame_tint;
 
 void main()
 {
-	vec4 bg = texture(background, uv/textureSize(background, 0))*background_tint;
-	vec4 fg = texture(foreground, uv/textureSize(foreground, 0))*foreground_tint;
+	vec4 bg_0 = texture(widget_background, uv/textureSize(widget_background, 0))*widget_background_tint;
+	float bg_mask = texture(bg_layer_mask, uv/textureSize(bg_layer_mask, 0)).r;
+	vec4 bg_1 = texture(selection_background, uv/textureSize(selection_background, 0))*selection_background_tint;
+	vec4 fg_0 = texture(widget_foreground, uv/textureSize(widget_foreground, 0))*widget_foreground_tint;
+	vec4 fg_1 = texture(frame, uv/textureSize(widget_foreground, 0))*frame_tint;
 
-	// This assumes values are pre-multiplied alphaś
-	fragment_color = fg + bg*(1 - fg.w);
+	// This assumes that pre-multiplied alpha is used
+	vec4 result = bg_1 + bg_0*(1 - bg_1.w*bg_mask);
+	result = fg_0 + result*(1 - fg_0.w);
+	result = fg_1 + result*(1 - fg_1.w);
+
+	fragment_color = result;
 })"}
 		};
 	};

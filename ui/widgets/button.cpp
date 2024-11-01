@@ -63,22 +63,32 @@ void terraformer::ui::widgets::button::prepare_for_presentation(main::widget_ren
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
-	if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
+
+	std::array const fg_tint{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
+	if(output_rect.set_widget_foreground(m_foreground.get(), fg_tint) != main::set_texture_result::success) [[unlikely]]
 	{
 		m_foreground = output_rect.create_texture();
-		(void)output_rect.set_foreground(m_foreground.get());
+		(void)output_rect.set_widget_foreground(m_foreground.get(), fg_tint);
 		m_dirty_bits |= gpu_textures_dirty;
 	}
-;
+
+	std::array const bg_tint{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
 	if(
-		output_rect.set_background( (display_state == state::released)?
-		m_background_released.get() : m_background_pressed.get())!=main::set_texture_result::success
+		output_rect.set_widget_background(
+			(
+				display_state == state::released)?
+					m_background_released.get() : m_background_pressed.get(),
+				bg_tint
+			) != main::set_texture_result::success
 	) [[unlikely]]
 	{
 		m_background_released = output_rect.create_texture();
 		m_background_pressed = output_rect.create_texture();
-		output_rect.set_background((display_state == state::released)?
-			m_background_released.get() : m_background_pressed.get());
+		output_rect.set_widget_background(
+			(display_state == state::released)?
+				m_background_released.get() : m_background_pressed.get(),
+			bg_tint
+		);
 		m_dirty_bits |= gpu_textures_dirty;
 	}
 
@@ -90,8 +100,8 @@ void terraformer::ui::widgets::button::prepare_for_presentation(main::widget_ren
 		m_dirty_bits &= ~gpu_textures_dirty;
 	}
 
-	output_rect.set_background_tints(std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint});
-	output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
+	output_rect.set_bg_layer_mask(m_null_texture.get());
+	output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});	output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
 }
 
 terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget_width_request)
@@ -128,4 +138,5 @@ void terraformer::ui::widgets::button::theme_updated(main::config const& cfg, ma
 	m_fg_tint = cfg.command_area.colors.foreground;
 	m_border_thickness = static_cast<uint32_t>(cfg.command_area.border_thickness);
 	m_dirty_bits |= host_textures_dirty | text_dirty;
+	m_null_texture = cfg.misc_textures.null;
 }

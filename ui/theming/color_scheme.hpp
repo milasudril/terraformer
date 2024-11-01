@@ -102,7 +102,7 @@ namespace terraformer::ui::theming
 				0.0f,
 				1.0f
 			},
-			.selection_color = default_bright_warning_color
+			.selection = default_bright_warning_color
 		},
 		.command_area{
 			.background = rgba_pixel{
@@ -117,7 +117,7 @@ namespace terraformer::ui::theming
 				0.0f,
 				1.0f
 			},
-			.selection_color = default_bright_warning_color
+			.selection = default_bright_warning_color
 		},
 		.output_area{
 			.background = rgba_pixel{
@@ -132,7 +132,7 @@ namespace terraformer::ui::theming
 				0.0f,
 				1.0f
 			},
-			.selection_color = default_bright_warning_color
+			.selection = default_bright_warning_color
 		},
 		.status_indicator{
 			.progress_meter{

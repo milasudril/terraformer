@@ -44,6 +44,54 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 	m_dirty_bits |= gpu_textures_dirty;
 }
 
+void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main::widget_rendering_result output_rect)
+{
+	// TODO: Only regenerate relevant host textures
+	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
+	{ regenerate_textures(); }
+
+	std::array const bg_tints{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
+	if(output_rect.set_widget_background(m_background.get(), bg_tints) != main::set_texture_result::success) [[unlikely]]
+	{
+		m_background = output_rect.create_texture();
+		output_rect.set_widget_background(m_background.get(), bg_tints);
+		m_dirty_bits |= gpu_textures_dirty;
+	}
+
+	if(output_rect.set_bg_layer_mask(m_selection_mask.get()) != main::set_texture_result::success) [[unlikely]]
+	{
+		m_selection_mask = output_rect.create_texture();
+		(void)output_rect.set_bg_layer_mask(m_foreground.get());
+		m_dirty_bits |= gpu_textures_dirty;
+	}
+
+	std::array const sel_tints{m_sel_tint, m_sel_tint, m_sel_tint, m_sel_tint};
+	(void)output_rect.set_selection_background(m_background.get(), sel_tints);
+
+	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
+	if(output_rect.set_widget_foreground(m_foreground.get(), fg_tints) != main::set_texture_result::success) [[unlikely]]
+	{
+		m_foreground = output_rect.create_texture();
+		(void)output_rect.set_widget_foreground(m_foreground.get(), fg_tints);
+		m_dirty_bits |= gpu_textures_dirty;
+	}
+
+	if(output_rect.set_frame(m_frame.get(), fg_tints) != main::set_texture_result::success) [[unlikely]]
+	{
+		m_frame = output_rect.create_texture();
+		(void)output_rect.set_frame(m_frame.get(), fg_tints);
+		m_dirty_bits |= gpu_textures_dirty;
+	}
+
+	// TODO: Only upload relevant textures
+	if(m_dirty_bits & gpu_textures_dirty)
+	{
+		m_background.upload(std::as_const(m_background_host).pixels());
+		m_foreground.upload(std::as_const(m_foreground_host).pixels());
+		m_dirty_bits &= ~gpu_textures_dirty;
+	}
+}
+
 terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_width_request)
 {
 	// TODO: Use height to find required width (multi-line)
@@ -73,8 +121,11 @@ void terraformer::ui::widgets::single_line_text_input::theme_updated(main::confi
 {
 	m_margin = static_cast<uint32_t>(cfg.input_area.padding + cfg.input_area.border_thickness);
 	m_font = cfg.input_area.font;
-	m_bg_tint = cfg.input_area.colors.selection_color;
+	m_bg_tint = cfg.input_area.colors.background;
+	m_sel_tint = cfg.input_area.colors.selection;
 	m_fg_tint = cfg.input_area.colors.foreground;
+	m_selection_mask = cfg.misc_textures.null;
+	m_frame = cfg.misc_textures.null;
 	m_border_thickness = static_cast<uint32_t>(cfg.input_area.border_thickness);
 	m_dirty_bits |= host_textures_dirty | text_dirty;
 }

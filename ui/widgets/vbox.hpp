@@ -24,20 +24,18 @@ namespace terraformer::ui::widgets
 
  		void prepare_for_presentation(main::widget_rendering_result output_rect)
 		{
-			output_rect.set_background(m_background.get());
-			output_rect.set_foreground_tints(std::array{
-				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
-				rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
-			});
-			output_rect.set_background_tints(std::array{
+			std::array const bg_tints{
 				m_background_tint,
 				m_background_tint,
 				m_background_tint,
 				m_background_tint,
-			});
-			output_rect.set_foreground(m_foreground.get());
+			};
+
+			output_rect.set_widget_background(m_background.get(), bg_tints);
+			output_rect.set_bg_layer_mask(m_null_texture.get());
+			output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});
+			output_rect.set_widget_foreground(m_null_texture.get(), std::array<rgba_pixel, 4>{});
+			output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
 		}
 
 		void theme_updated(main::config const& new_theme, main::widget_instance_info instance_info)
@@ -49,7 +47,7 @@ namespace terraformer::ui::widgets
 			layout.margin_y = panel.padding;
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
-			m_foreground = new_theme.misc_textures.null;
+			m_null_texture = new_theme.misc_textures.null;
 		}
 
 		main::layout_policy_ref get_layout()
@@ -69,7 +67,7 @@ namespace terraformer::ui::widgets
 		layouts::rowmajor_table layout{2};
 
 		main::generic_shared_texture m_background;
-		main::generic_shared_texture m_foreground;
+		main::generic_shared_texture m_null_texture;
 		rgba_pixel m_background_tint;
 	};
 }

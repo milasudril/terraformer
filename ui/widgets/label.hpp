@@ -62,7 +62,7 @@ namespace terraformer::ui::widgets
 		rgba_pixel m_fg_tint;
 
 		main::generic_unique_texture m_foreground;
-		main::generic_shared_texture m_background;
+		main::generic_shared_texture m_null_texture;
 
 		main::fb_size m_current_size;
 		image m_foreground_host;

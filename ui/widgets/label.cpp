@@ -66,7 +66,7 @@ void terraformer::ui::widgets::label::theme_updated(main::config const& cfg, mai
 	m_font = cfg.output_area.font;
 	m_dirty_bits |= host_textures_dirty | text_dirty;
 	m_fg_tint = cfg.output_area.colors.foreground;
-	m_background = cfg.misc_textures.null;
+	m_null_texture = cfg.misc_textures.null;
 }
 
 
@@ -75,10 +75,11 @@ void terraformer::ui::widgets::label::prepare_for_presentation(main::widget_rend
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
-	if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
+	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
+	if(output_rect.set_widget_foreground(m_foreground.get(), fg_tints) != main::set_texture_result::success) [[unlikely]]
 	{
 		m_foreground = output_rect.create_texture();
-		output_rect.set_foreground(m_foreground.get());
+		output_rect.set_widget_foreground(m_foreground.get(), fg_tints);
 		m_dirty_bits |= gpu_textures_dirty;
 	}
 
@@ -88,6 +89,7 @@ void terraformer::ui::widgets::label::prepare_for_presentation(main::widget_rend
 		m_dirty_bits &= ~gpu_textures_dirty;
 	}
 
-	output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
-	output_rect.set_background(m_background.get());
+	output_rect.set_widget_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});
+	output_rect.set_bg_layer_mask(m_null_texture.get());
+	output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});	output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
 }

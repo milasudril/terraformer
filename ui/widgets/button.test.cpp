@@ -2,6 +2,7 @@
 
 #include "./button.hpp"
 #include "ui/font_handling/font_mapper.hpp"
+#include "ui/theming/texture_generators.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
 #include <testfwk/testfwk.hpp>
@@ -12,9 +13,11 @@ namespace
 	struct dummy_texture
 	{
 		terraformer::image img;
-		void upload(terraformer::span_2d<terraformer::rgba_pixel const> pixels)
+
+		auto& upload(terraformer::span_2d<terraformer::rgba_pixel const> pixels)
 		{
 			img = terraformer::image{pixels};
+			return *this;
 		}
 	};
 
@@ -38,38 +41,59 @@ namespace
 	{
 		using texture_type = TextureType;
 
-		auto set_background(texture_type const* texture)
+		auto set_widget_background(texture_type const* val, std::array<terraformer::rgba_pixel, 4> const& tints)
 		{
-			if(texture == nullptr)
-			{ return terraformer::ui::main::set_texture_result::incompatible; }
-
-			background = texture;
-			return terraformer::ui::main::set_texture_result::success;
+			widget_background = val;
+			widget_background_tints = tints;
+			return val == nullptr?
+				terraformer::ui::main::set_texture_result::incompatible:
+				terraformer::ui::main::set_texture_result::success;
 		}
 
-		auto set_foreground(texture_type const* texture)
+		auto set_bg_layer_mask(texture_type const* val)
 		{
-			if(texture == nullptr)
-			{ return terraformer::ui::main::set_texture_result::incompatible; }
-
-			foreground = texture;
-			return terraformer::ui::main::set_texture_result::success;
+			bg_layer_mask = val;
+			return val == nullptr?
+				terraformer::ui::main::set_texture_result::incompatible:
+				terraformer::ui::main::set_texture_result::success;
 		}
 
-		void set_background_tints(std::array<terraformer::rgba_pixel, 4> const& vals)
-		{ background_tints = vals; }
+		auto set_selection_background(texture_type const* val, std::array<terraformer::rgba_pixel, 4> const& tints)
+		{
+			selection_background = val;
+			selection_background_tints = tints;
+			return val == nullptr?
+				terraformer::ui::main::set_texture_result::incompatible:
+				terraformer::ui::main::set_texture_result::success;
+		}
 
-		void set_foreground_tints(std::array<terraformer::rgba_pixel, 4> const& vals)
-		{ foreground_tints = vals; }
+		auto set_widget_foreground(texture_type const* val, std::array<terraformer::rgba_pixel, 4> const& tints)
+		{
+			widget_foreground = val;
+			widget_foreground_tints = tints;
+			return val == nullptr?
+				terraformer::ui::main::set_texture_result::incompatible:
+				terraformer::ui::main::set_texture_result::success;
+		}
 
-		TextureType const* background;
-		TextureType const* foreground;
+		auto set_frame(texture_type const* val, std::array<terraformer::rgba_pixel, 4> const& tints)
+		{
+			frame = val;
+			frame_tints = tints;
+			return val == nullptr?
+				terraformer::ui::main::set_texture_result::incompatible:
+				terraformer::ui::main::set_texture_result::success;
+		}
 
-		std::array<terraformer::rgba_pixel, 4> background_tints;
-		std::array<terraformer::rgba_pixel, 4> foreground_tints;
-
-		static auto create_texture()
-		{ return TextureType{}; }
+		texture_type const* widget_background;
+		texture_type const* bg_layer_mask;
+		texture_type const* selection_background;
+		texture_type const* widget_foreground;
+		texture_type const* frame;
+		std::array<terraformer::rgba_pixel, 4> widget_background_tints;
+		std::array<terraformer::rgba_pixel, 4> selection_background_tints;
+		std::array<terraformer::rgba_pixel, 4> widget_foreground_tints;
+		std::array<terraformer::rgba_pixel, 4> frame_tints;
 	};
 
 	auto create_render_resources()
@@ -79,18 +103,25 @@ namespace
 		auto const font = std::make_shared<terraformer::ui::font_handling::font>(fontfile.c_str());
 		font->set_font_size(11);
 
+		terraformer::ui::main::generic_shared_texture const null_texture{
+			std::type_identity<dummy_texture<0>>{},
+			terraformer::ui::theming::generate_transparent_texture<dummy_texture<0>>()
+		};
+
 		terraformer::ui::main::config resources;
 
 		resources.command_area = terraformer::ui::main::widget_look{
 			.colors{
 				.background = terraformer::rgba_pixel{0.125f, 0.125f, 0.125f, 1.0f},
 				.foreground = terraformer::rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-				.selection_color = terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f}
+				.selection = terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f}
 			},
 			.padding{4.0f},
 			.border_thickness = 2.0f,
 			.font = font
 		};
+
+		resources.misc_textures.null = null_texture;
 
 		return resources;
 	}
@@ -148,7 +179,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::released
 	);
 
@@ -167,7 +198,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
 
@@ -186,7 +217,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_f
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(callcount, 1);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::released
 	);
 }
@@ -221,7 +252,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
 
@@ -241,7 +272,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
 
@@ -259,7 +290,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_t
 	EXPECT_EQ(callcount, 1);
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
 }
@@ -291,7 +322,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_release_button_0_no_action)
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::released
 	);
 }
@@ -328,7 +359,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 	my_button.prepare_for_presentation(terraformer::ui::main::widget_rendering_result{std::ref(rect)});
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::released
 	);
 
@@ -347,7 +378,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_1)
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::released
 	);
 }
@@ -392,7 +423,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
 
@@ -407,7 +438,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::released
 	);
 
@@ -422,7 +453,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(my_button.value(), false);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::released
 	);
 }
@@ -458,7 +489,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
 		EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
 
@@ -476,7 +507,7 @@ TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_button_0_leave_and_enter
 	EXPECT_EQ(my_button.value(), true);
 	EXPECT_EQ(callcount, 0);
 	EXPECT_EQ(
-		inspect_button_state(rect.background->img.pixels()),
+		inspect_button_state(rect.widget_background->img.pixels()),
 		terraformer::ui::widgets::button::state::pressed
 	);
 	my_button.handle_event(

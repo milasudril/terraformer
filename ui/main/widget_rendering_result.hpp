@@ -19,26 +19,48 @@ namespace terraformer::ui::main
 		generic_unique_texture create_texture()
 		{ return m_vtable->create_texture(); }
 
-		set_texture_result set_background(generic_texture_pointer_const texture)
-		{ return m_vtable->set_background(m_pointer, texture); }
+		set_texture_result set_widget_background(
+			generic_texture_pointer_const texture,
+			std::array<rgba_pixel, 4> const& tints
+		)
+		{ return m_vtable->set_widget_background(m_pointer, texture, tints); }
 
-		set_texture_result set_foreground(generic_texture_pointer_const texture)
-		{ return m_vtable->set_foreground(m_pointer, texture); }
+		set_texture_result set_bg_layer_mask(generic_texture_pointer_const texture)
+		{ return m_vtable->set_bg_layer_mask(m_pointer, texture); }
 
-		void set_background_tints(std::array<rgba_pixel, 4> const& vals)
-		{ m_vtable->set_background_tints(m_pointer, vals); }
+		set_texture_result set_selection_background(
+			generic_texture_pointer_const texture,
+			std::array<rgba_pixel, 4> const& tints
+		)
+		{ return m_vtable->set_selection_background(m_pointer, texture, tints); }
 
-		void set_foreground_tints(std::array<rgba_pixel, 4> const& vals)
-		{ m_vtable->set_foreground_tints(m_pointer, vals); }
+		set_texture_result set_widget_foreground(
+			generic_texture_pointer_const texture,
+			std::array<rgba_pixel, 4> const& tints
+		)
+		{ return m_vtable->set_widget_foreground(m_pointer, texture, tints); }
+
+		set_texture_result set_frame(
+			generic_texture_pointer_const texture,
+			std::array<rgba_pixel, 4> const& tints
+		)
+		{ return m_vtable->set_frame(m_pointer, texture, tints); }
 
 	private:
 		struct vtable
 		{
+			using set_layer_callback = set_texture_result (*)(
+				void*,
+				generic_texture_pointer_const,
+				std::array<rgba_pixel, 4> const&
+			);
+
 			generic_unique_texture (*create_texture)();
-			set_texture_result (*set_background)(void*, generic_texture_pointer_const texture);
-			set_texture_result (*set_foreground)(void*, generic_texture_pointer_const texture);
-			void (*set_background_tints)(void*, std::array<rgba_pixel, 4> const&);
-			void (*set_foreground_tints)(void*, std::array<rgba_pixel, 4> const&);
+			set_layer_callback set_widget_background;
+			set_texture_result (*set_bg_layer_mask)(void*, generic_texture_pointer_const);
+			set_layer_callback set_selection_background;
+			set_layer_callback set_widget_foreground;
+			set_layer_callback set_frame;
 		};
 
 		template<class T>
@@ -46,17 +68,20 @@ namespace terraformer::ui::main
 			.create_texture = [](){
 				return generic_unique_texture{std::type_identity<typename T::texture_type>{}};
 			},
-			.set_background = [](void* obj, generic_texture_pointer_const texture){
-				return static_cast<T*>(obj)->set_background(texture.get_if<typename T::texture_type>());
+			.set_widget_background = [](void* obj, generic_texture_pointer_const texture, std::array<rgba_pixel, 4> const& tints) {
+				return static_cast<T*>(obj)->set_widget_background(texture.get_if<typename T::texture_type>(), tints);
 			},
-			.set_foreground = [](void* obj, generic_texture_pointer_const texture){
-				return static_cast<T*>(obj)->set_foreground(texture.get_if<typename T::texture_type>());
+			.set_bg_layer_mask = [](void* obj, generic_texture_pointer_const texture) {
+				return static_cast<T*>(obj)->set_bg_layer_mask(texture.get_if<typename T::texture_type>());
 			},
-			.set_background_tints = [](void* obj, std::array<rgba_pixel, 4> const& vals){
-				static_cast<T*>(obj)->set_background_tints(vals);
+			.set_selection_background = [](void* obj, generic_texture_pointer_const texture, std::array<rgba_pixel, 4> const& tints){
+				return static_cast<T*>(obj)->set_selection_background(texture.get_if<typename T::texture_type>(), tints);
 			},
-			.set_foreground_tints = [](void* obj, std::array<rgba_pixel, 4> const& vals){
-				static_cast<T*>(obj)->set_foreground_tints(vals);
+			.set_widget_foreground = [](void* obj, generic_texture_pointer_const texture, std::array<rgba_pixel, 4> const& tints){
+				return static_cast<T*>(obj)->set_widget_foreground(texture.get_if<typename T::texture_type>(), tints);
+			},
+			.set_frame = [](void* obj, generic_texture_pointer_const texture, std::array<rgba_pixel, 4> const& tints){
+				return static_cast<T*>(obj)->set_frame(texture.get_if<typename T::texture_type>(), tints);
 			}
 		};
 		vtable const* m_vtable;

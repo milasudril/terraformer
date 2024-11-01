@@ -25,6 +25,17 @@ namespace terraformer::ui::drawing_api
 		{
 			glShaderSource(m_handle.get(), 1, &src, nullptr);
 			glCompileShader(m_handle.get());
+			GLint result{};
+			glGetShaderiv(m_handle.get(), GL_COMPILE_STATUS, &result);
+			if(result == GL_TRUE) [[likely]]
+			{ return; }
+
+			glGetShaderiv(m_handle.get(), GL_INFO_LOG_LENGTH, &result);
+			auto const bufflength = result;
+			auto msgbuff = std::make_unique<GLchar[]>(bufflength);
+			GLsizei actual_length{};
+			glGetShaderInfoLog(m_handle.get(), bufflength, &actual_length, msgbuff.get());
+			throw std::runtime_error{reinterpret_cast<char const*>(msgbuff.get())};
 		}
 
 		auto get() const { return m_handle.get(); }

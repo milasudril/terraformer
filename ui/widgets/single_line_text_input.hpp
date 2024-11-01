@@ -89,47 +89,21 @@ namespace terraformer::ui::widgets
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
 		rgba_pixel m_bg_tint;
+		rgba_pixel m_sel_tint;
 		rgba_pixel m_fg_tint;
 
 		main::generic_unique_texture m_background;
+		// TODO: Move frame from foreground texture to frame texture
 		main::generic_unique_texture m_foreground;
+		// TODO: Frame should be should show the current frame
+		main::generic_shared_texture m_frame;
+		// TODO: Generate depending on what has been selected
+		main::generic_shared_texture m_selection_mask;
 
 		main::fb_size m_current_size;
 		image m_background_host;
 		image m_foreground_host;
 	};
-
-	inline void single_line_text_input::prepare_for_presentation(main::widget_rendering_result output_rect)
-	{
-		if(m_dirty_bits & host_textures_dirty) [[unlikely]]
-		{ regenerate_textures(); }
-
-		if(output_rect.set_foreground(m_foreground.get()) != main::set_texture_result::success) [[unlikely]]
-		{
-			m_foreground = output_rect.create_texture();
-			(void)output_rect.set_foreground(m_foreground.get());
-			m_dirty_bits |= gpu_textures_dirty;
-		}
-;
-		if(
-			output_rect.set_background(m_background.get())!=main::set_texture_result::success
-		) [[unlikely]]
-		{
-			m_background = output_rect.create_texture();
-			output_rect.set_background(m_background.get());
-			m_dirty_bits |= gpu_textures_dirty;
-		}
-
-		if(m_dirty_bits & gpu_textures_dirty)
-		{
-			m_background.upload(std::as_const(m_background_host).pixels());
-			m_foreground.upload(std::as_const(m_foreground_host).pixels());
-			m_dirty_bits &= ~gpu_textures_dirty;
-		}
-
-		output_rect.set_background_tints(std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint});
-		output_rect.set_foreground_tints(std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint});
-	}
 }
 
 #endif
