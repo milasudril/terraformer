@@ -10,3 +10,6 @@
 [submodule "pcg-cpp"]
 	path = pcg-cpp
 	url = https://github.com/imneme/pcg-cpp
+[submodule "UTF-8-Unicode-Test-Documents"]
+	path = UTF-8-Unicode-Test-Documents
+	url = https://github.com/bits/UTF-8-Unicode-Test-Documents.git

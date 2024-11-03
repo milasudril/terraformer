@@ -15,6 +15,7 @@
 #include <cstdio>
 #include <stdexcept>
 #include <functional>
+#include <string_view>
 
 namespace terraformer
 {
@@ -123,6 +124,10 @@ namespace terraformer
 		else
 		{ return false;}
 	}
+
+	std::u8string to_utf8(std::u32string_view);
+
+	std::u32string to_utf32(std::u8string_view);
 
 }
 
