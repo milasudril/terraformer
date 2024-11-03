@@ -70,6 +70,129 @@ TESTCASE(terraformer_to_utf32_twobyte_sequences)
 	EXPECT_EQ(encoded, input);
 }
 
+TESTCASE(terraformer_to_utf32_incomplete_sequence)
+{
+	try
+	{
+		constexpr std::u8string_view input{u8"\xc3"};
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+TESTCASE(terraformer_to_utf32_invalid_start)
+{
+	try
+	{
+		constexpr std::u8string_view input{u8"\x83"};
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+TESTCASE(terraformer_to_utf32_too_long_sequence)
+{
+	try
+	{
+		constexpr std::u8string_view input{u8"\xf8\x1\x82\x83\x84"};
+		REQUIRE_EQ(std::size(input), 5);
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+TESTCASE(terraformer_to_utf32_invalid_second_byte)
+{
+	try
+	{
+		constexpr std::u8string_view input{u8"\xc1\x1"};
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+
+	try
+	{
+		constexpr std::u8string_view input{u8"\xc1\x41"};
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+
+	try
+	{
+		constexpr std::u8string_view input{u8"\xc1\xc1"};
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+TESTCASE(terraformer_to_utf32_invalid_codepoint)
+{
+	try
+	{
+		std::u8string input;
+		constexpr char32_t item{0xd800 + 1};
+		input.push_back(static_cast<char8_t>(0xE0 | (item >> 12)));
+		input.push_back(static_cast<char8_t>(0x80 | ((item >> 6) & 0x3f)));
+		input.push_back(static_cast<char8_t>(0x80 | (item & 0x3f)));
+
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+
+	try
+	{
+		constexpr std::u8string_view input{u8"\xc1\x41"};
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+
+	try
+	{
+		constexpr std::u8string_view input{u8"\xc1\xc1"};
+		auto const res = terraformer::to_utf32(input);
+		abort();
+	}
+	catch(...)
+	{}
+}
+
+TESTCASE(terraformer_to_utf8_invalid_codepoint)
+{
+	try
+	{
+		std::u32string bad_input{0x10ffff + 1};
+		auto const res = terraformer::to_utf8(bad_input);
+		abort();
+	}
+	catch(...)
+	{}
+
+	try
+	{
+		std::u32string bad_input{0xd800 + 1};
+		auto const res = terraformer::to_utf8(bad_input);
+		abort();
+	}
+	catch(...)
+	{}
+}
+
 TESTCASE(terraformer_utf8_utf32_roundtrip)
 {
 	auto input_file = std::unique_ptr<FILE, decltype([](FILE* f){fclose(f);})>(

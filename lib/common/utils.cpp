@@ -88,8 +88,6 @@ std::u8string terraformer::to_utf8(std::u32string_view str)
 			ret.push_back(static_cast<char8_t>(0x80 | ((item >> 6) & 0x3f)));
 			ret.push_back(static_cast<char8_t>(0x80 | (item & 0x3f)));
 		}
-		else
-		{ throw std::runtime_error{"Codepoint out of range"}; }
 	}
 	return ret;
 }
