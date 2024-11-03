@@ -2,7 +2,6 @@
 
 #include "./utils.hpp"
 #include <bit>
-#include <format>
 
 namespace
 {
@@ -63,6 +62,9 @@ std::u8string terraformer::to_utf8(std::u32string_view str)
 	std::u8string ret;
 	for(auto item : str)
 	{
+		if(!is_valid(item))
+		{ throw std::runtime_error{"Codepoint out of range"}; }
+
 		if(item <= 0x7f)
 		{ ret.push_back(static_cast<char8_t>(item)); }
 		else
@@ -100,12 +102,11 @@ std::u32string terraformer::to_utf32(std::u8string_view str)
 	{
 		decoder_state() = default;
 
-		explicit decoder_state(char32_t item, size_t start_offset):
+		explicit decoder_state(char32_t item):
 			code_units_to_read{std::max(std::countl_one(static_cast<uint8_t>(item)), 1)},
 			code_units_read{0},
 			current_codepoint{0},
-			current_shift{6*(code_units_to_read - 1)},
-			start_offset{start_offset}
+			current_shift{6*(code_units_to_read - 1)}
 		{
 			if(code_units_to_read > 4 || (code_units_to_read == 1 && (item & 0x80)))
 			{ throw std::runtime_error{"Invalid UTF-8 sequence"}; }
@@ -118,16 +119,14 @@ std::u32string terraformer::to_utf32(std::u8string_view str)
 		int code_units_read{0};
 		char32_t current_codepoint{0};
 		int current_shift{0};
-		size_t start_offset{0};
 	};
 
 	decoder_state current_state{};
-	size_t index = 0;
 	for(auto item : str)
 	{
 		if(current_state.at_end())
 		{
-			current_state = decoder_state{item, index};
+			current_state = decoder_state{item};
 			static constexpr std::array<uint8_t, 4> init_mask{
 				0b0111'1111,
 				0b0001'1111,
@@ -137,7 +136,11 @@ std::u32string terraformer::to_utf32(std::u8string_view str)
 			item &= init_mask[current_state.code_units_to_read - 1];
 		}
 		else
-		{ item &= 0x3f; }
+		{
+			if((item&0xc0) != 0x80)
+			{ throw std::runtime_error{"Invalid UTF-8 sequence"}; }
+			item &= 0x3f;
+		}
 		current_state.current_codepoint |= (item << current_state.current_shift);
 		++current_state.code_units_read;
 		current_state.current_shift -= 6;
@@ -145,21 +148,9 @@ std::u32string terraformer::to_utf32(std::u8string_view str)
 		if(current_state.at_end())
 		{
 			if(!is_valid(current_state.current_codepoint))
-			{
-				auto const starts_at = current_state.start_offset;
-				// TODO: Maybe notify about the byte sequence
-				throw std::runtime_error{
-					std::format(
-						"Invalid UTF-8 sequence at offset {} - {}",
-						starts_at,
-						index
-					)
-				};
-			}
+			{ throw std::runtime_error{"Invalid UTF-8 sequence"}; }
 			ret.push_back(current_state.current_codepoint);
 		}
-
-		++index;
 	}
 
 	if(!current_state.at_end())
