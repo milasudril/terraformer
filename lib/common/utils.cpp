@@ -144,10 +144,7 @@ std::u32string terraformer::to_utf32(std::u8string_view str)
 
 		if(current_state.at_end())
 		{
-			if(
-				current_state.current_codepoint > 0x10ffff ||
-				(current_state.current_codepoint >= 0xd800 && current_state.current_codepoint <= 0xdfff)
-			)
+			if(!is_valid(current_state.current_codepoint))
 			{
 				auto const starts_at = current_state.start_offset;
 				// TODO: Maybe notify about the byte sequence

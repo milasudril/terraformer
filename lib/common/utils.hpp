@@ -125,6 +125,11 @@ namespace terraformer
 		{ return false;}
 	}
 
+	constexpr bool is_valid(char32_t codepoint)
+	{
+		return codepoint <= 0x10ffff && (codepoint < 0xd800 || codepoint > 0xdfff);
+	}
+
 	std::u8string to_utf8(std::u32string_view);
 
 	std::u32string to_utf32(std::u8string_view);
