@@ -10,6 +10,8 @@
 #include "lib/common/object_tree.hpp"
 #include "lib/common/move_only_function.hpp"
 
+#include <type_traits>
+
 namespace terraformer::ui::widgets
 {
 	class single_line_text_input:public main::widget_with_default_actions
@@ -27,13 +29,17 @@ namespace terraformer::ui::widgets
 		template<class StringType>
 		single_line_text_input& value(StringType&& new_val)
 		{
-			m_value = std::forward<StringType>(new_val);
+			if constexpr(std::is_convertible_v<StringType, std::u32string>)
+			{ m_value = std::forward<StringType>(new_val); }
+			else
+			{ m_value = to_utf32(new_val); }
+
 			m_dirty_bits |= text_dirty;
 			return *this;
 		}
 
-		auto const& value() const
-		{ return m_value; }
+		auto value() const
+		{ return to_utf8(m_value); }
 
 		void handle_event(main::typing_event event, main::window_ref, main::ui_controller)
 		{
@@ -79,7 +85,7 @@ namespace terraformer::ui::widgets
 		move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)> m_on_value_changed =
 			move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)>{no_operation_tag{}};
 
-		std::basic_string<char32_t> m_value;
+		std::u32string m_value;
 		basic_image<uint8_t> m_rendered_text;
 		static constexpr auto text_dirty = 0x1;
 		static constexpr auto host_textures_dirty = 0x2;
