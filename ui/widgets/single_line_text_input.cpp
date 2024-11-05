@@ -34,8 +34,8 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 	);
 
 	m_foreground_host = drawing_api::convert_mask(
-		static_cast<uint32_t>(m_current_size.width),
-		static_cast<uint32_t>(m_current_size.height),
+		m_current_size.width,
+		m_current_size.height,
 		m_rendered_text,
 		m_margin
 	);
@@ -46,6 +46,9 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 
 void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main::widget_rendering_result output_rect)
 {
+	if(m_dirty_bits & text_dirty) [[unlikely]]
+	{ regenerate_text_mask(); }
+
 	// TODO: Only regenerate relevant host textures
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
@@ -94,6 +97,27 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 
 terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_width_request)
 {
+	if(m_placeholder.has_value())
+	{
+		font_handling::text_shaper shaper{};
+
+		// TODO: Add support for different scripts, direction, and languages
+		// TODO: DRY
+		// TODO: Cache result
+		auto result = shaper.append(*m_placeholder)
+			.with(hb_script_t::HB_SCRIPT_LATIN)
+			.with(hb_direction_t::HB_DIRECTION_LTR)
+			.with(hb_language_from_string("en-UE", -1))
+			.run(*m_font);
+
+		auto const temp = render(result);
+		return scaling{
+			static_cast<float>(temp.width() + 2*m_margin),
+			static_cast<float>(temp.height() + 2*m_margin),
+			1.0f
+		};
+	}
+
 	// TODO: Use height to find required width (multi-line)
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
@@ -107,6 +131,27 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 
 terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_height_request)
 {
+	if(m_placeholder.has_value())
+	{
+		font_handling::text_shaper shaper{};
+
+		// TODO: Add support for different scripts, direction, and languages
+		// TODO: DRY
+		// TODO: Cache result
+		auto result = shaper.append(*m_placeholder)
+			.with(hb_script_t::HB_SCRIPT_LATIN)
+			.with(hb_direction_t::HB_DIRECTION_LTR)
+			.with(hb_language_from_string("en-UE", -1))
+			.run(*m_font);
+
+		auto const temp = render(result);
+		return scaling{
+			static_cast<float>(temp.width() + 2*m_margin),
+			static_cast<float>(temp.height() + 2*m_margin),
+			1.0f
+		};
+	}
+
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 

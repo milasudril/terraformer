@@ -51,12 +51,18 @@ terraformer::image terraformer::ui::drawing_api::convert_mask(
 {
 	auto const w = output_width;
 	auto const h = output_height;
+	auto const w_src = input.width();
+	auto const h_src = input.height();
 	image ret{w, h};
 	for(uint32_t y = margin; y != h - margin; ++y)
 	{
 		for(uint32_t x = margin; x != w - margin; ++x)
 		{
-			auto const mask_val = static_cast<float>(input(x - margin, y - margin))/255.0f;
+			auto const x_src = x - margin;
+			auto const y_src = y - margin;
+			auto const mask_val = (x_src < w_src && y_src < h_src)?
+				static_cast<float>(input(x_src, y_src))/255.0f:
+				0.0f;
 			ret(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
 		}
 	}

@@ -41,6 +41,13 @@ namespace terraformer::ui::widgets
 		auto value() const
 		{ return to_utf8(m_value); }
 
+		template<class StringType>
+		single_line_text_input& use_size_from_placeholder(StringType&& placeholder)
+		{
+			m_placeholder = placeholder;
+			return *this;
+		}
+
 		void handle_event(main::typing_event event, main::window_ref, main::ui_controller)
 		{
 				m_value.push_back(event.codepoint);
@@ -81,6 +88,8 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
+
+
 	private:
 		move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)> m_on_value_changed =
 			move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)>{no_operation_tag{}};
@@ -107,6 +116,7 @@ namespace terraformer::ui::widgets
 		main::generic_shared_texture m_selection_mask;
 
 		main::fb_size m_current_size;
+		std::optional<std::u8string> m_placeholder;
 		image m_background_host;
 		image m_foreground_host;
 	};
