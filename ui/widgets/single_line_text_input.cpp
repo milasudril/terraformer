@@ -95,6 +95,59 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	}
 }
 
+void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
+{
+	if(event.scancode == 0x66 && event.action == main::keyboard_button_action::press)
+	{
+			printf("Home\n");
+	}
+	else
+	if(event.scancode == 0x6b && event.action == main::keyboard_button_action::press)
+	{
+			printf("End\n");
+	}
+	else
+	if(
+		event.action == main::keyboard_button_action::press
+		|| event.action == main::keyboard_button_action::repeat
+	)
+	{
+		if(event.scancode == 0xe)
+		{
+			// TODO: Erase to the left of text cursor
+			if(!m_value.empty())
+			{
+				m_value.pop_back();
+				m_dirty_bits |= text_dirty;
+			}
+		}
+		else
+		if(event.scancode == 0x67)
+		{
+			printf("Browse back\n");
+		}
+		else
+		if(event.scancode == 0x6c)
+		{
+			printf("Browse forward\n");
+		}
+		else
+		if(event.scancode == 0x69)
+		{
+			printf("Move left\n");
+		}
+		else
+		if(event.scancode == 0x6a)
+		{
+			printf("Move right\n");
+		}
+		else
+		{
+			printf("%08x\n", event.scancode);
+		}
+	}
+}
+
 terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_width_request)
 {
 	if(m_placeholder.has_value())
