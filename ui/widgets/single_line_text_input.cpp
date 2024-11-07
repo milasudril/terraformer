@@ -99,12 +99,14 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 {
 	if(event.scancode == 0x66 && event.action == main::keyboard_button_action::press)
 	{
-			printf("Home\n");
+		m_insert_offset = 0;
+		printf("Home %zu\n", m_insert_offset);
 	}
 	else
 	if(event.scancode == 0x6b && event.action == main::keyboard_button_action::press)
 	{
-			printf("End\n");
+		m_insert_offset = std::size(m_value);
+		printf("End %zu\n", m_insert_offset);
 	}
 	else
 	if(
@@ -114,32 +116,46 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 	{
 		if(event.scancode == 0xe)
 		{
-			// TODO: Erase to the left of text cursor
-			if(!m_value.empty())
+			if(!m_value.empty() && m_insert_offset != 0)
 			{
-				m_value.pop_back();
+				auto const i = m_value.erase(std::begin(m_value) + m_insert_offset - 1);
+				m_insert_offset = std::distance(std::begin(m_value), i);
+				printf("%zu\n", std::distance(std::begin(m_value), i));
 				m_dirty_bits |= text_dirty;
 			}
 		}
 		else
 		if(event.scancode == 0x67)
-		{
-			printf("Browse back\n");
-		}
+		{ printf("Browse back\n"); }
 		else
 		if(event.scancode == 0x6c)
-		{
-			printf("Browse forward\n");
-		}
+		{ printf("Browse forward\n"); }
 		else
 		if(event.scancode == 0x69)
 		{
-			printf("Move left\n");
+			if(m_insert_offset > 0)
+			{
+				--m_insert_offset;
+				printf("Insert offset = %zu\n", m_insert_offset);
+			}
 		}
 		else
 		if(event.scancode == 0x6a)
 		{
-			printf("Move right\n");
+			if(m_insert_offset < std::size(m_value))
+			{
+				++m_insert_offset;
+				printf("Insert offset = %zu\n", m_insert_offset);
+			}
+		}
+		else
+		if(event.scancode == 0x6f)
+		{
+			if(m_insert_offset != std::size(m_value))
+			{
+				m_value.erase(std::begin(m_value) + m_insert_offset);
+				m_dirty_bits |= text_dirty;
+			}
 		}
 		else
 		{
