@@ -98,16 +98,10 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
 {
 	if(event.scancode == 0x66 && event.action == main::keyboard_button_action::press)
-	{
-		m_insert_offset = 0;
-		printf("Home %zu\n", m_insert_offset);
-	}
+	{ update_insert_offset(0); }
 	else
 	if(event.scancode == 0x6b && event.action == main::keyboard_button_action::press)
-	{
-		m_insert_offset = std::size(m_value);
-		printf("End %zu\n", m_insert_offset);
-	}
+	{ update_insert_offset(std::size(m_value)); }
 	else
 	if(
 		event.action == main::keyboard_button_action::press
@@ -118,34 +112,8 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 		{
 			if(!m_value.empty() && m_insert_offset != 0)
 			{
-				auto const i = m_value.erase(std::begin(m_value) + m_insert_offset - 1);
-				m_insert_offset = std::distance(std::begin(m_value), i);
-				printf("%zu\n", std::distance(std::begin(m_value), i));
+				update_insert_offset(m_value.erase(std::begin(m_value) + m_insert_offset - 1));
 				m_dirty_bits |= text_dirty;
-			}
-		}
-		else
-		if(event.scancode == 0x67)
-		{ printf("Browse back\n"); }
-		else
-		if(event.scancode == 0x6c)
-		{ printf("Browse forward\n"); }
-		else
-		if(event.scancode == 0x69)
-		{
-			if(m_insert_offset > 0)
-			{
-				--m_insert_offset;
-				printf("Insert offset = %zu\n", m_insert_offset);
-			}
-		}
-		else
-		if(event.scancode == 0x6a)
-		{
-			if(m_insert_offset < std::size(m_value))
-			{
-				++m_insert_offset;
-				printf("Insert offset = %zu\n", m_insert_offset);
 			}
 		}
 		else
@@ -157,6 +125,18 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 				m_dirty_bits |= text_dirty;
 			}
 		}
+		else
+		if(event.scancode == 0x67)
+		{ printf("Browse back\n"); }
+		else
+		if(event.scancode == 0x6c)
+		{ printf("Browse forward\n"); }
+		else
+		if(event.scancode == 0x69)
+		{ clamped_decrement(m_insert_offset, 0); }
+		else
+		if(event.scancode == 0x6a)
+		{ clamped_increment(m_insert_offset, std::size(m_value)); }
 		else
 		{
 			printf("%08x\n", event.scancode);

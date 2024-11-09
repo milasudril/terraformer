@@ -130,6 +130,22 @@ namespace terraformer
 		return codepoint <= 0x10ffff && (codepoint < 0xd800 || codepoint > 0xdfff);
 	}
 
+	template<class T, class U>
+	requires std::is_convertible_v<U, U>
+	constexpr void clamped_increment(T& x, U maxval)
+	{
+		if(x < static_cast<T>(maxval))
+		{ ++x; }
+	}
+
+	template<class T, class U>
+	requires std::is_convertible_v<U, T>
+	constexpr void clamped_decrement(T& x, U minval)
+	{
+		if(x > static_cast<T>(minval))
+		{ --x; }
+	}
+
 	std::u8string to_utf8(std::u32string_view);
 
 	std::u32string to_utf32(std::u8string_view);

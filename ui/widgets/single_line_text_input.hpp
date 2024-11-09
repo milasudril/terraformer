@@ -51,9 +51,7 @@ namespace terraformer::ui::widgets
 		void handle_event(main::typing_event event, main::window_ref, main::ui_controller)
 		{
 			auto const i = std::begin(m_value) + m_insert_offset;
-			auto const ret = m_value.insert(i, event.codepoint);
-			m_insert_offset = std::distance(std::begin(m_value), ret) + 1;
-			printf("%zu\n", m_insert_offset);
+			update_insert_offset(m_value.insert(i, event.codepoint) + 1);
 			m_dirty_bits |= text_dirty;
 		}
 
@@ -78,6 +76,12 @@ namespace terraformer::ui::widgets
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
 	private:
+		void update_insert_offset(std::u32string::iterator new_pos)
+		{ update_insert_offset(std::distance(std::begin(m_value), new_pos)); }
+
+		void update_insert_offset(size_t new_pos)
+		{ m_insert_offset = new_pos; }
+
 		move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)> m_on_value_changed =
 			move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)>{no_operation_tag{}};
 
