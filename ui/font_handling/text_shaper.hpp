@@ -72,6 +72,31 @@ namespace terraformer::ui::font_handling
 		hb_glyph_position_t* glyph_pos;
 	};
 
+	span_2d_extents compute_extents(shaping_result const& result);
+
+	basic_image<uint8_t> render(shaping_result const& result);
+
+	struct glyph_sequence
+	{
+	public:
+		explicit glyph_sequence(shaping_result const&);
+
+		auto element_indices() const
+		{ return m_content.element_indices(); }
+
+		auto locations() const
+		{ return m_content.get<0>(); }
+
+		auto input_indices() const
+		{ return m_content.get<1>(); }
+
+		auto glyph_pointers() const
+		{ return m_content.get<2>(); }
+
+	private:
+		multi_array<location, size_t, glyph const*> m_content;
+	};
+
 	inline auto& get_glyph(shaping_result const& result, glyph_index index)
 	{ return result.renderer.get().get_glyph(index); };
 
@@ -147,9 +172,6 @@ namespace terraformer::ui::font_handling
 		bool m_clear_before_append{false};
 	};
 
-	span_2d_extents compute_extents(shaping_result const& result);
-
-	basic_image<uint8_t> render(shaping_result const& result);
 }
 
 #endif

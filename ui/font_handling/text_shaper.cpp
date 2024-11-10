@@ -58,6 +58,7 @@ terraformer::ui::font_handling::render(shaping_result const& result)
 			static_cast<uint32_t>((cursor_x + x_offset)/64) + glyph.x_offset,
 			static_cast<uint32_t>((cursor_y + y_offset)/64) + static_cast<int32_t>(ascender) - glyph.y_offset
 		);
+
 		cursor_x += glyph_pos[i].x_advance;
 		cursor_y -= glyph_pos[i].y_advance;
 	}
