@@ -30,42 +30,6 @@ terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 	};
 }
 
-terraformer::basic_image<uint8_t>
-terraformer::ui::font_handling::render(shaping_result const& result)
-{
-	// TODO: Fix vertical rendering
-
-	auto const size = compute_extents(result);
-	terraformer::basic_image<uint8_t> ret{size.width, size.height};
-
-	auto const n = result.glyph_count;
-	auto const glyph_info = result.glyph_info;
-	auto const glyph_pos = result.glyph_pos;
-	auto const ascender = result.renderer.get().get_ascender()/64;
-
-	uint64_t cursor_x = 0;
-	uint64_t cursor_y = 0;
-
-	for(size_t i = 0; i != n; ++i)
-	{
-		auto const& glyph = get_glyph(result, glyph_index{glyph_info[i].codepoint});
-		auto const x_offset  = -glyph_pos[i].x_offset;
-		auto const y_offset  = glyph_pos[i].y_offset;
-
-		render(
-			glyph,
-			ret.pixels(),
-			static_cast<uint32_t>((cursor_x + x_offset)/64) + glyph.x_offset,
-			static_cast<uint32_t>((cursor_y + y_offset)/64) + static_cast<int32_t>(ascender) - glyph.y_offset
-		);
-
-		cursor_x += glyph_pos[i].x_advance;
-		cursor_y -= glyph_pos[i].y_advance;
-	}
-
-	return ret;
-}
-
 terraformer::ui::font_handling::glyph_sequence::glyph_sequence(shaping_result const& result):
 	m_extents{compute_extents(result)}
 {
