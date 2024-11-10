@@ -53,6 +53,14 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
+	{
+		if(m_insert_offset != 0)
+		{
+			auto const loc = input_index_to_location(m_glyphs, m_insert_offset - 1).value_or(location{});
+			printf("%.8g %.8g\n", loc[0], loc[1]);
+		}
+	}
+
 	std::array const bg_tints{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
 	if(output_rect.set_widget_background(m_background.get(), bg_tints) != main::set_texture_result::success) [[unlikely]]
 	{
@@ -133,16 +141,10 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 		{ printf("Browse forward\n"); }
 		else
 		if(event.scancode == 0x69)
-		{
-			clamped_decrement(m_insert_offset, 0);
-			set_cursor_location_from_insert_pos();
-		}
+		{ clamped_decrement(m_insert_offset, 0); }
 		else
 		if(event.scancode == 0x6a)
-		{
-			clamped_increment(m_insert_offset, std::size(m_value));
-			set_cursor_location_from_insert_pos();
-		}
+		{ clamped_increment(m_insert_offset, std::size(m_value)); }
 		else
 		{
 			printf("%08x\n", event.scancode);
