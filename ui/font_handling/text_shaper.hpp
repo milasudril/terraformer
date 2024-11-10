@@ -76,6 +76,9 @@ namespace terraformer::ui::font_handling
 
 	basic_image<uint8_t> render(shaping_result const& result);
 
+	inline auto& get_glyph(shaping_result const& result, glyph_index index)
+	{ return result.renderer.get().get_glyph(index); };
+
 	struct glyph_sequence
 	{
 	public:
@@ -96,12 +99,16 @@ namespace terraformer::ui::font_handling
 		auto glyph_pointers() const
 		{ return m_content.get<2>(); }
 
+		auto extents() const
+		{ return m_extents; }
+
 	private:
 		storage_type m_content;
+		span_2d_extents m_extents;
 	};
 
-	inline auto& get_glyph(shaping_result const& result, glyph_index index)
-	{ return result.renderer.get().get_glyph(index); };
+	terraformer::basic_image<uint8_t> render(glyph_sequence const& seq);
+
 
 	class text_shaper
 	{

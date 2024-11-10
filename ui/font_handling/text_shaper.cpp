@@ -66,8 +66,11 @@ terraformer::ui::font_handling::render(shaping_result const& result)
 	return ret;
 }
 
-terraformer::ui::font_handling::glyph_sequence::glyph_sequence(shaping_result const& result)
+terraformer::ui::font_handling::glyph_sequence::glyph_sequence(shaping_result const& result):
+	m_extents{compute_extents(result)}
 {
+	// TODO: Fix vertical rendering
+
 	m_content.resize(static_cast<size_type>(result.glyph_count));
 	auto const glyph_info = result.glyph_info;
 	auto const glyph_pos = result.glyph_pos;
@@ -97,4 +100,29 @@ terraformer::ui::font_handling::glyph_sequence::glyph_sequence(shaping_result co
 		cursor_x += glyph_pos[i].x_advance;
 		cursor_y -= glyph_pos[i].y_advance;
 	}
+}
+
+terraformer::basic_image<uint8_t>
+terraformer::ui::font_handling::render(glyph_sequence const& seq)
+{
+	auto const size = seq.extents();
+	terraformer::basic_image<uint8_t> ret{size.width, size.height};
+
+	auto const locations = seq.locations();
+	auto const glyph_ptrs = seq.glyph_pointers();
+
+	for(auto item : seq.element_indices())
+	{
+		auto const& glyph = *glyph_ptrs[item];
+		auto const loc = locations[item];
+
+		render(
+			glyph,
+			ret.pixels(),
+			static_cast<uint32_t>(loc[0]),
+			static_cast<uint32_t>(loc[1])
+		);
+	}
+
+	return ret;
 }
