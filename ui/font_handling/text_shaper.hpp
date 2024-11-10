@@ -102,6 +102,9 @@ namespace terraformer::ui::font_handling
 		auto extents() const
 		{ return m_extents; }
 
+		auto glyph_count() const
+		{ return std::size(m_content).get(); }
+
 	private:
 		storage_type m_content;
 		span_2d_extents m_extents;
@@ -169,11 +172,13 @@ namespace terraformer::ui::font_handling
 			unsigned int glyph_count{};
 			auto const info = hb_buffer_get_glyph_infos(m_handle.get(), &glyph_count);
 			m_clear_before_append = true;
-			return shaping_result{
-				.renderer = font.get_renderer(),
-				.glyph_count = glyph_count,
-				.glyph_info = info,
-				.glyph_pos = hb_buffer_get_glyph_positions(m_handle.get(), &glyph_count)
+			return glyph_sequence{
+				shaping_result{
+					.renderer = font.get_renderer(),
+					.glyph_count = glyph_count,
+					.glyph_info = info,
+					.glyph_pos = hb_buffer_get_glyph_positions(m_handle.get(), &glyph_count)
+				}
 			};
 		}
 

@@ -91,7 +91,7 @@ terraformer::ui::font_handling::glyph_sequence::glyph_sequence(shaping_result co
 
 		locs[item] = location{
 			static_cast<float>(cursor_x + x_offset)/64.0f + static_cast<float>(glyph.x_offset),
-			static_cast<float>(cursor_y + y_offset + ascender)/64.0f + static_cast<float>(glyph.y_offset),
+			static_cast<float>(cursor_y + y_offset + ascender)/64.0f - static_cast<float>(glyph.y_offset),
 			0.0f
 		};
 		indices[item] = glyph_info[i].cluster;

@@ -20,8 +20,7 @@ TESTCASE(terraformer_ui_font_handling_shape_text)
 		.with(hb_language_from_string("sv-SE", -1))
 		.run(the_font);
 
-	EXPECT_EQ(result.glyph_count, 50);
-	EXPECT_EQ(&result.renderer.get(), &the_font.get_renderer());
+	EXPECT_EQ(result.glyph_count(), 50);
 
 	auto img = render(result);
 	FILE* dump = fopen("/dev/shm/slask.data", "wb");
