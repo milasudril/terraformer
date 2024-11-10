@@ -115,14 +115,31 @@ namespace terraformer::ui::font_handling
 
 	terraformer::basic_image<uint8_t> render(glyph_sequence const& seq);
 
+	struct glyph_geometry
+	{
+		location loc;
+		displacement advance;
+	};
+
 	inline auto input_index_to_location(glyph_sequence const& seq, size_t index)
 	{
 		auto const find_iter = std::ranges::find(seq.input_indices(), index);
 		if(find_iter == std::end(seq.input_indices()))
-		{ return std::optional<location>{}; }
+		{ return std::optional<glyph_geometry>{}; }
 
 		glyph_sequence::index_type const i{static_cast<size_t>(find_iter - std::begin(seq.input_indices()))};
-		return std::optional{seq.locations()[i]};
+		auto const& glyph = *seq.glyph_pointers()[i];
+
+		return std::optional{
+			glyph_geometry{
+				.loc = seq.locations()[i],
+				.advance = displacement{
+					static_cast<float>(glyph.image.width()),
+					static_cast<float>(glyph.image.height()),
+					0.0f
+				}
+			}
+		};
 	}
 
 

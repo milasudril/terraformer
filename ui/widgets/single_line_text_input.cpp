@@ -56,8 +56,10 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	{
 		if(m_insert_offset != 0)
 		{
-			auto const loc = input_index_to_location(m_glyphs, m_insert_offset - 1).value_or(location{});
-			printf("%.8g %.8g\n", loc[0], loc[1]);
+			auto const geom = input_index_to_location(m_glyphs, m_insert_offset - 1)
+				.value_or(font_handling::glyph_geometry{});
+			auto cursor_loc = geom.loc + geom.advance;
+			printf("%.8g %.8g\n", cursor_loc[0], cursor_loc[1]);
 		}
 	}
 
