@@ -82,6 +82,8 @@ namespace terraformer::ui::font_handling
 	struct glyph_sequence
 	{
 	public:
+		glyph_sequence() = default;
+
 		using storage_type = multi_array<location, size_t, glyph const*>;
 		using size_type = storage_type::size_type;
 
@@ -111,6 +113,20 @@ namespace terraformer::ui::font_handling
 	};
 
 	terraformer::basic_image<uint8_t> render(glyph_sequence const& seq);
+
+	inline auto input_index_to_location(span<size_t const> indices, size_t index)
+	{
+		auto const i = std::ranges::find(indices, index);
+		if(i == std::end(indices))
+		{ return static_cast<size_t>(-1); }
+
+		return *i;
+	}
+
+	inline auto input_index_to_location(glyph_sequence const& seq, size_t index)
+	{
+		return input_index_to_location(seq.input_indices(), index);
+	}
 
 
 	class text_shaper

@@ -87,6 +87,7 @@ namespace terraformer::ui::widgets
 
 		std::u32string m_value;
 		size_t m_insert_offset = 0;
+		font_handling::glyph_sequence m_glyphs;
 		basic_image<uint8_t> m_rendered_text;
 		static constexpr auto text_dirty = 0x1;
 		static constexpr auto host_textures_dirty = 0x2;

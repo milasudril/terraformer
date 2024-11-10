@@ -7,13 +7,13 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_text_mask()
 	font_handling::text_shaper shaper{};
 
 	// TODO: Add support for different scripts, direction, and languages
-	auto result = shaper.append(m_value)
+	m_glyphs = shaper.append(m_value)
 		.with(hb_script_t::HB_SCRIPT_LATIN)
 		.with(hb_direction_t::HB_DIRECTION_LTR)
 		.with(hb_language_from_string("en-UE", -1))
 		.run(*m_font);
 
-	m_rendered_text = render(result);
+	m_rendered_text = render(m_glyphs);
 	m_dirty_bits &= ~text_dirty;
 	m_dirty_bits |= host_textures_dirty;
 }
