@@ -146,7 +146,8 @@ namespace terraformer::ui::font_handling
 	class text_shaper
 	{
 	public:
-		text_shaper():m_handle{hb_buffer_create()}{}
+		text_shaper():m_handle{hb_buffer_create()}
+		{ hb_buffer_set_cluster_level(m_handle.get(), HB_BUFFER_CLUSTER_LEVEL_MONOTONE_CHARACTERS); }
 
 		text_shaper& append(std::basic_string_view<char8_t> buffer)
 		{
