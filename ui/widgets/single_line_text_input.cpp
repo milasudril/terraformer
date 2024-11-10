@@ -133,10 +133,16 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 		{ printf("Browse forward\n"); }
 		else
 		if(event.scancode == 0x69)
-		{ clamped_decrement(m_insert_offset, 0); }
+		{
+			clamped_decrement(m_insert_offset, 0);
+			set_cursor_location_from_insert_pos();
+		}
 		else
 		if(event.scancode == 0x6a)
-		{ clamped_increment(m_insert_offset, std::size(m_value)); }
+		{
+			clamped_increment(m_insert_offset, std::size(m_value));
+			set_cursor_location_from_insert_pos();
+		}
 		else
 		{
 			printf("%08x\n", event.scancode);

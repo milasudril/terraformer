@@ -80,7 +80,17 @@ namespace terraformer::ui::widgets
 		{ update_insert_offset(std::distance(std::begin(m_value), new_pos)); }
 
 		void update_insert_offset(size_t new_pos)
-		{ m_insert_offset = new_pos; }
+		{
+			m_insert_offset = new_pos;
+			set_cursor_location_from_insert_pos();
+		}
+
+		void set_cursor_location_from_insert_pos()
+		{
+			auto const loc = input_index_to_location(m_glyphs, m_insert_offset).value_or(location{});
+
+			printf("%.8g %.8g\n", loc[0], loc[1]);
+		}
 
 		move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)> m_on_value_changed =
 			move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)>{no_operation_tag{}};
