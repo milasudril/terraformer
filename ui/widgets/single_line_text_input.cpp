@@ -62,7 +62,6 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 		}
 		else
 		{
-			// FIXME: This only works if last glyph is not a ligature. Test with ff
 			auto const geom = input_index_to_location(m_glyphs, m_insert_offset - 1)
 				.value_or(font_handling::glyph_geometry{});
 			auto cursor_loc = geom.loc + geom.advance;
