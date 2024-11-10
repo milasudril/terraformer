@@ -54,8 +54,15 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	{ regenerate_textures(); }
 
 	{
-		if(m_insert_offset != 0)
+		// Compute cursor location
+
+		if(m_insert_offset == 0)
 		{
+			printf("%.8g %.8g\n", 0.0f, 0.0f);
+		}
+		else
+		{
+			// FIXME: This only works if last glyph is not a ligature. Test with ff
 			auto const geom = input_index_to_location(m_glyphs, m_insert_offset - 1)
 				.value_or(font_handling::glyph_geometry{});
 			auto cursor_loc = geom.loc + geom.advance;
