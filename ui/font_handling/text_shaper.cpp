@@ -65,3 +65,36 @@ terraformer::ui::font_handling::render(shaping_result const& result)
 
 	return ret;
 }
+
+terraformer::ui::font_handling::glyph_sequence::glyph_sequence(shaping_result const& result)
+{
+	m_content.resize(static_cast<size_type>(result.glyph_count));
+	auto const glyph_info = result.glyph_info;
+	auto const glyph_pos = result.glyph_pos;
+	auto const ascender = result.renderer.get().get_ascender();
+	uint64_t cursor_x = 0;
+	uint64_t cursor_y = 0;
+
+	auto const locs = m_content.get<0>();
+	auto const indices = m_content.get<1>();
+	auto const glyph_ptrs = m_content.get<2>();
+
+	for(auto item : m_content.element_indices())
+	{
+		auto const i = item.get();
+		auto const& glyph = get_glyph(result, glyph_index{glyph_info[i].codepoint});
+		auto const x_offset  = -glyph_pos[i].x_offset;
+		auto const y_offset  = glyph_pos[i].y_offset;
+
+		locs[item] = location{
+			static_cast<float>(cursor_x + x_offset)/64.0f + static_cast<float>(glyph.x_offset),
+			static_cast<float>(cursor_y + y_offset + ascender)/64.0f + static_cast<float>(glyph.y_offset),
+			0.0f
+		};
+		indices[item] = glyph_info[i].cluster;
+		glyph_ptrs[item] = &glyph;
+
+		cursor_x += glyph_pos[i].x_advance;
+		cursor_y -= glyph_pos[i].y_advance;
+	}
+}

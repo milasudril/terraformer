@@ -79,6 +79,9 @@ namespace terraformer::ui::font_handling
 	struct glyph_sequence
 	{
 	public:
+		using storage_type = multi_array<location, size_t, glyph const*>;
+		using size_type = storage_type::size_type;
+
 		explicit glyph_sequence(shaping_result const&);
 
 		auto element_indices() const
@@ -94,7 +97,7 @@ namespace terraformer::ui::font_handling
 		{ return m_content.get<2>(); }
 
 	private:
-		multi_array<location, size_t, glyph const*> m_content;
+		storage_type m_content;
 	};
 
 	inline auto& get_glyph(shaping_result const& result, glyph_index index)
