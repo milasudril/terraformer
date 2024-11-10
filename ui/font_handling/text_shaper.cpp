@@ -5,8 +5,8 @@
 terraformer::span_2d_extents
 terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 {
-	uint64_t width = 0;
-	uint64_t height = 0;
+	uint32_t width = 0;
+	uint32_t height = 0;
 	auto const n = result.glyph_count;
 	auto const glyph_info = result.glyph_info;
 	auto const glyph_pos = result.glyph_pos;
@@ -21,12 +21,12 @@ terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 
 	auto const& renderer = result.renderer.get();
 
-	height = std::max(static_cast<uint64_t>(renderer.get_global_glyph_height()), height);
-	width = std::max(static_cast<uint64_t>(renderer.get_global_glyph_width()), width);
+	height = std::max(static_cast<uint32_t>(renderer.get_global_glyph_height()), height);
+	width = std::max(static_cast<uint32_t>(renderer.get_global_glyph_width()), width);
 
 	return span_2d_extents{
-		.width = narrowing_cast<uint32_t>(width/64),
-		.height = narrowing_cast<uint32_t>(height/64)
+		.width = static_cast<uint32_t>(std::ceil(static_cast<float>(width)/64.0f)),
+		.height = static_cast<uint32_t>(std::ceil(static_cast<float>(height)/64.0f))
 	};
 }
 
@@ -83,8 +83,8 @@ terraformer::ui::font_handling::render(glyph_sequence const& seq)
 		render(
 			glyph,
 			ret.pixels(),
-			static_cast<uint32_t>(loc[0]),
-			static_cast<uint32_t>(loc[1])
+			static_cast<uint32_t>(loc[0] + 0.5f),
+			static_cast<uint32_t>(loc[1] + 0.5f)
 		);
 	}
 
