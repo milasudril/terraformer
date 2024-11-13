@@ -209,12 +209,21 @@ vec4 sample_scaled(sampler2D tex, vec2 uv)
 	return texture(tex, uv/textureSize(tex, 0));
 }
 
+vec4 sample_cropped(sampler2D tex, vec2 uv)
+{
+	vec2 uv_out = uv/textureSize(tex, 0);
+	if(uv_out.x >= 0.0 && uv_out.x <= 1.0 && uv_out.y >= 0.0 && uv_out.y<=1.0)
+	{ return texture(tex, uv_out); }
+	else
+	{ return vec4(0.0, 0.0, 0.0, 0.0); }
+}
+
 void main()
 {
 	vec4 bg_0 = sample_scaled(widget_background, uv)*widget_background_tint;
 	float bg_mask = sample_scaled(bg_layer_mask, uv).r;
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
-	vec4 fg_0 = sample_scaled(widget_foreground, uv)*widget_foreground_tint;
+	vec4 fg_0 = sample_cropped(widget_foreground, uv)*widget_foreground_tint;
 	vec4 fg_1 = texture(frame, uv)*frame_tint;
 
 	// This assumes that pre-multiplied alpha is used
