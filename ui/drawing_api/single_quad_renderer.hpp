@@ -204,13 +204,18 @@ in vec4 selection_background_tint;
 in vec4 widget_foreground_tint;
 in vec4 frame_tint;
 
+vec4 sample_scaled(sampler2D tex, vec2 uv)
+{
+	return texture(tex, uv/textureSize(tex, 0));
+}
+
 void main()
 {
-	vec4 bg_0 = texture(widget_background, uv/textureSize(widget_background, 0))*widget_background_tint;
-	float bg_mask = texture(bg_layer_mask, uv/textureSize(bg_layer_mask, 0)).r;
-	vec4 bg_1 = texture(selection_background, uv/textureSize(selection_background, 0))*selection_background_tint;
-	vec4 fg_0 = texture(widget_foreground, uv/textureSize(widget_foreground, 0))*widget_foreground_tint;
-	vec4 fg_1 = texture(frame, uv/textureSize(widget_foreground, 0))*frame_tint;
+	vec4 bg_0 = sample_scaled(widget_background, uv)*widget_background_tint;
+	float bg_mask = sample_scaled(bg_layer_mask, uv).r;
+	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
+	vec4 fg_0 = sample_scaled(widget_foreground, uv)*widget_foreground_tint;
+	vec4 fg_1 = texture(frame, uv)*frame_tint;
 
 	// This assumes that pre-multiplied alpha is used
 	vec4 result = bg_1 + bg_0*(1 - bg_1.w*bg_mask);
