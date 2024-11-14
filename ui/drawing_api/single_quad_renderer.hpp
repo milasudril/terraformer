@@ -23,6 +23,11 @@ namespace terraformer::ui::drawing_api
 			std::array<rgba_pixel, 4> tints;
 		};
 
+		struct layer_with_offset:layer
+		{
+			displacement offset;
+		};
+
 		struct input_rectangle
 		{
 			using texture_type = gl_texture;
@@ -79,7 +84,7 @@ namespace terraformer::ui::drawing_api
 			layer widget_background;
 			texture_type const* bg_layer_mask;
 			layer selection_background;
-			layer widget_foreground;
+			layer_with_offset widget_foreground;
 			layer frame;
 
 			static gl_texture create_texture()
@@ -107,8 +112,8 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(5, rect.widget_background.tints)
 				.set_uniform(9, rect.selection_background.tints)
 				.set_uniform(13, rect.widget_foreground.tints)
+				.set_uniform(21, rect.widget_foreground.offset[0], rect.widget_foreground.offset[1])
 				.set_uniform(17, rect.frame.tints)
-				.set_uniform(21, 0.0f, 0.0f)
 				.bind();
 
 			assert(rect.widget_background.texture != nullptr);
