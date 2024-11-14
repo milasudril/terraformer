@@ -61,13 +61,14 @@ namespace terraformer::ui::drawing_api
 				return main::set_texture_result::success;
 			}
 
-			auto set_widget_foreground(texture_type const* texture, std::array<rgba_pixel, 4> const& tints)
+			auto set_widget_foreground(texture_type const* texture, std::array<rgba_pixel, 4> const& tints, displacement offset = displacement{4.0f, 4.0f, 0.0f})
 			{
 				if(texture == nullptr)
 				{ return main::set_texture_result::incompatible; }
 
 				widget_foreground.texture = texture;
 				widget_foreground.tints = tints;
+				widget_foreground.offset = offset;
 				return main::set_texture_result::success;
 			}
 
