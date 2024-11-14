@@ -33,12 +33,7 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 		}
 	);
 
-	m_foreground_host = drawing_api::convert_mask(
-		m_rendered_text.width(),
-		m_rendered_text.height(),
-		m_rendered_text,
-		0
-	);
+	m_foreground_host = drawing_api::convert_mask(m_rendered_text);
 
 	m_dirty_bits &= ~host_textures_dirty;
 	m_dirty_bits |= gpu_textures_dirty;

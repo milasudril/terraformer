@@ -42,26 +42,17 @@ terraformer::image terraformer::ui::drawing_api::generate(flat_rectangle const& 
 	return ret;
 }
 
-terraformer::image terraformer::ui::drawing_api::convert_mask(
-	uint32_t output_width,
-	uint32_t output_height,
-	span_2d<uint8_t const> input,
-	uint32_t margin
-)
+terraformer::image terraformer::ui::drawing_api::convert_mask(span_2d<uint8_t const> input)
 {
-	auto const w = output_width;
-	auto const h = output_height;
-	auto const w_src = input.width();
-	auto const h_src = input.height();
+	auto const w = input.width();
+	auto const h = input.height();
 	image ret{w, h};
-	for(uint32_t y = margin; y != h - margin; ++y)
+	for(uint32_t y = 0; y != h; ++y)
 	{
-		for(uint32_t x = margin; x != w - margin; ++x)
+		for(uint32_t x = 0; x != w; ++x)
 		{
-			auto const x_src = x - margin;
-			auto const y_src = y - margin;
-			auto const mask_val = (x_src < w_src && y_src < h_src)?
-				static_cast<float>(input(x_src, y_src))/255.0f:
+			auto const mask_val = (x < w && y < h)?
+				static_cast<float>(input(x, y))/255.0f:
 				0.0f;
 			ret(x, y) = rgba_pixel{mask_val, mask_val, mask_val, mask_val};
 		}

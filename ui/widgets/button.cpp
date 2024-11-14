@@ -45,12 +45,7 @@ void terraformer::ui::widgets::button::regenerate_textures()
 		}
 	);
 
-	m_foreground_host = drawing_api::convert_mask(
-		static_cast<uint32_t>(m_current_size.width),
-		static_cast<uint32_t>(m_current_size.height),
-		m_rendered_text,
-		m_margin
-	);
+	m_foreground_host = drawing_api::convert_mask(m_rendered_text);
 
 	m_dirty_bits &= ~host_textures_dirty;
 	m_dirty_bits |= gpu_textures_dirty;

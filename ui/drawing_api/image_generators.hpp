@@ -30,8 +30,7 @@ namespace terraformer::ui::drawing_api
 
 	image generate(flat_rectangle const& params);
 
-	// TODO: It should be possible to center input in output image
-	image convert_mask(uint32_t output_width, uint32_t output_height, span_2d<uint8_t const> input, uint32_t margin);
+	image convert_mask(span_2d<uint8_t const> input);
 }
 
 #endif
