@@ -75,6 +75,7 @@ namespace
 		{
 			widget_foreground = val;
 			widget_foreground_tints = tints;
+			// TODO: Verify that offset is correct
 			widget_foreground_offset = offset;
 
 			return val == nullptr?
