@@ -108,6 +108,7 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(9, rect.selection_background.tints)
 				.set_uniform(13, rect.widget_foreground.tints)
 				.set_uniform(17, rect.frame.tints)
+				.set_uniform(21, 0.0f, 0.0f)
 				.bind();
 
 			assert(rect.widget_background.texture != nullptr);
@@ -197,6 +198,7 @@ layout (binding = 1) uniform sampler2D bg_layer_mask;
 layout (binding = 2) uniform sampler2D selection_background;
 layout (binding = 3) uniform sampler2D widget_foreground;
 layout (binding = 4) uniform sampler2D frame;
+layout (location = 21) uniform vec2 fg_offset;
 
 in vec2 uv;
 in vec4 widget_background_tint;
@@ -223,7 +225,7 @@ void main()
 	vec4 bg_0 = sample_scaled(widget_background, uv)*widget_background_tint;
 	float bg_mask = sample_scaled(bg_layer_mask, uv).r;
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
-	vec4 fg_0 = sample_cropped(widget_foreground, uv)*widget_foreground_tint;
+	vec4 fg_0 = sample_cropped(widget_foreground, uv - fg_offset)*widget_foreground_tint;
 	vec4 fg_1 = texture(frame, uv)*frame_tint;
 
 	// This assumes that pre-multiplied alpha is used
