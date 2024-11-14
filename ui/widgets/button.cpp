@@ -60,10 +60,17 @@ void terraformer::ui::widgets::button::prepare_for_presentation(main::widget_ren
 
 
 	std::array const fg_tint{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	if(output_rect.set_widget_foreground(m_foreground.get(), fg_tint) != main::set_texture_result::success) [[unlikely]]
+	displacement const fg_offset{m_margin, m_margin, 0.0f};
+	if(
+		output_rect.set_widget_foreground(
+			m_foreground.get(),
+			fg_tint,
+			fg_offset
+		) != main::set_texture_result::success
+	) [[unlikely]]
 	{
 		m_foreground = output_rect.create_texture();
-		(void)output_rect.set_widget_foreground(m_foreground.get(), fg_tint);
+		(void)output_rect.set_widget_foreground(m_foreground.get(), fg_tint, fg_offset);
 		m_dirty_bits |= gpu_textures_dirty;
 	}
 
@@ -106,8 +113,8 @@ terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget
 	{ regenerate_text_mask(); }
 
 	return scaling{
-		static_cast<float>(m_rendered_text.width() + 2*m_margin),
-		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
+		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
 		1.0f
 	};
 }
@@ -119,15 +126,15 @@ terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget
 	{ regenerate_text_mask(); }
 
 	return scaling{
-		static_cast<float>(m_rendered_text.width() + 2*m_margin),
-		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
+		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
 		1.0f
 	};
 }
 
 void terraformer::ui::widgets::button::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
-	m_margin = static_cast<uint32_t>(cfg.command_area.padding + cfg.command_area.border_thickness);
+	m_margin = cfg.command_area.padding + cfg.command_area.border_thickness;
 	m_font = cfg.command_area.font;
 	m_bg_tint = cfg.command_area.colors.background;
 	m_fg_tint = cfg.command_area.colors.foreground;

@@ -83,10 +83,17 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	(void)output_rect.set_selection_background(m_background.get(), sel_tints);
 
 	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	if(output_rect.set_widget_foreground(m_foreground.get(), fg_tints) != main::set_texture_result::success) [[unlikely]]
+	displacement const fg_offset{m_margin, m_margin, 0.0f};
+	if(
+		output_rect.set_widget_foreground(
+			m_foreground.get(),
+			fg_tints,
+			fg_offset
+		) != main::set_texture_result::success
+	) [[unlikely]]
 	{
 		m_foreground = output_rect.create_texture();
-		(void)output_rect.set_widget_foreground(m_foreground.get(), fg_tints);
+		(void)output_rect.set_widget_foreground(m_foreground.get(), fg_tints, fg_offset);
 		m_dirty_bits |= gpu_textures_dirty;
 	}
 
@@ -172,8 +179,8 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 
 		auto const temp = render(result);
 		return scaling{
-			static_cast<float>(temp.width() + 2*m_margin),
-			static_cast<float>(temp.height() + 2*m_margin),
+			static_cast<float>(temp.width()) + 2.0f*m_margin,
+			static_cast<float>(temp.height()) + 2.0f*m_margin,
 			1.0f
 		};
 	}
@@ -183,8 +190,8 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 	{ regenerate_text_mask(); }
 
 	return scaling{
-		static_cast<float>(m_rendered_text.width() + 2*m_margin),
-		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
+		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
 		1.0f
 	};
 }
@@ -206,8 +213,8 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 
 		auto const temp = render(result);
 		return scaling{
-			static_cast<float>(temp.width() + 2*m_margin),
-			static_cast<float>(temp.height() + 2*m_margin),
+			static_cast<float>(temp.width()) + 2.0f*m_margin,
+			static_cast<float>(temp.height()) + 2.0f*m_margin,
 			1.0f
 		};
 	}
@@ -216,15 +223,15 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 	{ regenerate_text_mask(); }
 
 	return scaling{
-		static_cast<float>(m_rendered_text.width() + 2*m_margin),
-		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
+		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
 		1.0f
 	};
 }
 
 void terraformer::ui::widgets::single_line_text_input::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
-	m_margin = static_cast<uint32_t>(cfg.input_area.padding + cfg.input_area.border_thickness);
+	m_margin = cfg.input_area.padding + cfg.input_area.border_thickness;
 	m_font = cfg.input_area.font;
 	m_bg_tint = cfg.input_area.colors.background;
 	m_sel_tint = cfg.input_area.colors.selection;

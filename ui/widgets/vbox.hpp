@@ -34,7 +34,7 @@ namespace terraformer::ui::widgets
 			output_rect.set_widget_background(m_background.get(), bg_tints);
 			output_rect.set_bg_layer_mask(m_null_texture.get());
 			output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});
-			output_rect.set_widget_foreground(m_null_texture.get(), std::array<rgba_pixel, 4>{});
+			output_rect.set_widget_foreground(m_null_texture.get(), std::array<rgba_pixel, 4>{}, displacement{});
 			output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
 		}
 

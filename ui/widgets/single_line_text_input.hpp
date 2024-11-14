@@ -93,7 +93,7 @@ namespace terraformer::ui::widgets
 		static constexpr auto host_textures_dirty = 0x2;
 		static constexpr auto gpu_textures_dirty = 0x4;
 		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
-		unsigned int m_margin = 0;
+		float m_margin = 0;
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
 		rgba_pixel m_bg_tint;

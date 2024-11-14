@@ -37,7 +37,7 @@ namespace terraformer::ui::main
 		set_texture_result set_widget_foreground(
 			generic_texture_pointer_const texture,
 			std::array<rgba_pixel, 4> const& tints,
-			displacement offset = displacement{4.0f, 4.0f, 0.0f}
+			displacement offset
 		)
 		{ return m_vtable->set_widget_foreground(m_pointer, texture, tints, offset); }
 

@@ -36,8 +36,8 @@ terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_
 	{ regenerate_text_mask(); }
 
 	return scaling{
-		static_cast<float>(m_rendered_text.width() + 2*m_margin),
-		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
+		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
 		1.0f
 	};
 }
@@ -49,15 +49,15 @@ terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_
 	{ regenerate_text_mask(); }
 
 	return scaling{
-		static_cast<float>(m_rendered_text.width() + 2*m_margin),
-		static_cast<float>(m_rendered_text.height() + 2*m_margin),
+		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
+		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
 		1.0f
 	};
 }
 
 void terraformer::ui::widgets::label::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
-	m_margin = static_cast<uint32_t>(cfg.output_area.padding + cfg.output_area.border_thickness);
+	m_margin = cfg.output_area.padding + cfg.output_area.border_thickness;
 	m_font = cfg.output_area.font;
 	m_dirty_bits |= host_textures_dirty | text_dirty;
 	m_fg_tint = cfg.output_area.colors.foreground;
@@ -71,10 +71,17 @@ void terraformer::ui::widgets::label::prepare_for_presentation(main::widget_rend
 	{ regenerate_textures(); }
 
 	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	if(output_rect.set_widget_foreground(m_foreground.get(), fg_tints) != main::set_texture_result::success) [[unlikely]]
+	displacement const fg_offset{m_margin, m_margin, 0.0f};
+	if(
+		output_rect.set_widget_foreground(
+			m_foreground.get(),
+			fg_tints,
+			fg_offset
+		) != main::set_texture_result::success
+	) [[unlikely]]
 	{
 		m_foreground = output_rect.create_texture();
-		output_rect.set_widget_foreground(m_foreground.get(), fg_tints);
+		output_rect.set_widget_foreground(m_foreground.get(), fg_tints, fg_offset);
 		m_dirty_bits |= gpu_textures_dirty;
 	}
 

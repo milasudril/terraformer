@@ -123,7 +123,8 @@ TESTCASE(terraformer_ui_main_widget_rendering_result_set_values)
 	dummy_texture<1> wrong_texture;
 	result.set_widget_background(terraformer::ui::main::generic_texture_pointer_const{&wrong_texture}, bg_tints);
 	EXPECT_EQ(res.widget_background, nullptr);
-	result.set_widget_foreground(terraformer::ui::main::generic_texture_pointer_const{&wrong_texture}, fg_tints);
+	result.set_widget_foreground(terraformer::ui::main::generic_texture_pointer_const{&wrong_texture}, fg_tints, terraformer::displacement{});
 	EXPECT_EQ(res.widget_foreground, nullptr);
+	EXPECT_EQ(res.widget_foreground_offset, (terraformer::displacement{1.0f, 2.0f, 3.0f}));
 }
 
