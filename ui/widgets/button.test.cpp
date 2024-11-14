@@ -67,10 +67,16 @@ namespace
 				terraformer::ui::main::set_texture_result::success;
 		}
 
-		auto set_widget_foreground(texture_type const* val, std::array<terraformer::rgba_pixel, 4> const& tints)
+		auto set_widget_foreground(
+			texture_type const* val,
+			std::array<terraformer::rgba_pixel, 4> const& tints,
+			terraformer::displacement offset
+		)
 		{
 			widget_foreground = val;
 			widget_foreground_tints = tints;
+			widget_foreground_offset = offset;
+
 			return val == nullptr?
 				terraformer::ui::main::set_texture_result::incompatible:
 				terraformer::ui::main::set_texture_result::success;
@@ -94,6 +100,7 @@ namespace
 		std::array<terraformer::rgba_pixel, 4> selection_background_tints;
 		std::array<terraformer::rgba_pixel, 4> widget_foreground_tints;
 		std::array<terraformer::rgba_pixel, 4> frame_tints;
+		terraformer::displacement widget_foreground_offset;
 	};
 
 	auto create_render_resources()

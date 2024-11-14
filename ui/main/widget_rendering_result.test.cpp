@@ -39,10 +39,15 @@ namespace
 			return terraformer::ui::main::set_texture_result::success;
 		}
 
-		auto set_widget_foreground(texture_type const* val, std::array<terraformer::rgba_pixel, 4> const& tints)
+		auto set_widget_foreground(
+			texture_type const* val,
+			std::array<terraformer::rgba_pixel, 4> const& tints,
+			terraformer::displacement offset
+		)
 		{
 			widget_foreground = val;
 			widget_foreground_tints = tints;
+			widget_foreground_offset = offset;
 			return terraformer::ui::main::set_texture_result::success;
 		}
 
@@ -62,6 +67,7 @@ namespace
 		std::array<terraformer::rgba_pixel, 4> selection_background_tints;
 		std::array<terraformer::rgba_pixel, 4> widget_foreground_tints;
 		std::array<terraformer::rgba_pixel, 4> frame_tints;
+		terraformer::displacement widget_foreground_offset;
 	};
 }
 
@@ -103,7 +109,7 @@ TESTCASE(terraformer_ui_main_widget_rendering_result_set_values)
 	};
 
 	result.set_widget_background(bg.get(), bg_tints);
-	result.set_widget_foreground(fg.get(), fg_tints);
+	result.set_widget_foreground(fg.get(), fg_tints, terraformer::displacement{1.0f, 2.0f, 3.0f});
 
 	REQUIRE_NE(bg.get_if<dummy_texture<0>>(), nullptr);
 	REQUIRE_NE(fg.get_if<dummy_texture<0>>(), nullptr);
@@ -112,6 +118,7 @@ TESTCASE(terraformer_ui_main_widget_rendering_result_set_values)
 	EXPECT_EQ(res.widget_foreground, fg.get_if<dummy_texture<0>>());
 	EXPECT_EQ(res.widget_background_tints, bg_tints);
 	EXPECT_EQ(res.widget_foreground_tints, fg_tints);
+	EXPECT_EQ(res.widget_foreground_offset, (terraformer::displacement{1.0f, 2.0f, 3.0f}));
 
 	dummy_texture<1> wrong_texture;
 	result.set_widget_background(terraformer::ui::main::generic_texture_pointer_const{&wrong_texture}, bg_tints);

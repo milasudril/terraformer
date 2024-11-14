@@ -36,9 +36,10 @@ namespace terraformer::ui::main
 
 		set_texture_result set_widget_foreground(
 			generic_texture_pointer_const texture,
-			std::array<rgba_pixel, 4> const& tints
+			std::array<rgba_pixel, 4> const& tints,
+			displacement offset = displacement{4.0f, 4.0f, 0.0f}
 		)
-		{ return m_vtable->set_widget_foreground(m_pointer, texture, tints); }
+		{ return m_vtable->set_widget_foreground(m_pointer, texture, tints, offset); }
 
 		set_texture_result set_frame(
 			generic_texture_pointer_const texture,
@@ -49,18 +50,20 @@ namespace terraformer::ui::main
 	private:
 		struct vtable
 		{
+			template<class ... ExtraArgs>
 			using set_layer_callback = set_texture_result (*)(
 				void*,
 				generic_texture_pointer_const,
-				std::array<rgba_pixel, 4> const&
+				std::array<rgba_pixel, 4> const&,
+				ExtraArgs...
 			);
 
 			generic_unique_texture (*create_texture)();
-			set_layer_callback set_widget_background;
+			set_layer_callback<> set_widget_background;
 			set_texture_result (*set_bg_layer_mask)(void*, generic_texture_pointer_const);
-			set_layer_callback set_selection_background;
-			set_layer_callback set_widget_foreground;
-			set_layer_callback set_frame;
+			set_layer_callback<> set_selection_background;
+			set_layer_callback<displacement> set_widget_foreground;
+			set_layer_callback<> set_frame;
 		};
 
 		template<class T>
@@ -77,8 +80,17 @@ namespace terraformer::ui::main
 			.set_selection_background = [](void* obj, generic_texture_pointer_const texture, std::array<rgba_pixel, 4> const& tints){
 				return static_cast<T*>(obj)->set_selection_background(texture.get_if<typename T::texture_type>(), tints);
 			},
-			.set_widget_foreground = [](void* obj, generic_texture_pointer_const texture, std::array<rgba_pixel, 4> const& tints){
-				return static_cast<T*>(obj)->set_widget_foreground(texture.get_if<typename T::texture_type>(), tints);
+			.set_widget_foreground = [](
+				void* obj,
+				generic_texture_pointer_const texture,
+				std::array<rgba_pixel, 4> const& tints,
+				displacement offset
+			){
+				return static_cast<T*>(obj)->set_widget_foreground(
+					texture.get_if<typename T::texture_type>(),
+					tints,
+					offset
+				);
 			},
 			.set_frame = [](void* obj, generic_texture_pointer_const texture, std::array<rgba_pixel, 4> const& tints){
 				return static_cast<T*>(obj)->set_frame(texture.get_if<typename T::texture_type>(), tints);
