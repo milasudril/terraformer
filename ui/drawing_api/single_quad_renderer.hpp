@@ -220,6 +220,7 @@ vec4 sample_scaled(sampler2D tex, vec2 uv)
 vec4 sample_cropped(sampler2D tex, vec2 uv)
 {
 	vec2 uv_out = uv/textureSize(tex, 0);
+	// FIXME: Need to crop based on view window as well
 	if(uv_out.x >= 0.0 && uv_out.x <= 1.0 && uv_out.y >= 0.0 && uv_out.y<=1.0)
 	{ return texture(tex, uv_out); }
 	else

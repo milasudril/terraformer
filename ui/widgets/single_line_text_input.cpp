@@ -48,20 +48,13 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
+	auto cursor_loc = 0.0f;
 	{
-		// Compute cursor location
-
-		if(m_insert_offset == 0)
-		{
-			printf("%.8g %.8g\n", 0.0f, 0.0f);
-		}
-		else
-		{
-			auto const geom = input_index_to_location(m_glyphs, m_insert_offset - 1)
-				.value_or(font_handling::glyph_geometry{});
-			auto cursor_loc = geom.loc + geom.advance;
-			printf("%.8g %.8g\n", cursor_loc[0], cursor_loc[1]);
-		}
+		auto const geom = input_index_to_location(m_glyphs, m_insert_offset)
+			.value_or(font_handling::glyph_geometry{});
+		auto cursor_loc_temp = geom.loc + geom.advance;
+		cursor_loc = cursor_loc_temp[0];
+		printf("%.8g %.8g\n", cursor_loc_temp[0], cursor_loc_temp[1]);
 	}
 
 	std::array const bg_tints{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
@@ -83,7 +76,7 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	(void)output_rect.set_selection_background(m_background.get(), sel_tints);
 
 	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	displacement const fg_offset{m_margin, m_margin, 0.0f};
+	displacement const fg_offset{m_margin - cursor_loc, m_margin, 0.0f};
 	if(
 		output_rect.set_widget_foreground(
 			m_foreground.get(),

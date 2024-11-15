@@ -125,11 +125,13 @@ namespace terraformer::ui::font_handling
 	{
 		while(index != 0)
 		{
+			--index;
+
 			// TODO: Search backwards (no need to have an inner loop?)
 			auto const find_iter = std::ranges::find(seq.input_indices(), index);
 			if(find_iter == std::end(seq.input_indices()))
 			{
-				--index;
+				printf("Not found\n");
 				continue;
 			}
 
