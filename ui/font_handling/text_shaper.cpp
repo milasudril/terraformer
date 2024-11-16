@@ -80,6 +80,8 @@ terraformer::ui::font_handling::render(glyph_sequence const& seq)
 		auto const& glyph = *glyph_ptrs[item];
 		auto const loc = locations[item];
 
+		printf("%.8g ", loc[0]);
+
 		render(
 			glyph,
 			ret.pixels(),
@@ -87,6 +89,7 @@ terraformer::ui::font_handling::render(glyph_sequence const& seq)
 			static_cast<uint32_t>(loc[1] + 0.5f)
 		);
 	}
+	putchar('\n');
 
 	return ret;
 }

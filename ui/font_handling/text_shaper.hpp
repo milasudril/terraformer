@@ -130,13 +130,12 @@ namespace terraformer::ui::font_handling
 			// TODO: Search backwards (no need to have an inner loop?)
 			auto const find_iter = std::ranges::find(seq.input_indices(), index);
 			if(find_iter == std::end(seq.input_indices()))
-			{
-				printf("Not found\n");
-				continue;
-			}
+			{ continue; }
 
 			glyph_sequence::index_type const i{static_cast<size_t>(find_iter - std::begin(seq.input_indices()))};
 			auto const& glyph = *seq.glyph_pointers()[i];
+
+			printf("%zu maps to %zu  %.8g\n", index, i.get(), seq.locations()[i][0]);
 
 			return std::optional{
 				glyph_geometry{

@@ -4,6 +4,7 @@
 
 void terraformer::ui::widgets::single_line_text_input::regenerate_text_mask()
 {
+	puts("========================");
 	font_handling::text_shaper shaper{};
 
 	// TODO: Add support for different scripts, direction, and languages
@@ -16,6 +17,7 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_text_mask()
 	m_rendered_text = render(m_glyphs);
 	m_dirty_bits &= ~text_dirty;
 	m_dirty_bits |= host_textures_dirty;
+	puts("===============================");
 }
 
 void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
@@ -52,7 +54,7 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	{
 		auto const geom = input_index_to_location(m_glyphs, m_insert_offset)
 			.value_or(font_handling::glyph_geometry{});
-		auto cursor_loc_temp = geom.loc + geom.advance;
+		auto cursor_loc_temp = geom.loc;
 		cursor_loc = cursor_loc_temp[0];
 		printf("%.8g %.8g\n", cursor_loc_temp[0], cursor_loc_temp[1]);
 	}
