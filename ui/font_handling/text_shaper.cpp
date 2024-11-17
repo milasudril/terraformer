@@ -114,11 +114,22 @@ terraformer::ui::font_handling::find_glyph_index_range(
 
 	printf("Looking for glyhs in range %zu %zu\n", selection.front(), selection.back() + 1);
 	auto const indices = seq.input_indices();
-	auto const i_start = std::ranges::find(indices, selection.front());
+	auto const i_start = std::ranges::find_if(
+		std::ranges::reverse_view{indices},
+		[search_for = selection.front()](auto val){
+			return val <= search_for;
+		}
+	).base() - 1;
 	if(i_start == std::end(indices))
 	{  return ret_type{}; }
 
-	auto i_end = std::find(i_start + 1, std::end(indices), selection.back() + 1);
+	auto i_end = std::find_if(
+		i_start + 1,
+		std::end(indices),
+		[search_for = selection.back() + 1](auto val){
+			return val >= search_for;
+		}
+	);
 	return ret_type{
 		glyph_sequence::index_type{static_cast<size_t>(i_start - std::begin(indices))},
 		glyph_sequence::index_type{static_cast<size_t>(i_end - std::begin(indices))},
