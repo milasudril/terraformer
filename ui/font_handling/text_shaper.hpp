@@ -121,8 +121,17 @@ namespace terraformer::ui::font_handling
 		displacement advance;
 	};
 
+	index_range<glyph_sequence::index_type>
+	find_glyph_index_range(glyph_sequence const& seq, index_range<size_t> selection);
+
 	inline auto input_index_to_location(glyph_sequence const& seq, size_t index)
 	{
+		printf("Looking for index %zu: ", index);
+		for(auto i : seq.input_indices())
+		{ printf("%zu ", i); }
+		putchar('\n');
+
+		// TODO: Caller wants index *and* index + 1, to get the bounding box of the selected glyph
 		while(index != 0)
 		{
 			--index;

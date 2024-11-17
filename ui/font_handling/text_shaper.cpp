@@ -2,6 +2,8 @@
 
 #include "./text_shaper.hpp"
 
+#include <algorithm>
+
 terraformer::span_2d_extents
 terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 {
@@ -92,4 +94,33 @@ terraformer::ui::font_handling::render(glyph_sequence const& seq)
 	putchar('\n');
 
 	return ret;
+}
+
+terraformer::index_range<terraformer::ui::font_handling::glyph_sequence::index_type>
+terraformer::ui::font_handling::find_glyph_index_range(
+	glyph_sequence const& seq,
+	index_range<size_t> selection
+)
+{
+
+	using ret_type = index_range<glyph_sequence::index_type>;
+	if(selection.empty())
+	{ return ret_type{}; }
+
+	for(auto i : seq.input_indices())
+	{ printf("%zu ", i); }
+	putchar('\n');
+
+
+	printf("Looking for glyhs in range %zu %zu\n", selection.front(), selection.back() + 1);
+	auto const indices = seq.input_indices();
+	auto const i_start = std::ranges::find(indices, selection.front());
+	if(i_start == std::end(indices))
+	{  return ret_type{}; }
+
+	auto i_end = std::find(i_start + 1, std::end(indices), selection.back() + 1);
+	return ret_type{
+		glyph_sequence::index_type{static_cast<size_t>(i_start - std::begin(indices))},
+		glyph_sequence::index_type{static_cast<size_t>(i_end - std::begin(indices))},
+	};
 }

@@ -106,6 +106,8 @@ namespace terraformer
 			T m_current;
 		};
 
+		constexpr index_range() = default;
+
 		constexpr explicit index_range(T starts_at, T bound) noexcept:
 			m_starts_at{starts_at},
 			m_bound{bound}
@@ -121,7 +123,7 @@ namespace terraformer
 		constexpr bool operator!=(index_range const&) const noexcept = default;
 
 		constexpr bool empty() const noexcept
-		{ return m_starts_at != m_bound; }
+		{ return m_starts_at == m_bound; }
 
 		constexpr auto size() const noexcept
 		{ return m_bound - m_starts_at; }
@@ -139,8 +141,8 @@ namespace terraformer
 		{ return m_starts_at; }
 
 	private:
-		T m_starts_at;
-		T m_bound;
+		T m_starts_at{};
+		T m_bound{};
 	};
 
 	template<class T, class Rep = size_t>
