@@ -108,6 +108,9 @@ namespace terraformer::ui::font_handling
 		auto glyph_count() const
 		{ return std::size(m_content).get(); }
 
+		[[nodiscard]] bool empty() const
+		{ return m_content.empty(); }
+
 	private:
 		storage_type m_content;
 		span_2d_extents m_extents;

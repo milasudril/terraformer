@@ -53,14 +53,24 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	auto cursor_loc = 0.0f;
 	{
 		printf("%zu\n", m_insert_offset);
-		auto const glyph_range = find_glyph_index_range(
-			m_glyphs,
-			m_insert_offset != 0 ?
-				index_range<size_t>{m_insert_offset - 1, m_insert_offset}:
-				index_range{m_insert_offset, m_insert_offset}
-		);
+		if(!m_glyphs.empty())
+		{
+			auto const glyph_range = find_glyph_index_range(
+				m_glyphs,
+				m_insert_offset != 0 ?
+					index_range<size_t>{m_insert_offset - 1, m_insert_offset}:
+					index_range{m_insert_offset, m_insert_offset}
+			);
 
-		printf("Found range %zu %zu\n", (*glyph_range.begin()).get(), (*glyph_range.end()).get());
+			auto const locations = m_glyphs.locations();
+			cursor_loc = (std::end(glyph_range) == std::end(m_glyphs.element_indices())?
+				locations[m_glyphs.element_indices().back()]:
+				locations[*std::end(glyph_range)])[0];
+
+			{ puts("Hej"); }
+
+			printf("Found range %zu %zu\n", (*glyph_range.begin()).get(), (*glyph_range.end()).get());
+		}
 
 #if 0
 		auto const geom = input_index_to_location(m_glyphs, m_insert_offset)
