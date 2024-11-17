@@ -126,44 +126,6 @@ namespace terraformer::ui::font_handling
 
 	index_range<glyph_sequence::index_type>
 	find_glyph_index_range(glyph_sequence const& seq, index_range<size_t> selection);
-
-	inline auto input_index_to_location(glyph_sequence const& seq, size_t index)
-	{
-		printf("Looking for index %zu: ", index);
-		for(auto i : seq.input_indices())
-		{ printf("%zu ", i); }
-		putchar('\n');
-
-		// TODO: Caller wants index *and* index + 1, to get the bounding box of the selected glyph
-		while(index != 0)
-		{
-			--index;
-
-			// TODO: Search backwards (no need to have an inner loop?)
-			auto const find_iter = std::ranges::find(seq.input_indices(), index);
-			if(find_iter == std::end(seq.input_indices()))
-			{ continue; }
-
-			glyph_sequence::index_type const i{static_cast<size_t>(find_iter - std::begin(seq.input_indices()))};
-			auto const& glyph = *seq.glyph_pointers()[i];
-
-			printf("%zu maps to %zu  %.8g\n", index, i.get(), seq.locations()[i][0]);
-
-			return std::optional{
-				glyph_geometry{
-					.loc = seq.locations()[i],
-					.advance = displacement{
-						static_cast<float>(glyph.image.width()),
-						static_cast<float>(glyph.image.height()),
-						0.0f
-					}
-				}
-			};
-		}
-		return std::optional<glyph_geometry>{};
-	}
-
-
 	class text_shaper
 	{
 	public:
