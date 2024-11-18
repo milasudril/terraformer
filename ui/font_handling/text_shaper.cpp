@@ -130,6 +130,8 @@ terraformer::ui::font_handling::find_glyph_index_range(
 	);
 	return glyph_index_range{
 		glyph_sequence::index_type{static_cast<size_t>(i_start - std::begin(indices))},
-		glyph_sequence::index_type{static_cast<size_t>(i_end - std::begin(indices))},
+		i_end == std::end(indices) ?
+			glyph_sequence::npos:
+			glyph_sequence::index_type{static_cast<size_t>(i_end - std::begin(indices))},
 	};
 }
