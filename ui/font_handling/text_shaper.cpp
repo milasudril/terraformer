@@ -96,16 +96,14 @@ terraformer::ui::font_handling::render(glyph_sequence const& seq)
 	return ret;
 }
 
-terraformer::index_range<terraformer::ui::font_handling::glyph_sequence::index_type>
+terraformer::ui::font_handling::glyph_index_range
 terraformer::ui::font_handling::find_glyph_index_range(
 	glyph_sequence const& seq,
 	index_range<size_t> selection
 )
 {
-
-	using ret_type = index_range<glyph_sequence::index_type>;
 	if(selection.empty())
-	{ return ret_type{}; }
+	{ return glyph_index_range{}; }
 
 	for(auto i : seq.input_indices())
 	{ printf("%zu ", i); }
@@ -121,7 +119,7 @@ terraformer::ui::font_handling::find_glyph_index_range(
 		}
 	).base() - 1;
 	if(i_start == std::end(indices))
-	{  return ret_type{}; }
+	{  return glyph_index_range{}; }
 
 	auto i_end = std::find_if(
 		i_start + 1,
@@ -130,7 +128,7 @@ terraformer::ui::font_handling::find_glyph_index_range(
 			return val >= search_for;
 		}
 	);
-	return ret_type{
+	return glyph_index_range{
 		glyph_sequence::index_type{static_cast<size_t>(i_start - std::begin(indices))},
 		glyph_sequence::index_type{static_cast<size_t>(i_end - std::begin(indices))},
 	};

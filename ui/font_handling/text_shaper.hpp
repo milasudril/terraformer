@@ -88,6 +88,8 @@ namespace terraformer::ui::font_handling
 		using size_type = storage_type::size_type;
 		using index_type = storage_type::index_type;
 
+		static constexpr auto npos = index_type{static_cast<size_t>(-1)};
+
 		explicit glyph_sequence(shaping_result const&);
 
 		auto element_indices() const
@@ -124,8 +126,15 @@ namespace terraformer::ui::font_handling
 		displacement advance;
 	};
 
-	index_range<glyph_sequence::index_type>
+	struct glyph_index_range
+	{
+		glyph_sequence::index_type begin{glyph_sequence::npos};
+		glyph_sequence::index_type end{glyph_sequence::npos};
+	};
+
+	glyph_index_range
 	find_glyph_index_range(glyph_sequence const& seq, index_range<size_t> selection);
+
 	class text_shaper
 	{
 	public:

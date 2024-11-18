@@ -63,13 +63,11 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 			);
 
 			auto const locations = m_glyphs.locations();
-			cursor_loc = (std::end(glyph_range) == std::end(m_glyphs.element_indices())?
+			cursor_loc = ((glyph_range.end == font_handling::glyph_sequence::npos)?
 				locations[m_glyphs.element_indices().back()]:
-				locations[*std::end(glyph_range)])[0];
+				locations[glyph_range.end])[0];
 
-			{ puts("Hej"); }
-
-			printf("Found range %zu %zu\n", (*glyph_range.begin()).get(), (*glyph_range.end()).get());
+			printf("Found range %zu %zu\n", glyph_range.begin.get(), glyph_range.end.get());
 		}
 
 #if 0
