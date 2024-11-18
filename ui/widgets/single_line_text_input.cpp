@@ -53,13 +53,11 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	auto cursor_loc = 0.0f;
 	{
 		printf("%zu\n", m_insert_offset);
-		if(!m_glyphs.empty())
+		if(!m_glyphs.empty() && m_insert_offset != 0)
 		{
 			auto const glyph_range = find_glyph_index_range(
 				m_glyphs,
-				m_insert_offset != 0 ?
-					index_range<size_t>{m_insert_offset - 1, m_insert_offset}:
-					index_range{m_insert_offset, m_insert_offset}
+				index_range<size_t>{m_insert_offset - 1, m_insert_offset}
 			);
 
 			auto const locations = m_glyphs.locations();
