@@ -4,7 +4,6 @@
 
 void terraformer::ui::widgets::single_line_text_input::regenerate_text_mask()
 {
-	puts("========================");
 	font_handling::text_shaper shaper{};
 
 	// TODO: Add support for different scripts, direction, and languages
@@ -17,7 +16,6 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_text_mask()
 	m_rendered_text = render(m_glyphs);
 	m_dirty_bits &= ~text_dirty;
 	m_dirty_bits |= host_textures_dirty;
-	puts("===============================");
 }
 
 void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
@@ -50,9 +48,9 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
+	// FIXME: This should be a separate function
 	auto cursor_loc = 0.0f;
 	{
-		printf("%zu\n", m_insert_offset);
 		if(!m_glyphs.empty() && m_insert_offset != 0)
 		{
 			auto const glyph_range = find_glyph_index_range(
@@ -61,20 +59,10 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 			);
 
 			auto const locations = m_glyphs.locations();
-			cursor_loc = ((glyph_range.end == font_handling::glyph_sequence::npos)?
-				locations[m_glyphs.element_indices().back()]:
-				locations[glyph_range.end])[0];
-
-			printf("Found range %zu %zu\n", glyph_range.begin.get(), glyph_range.end.get());
+			cursor_loc = (glyph_range.end == font_handling::glyph_sequence::npos)?
+				static_cast<float>(m_glyphs.extents().width):
+				locations[glyph_range.end][0];
 		}
-
-#if 0
-		auto const geom = input_index_to_location(m_glyphs, m_insert_offset)
-			.value_or(font_handling::glyph_geometry{});
-		auto cursor_loc_temp = geom.loc;
-		cursor_loc = cursor_loc_temp[0];
-		printf("%.8g %.8g\n", cursor_loc_temp[0], cursor_loc_temp[1]);
-#endif
 	}
 
 	std::array const bg_tints{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};

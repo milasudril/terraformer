@@ -23,8 +23,12 @@ terraformer::ui::font_handling::compute_extents(shaping_result const& result)
 
 	auto const& renderer = result.renderer.get();
 
+	// FIXME: only if horizontal
 	height = std::max(static_cast<uint32_t>(renderer.get_global_glyph_height()), height);
-	width = std::max(static_cast<uint32_t>(renderer.get_global_glyph_width()), width);
+	width = std::max(1u, width);
+
+	// FIXME: only if vertical
+	// width = std::max(static_cast<uint32_t>(renderer.get_global_glyph_width()), width);
 
 	return span_2d_extents{
 		.width = static_cast<uint32_t>(std::ceil(static_cast<float>(width)/64.0f)),
@@ -82,8 +86,6 @@ terraformer::ui::font_handling::render(glyph_sequence const& seq)
 		auto const& glyph = *glyph_ptrs[item];
 		auto const loc = locations[item];
 
-		printf("%.8g ", loc[0]);
-
 		render(
 			glyph,
 			ret.pixels(),
@@ -91,7 +93,6 @@ terraformer::ui::font_handling::render(glyph_sequence const& seq)
 			static_cast<uint32_t>(loc[1] + 0.5f)
 		);
 	}
-	putchar('\n');
 
 	return ret;
 }
@@ -105,12 +106,6 @@ terraformer::ui::font_handling::find_glyph_index_range(
 	if(selection.empty())
 	{ return glyph_index_range{}; }
 
-	for(auto i : seq.input_indices())
-	{ printf("%zu ", i); }
-	putchar('\n');
-
-
-	printf("Looking for glyhs in range %zu %zu\n", selection.front(), selection.back() + 1);
 	auto const indices = seq.input_indices();
 	auto const i_start = std::ranges::find_if(
 		std::ranges::reverse_view{indices},
