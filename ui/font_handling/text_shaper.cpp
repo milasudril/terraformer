@@ -130,3 +130,21 @@ terraformer::ui::font_handling::find_glyph_index_range(
 			glyph_sequence::index_type{static_cast<size_t>(i_end - std::begin(indices))},
 	};
 }
+
+float terraformer::ui::font_handling::horz_offset_from_index(glyph_sequence const& seq,size_t index)
+{
+	if(index != 0)
+	{
+		auto const glyph_range = find_glyph_index_range(
+			seq,
+			index_range<size_t>{index - 1, index}
+		);
+
+		auto const locations = seq.locations();
+		return (glyph_range.end == font_handling::glyph_sequence::npos)?
+			static_cast<float>(seq.extents().width):
+			locations[glyph_range.end][0];
+	}
+
+	return 0.0f;
+}

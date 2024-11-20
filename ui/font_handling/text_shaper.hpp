@@ -135,6 +135,8 @@ namespace terraformer::ui::font_handling
 	glyph_index_range
 	find_glyph_index_range(glyph_sequence const& seq, index_range<size_t> selection);
 
+	float horz_offset_from_index(glyph_sequence const& seq,size_t index);
+
 	class text_shaper
 	{
 	public:

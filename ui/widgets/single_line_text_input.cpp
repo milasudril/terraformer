@@ -49,21 +49,7 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	{ regenerate_textures(); }
 
 	// FIXME: This should be a separate function
-	auto cursor_loc = 0.0f;
-	{
-		if(m_insert_offset != 0)
-		{
-			auto const glyph_range = find_glyph_index_range(
-				m_glyphs,
-				index_range<size_t>{m_insert_offset - 1, m_insert_offset}
-			);
-
-			auto const locations = m_glyphs.locations();
-			cursor_loc = (glyph_range.end == font_handling::glyph_sequence::npos)?
-				static_cast<float>(m_glyphs.extents().width):
-				locations[glyph_range.end][0];
-		}
-	}
+	auto const cursor_loc = horz_offset_from_index(m_glyphs, m_insert_offset);
 
 	std::array const bg_tints{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
 	if(output_rect.set_widget_background(m_background.get(), bg_tints) != main::set_texture_result::success) [[unlikely]]
