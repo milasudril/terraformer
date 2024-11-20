@@ -51,7 +51,7 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	// FIXME: This should be a separate function
 	auto cursor_loc = 0.0f;
 	{
-		if(!m_glyphs.empty() && m_insert_offset != 0)
+		if(m_insert_offset != 0)
 		{
 			auto const glyph_range = find_glyph_index_range(
 				m_glyphs,
