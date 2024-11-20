@@ -48,7 +48,6 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
-	// FIXME: This should be a separate function
 	auto const cursor_loc = horz_offset_from_index(m_glyphs, m_insert_offset);
 
 	std::array const bg_tints{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
