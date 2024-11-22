@@ -141,7 +141,7 @@ namespace terraformer::ui::drawing_api
 			rect.bg_layer_mask->bind(1);
 			rect.selection_background.texture->bind(2);
 			rect.widget_foreground.texture->bind(3);
-			rect.frame.texture->bind(4);
+			rect.frame.texture->bind(5);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles();
@@ -184,6 +184,7 @@ out vec2 uv;
 out vec4 widget_background_tint;
 out vec4 selection_background_tint;
 out vec4 widget_foreground_tint;
+out vec4 input_marker_tint;
 out vec4 frame_tint;
 
 const vec2 uv_coords[4] = vec2[4](
@@ -209,6 +210,7 @@ void main()
 	widget_background_tint = widget_background_tints[gl_VertexID];
 	selection_background_tint = selection_background_tints[gl_VertexID];
 	widget_foreground_tint = widget_foreground_tints[gl_VertexID];
+	input_marker_tint = input_marker_tints[gl_VertexID];
 	frame_tint = frame_tints[gl_VertexID];
 })"
 			},
@@ -218,7 +220,8 @@ layout (binding = 0) uniform sampler2D widget_background;
 layout (binding = 1) uniform sampler2D bg_layer_mask;
 layout (binding = 2) uniform sampler2D selection_background;
 layout (binding = 3) uniform sampler2D widget_foreground;
-layout (binding = 4) uniform sampler2D frame;
+layout (binding = 4) uniform sampler2D input_marker;
+layout (binding = 5) uniform sampler2D frame;
 layout (location = 25) uniform vec2 fg_offset;
 layout (location = 26) uniform vec2 input_marker_offset;
 
@@ -226,6 +229,7 @@ in vec2 uv;
 in vec4 widget_background_tint;
 in vec4 selection_background_tint;
 in vec4 widget_foreground_tint;
+in vec4 input_marker_tint;
 in vec4 frame_tint;
 
 vec4 sample_scaled(sampler2D tex, vec2 uv)
@@ -249,12 +253,14 @@ void main()
 	float bg_mask = sample_scaled(bg_layer_mask, uv).r;
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
 	vec4 fg_0 = sample_cropped(widget_foreground, uv - fg_offset)*widget_foreground_tint;
-	vec4 fg_1 = texture(frame, uv)*frame_tint;
+	vec4 fg_1 = sample_cropped(input_marker, uv - input_marker_offset)*input_marker_tint;
+	vec4 fg_2 = texture(frame, uv)*frame_tint;
 
 	// This assumes that pre-multiplied alpha is used
 	vec4 result = bg_1 + bg_0*(1 - bg_1.w*bg_mask);
 	result = fg_0 + result*(1 - fg_0.w);
 	result = fg_1 + result*(1 - fg_1.w);
+	result = fg_2 + result*(1 - fg_2.w);
 
 	fragment_color = result;
 })"}
