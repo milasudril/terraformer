@@ -72,6 +72,17 @@ namespace terraformer::ui::drawing_api
 				return main::set_texture_result::success;
 			}
 
+			auto set_input_marker(texture_type const* texture, std::array<rgba_pixel, 4> const& tints, displacement offset)
+			{
+				if(texture == nullptr)
+				{ return main::set_texture_result::incompatible; }
+
+				input_marker.texture = texture;
+				input_marker.tints = tints;
+				input_marker.offset = offset;
+				return main::set_texture_result::success;
+			}
+
 			auto set_frame(texture_type const* texture, std::array<rgba_pixel, 4> const& tints)
 			{
 				if(texture == nullptr)
@@ -86,6 +97,7 @@ namespace terraformer::ui::drawing_api
 			texture_type const* bg_layer_mask;
 			layer selection_background;
 			layer_with_offset widget_foreground;
+			layer_with_offset input_marker;
 			layer frame;
 
 			static gl_texture create_texture()
@@ -113,8 +125,10 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(5, rect.widget_background.tints)
 				.set_uniform(9, rect.selection_background.tints)
 				.set_uniform(13, rect.widget_foreground.tints)
-				.set_uniform(21, rect.widget_foreground.offset[0], rect.widget_foreground.offset[1])
-				.set_uniform(17, rect.frame.tints)
+				.set_uniform(17, rect.input_marker.tints)
+				.set_uniform(21, rect.frame.tints)
+				.set_uniform(25, rect.widget_foreground.offset[0], rect.widget_foreground.offset[1])
+				.set_uniform(26, rect.input_marker.offset[0], rect.input_marker.offset[1])
 				.bind();
 
 			assert(rect.widget_background.texture != nullptr);
@@ -163,7 +177,8 @@ layout (location = 4) uniform vec4 world_scale;
 layout (location = 5) uniform vec4 widget_background_tints[4];
 layout (location = 9) uniform vec4 selection_background_tints[4];
 layout (location = 13) uniform vec4 widget_foreground_tints[4];
-layout (location = 17) uniform vec4 frame_tints[4];
+layout (location = 17) uniform vec4 input_marker_tints[4];
+layout (location = 21) uniform vec4 frame_tints[4];
 
 out vec2 uv;
 out vec4 widget_background_tint;
@@ -204,7 +219,8 @@ layout (binding = 1) uniform sampler2D bg_layer_mask;
 layout (binding = 2) uniform sampler2D selection_background;
 layout (binding = 3) uniform sampler2D widget_foreground;
 layout (binding = 4) uniform sampler2D frame;
-layout (location = 21) uniform vec2 fg_offset;
+layout (location = 25) uniform vec2 fg_offset;
+layout (location = 26) uniform vec2 input_marker_offset;
 
 in vec2 uv;
 in vec4 widget_background_tint;
