@@ -93,5 +93,7 @@ void terraformer::ui::widgets::label::prepare_for_presentation(main::widget_rend
 
 	output_rect.set_widget_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});
 	output_rect.set_bg_layer_mask(m_null_texture.get());
-	output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});	output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
+	output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});
+	output_rect.set_input_marker(m_null_texture.get(), std::array<rgba_pixel, 4>{}, fg_offset);
+	output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
 }

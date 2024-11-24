@@ -107,11 +107,13 @@ namespace terraformer::ui::widgets
 		main::generic_shared_texture m_frame;
 		// TODO: Generate depending on what has been selected
 		main::generic_shared_texture m_selection_mask;
+		main::generic_unique_texture m_input_marker;
 
 		main::fb_size m_current_size;
 		std::optional<std::u8string> m_placeholder;
 		image m_background_host;
 		image m_foreground_host;
+		image m_input_marker_host;
 	};
 }
 

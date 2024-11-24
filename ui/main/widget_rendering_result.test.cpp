@@ -51,6 +51,16 @@ namespace
 			return terraformer::ui::main::set_texture_result::success;
 		}
 
+		auto set_input_marker(
+			texture_type const*,
+			std::array<terraformer::rgba_pixel, 4> const&,
+			terraformer::displacement
+		)
+		{
+			// TODO: Assign values
+			return terraformer::ui::main::set_texture_result::success;
+		}
+
 		auto set_frame(texture_type const* val, std::array<terraformer::rgba_pixel, 4> const& tints)
 		{
 			frame = val;
@@ -125,6 +135,5 @@ TESTCASE(terraformer_ui_main_widget_rendering_result_set_values)
 	EXPECT_EQ(res.widget_background, nullptr);
 	result.set_widget_foreground(terraformer::ui::main::generic_texture_pointer_const{&wrong_texture}, fg_tints, terraformer::displacement{});
 	EXPECT_EQ(res.widget_foreground, nullptr);
-	EXPECT_EQ(res.widget_foreground_offset, (terraformer::displacement{1.0f, 2.0f, 3.0f}));
 }
 

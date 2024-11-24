@@ -92,6 +92,15 @@ namespace
 				terraformer::ui::main::set_texture_result::success;
 		}
 
+		auto set_input_marker(
+			texture_type const*,
+			std::array<terraformer::rgba_pixel, 4> const&,
+			terraformer::displacement
+		)
+		{
+			return terraformer::ui::main::set_texture_result::success;
+		}
+
 		texture_type const* widget_background;
 		texture_type const* bg_layer_mask;
 		texture_type const* selection_background;

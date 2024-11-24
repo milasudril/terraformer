@@ -104,6 +104,7 @@ void terraformer::ui::widgets::button::prepare_for_presentation(main::widget_ren
 
 	output_rect.set_bg_layer_mask(m_null_texture.get());
 	output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});	output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
+	output_rect.set_input_marker(m_null_texture.get(), std::array<rgba_pixel, 4>{}, fg_offset);
 }
 
 terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget_width_request)

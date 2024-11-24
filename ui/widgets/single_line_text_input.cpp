@@ -35,6 +35,16 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 
 	m_foreground_host = drawing_api::convert_mask(m_rendered_text);
 
+	m_input_marker_host = generate(
+		drawing_api::flat_rectangle{
+			.width = 1u,
+			.height = static_cast<uint32_t>(std::max(1.0f, static_cast<float>(m_current_size.height) - 2.0f*m_margin)),
+			.border_thickness = 0u,
+			.border_color = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+			.fill_color = m_fg_tint
+		}
+	);
+
 	m_dirty_bits &= ~host_textures_dirty;
 	m_dirty_bits |= gpu_textures_dirty;
 }
@@ -69,7 +79,8 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	(void)output_rect.set_selection_background(m_background.get(), sel_tints);
 
 	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	displacement const fg_offset{m_margin - cursor_loc, m_margin, 0.0f};
+	displacement const input_marker_offset{m_margin + cursor_loc, m_margin, 0.0f};
+	displacement const fg_offset{m_margin, m_margin, 0.0f};
 	if(
 		output_rect.set_widget_foreground(
 			m_foreground.get(),
@@ -90,11 +101,24 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 		m_dirty_bits |= gpu_textures_dirty;
 	}
 
+	if(
+		output_rect.set_input_marker(
+			m_input_marker.get(),
+			fg_tints,
+			input_marker_offset
+		) != main::set_texture_result::success
+	) [[unlikely]]
+	{
+		m_input_marker = output_rect.create_texture();
+		(void)output_rect.set_input_marker(m_input_marker.get(), fg_tints, input_marker_offset);
+	}
+
 	// TODO: Only upload relevant textures
 	if(m_dirty_bits & gpu_textures_dirty)
 	{
 		m_background.upload(std::as_const(m_background_host).pixels());
 		m_foreground.upload(std::as_const(m_foreground_host).pixels());
+		m_input_marker.upload(std::as_const(m_input_marker_host).pixels());
 		m_dirty_bits &= ~gpu_textures_dirty;
 	}
 }

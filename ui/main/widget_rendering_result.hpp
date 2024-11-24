@@ -47,6 +47,13 @@ namespace terraformer::ui::main
 		)
 		{ return m_vtable->set_frame(m_pointer, texture, tints); }
 
+		set_texture_result set_input_marker(
+			generic_texture_pointer_const texture,
+			std::array<rgba_pixel, 4> const& tints,
+			displacement offset
+		)
+		{ return m_vtable->set_input_marker(m_pointer, texture, tints, offset); }
+
 	private:
 		struct vtable
 		{
@@ -63,6 +70,7 @@ namespace terraformer::ui::main
 			set_texture_result (*set_bg_layer_mask)(void*, generic_texture_pointer_const);
 			set_layer_callback<> set_selection_background;
 			set_layer_callback<displacement> set_widget_foreground;
+			set_layer_callback<displacement> set_input_marker;
 			set_layer_callback<> set_frame;
 		};
 
@@ -87,6 +95,18 @@ namespace terraformer::ui::main
 				displacement offset
 			){
 				return static_cast<T*>(obj)->set_widget_foreground(
+					texture.get_if<typename T::texture_type>(),
+					tints,
+					offset
+				);
+			},
+			.set_input_marker =  [](
+				void* obj,
+				generic_texture_pointer_const texture,
+				std::array<rgba_pixel, 4> const& tints,
+				displacement offset
+			){
+				return static_cast<T*>(obj)->set_input_marker(
 					texture.get_if<typename T::texture_type>(),
 					tints,
 					offset

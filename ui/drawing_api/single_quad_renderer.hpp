@@ -135,12 +135,14 @@ namespace terraformer::ui::drawing_api
 			assert(rect.bg_layer_mask != nullptr);
 			assert(rect.selection_background.texture != nullptr);
 			assert(rect.widget_foreground.texture != nullptr);
+			assert(rect.input_marker.texture != nullptr);
 			assert(rect.frame.texture != nullptr);
 
 			rect.widget_background.texture->bind(0);
 			rect.bg_layer_mask->bind(1);
 			rect.selection_background.texture->bind(2);
 			rect.widget_foreground.texture->bind(3);
+			rect.input_marker.texture->bind(4);
 			rect.frame.texture->bind(5);
 
 			m_mesh.bind();
