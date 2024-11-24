@@ -17,6 +17,44 @@ namespace terraformer::ui::widgets
 	class single_line_text_input:public main::widget_with_default_actions
 	{
 	public:
+		class selection_range
+		{
+		public:
+			explicit selection_range() = default;
+
+			explicit selection_range(size_t begin, size_t end):m_begin{begin}, m_end{end}
+			{
+				if (begin > end)
+				{ throw std::runtime_error{"Invalid selection range from"}; }
+			}
+
+			void extend_left()
+			{ clamped_decrement(m_begin, 0); }
+
+			void shrink_left()
+			{ clamped_increment(m_begin, m_end); }
+
+			void extend_right(size_t maxval)
+			{ clamped_increment(m_end, maxval); }
+
+			void shrink_right()
+			{ clamped_decrement(m_end, m_begin); }
+
+			bool empty() const { return m_begin == m_end; }
+
+			size_t begin() const { return m_begin; }
+
+			size_t end() const { return m_end; }
+
+			bool operator==(selection_range const&) const = default;
+
+			bool operator!=(selection_range const&) const = default;
+
+		private:
+			size_t m_begin{0};
+			size_t m_end{0};
+		};
+
 		using widget_with_default_actions::handle_event;
 
 		void handle_event(main::keyboard_focus_enter_event, main::window_ref, main::ui_controller)
@@ -96,6 +134,10 @@ namespace terraformer::ui::widgets
 
 		std::u32string m_value;
 		size_t m_insert_offset = 0;
+		std::optional<selection_range> m_sel_range;
+		size_t m_selection_begin = 0;
+		size_t m_selection_end = 0;
+
 		font_handling::glyph_sequence m_glyphs;
 		basic_image<uint8_t> m_rendered_text;
 		static constexpr auto text_dirty = 0x1;
