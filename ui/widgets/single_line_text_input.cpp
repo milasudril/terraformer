@@ -79,8 +79,11 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	(void)output_rect.set_selection_background(m_background.get(), sel_tints);
 
 	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	displacement const input_marker_offset{m_margin + cursor_loc, m_margin, 0.0f};
-	displacement const fg_offset{m_margin, m_margin, 0.0f};
+	auto const w_max = static_cast<float>(m_background_host.width()) - 2.0f*m_margin;
+	displacement const input_marker_offset{std::min(cursor_loc, w_max) + m_margin , m_margin, 0.0f};
+	auto const horz_fg_offset = cursor_loc >= w_max?
+		w_max + m_margin - cursor_loc: m_margin;
+	displacement const fg_offset{horz_fg_offset, m_margin, 0.0f};
 	if(
 		output_rect.set_widget_foreground(
 			m_foreground.get(),
