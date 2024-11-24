@@ -110,7 +110,7 @@ int main(int, char**)
 	cancel.text(u8"Cancel");
 
 	terraformer::ui::widgets::single_line_text_input my_input;
-//	my_input.use_size_from_placeholder(u8"Write your text here");
+	my_input.use_size_from_placeholder(u8"Write your text here");
 
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
