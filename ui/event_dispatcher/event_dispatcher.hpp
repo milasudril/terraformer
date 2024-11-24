@@ -182,6 +182,8 @@ namespace terraformer::ui::main
 
 			try_dispatch(keyboard_focus_enter_event{}, m_flat_collection.attributes(), new_widget, window, ui_controller{*this});
 
+			try_dispatch(keyboard_focus_leave_event{}, m_flat_collection.attributes(), m_keyboard_widget, window, ui_controller{*this});
+
 			m_keyboard_widget = new_widget;
 		}
 

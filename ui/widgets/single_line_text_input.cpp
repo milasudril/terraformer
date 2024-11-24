@@ -94,23 +94,29 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 		m_dirty_bits |= gpu_textures_dirty;
 	}
 
-	if(output_rect.set_frame(m_frame.get(), fg_tints) != main::set_texture_result::success) [[unlikely]]
-	{
-		m_frame = output_rect.create_texture();
-		(void)output_rect.set_frame(m_frame.get(), fg_tints);
-		m_dirty_bits |= gpu_textures_dirty;
-	}
-
+	std::array const input_marker_tints{
+		m_fg_tint*m_cursor_intensity,
+		m_fg_tint*m_cursor_intensity,
+		m_fg_tint*m_cursor_intensity,
+		m_fg_tint*m_cursor_intensity
+	};
 	if(
 		output_rect.set_input_marker(
 			m_input_marker.get(),
-			fg_tints,
+			input_marker_tints,
 			input_marker_offset
 		) != main::set_texture_result::success
 	) [[unlikely]]
 	{
 		m_input_marker = output_rect.create_texture();
-		(void)output_rect.set_input_marker(m_input_marker.get(), fg_tints, input_marker_offset);
+		(void)output_rect.set_input_marker(m_input_marker.get(), input_marker_tints, input_marker_offset);
+	}
+
+	if(output_rect.set_frame(m_frame.get(), fg_tints) != main::set_texture_result::success) [[unlikely]]
+	{
+		m_frame = output_rect.create_texture();
+		(void)output_rect.set_frame(m_frame.get(), fg_tints);
+		m_dirty_bits |= gpu_textures_dirty;
 	}
 
 	// TODO: Only upload relevant textures

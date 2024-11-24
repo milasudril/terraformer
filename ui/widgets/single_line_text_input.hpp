@@ -19,6 +19,15 @@ namespace terraformer::ui::widgets
 	public:
 		using widget_with_default_actions::handle_event;
 
+		void handle_event(main::keyboard_focus_enter_event, main::window_ref, main::ui_controller)
+		{ m_cursor_intensity = 1.0f; }
+
+		void handle_event(main::keyboard_focus_leave_event, main::window_ref, main::ui_controller)
+		{
+			// TODO: This should be read from ui config
+			m_cursor_intensity = 0.6125f;
+		}
+
 		template<class Function>
 		single_line_text_input& on_value_changed(Function&& func)
 		{
@@ -99,6 +108,7 @@ namespace terraformer::ui::widgets
 		rgba_pixel m_bg_tint;
 		rgba_pixel m_sel_tint;
 		rgba_pixel m_fg_tint;
+		float m_cursor_intensity = 0.6125f;
 
 		main::generic_unique_texture m_background;
 		// TODO: Move frame from foreground texture to frame texture
