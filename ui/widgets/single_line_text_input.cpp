@@ -170,10 +170,24 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 		{ printf("Browse forward\n"); }
 		else
 		if(event.scancode == 0x69)
-		{ clamped_decrement(m_insert_offset, 0); }
+		{
+			if((event.modifiers & main::modifier_keys::shift) == main::modifier_keys::shift)
+			{ step_selection_left(); }
+			else
+			{ clear_selection(); }
+			printf("%zu %zu\n", m_sel_range.begin(), m_sel_range.end());
+			clamped_decrement(m_insert_offset, 0);
+		}
 		else
 		if(event.scancode == 0x6a)
-		{ clamped_increment(m_insert_offset, std::size(m_value)); }
+		{
+			if((event.modifiers & main::modifier_keys::shift) == main::modifier_keys::shift)
+			{ step_selection_right(); }
+			else
+			{ clear_selection(); }
+			printf("%zu %zu\n", m_sel_range.begin(), m_sel_range.end());
+			clamped_increment(m_insert_offset, std::size(m_value));
+		}
 		else
 		{
 			printf("%08x\n", event.scancode);

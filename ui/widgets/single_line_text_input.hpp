@@ -50,6 +50,9 @@ namespace terraformer::ui::widgets
 
 			bool operator!=(selection_range const&) const = default;
 
+			void clear()
+			{ *this = selection_range{}; }
+
 		private:
 			size_t m_begin{0};
 			size_t m_end{0};
@@ -122,6 +125,38 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
+		void step_selection_left()
+		{
+			if(m_sel_range.begin() == m_sel_range.end())
+			{ m_sel_range = selection_range{m_insert_offset, m_insert_offset}; }
+
+			if(m_sel_range.begin() == m_insert_offset)
+			{ m_sel_range.extend_left(); }
+			else
+			{ m_sel_range.shrink_right(); }
+
+			m_dirty_bits |= sel_mask_dirty;
+		}
+
+		void step_selection_right()
+		{
+			if(m_sel_range.begin() == m_sel_range.end())
+			{ m_sel_range = selection_range{m_insert_offset, m_insert_offset}; }
+
+			if(m_sel_range.end() == m_insert_offset)
+			{ m_sel_range.extend_right(std::size(m_value)); }
+			else
+			{ m_sel_range.shrink_left(); }
+
+			m_dirty_bits |= sel_mask_dirty;
+		}
+
+		void clear_selection()
+		{
+			m_sel_range.clear();
+			m_dirty_bits |= sel_mask_dirty;
+		}
+
 	private:
 		void update_insert_offset(std::u32string::iterator new_pos)
 		{ update_insert_offset(std::distance(std::begin(m_value), new_pos)); }
@@ -134,16 +169,15 @@ namespace terraformer::ui::widgets
 
 		std::u32string m_value;
 		size_t m_insert_offset = 0;
-		std::optional<selection_range> m_sel_range;
-		size_t m_selection_begin = 0;
-		size_t m_selection_end = 0;
+		selection_range m_sel_range{};
 
 		font_handling::glyph_sequence m_glyphs;
 		basic_image<uint8_t> m_rendered_text;
 		static constexpr auto text_dirty = 0x1;
 		static constexpr auto host_textures_dirty = 0x2;
 		static constexpr auto gpu_textures_dirty = 0x4;
-		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
+		static constexpr auto sel_mask_dirty = 0x8;
+		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty | sel_mask_dirty;
 		float m_margin = 0;
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
