@@ -32,7 +32,7 @@ namespace terraformer::ui::theming
 	constexpr auto default_bright_palette = sample_colormap<12>(bright_colors);
 
 	constexpr auto error_hue = 0.0f;
-	constexpr auto warning_hue = 1.0f/6.0f;
+	constexpr auto warning_hue = 1.0f/4.0f;
 	constexpr auto result_pending_hue = 1.0f/3.0f;
 	constexpr auto ok_hue = 1.0f/2.0f;
 	constexpr auto ready_hue = 1.0f/2.0f;
