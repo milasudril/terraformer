@@ -45,6 +45,22 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 		}
 	);
 
+	// TODO: Selection mask should be grayscale
+	auto const sel_begin = horz_offset_from_index(m_glyphs, m_sel_range.begin());
+	auto const sel_end = horz_offset_from_index(m_glyphs, m_sel_range.end());
+
+	printf("%.8g %.8g\n", sel_begin, sel_end);
+
+	m_selection_mask_host = generate(
+		drawing_api::flat_rectangle{
+			.width = static_cast<uint32_t>(std::max(sel_end - sel_begin, 1.0f)),
+			.height = static_cast<uint32_t>(m_current_size.height),
+			.border_thickness = 0u,
+			.border_color = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+			.fill_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+		}
+	);
+
 	m_dirty_bits &= ~host_textures_dirty;
 	m_dirty_bits |= gpu_textures_dirty;
 }
@@ -71,7 +87,7 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	if(output_rect.set_bg_layer_mask(m_selection_mask.get()) != main::set_texture_result::success) [[unlikely]]
 	{
 		m_selection_mask = output_rect.create_texture();
-		(void)output_rect.set_bg_layer_mask(m_foreground.get());
+		(void)output_rect.set_bg_layer_mask(m_selection_mask.get());
 		m_dirty_bits |= gpu_textures_dirty;
 	}
 
@@ -128,6 +144,7 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 		m_background.upload(std::as_const(m_background_host).pixels());
 		m_foreground.upload(std::as_const(m_foreground_host).pixels());
 		m_input_marker.upload(std::as_const(m_input_marker_host).pixels());
+		m_selection_mask.upload(std::as_const(m_selection_mask_host).pixels());
 		m_dirty_bits &= ~gpu_textures_dirty;
 	}
 }
@@ -175,7 +192,6 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 			{ step_selection_left(); }
 			else
 			{ clear_selection(); }
-			printf("%zu %zu\n", m_sel_range.begin(), m_sel_range.end());
 			clamped_decrement(m_insert_offset, 0);
 		}
 		else
@@ -185,7 +201,6 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 			{ step_selection_right(); }
 			else
 			{ clear_selection(); }
-			printf("%zu %zu\n", m_sel_range.begin(), m_sel_range.end());
 			clamped_increment(m_insert_offset, std::size(m_value));
 		}
 		else
@@ -269,7 +284,6 @@ void terraformer::ui::widgets::single_line_text_input::theme_updated(main::confi
 	m_bg_tint = cfg.input_area.colors.background;
 	m_sel_tint = cfg.input_area.colors.selection;
 	m_fg_tint = cfg.input_area.colors.foreground;
-	m_selection_mask = cfg.misc_textures.null;
 	m_frame = cfg.misc_textures.null;
 	m_border_thickness = static_cast<uint32_t>(cfg.input_area.border_thickness);
 	m_dirty_bits |= host_textures_dirty | text_dirty;

@@ -252,7 +252,7 @@ vec4 sample_cropped(sampler2D tex, vec2 uv)
 void main()
 {
 	vec4 bg_0 = sample_scaled(widget_background, uv)*widget_background_tint;
-	float bg_mask = sample_scaled(bg_layer_mask, uv).r;
+	float bg_mask = sample_cropped(bg_layer_mask, uv - fg_offset).r;
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
 	vec4 fg_0 = sample_cropped(widget_foreground, uv - fg_offset)*widget_foreground_tint;
 	vec4 fg_1 = sample_cropped(input_marker, uv - input_marker_offset)*input_marker_tint;

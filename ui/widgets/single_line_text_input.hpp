@@ -135,7 +135,7 @@ namespace terraformer::ui::widgets
 			else
 			{ m_sel_range.shrink_right(); }
 
-			m_dirty_bits |= sel_mask_dirty;
+			m_dirty_bits |= host_textures_dirty;
 		}
 
 		void step_selection_right()
@@ -148,13 +148,13 @@ namespace terraformer::ui::widgets
 			else
 			{ m_sel_range.shrink_left(); }
 
-			m_dirty_bits |= sel_mask_dirty;
+			m_dirty_bits |= host_textures_dirty;
 		}
 
 		void clear_selection()
 		{
 			m_sel_range.clear();
-			m_dirty_bits |= sel_mask_dirty;
+			m_dirty_bits |= host_textures_dirty;
 		}
 
 	private:
@@ -176,8 +176,7 @@ namespace terraformer::ui::widgets
 		static constexpr auto text_dirty = 0x1;
 		static constexpr auto host_textures_dirty = 0x2;
 		static constexpr auto gpu_textures_dirty = 0x4;
-		static constexpr auto sel_mask_dirty = 0x8;
-		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty | sel_mask_dirty;
+		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
 		float m_margin = 0;
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
@@ -191,8 +190,8 @@ namespace terraformer::ui::widgets
 		main::generic_unique_texture m_foreground;
 		// TODO: Frame should be should show the current frame
 		main::generic_shared_texture m_frame;
-		// TODO: Generate depending on what has been selected
-		main::generic_shared_texture m_selection_mask;
+		// TODO: Selection mask should be grayscale
+		main::generic_unique_texture m_selection_mask;
 		main::generic_unique_texture m_input_marker;
 
 		main::fb_size m_current_size;
@@ -200,6 +199,7 @@ namespace terraformer::ui::widgets
 		image m_background_host;
 		image m_foreground_host;
 		image m_input_marker_host;
+		image m_selection_mask_host;
 	};
 }
 
