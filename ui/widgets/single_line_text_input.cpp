@@ -25,6 +25,12 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 
 	m_background_host = generate(
 		drawing_api::flat_rectangle{
+			.domain_size = span_2d_extents {
+				.width = static_cast<uint32_t>(m_current_size.width),
+				.height = static_cast<uint32_t>(m_current_size.height)
+			},
+			.origin_x = 0u,
+			.origin_y = 0u,
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
@@ -37,6 +43,12 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 
 	m_input_marker_host = generate(
 		drawing_api::flat_rectangle{
+			.domain_size = span_2d_extents {
+				.width = static_cast<uint32_t>(m_current_size.width),
+				.height = static_cast<uint32_t>(m_current_size.height)
+			},
+			.origin_x = 0u,
+			.origin_y = 0u,
 			.width = 1u,
 			.height = static_cast<uint32_t>(std::max(1.0f, static_cast<float>(m_current_size.height) - 2.0f*m_margin)),
 			.border_thickness = 0u,
@@ -53,6 +65,12 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 
 	m_selection_mask_host = generate(
 		drawing_api::flat_rectangle{
+			.domain_size = span_2d_extents {
+				.width = static_cast<uint32_t>(m_current_size.width),
+				.height = static_cast<uint32_t>(m_current_size.height)
+			},
+			.origin_x = 0u,
+			.origin_y = 0u,
 			.width = static_cast<uint32_t>(std::max(sel_end - sel_begin, 1.0f)),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = 0u,
