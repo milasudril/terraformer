@@ -174,10 +174,23 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
 {
 	if(event.scancode == 0x66 && event.action == main::keyboard_button_action::press)
-	{ update_insert_offset(0); }
+	{
+		if((event.modifiers & main::modifier_keys::shift) == main::modifier_keys::shift)
+		{ select_from_cursor_to_begin(); }
+		else
+		{ clear_selection(); }
+		update_insert_offset(0);
+
+	}
 	else
 	if(event.scancode == 0x6b && event.action == main::keyboard_button_action::press)
-	{ update_insert_offset(std::size(m_value)); }
+	{
+		if((event.modifiers & main::modifier_keys::shift) == main::modifier_keys::shift)
+		{ select_from_cursor_to_end(); }
+		else
+		{ clear_selection(); }
+		update_insert_offset(std::size(m_value));
+	}
 	else
 	if(
 		event.action == main::keyboard_button_action::press
