@@ -59,9 +59,11 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 
 	// TODO: Selection mask should be grayscale
 	auto const sel_begin = horz_offset_from_index(m_glyphs, m_sel_range.begin());
-	auto const sel_end = horz_offset_from_index(m_glyphs, m_sel_range.end());
+	// Add one to get inclusive boundaries
+	auto const sel_end = horz_offset_from_index(m_glyphs, m_sel_range.end()) + 1.0f;
 
-	printf("%.8g %.8g\n", sel_begin, sel_end);
+	printf("begin = %zu, end = %zu, cursor = %zu\n", m_sel_range.begin(), m_sel_range.end(), m_insert_offset);
+	printf("sel_begin = %.8g, sel_end = %.8g\n", sel_begin, sel_end);
 
 	m_selection_mask_host = generate(
 		drawing_api::flat_rectangle{
@@ -69,10 +71,12 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 				.width = static_cast<uint32_t>(m_current_size.width),
 				.height = static_cast<uint32_t>(m_current_size.height)
 			},
-			.origin_x = 0u,
-			.origin_y = 0u,
-			.width = static_cast<uint32_t>(std::max(sel_end - sel_begin, 1.0f)),
-			.height = static_cast<uint32_t>(m_current_size.height),
+			.origin_x = static_cast<uint32_t>(sel_begin + m_margin),
+			.origin_y = static_cast<uint32_t>(m_margin),
+			.width = static_cast<uint32_t>(std::max(sel_end - sel_begin, 1.0f) + 0.5f),
+			.height = static_cast<uint32_t>(
+				std::max(static_cast<int32_t>(m_current_size.height) - static_cast<int32_t>(2.0f*m_margin), 1)
+			),
 			.border_thickness = 0u,
 			.border_color = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
 			.fill_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}

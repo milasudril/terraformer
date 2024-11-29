@@ -27,16 +27,22 @@ terraformer::image terraformer::ui::drawing_api::generate(flat_rectangle const& 
 {
 	auto const w = params.width;
 	auto const h = params.height;
-	image ret{params.width, params.height};
+	image ret{params.domain_size.width, params.domain_size.height};
 	auto const border_thickness = params.border_thickness;
 	auto const border_color = params.border_color;
 	auto const fill_color = params.fill_color;
+	auto const origin_x = params.origin_x;
+	auto const origin_y = params.origin_y;
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		for(uint32_t x = 0; x != w; ++x)
 		{
-			ret(x, y) = (x>=border_thickness && x <= w - (border_thickness + 1)) && (y >= border_thickness && y <= h - (border_thickness + 1)) ? fill_color : border_color;
+			ret(x + origin_x, y + origin_y) =
+				(x>=border_thickness && x <= w - (border_thickness + 1)) &&
+					(y >= border_thickness && y <= h - (border_thickness + 1)) ?
+					fill_color :
+					border_color;
 		}
 	}
 	return ret;
