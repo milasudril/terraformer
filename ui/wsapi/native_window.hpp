@@ -23,6 +23,17 @@ struct terraformer::ui::main::window_traits<GLFWwindow>
 {
 	static void set_title(GLFWwindow& window, char const* new_title)
 	{ glfwSetWindowTitle(&window, new_title); }
+
+	static void set_clipboard_string(GLFWwindow& window, char8_t const* str)
+	{
+		// NOTE: Ok since glfwSetClipboardString actually wants utf8
+		glfwSetClipboardString(&window, reinterpret_cast<char const*>(str));
+	}
+
+	static std::u8string get_clipboard_string(GLFWwindow& window)
+	{
+		return std::u8string{reinterpret_cast<char8_t const*>(glfwGetClipboardString(&window))};
+	}
 };
 
 namespace terraformer::ui::wsapi

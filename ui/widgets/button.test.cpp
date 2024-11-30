@@ -164,6 +164,11 @@ struct terraformer::ui::main::window_traits<dummy_window>
 	{
 		window.title = new_title;
 	}
+
+	static void set_clipboard_string(dummy_window&, char8_t const*){}
+
+	static std::u8string get_clipboard_string(dummy_window const&)
+	{ return std::u8string{}; }
 };
 
 TESTCASE(terraformer_ui_widgets_button_handle_mbe_press_release_button_0_value_false)
