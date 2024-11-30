@@ -93,11 +93,34 @@ terraformer::ui::main::builtin_command_id terraformer::ui::main::to_builtin_comm
 	// Up arrow
 	if(kbe.scancode == 0x67)
 	{
+		if(
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+			&& !shift_pressed
+		)
+		{ return builtin_command_id::step_up; }
+
+		if(
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+			&& shift_pressed
+		)
+		{ return builtin_command_id::select_up; }
 	}
 
 	// Down arrow
 	if(kbe.scancode == 0x6c)
-	{}
+	{
+		if(
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+			&& !shift_pressed
+		)
+		{ return builtin_command_id::step_down; }
+
+		if(
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+			&& shift_pressed
+		)
+		{ return builtin_command_id::select_down; }
+	}
 
 	if(kbe.scancode == 0x1e)
 	{
