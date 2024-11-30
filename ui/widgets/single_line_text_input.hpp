@@ -100,8 +100,17 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::typing_event event, main::window_ref, main::ui_controller)
 		{
+			printf("Handling typing event %zu\n", m_insert_offset);
+			fflush(stdout);
+
 			if(!m_sel_range.empty())
-			{ erase_selected_range(); }
+			{
+				printf("Erasing current selection\n");
+				erase_selected_range();
+			}
+
+			printf("Insert offset is %zu\n", m_insert_offset);
+			fflush(stdout);
 			auto const i = std::begin(m_value) + m_insert_offset;
 			update_insert_offset(m_value.insert(i, event.codepoint) + 1);
 			m_dirty_bits |= text_dirty;
@@ -164,7 +173,7 @@ namespace terraformer::ui::widgets
 			if(m_sel_range.begin() == m_insert_offset)
 			{ m_sel_range = selection_range{0, m_sel_range.end()}; }
 			else
-			{ m_sel_range = selection_range{0, m_insert_offset + 1}; }
+			{ m_sel_range = selection_range{0, m_insert_offset}; }
 			m_dirty_bits |= host_textures_dirty;
 		}
 
@@ -179,6 +188,7 @@ namespace terraformer::ui::widgets
 
 		void erase_selected_range()
 		{
+			printf("Erasing range %zu %zu (size of buffer is %zu)\n", m_sel_range.begin(), m_sel_range.end(), std::size(m_value));
 			m_value.erase(
 				std::begin(m_value) + m_sel_range.begin(),
 				std::begin(m_value) + m_sel_range.end()
