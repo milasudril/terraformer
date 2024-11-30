@@ -199,6 +199,9 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 	{
 		if(event.scancode == 0xe)
 		{
+			if(!m_sel_range.empty())
+			{ erase_selected_range(); }
+			else
 			if(!m_value.empty() && m_insert_offset != 0)
 			{
 				update_insert_offset(m_value.erase(std::begin(m_value) + m_insert_offset - 1));
@@ -208,6 +211,9 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 		else
 		if(event.scancode == 0x6f)
 		{
+			if(!m_sel_range.empty())
+			{ erase_selected_range(); }
+			else
 			if(m_insert_offset != std::size(m_value))
 			{
 				m_value.erase(std::begin(m_value) + m_insert_offset);
@@ -216,10 +222,16 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 		}
 		else
 		if(event.scancode == 0x67)
-		{ printf("Browse back\n"); }
+		{
+			printf("Browse back\n");
+			clear_selection();
+		}
 		else
 		if(event.scancode == 0x6c)
-		{ printf("Browse forward\n"); }
+		{
+			printf("Browse forward\n");
+			clear_selection();
+		}
 		else
 		if(event.scancode == 0x69)
 		{

@@ -100,6 +100,8 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::typing_event event, main::window_ref, main::ui_controller)
 		{
+			if(!m_sel_range.empty())
+			{ erase_selected_range(); }
 			auto const i = std::begin(m_value) + m_insert_offset;
 			update_insert_offset(m_value.insert(i, event.codepoint) + 1);
 			m_dirty_bits |= text_dirty;
@@ -173,6 +175,17 @@ namespace terraformer::ui::widgets
 			else
 			{ m_sel_range = selection_range{m_insert_offset, std::size(m_value)}; }
 			m_dirty_bits |= host_textures_dirty;
+		}
+
+		void erase_selected_range()
+		{
+			m_value.erase(
+				std::begin(m_value) + m_sel_range.begin(),
+				std::begin(m_value) + m_sel_range.end()
+			);
+			m_insert_offset = m_sel_range.begin();
+			m_sel_range.clear();
+			m_dirty_bits |= text_dirty;
 		}
 
 	private:
