@@ -5,6 +5,8 @@
 
 #include "./builtin_command_id.hpp"
 
+#include "lib/common/bitmask_enum.hpp"
+
 namespace terraformer::ui::main
 {
 	enum class modifier_keys

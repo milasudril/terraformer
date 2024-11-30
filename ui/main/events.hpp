@@ -3,7 +3,6 @@
 
 #include "./keyboard_button_event.hpp"
 
-#include "lib/common/bitmask_enum.hpp"
 #include <string>
 #include <cstdint>
 

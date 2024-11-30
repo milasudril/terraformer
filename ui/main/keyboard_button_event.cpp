@@ -2,32 +2,120 @@
 
 #include "./keyboard_button_event.hpp"
 
+#include <cstdio>
+
 terraformer::ui::main::builtin_command_id terraformer::ui::main::to_builtin_command_id(
 	keyboard_button_event const& kbe
 )
 {
-	if(kbe.scancode == 0x39 && kbe.action == keyboard_button_action::press)
-	{ return builtin_command_id::button_press; }
+	auto const shift_pressed = (kbe.modifiers & modifier_keys::shift) == modifier_keys::shift;
+	auto const ctrl_pressed = (kbe.modifiers & modifier_keys::shift) == modifier_keys::control;
 
-	if(kbe.scancode == 0x39 && kbe.action == keyboard_button_action::repeat)
-	{ return builtin_command_id::button_press_repeat; }
+	// Spacebar
+	if(kbe.scancode == 0x39)
+	{
+		if(kbe.action == keyboard_button_action::press)
+		{ return builtin_command_id::button_press; }
 
-	if(kbe.scancode == 0x39 && kbe.action == keyboard_button_action::release)
-	{ return builtin_command_id::button_release; }
+		if(kbe.action == keyboard_button_action::repeat)
+		{ return builtin_command_id::button_press_repeat; }
+
+		if(kbe.action == keyboard_button_action::release)
+		{ return builtin_command_id::button_release; }
+	}
+
+	// Home key
+	if(kbe.scancode == 0x66)
+	{
+		if(kbe.action == keyboard_button_action::press && !shift_pressed)
+		{ return builtin_command_id::go_to_begin; }
+
+		if(kbe.action == keyboard_button_action::press && shift_pressed)
+		{ return builtin_command_id::select_to_begin; }
+	}
+
+	// End key
+	if(kbe.scancode == 0x6b)
+	{
+		if(kbe.action == keyboard_button_action::press && !shift_pressed)
+		{ return builtin_command_id::go_to_end; }
+
+		if(kbe.action == keyboard_button_action::press && shift_pressed)
+		{ return builtin_command_id::select_to_end; }
+	}
+
+	// Backspace
+	if(
+		kbe.scancode == 0xe &&
+		(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+	)
+	{ return builtin_command_id::erase_backwards; }
+
+	// Delete
+	if(
+		kbe.scancode == 0x6f &&
+		(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+	)
+	{ return builtin_command_id::erase_forwards; }
+
+	// Left arrow
+	if(kbe.scancode == 0x69)
+	{
+		if(
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+			&& !shift_pressed
+		)
+		{ return builtin_command_id::step_left; }
+
+		if(
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+			&& shift_pressed
+		)
+		{ return builtin_command_id::select_left; }
+	}
+
+	// Right arrow
+	if(kbe.scancode == 0x6a)
+	{
+		if(
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+			&& !shift_pressed
+		)
+		{ return builtin_command_id::step_right; }
+
+		if(
+			(kbe.action == keyboard_button_action::press || kbe.action == keyboard_button_action::repeat)
+			&& shift_pressed
+		)
+		{ return builtin_command_id::select_right; }
+	}
+
+	// Up arrow
+	if(kbe.scancode == 0x67)
+	{
+	}
+
+	// Down arrow
+	if(kbe.scancode == 0x6c)
+	{}
+
+	if(kbe.scancode == 0x1e)
+	{
+		if(kbe.action == keyboard_button_action::press && ctrl_pressed)
+		{
+			return builtin_command_id::select_all;
+		}
+	}
+
+	// Down arrow
+
+
 
 #if 0
-		button_press,
-		button_release,
-		set_cursor_to_begin,
-		set_cursor_to_end,
 		move_cursor_left,
 		move_cursor_right,
-		select_to_begin,
-		select_to_end,
 		select_left,
 		select_right,
-		erase_backwards,
-		erase_forwards,
 		select_all
 #endif
 	return builtin_command_id::not_builtin;
