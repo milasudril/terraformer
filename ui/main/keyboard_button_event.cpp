@@ -2,14 +2,12 @@
 
 #include "./keyboard_button_event.hpp"
 
-#include <cstdio>
-
 terraformer::ui::main::builtin_command_id terraformer::ui::main::to_builtin_command_id(
 	keyboard_button_event const& kbe
 )
 {
 	auto const shift_pressed = (kbe.modifiers & modifier_keys::shift) == modifier_keys::shift;
-	auto const ctrl_pressed = (kbe.modifiers & modifier_keys::shift) == modifier_keys::control;
+	auto const ctrl_pressed = (kbe.modifiers & modifier_keys::control) == modifier_keys::control;
 
 	// Spacebar
 	if(kbe.scancode == 0x39)
@@ -125,21 +123,8 @@ terraformer::ui::main::builtin_command_id terraformer::ui::main::to_builtin_comm
 	if(kbe.scancode == 0x1e)
 	{
 		if(kbe.action == keyboard_button_action::press && ctrl_pressed)
-		{
-			return builtin_command_id::select_all;
-		}
+		{ return builtin_command_id::select_all; }
 	}
 
-	// Down arrow
-
-
-
-#if 0
-		move_cursor_left,
-		move_cursor_right,
-		select_left,
-		select_right,
-		select_all
-#endif
 	return builtin_command_id::not_builtin;
 }

@@ -173,32 +173,29 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 
 void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
 {
-	if(event.scancode == 0x66 && event.action == main::keyboard_button_action::press)
+	switch(to_builtin_command_id(event))
 	{
-		if((event.modifiers & main::modifier_keys::shift) == main::modifier_keys::shift)
-		{ select_from_cursor_to_begin(); }
-		else
-		{ clear_selection(); }
-		update_insert_offset(0);
+		case main::builtin_command_id::go_to_begin:
+			clear_selection();
+			update_insert_offset(0);
+			return;
 
-	}
-	else
-	if(event.scancode == 0x6b && event.action == main::keyboard_button_action::press)
-	{
-		if((event.modifiers & main::modifier_keys::shift) == main::modifier_keys::shift)
-		{ select_from_cursor_to_end(); }
-		else
-		{ clear_selection(); }
-		update_insert_offset(std::size(m_value));
-	}
-	else
-	if(
-		event.action == main::keyboard_button_action::press
-		|| event.action == main::keyboard_button_action::repeat
-	)
-	{
-		if(event.scancode == 0xe)
-		{
+		case main::builtin_command_id::select_to_begin:
+			select_from_cursor_to_begin();
+			update_insert_offset(0);
+			return;
+
+		case main::builtin_command_id::go_to_end:
+			clear_selection();
+			update_insert_offset(std::size(m_value));
+			return;
+
+		case main::builtin_command_id::select_to_end:
+			select_from_cursor_to_end();
+			update_insert_offset(std::size(m_value));
+			return;
+
+		case main::builtin_command_id::erase_backwards:
 			if(!m_sel_range.empty())
 			{ erase_selected_range(); }
 			else
@@ -207,10 +204,9 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 				update_insert_offset(m_value.erase(std::begin(m_value) + m_insert_offset - 1));
 				m_dirty_bits |= text_dirty;
 			}
-		}
-		else
-		if(event.scancode == 0x6f)
-		{
+			return;
+
+		case main::builtin_command_id::erase_forwards:
 			if(!m_sel_range.empty())
 			{ erase_selected_range(); }
 			else
@@ -219,41 +215,42 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 				m_value.erase(std::begin(m_value) + m_insert_offset);
 				m_dirty_bits |= text_dirty;
 			}
-		}
-		else
-		if(event.scancode == 0x67)
-		{
-			printf("Browse back\n");
+			return;
+
+		case main::builtin_command_id::step_left:
 			clear_selection();
-		}
-		else
-		if(event.scancode == 0x6c)
-		{
-			printf("Browse forward\n");
-			clear_selection();
-		}
-		else
-		if(event.scancode == 0x69)
-		{
-			if((event.modifiers & main::modifier_keys::shift) == main::modifier_keys::shift)
-			{ step_selection_left(); }
-			else
-			{ clear_selection(); }
 			clamped_decrement(m_insert_offset, 0);
-		}
-		else
-		if(event.scancode == 0x6a)
-		{
-			if((event.modifiers & main::modifier_keys::shift) == main::modifier_keys::shift)
-			{ step_selection_right(); }
-			else
-			{ clear_selection(); }
+			return;
+
+		case main::builtin_command_id::select_left:
+			step_selection_left();
+			clamped_decrement(m_insert_offset, 0);
+			return;
+
+		case main::builtin_command_id::step_right:
+			clear_selection();
 			clamped_increment(m_insert_offset, std::size(m_value));
-		}
-		else
-		{
-			printf("%08x\n", event.scancode);
-		}
+			return;
+
+		case main::builtin_command_id::select_right:
+			step_selection_right();
+			clamped_increment(m_insert_offset, std::size(m_value));
+			return;
+
+		case main::builtin_command_id::step_up:
+			clear_selection();
+			return;
+
+		case main::builtin_command_id::step_down:
+			clear_selection();
+			return;
+
+		case main::builtin_command_id::select_all:
+			select_all();
+			break;
+
+		default:
+			break;
 	}
 }
 

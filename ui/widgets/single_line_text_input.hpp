@@ -198,6 +198,13 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= text_dirty;
 		}
 
+		void select_all()
+		{
+			m_sel_range = selection_range{0, std::size(m_value)};
+			m_insert_offset = std::size(m_value);
+			m_dirty_bits |= host_textures_dirty;
+		}
+
 	private:
 		void update_insert_offset(std::u32string::iterator new_pos)
 		{ update_insert_offset(std::distance(std::begin(m_value), new_pos)); }
