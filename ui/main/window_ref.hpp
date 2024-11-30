@@ -10,7 +10,7 @@ namespace terraformer::ui::main
 	{
 		void (*set_title)(void* handle, char const* new_title);
 		std::u8string (*get_clipboard_string)(void* handle);
-		void (*set_clipboard_string)(void* handle, char8_t const* str);
+		void (*set_clipboard_string)(void* handle, std::u8string_view str);
 	};
 
 	template<class Window>
@@ -24,7 +24,7 @@ namespace terraformer::ui::main
 		.get_clipboard_string = [](void* handle){
 			return window_traits<Window>::get_clipboard_string(*static_cast<Window*>(handle));
 		},
-		.set_clipboard_string = [](void* handle, char8_t const* str){
+		.set_clipboard_string = [](void* handle, std::u8string_view str){
 			window_traits<Window>::set_clipboard_string(*static_cast<Window*>(handle), str);
 		},
 	};
@@ -47,7 +47,7 @@ namespace terraformer::ui::main
 		std::u8string get_clipboard_string() const
 		{ return m_vtable->get_clipboard_string(m_handle); }
 
-		void set_clipboard_string(char8_t* str) const
+		void set_clipboard_string(std::u8string_view str) const
 		{ m_vtable->set_clipboard_string(m_handle, str); }
 
 	private:

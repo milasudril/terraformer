@@ -9,7 +9,7 @@ namespace
 	struct window_handle;
 
 	void set_title(window_handle& obj, char const* str);
-	void set_clipboard_string(window_handle& obj, char8_t const* str);
+	void set_clipboard_string(window_handle& obj, std::u8string_view str);
 	std::u8string get_clipboard_string(window_handle const& obj);
 }
 
@@ -21,7 +21,7 @@ namespace terraformer::ui::main
 		static void set_title(window_handle& obj, char const* str)
 		{ ::set_title(obj, str); }
 
-		static void set_clipboard_string(window_handle& obj, char8_t const* str)
+		static void set_clipboard_string(window_handle& obj, std::u8string_view str)
 		{ ::set_clipboard_string(obj, str); }
 
 		static auto get_clipboard_string(window_handle const& obj)
@@ -42,13 +42,17 @@ namespace
 		obj.title = str;
 	}
 
-	void set_clipboard_string(window_handle& obj, char8_t const* str)
+	void set_clipboard_string(window_handle& obj, std::u8string_view str)
 	{
+		// TODO: Improve test coverage
 		obj.clipboard = str;
 	}
 
 	std::u8string get_clipboard_string(window_handle const& obj)
-	{ return obj.clipboard; }
+	{
+		// TODO: Improve test coverage
+		return obj.clipboard;
+	}
 }
 
 
