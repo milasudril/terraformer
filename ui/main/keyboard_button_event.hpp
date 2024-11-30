@@ -1,5 +1,9 @@
+//@	{"dependencies_extra":[{"ref":"./keyboard_button_event.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_UI_MAIN_KEYBOARD_BUTTON_EVENT_HPP
 #define TERRAFORMER_UI_MAIN_KEYBOARD_BUTTON_EVENT_HPP
+
+#include "./builtin_command_id.hpp"
 
 namespace terraformer::ui::main
 {
@@ -29,6 +33,8 @@ namespace terraformer::ui::main
 		keyboard_button_action action;
 		modifier_keys modifiers;
 	};
+
+	builtin_command_id to_builtin_command_id(keyboard_button_event const& event);
 }
 
 #endif

@@ -75,25 +75,20 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::keyboard_button_event const& kbe, main::window_ref window, main::ui_controller ui_ctrl)
 		{
-			if(kbe.scancode == 0x39)
+			switch(to_builtin_command_id(kbe))
 			{
-				switch(kbe.action)
-				{
-					case main::keyboard_button_action::press:
-						m_temp_state = state::pressed;
-						break;
-
-					case main::keyboard_button_action::release:
-						if(m_temp_state.has_value())
-						{
-							m_temp_state.reset();
-							m_on_activated(*this, window, ui_ctrl);
-						}
-						break;
-
-					case main::keyboard_button_action::repeat:
-						break;
-				}
+				case main::builtin_command_id::button_press:
+					m_temp_state = state::pressed;
+					break;
+				case main::builtin_command_id::button_release:
+					if(m_temp_state.has_value())
+					{
+						m_temp_state.reset();
+						m_on_activated(*this, window, ui_ctrl);
+					}
+					break;
+				default:
+					break;
 			}
 		}
 
