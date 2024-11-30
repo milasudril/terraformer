@@ -205,6 +205,24 @@ namespace terraformer::ui::widgets
 			m_dirty_bits |= host_textures_dirty;
 		}
 
+		void insert_at_cursor(std::u8string_view str)
+		{
+			auto val_temp = to_utf32(str);
+			m_value.insert(m_insert_offset, val_temp);
+			m_insert_offset += std::size(val_temp);
+			m_dirty_bits |= text_dirty | host_textures_dirty;
+		}
+
+		std::u8string get_selection() const
+		{
+			return to_utf8(
+				std::u32string_view{
+					std::begin(m_value) + m_sel_range.begin(),
+					std::begin(m_value) + m_sel_range.end()
+				}
+			);
+		}
+
 	private:
 		void update_insert_offset(std::u32string::iterator new_pos)
 		{ update_insert_offset(std::distance(std::begin(m_value), new_pos)); }

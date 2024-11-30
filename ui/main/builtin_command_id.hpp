@@ -24,7 +24,10 @@ namespace terraformer::ui::main
 		select_up,
 		step_down,
 		select_down,
-		select_all
+		select_all,
+		copy,
+		cut,
+		paste
 	};
 }
 

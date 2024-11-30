@@ -2,6 +2,8 @@
 
 #include "./keyboard_button_event.hpp"
 
+#include <cstdio>
+
 terraformer::ui::main::builtin_command_id terraformer::ui::main::to_builtin_command_id(
 	keyboard_button_event const& kbe
 )
@@ -124,6 +126,24 @@ terraformer::ui::main::builtin_command_id terraformer::ui::main::to_builtin_comm
 	{
 		if(kbe.action == keyboard_button_action::press && ctrl_pressed)
 		{ return builtin_command_id::select_all; }
+	}
+
+	if(kbe.scancode == 0x2e)
+	{
+		if(kbe.action == keyboard_button_action::press && ctrl_pressed)
+		{ return builtin_command_id::copy; }
+	}
+
+	if(kbe.scancode == 0x2d)
+	{
+		if(kbe.action == keyboard_button_action::press && ctrl_pressed)
+		{ return builtin_command_id::cut; }
+	}
+
+	if(kbe.scancode == 0x2f)
+	{
+		if(kbe.action == keyboard_button_action::press && ctrl_pressed)
+		{ return builtin_command_id::paste; }
 	}
 
 	return builtin_command_id::not_builtin;

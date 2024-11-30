@@ -171,7 +171,7 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	}
 }
 
-void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
+void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref window, main::ui_controller)
 {
 	switch(to_builtin_command_id(event))
 	{
@@ -247,10 +247,29 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 
 		case main::builtin_command_id::select_all:
 			select_all();
-			break;
+			return;
+
+		case main::builtin_command_id::paste:
+			if(!m_sel_range.empty())
+			{ erase_selected_range(); }
+			insert_at_cursor(window.get_clipboard_string().c_str());
+			return;
+
+		case main::builtin_command_id::copy:
+			if(!m_sel_range.empty())
+			{ window.set_clipboard_string(get_selection()); }
+			return;
+
+		case main::builtin_command_id::cut:
+			if(!m_sel_range.empty())
+			{
+				window.set_clipboard_string(get_selection());
+				erase_selected_range();
+			}
+			return;
 
 		default:
-			break;
+			return;
 	}
 }
 
