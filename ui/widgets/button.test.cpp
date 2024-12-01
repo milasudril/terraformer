@@ -160,7 +160,7 @@ namespace
 template<>
 struct terraformer::ui::main::window_traits<dummy_window>
 {
-	static void set_title(dummy_window& window, char8_t const* new_title)
+	static void set_title(dummy_window& window, std::u8string_view new_title)
 	{
 		window.title = new_title;
 	}
