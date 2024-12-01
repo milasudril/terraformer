@@ -23,7 +23,7 @@ namespace
 
 	struct dummy_window
 	{
-		std::string title;
+		std::u8string title;
 	};
 
 	struct dummy_ui_controller
@@ -160,7 +160,7 @@ namespace
 template<>
 struct terraformer::ui::main::window_traits<dummy_window>
 {
-	static void set_title(dummy_window& window, char const* new_title)
+	static void set_title(dummy_window& window, char8_t const* new_title)
 	{
 		window.title = new_title;
 	}

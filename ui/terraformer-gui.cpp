@@ -88,12 +88,12 @@ int main(int, char**)
 			if(obj.value())
 			{
 				foo.value(u8"Value is true");
-				window.set_title("True");
+				window.set_title(u8"True");
 			}
 			else
 			{
 				foo.value(u8"Value is false");
-				window.set_title("False");
+				window.set_title(u8"False");
 			}
 		});
 	terraformer::ui::widgets::vbox my_vbox;
@@ -113,7 +113,7 @@ int main(int, char**)
 	my_input
 		.use_size_from_placeholder(u8"Write your text here")
 		.on_value_changed([](auto const& obj, terraformer::ui::main::window_ref window, auto){
-				window.set_title(reinterpret_cast<char const*>(obj.value().c_str()));
+				window.set_title(obj.value().c_str());
 			}
 		);
 

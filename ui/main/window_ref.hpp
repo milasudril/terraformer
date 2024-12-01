@@ -8,7 +8,7 @@ namespace terraformer::ui::main
 {
 	struct window_ref_vtable
 	{
-		void (*set_title)(void* handle, char const* new_title);
+		void (*set_title)(void* handle, char8_t const* new_title);
 		std::u8string (*get_clipboard_string)(void* handle);
 		void (*set_clipboard_string)(void* handle, std::u8string_view str);
 	};
@@ -18,7 +18,7 @@ namespace terraformer::ui::main
 
 	template<class Window>
 	constexpr window_ref_vtable window_vtable{
-		.set_title = [](void* handle, char const* new_title) {
+		.set_title = [](void* handle, char8_t const* new_title) {
 			window_traits<Window>::set_title(*static_cast<Window*>(handle), new_title);
 		},
 		.get_clipboard_string = [](void* handle){
@@ -38,7 +38,7 @@ namespace terraformer::ui::main
 			m_handle{&window}
 		{}
 
-		void set_title(char const* new_title)
+		void set_title(char8_t const* new_title)
 		{ m_vtable->set_title(m_handle, new_title); }
 
 		void* handle() const

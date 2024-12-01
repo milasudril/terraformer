@@ -21,8 +21,11 @@
 template<>
 struct terraformer::ui::main::window_traits<GLFWwindow>
 {
-	static void set_title(GLFWwindow& window, char const* new_title)
-	{ glfwSetWindowTitle(&window, new_title); }
+	static void set_title(GLFWwindow& window, char8_t const* new_title)
+	{
+		// NOTE: glfwSetWindowTitle accepts char8_t, but is declared to use char
+		glfwSetWindowTitle(&window, reinterpret_cast<char const*>(new_title));
+	}
 
 	static void set_clipboard_string(GLFWwindow& window, std::u8string_view str)
 	{
