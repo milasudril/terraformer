@@ -110,7 +110,12 @@ int main(int, char**)
 	cancel.text(u8"Cancel");
 
 	terraformer::ui::widgets::single_line_text_input my_input;
-	my_input.use_size_from_placeholder(u8"Write your text here");
+	my_input
+		.use_size_from_placeholder(u8"Write your text here")
+		.on_value_changed([](auto const& obj, terraformer::ui::main::window_ref window, auto){
+				window.set_title(reinterpret_cast<char const*>(obj.value().c_str()));
+			}
+		);
 
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));

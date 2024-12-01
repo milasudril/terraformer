@@ -171,7 +171,7 @@ void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(
 	}
 }
 
-void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref window, main::ui_controller)
+void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref window, main::ui_controller controller)
 {
 	switch(to_builtin_command_id(event))
 	{
@@ -204,6 +204,7 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 				update_insert_offset(m_value.erase(std::begin(m_value) + m_insert_offset - 1));
 				m_dirty_bits |= text_dirty;
 			}
+			m_on_value_changed(*this, window, controller);
 			return;
 
 		case main::builtin_command_id::erase_forwards:
@@ -215,6 +216,7 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 				m_value.erase(std::begin(m_value) + m_insert_offset);
 				m_dirty_bits |= text_dirty;
 			}
+			m_on_value_changed(*this, window, controller);
 			return;
 
 		case main::builtin_command_id::step_left:
@@ -253,6 +255,7 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 			if(!m_sel_range.empty())
 			{ erase_selected_range(); }
 			insert_at_cursor(window.get_clipboard_string().c_str());
+			m_on_value_changed(*this, window, controller);
 			return;
 
 		case main::builtin_command_id::copy:
@@ -265,6 +268,7 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 			{
 				window.set_clipboard_string(get_selection());
 				erase_selected_range();
+				m_on_value_changed(*this, window, controller);
 			}
 			return;
 

@@ -98,22 +98,15 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		void handle_event(main::typing_event event, main::window_ref, main::ui_controller)
+		void handle_event(main::typing_event event, main::window_ref window, main::ui_controller controller)
 		{
-			printf("Handling typing event %zu\n", m_insert_offset);
-			fflush(stdout);
-
 			if(!m_sel_range.empty())
-			{
-				printf("Erasing current selection\n");
-				erase_selected_range();
-			}
+			{ erase_selected_range(); }
 
-			printf("Insert offset is %zu\n", m_insert_offset);
-			fflush(stdout);
 			auto const i = std::begin(m_value) + m_insert_offset;
 			update_insert_offset(m_value.insert(i, event.codepoint) + 1);
 			m_dirty_bits |= text_dirty;
+			m_on_value_changed(*this, window, controller);
 		}
 
 		void handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller);
