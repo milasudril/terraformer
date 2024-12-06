@@ -116,6 +116,12 @@ namespace terraformer
     return func;
 	}
 
+	template<class... Args, class RetType, class Class>
+	constexpr auto resolve_overload(RetType (Class::*func)(Args...) const)
+	{
+    return func;
+	}
+
 	template<class A, class B>
 	constexpr bool compare_with_fallback(A const& a, B const& b)
 	{

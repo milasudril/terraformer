@@ -2,6 +2,7 @@
 #define TERRAFORMER_UI_MAIN_STAGED_RESOURCE_HPP
 
 #include "lib/common/global_instance_counter.hpp"
+#include "lib/common/utils.hpp"
 
 namespace terraformer::ui::main
 {
@@ -15,13 +16,16 @@ namespace terraformer::ui::main
 		{}
 
 		template<class BackendResourceFactory>
-		requires(std::is_base_of_v<object_counter, BackendResourceFactory>)
+		requires(
+				std::is_base_of_v<global_instance_counter, BackendResourceFactory>
+			&& resolve_overload<>(&BackendResourceFactory::get_global_id)
+				== resolve_overload<>(&global_instance_counter::get_global_id)
+		)
 		BackendResource& get_backend_resource(BackendResourceFactory& backend)
 		{
-			if(!m_backend_resource.created_by_backend(backend.get_global_id())) [[unlikely]]
+			if(!m_backend_resource.created_by_factory(backend.get_global_id())) [[unlikely]]
 			{
-				m_backend_resource = value_of(backend)
-					.create(std::type_identity<BackendResource>{}, m_frontend_resource);
+				m_backend_resource = backend.create(std::type_identity<BackendResource>{}, m_frontend_resource);
 				m_must_update_backend_resource = false;
 				return m_backend_resource;
 			}
