@@ -15,6 +15,16 @@ namespace terraformer::ui::main
 			m_must_update_backend_resource{true}
 		{}
 
+		staged_resource& operator=(FrontendResource&& resource)
+		{
+			m_frontend_resource = std::move(resource);
+			m_must_update_backend_resource = true;
+			return *this;
+		}
+
+		operator FrontendResource const&() const
+		{ return m_frontend_resource; }
+
 		template<class BackendResourceFactory>
 		requires(
 				std::is_base_of_v<global_instance_counter, BackendResourceFactory>
