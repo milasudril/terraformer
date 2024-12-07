@@ -6,6 +6,7 @@
 #include "./events.hpp"
 #include "./config.hpp"
 #include "./widget_rendering_result.hpp"
+#include "./widget_layer_stack.hpp"
 #include "./widget_state.hpp"
 #include "./widget_geometry.hpp"
 #include "./ui_controller.hpp"
