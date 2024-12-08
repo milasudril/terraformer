@@ -1,21 +1,21 @@
 #ifndef TERRAFORMER_UI_MAIN_WIDGET_LAYER_STACK_HPP
 #define TERRAFORMER_UI_MAIN_WIDGET_LAYER_STACK_HPP
 
-#include "./generic_texture.hpp"
+#include "./texture.hpp"
 
 namespace terraformer::ui::main
 {
 	struct widget_layer
 	{
 		displacement offset;
-		generic_texture_pointer_const texture;
+		class texture texture;
 		std::array<rgba_pixel, 4> tints;
 	};
 
 	struct widget_layer_mask
 	{
 		displacement offset;
-		generic_texture_pointer_const texture;
+		class texture texture;
 	};
 
 	struct widget_layer_stack
