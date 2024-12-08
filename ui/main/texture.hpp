@@ -2,25 +2,26 @@
 #define TERRAFORMER_UI_MAIN_TEXTURE_HPP
 
 #include "lib/pixel_store/image.hpp"
-
-#include <utility>
+#include "lib/common/unique_resource.hpp"
 
 namespace terraformer::ui::main
 {
 	class texture
 	{
 	public:
-		template<class RealTexture>
-		explicit texture(std::in_place_type_t<RealTexture>,  Args&&... args):
-			m_handle{resource_owner<vtable>::create(std::forward<Args>(args)...)},
-			m_factory_id{factory.get_global_id()}
+		texture() = default;
+
+		template<class RealTexture, class... Args>
+		explicit texture(std::in_place_type_t<RealTexture>, uint64_t factory_id, Args&&... args):
+			m_handle{std::in_place_type_t<RealTexture>{}, std::forward<Args>(args)...},
+			m_factory_id{factory_id}
 		{}
 
 		void upload(span_2d<rgba_pixel const> pixels)
-		{ m_handle->call(vtable::upload, pixels); }
+		{ m_handle.get_vtable().upload(m_handle.get_pointer(), pixels); }
 
-		void bind(int slot)
-		{ m_vtable->bind(m_handle.get(), slot); }
+		void bind(int shader_port)
+		{ m_handle.get_vtable().bind(m_handle.get_pointer(), shader_port); }
 
 		bool created_by_factory(uint64_t factory) const
 		{ return static_cast<bool>(m_handle) && m_factory_id == factory; }
@@ -28,12 +29,26 @@ namespace terraformer::ui::main
 	private:
 		struct vtable
 		{
+			template<class RealTexture>
+			explicit constexpr vtable(std::type_identity<RealTexture>):
+				upload{
+					[](void* handle, span_2d<rgba_pixel const> pixels){
+						static_cast<RealTexture*>(handle)->upload(pixels);
+					}
+				},
+				bind{
+					[](void* handle, int shader_port){
+						static_cast<RealTexture*>(handle)->bind(shader_port);
+					}
+				}
+			{}
+
 			void (*upload)(void*, span_2d<rgba_pixel const>);
-			void (*bind)(void, int);
+			void (*bind)(void*, int);
 		};
 
-		resource_owner<vtable> m_handle;
-		uint64_t m_factory_id;
+		unique_resource<vtable> m_handle;
+		uint64_t m_factory_id{};
 	};
 }
 
