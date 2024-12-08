@@ -19,13 +19,10 @@ class unique_resource
 		{}
 
 		~unique_resource()
-		{
-			if(m_handle != nullptr)
-			{ m_vtable_pointer->destroy(m_handle); }
-		}
+		{ reset(); }
 
 		unique_resource(unique_resource&& other):
-			m_vtable_pointer{std::exchange(other.m_vtable_pointer, nullptr)}.
+			m_vtable_pointer{std::exchange(other.m_vtable_pointer, nullptr)},
 			m_handle{std::exchange(other.m_handle, nullptr)}
 		{ }
 
@@ -52,6 +49,9 @@ class unique_resource
 
 		void reset()
 		{
+			if(m_handle == nullptr)
+			{ return; }
+
 			m_vtable_pointer->destroy(m_handle);
 			m_handle = nullptr;
 			m_vtable_pointer = nullptr;
