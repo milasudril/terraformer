@@ -11,9 +11,8 @@ namespace terraformer::ui::main
 	{
 	public:
 		template<class RealTexture>
-		requires(!std::is_same_v<std::remove_cvref_t<RealTexture>, texture>)
-		explicit texture(RealTexture&& texture):
-			m_handle{std::move(texture)},
+		explicit texture(std::in_place_type_t<RealTexture>,  Args&&... args):
+			m_handle{resource_owner<vtable>::create(std::forward<Args>(args)...)},
 			m_factory_id{factory.get_global_id()}
 		{}
 
