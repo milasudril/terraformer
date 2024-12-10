@@ -16,10 +16,12 @@ namespace
 
 	struct dummy_factory
 	{
-		uint64_t factory_id{134};
+		constexpr uint64_t get_global_id() const
+		{ return 124; }
 
 		auto create(
 			std::type_identity<terraformer::ui::main::texture>,
+			uint64_t factory_id,
 			terraformer::image const& img
 		)
 		{
@@ -38,7 +40,7 @@ TESTCASE(terraformer_resource_factory_create_texture)
 		img
 	);
 
-	EXPECT_EQ(texture.created_by_factory(134), true);
+	EXPECT_EQ(texture.created_by_factory(my_factory.get_global_id()), true);
 	EXPECT_EQ(texture.created_by_factory(3), false);
 }
 
