@@ -8,14 +8,14 @@ namespace terraformer::ui::main
 	struct widget_layer
 	{
 		displacement offset;
-		class texture texture;
+		texture_reference texture;
 		std::array<rgba_pixel, 4> tints;
 	};
 
 	struct widget_layer_mask
 	{
 		displacement offset;
-		class texture texture;
+		texture_reference texture;
 	};
 
 	struct widget_layer_stack
