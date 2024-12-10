@@ -28,7 +28,7 @@ namespace terraformer
 		resource_reference() = default;
 
 		template<class ReferencedType>
-		explicit resource_reference(ReferencedType& ref):
+		explicit resource_reference(std::reference_wrapper<ReferencedType> ref):
 			m_handle{&ref},
 			m_vtable_pointer{&s_vtable<ReferencedType>}
 		{}
