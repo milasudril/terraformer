@@ -18,10 +18,10 @@ namespace terraformer::ui::main
 		{}
 
 		void upload(span_2d<rgba_pixel const> pixels)
-		{ m_handle.get_vtable().upload(m_handle.get_pointer(), pixels); }
+		{ m_handle.get().get_vtable().upload(m_handle.get().get_pointer(), pixels); }
 
 		void bind(int shader_port)
-		{ m_handle.get_vtable().bind(m_handle.get_pointer(), shader_port); }
+		{ m_handle.get().get_vtable().bind(m_handle.get().get_pointer(), shader_port); }
 
 		bool created_by_factory(uint64_t factory) const
 		{ return static_cast<bool>(m_handle) && m_factory_id == factory; }

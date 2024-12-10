@@ -20,10 +20,17 @@ TESTCASE(terraformer_unique_resource_default_state_is_falsy)
 	EXPECT_EQ(res, false);
 }
 
+TESTCASE(terraformer_resource_reference_default_state_is_falsy)
+{
+	terraformer::resource_reference<dummy_vtable> res;
+	EXPECT_EQ(res, false);
+}
+
+
 TESTCASE(terraformer_unique_resource_default_state_points_to_nullptr)
 {
 	terraformer::unique_resource<dummy_vtable> res;
-	EXPECT_EQ(res.get_pointer(), nullptr);
+	EXPECT_EQ(res.get().get_pointer(), nullptr);
 }
 
 TESTCASE(terraformer_unique_resource_non_trivial_resource_is_properly_destroyed)
@@ -41,6 +48,7 @@ TESTCASE(terraformer_unique_resource_constructed_is_truthy)
 		std::in_place_type_t<testfwk::lifetime_checker<int>>{}
 	};
 	EXPECT_EQ(res, true);
+	EXPECT_EQ(res.get(), true);
 }
 
 TESTCASE(terraformer_unique_resource_constructed_resource_points_to_non_null)
@@ -49,7 +57,7 @@ TESTCASE(terraformer_unique_resource_constructed_resource_points_to_non_null)
 	terraformer::unique_resource<dummy_vtable> res{
 		std::in_place_type_t<testfwk::lifetime_checker<int>>{}
 	};
-	EXPECT_NE(res.get_pointer(), nullptr);
+	EXPECT_NE(res.get().get_pointer(), nullptr);
 }
 
 TESTCASE(terraformer_unique_resource_constructed_resource_points_to_correct_vtable_type)
@@ -58,7 +66,7 @@ TESTCASE(terraformer_unique_resource_constructed_resource_points_to_correct_vtab
 	terraformer::unique_resource<dummy_vtable> res{
 		std::in_place_type_t<testfwk::lifetime_checker<int>>{}
 	};
-	auto vt = res.get_vtable();
+	auto vt = res.get().get_vtable();
 	EXPECT_EQ((std::is_same_v<decltype(vt), dummy_vtable>), true);
 }
 
@@ -72,7 +80,7 @@ TESTCASE(terraformer_unique_resource_same_vt_type_points_to_same_vt)
 		std::in_place_type_t<testfwk::lifetime_checker<int>>{}
 	};
 
-	EXPECT_EQ(&res_1.get_vtable(), &res_2.get_vtable());
+	EXPECT_EQ(&res_1.get().get_vtable(), &res_2.get().get_vtable());
 }
 
 TESTCASE(terraformer_unique_resource_move_construct_moves_pointers_to_new_owner)
@@ -82,15 +90,15 @@ TESTCASE(terraformer_unique_resource_move_construct_moves_pointers_to_new_owner)
 		std::in_place_type_t<testfwk::lifetime_checker<int>>{}
 	};
 
-	auto orig_ptr = res_1.get_pointer();
-	auto orig_vptr = &res_1.get_vtable();
+	auto orig_ptr = res_1.get().get_pointer();
+	auto orig_vptr = &res_1.get().get_vtable();
 
 	auto res_2 = std::move(res_1);
 
-	EXPECT_EQ(res_1.get_pointer(), nullptr);
+	EXPECT_EQ(res_1.get().get_pointer(), nullptr);
 	EXPECT_EQ(res_1, false);
-	EXPECT_EQ(res_2.get_pointer(), orig_ptr);
-	EXPECT_EQ(&res_2.get_vtable(), orig_vptr);
+	EXPECT_EQ(res_2.get().get_pointer(), orig_ptr);
+	EXPECT_EQ(&res_2.get().get_vtable(), orig_vptr);
 }
 
 TESTCASE(terraformer_unique_resource_move_assign_moves_pointers_to_new_owner_and_destroys_old_object)
@@ -105,15 +113,15 @@ TESTCASE(terraformer_unique_resource_move_assign_moves_pointers_to_new_owner_and
 		std::in_place_type_t<testfwk::lifetime_checker<int>>{}
 	};
 
-	auto orig_ptr = res_1.get_pointer();
-	auto orig_vptr = &res_1.get_vtable();
+	auto orig_ptr = res_1.get().get_pointer();
+	auto orig_vptr = &res_1.get().get_vtable();
 
 	res_2 = std::move(res_1);
 
-	EXPECT_EQ(res_1.get_pointer(), nullptr);
+	EXPECT_EQ(res_1.get().get_pointer(), nullptr);
 	EXPECT_EQ(res_1, false);
-	EXPECT_EQ(res_2.get_pointer(), orig_ptr);
-	EXPECT_EQ(&res_2.get_vtable(), orig_vptr);
+	EXPECT_EQ(res_2.get().get_pointer(), orig_ptr);
+	EXPECT_EQ(&res_2.get().get_vtable(), orig_vptr);
 }
 
 TESTCASE(terraformer_unqiue_resource_reset_reverts_state_to_default)
@@ -123,7 +131,7 @@ TESTCASE(terraformer_unqiue_resource_reset_reverts_state_to_default)
 		std::in_place_type_t<testfwk::lifetime_checker<int>>{}
 	};
 
-	EXPECT_NE(res.get_pointer(), nullptr);
+	EXPECT_NE(res.get().get_pointer(), nullptr);
 	res.reset();
-	EXPECT_EQ(res.get_pointer(), nullptr);
+	EXPECT_EQ(res.get().get_pointer(), nullptr);
 }

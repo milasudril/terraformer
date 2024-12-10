@@ -6,24 +6,73 @@
 
 namespace terraformer
 {
-template<class Vtable>
-class unique_resource
-{
+	template<class Vtable>
+	class resource_reference
+	{
+	public:
+		struct vtable:Vtable
+		{
+			template<class ReferencedType>
+			constexpr vtable(std::type_identity<ReferencedType>):
+				Vtable{std::type_identity<ReferencedType>{}},
+				destroy{
+					[](void* object){
+						delete static_cast<ReferencedType*>(object);
+					}
+				}
+			{}
+
+			void (*destroy)(void*);
+		};
+
+		resource_reference() = default;
+
+		template<class ReferencedType>
+		explicit resource_reference(ReferencedType& ref):
+			m_handle{&ref},
+			m_vtable_pointer{&s_vtable<ReferencedType>}
+		{}
+
+		explicit resource_reference(void* handle, vtable const* vt):
+			m_handle{handle},
+			m_vtable_pointer{vt}
+		{}
+
+		template<class ReferencedType>
+		static constexpr vtable s_vtable{std::type_identity<ReferencedType>{}};
+
+		void* get_pointer() const
+		{ return m_handle; }
+
+		Vtable const& get_vtable() const
+		{ return *m_vtable_pointer; }
+
+		operator bool() const
+		{ return m_handle != nullptr; }
+
+	private:
+		void* m_handle{nullptr};
+		vtable const* m_vtable_pointer{nullptr};
+	};
+
+	template<class Vtable>
+	class unique_resource
+	{
 	public:
 		unique_resource() = default;
 
 		template<class OwnedType, class... Args>
 		explicit unique_resource(std::in_place_type_t<OwnedType>, Args&&... args):
-			m_vtable_pointer{&s_vtable<OwnedType>},
-			m_handle{new OwnedType(std::forward<Args>(args)...)}
+			m_handle{new OwnedType(std::forward<Args>(args)...)},
+			m_vtable_pointer{&resource_reference<Vtable>::template s_vtable<OwnedType>}
 		{}
 
 		~unique_resource()
 		{ reset(); }
 
 		unique_resource(unique_resource&& other):
-			m_vtable_pointer{std::exchange(other.m_vtable_pointer, nullptr)},
-			m_handle{std::exchange(other.m_handle, nullptr)}
+			m_handle{std::exchange(other.m_handle, nullptr)},
+			m_vtable_pointer{std::exchange(other.m_vtable_pointer, nullptr)}
 		{ }
 
 		unique_resource& operator=(unique_resource&& other)
@@ -38,11 +87,8 @@ class unique_resource
 
 		unique_resource& operator=(unique_resource const&) = delete;
 
-		void* get_pointer() const
-		{ return m_handle; }
-
-		Vtable const& get_vtable() const
-		{ return *m_vtable_pointer; }
+		resource_reference<Vtable> get() const
+		{ return resource_reference<Vtable>{m_handle, m_vtable_pointer}; }
 
 		operator bool() const
 		{ return m_handle != nullptr; }
@@ -58,26 +104,8 @@ class unique_resource
 		}
 
 	private:
-		struct vtable:Vtable
-		{
-			template<class OwnedType>
-			constexpr vtable(std::type_identity<OwnedType>):
-				Vtable{std::type_identity<OwnedType>{}},
-				destroy{
-					[](void* object){
-						delete static_cast<OwnedType*>(object);
-					}
-				}
-			{}
-
-			void (*destroy)(void*);
-		};
-
-		template<class OwnedType>
-		static constexpr vtable s_vtable{std::type_identity<OwnedType>{}};
-
-		vtable const* m_vtable_pointer{nullptr};
 		void* m_handle{nullptr};
+		typename resource_reference<Vtable>::vtable const* m_vtable_pointer{nullptr};
 	};
 }
 
