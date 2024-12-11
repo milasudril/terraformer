@@ -1,15 +1,15 @@
-#ifndef TERRAFORMER_UI_MAIN_GRAPHICS_RESOURCE_FACTORY_HPP
-#define TERRAFORMER_UI_MAIN_GRAPHICS_RESOURCE_FACTORY_HPP
+#ifndef TERRAFORMER_UI_MAIN_GRAPHICS_RESOURCE_FACTORY_REF_HPP
+#define TERRAFORMER_UI_MAIN_GRAPHICS_RESOURCE_FACTORY_REF_HPP
 
 #include "./texture.hpp"
 
 namespace terraformer::ui::main
 {
-	class graphics_resource_factory
+	class graphics_resource_factory_ref
 	{
 	public:
 		template<class FactoryType>
-		explicit graphics_resource_factory(FactoryType& factory):
+		explicit graphics_resource_factory_ref(FactoryType& factory):
 			m_handle{&factory},
 			m_vtable_pointer{&s_vtable<FactoryType>},
 			m_global_id{std::as_const(factory).get_global_id()}

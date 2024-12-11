@@ -1,6 +1,6 @@
-//@	{"target":{"name":"graphics_resource_factory.test"}}
+//@	{"target":{"name":"graphics_resource_factory_ref.test"}}
 
-#include "./graphics_resource_factory.hpp"
+#include "./graphics_resource_factory_ref.hpp"
 
 #include <testfwk/testfwk.hpp>
 
@@ -30,10 +30,10 @@ namespace
 	};
 }
 
-TESTCASE(terraformer_resource_factory_create_texture)
+TESTCASE(terraformer_resource_factory_ref_create_texture)
 {
 	dummy_factory my_factory;
-	terraformer::ui::main::graphics_resource_factory resource_factroy{my_factory};
+	terraformer::ui::main::graphics_resource_factory_ref resource_factroy{my_factory};
 	terraformer::image img{3, 2};
 	auto texture = resource_factroy.create(
 		std::type_identity<terraformer::ui::main::texture>{},
