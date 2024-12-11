@@ -26,10 +26,10 @@ namespace terraformer::ui::main
 		void (*bind)(void*, int);
 	};
 
-	class texture_reference
+	class texture_ref
 	{
 	public:
-		explicit texture_reference(resource_reference<texture_vtable> reference):
+		explicit texture_ref(resource_reference<texture_vtable> reference):
 			m_reference{reference}
 		{}
 
@@ -66,8 +66,8 @@ namespace terraformer::ui::main
 		bool created_by_factory(uint64_t factory) const
 		{ return static_cast<bool>(m_handle) && m_factory_id == factory; }
 
-		texture_reference get()
-		{ return texture_reference{m_handle.get()}; }
+		texture_ref get()
+		{ return texture_ref{m_handle.get()}; }
 
 	private:
 		unique_resource<texture_vtable> m_handle;
