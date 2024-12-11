@@ -147,10 +147,12 @@ namespace terraformer::ui::drawing_api
 		explicit gl_texture():m_descriptor{0, 0, 0, 0, 0}
 		{ }
 
+		template<class T>
+		explicit gl_texture(span_2d<T const> pixels):gl_texture{}
+		{ upload(pixels); }
+
 		explicit gl_texture(gl_texture_descriptor const& descriptor):gl_texture{}
-		{
-			set_format(descriptor);
-		}
+		{ set_format(descriptor); }
 
 		auto& upload(std::span<std::byte const> data, gl_texture_descriptor const& descriptor)
 		{
