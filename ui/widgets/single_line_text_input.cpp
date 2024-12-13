@@ -1,4 +1,4 @@
-//@	{"target":{"name":"single_line_text_input.o"}}
+//	{"target":{"name":"single_line_text_input.o"}}
 
 #include "./single_line_text_input.hpp"
 

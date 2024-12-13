@@ -1,4 +1,4 @@
-//@	{"target":{"name":"label.o"}}
+//	{"target":{"name":"label.o"}}
 
 #include "./label.hpp"
 

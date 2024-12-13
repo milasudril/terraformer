@@ -6,11 +6,12 @@
 #include "./drawing_api/gl_texture.hpp"
 #include "./drawing_api/frame_renderer.hpp"
 #include "./drawing_api/single_quad_renderer.hpp"
+#include "./drawing_api/gl_widget_stack_renderer.hpp"
 #include "./event_dispatcher/event_dispatcher.hpp"
 #include "./wsapi/native_window.hpp"
-#include "./widgets/label.hpp"
-#include "./widgets/button.hpp"
-#include "./widgets/single_line_text_input.hpp"
+//#include "./widgets/label.hpp"
+//#include "./widgets/button.hpp"
+//#include "./widgets/single_line_text_input.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
@@ -79,48 +80,48 @@ int main(int, char**)
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback( MessageCallback, 0 );
 
-	terraformer::ui::widgets::label foo;
-	foo.text(u8"Hello, World");
-	terraformer::ui::widgets::toggle_button bar;
-	bar.text(u8"Click me!")
-		.value(false)
-		.on_value_changed([&foo](auto const& obj, terraformer::ui::main::window_ref window, auto){
-			if(obj.value())
-			{
-				foo.value(u8"Value is true");
-				window.set_title(u8"True");
-			}
-			else
-			{
-				foo.value(u8"Value is false");
-				window.set_title(u8"False");
-			}
-		});
+//	terraformer::ui::widgets::label foo;
+//	foo.text(u8"Hello, World");
+//	terraformer::ui::widgets::toggle_button bar;
+//	bar.text(u8"Click me!")
+//		.value(false)
+//		.on_value_changed([&foo](auto const& obj, terraformer::ui::main::window_ref window, auto){
+//			if(obj.value())
+//			{
+//				foo.value(u8"Value is true");
+//				window.set_title(u8"True");
+//			}
+//			else
+//			{
+//				foo.value(u8"Value is false");
+//				window.set_title(u8"False");
+//			}
+//		});
 	terraformer::ui::widgets::vbox my_vbox;
 
-	my_vbox.append(std::ref(foo));
-	my_vbox.append(std::ref(bar));
+//	my_vbox.append(std::ref(foo));
+//	my_vbox.append(std::ref(bar));
 
 	terraformer::ui::widgets::vbox my_outer_vbox;
 
-	terraformer::ui::widgets::button ok;
-	ok.text(u8"Ok");
+//	terraformer::ui::widgets::button ok;
+//	ok.text(u8"Ok");
 
-	terraformer::ui::widgets::button cancel;
-	cancel.text(u8"Cancel");
+//	terraformer::ui::widgets::button cancel;
+//	cancel.text(u8"Cancel");
 
-	terraformer::ui::widgets::single_line_text_input my_input;
-	my_input
-		.use_size_from_placeholder(u8"Write your text here")
-		.on_value_changed([](auto const& obj, terraformer::ui::main::window_ref window, auto){
-				window.set_title(obj.value().c_str());
-			}
-		);
+//	terraformer::ui::widgets::single_line_text_input my_input;
+//	my_input
+//		.use_size_from_placeholder(u8"Write your text here")
+//		.on_value_changed([](auto const& obj, terraformer::ui::main::window_ref window, auto){
+//				window.set_title(obj.value().c_str());
+//			}
+//		);
 
-	my_outer_vbox.append(std::ref(ok));
+//	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
-	my_outer_vbox.append(std::ref(cancel));
-	my_outer_vbox.append(std::ref(my_input));
+//	my_outer_vbox.append(std::ref(cancel));
+//	my_outer_vbox.append(std::ref(my_input));
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
 		terraformer::ui::theming::load_default_config<terraformer::ui::drawing_api::gl_texture>(),

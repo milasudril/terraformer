@@ -1,4 +1,4 @@
-//@	{"target":{"name": "button.test"}}
+//	{"target":{"name": "button.test"}}
 
 #include "./button.hpp"
 #include "ui/font_handling/font_mapper.hpp"
