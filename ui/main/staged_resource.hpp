@@ -31,7 +31,7 @@ namespace terraformer::ui::main
 			&& resolve_overload<>(&BackendResourceFactory::get_global_id)
 				== resolve_overload<>(&global_instance_counter::get_global_id)
 		)
-		BackendResource& get_backend_resource(BackendResourceFactory& backend)
+		BackendResource& get_backend_resource(BackendResourceFactory& backend) const
 		{
 			if(!m_backend_resource.created_by_factory(backend.get_global_id())) [[unlikely]]
 			{
@@ -49,9 +49,9 @@ namespace terraformer::ui::main
 		}
 
 	private:
-		BackendResource m_backend_resource;
+		mutable BackendResource m_backend_resource;
 		FrontendResource m_frontend_resource;
-		bool m_must_update_backend_resource;
+		mutable bool m_must_update_backend_resource;
 	};
 }
 
