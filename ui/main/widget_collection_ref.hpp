@@ -98,7 +98,7 @@ namespace terraformer::ui::main
 	using keyboard_focus_enter_callback = event_callback_t<keyboard_focus_enter_event, window_ref, ui_controller>;
 	using keyboard_focus_leave_callback = event_callback_t<keyboard_focus_leave_event, window_ref, ui_controller>;
 	using size_callback = event_callback_t<fb_size>;
-	using prepare_for_presentation_callback = event_callback_t<widget_layer_stack&, graphics_resource_factory_ref>;
+	using prepare_for_presentation_callback = widget_layer_stack (*)(void*, graphics_resource_factory_ref);
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
 
 	using compute_size_given_height_callback = scaling (*)(void*, widget_width_request);
@@ -116,6 +116,7 @@ namespace terraformer::ui::main
 			widget_state,
 			scaling,
 			widget_geometry,
+			widget_layer_stack,
 			prepare_for_presentation_callback,
 			cursor_enter_callback,
 			cursor_leave_callback,
@@ -162,6 +163,9 @@ namespace terraformer::ui::main
 
 		auto widget_states() const
 		{ return m_span.template get_by_type<widget_state>(); }
+
+		auto widget_layer_stacks() const
+		{ return m_span.template get_by_type<widget_layer_stack>(); }
 
 		template<class EventType, class ... Args>
 		auto event_callbacks() const

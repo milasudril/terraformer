@@ -2,7 +2,6 @@
 #define TERRAFORMER_UI_MAIN_EVENT_DISPATCHER_HPP
 
 #include "ui/main/widget.hpp"
-#include "ui/main/widgets_to_render_collection.hpp"
 #include "ui/main/events.hpp"
 #include "ui/main/widget_collection.hpp"
 #include "ui/main/flat_widget_collection.hpp"
@@ -196,30 +195,32 @@ namespace terraformer::ui::main
 		template<class GraphicsResourceFactory>
 		void render(GraphicsResourceFactory& res_factory)
 		{
-			root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
-			// TODO: Pick width/height based on window size
-			auto const box_size = compute_size(root);
-			confirm_sizes(
-				root,
-				fb_size{
-					.width = static_cast<int>(box_size[0]),
-					.height = static_cast<int>(box_size[1])
-				}
-			);
+			{
+				root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
+				// TODO: Pick width/height based on window size
+				auto const box_size = compute_size(root);
+				confirm_sizes(
+					root,
+					fb_size{
+						.width = static_cast<int>(box_size[0]),
+						.height = static_cast<int>(box_size[1])
+					}
+				);
 
-			m_root_collection.get_attributes().widget_geometries().front() = widget_geometry{
-				.where = location{0.0f, 0.0f, 0.0f},
-				.origin = location{-1.0f, 1.0f, 0.0f},
-				.size = box_size
-			};
-			apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
+				m_root_collection.get_attributes().widget_geometries().front() = widget_geometry{
+					.where = location{0.0f, 0.0f, 0.0f},
+					.origin = location{-1.0f, 1.0f, 0.0f},
+					.size = box_size
+				};
+				apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
 
-			main::widgets_to_render_collection<main::widget_layer_stack>
-				widgets_to_render{std::as_const(m_root_collection).get_attributes()};
+				m_root_collection.get_attributes().widget_layer_stacks().front() = prepare_for_presentation(root, res_factory);
+			}
 
-			prepare_for_presentation(widgets_to_render, res_factory);
-
-			show_widgets(value_of(m_content_renderer), widgets_to_render);
+			{
+				root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
+				show_widgets(std::ref(m_content_renderer), root);
+			}
 #if 0
 			if(m_hot_widget != find_recursive_result{}
 				&& m_hot_widget.state().has_cursor_focus_indicator())

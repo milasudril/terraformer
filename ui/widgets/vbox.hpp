@@ -22,8 +22,7 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
- 		void prepare_for_presentation(
-			main::widget_layer_stack& layers,
+ 		main::widget_layer_stack prepare_for_presentation(
 			main::graphics_resource_factory_ref res_factory
 		)
 		{
@@ -35,34 +34,36 @@ namespace terraformer::ui::widgets
 			};
 
 			auto const null_texture = m_null_texture->get_backend_resource(res_factory).get();
-			layers.background = main::widget_layer{
-				.offset = displacement{},
-				.texture = m_background->get_backend_resource(res_factory).get(),
-				.tints = bg_tints
-			};
-			layers.sel_bg_mask = main::widget_layer_mask{
-				.offset = displacement{},
-				.texture = null_texture,
-			},
-			layers.selection_background = main::widget_layer{
-				.offset = displacement{},
-				.texture = null_texture,
-				.tints = std::array<rgba_pixel, 4>{}
-			};
-			layers.foreground = main::widget_layer{
-				.offset = displacement{},
-				.texture = null_texture,
-				.tints = std::array<rgba_pixel, 4>{}
-			},
-			layers.frame = main::widget_layer{
-				.offset = displacement{},
-				.texture = null_texture,
-				.tints = std::array<rgba_pixel, 4>{}
-			};
-			layers.input_marker = main::widget_layer{
-				.offset = displacement{},
-				.texture = null_texture,
-				.tints = std::array<rgba_pixel, 4>{}
+			return main::widget_layer_stack{
+				.background = main::widget_layer{
+					.offset = displacement{},
+					.texture = m_background->get_backend_resource(res_factory).get(),
+					.tints = bg_tints
+				},
+				.sel_bg_mask = main::widget_layer_mask{
+					.offset = displacement{},
+					.texture = null_texture,
+				},
+				.selection_background = main::widget_layer{
+					.offset = displacement{},
+					.texture = null_texture,
+					.tints = std::array<rgba_pixel, 4>{}
+				},
+				.foreground = main::widget_layer{
+					.offset = displacement{},
+					.texture = null_texture,
+					.tints = std::array<rgba_pixel, 4>{}
+				},
+				.frame = main::widget_layer{
+					.offset = displacement{},
+					.texture = null_texture,
+					.tints = std::array<rgba_pixel, 4>{}
+				},
+				.input_marker = main::widget_layer{
+					.offset = displacement{},
+					.texture = null_texture,
+					.tints = std::array<rgba_pixel, 4>{}
+				}
 			};
 		}
 

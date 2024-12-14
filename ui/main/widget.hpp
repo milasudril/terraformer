@@ -5,6 +5,7 @@
 
 #include "lib/common/utils.hpp"
 #include "lib/array_classes/multi_span.hpp"
+#include "lib/common/value_accessor.hpp"
 
 #include <utility>
 #include <type_traits>
@@ -22,7 +23,6 @@ namespace terraformer::ui::main
 		keyboard_button_event const& kbe,
 		widget_instance_info const&,
 		config const& cfg,
-		widget_layer_stack& layers,
 		graphics_resource_factory_ref res_factory,
 		widget_instance_info instance_info,
 		widget_width_request w_req,
@@ -34,7 +34,7 @@ namespace terraformer::ui::main
 		ui_controller ui_ctrl
 	)
 	{
-		{ obj.prepare_for_presentation(layers, res_factory) } -> std::same_as<void>;
+		{ obj.prepare_for_presentation(res_factory) } -> std::same_as<widget_layer_stack>;
 		{ obj.handle_event(cee, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(cle, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(cme, wr, ui_ctrl) } -> std::same_as<void>;
@@ -68,7 +68,10 @@ namespace terraformer::ui::main
 				.width = static_cast<int>(widgets.widget_geometries()[index].size[0]),
 				.height = static_cast<int>(widgets.widget_geometries()[index].size[1])
 			},
-			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
+			m_layout{widgets.get_layout_callbacks()[index](m_widget)},
+			m_prepare_for_presentation_callback{widgets.render_callbacks()[index]},
+			m_layers{widgets.widget_layer_stacks()[index]},
+			m_geometry{widgets.widget_geometries()[index]}
 		{ }
 
 		root_widget() = default;
@@ -95,6 +98,15 @@ namespace terraformer::ui::main
 			return m_layout.update_widget_locations(m_children);
 		}
 
+		widget_layer_stack prepare_for_presentation(graphics_resource_factory_ref res_factory)
+		{ return m_prepare_for_presentation_callback(m_widget, res_factory); }
+
+		template<class Renderer>
+		void render(Renderer renderer)
+		{
+			value_of(renderer).render(m_geometry.where, m_geometry.origin, m_geometry.size, m_layers);
+		}
+
 	private:
 		void* m_widget = nullptr;
 		widget_collection_ref m_children;
@@ -103,6 +115,9 @@ namespace terraformer::ui::main
 		event_callback_t<fb_size> m_size_confirmed = [](void*, fb_size){};
 		fb_size m_old_size{};
 		layout_policy_ref m_layout;
+		prepare_for_presentation_callback m_prepare_for_presentation_callback = [](void*, graphics_resource_factory_ref){return widget_layer_stack{}; };
+		widget_layer_stack m_layers{};
+		widget_geometry m_geometry{};
 	};
 
 	inline scaling compute_size(root_widget& root)
@@ -171,9 +186,42 @@ namespace terraformer::ui::main
 		}
 	}
 
+	inline widget_layer_stack prepare_for_presentation(root_widget& root, graphics_resource_factory_ref res_factory)
+	{
+		auto ret = root.prepare_for_presentation(res_factory);
+		auto& children = root.children();
+		auto const widget_states = children.widget_states();
+		auto const layer_stacks = children.widget_layer_stacks();
+		for(auto k : children.element_indices())
+		{
+			if(!widget_states[k].hidden) [[likely]]
+			{
+				root_widget next_root{children, k};
+				layer_stacks[k] = prepare_for_presentation(next_root, res_factory);
+			}
+		}
+		return ret;
+	}
+
+	template<class Renderer>
+	inline void show_widgets(Renderer renderer, root_widget& root)
+	{
+		root.render(renderer);
+		auto& children = root.children();
+		auto const widget_states = children.widget_states();
+		for(auto k : children.element_indices())
+		{
+			if(!widget_states[k].hidden) [[likely]]
+			{
+				root_widget next_root{children, k};
+				show_widgets(renderer, next_root);
+			}
+		}
+	}
+
 	struct widget_with_default_actions
 	{
-		void prepare_for_presentation(widget_layer_stack&, graphics_resource_factory_ref) {}
+		widget_layer_stack prepare_for_presentation(graphics_resource_factory_ref) { return widget_layer_stack{}; }
 		void handle_event(cursor_enter_event const&, window_ref, ui_controller) {}
 		void handle_event(cursor_leave_event const&, window_ref, ui_controller) {}
 		void handle_event(cursor_motion_event const&, window_ref, ui_controller) {}
