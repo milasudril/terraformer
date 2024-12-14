@@ -1,6 +1,6 @@
-//@	{"target":{"name":"graphics_resource_factory_ref.test"}}
+//@	{"target":{"name":"graphics_backend_ref.test"}}
 
-#include "./graphics_resource_factory_ref.hpp"
+#include "./graphics_backend_ref.hpp"
 
 #include <testfwk/testfwk.hpp>
 
@@ -14,33 +14,33 @@ namespace
 		void bind(int){};
 	};
 
-	struct dummy_factory
+	struct dummy_backend
 	{
 		constexpr uint64_t get_global_id() const
 		{ return 124; }
 
 		auto create(
 			std::type_identity<terraformer::ui::main::texture>,
-			uint64_t factory_id,
+			uint64_t backend_id,
 			terraformer::image const& img
 		)
 		{
-			return terraformer::ui::main::texture{std::in_place_type_t<dummy_texture>{}, factory_id, img};
+			return terraformer::ui::main::texture{std::in_place_type_t<dummy_texture>{}, backend_id, img};
 		}
 	};
 }
 
-TESTCASE(terraformer_resource_factory_ref_create_texture)
+TESTCASE(terraformer_resource_backend_ref_create_texture)
 {
-	dummy_factory my_factory;
-	terraformer::ui::main::graphics_resource_factory_ref resource_factroy{my_factory};
+	dummy_backend my_backend;
+	terraformer::ui::main::graphics_backend_ref resource_factroy{my_backend};
 	terraformer::image img{3, 2};
 	auto texture = resource_factroy.create(
 		std::type_identity<terraformer::ui::main::texture>{},
 		img
 	);
 
-	EXPECT_EQ(texture.created_by_factory(my_factory.get_global_id()), true);
-	EXPECT_EQ(texture.created_by_factory(3), false);
+	EXPECT_EQ(texture.belongs_to_backend(my_backend.get_global_id()), true);
+	EXPECT_EQ(texture.belongs_to_backend(3), false);
 }
 

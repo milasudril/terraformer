@@ -138,6 +138,6 @@ int main(int, char**)
 	gui_ctxt.wait_events(
 		std::ref(event_dispatcher),
 		std::ref(mainwin),
-		terraformer::ui::main::graphics_resource_factory_ref{res_factory}
+		terraformer::ui::main::graphics_backend_ref{res_factory}
 	);
 }

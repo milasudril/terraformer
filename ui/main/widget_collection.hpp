@@ -30,8 +30,8 @@ namespace terraformer::ui::main
 				scaling{},
 				initial_geometry,
 				widget_layer_stack{},
-				[](void* obj, graphics_resource_factory_ref res_factory) {
-					return static_cast<Widget*>(obj)->prepare_for_presentation(res_factory);
+				[](void* obj, graphics_backend_ref backend) {
+					return static_cast<Widget*>(obj)->prepare_for_presentation(backend);
 				},
 				[](void* obj, cursor_enter_event const& event, window_ref wr, ui_controller ui_ctrl) {
 					static_cast<Widget*>(obj)->handle_event(event, wr, ui_ctrl);

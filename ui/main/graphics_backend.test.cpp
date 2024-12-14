@@ -16,11 +16,11 @@ namespace
 	{
 		terraformer::ui::main::generic_unique_texture create(
 			std::type_identity<terraformer::ui::main::generic_unique_texture>,
-			uint64_t factory_id,
+			uint64_t backend_id,
 			terraformer::image const& img
 		)
 		{
-			called_with_id = factory_id;
+			called_with_id = backend_id;
 			called_with_image = &img;
 			return terraformer::ui::main::generic_unique_texture{std::type_identity<dummy_texture>{}};
 		}

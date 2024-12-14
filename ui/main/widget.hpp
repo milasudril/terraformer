@@ -23,7 +23,7 @@ namespace terraformer::ui::main
 		keyboard_button_event const& kbe,
 		widget_instance_info const&,
 		config const& cfg,
-		graphics_resource_factory_ref res_factory,
+		graphics_backend_ref backend,
 		widget_instance_info instance_info,
 		widget_width_request w_req,
 		widget_height_request h_req,
@@ -34,7 +34,7 @@ namespace terraformer::ui::main
 		ui_controller ui_ctrl
 	)
 	{
-		{ obj.prepare_for_presentation(res_factory) } -> std::same_as<widget_layer_stack>;
+		{ obj.prepare_for_presentation(backend) } -> std::same_as<widget_layer_stack>;
 		{ obj.handle_event(cee, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(cle, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(cme, wr, ui_ctrl) } -> std::same_as<void>;
@@ -98,8 +98,8 @@ namespace terraformer::ui::main
 			return m_layout.update_widget_locations(m_children);
 		}
 
-		widget_layer_stack prepare_for_presentation(graphics_resource_factory_ref res_factory)
-		{ return m_prepare_for_presentation_callback(m_widget, res_factory); }
+		widget_layer_stack prepare_for_presentation(graphics_backend_ref backend)
+		{ return m_prepare_for_presentation_callback(m_widget, backend); }
 
 		template<class Renderer>
 		void render(Renderer renderer)
@@ -115,7 +115,7 @@ namespace terraformer::ui::main
 		event_callback_t<fb_size> m_size_confirmed = [](void*, fb_size){};
 		fb_size m_old_size{};
 		layout_policy_ref m_layout;
-		prepare_for_presentation_callback m_prepare_for_presentation_callback = [](void*, graphics_resource_factory_ref){return widget_layer_stack{}; };
+		prepare_for_presentation_callback m_prepare_for_presentation_callback = [](void*, graphics_backend_ref){return widget_layer_stack{}; };
 		widget_layer_stack m_layers{};
 		widget_geometry m_geometry{};
 	};
@@ -186,9 +186,9 @@ namespace terraformer::ui::main
 		}
 	}
 
-	inline widget_layer_stack prepare_for_presentation(root_widget& root, graphics_resource_factory_ref res_factory)
+	inline widget_layer_stack prepare_for_presentation(root_widget& root, graphics_backend_ref backend)
 	{
-		auto ret = root.prepare_for_presentation(res_factory);
+		auto ret = root.prepare_for_presentation(backend);
 		auto& children = root.children();
 		auto const widget_states = children.widget_states();
 		auto const layer_stacks = children.widget_layer_stacks();
@@ -197,7 +197,7 @@ namespace terraformer::ui::main
 			if(!widget_states[k].hidden) [[likely]]
 			{
 				root_widget next_root{children, k};
-				layer_stacks[k] = prepare_for_presentation(next_root, res_factory);
+				layer_stacks[k] = prepare_for_presentation(next_root, backend);
 			}
 		}
 		return ret;
@@ -221,7 +221,7 @@ namespace terraformer::ui::main
 
 	struct widget_with_default_actions
 	{
-		widget_layer_stack prepare_for_presentation(graphics_resource_factory_ref) { return widget_layer_stack{}; }
+		widget_layer_stack prepare_for_presentation(graphics_backend_ref) { return widget_layer_stack{}; }
 		void handle_event(cursor_enter_event const&, window_ref, ui_controller) {}
 		void handle_event(cursor_leave_event const&, window_ref, ui_controller) {}
 		void handle_event(cursor_motion_event const&, window_ref, ui_controller) {}

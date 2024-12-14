@@ -23,7 +23,7 @@ namespace terraformer::ui::widgets
 		}
 
  		main::widget_layer_stack prepare_for_presentation(
-			main::graphics_resource_factory_ref res_factory
+			main::graphics_backend_ref backend
 		)
 		{
 			std::array const bg_tints{
@@ -33,11 +33,11 @@ namespace terraformer::ui::widgets
 				m_background_tint,
 			};
 
-			auto const null_texture = m_null_texture->get_backend_resource(res_factory).get();
+			auto const null_texture = m_null_texture->get_backend_resource(backend).get();
 			return main::widget_layer_stack{
 				.background = main::widget_layer{
 					.offset = displacement{},
-					.texture = m_background->get_backend_resource(res_factory).get(),
+					.texture = m_background->get_backend_resource(backend).get(),
 					.tints = bg_tints
 				},
 				.sel_bg_mask = main::widget_layer_mask{

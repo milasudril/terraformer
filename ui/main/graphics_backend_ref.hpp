@@ -5,14 +5,14 @@
 
 namespace terraformer::ui::main
 {
-	class graphics_resource_factory_ref
+	class graphics_backend_ref
 	{
 	public:
-		template<class FactoryType>
-		explicit graphics_resource_factory_ref(FactoryType& factory):
-			m_handle{&factory},
-			m_vtable_pointer{&s_vtable<FactoryType>},
-			m_global_id{std::as_const(factory).get_global_id()}
+		template<class BackendType>
+		explicit graphics_backend_ref(BackendType& backend):
+			m_handle{&backend},
+			m_vtable_pointer{&s_vtable<BackendType>},
+			m_global_id{std::as_const(backend).get_global_id()}
 		{}
 
 		texture create(std::type_identity<texture>, image const& src)
@@ -27,10 +27,10 @@ namespace terraformer::ui::main
 			texture (*create_texture_from_image)(void*, uint64_t, image const&);
 		};
 
-		template<class FactoryType>
+		template<class BackendType>
 		static constexpr vtable s_vtable{
 			.create_texture_from_image = [](void* object, uint64_t global_id, image const& img) {
-				return static_cast<FactoryType*>(object)
+				return static_cast<BackendType*>(object)
 					->create(std::type_identity<texture>{}, global_id, img);
 			}
 		};

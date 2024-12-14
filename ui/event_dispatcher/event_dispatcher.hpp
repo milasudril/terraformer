@@ -162,11 +162,11 @@ namespace terraformer::ui::main
 			// TODO: Should update size here as well
 		}
 
-		template<class Viewport, class GraphicsResourceFactory, class ... Overlay>
-		bool operator()(Viewport&& viewport, GraphicsResourceFactory& res_factory, Overlay&&... overlay)
+		template<class Viewport, class GraphicsBackend, class ... Overlay>
+		bool operator()(Viewport&& viewport, GraphicsBackend& backend, Overlay&&... overlay)
 		{
 			value_of(m_content_renderer).clear_buffers();
-			render(res_factory);
+			render(backend);
 			(...,overlay());
 			value_of(viewport).swap_buffers();
 			return value_of(m_window_controller).main_loop_should_exit(viewport);
@@ -192,8 +192,8 @@ namespace terraformer::ui::main
 			m_config = std::move(new_config);
 		}
 
-		template<class GraphicsResourceFactory>
-		void render(GraphicsResourceFactory& res_factory)
+		template<class GraphicsBackend>
+		void render(GraphicsBackend& backend)
 		{
 			{
 				root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
@@ -214,7 +214,7 @@ namespace terraformer::ui::main
 				};
 				apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
 
-				m_root_collection.get_attributes().widget_layer_stacks().front() = prepare_for_presentation(root, res_factory);
+				m_root_collection.get_attributes().widget_layer_stacks().front() = prepare_for_presentation(root, backend);
 			}
 
 			{

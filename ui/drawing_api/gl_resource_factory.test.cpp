@@ -33,5 +33,5 @@ TESTCASE(terraformer_ui_drawing_api_gl_resource_factory_create_texture)
 	);
 
 	EXPECT_EQ(res.get(), true);
-	EXPECT_EQ(res.created_by_factory(555), true);
+	EXPECT_EQ(res.belongs_to_backend(555), true);
 }

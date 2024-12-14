@@ -11,7 +11,7 @@
 #include "./ui_controller.hpp"
 #include "./window_ref.hpp"
 #include "./widget_layer_stack.hpp"
-#include "./graphics_resource_factory_ref.hpp"
+#include "./graphics_backend_ref.hpp"
 
 #include <concepts>
 #include <utility>
@@ -98,7 +98,7 @@ namespace terraformer::ui::main
 	using keyboard_focus_enter_callback = event_callback_t<keyboard_focus_enter_event, window_ref, ui_controller>;
 	using keyboard_focus_leave_callback = event_callback_t<keyboard_focus_leave_event, window_ref, ui_controller>;
 	using size_callback = event_callback_t<fb_size>;
-	using prepare_for_presentation_callback = widget_layer_stack (*)(void*, graphics_resource_factory_ref);
+	using prepare_for_presentation_callback = widget_layer_stack (*)(void*, graphics_backend_ref);
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
 
 	using compute_size_given_height_callback = scaling (*)(void*, widget_width_request);

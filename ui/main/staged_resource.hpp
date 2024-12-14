@@ -25,10 +25,10 @@ namespace terraformer::ui::main
 		operator FrontendResource const&() const
 		{ return m_frontend_resource; }
 
-		template<class BackendResourceFactory>
-		BackendResource& get_backend_resource(BackendResourceFactory& backend) const
+		template<class GraphicsBackend>
+		BackendResource& get_backend_resource(GraphicsBackend& backend) const
 		{
-			if(!m_backend_resource.created_by_factory(backend.get_global_id())) [[unlikely]]
+			if(!m_backend_resource.belongs_to_backend(backend.get_global_id())) [[unlikely]]
 			{
 				m_backend_resource = backend.create(std::type_identity<BackendResource>{}, m_frontend_resource);
 				m_must_update_backend_resource = false;

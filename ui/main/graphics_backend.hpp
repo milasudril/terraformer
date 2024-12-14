@@ -29,8 +29,8 @@ namespace terraformer::ui::main
 
 		template<class T>
 		static constexpr vtable vt{
-			.create_texture_from_image = [](void* handle, uint64_t factory_id, image const& img) {
-					return static_cast<T*>(handle)->create(std::type_identity<generic_unique_texture>{}, factory_id, img);
+			.create_texture_from_image = [](void* handle, uint64_t backend_id, image const& img) {
+					return static_cast<T*>(handle)->create(std::type_identity<generic_unique_texture>{}, backend_id, img);
 			}
 		};
 

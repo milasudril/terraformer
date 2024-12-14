@@ -54,9 +54,9 @@ namespace terraformer::ui::main
 		texture() = default;
 
 		template<class RealTexture, class... Args>
-		explicit texture(std::in_place_type_t<RealTexture>, uint64_t factory_id, Args&&... args):
+		explicit texture(std::in_place_type_t<RealTexture>, uint64_t backend_id, Args&&... args):
 			m_handle{std::in_place_type_t<RealTexture>{}, std::forward<Args>(args)...},
-			m_factory_id{factory_id}
+			m_backend_id{backend_id}
 		{}
 
 		void upload(span_2d<rgba_pixel const> pixels)
@@ -65,15 +65,15 @@ namespace terraformer::ui::main
 		void bind(int shader_port)
 		{ m_handle.get().get_vtable().bind(m_handle.get().get_pointer(), shader_port); }
 
-		bool created_by_factory(uint64_t factory) const
-		{ return static_cast<bool>(m_handle) && m_factory_id == factory; }
+		bool belongs_to_backend(uint64_t backend) const
+		{ return static_cast<bool>(m_handle) && m_backend_id == backend; }
 
 		texture_ref get()
 		{ return texture_ref{m_handle.get()}; }
 
 	private:
 		unique_resource<texture_vtable> m_handle;
-		uint64_t m_factory_id{};
+		uint64_t m_backend_id{};
 	};
 }
 
