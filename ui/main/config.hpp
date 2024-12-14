@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_MAIN_CONFIG_HPP
 #define TERRAFORMER_UI_MAIN_CONFIG_HPP
 
-#include "./generic_texture.hpp"
+#include "./texture_types.hpp"
 
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "ui/font_handling/text_shaper.hpp"
@@ -73,7 +73,7 @@ namespace terraformer::ui::main
 	struct panel_look
 	{
 		panel_colors colors;
-		main::generic_shared_texture background_texture;
+		immutable_shared_texture background_texture;
 		float padding;
 	};
 
@@ -93,10 +93,10 @@ namespace terraformer::ui::main
 
 	struct stock_textures
 	{
-		generic_shared_texture null;
-		generic_shared_texture black;
-		generic_shared_texture white;
-		generic_shared_texture test_pattern;
+		immutable_shared_texture null;
+		immutable_shared_texture black;
+		immutable_shared_texture white;
+		immutable_shared_texture test_pattern;
 	};
 
 	struct config

@@ -163,11 +163,11 @@ namespace terraformer::ui::main
 			// TODO: Should update size here as well
 		}
 
-		template<class Viewport, class ... Overlay>
-		bool operator()(Viewport&& viewport, Overlay&&... overlay)
+		template<class Viewport, class GraphicsResourceFactory, class ... Overlay>
+		bool operator()(Viewport&& viewport, GraphicsResourceFactory& res_factory, Overlay&&... overlay)
 		{
 			value_of(m_content_renderer).clear_buffers();
-			render();
+			render(res_factory);
 			(...,overlay());
 			value_of(viewport).swap_buffers();
 			return value_of(m_window_controller).main_loop_should_exit(viewport);
@@ -193,7 +193,8 @@ namespace terraformer::ui::main
 			m_config = std::move(new_config);
 		}
 
-		void render()
+		template<class GraphicsResourceFactory>
+		void render(GraphicsResourceFactory& res_factory)
 		{
 			root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
 			// TODO: Pick width/height based on window size
@@ -213,13 +214,13 @@ namespace terraformer::ui::main
 			};
 			apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
 
-			using WidgetRenderingResult = typename dereferenced_type<ContentRenderer>::input_rectangle;
-			main::widgets_to_render_collection<WidgetRenderingResult>
+			main::widgets_to_render_collection<main::widget_layer_stack>
 				widgets_to_render{std::as_const(m_root_collection).get_attributes()};
 
-			prepare_for_presentation(widgets_to_render);
+			prepare_for_presentation(widgets_to_render, res_factory);
 
 			show_widgets(value_of(m_content_renderer), widgets_to_render);
+#if 0
 			if(m_hot_widget != find_recursive_result{}
 				&& m_hot_widget.state().has_cursor_focus_indicator())
 			{
@@ -233,7 +234,7 @@ namespace terraformer::ui::main
 					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
 					Frame{
 						.thickness = border_thickness,
-						.texture = m_config.misc_textures.white.get_if<typename Frame::texture_type>(),
+						.texture = m_config.misc_textures.white->get_backend_resource(resource_factory),
 						.tints = std::array{
 							0.0f*color,
 							0.0f*color,
@@ -268,7 +269,7 @@ namespace terraformer::ui::main
 					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
 					Frame{
 						.thickness = border_thickness,
-						.texture = m_config.misc_textures.white.get_if<typename Frame::texture_type>(),
+						.texture = m_config.misc_textures.white->get_backend_resource(resource_factory),
 						.tints = std::array{
 							0.0f*color,
 							0.0f*color,
@@ -282,6 +283,7 @@ namespace terraformer::ui::main
 					}
 				);
 			}
+#endif
 		}
 
 	private:

@@ -32,7 +32,13 @@ namespace terraformer::ui::main
 		auto widget_pointers() const
 		{ return m_objects.template get<0>(); }
 
-		auto output_rectangles() const
+		auto render_callbacks() const
+		{ return m_objects.template get<1>(); }
+
+		auto widget_layers() const
+		{ return m_objects.template get<2>(); }
+
+		auto widget_layers()
 		{ return m_objects.template get<2>(); }
 
 		auto output_rectangles()
@@ -44,8 +50,6 @@ namespace terraformer::ui::main
 		auto widget_geometries()
 		{ return m_objects.template get<3>(); }
 
-		auto render_callbacks() const
-		{ return m_objects.template get<1>(); }
 
 	private:
 		static void collect_widgets(widget_collection_view const& from, widget_array& to)
@@ -69,22 +73,22 @@ namespace terraformer::ui::main
 		widget_array m_objects;
 	};
 
-	template<class WidgetRenderingResult>
-	void prepare_for_presentation(widgets_to_render_collection<WidgetRenderingResult>& widgets)
+	template<class WidgetRenderingResult, class GraphicsResourceFactory>
+	void prepare_for_presentation(widgets_to_render_collection<WidgetRenderingResult>& widgets, GraphicsResourceFactory& res_factory)
 	{
 		auto const render_callbacks = widgets.render_callbacks();
 		auto const widget_pointers = widgets.widget_pointers();
-		auto output_rectangles = widgets.output_rectangles();
+		auto widget_layers = widgets.widget_layers();
 
 		for(auto k : widgets.element_indices())
-		{ render_callbacks[k](widget_pointers[k], widget_rendering_result{std::ref(output_rectangles[k])}); }
+		{ render_callbacks[k](widget_pointers[k], widget_layers[k], res_factory); }
 	}
 
 	template<class Renderer, class WidgetRenderingResult>
 	void show_widgets(Renderer&& renderer, widgets_to_render_collection<WidgetRenderingResult> const& widgets)
 	{
 		auto const widget_geometries = widgets.widget_geometries();
-		auto const output_rects = widgets.output_rectangles();
+		auto const widget_layers = widgets.widget_layers();
 
 		for(auto k : widgets.element_indices())
 		{
@@ -92,7 +96,7 @@ namespace terraformer::ui::main
 				widget_geometries[k].where,
 				widget_geometries[k].origin,
 				widget_geometries[k].size,
-				output_rects[k]
+				widget_layers[k]
 			);
 		}
 	}

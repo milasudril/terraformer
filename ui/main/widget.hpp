@@ -22,7 +22,8 @@ namespace terraformer::ui::main
 		keyboard_button_event const& kbe,
 		widget_instance_info const&,
 		config const& cfg,
-		widget_rendering_result surface,
+		widget_layer_stack& layers,
+		graphics_resource_factory_ref res_factory,
 		widget_instance_info instance_info,
 		widget_width_request w_req,
 		widget_height_request h_req,
@@ -33,7 +34,7 @@ namespace terraformer::ui::main
 		ui_controller ui_ctrl
 	)
 	{
-		{ obj.prepare_for_presentation(surface) } -> std::same_as<void>;
+		{ obj.prepare_for_presentation(layers, res_factory) } -> std::same_as<void>;
 		{ obj.handle_event(cee, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(cle, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(cme, wr, ui_ctrl) } -> std::same_as<void>;
@@ -172,7 +173,7 @@ namespace terraformer::ui::main
 
 	struct widget_with_default_actions
 	{
-		void prepare_for_presentation(widget_rendering_result) {}
+		void prepare_for_presentation(widget_layer_stack&, graphics_resource_factory_ref) {}
 		void handle_event(cursor_enter_event const&, window_ref, ui_controller) {}
 		void handle_event(cursor_leave_event const&, window_ref, ui_controller) {}
 		void handle_event(cursor_motion_event const&, window_ref, ui_controller) {}

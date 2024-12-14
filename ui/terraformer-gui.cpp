@@ -3,9 +3,8 @@
 //@	}
 
 #include "./drawing_api/gl_surface_configuration.hpp"
-#include "./drawing_api/gl_texture.hpp"
+#include "./drawing_api/gl_resource_factory.hpp"
 #include "./drawing_api/frame_renderer.hpp"
-#include "./drawing_api/single_quad_renderer.hpp"
 #include "./drawing_api/gl_widget_stack_renderer.hpp"
 #include "./event_dispatcher/event_dispatcher.hpp"
 #include "./wsapi/native_window.hpp"
@@ -123,10 +122,13 @@ int main(int, char**)
 //	my_outer_vbox.append(std::ref(cancel));
 //	my_outer_vbox.append(std::ref(my_input));
 
+
+	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
+
 	terraformer::ui::main::event_dispatcher event_dispatcher{
-		terraformer::ui::theming::load_default_config<terraformer::ui::drawing_api::gl_texture>(),
+		terraformer::ui::theming::load_default_config(),
 		window_controller{},
-		terraformer::ui::drawing_api::single_quad_renderer{},
+		terraformer::ui::drawing_api::gl_widget_layer_stack_renderer{},
 		terraformer::ui::drawing_api::frame_renderer{},
 		error_handler{},
 		std::ref(my_outer_vbox)
@@ -135,6 +137,7 @@ int main(int, char**)
 	mainwin.set_event_handler<mainwin_tag>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(
 		std::ref(event_dispatcher),
-		std::ref(mainwin)
+		std::ref(mainwin),
+		terraformer::ui::main::graphics_resource_factory_ref{res_factory}
 	);
 }

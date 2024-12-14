@@ -26,11 +26,6 @@ namespace terraformer::ui::main
 		{ return m_frontend_resource; }
 
 		template<class BackendResourceFactory>
-		requires(
-				std::is_base_of_v<global_instance_counter, BackendResourceFactory>
-			&& resolve_overload<>(&BackendResourceFactory::get_global_id)
-				== resolve_overload<>(&global_instance_counter::get_global_id)
-		)
 		BackendResource& get_backend_resource(BackendResourceFactory& backend) const
 		{
 			if(!m_backend_resource.created_by_factory(backend.get_global_id())) [[unlikely]]

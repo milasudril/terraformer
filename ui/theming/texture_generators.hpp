@@ -11,7 +11,6 @@
 
 namespace terraformer::ui::theming
 {
-	template<class DrawingSurface>
 	auto generate_noisy_texture()
 	{
 		terraformer::image img{256, 256};
@@ -27,10 +26,9 @@ namespace terraformer::ui::theming
 			}
 		}
 
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
+		return img;
 	}
 
-	template<class DrawingSurface>
 	auto generate_stock_interactive_frame_texture()
 	{
 		constexpr std::array<int, 24*30> pixels{
@@ -86,10 +84,9 @@ namespace terraformer::ui::theming
 				++k;
 			}
 		}
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels(), 2));
+		return img;
 	}
 
-	template<class DrawingSurface>
 	auto generate_test_pattern()
 	{
 		terraformer::image img{800, 4*96};
@@ -111,31 +108,28 @@ namespace terraformer::ui::theming
 			}
 		}
 
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
+		return img;
 	}
 
-	template<class DrawingSurface>
-	auto generate_transparent_texture()
+	auto generate_null_texture()
 	{
 		terraformer::image img{1, 1};
 		img(0, 0) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f};
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
+		return img;
 	}
 
-	template<class DrawingSurface>
 	auto generate_white_texture()
 	{
 		terraformer::image img{1, 1};
 		img(0, 0) = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
+		return img;
 	}
 
-	template<class DrawingSurface>
 	auto generate_black_texture()
 	{
 		terraformer::image img{1, 1};
 		img(0, 0) = rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f};
-		return std::move(DrawingSurface{}.upload(std::as_const(img).pixels()));
+		return img;
 	}
 };
 

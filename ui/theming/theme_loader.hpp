@@ -10,33 +10,13 @@
 
 namespace terraformer::ui::theming
 {
-	template<class TextureType>
 	main::config load_default_config()
 	{
-		main::generic_shared_texture const noisy_texture{
-			std::type_identity<TextureType>{},
-			generate_noisy_texture<TextureType>()
-		};
-
-		main::generic_shared_texture const white_texture{
-			std::type_identity<TextureType>{},
-			generate_white_texture<TextureType>()
-		};
-
-		main::generic_shared_texture const test_pattern{
-			std::type_identity<TextureType>{},
-			generate_test_pattern<TextureType>()
-		};
-
-		main::generic_shared_texture const null_texture{
-			std::type_identity<TextureType>{},
-			generate_transparent_texture<TextureType>()
-		};
-
-		main::generic_shared_texture const black_texture{
-			std::type_identity<TextureType>{},
-			generate_black_texture<TextureType>()
-		};
+		auto noisy_texture = std::make_shared<main::staged_texture const>(generate_noisy_texture());
+		auto white_texture = std::make_shared<main::staged_texture const>(generate_white_texture());
+		auto test_pattern = std::make_shared<main::staged_texture const>(generate_test_pattern());
+		auto null_texture = std::make_shared<main::staged_texture const>(generate_null_texture());
+		auto black_texture = std::make_shared<main::staged_texture const>(generate_black_texture());
 
 		font_handling::font_mapper fonts;
 		auto const fontfile = fonts.get_path("sans-serif");

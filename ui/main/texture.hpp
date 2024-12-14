@@ -29,6 +29,8 @@ namespace terraformer::ui::main
 	class texture_ref
 	{
 	public:
+		texture_ref() = default;
+
 		explicit texture_ref(resource_reference<texture_vtable> reference):
 			m_reference{reference}
 		{}

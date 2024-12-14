@@ -22,7 +22,10 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
- 		void prepare_for_presentation(main::widget_rendering_result output_rect)
+ 		void prepare_for_presentation(
+			main::widget_layer_stack& layers,
+			main::graphics_resource_factory_ref res_factory
+		)
 		{
 			std::array const bg_tints{
 				m_background_tint,
@@ -31,12 +34,36 @@ namespace terraformer::ui::widgets
 				m_background_tint,
 			};
 
-			output_rect.set_widget_background(m_background.get(), bg_tints);
-			output_rect.set_bg_layer_mask(m_null_texture.get());
-			output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});
-			output_rect.set_widget_foreground(m_null_texture.get(), std::array<rgba_pixel, 4>{}, displacement{});
-			output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
-			output_rect.set_input_marker(m_null_texture.get(), std::array<rgba_pixel, 4>{}, displacement{});
+			auto const null_texture = m_null_texture->get_backend_resource(res_factory).get();
+			layers.background = main::widget_layer{
+				.offset = displacement{},
+				.texture = m_background->get_backend_resource(res_factory).get(),
+				.tints = bg_tints
+			};
+			layers.sel_bg_mask = main::widget_layer_mask{
+				.offset = displacement{},
+				.texture = null_texture,
+			},
+			layers.selection_background = main::widget_layer{
+				.offset = displacement{},
+				.texture = null_texture,
+				.tints = std::array<rgba_pixel, 4>{}
+			};
+			layers.foreground = main::widget_layer{
+				.offset = displacement{},
+				.texture = null_texture,
+				.tints = std::array<rgba_pixel, 4>{}
+			},
+			layers.frame = main::widget_layer{
+				.offset = displacement{},
+				.texture = null_texture,
+				.tints = std::array<rgba_pixel, 4>{}
+			};
+			layers.input_marker = main::widget_layer{
+				.offset = displacement{},
+				.texture = null_texture,
+				.tints = std::array<rgba_pixel, 4>{}
+			};
 		}
 
 		void theme_updated(main::config const& new_theme, main::widget_instance_info instance_info)
@@ -67,8 +94,8 @@ namespace terraformer::ui::widgets
 		widget_collection::index_type m_cursor_widget_index{widget_collection::npos};
 		layouts::rowmajor_table layout{2};
 
-		main::generic_shared_texture m_background;
-		main::generic_shared_texture m_null_texture;
+		main::immutable_shared_texture m_background;
+		main::immutable_shared_texture m_null_texture;
 		rgba_pixel m_background_tint;
 	};
 }

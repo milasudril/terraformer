@@ -21,8 +21,8 @@ namespace terraformer::ui::main
 	struct widget_layer_stack
 	{
 		widget_layer background;
-		widget_layer_mask bg_mask;
-		widget_layer selction_backround;
+		widget_layer_mask sel_bg_mask;
+		widget_layer selection_background;
 		widget_layer foreground;
 		widget_layer frame;
 		widget_layer input_marker;

@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_UI_DRAWING_API_SINGLE_QUAD_RENDERER_HPP
-#define TERRAFORMER_UI_DRAWING_API_SINGLE_QUAD_RENDERER_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_WIDGET_LAYER_STACK_RENDERER_HPP
+#define TERRAFORMER_UI_DRAWING_API_WIDGET_LAYER_STACK_RENDERER_HPP
 
 #include "./gl_mesh.hpp"
 #include "./gl_shader.hpp"
@@ -32,28 +32,28 @@ namespace terraformer::ui::drawing_api
 			m_program.set_uniform(0, where[0], where[1], where[2], 1.0f)
 				.set_uniform(1, v[0], v[1], v[2], 1.0f)
 				.set_uniform(2, scale[0], scale[1], scale[2], 0.0f)
-				.set_uniform(5, rect.widget_background.tints)
+				.set_uniform(5, rect.background.tints)
 				.set_uniform(9, rect.selection_background.tints)
-				.set_uniform(13, rect.widget_foreground.tints)
+				.set_uniform(13, rect.foreground.tints)
 				.set_uniform(17, rect.input_marker.tints)
 				.set_uniform(21, rect.frame.tints)
-				.set_uniform(25, rect.widget_foreground.offset[0], rect.widget_foreground.offset[1])
+				.set_uniform(25, rect.foreground.offset[0], rect.foreground.offset[1])
 				.set_uniform(26, rect.input_marker.offset[0], rect.input_marker.offset[1])
 				.bind();
 
-			assert(rect.widget_background.texture != nullptr);
-			assert(rect.bg_layer_mask != nullptr);
-			assert(rect.selection_background.texture != nullptr);
-			assert(rect.widget_foreground.texture != nullptr);
-			assert(rect.input_marker.texture != nullptr);
-			assert(rect.frame.texture != nullptr);
+			assert(rect.background.texture);
+			assert(rect.sel_bg_mask.texture);
+			assert(rect.selection_background.texture);
+			assert(rect.foreground.texture);
+			assert(rect.input_marker.texture);
+			assert(rect.frame.texture);
 
-			rect.widget_background.texture->bind(0);
-			rect.bg_layer_mask->bind(1);
-			rect.selection_background.texture->bind(2);
-			rect.widget_foreground.texture->bind(3);
-			rect.input_marker.texture->bind(4);
-			rect.frame.texture->bind(5);
+			rect.background.texture.bind(0);
+			rect.sel_bg_mask.texture.bind(1);
+			rect.selection_background.texture.bind(2);
+			rect.foreground.texture.bind(3);
+			rect.input_marker.texture.bind(4);
+			rect.frame.texture.bind(5);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles();
@@ -86,16 +86,16 @@ layout (location = 1) uniform vec4 model_origin;
 layout (location = 2) uniform vec4 model_size;
 layout (location = 3) uniform vec4 world_location;
 layout (location = 4) uniform vec4 world_scale;
-layout (location = 5) uniform vec4 widget_background_tints[4];
+layout (location = 5) uniform vec4 background_tints[4];
 layout (location = 9) uniform vec4 selection_background_tints[4];
-layout (location = 13) uniform vec4 widget_foreground_tints[4];
+layout (location = 13) uniform vec4 foreground_tints[4];
 layout (location = 17) uniform vec4 input_marker_tints[4];
 layout (location = 21) uniform vec4 frame_tints[4];
 
 out vec2 uv;
-out vec4 widget_background_tint;
+out vec4 background_tint;
 out vec4 selection_background_tint;
-out vec4 widget_foreground_tint;
+out vec4 foreground_tint;
 out vec4 input_marker_tint;
 out vec4 frame_tint;
 
@@ -119,28 +119,28 @@ void main()
 	vec4 loc = model_location + model_size*(coords[gl_VertexID] - model_origin);
 	gl_Position = world_location + world_scale*(loc - world_origin);
 	uv = model_size.xy*uv_coords[gl_VertexID];
-	widget_background_tint = widget_background_tints[gl_VertexID];
+	background_tint = background_tints[gl_VertexID];
 	selection_background_tint = selection_background_tints[gl_VertexID];
-	widget_foreground_tint = widget_foreground_tints[gl_VertexID];
+	foreground_tint = foreground_tints[gl_VertexID];
 	input_marker_tint = input_marker_tints[gl_VertexID];
 	frame_tint = frame_tints[gl_VertexID];
 })"
 			},
 			gl_shader<GL_FRAGMENT_SHADER>{R"(#version 460 core
 out vec4 fragment_color;
-layout (binding = 0) uniform sampler2D widget_background;
+layout (binding = 0) uniform sampler2D background;
 layout (binding = 1) uniform sampler2D bg_layer_mask;
 layout (binding = 2) uniform sampler2D selection_background;
-layout (binding = 3) uniform sampler2D widget_foreground;
+layout (binding = 3) uniform sampler2D foreground;
 layout (binding = 4) uniform sampler2D input_marker;
 layout (binding = 5) uniform sampler2D frame;
 layout (location = 25) uniform vec2 fg_offset;
 layout (location = 26) uniform vec2 input_marker_offset;
 
 in vec2 uv;
-in vec4 widget_background_tint;
+in vec4 background_tint;
 in vec4 selection_background_tint;
-in vec4 widget_foreground_tint;
+in vec4 foreground_tint;
 in vec4 input_marker_tint;
 in vec4 frame_tint;
 
@@ -161,10 +161,10 @@ vec4 sample_cropped(sampler2D tex, vec2 uv)
 
 void main()
 {
-	vec4 bg_0 = sample_scaled(widget_background, uv)*widget_background_tint;
+	vec4 bg_0 = sample_scaled(background, uv)*background_tint;
 	float bg_mask = sample_scaled(bg_layer_mask, uv).r;
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
-	vec4 fg_0 = sample_cropped(widget_foreground, uv - fg_offset)*widget_foreground_tint;
+	vec4 fg_0 = sample_cropped(foreground, uv - fg_offset)*foreground_tint;
 	vec4 fg_1 = sample_cropped(input_marker, uv - input_marker_offset)*input_marker_tint;
 	vec4 fg_2 = texture(frame, uv)*frame_tint;
 

@@ -29,8 +29,8 @@ namespace terraformer::ui::main
 				initial_state,
 				scaling{},
 				initial_geometry,
-				[](void* obj, widget_rendering_result result) {
-					return static_cast<Widget*>(obj)->prepare_for_presentation(result);
+				[](void* obj, widget_layer_stack& layers, graphics_resource_factory_ref res_factory) {
+					return static_cast<Widget*>(obj)->prepare_for_presentation(layers, res_factory);
 				},
 				[](void* obj, cursor_enter_event const& event, window_ref wr, ui_controller ui_ctrl) {
 					static_cast<Widget*>(obj)->handle_event(event, wr, ui_ctrl);
