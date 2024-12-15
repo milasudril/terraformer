@@ -1,6 +1,7 @@
-//	{"target":{"name":"single_line_text_input.o"}}
+//@	{"target":{"name":"single_line_text_input.o"}}
 
 #include "./single_line_text_input.hpp"
+#include "ui/drawing_api/image_generators.hpp"
 
 void terraformer::ui::widgets::single_line_text_input::regenerate_text_mask()
 {
@@ -23,7 +24,7 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 	if(m_dirty_bits & text_dirty) [[unlikely]]
 	{ regenerate_text_mask(); }
 
-	m_background_host = generate(
+	m_frame = generate(
 		drawing_api::flat_rectangle{
 			.domain_size = span_2d_extents {
 				.width = static_cast<uint32_t>(m_current_size.width),
@@ -34,14 +35,14 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
-			.border_color = m_fg_tint,
-			.fill_color = m_bg_tint
+			.border_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+			.fill_color = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
 		}
 	);
 
-	m_foreground_host = drawing_api::convert_mask(m_rendered_text);
+	m_foreground = drawing_api::convert_mask(m_rendered_text);
 
-	m_input_marker_host = generate(
+	m_input_marker = generate(
 		drawing_api::flat_rectangle{
 			.domain_size = span_2d_extents {
 				.width = static_cast<uint32_t>(m_current_size.width),
@@ -53,7 +54,7 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 			.height = static_cast<uint32_t>(std::max(1.0f, static_cast<float>(m_current_size.height) - 2.0f*m_margin)),
 			.border_thickness = 0u,
 			.border_color = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
-			.fill_color = m_fg_tint
+			.fill_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
 		}
 	);
 
@@ -65,7 +66,7 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 	printf("begin = %zu, end = %zu, cursor = %zu\n", m_sel_range.begin(), m_sel_range.end(), m_insert_offset);
 	printf("sel_begin = %.8g, sel_end = %.8g\n", sel_begin, sel_end);
 
-	m_selection_mask_host = generate(
+	m_selection_mask = generate(
 		drawing_api::flat_rectangle{
 			.domain_size = span_2d_extents {
 				.width = static_cast<uint32_t>(m_current_size.width),
@@ -84,91 +85,64 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 	);
 
 	m_dirty_bits &= ~host_textures_dirty;
-	m_dirty_bits |= gpu_textures_dirty;
 }
 
-void terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main::widget_rendering_result output_rect)
+terraformer::ui::main::widget_layer_stack
+terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	if(m_dirty_bits & text_dirty) [[unlikely]]
 	{ regenerate_text_mask(); }
 
-	// TODO: Only regenerate relevant host textures
+	// TODO: Only regenerate relevant host textures (frame only needs to be updated on resize)
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
 	auto const cursor_loc = horz_offset_from_index(m_glyphs, m_insert_offset);
 
-	std::array const bg_tints{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
-	if(output_rect.set_widget_background(m_background.get(), bg_tints) != main::set_texture_result::success) [[unlikely]]
-	{
-		m_background = output_rect.create_texture();
-		output_rect.set_widget_background(m_background.get(), bg_tints);
-		m_dirty_bits |= gpu_textures_dirty;
-	}
-
-	if(output_rect.set_bg_layer_mask(m_selection_mask.get()) != main::set_texture_result::success) [[unlikely]]
-	{
-		m_selection_mask = output_rect.create_texture();
-		(void)output_rect.set_bg_layer_mask(m_selection_mask.get());
-		m_dirty_bits |= gpu_textures_dirty;
-	}
-
-	std::array const sel_tints{m_sel_tint, m_sel_tint, m_sel_tint, m_sel_tint};
-	(void)output_rect.set_selection_background(m_background.get(), sel_tints);
-
-	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	auto const w_max = static_cast<float>(m_background_host.width()) - 2.0f*m_margin;
+	auto const w_max = static_cast<float>(m_frame.frontend_resource().width()) - 2.0f*m_margin;
 	displacement const input_marker_offset{std::min(cursor_loc, w_max) + m_margin , m_margin, 0.0f};
 	auto const horz_fg_offset = cursor_loc >= w_max?
 		w_max + m_margin - cursor_loc: m_margin;
 	displacement const fg_offset{horz_fg_offset, m_margin, 0.0f};
-	if(
-		output_rect.set_widget_foreground(
-			m_foreground.get(),
-			fg_tints,
-			fg_offset
-		) != main::set_texture_result::success
-	) [[unlikely]]
-	{
-		m_foreground = output_rect.create_texture();
-		(void)output_rect.set_widget_foreground(m_foreground.get(), fg_tints, fg_offset);
-		m_dirty_bits |= gpu_textures_dirty;
-	}
 
 	std::array const input_marker_tints{
-		m_fg_tint*m_cursor_intensity,
-		m_fg_tint*m_cursor_intensity,
-		m_fg_tint*m_cursor_intensity,
-		m_fg_tint*m_cursor_intensity
+			m_fg_tint*m_cursor_intensity,
+			m_fg_tint*m_cursor_intensity,
+			m_fg_tint*m_cursor_intensity,
+			m_fg_tint*m_cursor_intensity
+		};
+
+	return main::widget_layer_stack{
+		.background = main::widget_layer{
+			.offset = displacement{},
+			.texture = m_background->get_backend_resource(backend).get(),
+			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
+		},
+		.sel_bg_mask = main::widget_layer_mask{
+			.offset = displacement{},
+			.texture = m_selection_mask.get_backend_resource(backend).get()
+		},
+		.selection_background = main::widget_layer{
+			.offset = displacement{},
+			.texture = m_background->get_backend_resource(backend).get(),
+			.tints = std::array{m_sel_tint, m_sel_tint, m_sel_tint, m_sel_tint}
+		},
+		.foreground = main::widget_layer{
+			.offset = fg_offset,
+			.texture = m_foreground.get_backend_resource(backend).get(),
+			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
+		},
+		.frame = main::widget_layer{
+			.offset = displacement{},
+			.texture = m_frame.get_backend_resource(backend).get(),
+			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
+		},
+		.input_marker = main::widget_layer{
+			.offset = input_marker_offset,
+			.texture = m_input_marker.get_backend_resource(backend).get(),
+			.tints = input_marker_tints
+		}
 	};
-	if(
-		output_rect.set_input_marker(
-			m_input_marker.get(),
-			input_marker_tints,
-			input_marker_offset
-		) != main::set_texture_result::success
-	) [[unlikely]]
-	{
-		m_input_marker = output_rect.create_texture();
-		(void)output_rect.set_input_marker(m_input_marker.get(), input_marker_tints, input_marker_offset);
-	}
-
-	if(output_rect.set_frame(m_frame.get(), fg_tints) != main::set_texture_result::success) [[unlikely]]
-	{
-		m_frame = output_rect.create_texture();
-		(void)output_rect.set_frame(m_frame.get(), fg_tints);
-		m_dirty_bits |= gpu_textures_dirty;
-	}
-
-	// TODO: Only upload relevant textures
-	if(m_dirty_bits & gpu_textures_dirty)
-	{
-		m_background.upload(std::as_const(m_background_host).pixels());
-		m_foreground.upload(std::as_const(m_foreground_host).pixels());
-		m_input_marker.upload(std::as_const(m_input_marker_host).pixels());
-		m_selection_mask.upload(std::as_const(m_selection_mask_host).pixels());
-		m_dirty_bits &= ~gpu_textures_dirty;
-	}
 }
 
 void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboard_button_event const& event, main::window_ref window, main::ui_controller controller)
@@ -351,7 +325,7 @@ void terraformer::ui::widgets::single_line_text_input::theme_updated(main::confi
 	m_bg_tint = cfg.input_area.colors.background;
 	m_sel_tint = cfg.input_area.colors.selection;
 	m_fg_tint = cfg.input_area.colors.foreground;
-	m_frame = cfg.misc_textures.null;
+	m_background = cfg.misc_textures.white;
 	m_border_thickness = static_cast<uint32_t>(cfg.input_area.border_thickness);
 	m_dirty_bits |= host_textures_dirty | text_dirty;
 }

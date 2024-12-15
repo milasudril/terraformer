@@ -10,7 +10,7 @@
 #include "./wsapi/native_window.hpp"
 #include "./widgets/label.hpp"
 #include "./widgets/button.hpp"
-//#include "./widgets/single_line_text_input.hpp"
+#include "./widgets/single_line_text_input.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
@@ -109,18 +109,18 @@ int main(int, char**)
 	terraformer::ui::widgets::button cancel;
 	cancel.text(u8"Cancel");
 
-//	terraformer::ui::widgets::single_line_text_input my_input;
-//	my_input
-//		.use_size_from_placeholder(u8"Write your text here")
-//		.on_value_changed([](auto const& obj, terraformer::ui::main::window_ref window, auto){
-//				window.set_title(obj.value().c_str());
-//			}
-//		);
+	terraformer::ui::widgets::single_line_text_input my_input;
+	my_input
+		.use_size_from_placeholder(u8"Write your text here")
+		.on_value_changed([](auto const& obj, terraformer::ui::main::window_ref window, auto){
+				window.set_title(obj.value().c_str());
+			}
+		);
 
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
 	my_outer_vbox.append(std::ref(cancel));
-//	my_outer_vbox.append(std::ref(my_input));
+	my_outer_vbox.append(std::ref(my_input));
 
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};

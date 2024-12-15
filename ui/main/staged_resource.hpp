@@ -27,6 +27,9 @@ namespace terraformer::ui::main
 		operator FrontendResource const&() const
 		{ return m_frontend_resource; }
 
+		FrontendResource const& frontend_resource() const
+		{ return m_frontend_resource; }
+
 		template<class GraphicsBackend>
 		BackendResource& get_backend_resource(GraphicsBackend& backend) const
 		{

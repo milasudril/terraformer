@@ -166,7 +166,7 @@ void main()
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
 	vec4 fg_0 = sample_cropped(foreground, uv - fg_offset)*foreground_tint;
 	vec4 fg_1 = sample_cropped(input_marker, uv - input_marker_offset)*input_marker_tint;
-	vec4 fg_2 = texture(frame, uv)*frame_tint;
+	vec4 fg_2 = sample_scaled(frame, uv)*frame_tint;
 
 	// This assumes that pre-multiplied alpha is used
 	vec4 result = bg_1 + bg_0*(1 - bg_1.w*bg_mask);

@@ -3,12 +3,11 @@
 #ifndef TERRAFORMER_UI_WIDGETS_SINGLE_LINE_TEXT_INPUT_HPP
 #define TERRAFORMER_UI_WIDGETS_SINGLE_LINE_TEXT_INPUT_HPP
 
-#include "ui/main/generic_texture.hpp"
-#include "ui/drawing_api/image_generators.hpp"
+#include "ui/main/texture_types.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
-#include "lib/common/object_tree.hpp"
 #include "lib/common/move_only_function.hpp"
+#include "ui/main/graphics_backend_ref.hpp"
 
 #include <type_traits>
 
@@ -115,7 +114,7 @@ namespace terraformer::ui::widgets
 
 		void regenerate_textures();
 
-		void prepare_for_presentation(main::widget_rendering_result output_rect);
+		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
 		scaling compute_size(main::widget_width_request req);
 
@@ -232,10 +231,10 @@ namespace terraformer::ui::widgets
 
 		font_handling::glyph_sequence m_glyphs;
 		basic_image<uint8_t> m_rendered_text;
+		// TODO: Review flags
 		static constexpr auto text_dirty = 0x1;
 		static constexpr auto host_textures_dirty = 0x2;
-		static constexpr auto gpu_textures_dirty = 0x4;
-		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
+		unsigned int m_dirty_bits = text_dirty | host_textures_dirty;
 		float m_margin = 0;
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
@@ -244,21 +243,15 @@ namespace terraformer::ui::widgets
 		rgba_pixel m_fg_tint;
 		float m_cursor_intensity = 0.6125f;
 
-		main::generic_unique_texture m_background;
-		// TODO: Move frame from foreground texture to frame texture
-		main::generic_unique_texture m_foreground;
-		// TODO: Frame should be should show the current frame
-		main::generic_shared_texture m_frame;
-		// TODO: Selection mask should be grayscale
-		main::generic_unique_texture m_selection_mask;
-		main::generic_unique_texture m_input_marker;
+		main::immutable_shared_texture m_background;
+		main::unique_texture m_selection_mask;
+		main::immutable_shared_texture m_sel_background;
+		main::unique_texture m_foreground;
+		main::unique_texture m_frame;
+		main::unique_texture m_input_marker;
 
 		main::fb_size m_current_size;
 		std::optional<std::u8string> m_placeholder;
-		image m_background_host;
-		image m_foreground_host;
-		image m_input_marker_host;
-		image m_selection_mask_host;
 	};
 }
 
