@@ -118,6 +118,7 @@ terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main:
 			.texture = m_background->get_backend_resource(backend).get(),
 			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
 		},
+		// FIXME: Selection mask is only correct when text fits in textbox
 		.sel_bg_mask = main::widget_layer_mask{
 			.offset = displacement{},
 			.texture = m_selection_mask.get_backend_resource(backend).get()
