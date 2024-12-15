@@ -195,6 +195,7 @@ namespace terraformer::ui::main
 		template<class GraphicsBackend>
 		void render(GraphicsBackend& backend)
 		{
+			// TODO: Try to get rid of "root", use an implementation similar to try_dispatch
 			{
 				root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
 				// TODO: Pick width/height based on window size
