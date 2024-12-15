@@ -10,6 +10,8 @@ namespace terraformer::ui::main
 	class staged_resource
 	{
 	public:
+		staged_resource() = default;
+
 		explicit staged_resource(FrontendResource&& resource):
 			m_frontend_resource{std::move(resource)},
 			m_must_update_backend_resource{true}

@@ -1,6 +1,7 @@
-//	{"target":{"name":"label.o"}}
+//@	{"target":{"name":"label.o"}}
 
 #include "./label.hpp"
+#include "ui/drawing_api/image_generators.hpp"
 
 void terraformer::ui::widgets::label::regenerate_text_mask()
 {
@@ -23,10 +24,9 @@ void terraformer::ui::widgets::label::regenerate_textures()
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
-	m_foreground_host = drawing_api::convert_mask(m_rendered_text);
+	m_foreground = drawing_api::convert_mask(m_rendered_text);
 
 	m_dirty_bits &= ~host_textures_dirty;
-	m_dirty_bits |= gpu_textures_dirty;
 }
 
 terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_width_request)
@@ -64,36 +64,43 @@ void terraformer::ui::widgets::label::theme_updated(main::config const& cfg, mai
 	m_null_texture = cfg.misc_textures.null;
 }
 
-
-void terraformer::ui::widgets::label::prepare_for_presentation(main::widget_rendering_result output_rect)
+terraformer::ui::main::widget_layer_stack
+terraformer::ui::widgets::label::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
-	std::array const fg_tints{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	displacement const fg_offset{m_margin, m_margin, 0.0f};
-	if(
-		output_rect.set_widget_foreground(
-			m_foreground.get(),
-			fg_tints,
-			fg_offset
-		) != main::set_texture_result::success
-	) [[unlikely]]
-	{
-		m_foreground = output_rect.create_texture();
-		output_rect.set_widget_foreground(m_foreground.get(), fg_tints, fg_offset);
-		m_dirty_bits |= gpu_textures_dirty;
-	}
+	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
 
-	if(m_dirty_bits & gpu_textures_dirty)
-	{
-		m_foreground.upload(std::as_const(m_foreground_host).pixels());
-		m_dirty_bits &= ~gpu_textures_dirty;
-	}
-
-	output_rect.set_widget_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});
-	output_rect.set_bg_layer_mask(m_null_texture.get());
-	output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});
-	output_rect.set_input_marker(m_null_texture.get(), std::array<rgba_pixel, 4>{}, fg_offset);
-	output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
+	return main::widget_layer_stack{
+		.background = main::widget_layer{
+			.offset = displacement{},
+			.texture = null_texture,
+			.tints = std::array<rgba_pixel, 4>{}
+		},
+		.sel_bg_mask = main::widget_layer_mask{
+			.offset = displacement{},
+			.texture = null_texture
+		},
+		.selection_background = main::widget_layer{
+			.offset = displacement{},
+			.texture = null_texture,
+			.tints = std::array<rgba_pixel, 4>{}
+		},
+		.foreground = main::widget_layer{
+			.offset = displacement{m_margin, m_margin, 0.0f},
+			.texture = m_foreground.get_backend_resource(backend).get(),
+			.tints = std::array<rgba_pixel, 4>{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
+		},
+		.frame = main::widget_layer{
+			.offset = displacement{},
+			.texture = null_texture,
+			.tints = std::array<rgba_pixel, 4>{}
+		},
+		.input_marker{
+			.offset = displacement{},
+			.texture = null_texture,
+			.tints = std::array<rgba_pixel, 4>{}
+		}
+	};
 }
