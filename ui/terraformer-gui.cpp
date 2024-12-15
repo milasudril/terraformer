@@ -4,7 +4,7 @@
 
 #include "./drawing_api/gl_surface_configuration.hpp"
 #include "./drawing_api/gl_resource_factory.hpp"
-#include "./drawing_api/frame_renderer.hpp"
+#include "./drawing_api/gl_frame_renderer.hpp"
 #include "./drawing_api/gl_widget_stack_renderer.hpp"
 #include "./event_dispatcher/event_dispatcher.hpp"
 #include "./wsapi/native_window.hpp"
@@ -129,7 +129,7 @@ int main(int, char**)
 		terraformer::ui::theming::load_default_config(),
 		window_controller{},
 		terraformer::ui::drawing_api::gl_widget_layer_stack_renderer{},
-		terraformer::ui::drawing_api::frame_renderer{},
+		terraformer::ui::drawing_api::gl_frame_renderer{},
 		error_handler{},
 		std::ref(my_outer_vbox)
 	};

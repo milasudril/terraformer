@@ -1,27 +1,19 @@
-#ifndef TERRAFORMER_UI_DRAWING_API_FRAME_RENDERER_HPP
-#define TERRAFORMER_UI_DRAWING_API_FRAME_RENDERER_HPP
+#ifndef TERRAFORMER_UI_DRAWING_API_GL_FRAME_RENDERER_HPP
+#define TERRAFORMER_UI_DRAWING_API_GL_FRAME_RENDERER_HPP
 
 #include "./gl_mesh.hpp"
 #include "./gl_shader.hpp"
 #include "./gl_texture.hpp"
 #include "ui/main/events.hpp"
+#include "ui/main/widget_frame.hpp"
 
 #include <cassert>
 
 namespace terraformer::ui::drawing_api
 {
-	class frame_renderer
+	class gl_frame_renderer
 	{
 	public:
-		struct input_rectangle
-		{
-			using texture_type = gl_texture;
-
-			float thickness;
-			gl_texture const* texture;
-			std::array<rgba_pixel, 8> tints;
-		};
-
 		void set_world_transform(location where, main::fb_size size)
 		{
 			scaling const s{2.0f/static_cast<float>(size.width), 2.0f/static_cast<float>(size.height), 1.0f};
@@ -33,7 +25,7 @@ namespace terraformer::ui::drawing_api
 			location where,
 			location origin,
 			scaling scale,
-			input_rectangle const& rect
+			main::widget_frame const& rect
 		)
 		{
 			auto const v = 0.5f*origin.get();
@@ -44,8 +36,8 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(6, rect.tints)
 				.bind();
 
-			assert(rect.texture != nullptr);
-			rect.texture->bind(0);
+			assert(rect.texture);
+			rect.texture.bind(0);
 
 			m_mesh.bind();
 			gl_bindings::draw_triangles_repeatedly(2);

@@ -7,6 +7,7 @@
 #include "ui/main/flat_widget_collection.hpp"
 #include "ui/main/window_ref.hpp"
 #include "ui/main/ui_controller.hpp"
+#include "ui/main/widget_frame.hpp"
 
 #include "lib/common/value_accessor.hpp"
 
@@ -222,21 +223,20 @@ namespace terraformer::ui::main
 				root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
 				show_widgets(std::ref(m_content_renderer), root);
 			}
-#if 0
+
 			if(m_hot_widget != find_recursive_result{}
 				&& m_hot_widget.state().has_cursor_focus_indicator())
 			{
 				auto const& geometry = m_hot_widget.geometry();
 				auto const color = m_config.mouse_kbd_tracking.colors.mouse_focus_color;
 				auto const border_thickness = m_config.mouse_kbd_tracking.border_thickness;
-				using Frame = typename FrameRenderer::input_rectangle;
 				m_frame_renderer.render(
 					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
 					geometry.origin,
 					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
-					Frame{
+					widget_frame{
 						.thickness = border_thickness,
-						.texture = m_config.misc_textures.white->get_backend_resource(resource_factory),
+						.texture = m_config.misc_textures.white->get_backend_resource(backend).get(),
 						.tints = std::array{
 							0.0f*color,
 							0.0f*color,
@@ -264,14 +264,13 @@ namespace terraformer::ui::main
 				auto const color = m_config.mouse_kbd_tracking.colors.keyboard_focus_color;
 				auto const border_thickness =  m_config.mouse_kbd_tracking.border_thickness;
 
-				using Frame = typename FrameRenderer::input_rectangle;
 				m_frame_renderer.render(
 					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
 					geometry.origin,
 					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
-					Frame{
+					widget_frame{
 						.thickness = border_thickness,
-						.texture = m_config.misc_textures.white->get_backend_resource(resource_factory),
+						.texture = m_config.misc_textures.white->get_backend_resource(backend).get(),
 						.tints = std::array{
 							0.0f*color,
 							0.0f*color,
@@ -285,7 +284,6 @@ namespace terraformer::ui::main
 					}
 				);
 			}
-#endif
 		}
 
 	private:
