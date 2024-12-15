@@ -3,11 +3,10 @@
 #ifndef TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 #define TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 
-#include "ui/main/generic_texture.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
-#include "lib/common/object_tree.hpp"
+#include "ui/main/graphics_backend_ref.hpp"
 #include "lib/common/move_only_function.hpp"
 
 namespace terraformer::ui::widgets
@@ -47,7 +46,7 @@ namespace terraformer::ui::widgets
 
 		void regenerate_textures();
 
-		void prepare_for_presentation(main::widget_rendering_result output_rect);
+		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
 		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller)
 		{ m_temp_state = std::nullopt; }
@@ -122,25 +121,24 @@ namespace terraformer::ui::widgets
 
 		std::basic_string<char8_t> m_text;
 		basic_image<uint8_t> m_rendered_text;
+
+		// TODO: Cleanup flags
 		static constexpr auto text_dirty = 0x1;
 		static constexpr auto host_textures_dirty = 0x2;
-		static constexpr auto gpu_textures_dirty = 0x4;
-		unsigned int m_dirty_bits = text_dirty | host_textures_dirty | gpu_textures_dirty;
+		unsigned int m_dirty_bits = text_dirty | host_textures_dirty;
+
 		float m_margin = 0;
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
 		rgba_pixel m_bg_tint;
 		rgba_pixel m_fg_tint;
 
-		main::generic_unique_texture m_background_released;
-		main::generic_unique_texture m_background_pressed;
-		main::generic_unique_texture m_foreground;
-		main::generic_shared_texture m_null_texture;
+		main::unique_texture m_background_released;
+		main::unique_texture m_background_pressed;
+		main::unique_texture m_foreground;
+		main::immutable_shared_texture m_null_texture;
 
 		main::fb_size m_current_size;
-		image m_background_released_host;
-		image m_background_pressed_host;
-		image m_foreground_host;
 
 		state m_value = state::released;
 		std::optional<state> m_temp_state;

@@ -1,4 +1,4 @@
-//	{"target":{"name":"button.o"}}
+//@	{"target":{"name":"button.o"}}
 
 #include "./button.hpp"
 
@@ -23,7 +23,7 @@ void terraformer::ui::widgets::button::regenerate_textures()
 	if(m_dirty_bits & text_dirty) [[unlikely]]
 	{ regenerate_text_mask(); }
 
-	m_background_released_host = generate(
+	m_background_released = generate(
 		drawing_api::beveled_rectangle{
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
@@ -34,7 +34,7 @@ void terraformer::ui::widgets::button::regenerate_textures()
 		}
 	);
 
-	m_background_pressed_host = generate(
+	m_background_pressed = generate(
 		drawing_api::beveled_rectangle{
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
@@ -45,66 +45,54 @@ void terraformer::ui::widgets::button::regenerate_textures()
 		}
 	);
 
-	m_foreground_host = drawing_api::convert_mask(m_rendered_text);
+	m_foreground = drawing_api::convert_mask(m_rendered_text);
 
 	m_dirty_bits &= ~host_textures_dirty;
-	m_dirty_bits |= gpu_textures_dirty;
 }
 
-void terraformer::ui::widgets::button::prepare_for_presentation(main::widget_rendering_result output_rect)
+terraformer::ui::main::widget_layer_stack
+terraformer::ui::widgets::button::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	auto const display_state = m_temp_state.value_or(m_value);
 
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
+	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
 
-	std::array const fg_tint{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint};
-	displacement const fg_offset{m_margin, m_margin, 0.0f};
-	if(
-		output_rect.set_widget_foreground(
-			m_foreground.get(),
-			fg_tint,
-			fg_offset
-		) != main::set_texture_result::success
-	) [[unlikely]]
-	{
-		m_foreground = output_rect.create_texture();
-		(void)output_rect.set_widget_foreground(m_foreground.get(), fg_tint, fg_offset);
-		m_dirty_bits |= gpu_textures_dirty;
-	}
-
-	std::array const bg_tint{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint};
-	if(
-		output_rect.set_widget_background(
-			(
-				display_state == state::released)?
-					m_background_released.get() : m_background_pressed.get(),
-				bg_tint
-			) != main::set_texture_result::success
-	) [[unlikely]]
-	{
-		m_background_released = output_rect.create_texture();
-		m_background_pressed = output_rect.create_texture();
-		output_rect.set_widget_background(
-			(display_state == state::released)?
-				m_background_released.get() : m_background_pressed.get(),
-			bg_tint
-		);
-		m_dirty_bits |= gpu_textures_dirty;
-	}
-
-	if(m_dirty_bits & gpu_textures_dirty)
-	{
-		m_background_released.upload(std::as_const(m_background_released_host).pixels());
-		m_background_pressed.upload(std::as_const(m_background_pressed_host).pixels());
-		m_foreground.upload(std::as_const(m_foreground_host).pixels());
-		m_dirty_bits &= ~gpu_textures_dirty;
-	}
-
-	output_rect.set_bg_layer_mask(m_null_texture.get());
-	output_rect.set_selection_background(m_null_texture.get(), std::array<rgba_pixel, 4>{});	output_rect.set_frame(m_null_texture.get(), std::array<rgba_pixel, 4>{});
-	output_rect.set_input_marker(m_null_texture.get(), std::array<rgba_pixel, 4>{}, fg_offset);
+	return main::widget_layer_stack{
+		.background = main::widget_layer{
+			.offset = displacement{},
+			.texture = (display_state == state::released)?
+				m_background_released.get_backend_resource(backend).get():
+				m_background_pressed.get_backend_resource(backend).get(),
+			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
+		},
+		.sel_bg_mask = main::widget_layer_mask{
+			.offset = displacement{},
+			.texture = null_texture
+		},
+		.selection_background = main::widget_layer{
+			.offset = displacement{},
+			.texture = null_texture,
+			.tints = std::array<rgba_pixel, 4>{}
+		},
+		.foreground = main::widget_layer{
+			.offset = displacement{m_margin, m_margin, 0.0f},
+			.texture = m_foreground.get_backend_resource(backend).get(),
+			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
+		},
+		.frame = main::widget_layer{
+			.offset = displacement{},
+			.texture = null_texture,
+			.tints = std::array<rgba_pixel, 4>{}
+		},
+		.input_marker = main::widget_layer{
+			.offset = displacement{},
+			.texture = null_texture,
+			.tints = std::array<rgba_pixel, 4>{}
+		}
+	};
 }
 
 terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget_width_request)
