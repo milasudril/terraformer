@@ -4,7 +4,6 @@
 #include "./texture_generators.hpp"
 #include "./color_scheme.hpp"
 
-#include "ui/main/generic_texture.hpp"
 #include "ui/font_handling/font_mapper.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 
