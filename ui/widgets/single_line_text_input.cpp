@@ -69,11 +69,11 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 	m_selection_mask = generate(
 		drawing_api::flat_rectangle{
 			.domain_size = span_2d_extents {
-				.width = static_cast<uint32_t>(m_current_size.width),
-				.height = static_cast<uint32_t>(m_current_size.height)
+				.width = static_cast<uint32_t>(m_rendered_text.width()),
+				.height = static_cast<uint32_t>(m_rendered_text.height())
 			},
-			.origin_x = static_cast<uint32_t>(sel_begin + m_margin),
-			.origin_y = static_cast<uint32_t>(m_margin),
+			.origin_x = static_cast<uint32_t>(sel_begin),
+			.origin_y = 0u,
 			.width = static_cast<uint32_t>(std::max(sel_end - sel_begin, 1.0f) + 0.5f),
 			.height = static_cast<uint32_t>(
 				std::max(static_cast<int32_t>(m_current_size.height) - static_cast<int32_t>(2.0f*m_margin), 1)
