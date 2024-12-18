@@ -215,10 +215,12 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 			return;
 
 		case main::builtin_command_id::step_up:
+			m_on_step_up(*this, window, controller);
 			clear_selection();
 			return;
 
 		case main::builtin_command_id::step_down:
+			m_on_step_down(*this, window, controller);
 			clear_selection();
 			return;
 

@@ -115,7 +115,13 @@ int main(int, char**)
 		.on_value_changed([](auto const& obj, terraformer::ui::main::window_ref window, auto){
 				window.set_title(obj.value().c_str());
 			}
-		);
+		)
+		.on_step_up([](auto&&...){
+			puts("Step up");
+		})
+		.on_step_down([](auto&&...){
+			puts("Step down");
+		});
 
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));

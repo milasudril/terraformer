@@ -75,6 +75,20 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
+		template<class Function>
+		single_line_text_input& on_step_up(Function&& func)
+		{
+			m_on_step_up = std::forward<Function>(func);
+			return *this;
+		}
+
+		template<class Function>
+		single_line_text_input& on_step_down(Function&& func)
+		{
+			m_on_step_down = std::forward<Function>(func);
+			return *this;
+		}
+
 		template<class StringType>
 		single_line_text_input& value(StringType&& new_val)
 		{
@@ -222,8 +236,11 @@ namespace terraformer::ui::widgets
 		void update_insert_offset(size_t new_pos)
 		{ m_insert_offset = new_pos; }
 
-		move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)> m_on_value_changed =
-			move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)>{no_operation_tag{}};
+		using callback = move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)>;
+
+		callback m_on_value_changed = callback{no_operation_tag{}};
+		callback m_on_step_up = callback{no_operation_tag{}};
+		callback m_on_step_down = callback{no_operation_tag{}};
 
 		std::u32string m_value;
 		size_t m_insert_offset = 0;
