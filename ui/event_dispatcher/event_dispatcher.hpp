@@ -11,6 +11,10 @@
 
 #include "lib/common/value_accessor.hpp"
 
+// TODO (Event routing):
+// Signal that cursor is above the same widget the cursor hit
+// Cursor leave/enter is triggered when mouse button is lefted
+
 namespace terraformer::ui::main
 {
 	constexpr span_search_direction get_form_navigation_step_size(keyboard_button_event const& kbe)
@@ -76,7 +80,7 @@ namespace terraformer::ui::main
 			{
 				if(event.action == mouse_button_action::press)
 				{ m_keyboard_widget = flat_widget_collection::npos; }
-				printf("mbe in the void\n");
+				printf("%d mbe in the void\n", getpid());
 			}
 			else
 			if(event.action == mouse_button_action::press)
@@ -105,7 +109,7 @@ namespace terraformer::ui::main
 			}
 
 			if(!try_dispatch(event, res, window, ui_controller{*this}))
-			{ printf("cme in the void\n"); }
+			{ printf("%d cme in the void\n", getpid()); }
 		}
 
 		template<class Tag>
@@ -144,11 +148,18 @@ namespace terraformer::ui::main
 
 		template<class Tag>
 		void handle_event(Tag, window_ref, cursor_enter_event const& event)
-		{ value_of(m_window_controller).handle_event(Tag{}, event); }
+		{
+			printf("%d cursor enter\n", getpid());
+			value_of(m_window_controller).handle_event(Tag{}, event);
+		}
 
 		template<class Tag>
 		void handle_event(Tag, window_ref, cursor_leave_event const& event)
-		{ value_of(m_window_controller).handle_event(Tag{}, event); }
+		{
+			printf("%d cursor leave\n", getpid());
+			value_of(m_window_controller).handle_event(Tag{}, event);
+
+		}
 
 		template<class Tag>
 		void handle_event(Tag, window_ref, fb_size size)
