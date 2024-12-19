@@ -89,6 +89,15 @@ namespace terraformer::ui::main
 				{ set_keyboard_focus(find(res, m_flat_collection), window); }
 				else
 				{ m_keyboard_widget = flat_widget_collection::npos; }
+				m_mouse_widget = res;
+				printf("mouse_widget = %zu\n", m_mouse_widget.index().get());
+			}
+
+			if(event.action == mouse_button_action::release)
+			{
+				try_dispatch(event, m_mouse_widget, window, ui_controller{*this});
+				m_mouse_widget = find_recursive_result{};
+				printf("mouse_widget = %zu\n", m_mouse_widget.index().get());
 			}
 		}
 
@@ -304,6 +313,7 @@ namespace terraformer::ui::main
 		FrameRenderer m_frame_renderer;
 		ErrorHandler m_error_handler;
 		find_recursive_result m_hot_widget;
+		find_recursive_result m_mouse_widget;
 		flat_widget_collection::index_type m_keyboard_widget{flat_widget_collection::npos};
 
 		// TODO: Currently, a collection is used here, even though only one widget can be supported.
