@@ -96,6 +96,8 @@ namespace terraformer::ui::main
 			if(event.action == mouse_button_action::release)
 			{
 				try_dispatch(event, m_mouse_widget, window, ui_controller{*this});
+				if(m_mouse_widget != res)
+				{ try_dispatch(cursor_leave_event{}, m_mouse_widget, window, ui_controller{*this}); }
 				m_mouse_widget = find_recursive_result{};
 				printf("mouse_widget = %zu\n", m_mouse_widget.index().get());
 			}
