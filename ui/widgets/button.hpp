@@ -35,12 +35,13 @@ namespace terraformer::ui::widgets
 
 		button& value(bool new_value)
 		{
-			m_value = new_value? state::pressed : state::released;
+			m_value = new_value;
+			m_state_to_display = new_value? state::pressed : state::released;
 			return *this;
 		}
 
 		bool value() const
-		{ return m_value == state::pressed; }
+		{ return m_value; }
 
 		void regenerate_text_mask();
 
@@ -49,7 +50,10 @@ namespace terraformer::ui::widgets
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
 		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller)
-		{ m_temp_state = std::nullopt; }
+		{ m_state_saved = std::exchange(m_state_to_display, state::released); }
+
+		void handle_event(main::cursor_enter_event const&, main::window_ref, main::ui_controller)
+		{ m_state_to_display = m_state_saved; }
 
 		void handle_event(main::mouse_button_event const& mbe, main::window_ref window, main::ui_controller ui_ctrl)
 		{
@@ -58,15 +62,14 @@ namespace terraformer::ui::widgets
 				switch(mbe.action)
 				{
 					case main::mouse_button_action::press:
-						m_temp_state = state::pressed;
+						m_state_to_display = state::pressed;
 						break;
 
 					case main::mouse_button_action::release:
-						if(m_temp_state.has_value())
-						{
-							m_temp_state.reset();
-							m_on_activated(*this, window, ui_ctrl);
-						}
+						if(m_state_to_display == state::pressed)
+						{ m_on_activated(*this, window, ui_ctrl); }
+						m_state_to_display = state::released;
+						m_state_saved = state::released;
 						break;
 				}
 			}
@@ -77,22 +80,23 @@ namespace terraformer::ui::widgets
 			switch(to_builtin_command_id(kbe))
 			{
 				case main::builtin_command_id::button_press:
-					m_temp_state = state::pressed;
+					m_state_to_display = state::pressed;
 					break;
+
 				case main::builtin_command_id::button_release:
-					if(m_temp_state.has_value())
-					{
-						m_temp_state.reset();
-						m_on_activated(*this, window, ui_ctrl);
-					}
+					if(m_state_to_display == state::pressed)
+					{ m_on_activated(*this, window, ui_ctrl); }
+					m_state_to_display = state::released;
+					m_state_saved = state::released;
 					break;
+
 				default:
 					break;
 			}
 		}
 
 		void handle_event(main::keyboard_focus_leave_event, main::window_ref, main::ui_controller)
-		{ m_temp_state = std::nullopt; }
+		{ m_state_saved = std::exchange(m_state_to_display, state::released); }
 
 		scaling compute_size(main::widget_width_request req);
 
@@ -140,8 +144,9 @@ namespace terraformer::ui::widgets
 
 		main::fb_size m_current_size;
 
-		state m_value = state::released;
-		std::optional<state> m_temp_state;
+		state m_state_to_display = state::released;
+		state m_state_saved = state::released;
+		bool m_value = false;
 	};
 
 	class toggle_button:private button

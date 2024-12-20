@@ -53,7 +53,7 @@ void terraformer::ui::widgets::button::regenerate_textures()
 terraformer::ui::main::widget_layer_stack
 terraformer::ui::widgets::button::prepare_for_presentation(main::graphics_backend_ref backend)
 {
-	auto const display_state = m_temp_state.value_or(m_value);
+	auto const display_state = m_value ? state::pressed : m_state_to_display;
 
 	if(m_dirty_bits & host_textures_dirty) [[unlikely]]
 	{ regenerate_textures(); }
