@@ -6,7 +6,6 @@
 #include "ui/main/texture_types.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
-#include "lib/common/move_only_function.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
 
 #include <type_traits>
@@ -236,11 +235,9 @@ namespace terraformer::ui::widgets
 		void update_insert_offset(size_t new_pos)
 		{ m_insert_offset = new_pos; }
 
-		using callback = move_only_function<void(single_line_text_input&, main::window_ref, main::ui_controller)>;
-
-		callback m_on_value_changed = callback{no_operation_tag{}};
-		callback m_on_step_up = callback{no_operation_tag{}};
-		callback m_on_step_down = callback{no_operation_tag{}};
+		main::widget_action<single_line_text_input> m_on_value_changed = main::widget_action<single_line_text_input>{no_operation_tag{}};
+		main::widget_action<single_line_text_input> m_on_step_up = main::widget_action<single_line_text_input>{no_operation_tag{}};
+		main::widget_action<single_line_text_input> m_on_step_down = main::widget_action<single_line_text_input>{no_operation_tag{}};
 
 		std::u32string m_value;
 		size_t m_insert_offset = 0;

@@ -120,8 +120,7 @@ namespace terraformer::ui::widgets
 		{ return main::widget_collection_view{}; }
 
 	private:
-		move_only_function<void(button&, main::window_ref, main::ui_controller)> m_on_activated =
-			move_only_function<void(button&, main::window_ref, main::ui_controller)>{no_operation_tag{}};
+		main::widget_action<button> m_on_activated = main::widget_action<button>{no_operation_tag{}};
 
 		std::basic_string<char8_t> m_text;
 		basic_image<uint8_t> m_rendered_text;

@@ -6,6 +6,7 @@
 #include "lib/common/utils.hpp"
 #include "lib/array_classes/multi_span.hpp"
 #include "lib/common/value_accessor.hpp"
+#include "lib/common/move_only_function.hpp"
 
 #include <utility>
 #include <type_traits>
@@ -218,6 +219,9 @@ namespace terraformer::ui::main
 			}
 		}
 	}
+
+	template<class WidgetType>
+	using widget_action = move_only_function<void(WidgetType&, main::window_ref, main::ui_controller)>;
 
 	struct widget_with_default_actions
 	{
