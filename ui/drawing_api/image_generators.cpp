@@ -16,6 +16,7 @@ terraformer::image terraformer::ui::drawing_api::generate(beveled_rectangle cons
 	{
 		for(uint32_t x = 0; x != w; ++x)
 		{
+			// FIXME: This only works if w > h
 			auto const border = (x < h - y) || (y < h/2 && x < w - y)? upper_left_color : lower_right_color;
 			ret(x, y) = (x>=border_thickness && x <= w - (border_thickness + 1)) && (y >= border_thickness && y <= h - (border_thickness + 1)) ? fill_color : border;
 		}
