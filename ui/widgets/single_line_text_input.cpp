@@ -292,23 +292,28 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 {
 	if(m_placeholder.has_value())
 	{
-		font_handling::text_shaper shaper{};
+		if(m_dirty_bits & recompute_size)
+		{
+			font_handling::text_shaper shaper{};
 
-		// TODO: Add support for different scripts, direction, and languages
-		// TODO: DRY
-		// TODO: Cache result
-		auto result = shaper.append(*m_placeholder)
-			.with(hb_script_t::HB_SCRIPT_LATIN)
-			.with(hb_direction_t::HB_DIRECTION_LTR)
-			.with(hb_language_from_string("en-UE", -1))
-			.run(*m_font);
+			// TODO: Add support for different scripts, direction, and languages
+			// TODO: DRY
+			auto result = shaper.append(*m_placeholder)
+				.with(hb_script_t::HB_SCRIPT_LATIN)
+				.with(hb_direction_t::HB_DIRECTION_LTR)
+				.with(hb_language_from_string("en-UE", -1))
+				.run(*m_font);
 
-		auto const temp = render(result);
-		return scaling{
-			static_cast<float>(temp.width()) + 2.0f*m_margin,
-			static_cast<float>(temp.height()) + 2.0f*m_margin,
-			1.0f
-		};
+			auto const temp = render(result);
+			m_dirty_bits &= ~recompute_size;
+			m_widget_size = scaling{
+				static_cast<float>(temp.width()) + 2.0f*m_margin,
+				static_cast<float>(temp.height()) + 2.0f*m_margin,
+				1.0f
+			};
+			return m_widget_size;
+		}
+		return m_widget_size;
 	}
 
 	if(m_dirty_bits & text_dirty)
@@ -330,5 +335,5 @@ void terraformer::ui::widgets::single_line_text_input::theme_updated(main::confi
 	m_fg_tint = cfg.input_area.colors.foreground;
 	m_background = cfg.misc_textures.white;
 	m_border_thickness = static_cast<uint32_t>(cfg.input_area.border_thickness);
-	m_dirty_bits |= host_textures_dirty | text_dirty;
+	m_dirty_bits |= host_textures_dirty | text_dirty | recompute_size;
 }

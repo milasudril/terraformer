@@ -107,6 +107,7 @@ namespace terraformer::ui::widgets
 		single_line_text_input& use_size_from_placeholder(StringType&& placeholder)
 		{
 			m_placeholder = placeholder;
+			m_dirty_bits |= recompute_size;
 			return *this;
 		}
 
@@ -248,7 +249,9 @@ namespace terraformer::ui::widgets
 		// TODO: Review flags
 		static constexpr auto text_dirty = 0x1;
 		static constexpr auto host_textures_dirty = 0x2;
+		static constexpr auto recompute_size = 0x4;
 		unsigned int m_dirty_bits = text_dirty | host_textures_dirty;
+		scaling m_widget_size;
 		float m_margin = 0;
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
