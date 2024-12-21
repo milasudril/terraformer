@@ -2,6 +2,20 @@
 
 #include "./image_generators.hpp"
 
+namespace
+{
+	struct beveled_rectangle_corner_piece
+	{
+		int32_t size;
+	};
+
+
+	bool inside(int32_t x, int32_t y, beveled_rectangle_corner_piece piece)
+	{
+		return (x>= 0 && y >= 0) && (x < piece.size && y < piece.size) && x < y;
+	}
+}
+
 terraformer::image terraformer::ui::drawing_api::generate(beveled_rectangle const& params)
 {
 	auto const w = params.width;
@@ -16,8 +30,25 @@ terraformer::image terraformer::ui::drawing_api::generate(beveled_rectangle cons
 	{
 		for(uint32_t x = 0; x != w; ++x)
 		{
-			// FIXME: This only works if w > h
-			auto const border = (x < h - y) || (y < h/2 && x < w - y)? upper_left_color : lower_right_color;
+			auto const in_lower_left = inside(
+				static_cast<int32_t>(x),
+				static_cast<int32_t>(h) - static_cast<int32_t>(y) - 1,
+				beveled_rectangle_corner_piece{static_cast<int32_t>(border_thickness)}
+			);
+
+			auto const in_upper_right = inside(
+				static_cast<int32_t>(x) - static_cast<int32_t>(w) + static_cast<int32_t>(border_thickness),
+				static_cast<int32_t>(border_thickness) - static_cast<int32_t>(y) - 1,
+				beveled_rectangle_corner_piece{static_cast<int32_t>(border_thickness)}
+			);
+
+			auto const in_left_rect = x < border_thickness && y < h - border_thickness;
+			auto const in_top_rect = y < border_thickness && x < w - border_thickness;
+
+			auto const border = in_lower_left || in_upper_right || in_left_rect || in_top_rect?
+				upper_left_color:
+				lower_right_color;
+
 			ret(x, y) = (x>=border_thickness && x <= w - (border_thickness + 1)) && (y >= border_thickness && y <= h - (border_thickness + 1)) ? fill_color : border;
 		}
 	}
