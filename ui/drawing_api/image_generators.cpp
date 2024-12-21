@@ -103,3 +103,17 @@ terraformer::image terraformer::ui::drawing_api::convert_mask(span_2d<uint8_t co
 	}
 	return ret;
 }
+
+terraformer::image terraformer::ui::drawing_api::transpose(span_2d<rgba_pixel const> input)
+{
+	image ret{input.height(), input.width()};
+	auto const h = ret.height();
+	auto const w = ret.width();
+	for(uint32_t y = 0; y != h; ++y)
+	{
+		for(uint32_t x = 0; x != w; ++x)
+		{ ret(x, y) = input(x, y); }
+	}
+
+	return ret;
+}

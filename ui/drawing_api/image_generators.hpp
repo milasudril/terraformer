@@ -34,6 +34,8 @@ namespace terraformer::ui::drawing_api
 	image generate(flat_rectangle const& params);
 
 	image convert_mask(span_2d<uint8_t const> input);
+
+	image transpose(span_2d<rgba_pixel const> input);
 }
 
 #endif
