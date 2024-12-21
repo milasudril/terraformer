@@ -221,7 +221,7 @@ namespace terraformer::ui::main
 	}
 
 	template<class WidgetType>
-	using widget_action = move_only_function<void(WidgetType&, main::window_ref, main::ui_controller)>;
+	using widget_user_interaction_handler = move_only_function<void(WidgetType&, main::window_ref, main::ui_controller)>;
 
 	struct widget_with_default_actions
 	{
