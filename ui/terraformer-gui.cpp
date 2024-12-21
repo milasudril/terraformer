@@ -11,6 +11,7 @@
 #include "./widgets/label.hpp"
 #include "./widgets/button.hpp"
 #include "./widgets/single_line_text_input.hpp"
+#include "./widgets/slider.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
@@ -123,10 +124,13 @@ int main(int, char**)
 			puts("Step down");
 		});
 
+	terraformer::ui::widgets::slider my_slider;
+
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
 	my_outer_vbox.append(std::ref(cancel));
 	my_outer_vbox.append(std::ref(my_input));
+	my_outer_vbox.append(std::ref(my_slider));
 
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};

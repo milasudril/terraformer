@@ -116,7 +116,7 @@ namespace terraformer::ui::widgets
 		state m_state_saved = state::released;
 		state m_state_current = state::released;
 		float m_value = 0.0f;
-		enum orientation m_orientation;
+		enum orientation m_orientation = orientation::left_to_right;
 	};
 }
 

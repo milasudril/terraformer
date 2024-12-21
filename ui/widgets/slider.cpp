@@ -21,8 +21,12 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 
 	m_track = generate(
 		drawing_api::beveled_rectangle{
-			.width = static_cast<uint32_t>(m_current_size.width),
-			.height = static_cast<uint32_t>(m_current_size.height),
+			.width = (m_orientation == orientation::left_to_right || m_orientation == orientation::right_to_left)?
+				static_cast<uint32_t>(m_current_size.width):
+				2*m_border_thickness,
+			.height = (m_orientation == orientation::top_to_bottom || m_orientation == orientation::bottom_to_top)?
+				static_cast<uint32_t>(m_current_size.height):
+				2*m_border_thickness,
 			.border_thickness = m_border_thickness,
 			.upper_left_color = 0.25f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.75f},
 			.lower_right_color = m_bg_tint,
@@ -58,7 +62,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{},  // TODO: Derive offset from current value
-			.texture = m_handle.get_backend_resource(backend).get(),
+			.texture = null_texture, //m_handle.get_backend_resource(backend).get(),
 			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
 		},
 		.frame = main::widget_layer{
