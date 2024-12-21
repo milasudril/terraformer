@@ -2,6 +2,8 @@
 
 #include "./button.hpp"
 
+#include "ui/drawing_api/image_generators.hpp"
+
 void terraformer::ui::widgets::button::regenerate_text_mask()
 {
 	font_handling::text_shaper shaper{};

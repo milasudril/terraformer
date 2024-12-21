@@ -3,7 +3,6 @@
 #ifndef TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 #define TERRAFORMER_UI_WIDGETS_BUTTON_HPP
 
-#include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
