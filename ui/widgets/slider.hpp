@@ -98,7 +98,7 @@ namespace terraformer::ui::widgets
 		main::widget_user_interaction_handler<slider> m_on_activated{no_operation_tag{}};
 		static constexpr unsigned int handle_dirty = 0x1;
 		static constexpr unsigned int track_dirty = 0x2;
-		unsigned int m_dirty_bits = handle_dirty|track_dirty;
+		unsigned int m_dirty_bits = track_dirty;
 
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
