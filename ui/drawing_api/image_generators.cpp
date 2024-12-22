@@ -18,38 +18,47 @@ namespace
 
 terraformer::image terraformer::ui::drawing_api::generate(beveled_rectangle const& params)
 {
+
 	auto const w = params.width;
 	auto const h = params.height;
-	image ret{params.width, params.height};
+	image ret{params.domain_size.width, params.domain_size.height};
 	auto const border_thickness = params.border_thickness;
 	auto const upper_left_color = params.upper_left_color;
 	auto const lower_right_color = params.lower_right_color;
 	auto const fill_color = params.fill_color;
+	auto const origin_x = params.origin_x;
+	auto const origin_y = params.origin_y;
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		for(uint32_t x = 0; x != w; ++x)
 		{
-			auto const in_lower_left = inside(
-				static_cast<int32_t>(x),
-				static_cast<int32_t>(h) - static_cast<int32_t>(y) - 1,
-				beveled_rectangle_corner_piece{static_cast<int32_t>(border_thickness)}
-			);
+			auto const write_x = x + origin_x;
+			auto const write_y = y + origin_y;
 
-			auto const in_upper_right = inside(
-				static_cast<int32_t>(x) - static_cast<int32_t>(w) + static_cast<int32_t>(border_thickness),
-				static_cast<int32_t>(border_thickness) - static_cast<int32_t>(y) - 1,
-				beveled_rectangle_corner_piece{static_cast<int32_t>(border_thickness)}
-			);
+			if(write_x < ret.width() && write_y < ret.height())
+			{
+				auto const in_lower_left = inside(
+					static_cast<int32_t>(x),
+					static_cast<int32_t>(h) - static_cast<int32_t>(y) - 1,
+					beveled_rectangle_corner_piece{static_cast<int32_t>(border_thickness)}
+				);
 
-			auto const in_left_rect = x < border_thickness && y < h - border_thickness;
-			auto const in_top_rect = y < border_thickness && x < w - border_thickness;
+				auto const in_upper_right = inside(
+					static_cast<int32_t>(x) - static_cast<int32_t>(w) + static_cast<int32_t>(border_thickness),
+					static_cast<int32_t>(border_thickness) - static_cast<int32_t>(y) - 1,
+					beveled_rectangle_corner_piece{static_cast<int32_t>(border_thickness)}
+				);
 
-			auto const border = in_lower_left || in_upper_right || in_left_rect || in_top_rect?
-				upper_left_color:
-				lower_right_color;
+				auto const in_left_rect = x < border_thickness && y < h - border_thickness;
+				auto const in_top_rect = y < border_thickness && x < w - border_thickness;
 
-			ret(x, y) = (x>=border_thickness && x <= w - (border_thickness + 1)) && (y >= border_thickness && y <= h - (border_thickness + 1)) ? fill_color : border;
+				auto const border = in_lower_left || in_upper_right || in_left_rect || in_top_rect?
+					upper_left_color:
+					lower_right_color;
+
+				ret(write_x, write_y) = (x>=border_thickness && x <= w - (border_thickness + 1)) && (y >= border_thickness && y <= h - (border_thickness + 1)) ? fill_color : border;
+			}
 		}
 	}
 	return ret;

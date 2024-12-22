@@ -10,8 +10,10 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 		drawing_api::beveled_rectangle{
 			.domain_size = span_2d_extents{
 				.width = static_cast<uint32_t>(m_current_size.width),
-				.height = static_cast<uint32_t>(m_current_size.height),
+				.height = static_cast<uint32_t>(m_current_size.height)
 			},
+			.origin_x = 0,
+			.origin_y = 0,
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
@@ -27,8 +29,10 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 		drawing_api::beveled_rectangle{
 			.domain_size = span_2d_extents{
 				.width = static_cast<uint32_t>(m_current_size.width),
-				.height = static_cast<uint32_t>(m_current_size.height),
+				.height = static_cast<uint32_t>(m_current_size.height)
 			},
+			.origin_x = 0,
+			.origin_y = 0,
 			.width = (m_orientation == orientation::horizontal)?
 				static_cast<uint32_t>(m_current_size.width):
 				2*m_border_thickness,
