@@ -97,6 +97,8 @@ namespace terraformer::ui::main
 		immutable_shared_texture black;
 		immutable_shared_texture white;
 		immutable_shared_texture test_pattern;
+		immutable_shared_texture horizontal_handle;
+		immutable_shared_texture vertical_handle;
 	};
 
 	struct config

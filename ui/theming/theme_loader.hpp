@@ -4,6 +4,7 @@
 #include "./texture_generators.hpp"
 #include "./color_scheme.hpp"
 
+#include "ui/drawing_api/image_generators.hpp"
 #include "ui/font_handling/font_mapper.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 
@@ -63,10 +64,45 @@ namespace terraformer::ui::theming
 				.null = null_texture,
 				.black = black_texture,
 				.white = white_texture,
-				.test_pattern = test_pattern
+				.test_pattern = test_pattern,
+				.horizontal_handle = std::make_shared<main::staged_texture>(
+					generate(
+						drawing_api::beveled_rectangle{
+							.domain_size = span_2d_extents{
+								.width = 16,
+								.height = 8,
+							},
+							.origin_x = 0,
+							.origin_y = 0,
+							.width = 16,
+							.height = 8,
+							.border_thickness = 2,
+							.upper_left_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+							.lower_right_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
+							.fill_color = color_scheme.command_area.background
+						}
+					)
+				),
+				.vertical_handle = std::make_shared<main::staged_texture>(
+					generate(
+						drawing_api::beveled_rectangle{
+							.domain_size = span_2d_extents{
+								.width = 8,
+								.height = 16,
+							},
+							.origin_x = 0,
+							.origin_y = 0,
+							.width = 8,
+							.height = 16,
+							.border_thickness = 2,
+							.upper_left_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+							.lower_right_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
+							.fill_color = color_scheme.command_area.background
+						}
+					)
+				),
 			}
 		};
 	}
-};
-
+}
 #endif
