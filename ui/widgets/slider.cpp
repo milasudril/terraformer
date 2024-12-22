@@ -21,10 +21,10 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 
 	m_track = generate(
 		drawing_api::beveled_rectangle{
-			.width = (m_orientation == orientation::left_to_right || m_orientation == orientation::right_to_left)?
+			.width = (m_orientation == orientation::horizontal)?
 				static_cast<uint32_t>(m_current_size.width):
 				2*m_border_thickness,
-			.height = (m_orientation == orientation::top_to_bottom || m_orientation == orientation::bottom_to_top)?
+			.height = (m_orientation == orientation::vertical)?
 				static_cast<uint32_t>(m_current_size.height):
 				2*m_border_thickness,
 			.border_thickness = m_border_thickness,

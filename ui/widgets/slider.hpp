@@ -16,7 +16,7 @@ namespace terraformer::ui::widgets
 		using widget_with_default_actions::handle_event;
 
 		enum class state{released, handle_grabbed};
-		enum class orientation{left_to_right, top_to_bottom, right_to_left, bottom_to_top};
+		enum class orientation{horizontal, vertical};
 
 		slider& orientation(enum orientation new_orientation)
 		{
@@ -116,7 +116,7 @@ namespace terraformer::ui::widgets
 		state m_state_saved = state::released;
 		state m_state_current = state::released;
 		float m_value = 0.0f;
-		enum orientation m_orientation = orientation::left_to_right;
+		enum orientation m_orientation = orientation::horizontal;
 	};
 }
 
