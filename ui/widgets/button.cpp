@@ -27,6 +27,10 @@ void terraformer::ui::widgets::button::regenerate_textures()
 
 	m_background_released = generate(
 		drawing_api::beveled_rectangle{
+			.domain_size = span_2d_extents{
+				.width = static_cast<uint32_t>(m_current_size.width),
+				.height = static_cast<uint32_t>(m_current_size.height),
+			},
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
@@ -38,6 +42,10 @@ void terraformer::ui::widgets::button::regenerate_textures()
 
 	m_background_pressed = generate(
 		drawing_api::beveled_rectangle{
+			.domain_size = span_2d_extents{
+				.width = static_cast<uint32_t>(m_current_size.width),
+				.height = static_cast<uint32_t>(m_current_size.height),
+			},
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,

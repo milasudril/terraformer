@@ -5,9 +5,13 @@
 #include "ui/drawing_api/image_generators.hpp"
 
 void terraformer::ui::widgets::slider::regenerate_textures()
-{
+{	
 	m_handle = generate(
 		drawing_api::beveled_rectangle{
+			.domain_size = span_2d_extents{
+				.width = static_cast<uint32_t>(m_current_size.width),
+				.height = static_cast<uint32_t>(m_current_size.height),
+			},
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
@@ -21,6 +25,10 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 
 	m_track = generate(
 		drawing_api::beveled_rectangle{
+			.domain_size = span_2d_extents{
+				.width = static_cast<uint32_t>(m_current_size.width),
+				.height = static_cast<uint32_t>(m_current_size.height),
+			},
 			.width = (m_orientation == orientation::horizontal)?
 				static_cast<uint32_t>(m_current_size.width):
 				2*m_border_thickness,

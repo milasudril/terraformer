@@ -9,6 +9,7 @@ namespace terraformer::ui::drawing_api
 {
 	struct beveled_rectangle
 	{
+		span_2d_extents domain_size;
 		uint32_t width;
 		uint32_t height;
 		uint32_t border_thickness;
