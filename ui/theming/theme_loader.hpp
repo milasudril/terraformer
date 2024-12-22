@@ -78,8 +78,8 @@ namespace terraformer::ui::theming
 							.height = 8,
 							.border_thickness = 2,
 							.upper_left_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-							.lower_right_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
-							.fill_color = color_scheme.command_area.background
+							.lower_right_color = rgba_pixel{0.25f, 0.25f, 0.25f, 1.0f},
+							.fill_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
 						}
 					)
 				),
@@ -96,8 +96,8 @@ namespace terraformer::ui::theming
 							.height = 16,
 							.border_thickness = 2,
 							.upper_left_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-							.lower_right_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
-							.fill_color = color_scheme.command_area.background
+							.lower_right_color = rgba_pixel{0.25f, 0.25f, 0.25f, 1.0f},
+							.fill_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
 						}
 					)
 				),
