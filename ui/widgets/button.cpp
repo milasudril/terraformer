@@ -36,9 +36,9 @@ void terraformer::ui::widgets::button::regenerate_textures()
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
-			.upper_left_color = m_bg_tint,
-			.lower_right_color = 0.25f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.75f},
-			.fill_color = 0.5f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.5f},
+			.upper_left_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+			.lower_right_color = rgba_pixel{0.25f, 0.25f, 0.25f, 1.0f},
+			.fill_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f}
 		}
 	);
 
@@ -53,9 +53,9 @@ void terraformer::ui::widgets::button::regenerate_textures()
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
-			.upper_left_color = 0.25f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.75f},
-			.lower_right_color = m_bg_tint,
-			.fill_color = 0.5f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.5f},
+			.upper_left_color = rgba_pixel{0.25f, 0.25f, 0.25f, 1.0f},
+			.lower_right_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+			.fill_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
 		}
 	);
 
