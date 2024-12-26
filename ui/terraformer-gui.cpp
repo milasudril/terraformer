@@ -124,12 +124,16 @@ int main(int, char**)
 			puts("Step down");
 		});
 
+	terraformer::ui::widgets::label slider_label;
+	slider_label.text(u8"A slider");
+		
 	terraformer::ui::widgets::slider my_slider;
-
+	
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
 	my_outer_vbox.append(std::ref(cancel));
 	my_outer_vbox.append(std::ref(my_input));
+	my_outer_vbox.append(std::ref(slider_label));
 	my_outer_vbox.append(std::ref(my_slider));
 
 

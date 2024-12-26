@@ -109,7 +109,7 @@ namespace terraformer::ui::widgets
 
 		main::immutable_shared_texture m_null_texture;
 		main::unique_texture m_track;
-		main::unique_texture m_handle;
+		main::immutable_shared_texture m_handle;
 
 		main::fb_size m_current_size;
 

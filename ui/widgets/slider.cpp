@@ -6,25 +6,6 @@
 
 void terraformer::ui::widgets::slider::regenerate_textures()
 {	
-	m_handle = generate(
-		drawing_api::beveled_rectangle{
-			.domain_size = span_2d_extents{
-				.width = static_cast<uint32_t>(m_current_size.width),
-				.height = static_cast<uint32_t>(m_current_size.height)
-			},
-			.origin_x = 0,
-			.origin_y = 0,
-			.width = static_cast<uint32_t>(m_current_size.width),
-			.height = static_cast<uint32_t>(m_current_size.height),
-			.border_thickness = m_border_thickness,
-			.upper_left_color = m_bg_tint,
-			.lower_right_color = 0.25f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.75f},
-			.fill_color = 0.5f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.5f},
-		}
-	);
-
-	m_dirty_bits &= ~handle_dirty;
-
 	auto const orientation = m_orientation;
 	m_track = generate(
 		drawing_api::beveled_rectangle{
@@ -76,8 +57,8 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{},  // TODO: Derive offset from current value
-			.texture = null_texture, //m_handle.get_backend_resource(backend).get(),
-			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
+			.texture = m_handle->get_backend_resource(backend).get(),
+			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
 		},
 		.frame = main::widget_layer{
 			.offset = displacement{},
@@ -95,13 +76,16 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 
 terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_width_request)
 {
-	// TODO: Express minimum size in terms of handle size
-	return scaling{2.0f*m_margin, 2.0f*m_margin, 1.0f};
+	auto const h = static_cast<float>(m_handle->frontend_resource().width());
+	auto const w = static_cast<float>(m_handle->frontend_resource().height());
+	return scaling{2.0f*m_margin + 16.0f*w, 2.0f*m_margin + h, 1.0f};
 }
 
 terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_height_request)
 {
-return scaling{2.0f*m_margin, 2.0f*m_margin, 1.0f};
+	auto const h = static_cast<float>(m_handle->frontend_resource().width());
+	auto const w = static_cast<float>(m_handle->frontend_resource().height());
+	return scaling{2.0f*m_margin + 16.0f*w, 2.0f*m_margin + h, 1.0f};
 }
 
 void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, main::widget_instance_info)
@@ -113,4 +97,7 @@ void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, ma
 	m_border_thickness = static_cast<uint32_t>(cfg.command_area.border_thickness);
 	m_dirty_bits |= track_dirty;
 	m_null_texture = cfg.misc_textures.null;
+	m_handle = cfg.misc_textures.vertical_handle;
+	
+//	store(m_handle->frontend_resource(), "/dev/shm/slask.exr");
 }
