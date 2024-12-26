@@ -97,13 +97,15 @@ namespace terraformer::ui::widgets
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
 		
+		float track_margin() const
+		{ return static_cast<float>(m_handle->frontend_resource().width())/2.0f; }
+		
 		float track_length() const
-		{ return static_cast<float>(m_current_size.width) - 2.0f*m_margin; }
+		{ return static_cast<float>(m_current_size.width) - 2.0f*track_margin(); }
 		
 		float to_value(main::cursor_position loc) const
 		{ return static_cast<float>(loc.x)/track_length(); }
 
-		float m_margin = 0.0f;
 		rgba_pixel m_bg_tint;
 		rgba_pixel m_fg_tint;
 

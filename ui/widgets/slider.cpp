@@ -15,7 +15,7 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 			},
 			// TODO: This will break when tick marks are added
 			.origin_x = orientation == orientation::horizontal?
-				static_cast<uint32_t>(m_margin) :
+				0u :
 				m_current_size.width/2,
 			.origin_y = orientation == orientation::vertical? 0u : m_current_size.height/2,
 			.width = (orientation == orientation::horizontal)?
@@ -59,7 +59,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{
-				m_value*track_length() + m_margin,
+				m_value*track_length(),
 				0.0f,
 				0.0f
 			},  // TODO: Derive offset from current value
@@ -82,21 +82,20 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 
 terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_width_request)
 {
-	auto const h = static_cast<float>(m_handle->frontend_resource().width());
-	auto const w = static_cast<float>(m_handle->frontend_resource().height());
-	return scaling{2.0f*m_margin + 16.0f*w, 2.0f*m_margin + h, 1.0f};
+	auto const w = static_cast<float>(m_handle->frontend_resource().width());
+	auto const h = static_cast<float>(m_handle->frontend_resource().height());
+	return scaling{2.0f*track_margin() + 16.0f*w, h, 1.0f};
 }
 
 terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_height_request)
 {
-	auto const h = static_cast<float>(m_handle->frontend_resource().width());
-	auto const w = static_cast<float>(m_handle->frontend_resource().height());
-	return scaling{2.0f*m_margin + 16.0f*w, 2.0f*m_margin + h, 1.0f};
+	auto const w = static_cast<float>(m_handle->frontend_resource().width());
+	auto const h = static_cast<float>(m_handle->frontend_resource().height());
+	return scaling{2.0f*track_margin() + 16.0f*w, h, 1.0f};
 }
 
 void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
-	m_margin = cfg.command_area.padding + cfg.command_area.border_thickness;
 	m_font = cfg.command_area.font;
 	m_bg_tint = cfg.command_area.colors.background;
 	m_fg_tint = cfg.command_area.colors.foreground;
