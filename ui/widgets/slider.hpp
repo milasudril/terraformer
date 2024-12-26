@@ -25,35 +25,25 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		slider& value(bool new_value)
-		{
-			m_value = new_value;
-			m_state_current = new_value? state::handle_grabbed: state::released;
-			return *this;
-		}
-
-		bool value() const
-		{ return m_value; }
-
 		void regenerate_text_mask();
 
 		void regenerate_textures();
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
-
-		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller)
-		{ m_state_saved = std::exchange(m_state_current, state::released); }
-
-		void handle_event(main::cursor_enter_event const&, main::window_ref, main::ui_controller)
-		{ m_state_current = m_state_saved; }
 		
 		void handle_event(main::cursor_motion_event const& event, main::window_ref, main::ui_controller) 
 		{
 			if(m_state_current == state::handle_grabbed)
 			{
-				m_value = static_cast<float>(event.where.x)/static_cast<float>(m_track.frontend_resource().width());
+				value(static_cast<float>(event.where.x)/static_cast<float>(m_track.frontend_resource().width()));
 			}
 		}
+		
+		void value(float new_val)
+		{ m_value = std::clamp(new_val, 0.0f, 1.0f); }
+		
+		float value() const
+		{ return m_value; }
 
 		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller)
 		{
@@ -62,13 +52,13 @@ namespace terraformer::ui::widgets
 				switch(mbe.action)
 				{
 					case main::mouse_button_action::press:
-						m_value = static_cast<float>(mbe.where.x)/static_cast<float>(m_track.frontend_resource().width());
+						value(static_cast<float>(mbe.where.x)/static_cast<float>(m_track.frontend_resource().width()));
 						m_state_current = state::handle_grabbed;
 						break;
 
 					case main::mouse_button_action::release:
+						puts("Release");
 						m_state_current = state::released;
-						m_state_saved = state::released;
 						break;
 				}
 			}
@@ -78,9 +68,6 @@ namespace terraformer::ui::widgets
 		{
 			// TODO
 		}
-
-		void handle_event(main::keyboard_focus_leave_event, main::window_ref, main::ui_controller)
-		{ m_state_saved = std::exchange(m_state_current, state::released); }
 
 		scaling compute_size(main::widget_width_request req);
 
@@ -122,7 +109,6 @@ namespace terraformer::ui::widgets
 
 		main::fb_size m_current_size;
 
-		state m_state_saved = state::released;
 		state m_state_current = state::released;
 		float m_value = 0.0f;
 		enum orientation m_orientation = orientation::horizontal;

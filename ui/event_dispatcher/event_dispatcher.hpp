@@ -106,6 +106,9 @@ namespace terraformer::ui::main
 		template<class Tag>
 		void handle_event(Tag, window_ref window, cursor_motion_event&& event)
 		{
+			if(try_dispatch(event, m_mouse_widget, window, ui_controller{*this}))
+			{ return; }
+				
 			auto const res = find_recursive(event.where, m_root_collection);
 
 			if(res != m_hot_widget)
