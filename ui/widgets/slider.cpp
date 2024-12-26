@@ -14,7 +14,9 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 				.height = static_cast<uint32_t>(m_current_size.height)
 			},
 			// TODO: This will break when tick marks are added
-			.origin_x = orientation == orientation::horizontal? 0u : m_current_size.width/2,
+			.origin_x = orientation == orientation::horizontal?
+				static_cast<uint32_t>(m_margin) :
+				m_current_size.width/2,
 			.origin_y = orientation == orientation::vertical? 0u : m_current_size.height/2,
 			.width = (orientation == orientation::horizontal)?
 				static_cast<uint32_t>(track_length()):
@@ -57,7 +59,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{
-				m_value*track_length(),
+				m_value*track_length() + m_margin,
 				0.0f,
 				0.0f
 			},  // TODO: Derive offset from current value
