@@ -104,7 +104,7 @@ namespace terraformer::ui::widgets
 		{ return static_cast<float>(m_current_size.width) - 2.0f*track_margin(); }
 		
 		float to_value(main::cursor_position loc) const
-		{ return static_cast<float>(loc.x)/track_length(); }
+		{ return static_cast<float>(loc.x - track_margin())/track_length(); }
 
 		rgba_pixel m_bg_tint;
 		rgba_pixel m_fg_tint;

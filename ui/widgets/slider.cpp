@@ -15,7 +15,7 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 			},
 			// TODO: This will break when tick marks are added
 			.origin_x = orientation == orientation::horizontal?
-				0u :
+				static_cast<uint32_t>(track_margin()) :
 				m_current_size.width/2,
 			.origin_y = orientation == orientation::vertical? 0u : m_current_size.height/2,
 			.width = (orientation == orientation::horizontal)?
