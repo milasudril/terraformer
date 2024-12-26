@@ -49,7 +49,10 @@ namespace terraformer::ui::widgets
 		
 		void handle_event(main::cursor_motion_event const& event, main::window_ref, main::ui_controller) 
 		{
-			printf("%.8g\n",event.where.x);
+			if(m_state_current == state::handle_grabbed)
+			{
+				m_value = static_cast<float>(event.where.x)/static_cast<float>(m_track.frontend_resource().width());
+			}
 		}
 
 		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller)
@@ -59,6 +62,7 @@ namespace terraformer::ui::widgets
 				switch(mbe.action)
 				{
 					case main::mouse_button_action::press:
+						m_value = static_cast<float>(mbe.where.x)/static_cast<float>(m_track.frontend_resource().width());
 						m_state_current = state::handle_grabbed;
 						break;
 

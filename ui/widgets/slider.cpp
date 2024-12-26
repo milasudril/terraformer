@@ -56,7 +56,11 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.foreground = main::widget_layer{
-			.offset = displacement{},  // TODO: Derive offset from current value
+			.offset = displacement{
+				m_value*static_cast<float>(m_track.frontend_resource().width()),
+				0.0f,
+				0.0f
+			},  // TODO: Derive offset from current value
 			.texture = m_handle->get_backend_resource(backend).get(),
 			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
 		},
