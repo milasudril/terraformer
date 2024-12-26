@@ -17,7 +17,7 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 			.origin_x = orientation == orientation::horizontal? 0u : m_current_size.width/2,
 			.origin_y = orientation == orientation::vertical? 0u : m_current_size.height/2,
 			.width = (orientation == orientation::horizontal)?
-				static_cast<uint32_t>(m_current_size.width):
+				static_cast<uint32_t>(track_length()):
 				2*m_border_thickness,
 			.height = (orientation == orientation::vertical)?
 				static_cast<uint32_t>(m_current_size.height):
@@ -39,7 +39,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 	{ regenerate_textures(); }
 
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
-
+	printf("Render %.8g\n", m_value);
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
@@ -57,7 +57,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{
-				m_value*static_cast<float>(m_track.frontend_resource().width()),
+				m_value*track_length(),
 				0.0f,
 				0.0f
 			},  // TODO: Derive offset from current value

@@ -31,12 +31,10 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 		
-		void handle_event(main::cursor_motion_event const& event, main::window_ref, main::ui_controller) 
+		void handle_event(main::cursor_motion_event const& cme, main::window_ref, main::ui_controller) 
 		{
 			if(m_state_current == state::handle_grabbed)
-			{
-				value(static_cast<float>(event.where.x)/static_cast<float>(m_track.frontend_resource().width()));
-			}
+			{ value(to_value(cme.where)); }
 		}
 		
 		void value(float new_val)
@@ -52,7 +50,7 @@ namespace terraformer::ui::widgets
 				switch(mbe.action)
 				{
 					case main::mouse_button_action::press:
-						value(static_cast<float>(mbe.where.x)/static_cast<float>(m_track.frontend_resource().width()));
+						value(to_value(mbe.where));
 						m_state_current = state::handle_grabbed;
 						break;
 
@@ -98,6 +96,12 @@ namespace terraformer::ui::widgets
 
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
+		
+		float track_length() const
+		{ return static_cast<float>(m_current_size.width) - 2.0f*m_margin; }
+		
+		float to_value(main::cursor_position loc) const
+		{ return static_cast<float>(loc.x)/track_length(); }
 
 		float m_margin = 0.0f;
 		rgba_pixel m_bg_tint;
