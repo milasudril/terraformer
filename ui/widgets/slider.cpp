@@ -98,6 +98,4 @@ void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, ma
 	m_dirty_bits |= track_dirty;
 	m_null_texture = cfg.misc_textures.null;
 	m_handle = cfg.misc_textures.vertical_handle;
-	
-//	store(m_handle->frontend_resource(), "/dev/shm/slask.exr");
 }

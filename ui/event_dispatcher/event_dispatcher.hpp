@@ -72,7 +72,7 @@ namespace terraformer::ui::main
 		{ value_of(m_error_handler).handle_event(Tag{}, msg); }
 
 		template<class Tag>
-		void handle_event(Tag, window_ref window, mouse_button_event const& event)
+		void handle_event(Tag, window_ref window, mouse_button_event&& event)
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 
@@ -104,7 +104,7 @@ namespace terraformer::ui::main
 		}
 
 		template<class Tag>
-		void handle_event(Tag, window_ref window, cursor_motion_event const& event)
+		void handle_event(Tag, window_ref window, cursor_motion_event&& event)
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 

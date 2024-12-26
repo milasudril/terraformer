@@ -302,6 +302,12 @@ namespace terraformer::ui::main
 
 		auto const widgets = res.widgets().widget_pointers();
 		auto const callbacks = res.widgets().template event_callbacks<std::remove_cvref_t<EventType>, std::remove_cvref_t<Args>...>();
+		if constexpr(requires{e.where;})
+		{
+			auto const geoms = res.widgets().widget_geometries();
+			e.where.x -= geoms[res.index()].where[0];
+			e.where.y -= geoms[res.index()].where[1];
+		}
 		callbacks[res.index()](widgets[res.index()], std::forward<EventType>(e), std::forward<Args>(args)...);
 
 		return true;

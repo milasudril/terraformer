@@ -46,6 +46,11 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::cursor_enter_event const&, main::window_ref, main::ui_controller)
 		{ m_state_current = m_state_saved; }
+		
+		void handle_event(main::cursor_motion_event const& event, main::window_ref, main::ui_controller) 
+		{
+			printf("%.8g\n",event.where.x);
+		}
 
 		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller)
 		{
