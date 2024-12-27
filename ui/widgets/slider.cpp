@@ -40,7 +40,7 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 terraformer::ui::main::widget_layer_stack
 terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backend_ref backend)
 {
-	if(m_dirty_bits & (handle_dirty|track_dirty)) [[unlikely]]
+	if(m_dirty_bits & track_dirty) [[unlikely]]
 	{ regenerate_textures(); }
 
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();

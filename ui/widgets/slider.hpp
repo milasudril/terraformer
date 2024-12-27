@@ -21,7 +21,7 @@ namespace terraformer::ui::widgets
 		slider& orientation(enum orientation new_orientation)
 		{
 			m_orientation = new_orientation;
-			m_dirty_bits |= handle_dirty|track_dirty;
+			m_dirty_bits |= track_dirty;
 			return *this;
 		}
 
@@ -90,8 +90,7 @@ namespace terraformer::ui::widgets
 
 	private:
 		main::widget_user_interaction_handler<slider> m_on_activated{no_operation_tag{}};
-		static constexpr unsigned int handle_dirty = 0x1;
-		static constexpr unsigned int track_dirty = 0x2;
+		static constexpr unsigned int track_dirty = 0x1;
 		unsigned int m_dirty_bits = track_dirty;
 
 		unsigned int m_border_thickness = 0;
