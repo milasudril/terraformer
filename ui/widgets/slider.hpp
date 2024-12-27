@@ -3,6 +3,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_SLIDER_HPP
 #define TERRAFORMER_UI_WIDGETS_SLIDER_HPP
 
+#include "./normalized_float_input.hpp"
 #include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
@@ -10,104 +11,10 @@
 
 namespace terraformer::ui::widgets
 {
-	class slider:public main::widget_with_default_actions
+	class slider:public normalized_float_input<slider>
 	{
 	public:
-		using widget_with_default_actions::handle_event;
-
-		enum class state{released, handle_grabbed};
-
-		void handle_event(
-			main::cursor_motion_event const& cme,
-			main::window_ref window,
-			main::ui_controller controller
-		) 
-		{
-			if(m_state_current == state::handle_grabbed)
-			{ 
-				value(to_value(cme.where)); 
-				m_on_value_changed(*this, window, controller);
-			}
-		}
-
-		void value(float new_val)
-		{ m_value = std::clamp(new_val, 0.0f, 1.0f); }
-		
-		float value() const
-		{ return m_value; }
-		
-		template<class Function>
-		slider& on_value_changed(Function&& func)
-		{
-			m_on_value_changed = std::forward<Function>(func);
-			return *this;
-		}
-		
-				void handle_event(
-			main::mouse_button_event const& mbe,
-			main::window_ref window,
-			main::ui_controller controller
-		)
-		{
-			if(mbe.button == 0)
-			{
-				switch(mbe.action)
-				{
-					case main::mouse_button_action::press:
-						value(to_value(mbe.where));
-						m_on_value_changed(*this, window, controller);
-						m_state_current = state::handle_grabbed;
-						break;
-
-					case main::mouse_button_action::release:
-						m_state_current = state::released;
-						break;
-				}
-			}
-		}
-
-		void handle_event(
-			main::keyboard_button_event const& event,
-			main::window_ref window, 
-			main::ui_controller controller
-		)
-		{
-			// TODO: Add "gears" to make speed variable
-			auto const dx = 1.0f/64.0f;
-			switch(to_builtin_command_id(event))
-			{
-				case main::builtin_command_id::step_left:
-					if(m_orientation == orientation::horizontal)
-					{
-						value(m_value - dx); 
-						m_on_value_changed(*this, window, controller);
-					}
-					break;
-				case main::builtin_command_id::step_right:
-					if(m_orientation == orientation::horizontal)
-					{ 
-						value(m_value + dx); 
-						m_on_value_changed(*this, window, controller);
-					}
-					break;
-				case main::builtin_command_id::step_down:
-					if(m_orientation == orientation::vertical)
-					{
-						value(m_value - dx); 
-						m_on_value_changed(*this, window, controller);
-					}
-					break;
-				case main::builtin_command_id::step_up:
-					if(m_orientation == orientation::vertical)
-					{ 
-						value(m_value + dx); 
-						m_on_value_changed(*this, window, controller);
-					}
-					break;
-				default:
-					break;
-			}
-		}
+		using normalized_float_input<slider>::handle_event;
 
 		enum class orientation{horizontal, vertical};
 
@@ -140,12 +47,15 @@ namespace terraformer::ui::widgets
 		}
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
-
-	private:
-		using user_interaction_handler = main::widget_user_interaction_handler<slider>;
-		user_interaction_handler m_on_value_changed{no_operation_tag{}};
-		float m_value = 0.0f;
 		
+		float to_value(main::cursor_position loc) const
+		{ 
+			if(m_orientation == orientation::horizontal)
+			{ return static_cast<float>(loc.x - track_margin())/track_length(); }
+			return static_cast<float>(loc.y + m_current_size.height - track_margin())/track_length();
+		}
+
+	private:		
 		static constexpr unsigned int track_dirty = 0x1;
 		
 		unsigned int m_dirty_bits = track_dirty;
@@ -165,13 +75,6 @@ namespace terraformer::ui::widgets
 			if(m_orientation == orientation::horizontal)
 			{ return static_cast<float>(m_current_size.width) - 2.0f*track_margin(); }
 			return static_cast<float>(m_current_size.height) - 2.0f*track_margin();
-		}
-		
-		float to_value(main::cursor_position loc) const
-		{ 
-			if(m_orientation == orientation::horizontal)
-			{ return static_cast<float>(loc.x - track_margin())/track_length(); }
-			return static_cast<float>(loc.y + m_current_size.height - track_margin())/track_length();
 		}
 
 		rgba_pixel m_bg_tint;

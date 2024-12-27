@@ -44,6 +44,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 	{ regenerate_textures(); }
 	
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
+	auto const val = value();
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
@@ -61,9 +62,9 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{
-				m_orientation == orientation::horizontal ? m_value*track_length() : 0.0f,
+				m_orientation == orientation::horizontal ? val*track_length() : 0.0f,
 				m_orientation == orientation::vertical ?
-					(1.0f - m_value)*track_length() :
+					(1.0f - val)*track_length() :
 					0.0f,
 				0.0f
 			},
