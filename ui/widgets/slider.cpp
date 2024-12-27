@@ -6,6 +6,7 @@
 
 void terraformer::ui::widgets::slider::regenerate_textures()
 {	
+	auto const margin = static_cast<uint32_t>(track_margin());
 	auto const orientation = m_orientation;
 	m_track = generate(
 		drawing_api::beveled_rectangle{
@@ -15,9 +16,11 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 			},
 			// TODO: This will break when tick marks are added
 			.origin_x = orientation == orientation::horizontal?
-				static_cast<uint32_t>(track_margin()) :
-				m_current_size.width/2,
-			.origin_y = orientation == orientation::vertical? 0u : m_current_size.height/2,
+				margin :
+				m_current_size.width/2 - m_border_thickness,
+			.origin_y = orientation == orientation::vertical? 
+				margin : 
+				m_current_size.height/2 - m_border_thickness,
 			.width = (orientation == orientation::horizontal)?
 				static_cast<uint32_t>(track_length()):
 				2*m_border_thickness,
