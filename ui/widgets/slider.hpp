@@ -69,6 +69,7 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
 		{
+			// TODO: Add "gears" to make speed variable
 			auto const dx = 1.0f/64.0f;
 			switch(to_builtin_command_id(event))
 			{
