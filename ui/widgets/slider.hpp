@@ -116,7 +116,6 @@ namespace terraformer::ui::widgets
 		{ return main::widget_collection_view{}; }
 
 	private:
-		main::widget_user_interaction_handler<slider> m_on_activated{no_operation_tag{}};
 		static constexpr unsigned int track_dirty = 0x1;
 		unsigned int m_dirty_bits = track_dirty;
 
