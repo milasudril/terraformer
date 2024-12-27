@@ -128,6 +128,9 @@ int main(int, char**)
 	slider_label.text(u8"A slider");
 		
 	terraformer::ui::widgets::slider my_slider;
+	my_slider.on_value_changed([](auto const& obj, auto&&...) {
+		printf("%.8g\n", obj.value());
+	});
 //	my_slider.orientation(terraformer::ui::widgets::slider::orientation::vertical);
 	
 	my_outer_vbox.append(std::ref(ok));
