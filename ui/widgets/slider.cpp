@@ -44,7 +44,6 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 	{ regenerate_textures(); }
 
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
-	printf("Render %.8g\n", m_value);
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
@@ -87,14 +86,18 @@ terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
-	return scaling{2.0f*track_margin() + 16.0f*w, h, 1.0f};
+	if(m_orientation == orientation::horizontal)
+	{ return scaling{2.0f*track_margin() + 16.0f*w, h, 1.0f}; }
+	return scaling{w, 2.0f*track_margin() + 16.0f*h, 1.0f};
 }
 
 terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_height_request)
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
-	return scaling{2.0f*track_margin() + 16.0f*w, h, 1.0f};
+	if(m_orientation == orientation::horizontal)
+	{ return scaling{2.0f*track_margin() + 16.0f*w, h, 1.0f}; }
+	return scaling{w, 2.0f*track_margin() + 16.0f*h, 1.0f};
 }
 
 void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, main::widget_instance_info)

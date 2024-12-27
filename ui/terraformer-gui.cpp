@@ -128,6 +128,7 @@ int main(int, char**)
 	slider_label.text(u8"A slider");
 		
 	terraformer::ui::widgets::slider my_slider;
+	my_slider.orientation(terraformer::ui::widgets::slider::orientation::vertical);
 	
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
