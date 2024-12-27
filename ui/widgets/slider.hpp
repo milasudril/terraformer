@@ -36,10 +36,17 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 		
-		void handle_event(main::cursor_motion_event const& cme, main::window_ref, main::ui_controller) 
+		void handle_event(
+			main::cursor_motion_event const& cme,
+			main::window_ref window,
+			main::ui_controller controller
+		) 
 		{
 			if(m_state_current == state::handle_grabbed)
-			{ value(to_value(cme.where)); }
+			{ 
+				value(to_value(cme.where)); 
+				m_on_value_changed(*this, window, controller);
+			}
 		}
 		
 		void value(float new_val)
@@ -47,8 +54,19 @@ namespace terraformer::ui::widgets
 		
 		float value() const
 		{ return m_value; }
+		
+		template<class Function>
+		slider& on_value_changed(Function&& func)
+		{
+			m_on_value_changed = std::forward<Function>(func);
+			return *this;
+		}
 
-		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller)
+		void handle_event(
+			main::mouse_button_event const& mbe,
+			main::window_ref window,
+			main::ui_controller controller
+		)
 		{
 			if(mbe.button == 0)
 			{
@@ -56,18 +74,22 @@ namespace terraformer::ui::widgets
 				{
 					case main::mouse_button_action::press:
 						value(to_value(mbe.where));
+						m_on_value_changed(*this, window, controller);
 						m_state_current = state::handle_grabbed;
 						break;
 
 					case main::mouse_button_action::release:
-						puts("Release");
 						m_state_current = state::released;
 						break;
 				}
 			}
 		}
 
-		void handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
+		void handle_event(
+			main::keyboard_button_event const& event,
+			main::window_ref window, 
+			main::ui_controller controller
+		)
 		{
 			// TODO: Add "gears" to make speed variable
 			auto const dx = 1.0f/64.0f;
@@ -75,19 +97,31 @@ namespace terraformer::ui::widgets
 			{
 				case main::builtin_command_id::step_left:
 					if(m_orientation == orientation::horizontal)
-					{ value(m_value - dx); }
+					{
+						value(m_value - dx); 
+						m_on_value_changed(*this, window, controller);
+					}
 					break;
 				case main::builtin_command_id::step_right:
 					if(m_orientation == orientation::horizontal)
-					{ value(m_value + dx); }
+					{ 
+						value(m_value + dx); 
+						m_on_value_changed(*this, window, controller);
+					}
 					break;
 				case main::builtin_command_id::step_down:
 					if(m_orientation == orientation::vertical)
-					{ value(m_value - dx); }
+					{
+						value(m_value - dx); 
+						m_on_value_changed(*this, window, controller);
+					}
 					break;
 				case main::builtin_command_id::step_up:
 					if(m_orientation == orientation::vertical)
-					{ value(m_value + dx); }
+					{ 
+						value(m_value + dx); 
+						m_on_value_changed(*this, window, controller);
+					}
 					break;
 				default:
 					break;
@@ -116,7 +150,13 @@ namespace terraformer::ui::widgets
 		{ return main::widget_collection_view{}; }
 
 	private:
+		using user_interaction_handler = main::widget_user_interaction_handler<slider>;
+		user_interaction_handler m_on_value_changed{no_operation_tag{}};
+
+		float m_value = 0.0f;
+		
 		static constexpr unsigned int track_dirty = 0x1;
+		
 		unsigned int m_dirty_bits = track_dirty;
 
 		unsigned int m_border_thickness = 0;
@@ -156,7 +196,6 @@ namespace terraformer::ui::widgets
 		main::fb_size m_current_size;
 
 		state m_state_current = state::released;
-		float m_value = 0.0f;
 		enum orientation m_orientation = orientation::horizontal;
 	};
 }
