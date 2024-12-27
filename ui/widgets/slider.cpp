@@ -25,7 +25,7 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 				static_cast<uint32_t>(track_length()):
 				2*m_border_thickness,
 			.height = (orientation == orientation::vertical)?
-				static_cast<uint32_t>(m_current_size.height):
+				static_cast<uint32_t>(track_length()):
 				2*m_border_thickness,
 			.border_thickness = m_border_thickness,
 			.upper_left_color = 0.25f*m_bg_tint + rgba_pixel{0.0f, 0.0f, 0.0f, 0.75f},
@@ -42,7 +42,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 {
 	if(m_dirty_bits & track_dirty) [[unlikely]]
 	{ regenerate_textures(); }
-
+	
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
@@ -61,10 +61,12 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{
-				m_value*track_length(),
-				0.0f,
+				m_orientation == orientation::horizontal ? m_value*track_length() : 0.0f,
+				m_orientation == orientation::vertical ?
+					(1.0f - m_value)*track_length() :
+					0.0f,
 				0.0f
-			},  // TODO: Derive offset from current value
+			},
 			.texture = m_handle->get_backend_resource(backend).get(),
 			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
 		},

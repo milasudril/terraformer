@@ -24,6 +24,7 @@ namespace terraformer::ui::widgets
 			{ m_handle = m_horizontal_handle; } 
 			else
 			{ m_handle = m_vertical_handle; }
+	
 			m_orientation = new_orientation;
 			m_dirty_bits |= track_dirty;
 			return *this;
@@ -101,13 +102,25 @@ namespace terraformer::ui::widgets
 		std::shared_ptr<font_handling::font const> m_font;
 		
 		float track_margin() const
-		{ return static_cast<float>(m_handle->frontend_resource().width())/2.0f; }
+		{ 
+			if(m_orientation == orientation::horizontal)
+			{ return static_cast<float>(m_handle->frontend_resource().width())/2.0f; }
+			return static_cast<float>(m_handle->frontend_resource().height())/2.0f;
+		}
 		
 		float track_length() const
-		{ return static_cast<float>(m_current_size.width) - 2.0f*track_margin(); }
+		{ 
+			if(m_orientation == orientation::horizontal)
+			{ return static_cast<float>(m_current_size.width) - 2.0f*track_margin(); }
+			return static_cast<float>(m_current_size.height) - 2.0f*track_margin();
+		}
 		
 		float to_value(main::cursor_position loc) const
-		{ return static_cast<float>(loc.x - track_margin())/track_length(); }
+		{ 
+			if(m_orientation == orientation::horizontal)
+			{ return static_cast<float>(loc.x - track_margin())/track_length(); }
+			return static_cast<float>(loc.y + m_current_size.height - track_margin())/track_length();
+		}
 
 		rgba_pixel m_bg_tint;
 		rgba_pixel m_fg_tint;
