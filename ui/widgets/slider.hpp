@@ -20,6 +20,10 @@ namespace terraformer::ui::widgets
 
 		slider& orientation(enum orientation new_orientation)
 		{
+			if(new_orientation == orientation::vertical)
+			{ m_handle = m_horizontal_handle; } 
+			else
+			{ m_handle = m_vertical_handle; }
 			m_orientation = new_orientation;
 			m_dirty_bits |= track_dirty;
 			return *this;
@@ -110,7 +114,10 @@ namespace terraformer::ui::widgets
 
 		main::immutable_shared_texture m_null_texture;
 		main::unique_texture m_track;
+
 		main::immutable_shared_texture m_handle;
+		main::immutable_shared_texture m_horizontal_handle;
+		main::immutable_shared_texture m_vertical_handle;
 
 		main::fb_size m_current_size;
 

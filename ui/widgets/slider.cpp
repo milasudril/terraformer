@@ -108,5 +108,7 @@ void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, ma
 	m_border_thickness = static_cast<uint32_t>(cfg.command_area.border_thickness);
 	m_dirty_bits |= track_dirty;
 	m_null_texture = cfg.misc_textures.null;
-	m_handle = cfg.misc_textures.vertical_handle;
+	m_vertical_handle = cfg.misc_textures.vertical_handle;
+	m_horizontal_handle = cfg.misc_textures.horizontal_handle;
+	orientation(m_orientation);
 }
