@@ -16,26 +16,7 @@ namespace terraformer::ui::widgets
 		using widget_with_default_actions::handle_event;
 
 		enum class state{released, handle_grabbed};
-		enum class orientation{horizontal, vertical};
 
-		slider& orientation(enum orientation new_orientation)
-		{
-			if(new_orientation == orientation::vertical)
-			{ m_handle = m_horizontal_handle; } 
-			else
-			{ m_handle = m_vertical_handle; }
-	
-			m_orientation = new_orientation;
-			m_dirty_bits |= track_dirty;
-			return *this;
-		}
-
-		void regenerate_text_mask();
-
-		void regenerate_textures();
-
-		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
-		
 		void handle_event(
 			main::cursor_motion_event const& cme,
 			main::window_ref window,
@@ -48,7 +29,7 @@ namespace terraformer::ui::widgets
 				m_on_value_changed(*this, window, controller);
 			}
 		}
-		
+
 		void value(float new_val)
 		{ m_value = std::clamp(new_val, 0.0f, 1.0f); }
 		
@@ -61,8 +42,8 @@ namespace terraformer::ui::widgets
 			m_on_value_changed = std::forward<Function>(func);
 			return *this;
 		}
-
-		void handle_event(
+		
+				void handle_event(
 			main::mouse_button_event const& mbe,
 			main::window_ref window,
 			main::ui_controller controller
@@ -128,6 +109,26 @@ namespace terraformer::ui::widgets
 			}
 		}
 
+		enum class orientation{horizontal, vertical};
+
+		slider& orientation(enum orientation new_orientation)
+		{
+			if(new_orientation == orientation::vertical)
+			{ m_handle = m_horizontal_handle; } 
+			else
+			{ m_handle = m_vertical_handle; }
+	
+			m_orientation = new_orientation;
+			m_dirty_bits |= track_dirty;
+			return *this;
+		}
+
+		void regenerate_text_mask();
+
+		void regenerate_textures();
+
+		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
+
 		scaling compute_size(main::widget_width_request req);
 
 		scaling compute_size(main::widget_height_request req);
@@ -140,19 +141,9 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
-		main::layout_policy_ref get_layout() const
-		{ return main::layout_policy_ref{}; }
-
-		main::widget_collection_ref get_children()
-		{ return main::widget_collection_ref{}; }
-
-		main::widget_collection_view get_children() const
-		{ return main::widget_collection_view{}; }
-
 	private:
 		using user_interaction_handler = main::widget_user_interaction_handler<slider>;
 		user_interaction_handler m_on_value_changed{no_operation_tag{}};
-
 		float m_value = 0.0f;
 		
 		static constexpr unsigned int track_dirty = 0x1;
