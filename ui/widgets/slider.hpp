@@ -67,9 +67,30 @@ namespace terraformer::ui::widgets
 			}
 		}
 
-		void handle_event(main::keyboard_button_event const&, main::window_ref, main::ui_controller)
+		void handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller)
 		{
-			// TODO
+			auto const dx = 1.0f/64.0f;
+			switch(to_builtin_command_id(event))
+			{
+				case main::builtin_command_id::step_left:
+					if(m_orientation == orientation::horizontal)
+					{ value(m_value - dx); }
+					break;
+				case main::builtin_command_id::step_right:
+					if(m_orientation == orientation::horizontal)
+					{ value(m_value + dx); }
+					break;
+				case main::builtin_command_id::step_down:
+					if(m_orientation == orientation::vertical)
+					{ value(m_value - dx); }
+					break;
+				case main::builtin_command_id::step_up:
+					if(m_orientation == orientation::vertical)
+					{ value(m_value + dx); }
+					break;
+				default:
+					break;
+			}
 		}
 
 		scaling compute_size(main::widget_width_request req);
