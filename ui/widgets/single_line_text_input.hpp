@@ -235,10 +235,12 @@ namespace terraformer::ui::widgets
 
 		void update_insert_offset(size_t new_pos)
 		{ m_insert_offset = new_pos; }
+		
+		using user_interaction_handler = main::widget_user_interaction_handler<single_line_text_input>;
 
-		main::widget_user_interaction_handler<single_line_text_input> m_on_value_changed{no_operation_tag{}};
-		main::widget_user_interaction_handler<single_line_text_input> m_on_step_up{no_operation_tag{}};
-		main::widget_user_interaction_handler<single_line_text_input> m_on_step_down{no_operation_tag{}};
+		user_interaction_handler m_on_value_changed{no_operation_tag{}};
+		user_interaction_handler m_on_step_up{no_operation_tag{}};
+		user_interaction_handler m_on_step_down{no_operation_tag{}};
 
 		std::u32string m_value;
 		size_t m_insert_offset = 0;
