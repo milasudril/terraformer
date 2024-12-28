@@ -4,38 +4,13 @@
 #define TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 
 #include "ui/main/widget.hpp"
+#include "ui/value_maps/affine_value_map.hpp"
 #include "lib/common/move_only_function.hpp"
 #include "lib/common/bounded_value.hpp"
 #include "lib/common/interval.hpp"
 
 namespace terraformer::ui::widgets
 {
-	class affine_value_map
-	{
-	public:
-		constexpr explicit affine_value_map(float min, float max) noexcept:
-			m_min{min},
-			m_max{max}
-		{}
-
-		constexpr float min() const noexcept
-		{ return m_min; }
-
-		constexpr float max() const noexcept
-		{ return m_max; }
-
-		constexpr float from_value(float x) const noexcept
-		{ return std::lerp(0.0f, 1.0f, (x - m_min)/(m_max - m_min)); }
-
-		constexpr float to_value(float x) const noexcept
-		{ return std::lerp(m_min, m_max, x); }
-
-
-	private:
-		float m_min;
-		float m_max;
-	};
-
 	template<class Derived>
 	class float_input_controller:public main::widget_with_default_actions
 	{
@@ -162,7 +137,9 @@ namespace terraformer::ui::widgets
 			float (*to_value)(void const*, float);
 		};
 
-		unique_resource<value_map_vtable> m_value_map{std::in_place_type_t<affine_value_map>{}, 0.0f, 1.0f};
+		unique_resource<value_map_vtable> m_value_map{
+			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
+		};
 	};
 }
 
