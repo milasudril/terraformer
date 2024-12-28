@@ -25,7 +25,7 @@ namespace terraformer::ui::widgets
 		template<class ValueMap, class... Args>
 		explicit float_input_controller(std::in_place_type_t<ValueMap>, Args&&... args):
 			m_value_map{std::in_place_type_t<ValueMap>{}, std::forward<Args>(args)...}
-		{}
+		{ value(0.0f); }
 
 		void handle_event(
 			main::cursor_motion_event const& cme,
