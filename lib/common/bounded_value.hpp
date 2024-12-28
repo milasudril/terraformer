@@ -6,7 +6,12 @@
 
 namespace terraformer
 {
-	template<auto Interval, typename decltype(Interval)::value_type DefaultValue>
+	struct clamp_tag{};
+
+	template<
+		auto Interval,
+		typename decltype(Interval)::value_type DefaultValue = typename decltype(Interval)::value_type{}
+	>
 	class bounded_value
 	{
 	public:
@@ -26,6 +31,11 @@ namespace terraformer
 		{ return DefaultValue; }
 
 		constexpr bounded_value(): m_val{DefaultValue}{}
+
+		constexpr explicit bounded_value(value_type val, clamp_tag) requires
+			requires(value_type val) {{Interval.clamp(val)} -> std::same_as<value_type>;}:
+			m_val{Interval.clamp(val)}
+		{}
 
 		constexpr explicit bounded_value(value_type val):m_val{val}
 		{

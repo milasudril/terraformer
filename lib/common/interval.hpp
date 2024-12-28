@@ -139,6 +139,9 @@ namespace terraformer
 		constexpr bool operator==(closed_closed_interval const&) const = default;
 		constexpr bool operator!=(closed_closed_interval const&) const = default;
 
+		constexpr value_type clamp(value_type val) const
+		{ return std::clamp(val, min(), max()); }
+
 		T _m_min;
 		T _m_max;
 	};

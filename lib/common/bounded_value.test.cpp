@@ -46,3 +46,10 @@ TESTCASE(terraformer_bounded_value_construct_out_of_range)
 	catch(...)
 	{}
 }
+
+TESTCASE(terraformer_bounded_value_construct_out_of_range_clamp)
+{
+	using zero_to_one_value = terraformer::bounded_value<terraformer::closed_closed_interval{0.0f, 1.0f}, 0.5f>;
+	zero_to_one_value my_value{2.0f, terraformer::clamp_tag{}};
+	EXPECT_EQ(my_value, 1.0f);
+}
