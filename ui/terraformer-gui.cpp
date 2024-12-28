@@ -15,6 +15,7 @@
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
+#include "./value_maps/log_value_map.hpp"
 
 namespace
 {
@@ -127,7 +128,12 @@ int main(int, char**)
 	terraformer::ui::widgets::label slider_label;
 	slider_label.text(u8"A slider");
 
-	terraformer::ui::widgets::slider my_slider;
+	terraformer::ui::widgets::slider my_slider{
+		std::in_place_type_t<terraformer::ui::value_maps::log_value_map>{},
+		-4.0f,
+		0.0f,
+		10.0f
+	};
 	my_slider.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
 	});
