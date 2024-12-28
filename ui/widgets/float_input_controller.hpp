@@ -10,6 +10,32 @@
 
 namespace terraformer::ui::widgets
 {
+	class affine_value_map
+	{
+	public:
+		constexpr explicit affine_value_map(float min, float max) noexcept:
+			m_min{min},
+			m_max{max}
+		{}
+
+		constexpr float min() const noexcept
+		{ return m_min; }
+
+		constexpr float max() const noexcept
+		{ return m_max; }
+
+		constexpr float from_value(float x) const noexcept
+		{ return std::lerp(0.0f, 1.0f, (x - m_min)/(m_max - m_min)); }
+
+		constexpr float to_value(float x) const noexcept
+		{ return std::lerp(m_min, m_max, x); }
+
+
+	private:
+		float m_min;
+		float m_max;
+	};
+
 	template<class Derived>
 	class float_input_controller:public main::widget_with_default_actions
 	{
@@ -40,10 +66,10 @@ namespace terraformer::ui::widgets
 		}
 
 		void value(float new_val)
-		{ m_value = internal_value_type{new_val, clamp_tag{}}; }
+		{ m_value = internal_value_type{from_value(new_val), clamp_tag{}}; }
 
 		float value() const
-		{ return m_value; }
+		{ return to_value(m_value); }
 
 		template<class Function>
 		Derived& on_value_changed(Function&& func)
@@ -108,6 +134,12 @@ namespace terraformer::ui::widgets
 		internal_value_type internal_value() const
 		{ return m_value; }
 
+		float to_value(float x) const
+		{ return m_value_map.get().get_vtable().to_value(m_value_map.get().get_pointer(), x); }
+
+		float from_value(float x) const
+		{ return m_value_map.get().get_vtable().from_value(m_value_map.get().get_pointer(), x); }
+
 	private:
 		using user_interaction_handler = main::widget_user_interaction_handler<Derived>;
 		user_interaction_handler m_on_value_changed{no_operation_tag{}};
@@ -117,7 +149,7 @@ namespace terraformer::ui::widgets
 		struct value_map_vtable
 		{
 			template<class ValueMap>
-			explicit value_map_vtable(std::type_identity<ValueMap>):
+			constexpr explicit value_map_vtable(std::type_identity<ValueMap>):
 				from_value{[](void const* obj, float value){
 					return static_cast<ValueMap const*>(obj)->from_value(value);
 				}},
@@ -130,7 +162,7 @@ namespace terraformer::ui::widgets
 			float (*to_value)(void const*, float);
 		};
 
-		unique_resource<value_map_vtable> m_value_map;
+		unique_resource<value_map_vtable> m_value_map{std::in_place_type_t<affine_value_map>{}, 0.0f, 1.0f};
 	};
 }
 
