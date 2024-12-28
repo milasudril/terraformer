@@ -4,10 +4,8 @@
 #define TERRAFORMER_UI_WIDGETS_SLIDER_HPP
 
 #include "./normalized_float_input.hpp"
-#include "ui/font_handling/text_shaper.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
-#include "lib/common/move_only_function.hpp"
 
 namespace terraformer::ui::widgets
 {
@@ -21,10 +19,10 @@ namespace terraformer::ui::widgets
 		slider& orientation(enum orientation new_orientation)
 		{
 			if(new_orientation == orientation::vertical)
-			{ m_handle = m_horizontal_handle; } 
+			{ m_handle = m_horizontal_handle; }
 			else
 			{ m_handle = m_vertical_handle; }
-	
+
 			m_orientation = new_orientation;
 			m_dirty_bits |= track_dirty;
 			return *this;
@@ -47,31 +45,31 @@ namespace terraformer::ui::widgets
 		}
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
-		
+
 		float to_value(main::cursor_position loc) const
-		{ 
+		{
 			if(m_orientation == orientation::horizontal)
 			{ return static_cast<float>(loc.x - track_margin())/track_length(); }
 			return static_cast<float>(loc.y + m_current_size.height - track_margin())/track_length();
 		}
 
-	private:		
+	private:
 		static constexpr unsigned int track_dirty = 0x1;
-		
+
 		unsigned int m_dirty_bits = track_dirty;
 
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
-		
+
 		float track_margin() const
-		{ 
+		{
 			if(m_orientation == orientation::horizontal)
 			{ return static_cast<float>(m_handle->frontend_resource().width())/2.0f; }
 			return static_cast<float>(m_handle->frontend_resource().height())/2.0f;
 		}
-		
+
 		float track_length() const
-		{ 
+		{
 			if(m_orientation == orientation::horizontal)
 			{ return static_cast<float>(m_current_size.width) - 2.0f*track_margin(); }
 			return static_cast<float>(m_current_size.height) - 2.0f*track_margin();
