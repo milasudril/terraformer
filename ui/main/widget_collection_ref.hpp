@@ -79,9 +79,6 @@ namespace terraformer::ui::main
 	template<class EventType, class ... Args>
 	using event_callback_t = void (*)(void*, EventType, Args...);
 
-	template<class SizeRequestType>
-	using compute_size_callback_t = scaling (*)(void*, SizeRequestType);
-
 	struct widget_width_request
 	{
 		std::optional<float> height;
@@ -104,8 +101,8 @@ namespace terraformer::ui::main
 	using prepare_for_presentation_callback = widget_layer_stack (*)(void*, graphics_backend_ref);
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
 
-	using compute_size_given_height_callback = compute_size_callback_t<widget_width_request>;
-	using compute_size_given_width_callback = compute_size_callback_t<widget_height_request>;
+	using compute_size_given_height_callback = scaling (*)(void*, widget_width_request);
+	using compute_size_given_width_callback = scaling (*)(void*, widget_height_request);
 	using get_children_callback = widget_collection_ref (*)(void*);
 	using get_children_const_callback = widget_collection_view (*)(void const*);
 	using get_layout_callback = layout_policy_ref (*)(void*);
@@ -193,10 +190,6 @@ namespace terraformer::ui::main
 
 		auto compute_size_given_width_callbacks() const
 		{ return m_span.template get_by_type<compute_size_given_width_callback>(); }
-
-		template<class SizeRequestType>
-		auto compute_size_callbacks() const
-		{ return m_span.template get_by_type<compute_size_callback_t<SizeRequestType>>(); }
 
 		auto size_callbacks() const
 		{ return m_span.template get_by_type<size_callback>(); }

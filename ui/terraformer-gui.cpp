@@ -12,7 +12,6 @@
 #include "./widgets/button.hpp"
 #include "./widgets/single_line_text_input.hpp"
 #include "./widgets/slider.hpp"
-#include "./widgets/range_input.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
@@ -128,11 +127,10 @@ int main(int, char**)
 	terraformer::ui::widgets::label slider_label;
 	slider_label.text(u8"A slider");
 
-	terraformer::ui::widgets::range_input my_slider{std::in_place_type_t<terraformer::ui::widgets::slider>{}};
-	/*
+	terraformer::ui::widgets::slider my_slider;
 	my_slider.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
-	});*/
+	});
 //	my_slider.orientation(terraformer::ui::widgets::slider::orientation::vertical);
 
 	my_outer_vbox.append(std::ref(ok));
