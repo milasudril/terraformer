@@ -126,13 +126,13 @@ int main(int, char**)
 
 	terraformer::ui::widgets::label slider_label;
 	slider_label.text(u8"A slider");
-		
+
 	terraformer::ui::widgets::slider my_slider;
 	my_slider.on_value_changed([](auto const& obj, auto&&...) {
-		printf("%.8g\n", obj.value());
+		printf("%.8g\n", static_cast<float>(obj.value()));
 	});
 //	my_slider.orientation(terraformer::ui::widgets::slider::orientation::vertical);
-	
+
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
 	my_outer_vbox.append(std::ref(cancel));

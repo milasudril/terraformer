@@ -5,6 +5,8 @@
 
 #include "ui/main/widget.hpp"
 #include "lib/common/move_only_function.hpp"
+#include "lib/common/bounded_value.hpp"
+#include "lib/common/interval.hpp"
 
 namespace terraformer::ui::widgets
 {
@@ -20,28 +22,31 @@ namespace terraformer::ui::widgets
 			main::cursor_motion_event const& cme,
 			main::window_ref window,
 			main::ui_controller controller
-		) 
+		)
 		{
 			if(m_state_current == state::handle_grabbed)
-			{ 
-				value(derived().to_value(cme.where)); 
+			{
+				value(derived().to_value(cme.where));
 				m_on_value_changed(derived(), window, controller);
 			}
 		}
 
 		void value(float new_val)
-		{ m_value = std::clamp(new_val, 0.0f, 1.0f); }
-		
-		float value() const
+		{ value(bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f>{new_val, clamp_tag{}}); }
+
+		void value(bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f> new_val)
+		{ m_value = new_val; }
+
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f> value() const
 		{ return m_value; }
-		
+
 		template<class Function>
 		Derived& on_value_changed(Function&& func)
 		{
 			m_on_value_changed = std::forward<Function>(func);
 			return derived();
 		}
-		
+
 		void handle_event(
 			main::mouse_button_event const& mbe,
 			main::window_ref window,
@@ -67,7 +72,7 @@ namespace terraformer::ui::widgets
 
 		void handle_event(
 			main::keyboard_button_event const& event,
-			main::window_ref window, 
+			main::window_ref window,
 			main::ui_controller controller
 		)
 		{
@@ -77,13 +82,13 @@ namespace terraformer::ui::widgets
 			{
 				case main::builtin_command_id::step_left:
 				case main::builtin_command_id::step_down:
-					value(m_value - dx); 
+					value(m_value - dx);
 					m_on_value_changed(derived(), window, controller);
 					break;
 
 				case main::builtin_command_id::step_right:
 				case main::builtin_command_id::step_up:
-					value(m_value + dx); 
+					value(m_value + dx);
 					m_on_value_changed(derived(), window, controller);
 					break;
 				default:
@@ -91,14 +96,14 @@ namespace terraformer::ui::widgets
 					break;
 			}
 		}
-		
+
 		auto& derived() &
 		{ return static_cast<Derived&>(*this); }
 
 	private:
 		using user_interaction_handler = main::widget_user_interaction_handler<Derived>;
 		user_interaction_handler m_on_value_changed{no_operation_tag{}};
-		float m_value = 0.0f;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f> m_value;
 		state m_state_current = state::released;
 	};
 }
