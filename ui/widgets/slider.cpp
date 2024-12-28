@@ -5,7 +5,7 @@
 #include "ui/drawing_api/image_generators.hpp"
 
 void terraformer::ui::widgets::slider::regenerate_textures()
-{	
+{
 	auto const margin = static_cast<uint32_t>(track_margin());
 	auto const orientation = m_orientation;
 	m_track = generate(
@@ -18,8 +18,8 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 			.origin_x = orientation == orientation::horizontal?
 				margin :
 				m_current_size.width/2 - m_border_thickness,
-			.origin_y = orientation == orientation::vertical? 
-				margin : 
+			.origin_y = orientation == orientation::vertical?
+				margin :
 				m_current_size.height/2 - m_border_thickness,
 			.width = (orientation == orientation::horizontal)?
 				static_cast<uint32_t>(track_length()):
@@ -42,9 +42,9 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 {
 	if(m_dirty_bits & track_dirty) [[unlikely]]
 	{ regenerate_textures(); }
-	
+
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
-	auto const val = value();
+	auto const val = internal_value();
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},

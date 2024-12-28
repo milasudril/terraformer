@@ -46,11 +46,19 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
-		float to_value(main::cursor_position loc) const
+		internal_value_type to_internal_value(main::cursor_position loc) const
 		{
 			if(m_orientation == orientation::horizontal)
-			{ return static_cast<float>(loc.x - track_margin())/track_length(); }
-			return static_cast<float>(loc.y + m_current_size.height - track_margin())/track_length();
+			{
+				return internal_value_type{
+					static_cast<float>(loc.x - track_margin())/track_length(),
+					clamp_tag{}
+				};
+			}
+			return internal_value_type{
+				static_cast<float>(loc.y + m_current_size.height - track_margin())/track_length(),
+				clamp_tag{},
+			};
 		}
 
 	private:

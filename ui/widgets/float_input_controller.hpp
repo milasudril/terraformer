@@ -15,8 +15,16 @@ namespace terraformer::ui::widgets
 	{
 	public:
 		using widget_with_default_actions::handle_event;
+		using internal_value_type = bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f>;
 
 		enum class state{released, handle_grabbed};
+
+		float_input_controller() = default;
+
+		template<class ValueMap, class... Args>
+		explicit float_input_controller(std::in_place_type_t<ValueMap>, Args&&... args):
+			m_value_map{std::in_place_type_t<ValueMap>{}, std::forward<Args>(args)...}
+		{}
 
 		void handle_event(
 			main::cursor_motion_event const& cme,
@@ -26,18 +34,15 @@ namespace terraformer::ui::widgets
 		{
 			if(m_state_current == state::handle_grabbed)
 			{
-				value(derived().to_value(cme.where));
+				m_value = derived().to_internal_value(cme.where);
 				m_on_value_changed(derived(), window, controller);
 			}
 		}
 
 		void value(float new_val)
-		{ value(bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f>{new_val, clamp_tag{}}); }
+		{ m_value = internal_value_type{new_val, clamp_tag{}}; }
 
-		void value(bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f> new_val)
-		{ m_value = new_val; }
-
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f> value() const
+		float value() const
 		{ return m_value; }
 
 		template<class Function>
@@ -58,7 +63,7 @@ namespace terraformer::ui::widgets
 				switch(mbe.action)
 				{
 					case main::mouse_button_action::press:
-						value(derived().to_value(mbe.where));
+						m_value = derived().to_internal_value(mbe.where);
 						m_on_value_changed(derived(), window, controller);
 						m_state_current = state::handle_grabbed;
 						break;
@@ -82,13 +87,13 @@ namespace terraformer::ui::widgets
 			{
 				case main::builtin_command_id::step_left:
 				case main::builtin_command_id::step_down:
-					value(m_value - dx);
+					m_value = internal_value_type{m_value - dx, clamp_tag{}};
 					m_on_value_changed(derived(), window, controller);
 					break;
 
 				case main::builtin_command_id::step_right:
 				case main::builtin_command_id::step_up:
-					value(m_value + dx);
+					m_value = internal_value_type{m_value + dx, clamp_tag{}};
 					m_on_value_changed(derived(), window, controller);
 					break;
 				default:
@@ -100,11 +105,32 @@ namespace terraformer::ui::widgets
 		auto& derived() &
 		{ return static_cast<Derived&>(*this); }
 
+		internal_value_type internal_value() const
+		{ return m_value; }
+
 	private:
 		using user_interaction_handler = main::widget_user_interaction_handler<Derived>;
 		user_interaction_handler m_on_value_changed{no_operation_tag{}};
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.0f> m_value;
+		internal_value_type m_value;
 		state m_state_current = state::released;
+
+		struct value_map_vtable
+		{
+			template<class ValueMap>
+			explicit value_map_vtable(std::type_identity<ValueMap>):
+				from_value{[](void const* obj, float value){
+					return static_cast<ValueMap const*>(obj)->from_value(value);
+				}},
+				to_value{[](void const* obj, float value){
+					return static_cast<ValueMap const*>(obj)->to_value(value);
+				}}
+			{}
+
+			float (*from_value)(void const*, float);
+			float (*to_value)(void const*, float);
+		};
+
+		unique_resource<value_map_vtable> m_value_map;
 	};
 }
 
