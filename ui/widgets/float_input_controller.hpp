@@ -1,3 +1,5 @@
+//@	{"dependencies_extra":[{"ref":"./slider.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 #define TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 

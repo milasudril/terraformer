@@ -1,7 +1,7 @@
-//@	{"dependencies_extra":[{"ref":"./linear_input_control.o", "rel":"implementation"}]}
+//@	{"dependencies_extra":[{"ref":"./slider.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_UI_WIDGETS_LINEAR_FLOAT_VIEW_HPP
-#define TERRAFORMER_UI_WIDGETS_LINEAR_FLOAT_VIEW_HPP
+#ifndef TERRAFORMER_UI_WIDGETS_SLIDER_HPP
+#define TERRAFORMER_UI_WIDGETS_SLIDER_HPP
 
 #include "./float_input_controller.hpp"
 #include "ui/main/widget.hpp"
@@ -9,14 +9,14 @@
 
 namespace terraformer::ui::widgets
 {
-	class linear_input_control:public float_input_controller<linear_input_control>
+	class slider:public float_input_controller<slider>
 	{
 	public:
-		using float_input_controller<linear_input_control>::handle_event;
+		using float_input_controller<slider>::handle_event;
 
 		enum class orientation{horizontal, vertical};
 
-		linear_input_control& orientation(enum orientation new_orientation)
+		slider& orientation(enum orientation new_orientation)
 		{
 			if(new_orientation == orientation::vertical)
 			{ m_handle = m_horizontal_handle; }
