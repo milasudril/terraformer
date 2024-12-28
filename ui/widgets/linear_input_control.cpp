@@ -1,10 +1,10 @@
-//@	{"target":{"name":"slider.o"}}
+//@	{"target":{"name":"linear_input_control.o"}}
 
-#include "./slider.hpp"
+#include "./linear_input_control.hpp"
 
 #include "ui/drawing_api/image_generators.hpp"
 
-void terraformer::ui::widgets::slider::regenerate_textures()
+void terraformer::ui::widgets::linear_input_control::regenerate_textures()
 {
 	auto const margin = static_cast<uint32_t>(track_margin());
 	auto const orientation = m_orientation;
@@ -38,7 +38,7 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 }
 
 terraformer::ui::main::widget_layer_stack
-terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backend_ref backend)
+terraformer::ui::widgets::linear_input_control::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	if(m_dirty_bits & track_dirty) [[unlikely]]
 	{ regenerate_textures(); }
@@ -85,7 +85,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 	};
 }
 
-terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_width_request)
+terraformer::scaling terraformer::ui::widgets::linear_input_control::compute_size(main::widget_width_request)
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
@@ -94,7 +94,7 @@ terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget
 	return scaling{w, 2.0f*track_margin() + 16.0f*h, 1.0f};
 }
 
-terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_height_request)
+terraformer::scaling terraformer::ui::widgets::linear_input_control::compute_size(main::widget_height_request)
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
@@ -103,7 +103,7 @@ terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget
 	return scaling{w, 2.0f*track_margin() + 16.0f*h, 1.0f};
 }
 
-void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, main::widget_instance_info)
+void terraformer::ui::widgets::linear_input_control::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
 	m_font = cfg.command_area.font;
 	m_bg_tint = cfg.command_area.colors.background;

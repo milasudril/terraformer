@@ -11,7 +11,7 @@
 #include "./widgets/label.hpp"
 #include "./widgets/button.hpp"
 #include "./widgets/single_line_text_input.hpp"
-#include "./widgets/slider.hpp"
+#include "./widgets/linear_input_control.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
@@ -124,21 +124,21 @@ int main(int, char**)
 			puts("Step down");
 		});
 
-	terraformer::ui::widgets::label slider_label;
-	slider_label.text(u8"A slider");
+	terraformer::ui::widgets::label linear_input_control_label;
+	linear_input_control_label.text(u8"A linear_input_control");
 
-	terraformer::ui::widgets::slider my_slider;
-	my_slider.on_value_changed([](auto const& obj, auto&&...) {
+	terraformer::ui::widgets::linear_input_control my_linear_input_control;
+	my_linear_input_control.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
 	});
-//	my_slider.orientation(terraformer::ui::widgets::slider::orientation::vertical);
+//	my_linear_input_control.orientation(terraformer::ui::widgets::linear_input_control::orientation::vertical);
 
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
 	my_outer_vbox.append(std::ref(cancel));
 	my_outer_vbox.append(std::ref(my_input));
-	my_outer_vbox.append(std::ref(slider_label));
-	my_outer_vbox.append(std::ref(my_slider));
+	my_outer_vbox.append(std::ref(linear_input_control_label));
+	my_outer_vbox.append(std::ref(my_linear_input_control));
 
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
