@@ -14,6 +14,8 @@ namespace terraformer::ui::widgets
 	public:
 		using float_input_controller<slider>::handle_event;
 
+		using float_input_controller<slider>::float_input_controller;
+
 		enum class orientation{horizontal, vertical};
 
 		slider& orientation(enum orientation new_orientation)
