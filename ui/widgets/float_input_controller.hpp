@@ -1,7 +1,7 @@
 //@	{"dependencies_extra":[{"ref":"./slider.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_UI_WIDGETS_NORMALIZED_FLOAT_INPUT_HPP
-#define TERRAFORMER_UI_WIDGETS_NORMALIZED_FLOAT_INPUT_HPP
+#ifndef TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
+#define TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 
 #include "ui/main/widget.hpp"
 #include "lib/common/move_only_function.hpp"
@@ -11,7 +11,7 @@
 namespace terraformer::ui::widgets
 {
 	template<class Derived>
-	class normalized_float_input:public main::widget_with_default_actions
+	class float_input_controller:public main::widget_with_default_actions
 	{
 	public:
 		using widget_with_default_actions::handle_event;

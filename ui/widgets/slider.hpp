@@ -3,16 +3,16 @@
 #ifndef TERRAFORMER_UI_WIDGETS_SLIDER_HPP
 #define TERRAFORMER_UI_WIDGETS_SLIDER_HPP
 
-#include "./normalized_float_input.hpp"
+#include "./float_input_controller.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
 
 namespace terraformer::ui::widgets
 {
-	class slider:public normalized_float_input<slider>
+	class slider:public float_input_controller<slider>
 	{
 	public:
-		using normalized_float_input<slider>::handle_event;
+		using float_input_controller<slider>::handle_event;
 
 		enum class orientation{horizontal, vertical};
 
