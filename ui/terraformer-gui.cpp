@@ -126,15 +126,27 @@ int main(int, char**)
 			puts("Step down");
 		});
 
-	terraformer::ui::widgets::label slider_label;
-	slider_label.text(u8"A slider");
-
-	terraformer::ui::widgets::slider my_slider{
+	terraformer::ui::widgets::label slider_label_asinh;
+	slider_label_asinh.text(u8"A slider (asinh)");
+	terraformer::ui::widgets::slider my_asinh_slider{
 		std::in_place_type_t<terraformer::ui::value_maps::asinh_value_map>{},
 		800.0f,
 		10000.0f
 	};
-	my_slider.on_value_changed([](auto const& obj, auto&&...) {
+	my_asinh_slider.on_value_changed([](auto const& obj, auto&&...) {
+		printf("%.8g\n", static_cast<float>(obj.value()));
+	});
+
+	terraformer::ui::widgets::label slider_label_log;
+	slider_label_log.text(u8"A slider (log)");
+	terraformer::ui::widgets::slider my_log_slider{
+		std::in_place_type_t<terraformer::ui::value_maps::log_value_map>{},
+		1.0f,
+		10000.0f,
+		10.0f
+	};
+	my_log_slider.value(1000.0f);
+	my_log_slider.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
 	});
 //	my_slider.orientation(terraformer::ui::widgets::slider::orientation::vertical);
@@ -143,8 +155,10 @@ int main(int, char**)
 	my_outer_vbox.append(std::ref(my_vbox));
 	my_outer_vbox.append(std::ref(cancel));
 	my_outer_vbox.append(std::ref(my_input));
-	my_outer_vbox.append(std::ref(slider_label));
-	my_outer_vbox.append(std::ref(my_slider));
+	my_outer_vbox.append(std::ref(slider_label_asinh));
+	my_outer_vbox.append(std::ref(my_asinh_slider));
+	my_outer_vbox.append(std::ref(slider_label_log));
+	my_outer_vbox.append(std::ref(my_log_slider));
 
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
