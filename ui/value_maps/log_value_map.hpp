@@ -25,7 +25,12 @@ namespace terraformer::ui::value_maps
 		{ return m_base; }
 
 		constexpr float from_value(float x) const noexcept
-		{ return m_affie.from_value(std::log2(x)/m_base); }
+		{
+			if( x <= 0.0f ) [[unlikely]]
+			{ return from_value(min()); }
+			return m_affie.from_value(std::log2(x)/m_base);
+
+		}
 
 		constexpr float to_value(float x) const noexcept
 		{ return std::exp2(m_base*m_affie.to_value(x)); }

@@ -145,7 +145,8 @@ int main(int, char**)
 		10000.0f,
 		10.0f
 	};
-	my_log_slider.value(1000.0f);
+	printf("Current value = %.8g\n", my_log_slider.value());
+
 	my_log_slider.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
 	});
