@@ -10,11 +10,14 @@ namespace terraformer::ui::value_maps
 	public:
 		constexpr explicit asinh_value_map(float reference_value, float max) noexcept:
 			m_reference_value{reference_value},
-			m_max{max}
+			m_max{std::asinh(max*std::sinh(1.0f)/reference_value)}
 		{}
 
 		constexpr float max() const noexcept
 		{ return m_reference_value*std::sinh(m_max)/std::sinh(1.0f); }
+
+		constexpr float min() const noexcept
+		{ return -max(); }
 
 		constexpr float from_value(float x) const noexcept
 		{

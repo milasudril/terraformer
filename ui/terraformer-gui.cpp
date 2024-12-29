@@ -132,7 +132,7 @@ int main(int, char**)
 	terraformer::ui::widgets::slider my_slider{
 		std::in_place_type_t<terraformer::ui::value_maps::asinh_value_map>{},
 		800.0f,
-		4.0f
+		10000.0f
 	};
 	my_slider.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
