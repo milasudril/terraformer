@@ -11,8 +11,8 @@ namespace terraformer::ui::value_maps
 	{
 	public:
 		constexpr explicit log_value_map(float min, float max, float base) noexcept:
-			m_affie{min, max},
 			m_base{std::log2(base)}
+			m_affie{std::log2(min)/m_base, std::log2(max)/m_base},
 		{}
 
 		constexpr float min() const noexcept
@@ -31,8 +31,8 @@ namespace terraformer::ui::value_maps
 		{ return std::exp2(m_base*m_affie.to_value(x)); }
 
 	private:
-		affine_value_map m_affie;
 		float m_base;
+		affine_value_map m_affie;
 	};
 }
 #endif
