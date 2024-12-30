@@ -125,9 +125,9 @@ namespace terraformer::ui::theming
 								.width = 32,
 								.height = 32,
 							},
-							.origin_y = 0,
+							.origin_y = 3,
 							.thickness = 2,
-							.length = 16,
+							.length = 13,
 							.color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 						}
 					)
