@@ -84,7 +84,6 @@ namespace terraformer::ui::widgets
 		}
 
 		rgba_pixel m_bg_tint;
-		rgba_pixel m_fg_tint;
 
 		main::immutable_shared_texture m_null_texture;
 		main::unique_texture m_track;

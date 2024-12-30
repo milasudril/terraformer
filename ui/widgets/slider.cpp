@@ -107,7 +107,6 @@ void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, ma
 {
 	m_font = cfg.command_area.font;
 	m_bg_tint = cfg.command_area.colors.background;
-	m_fg_tint = cfg.command_area.colors.foreground;
 	m_border_thickness = static_cast<uint32_t>(cfg.command_area.border_thickness);
 	m_dirty_bits |= track_dirty;
 	m_null_texture = cfg.misc_textures.null;
