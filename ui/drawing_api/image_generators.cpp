@@ -95,6 +95,48 @@ terraformer::image terraformer::ui::drawing_api::generate(flat_rectangle const& 
 	return ret;
 }
 
+terraformer::image terraformer::ui::drawing_api::generate(beveled_disc const& params)
+{
+	auto const r = params.radius;
+	image ret{params.domain_size.width, params.domain_size.height};
+	auto const border_thickness = params.border_thickness;
+	auto const inner_radius = static_cast<int64_t>(r) - static_cast<int64_t>(border_thickness);
+	auto const upper_left_color = params.upper_left_color;
+	auto const lower_right_color = params.lower_right_color;
+	auto const fill_color = params.fill_color;
+	auto const origin_x = params.origin_x;
+	auto const origin_y = params.origin_y;
+
+	for(uint32_t y = 0; y != 2*r; ++y)
+	{
+		for(uint32_t x = 0; x != 2*r; ++x)
+		{
+			auto const write_x = x + origin_x;
+			auto const write_y = y + origin_y;
+
+			if(write_x < ret.width() && write_y < ret.height())
+			{
+				auto const dx = static_cast<int64_t>(x) - static_cast<int64_t>(r);
+				auto const dy = static_cast<int64_t>(y) - static_cast<int64_t>(r);
+				auto const d2 = dx*dx + dy*dy;
+				if(d2 <= inner_radius*inner_radius)
+				{ ret(write_x, write_y) = fill_color; }
+				else
+				if(d2 <= r*r)
+				{
+					if(x <= r && y<= r)
+					{ ret(write_x, write_y) = upper_left_color; }
+					else
+					{ ret(write_x, write_y) = lower_right_color; }
+				}
+				else
+				{ ret(write_x, write_y) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}; }
+			}
+		}
+	}
+	return ret;
+}
+
 terraformer::image terraformer::ui::drawing_api::convert_mask(span_2d<uint8_t const> input)
 {
 	auto const w = input.width();
