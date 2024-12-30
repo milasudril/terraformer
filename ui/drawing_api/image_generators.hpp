@@ -50,6 +50,29 @@ namespace terraformer::ui::drawing_api
 
 	image generate(beveled_disc const& params);
 
+	struct hand
+	{
+		span_2d_extents domain_size;
+		uint32_t origin_y;
+		uint32_t thickness;
+		uint32_t length;
+		rgba_pixel color;
+	};
+
+	inline image generate(hand const& params)
+	{
+		return generate(flat_rectangle{
+			.domain_size = params.domain_size,
+			.origin_x = (params.domain_size.width - params.thickness)/2,
+			.origin_y = params.origin_y,
+			.width = params.thickness,
+			.height = params.length,
+			.border_thickness = 0,
+			.border_color = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f},
+			.fill_color = params.color
+		});
+	}
+
 	image convert_mask(span_2d<uint8_t const> input);
 
 	image transpose(span_2d<rgba_pixel const> input);
