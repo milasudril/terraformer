@@ -99,6 +99,8 @@ namespace terraformer::ui::main
 		immutable_shared_texture test_pattern;
 		immutable_shared_texture horizontal_handle;
 		immutable_shared_texture vertical_handle;
+		immutable_shared_texture small_knob;
+		immutable_shared_texture small_hand;
 	};
 
 	struct config

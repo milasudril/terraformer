@@ -85,6 +85,41 @@ namespace terraformer::ui::theming
 				),
 				.vertical_handle = std::make_shared<main::staged_texture>(
 					generate(
+						drawing_api::beveled_rectangle{
+							.domain_size = span_2d_extents{
+								.width = 8,
+								.height = 16,
+							},
+							.origin_x = 0,
+							.origin_y = 0,
+							.width = 8,
+							.height = 16,
+							.border_thickness = 2,
+							.upper_left_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+							.lower_right_color = rgba_pixel{0.25f, 0.25f, 0.25f, 1.0f},
+							.fill_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
+						}
+					)
+				),
+				.small_knob = std::make_shared<main::staged_texture>(
+					generate(
+						drawing_api::beveled_disc{
+							.domain_size{
+								.width = 32,
+								.height = 32
+							},
+							.origin_x = 0,
+							.origin_y = 0,
+							.radius = 16,
+							.border_thickness = 2,
+							.upper_left_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+							.lower_right_color = rgba_pixel{0.25f, 0.25f, 0.25f, 1.0f},
+							.fill_color = rgba_pixel{0.5f, 0.5f, 0.5f, 1.0f},
+						}
+					)
+				),
+				.small_hand = std::make_shared<main::staged_texture>(
+					generate(
 						drawing_api::hand{
 							.domain_size = span_2d_extents{
 								.width = 32,
@@ -93,7 +128,6 @@ namespace terraformer::ui::theming
 							.origin_y = 0,
 							.thickness = 2,
 							.length = 16,
-							//.height = 16,
 							.color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 						}
 					)
