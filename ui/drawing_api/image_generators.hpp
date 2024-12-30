@@ -36,6 +36,20 @@ namespace terraformer::ui::drawing_api
 
 	image generate(flat_rectangle const& params);
 
+	struct beveled_disc
+	{
+		span_2d_extents domain_size;
+		uint32_t origin_x;
+		uint32_t origin_y;
+		uint32_t radius;
+		uint32_t border_thickness;
+		rgba_pixel upper_left_color;
+		rgba_pixel lower_right_color;
+		rgba_pixel fill_color;
+	};
+
+	image generate(beveled_disc const& params);
+
 	image convert_mask(span_2d<uint8_t const> input);
 
 	image transpose(span_2d<rgba_pixel const> input);

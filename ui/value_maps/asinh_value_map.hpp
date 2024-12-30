@@ -19,6 +19,9 @@ namespace terraformer::ui::value_maps
 		constexpr float min() const noexcept
 		{ return -max(); }
 
+		constexpr float reference_value() const noexcept
+		{ return m_reference_value; }
+
 		constexpr float from_value(float x) const noexcept
 		{
 			auto const xi = std::asinh(std::sinh(1.0f)*x/m_reference_value)/m_max;
