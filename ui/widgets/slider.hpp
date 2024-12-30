@@ -30,8 +30,6 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		void regenerate_text_mask();
-
 		void regenerate_textures();
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
@@ -97,7 +95,6 @@ namespace terraformer::ui::widgets
 
 		main::fb_size m_current_size;
 
-		state m_state_current = state::released;
 		enum orientation m_orientation = orientation::horizontal;
 	};
 }
