@@ -12,6 +12,7 @@
 #include "./widgets/button.hpp"
 #include "./widgets/single_line_text_input.hpp"
 #include "./widgets/slider.hpp"
+#include "./widgets/knob.hpp"
 #include "./widgets/vbox.hpp"
 #include "./theming/cursor_set.hpp"
 #include "./theming/theme_loader.hpp"
@@ -150,6 +151,20 @@ int main(int, char**)
 	my_log_slider.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
 	});
+
+	terraformer::ui::widgets::label knob_label;
+	knob_label.text(u8"A knob");
+	terraformer::ui::widgets::knob my_knob{
+		std::in_place_type_t<terraformer::ui::value_maps::log_value_map>{},
+		1.0f,
+		10000.0f,
+		10.0f
+	};
+	printf("Current value = %.8g\n", my_log_slider.value());
+
+	my_knob.on_value_changed([](auto const& obj, auto&&...) {
+		printf("%.8g\n", static_cast<float>(obj.value()));
+	});
 //	my_slider.orientation(terraformer::ui::widgets::slider::orientation::vertical);
 
 	my_outer_vbox.append(std::ref(ok));
@@ -160,7 +175,8 @@ int main(int, char**)
 	my_outer_vbox.append(std::ref(my_asinh_slider));
 	my_outer_vbox.append(std::ref(slider_label_log));
 	my_outer_vbox.append(std::ref(my_log_slider));
-
+	my_outer_vbox.append(std::ref(knob_label));
+	my_outer_vbox.append(std::ref(my_knob));
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
 
