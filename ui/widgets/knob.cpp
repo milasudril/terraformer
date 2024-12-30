@@ -8,7 +8,7 @@ terraformer::ui::main::widget_layer_stack
 terraformer::ui::widgets::knob::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
-	auto const val = internal_value();
+//	auto const val = internal_value();
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
@@ -25,7 +25,7 @@ terraformer::ui::widgets::knob::prepare_for_presentation(main::graphics_backend_
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.foreground = main::widget_layer{
-			.offset = displacement{val*track_length(), 0.0f, 0.0f},
+			.offset = displacement{},
 			.texture = m_hand->get_backend_resource(backend).get(),
 			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
 		},
@@ -59,11 +59,8 @@ terraformer::scaling terraformer::ui::widgets::knob::compute_size(main::widget_h
 
 void terraformer::ui::widgets::knob::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
-	m_font = cfg.command_area.font;
 	m_bg_tint = cfg.command_area.colors.background;
 	m_fg_tint = cfg.command_area.colors.foreground;
-	m_border_thickness = static_cast<uint32_t>(cfg.command_area.border_thickness);
-	m_dirty_bits |= track_dirty;
 	m_null_texture = cfg.misc_textures.null;
 	m_handle = cfg.misc_textures.small_knob;
 	m_hand = cfg.misc_textures.small_hand;

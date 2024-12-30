@@ -27,32 +27,34 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
+		knob& visual_angle_range(closed_closed_interval<geosimd::turn_angle> new_range)
+		{
+			m_angle_range = new_range;
+			return *this;
+		}
+
 		internal_value_type to_internal_value(main::cursor_position loc) const
 		{
+			auto const dx = loc.x - 0.5f*static_cast<double>(m_current_size.width);
+			auto const dy = loc.y + 0.5f*static_cast<double>(m_current_size.height);
+			auto const theta = geosimd::turn_angle{
+				geosimd::rad{std::atan2(dx, dy) + std::numbers::pi_v<double>}
+			} - m_angle_range.min();
+
 			return internal_value_type{
-				static_cast<float>(loc.x - track_margin())/track_length(),
+				static_cast<float>(
+					to_turns(theta).value/
+					to_turns(m_angle_range.max() - m_angle_range.min()).value
+				),
 				clamp_tag{}
 			};
 		}
 
 	private:
-		static constexpr unsigned int track_dirty = 0x1;
-
-		unsigned int m_dirty_bits = track_dirty;
-
-		unsigned int m_border_thickness = 0;
-		std::shared_ptr<font_handling::font const> m_font;
-
-		float track_margin() const
-		{
-			return static_cast<float>(m_handle->frontend_resource().width())/2.0f;
-		}
-
-		float track_length() const
-		{
-			return static_cast<float>(m_current_size.width) - 2.0f*track_margin();
-		}
-
+		closed_closed_interval<geosimd::turn_angle> m_angle_range{
+			geosimd::turns{1.0/6.0},
+			geosimd::turns{5.0/6.0}
+		};
 		rgba_pixel m_bg_tint;
 		rgba_pixel m_fg_tint;
 

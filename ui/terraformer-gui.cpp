@@ -154,12 +154,7 @@ int main(int, char**)
 
 	terraformer::ui::widgets::label knob_label;
 	knob_label.text(u8"A knob");
-	terraformer::ui::widgets::knob my_knob{
-		std::in_place_type_t<terraformer::ui::value_maps::log_value_map>{},
-		1.0f,
-		10000.0f,
-		10.0f
-	};
+	terraformer::ui::widgets::knob my_knob{};
 	printf("Current value = %.8g\n", my_log_slider.value());
 
 	my_knob.on_value_changed([](auto const& obj, auto&&...) {
