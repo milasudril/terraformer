@@ -37,6 +37,7 @@ namespace terraformer::ui::widgets
 			return main::widget_layer_stack{
 				.background = main::widget_layer{
 					.offset = displacement{},
+					.rotation = geosimd::turn_angle{},
 					.texture = m_background->get_backend_resource(backend).get(),
 					.tints = bg_tints
 				},
@@ -46,21 +47,25 @@ namespace terraformer::ui::widgets
 				},
 				.selection_background = main::widget_layer{
 					.offset = displacement{},
+					.rotation = geosimd::turn_angle{},
 					.texture = null_texture,
 					.tints = std::array<rgba_pixel, 4>{}
 				},
 				.foreground = main::widget_layer{
 					.offset = displacement{},
+					.rotation = geosimd::turn_angle{},
 					.texture = null_texture,
 					.tints = std::array<rgba_pixel, 4>{}
 				},
 				.frame = main::widget_layer{
 					.offset = displacement{},
+					.rotation = geosimd::turn_angle{},
 					.texture = null_texture,
 					.tints = std::array<rgba_pixel, 4>{}
 				},
 				.input_marker = main::widget_layer{
 					.offset = displacement{},
+					.rotation = geosimd::turn_angle{},
 					.texture = null_texture,
 					.tints = std::array<rgba_pixel, 4>{}
 				}

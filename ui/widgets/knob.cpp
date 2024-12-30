@@ -8,10 +8,12 @@ terraformer::ui::main::widget_layer_stack
 terraformer::ui::widgets::knob::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
-//	auto const val = internal_value();
+	auto const dtheta = m_angle_range.max() - m_angle_range.min();
+	auto const val = m_angle_range.min() + internal_value()*dtheta;
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = m_handle->get_backend_resource(backend).get(),
 			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
 		},
@@ -21,22 +23,26 @@ terraformer::ui::widgets::knob::prepare_for_presentation(main::graphics_backend_
 		},
 		.selection_background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{},
+			.rotation = val,
 			.texture = m_hand->get_backend_resource(backend).get(),
 			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
 		},
 		.frame = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		// TODO: Use this layer for tick marks
 		.input_marker = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		}

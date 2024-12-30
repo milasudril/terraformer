@@ -48,6 +48,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = m_track.get_backend_resource(backend).get(),
 			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
 		},
@@ -57,6 +58,7 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.selection_background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
@@ -68,17 +70,20 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 					0.0f,
 				0.0f
 			},
+			.rotation = geosimd::turn_angle{},
 			.texture = m_handle->get_backend_resource(backend).get(),
 			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
 		},
 		.frame = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		// TODO: Use this layer for tick marks
 		.input_marker = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		}

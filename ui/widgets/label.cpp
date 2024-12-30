@@ -75,6 +75,7 @@ terraformer::ui::widgets::label::prepare_for_presentation(main::graphics_backend
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
@@ -84,21 +85,25 @@ terraformer::ui::widgets::label::prepare_for_presentation(main::graphics_backend
 		},
 		.selection_background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{m_margin, m_margin, 0.0f},
+			.rotation = geosimd::turn_angle{},
 			.texture = m_foreground.get_backend_resource(backend).get(),
 			.tints = std::array<rgba_pixel, 4>{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
 		},
 		.frame = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.input_marker{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		}

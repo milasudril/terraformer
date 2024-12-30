@@ -115,6 +115,7 @@ terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main:
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = m_background->get_backend_resource(backend).get(),
 			.tints = std::array{m_bg_tint, m_bg_tint, m_bg_tint, m_bg_tint}
 		},
@@ -125,21 +126,25 @@ terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main:
 		},
 		.selection_background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = m_background->get_backend_resource(backend).get(),
 			.tints = std::array{m_sel_tint, m_sel_tint, m_sel_tint, m_sel_tint}
 		},
 		.foreground = main::widget_layer{
 			.offset = fg_offset,
+			.rotation = geosimd::turn_angle{},
 			.texture = m_foreground.get_backend_resource(backend).get(),
 			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
 		},
 		.frame = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = m_frame.get_backend_resource(backend).get(),
 			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
 		},
 		.input_marker = main::widget_layer{
 			.offset = input_marker_offset,
+			.rotation = geosimd::turn_angle{},
 			.texture = m_input_marker.get_backend_resource(backend).get(),
 			.tints = input_marker_tints
 		}

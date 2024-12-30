@@ -8,6 +8,7 @@ namespace terraformer::ui::main
 	struct widget_layer
 	{
 		displacement offset;
+		geosimd::turn_angle rotation;
 		texture_ref texture;
 		std::array<rgba_pixel, 4> tints;
 	};

@@ -39,6 +39,7 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(21, rect.frame.tints)
 				.set_uniform(25, rect.foreground.offset[0], rect.foreground.offset[1])
 				.set_uniform(26, rect.input_marker.offset[0], rect.input_marker.offset[1])
+				.set_uniform(27, static_cast<float>(to_rad(rect.foreground.rotation).value))
 				.bind();
 
 			assert(rect.background.texture);
@@ -136,6 +137,7 @@ layout (binding = 4) uniform sampler2D input_marker;
 layout (binding = 5) uniform sampler2D frame;
 layout (location = 25) uniform vec2 fg_offset;
 layout (location = 26) uniform vec2 input_marker_offset;
+layout (location = 27) uniform float fg_0_rotation;
 
 in vec2 uv;
 in vec4 background_tint;
@@ -149,9 +151,15 @@ vec4 sample_scaled(sampler2D tex, vec2 uv)
 	return texture(tex, uv/textureSize(tex, 0));
 }
 
-vec4 sample_cropped(sampler2D tex, vec2 uv)
+vec4 sample_cropped(sampler2D tex, vec2 uv, float rot_angle)
 {
-	vec2 uv_out = uv/textureSize(tex, 0);
+	vec2 uv_scaled = uv/textureSize(tex, 0);
+	vec2 uv_centered = uv_scaled - vec2(0.5, 0.5);
+	uv_centered = vec2(
+		dot(uv_centered, vec2(cos(rot_angle), sin(rot_angle))),
+		dot(uv_centered, vec2(-sin(rot_angle), cos(rot_angle)))
+	);
+	vec2 uv_out = uv_centered + vec2(0.5, 0.5);
 	// FIXME: Need to crop based on view window as well
 	if(uv_out.x >= 0.0 && uv_out.x <= 1.0 && uv_out.y >= 0.0 && uv_out.y<=1.0)
 	{ return texture(tex, uv_out); }
@@ -162,10 +170,10 @@ vec4 sample_cropped(sampler2D tex, vec2 uv)
 void main()
 {
 	vec4 bg_0 = sample_scaled(background, uv)*background_tint;
-	float bg_mask = sample_cropped(bg_layer_mask, uv - fg_offset).r;
+	float bg_mask = sample_cropped(bg_layer_mask, uv - fg_offset, 0.0).r;
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
-	vec4 fg_0 = sample_cropped(foreground, uv - fg_offset)*foreground_tint;
-	vec4 fg_1 = sample_cropped(input_marker, uv - input_marker_offset)*input_marker_tint;
+	vec4 fg_0 = sample_cropped(foreground, uv - fg_offset, fg_0_rotation)*foreground_tint;
+	vec4 fg_1 = sample_cropped(input_marker, uv - input_marker_offset, 0.0)*input_marker_tint;
 	vec4 fg_2 = sample_scaled(frame, uv)*frame_tint;
 
 	// This assumes that pre-multiplied alpha is used

@@ -49,7 +49,7 @@ void terraformer::ui::widgets::button::regenerate_textures()
 				.height = static_cast<uint32_t>(m_current_size.height),
 			},
 			.origin_x = 0,
-			.origin_y = 0, 
+			.origin_y = 0,
 			.width = static_cast<uint32_t>(m_current_size.width),
 			.height = static_cast<uint32_t>(m_current_size.height),
 			.border_thickness = m_border_thickness,
@@ -77,6 +77,7 @@ terraformer::ui::widgets::button::prepare_for_presentation(main::graphics_backen
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = (display_state == state::released)?
 				m_background_released.get_backend_resource(backend).get():
 				m_background_pressed.get_backend_resource(backend).get(),
@@ -88,21 +89,25 @@ terraformer::ui::widgets::button::prepare_for_presentation(main::graphics_backen
 		},
 		.selection_background = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{m_margin, m_margin, 0.0f},
+			.rotation = geosimd::turn_angle{},
 			.texture = m_foreground.get_backend_resource(backend).get(),
 			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
 		},
 		.frame = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.input_marker = main::widget_layer{
 			.offset = displacement{},
+			.rotation = geosimd::turn_angle{},
 			.texture = null_texture,
 			.tints = std::array<rgba_pixel, 4>{}
 		}
