@@ -124,10 +124,12 @@ terraformer::image terraformer::ui::drawing_api::generate(beveled_disc const& pa
 				else
 				if(d2 <= r*r)
 				{
-					if(x <= r && y<= r)
-					{ ret(write_x, write_y) = upper_left_color; }
-					else
+					auto const theta = std::atan2(static_cast<float>(dy), static_cast<float>(dx))
+						+ std::numbers::pi_v<float>/4.0f;
+					if(theta >= 0.0f && theta <= std::numbers::pi_v<float>)
 					{ ret(write_x, write_y) = lower_right_color; }
+					else
+					{ ret(write_x, write_y) = upper_left_color; }
 				}
 				else
 				{ ret(write_x, write_y) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}; }

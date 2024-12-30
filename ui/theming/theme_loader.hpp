@@ -85,15 +85,15 @@ namespace terraformer::ui::theming
 				),
 				.vertical_handle = std::make_shared<main::staged_texture>(
 					generate(
-						drawing_api::beveled_rectangle{
+						drawing_api::beveled_disc{
 							.domain_size = span_2d_extents{
-								.width = 8,
-								.height = 16,
+								.width = 32,
+								.height = 32,
 							},
 							.origin_x = 0,
 							.origin_y = 0,
-							.width = 8,
-							.height = 16,
+							.radius = 16,
+							//.height = 16,
 							.border_thickness = 2,
 							.upper_left_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 							.lower_right_color = rgba_pixel{0.25f, 0.25f, 0.25f, 1.0f},
