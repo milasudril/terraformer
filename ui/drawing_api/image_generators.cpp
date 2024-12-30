@@ -116,17 +116,18 @@ terraformer::image terraformer::ui::drawing_api::generate(beveled_disc const& pa
 
 			if(write_x < ret.width() && write_y < ret.height())
 			{
-				auto const dx = static_cast<int64_t>(x) - static_cast<int64_t>(r);
-				auto const dy = static_cast<int64_t>(y) - static_cast<int64_t>(r);
+				auto const dx = static_cast<float>(static_cast<int64_t>(x) - static_cast<int64_t>(r)) + 0.5f;
+				auto const dy = static_cast<float>(static_cast<int64_t>(y) - static_cast<int64_t>(r)) + 0.5f;
+
 				auto const d2 = dx*dx + dy*dy;
-				if(d2 <= inner_radius*inner_radius)
+				if(d2 < static_cast<float>(inner_radius*inner_radius))
 				{ ret(write_x, write_y) = fill_color; }
 				else
-				if(d2 <= r*r)
+				if(d2 < static_cast<float>(r*r))
 				{
 					auto const theta = std::atan2(static_cast<float>(dy), static_cast<float>(dx))
 						+ std::numbers::pi_v<float>/4.0f;
-					if(theta >= 0.0f && theta <= std::numbers::pi_v<float>)
+					if(theta >= 0.0f && theta < std::numbers::pi_v<float>)
 					{ ret(write_x, write_y) = lower_right_color; }
 					else
 					{ ret(write_x, write_y) = upper_left_color; }
