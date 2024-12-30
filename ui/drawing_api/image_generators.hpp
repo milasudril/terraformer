@@ -53,7 +53,6 @@ namespace terraformer::ui::drawing_api
 	struct hand
 	{
 		span_2d_extents domain_size;
-		uint32_t origin_y;
 		uint32_t thickness;
 		uint32_t length;
 		rgba_pixel color;
@@ -64,7 +63,7 @@ namespace terraformer::ui::drawing_api
 		return generate(flat_rectangle{
 			.domain_size = params.domain_size,
 			.origin_x = (params.domain_size.width - params.thickness)/2,
-			.origin_y = params.origin_y,
+			.origin_y = params.domain_size.height/2,
 			.width = params.thickness,
 			.height = params.length,
 			.border_thickness = 0,
