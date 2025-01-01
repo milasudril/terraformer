@@ -14,6 +14,15 @@ namespace terraformer
 		static std::string convert(deserialized_type value)
 		{ return to_string_helper(value); }
 
+		static deserialized_type convert(std::u8string_view str)
+		{
+			return convert(
+				std::string_view
+					{reinterpret_cast<char const*>(std::data(str)), std::size(str)
+				}
+			);
+		}
+
 		static deserialized_type convert(std::string_view str)
 		{
 			deserialized_type val{};

@@ -10,7 +10,7 @@
 #include "./wsapi/native_window.hpp"
 #include "./widgets/label.hpp"
 #include "./widgets/button.hpp"
-#include "./widgets/single_line_text_input.hpp"
+#include "./widgets/text_to_float_input.hpp"
 #include "./widgets/slider.hpp"
 #include "./widgets/knob.hpp"
 #include "./widgets/vbox.hpp"
@@ -157,10 +157,17 @@ int main(int, char**)
 	terraformer::ui::widgets::knob my_knob{};
 	printf("Current value = %.8g\n", my_log_slider.value());
 
+	terraformer::ui::widgets::label text_to_float_input_label;
+	text_to_float_input_label.text(u8"Text-to-float");
+
+	terraformer::ui::widgets::text_to_float_input ttf{};
+	ttf.on_value_changed([](auto const& obj, auto&&...) {
+		printf("%.8g\n", static_cast<float>(obj.value()));
+	});
+
 	my_knob.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
 	});
-//	my_slider.orientation(terraformer::ui::widgets::slider::orientation::vertical);
 
 	my_outer_vbox.append(std::ref(ok));
 	my_outer_vbox.append(std::ref(my_vbox));
@@ -172,6 +179,8 @@ int main(int, char**)
 	my_outer_vbox.append(std::ref(my_log_slider));
 	my_outer_vbox.append(std::ref(knob_label));
 	my_outer_vbox.append(std::ref(my_knob));
+	my_outer_vbox.append(std::ref(text_to_float_input_label));
+	my_outer_vbox.append(std::ref(ttf));
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
 

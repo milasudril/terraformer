@@ -156,6 +156,14 @@ namespace terraformer
 
 	std::u32string to_utf32(std::u8string_view);
 
+	inline std::u32string to_utf32(std::string_view str)
+	{
+		std::u32string ret;
+		ret.reserve(std::size(str));
+		std::ranges::copy(str, std::back_inserter(ret));
+		return ret;
+	}
+
 }
 
 #endif
