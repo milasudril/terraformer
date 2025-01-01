@@ -1,0 +1,6 @@
+costal_lowland -200 200
+continental_lowland 200 600
+mid_elevation 600 1500
+subalpine 1500 2500
+alpine 2500 5000
+upper_alpine 5000 10000
