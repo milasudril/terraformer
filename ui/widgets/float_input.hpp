@@ -42,9 +42,7 @@ namespace terraformer::ui::widgets
 			m_textbox
 				.on_value_changed([this]<class ... Args>(auto& input, Args&&... args){
 					m_input_widget.value(input.value());
-					// FIXME: Causes crash
-					//  input.value(m_input_widget.value());
-					//  Does value update from callback work properly?
+					input.value(m_input_widget.value());
 					m_on_value_changed(*this, std::forward<Args>(args)...);
 				})
 				.value(m_input_widget.value());

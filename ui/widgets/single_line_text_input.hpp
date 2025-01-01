@@ -120,6 +120,7 @@ namespace terraformer::ui::widgets
 			update_insert_offset(m_value.insert(i, event.codepoint) + 1);
 			m_dirty_bits |= text_dirty;
 			m_on_value_changed(*this, window, controller);
+			m_insert_offset = std::min(std::size(m_value), m_insert_offset);
 		}
 
 		void handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller);
@@ -235,7 +236,7 @@ namespace terraformer::ui::widgets
 
 		void update_insert_offset(size_t new_pos)
 		{ m_insert_offset = new_pos; }
-		
+
 		using user_interaction_handler = main::widget_user_interaction_handler<single_line_text_input>;
 
 		user_interaction_handler m_on_value_changed{no_operation_tag{}};
