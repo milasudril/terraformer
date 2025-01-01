@@ -10,7 +10,7 @@
 #include "./wsapi/native_window.hpp"
 #include "./widgets/label.hpp"
 #include "./widgets/button.hpp"
-#include "./widgets/text_to_float_input.hpp"
+#include "./widgets/float_input.hpp"
 #include "./widgets/slider.hpp"
 #include "./widgets/knob.hpp"
 #include "./widgets/vbox.hpp"
@@ -160,7 +160,9 @@ int main(int, char**)
 	terraformer::ui::widgets::label text_to_float_input_label;
 	text_to_float_input_label.text(u8"Text-to-float");
 
-	terraformer::ui::widgets::text_to_float_input ttf{};
+	terraformer::ui::widgets::float_input<
+		terraformer::ui::widgets::knob
+	> ttf{};
 	ttf.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
 	});
