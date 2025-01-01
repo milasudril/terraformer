@@ -40,7 +40,7 @@ namespace terraformer::ui::widgets
 		template<class Function>
 		text_to_float_input& on_value_changed(Function&& func)
 		{
-			single_line_text_input::on_value_changed(
+			single_line_text_input::on_edit_finalized(
 				[cb = std::forward<Function>(func)](
 					single_line_text_input& src,
 					main::window_ref window,

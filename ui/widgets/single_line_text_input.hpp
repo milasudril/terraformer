@@ -59,10 +59,19 @@ namespace terraformer::ui::widgets
 		using widget_with_default_actions::handle_event;
 
 		void handle_event(main::keyboard_focus_enter_event, main::window_ref, main::ui_controller)
-		{ m_cursor_intensity = 1.0f; }
-
-		void handle_event(main::keyboard_focus_leave_event, main::window_ref, main::ui_controller)
 		{
+			m_initial_value = m_value;
+			m_cursor_intensity = 1.0f;
+		}
+
+		void handle_event(main::keyboard_focus_leave_event, main::window_ref window, main::ui_controller controller)
+		{
+			if(m_initial_value != m_value)
+			{
+				m_on_edit_finalized(*this, window, controller);
+				m_insert_offset = std::min(std::size(m_value), m_insert_offset);
+				m_initial_value = m_value;
+			}
 			// TODO: This should be read from ui config
 			m_cursor_intensity = 0.6125f;
 		}
@@ -71,6 +80,13 @@ namespace terraformer::ui::widgets
 		single_line_text_input& on_value_changed(Function&& func)
 		{
 			m_on_value_changed = std::forward<Function>(func);
+			return *this;
+		}
+
+		template<class Function>
+		single_line_text_input& on_edit_finalized(Function&& func)
+		{
+			m_on_edit_finalized = std::forward<Function>(func);
 			return *this;
 		}
 
@@ -240,10 +256,12 @@ namespace terraformer::ui::widgets
 		using user_interaction_handler = main::widget_user_interaction_handler<single_line_text_input>;
 
 		user_interaction_handler m_on_value_changed{no_operation_tag{}};
+		user_interaction_handler m_on_edit_finalized{no_operation_tag{}};
 		user_interaction_handler m_on_step_up{no_operation_tag{}};
 		user_interaction_handler m_on_step_down{no_operation_tag{}};
 
 		std::u32string m_value;
+		std::u32string m_initial_value;
 		size_t m_insert_offset = 0;
 		selection_range m_sel_range{};
 
