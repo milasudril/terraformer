@@ -68,9 +68,16 @@ namespace terraformer::ui::widgets
 		{
 			if(m_initial_value != m_value)
 			{
-				m_on_edit_finalized(*this, window, controller);
-				m_insert_offset = std::min(std::size(m_value), m_insert_offset);
-				m_initial_value = m_value;
+				try
+				{
+					m_on_edit_finalized(*this, window, controller);
+					m_initial_value = m_value;
+				}
+				catch(...)
+				{
+					value(m_initial_value);
+					throw;
+				}
 			}
 			// TODO: This should be read from ui config
 			m_cursor_intensity = 0.6125f;
@@ -112,6 +119,8 @@ namespace terraformer::ui::widgets
 			else
 			{ m_value = to_utf32(new_val); }
 
+			m_insert_offset = std::min(std::size(m_value), m_insert_offset);
+
 			m_dirty_bits |= text_dirty;
 			return *this;
 		}
@@ -136,7 +145,6 @@ namespace terraformer::ui::widgets
 			update_insert_offset(m_value.insert(i, event.codepoint) + 1);
 			m_dirty_bits |= text_dirty;
 			m_on_value_changed(*this, window, controller);
-			m_insert_offset = std::min(std::size(m_value), m_insert_offset);
 		}
 
 		void handle_event(main::keyboard_button_event const& event, main::window_ref, main::ui_controller);
