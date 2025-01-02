@@ -80,6 +80,9 @@ namespace terraformer::ui::widgets
 						break;
 				}
 			}
+			else
+			if(mbe.action == main::mouse_button_action::release)
+			{ m_state_current = state::released; }
 		}
 
 		void handle_event(
