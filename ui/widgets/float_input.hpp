@@ -9,9 +9,16 @@
 namespace terraformer::ui::widgets
 {
 	template<class ControlWidget>
-	class float_input:public widget_group<layouts::rowmajor_table>
+	class float_input:private widget_group<layouts::rowmajor_table>
 	{
 	public:
+		using widget_group::handle_event;
+		using widget_group::prepare_for_presentation;
+		using widget_group::theme_updated;
+		using widget_group::get_children;
+		using widget_group::get_layout;
+		using widget_group::compute_size;
+
 		explicit float_input(
 			ControlWidget&& input_widget,
 			main::widget_orientation orientation = main::widget_orientation::horizontal
