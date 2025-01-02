@@ -23,9 +23,9 @@ namespace terraformer::ui::layouts
 
 		void minimize_cell_sizes(main::widget_collection_ref const& widgets);
 
-		float margin_x;
-
-		float margin_y;
+		float margin_x = 2.0f;
+		float margin_y = 2.0f;
+		bool no_outer_margin = false;
 
 	private:
 		size_t m_rowcount;

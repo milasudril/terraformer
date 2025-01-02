@@ -79,6 +79,7 @@ namespace terraformer::ui::widgets
 				new_theme.other_panel;
 			layout.margin_x = panel.padding;
 			layout.margin_y = panel.padding;
+			layout.no_outer_margin = true;
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
 			m_null_texture = new_theme.misc_textures.null;
