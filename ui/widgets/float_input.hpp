@@ -1,6 +1,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_HPP
 #define TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_HPP
 
+#include "./widget_group.hpp"
 #include "./text_to_float_input.hpp"
 #include "ui/layouts/rowmajor_table.hpp"
 #include "ui/main/widget_collection.hpp"
@@ -8,14 +9,23 @@
 namespace terraformer::ui::widgets
 {
 	template<class ControlWidget>
-	class float_input:public main::widget_with_default_actions
+	class float_input:public widget_group<layouts::rowmajor_table>
 	{
 	public:
-		explicit float_input(ControlWidget&& input_widget):
+		explicit float_input(
+			ControlWidget&& input_widget,
+			main::widget_orientation orientation = main::widget_orientation::horizontal
+		):
+			widget_group{
+				orientation == main::widget_orientation::horizontal?
+					static_cast<size_t>(2) :
+					static_cast<size_t>(1)
+			},
 			m_input_widget{std::move(input_widget)}
 		{ init(); }
 
-		explicit float_input()
+		explicit float_input(main::widget_orientation orientation = main::widget_orientation::horizontal):
+			widget_group{orientation == main::widget_orientation::horizontal? 2u : 1u}
 		{ init(); }
 
 		template<class Function>
@@ -44,69 +54,7 @@ namespace terraformer::ui::widgets
 		// TODO: It could be a good idea to only show ControlWidget when we have keyboard/mouse focus
 		// This will save precious space
 
-		main::layout_policy_ref get_layout()
-		{ return main::layout_policy_ref{std::ref(m_layout)}; }
-
-		main::widget_collection_ref get_children()
-		{ return m_widgets.get_attributes(); }
-
-		main::widget_collection_view get_children() const
-		{ return m_widgets.get_attributes(); }
-
-		void theme_updated(main::config const& new_theme, main::widget_instance_info instance_info)
-		{
-			auto const& panel = instance_info.section_level%2 == 0?
-				new_theme.main_panel :
-				new_theme.other_panel;
-			m_layout.margin_x = panel.padding;
-			m_layout.margin_y = panel.padding;
-			m_null_texture = new_theme.misc_textures.null;
-		}
-
- 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend)
-		{
-			// TODO: There will be multiple "group" widgets, and code duplication should be avoided
-			auto const null_texture = m_null_texture->get_backend_resource(backend).get();
-			return main::widget_layer_stack{
-				.background = main::widget_layer{
-					.offset = displacement{},
-					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
-					.tints = std::array<rgba_pixel, 4>{}
-				},
-				.sel_bg_mask = main::widget_layer_mask{
-					.offset = displacement{},
-					.texture = null_texture,
-				},
-				.selection_background = main::widget_layer{
-					.offset = displacement{},
-					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
-					.tints = std::array<rgba_pixel, 4>{}
-				},
-				.foreground = main::widget_layer{
-					.offset = displacement{},
-					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
-					.tints = std::array<rgba_pixel, 4>{}
-				},
-				.frame = main::widget_layer{
-					.offset = displacement{},
-					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
-					.tints = std::array<rgba_pixel, 4>{}
-				},
-				.input_marker = main::widget_layer{
-					.offset = displacement{},
-					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
-					.tints = std::array<rgba_pixel, 4>{}
-				}
-			};
-		}
-
 	private:
-		layouts::rowmajor_table m_layout{2};
 		ControlWidget m_input_widget;
 		text_to_float_input m_textbox;
 		main::widget_collection m_widgets;
@@ -116,8 +64,8 @@ namespace terraformer::ui::widgets
 
 		void init()
 		{
-			m_widgets.append(std::ref(m_input_widget), terraformer::ui::main::widget_geometry{});
-			m_widgets.append(std::ref(m_textbox), terraformer::ui::main::widget_geometry{});
+			append(std::ref(m_input_widget), terraformer::ui::main::widget_geometry{});
+			append(std::ref(m_textbox), terraformer::ui::main::widget_geometry{});
 			m_input_widget.on_value_changed([this]<class ... Args>(auto const& input, Args&&... args){
 				m_textbox.value(input.value());
 				m_on_value_changed(*this, std::forward<Args>(args)...);
@@ -129,7 +77,7 @@ namespace terraformer::ui::widgets
 					m_on_value_changed(*this, std::forward<Args>(args)...);
 				})
 				.value(m_input_widget.value());
-			m_layout.no_outer_margin = true;
+			layout.no_outer_margin = true;
 		}
 	};
 }

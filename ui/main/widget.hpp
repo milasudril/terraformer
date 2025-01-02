@@ -282,6 +282,8 @@ namespace terraformer::ui::main
 			.kbd_focus_indicator_mode = focus_indicator_mode::automatic
 		};
 	}
+
+	enum class widget_orientation{horizontal, vertical};
 }
 
 #endif
