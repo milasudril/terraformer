@@ -55,12 +55,11 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& new_theme, main::widget_instance_info instance_info)
 		{
-			// TODO: Layouts must support a way to set outer margins to 0
 			auto const& panel = instance_info.section_level%2 == 0?
 				new_theme.main_panel :
 				new_theme.other_panel;
 			m_layout.margin_x = panel.padding;
-			m_layout.margin_y = 0;
+			m_layout.margin_y = panel.padding;
 			m_null_texture = new_theme.misc_textures.null;
 		}
 

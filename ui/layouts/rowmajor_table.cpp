@@ -8,8 +8,8 @@ terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 ) const
 {
 	auto const widget_geometries = widgets.widget_geometries();
-	auto x_offset = no_outer_margin?0.0f:margin_x;
-	auto y_offset = margin_y;
+	auto x_offset = no_outer_margin?0.0f : margin_x;
+	auto y_offset = no_outer_margin?0.0f : margin_y;
 
 	auto const* const cols = m_colwidths.get();
 	size_t col = 0;
