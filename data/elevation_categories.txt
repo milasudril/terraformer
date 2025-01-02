@@ -1,6 +1,31 @@
-costal_lowland -200 200
-continental_lowland 200 600
-mid_elevation 600 1500
-subalpine 1500 2500
-alpine 2500 5000
-upper_alpine 5000 10000
+## Initial elevation ranges
+
+0  -200 200
+1  200 600
+2  600 1500
+3  1500 2500
+4  2500 5000
+5  5000 10000
+
+## Curve fitting rule
+
+Use geometric mean from ranges at n = 4 and n = 1
+
+z = A*sinh(k n)
+
+Gives
+
+k=0.6672893674556575
+A=487.5161865999319 m
+
+## Generates ranges
+
+Mountian type|  Plain type       |   Min elevation | Mid elevation | Max elevation
+-------------|-------------------|-----------------|---------------|--------------
+low_hills    |  lower_lowland    |  -1.6569e+02    |         0     | 1.6569e+02
+high_hills   |  higher_lowland   |   1.6569e+02    | 3.5000e+02    | 5.7363e+02
+low_fells    |  lower_midland    |   5.7363e+02    | 8.6172e+02    | 1.2466e+03
+high_fells   |  higher_midland   |   1.2466e+03    | 1.7716e+03    | 2.4956e+03
+low_alps     |  lower_highland   |   2.4956e+03    | 3.5000e+03    | 4.8976e+03
+high_alps    |  higher_highland  |   4.8976e+03    | 6.8456e+03    | 9.5626e+03
+
