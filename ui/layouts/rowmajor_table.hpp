@@ -18,14 +18,14 @@ namespace terraformer::ui::layouts
 			m_colcount{colcount},
 			m_colwidths{std::make_unique<float[]>(colcount)}
 		{}
-			
+
 		scaling update_widget_locations(main::widget_collection_ref& widgets) const;
-		
+
 		void minimize_cell_sizes(main::widget_collection_ref const& widgets);
 
-		float margin_x;
-		
-		float margin_y;
+		float margin_x = 2.0f;
+		float margin_y = 2.0f;
+		bool no_outer_margin = false;
 
 	private:
 		size_t m_colcount;

@@ -78,8 +78,12 @@ void terraformer::ui::layouts::columnmajor_table::minimize_cell_sizes(
 	if(row != 0)
 	{ m_colwidths.push_back(max_width); }
 
-	m_width = std::accumulate(std::begin(m_colwidths), std::end(m_colwidths), margin_x)
-		 - (no_outer_margin? 2.0f*margin_x : 0.0f);
+	m_width = std::accumulate(
+		std::begin(m_colwidths),
+		std::end(m_colwidths),
+		no_outer_margin?
+			0.0f:margin_x
+	);
 	m_height = std::accumulate(rows, rows + rowcount, margin_y)
 		 - (no_outer_margin? 2.0f*margin_y : 0.0f);
 }
