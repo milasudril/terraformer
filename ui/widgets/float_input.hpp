@@ -11,6 +11,13 @@ namespace terraformer::ui::widgets
 	class float_input:public main::widget_with_default_actions
 	{
 	public:
+		explicit float_input(ControlWidget&& input_widget):
+			m_input_widget{std::move(input_widget)}
+		{ init(); }
+
+		explicit float_input()
+		{ init(); }
+
 		template<class Function>
 		float_input& on_value_changed(Function&& f)
 		{
@@ -29,24 +36,7 @@ namespace terraformer::ui::widgets
 		}
 
 		// TODO: It could be a good idea to only show ControlWidget when we have keyboard/mouse focus
-		// //       This will save precious space
-
-		float_input()
-		{
-			m_widgets.append(std::ref(m_input_widget), terraformer::ui::main::widget_geometry{});
-			m_widgets.append(std::ref(m_textbox), terraformer::ui::main::widget_geometry{});
-			m_input_widget.on_value_changed([this]<class ... Args>(auto const& input, Args&&... args){
-				m_textbox.value(input.value());
-				m_on_value_changed(*this, std::forward<Args>(args)...);
-			});
-			m_textbox
-				.on_value_changed([this]<class ... Args>(auto& input, Args&&... args){
-					m_input_widget.value(input.value());
-					input.value(m_input_widget.value());
-					m_on_value_changed(*this, std::forward<Args>(args)...);
-				})
-				.value(m_input_widget.value());
-		}
+		// This will save precious space
 
 		main::layout_policy_ref get_layout()
 		{ return main::layout_policy_ref{std::ref(m_layout)}; }
@@ -118,6 +108,23 @@ namespace terraformer::ui::widgets
 		main::widget_user_interaction_handler<float_input> m_on_value_changed{no_operation_tag{}};
 
 		main::immutable_shared_texture m_null_texture;
+
+		void init()
+		{
+			m_widgets.append(std::ref(m_input_widget), terraformer::ui::main::widget_geometry{});
+			m_widgets.append(std::ref(m_textbox), terraformer::ui::main::widget_geometry{});
+			m_input_widget.on_value_changed([this]<class ... Args>(auto const& input, Args&&... args){
+				m_textbox.value(input.value());
+				m_on_value_changed(*this, std::forward<Args>(args)...);
+			});
+			m_textbox
+				.on_value_changed([this]<class ... Args>(auto& input, Args&&... args){
+					m_input_widget.value(input.value());
+					input.value(m_input_widget.value());
+					m_on_value_changed(*this, std::forward<Args>(args)...);
+				})
+				.value(m_input_widget.value());
+		}
 	};
 }
 

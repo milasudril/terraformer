@@ -22,6 +22,12 @@ namespace terraformer::ui::widgets
 
 		float_input_controller() = default;
 
+		template<class ValueMap>
+		requires (!std::is_same_v<std::remove_cvref_t<ValueMap>, float_input_controller>)
+		explicit float_input_controller(ValueMap&& vm):
+			m_value_map{std::forward<ValueMap>(vm)}
+		{ value(0.0f); }
+
 		template<class ValueMap, class... Args>
 		explicit float_input_controller(std::in_place_type_t<ValueMap>, Args&&... args):
 			m_value_map{std::in_place_type_t<ValueMap>{}, std::forward<Args>(args)...}

@@ -131,8 +131,8 @@ int main(int, char**)
 	slider_label_asinh.text(u8"A slider (asinh)");
 	terraformer::ui::widgets::slider my_asinh_slider{
 		std::in_place_type_t<terraformer::ui::value_maps::asinh_value_map>{},
-		800.0f,
-		10000.0f
+		490.0f,
+		4.0f
 	};
 	my_asinh_slider.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
@@ -141,10 +141,11 @@ int main(int, char**)
 	terraformer::ui::widgets::label slider_label_log;
 	slider_label_log.text(u8"A slider (log)");
 	terraformer::ui::widgets::slider my_log_slider{
-		std::in_place_type_t<terraformer::ui::value_maps::log_value_map>{},
-		1.0f,
-		10000.0f,
-		10.0f
+		terraformer::ui::value_maps::log_value_map{
+			1.0f,
+			10000.0f,
+			10.0f
+		}
 	};
 	printf("Current value = %.8g\n", my_log_slider.value());
 
@@ -157,15 +158,17 @@ int main(int, char**)
 	terraformer::ui::widgets::knob my_knob{};
 	printf("Current value = %.8g\n", my_log_slider.value());
 
-	terraformer::ui::widgets::label text_to_float_input_label;
-	text_to_float_input_label.text(u8"Text-to-float");
+	terraformer::ui::widgets::label float_input_label;
+	float_input_label.text(u8"Float input");
 
-	terraformer::ui::widgets::float_input<
-		terraformer::ui::widgets::knob
-	> ttf{};
-	ttf.on_value_changed([](auto const& obj, auto&&...) {
-		printf("%.8g\n", static_cast<float>(obj.value()));
-	});
+	terraformer::ui::widgets::float_input fi{
+		terraformer::ui::widgets::knob{
+			terraformer::ui::value_maps::asinh_value_map{
+				490.0f,
+				4.0f
+			}
+		}
+	};
 
 	my_knob.on_value_changed([](auto const& obj, auto&&...) {
 		printf("%.8g\n", static_cast<float>(obj.value()));
@@ -181,8 +184,8 @@ int main(int, char**)
 	my_outer_vbox.append(std::ref(my_log_slider));
 	my_outer_vbox.append(std::ref(knob_label));
 	my_outer_vbox.append(std::ref(my_knob));
-	my_outer_vbox.append(std::ref(text_to_float_input_label));
-	my_outer_vbox.append(std::ref(ttf));
+	my_outer_vbox.append(std::ref(float_input_label));
+	my_outer_vbox.append(std::ref(fi));
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
 
