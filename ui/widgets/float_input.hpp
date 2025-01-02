@@ -35,6 +35,12 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
+		ControlWidget& input_widget()
+		{ return m_input_widget; }
+
+		ControlWidget const& input_widget() const
+		{ return m_input_widget; }
+
 		// TODO: It could be a good idea to only show ControlWidget when we have keyboard/mouse focus
 		// This will save precious space
 
