@@ -3,40 +3,45 @@
 
 #include <cmath>
 
+#include <cstdio>
+
 namespace terraformer::ui::value_maps
 {
 	class asinh_value_map
 	{
 	public:
-		constexpr explicit asinh_value_map(float reference_value, float max) noexcept:
-			m_reference_value{reference_value},
-			m_max{std::asinh(max*std::sinh(1.0f)/reference_value)}
+		constexpr explicit asinh_value_map(float scale_factor, float steepness) noexcept:
+			m_scale_factor{scale_factor},
+			m_steepness{steepness}
 		{}
 
 		constexpr float max() const noexcept
-		{ return m_reference_value*std::sinh(m_max)/std::sinh(1.0f); }
+		{ return to_value(1.0f); }
 
 		constexpr float min() const noexcept
 		{ return -max(); }
 
-		constexpr float reference_value() const noexcept
-		{ return m_reference_value; }
+		constexpr float scale_factor() const noexcept
+		{ return m_scale_factor; }
+
+		constexpr float steepness() const noexcept
+		{ return m_steepness; }
 
 		constexpr float from_value(float x) const noexcept
 		{
-			auto const xi = std::asinh(std::sinh(1.0f)*x/m_reference_value)/m_max;
+			auto const xi = std::asinh(x/m_scale_factor)/m_steepness;
 			return (xi + 1.0f)/2.0f;
 		}
 
 		constexpr float to_value(float x) const noexcept
 		{
 			auto const xi = 2.0f*x - 1.0f;
-			return m_reference_value*std::sinh(m_max*xi)/std::sinh(1.0f);
+			return m_scale_factor*std::sinh(m_steepness*xi);
 		}
 
 	private:
-		float m_reference_value;
-		float m_max;
+		float m_scale_factor;
+		float m_steepness;
 	};
 }
 #endif

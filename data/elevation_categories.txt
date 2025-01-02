@@ -20,7 +20,7 @@ A=487.5161865999319 m
 
 ## Generates ranges
 
-Mountian type|  Plain type       |   Min elevation | Mid elevation | Max elevation
+Mountain type|  Plain type       |   Min elevation | Mid elevation | Max elevation
 -------------|-------------------|-----------------|---------------|--------------
 low_hills    |  lower_lowland    |  -1.6569e+02    |         0     | 1.6569e+02
 high_hills   |  higher_lowland   |   1.6569e+02    | 3.5000e+02    | 5.7363e+02
