@@ -15,16 +15,16 @@ void terraformer::ui::widgets::slider::regenerate_textures()
 				.height = static_cast<uint32_t>(m_current_size.height)
 			},
 			// TODO: This will break when tick marks are added
-			.origin_x = orientation == orientation::horizontal?
+			.origin_x = orientation == main::widget_orientation::horizontal?
 				margin :
 				m_current_size.width/2 - m_border_thickness,
-			.origin_y = orientation == orientation::vertical?
+			.origin_y = orientation == main::widget_orientation::vertical?
 				margin :
 				m_current_size.height/2 - m_border_thickness,
-			.width = (orientation == orientation::horizontal)?
+			.width = (orientation == main::widget_orientation::horizontal)?
 				static_cast<uint32_t>(track_length()):
 				2*m_border_thickness,
-			.height = (orientation == orientation::vertical)?
+			.height = (orientation == main::widget_orientation::vertical)?
 				static_cast<uint32_t>(track_length()):
 				2*m_border_thickness,
 			.border_thickness = m_border_thickness,
@@ -64,8 +64,8 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 		},
 		.foreground = main::widget_layer{
 			.offset = displacement{
-				m_orientation == orientation::horizontal ? val*track_length() : 0.0f,
-				m_orientation == orientation::vertical ?
+				m_orientation == main::widget_orientation::horizontal ? val*track_length() : 0.0f,
+				m_orientation == main::widget_orientation::vertical ?
 					(1.0f - val)*track_length() :
 					0.0f,
 				0.0f
@@ -94,7 +94,7 @@ terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
-	if(m_orientation == orientation::horizontal)
+	if(m_orientation == main::widget_orientation::horizontal)
 	{ return scaling{2.0f*track_margin() + 8.0f*w, h, 1.0f}; }
 	return scaling{w, 2.0f*track_margin() + 8.0f*h, 1.0f};
 }
@@ -103,7 +103,7 @@ terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
-	if(m_orientation == orientation::horizontal)
+	if(m_orientation == main::widget_orientation::horizontal)
 	{ return scaling{2.0f*track_margin() + 8.0f*w, h, 1.0f}; }
 	return scaling{w, 2.0f*track_margin() + 8.0f*h, 1.0f};
 }

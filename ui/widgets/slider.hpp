@@ -16,11 +16,9 @@ namespace terraformer::ui::widgets
 
 		using float_input_controller<slider>::float_input_controller;
 
-		enum class orientation{horizontal, vertical};
-
-		slider& orientation(enum orientation new_orientation)
+		slider& orientation(main::widget_orientation new_orientation)
 		{
-			if(new_orientation == orientation::vertical)
+			if(new_orientation == main::widget_orientation::vertical)
 			{ m_handle = m_horizontal_handle; }
 			else
 			{ m_handle = m_vertical_handle; }
@@ -48,7 +46,7 @@ namespace terraformer::ui::widgets
 
 		internal_value_type to_internal_value(main::cursor_position loc) const
 		{
-			if(m_orientation == orientation::horizontal)
+			if(m_orientation == main::widget_orientation::horizontal)
 			{
 				return internal_value_type{
 					static_cast<float>(loc.x - track_margin())/track_length(),
@@ -71,14 +69,14 @@ namespace terraformer::ui::widgets
 
 		float track_margin() const
 		{
-			if(m_orientation == orientation::horizontal)
+			if(m_orientation == main::widget_orientation::horizontal)
 			{ return static_cast<float>(m_handle->frontend_resource().width())/2.0f; }
 			return static_cast<float>(m_handle->frontend_resource().height())/2.0f;
 		}
 
 		float track_length() const
 		{
-			if(m_orientation == orientation::horizontal)
+			if(m_orientation == main::widget_orientation::horizontal)
 			{ return static_cast<float>(m_current_size.width) - 2.0f*track_margin(); }
 			return static_cast<float>(m_current_size.height) - 2.0f*track_margin();
 		}
@@ -94,7 +92,7 @@ namespace terraformer::ui::widgets
 
 		main::fb_size m_current_size;
 
-		enum orientation m_orientation = orientation::horizontal;
+		main::widget_orientation m_orientation = main::widget_orientation::horizontal;
 	};
 }
 
