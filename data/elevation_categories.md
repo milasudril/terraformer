@@ -1,9 +1,9 @@
 # Plateau measurements
 
-Elevation category| Object                      | Elevation/m
-------------------|-----------------------------|------------
-Low               | Hardangervidda              |1100
-High              | Tibetan Plateau, Mansarovar |4600
+Elevation category| Object                       | Elevation/m
+------------------|------------------------------|------------
+Low               | Hardangervidda               |1100
+High              | Tibetan Plateau, Manasarovar |4600
 
 # Curve fitting rule
 
@@ -13,7 +13,7 @@ $$
 z = A\sinh(k n)
 $$
 
-Use n = 5 for Mansarovar, and n = 3 for Hardangervidda
+Use n = 5 for Manasarovar, and n = 3 for Hardangervidda
 
 Gives
 
