@@ -17,10 +17,10 @@ Use n = 5 for Mansarovar, and n = 3 for Hardangervidda
 
 Gives
 
-  |
---|--------------------
-k | 0.7086205026374324
-A | 266.3185546307779 m
+Parameter | Value
+----------|----------------
+k         | 0.7086205026374324
+A         | 266.3185546307779 m
 
 # Results
 
