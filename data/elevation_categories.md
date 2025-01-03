@@ -7,7 +7,9 @@ High: Tibetan Plateau, Mansarovar 4600 meter above sea level
 
 Use 6 elevation divisions, and model elevation as
 
-z = A*sinh(k n)
+$$
+z = A*inh(k n)
+$$
 
 Use n = 5 for Mansarovar, and n = 3 for Hardangervidda
 
