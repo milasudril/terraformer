@@ -164,8 +164,8 @@ int main(int, char**)
 	terraformer::ui::widgets::float_input fi{
 		terraformer::ui::widgets::knob{
 			terraformer::ui::value_maps::asinh_value_map{
-				490.0f,
-				4.0f
+				317.5461997790359f,
+				0.6901447774480382f*6.0f
 			}
 		}
 	};
