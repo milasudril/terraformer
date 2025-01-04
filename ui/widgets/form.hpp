@@ -24,7 +24,7 @@ namespace terraformer::ui::widgets
 					static_cast<size_t>(2) :
 					static_cast<size_t>(1)
 			}
-		{}
+		{ is_transparent = false; }
 
 		template<class FieldDescriptor>
 		auto& create_widget(FieldDescriptor&& field)

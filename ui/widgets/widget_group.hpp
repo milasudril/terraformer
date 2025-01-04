@@ -22,6 +22,7 @@ namespace terraformer::ui::widgets
 		{ }
 
 		Layout layout;
+		bool is_transparent = true;
 
 		main::layout_policy_ref get_layout()
 		{ return main::layout_policy_ref{std::ref(layout)}; }
@@ -39,18 +40,27 @@ namespace terraformer::ui::widgets
 				new_theme.other_panel;
 			layout.margin_x = panel.padding;
 			layout.margin_y = panel.padding;
+			m_background = panel.background_texture;
+			m_background_tint = panel.colors.background;
 			m_null_texture = new_theme.misc_textures.null;
 		}
 
  		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend)
 		{
+			std::array const bg_tints{
+				m_background_tint,
+				m_background_tint,
+				m_background_tint,
+				m_background_tint
+			};
 			auto const null_texture = m_null_texture->get_backend_resource(backend).get();
+			auto const background = m_background->get_backend_resource(backend).get();
 			return main::widget_layer_stack{
 				.background = main::widget_layer{
 					.offset = displacement{},
 					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
-					.tints = std::array<rgba_pixel, 4>{}
+					.texture = is_transparent?null_texture:background,
+					.tints = bg_tints
 				},
 				.sel_bg_mask = main::widget_layer_mask{
 					.offset = displacement{},
@@ -84,7 +94,9 @@ namespace terraformer::ui::widgets
 		}
 
 	private:
+		main::immutable_shared_texture m_background;
 		main::immutable_shared_texture m_null_texture;
+		rgba_pixel m_background_tint;
 	};
 }
 
