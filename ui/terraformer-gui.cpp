@@ -18,6 +18,7 @@
 #include "./theming/theme_loader.hpp"
 #include "./value_maps/log_value_map.hpp"
 #include "./value_maps/asinh_value_map.hpp"
+#include "./widgets/form.hpp"
 
 namespace
 {
@@ -59,6 +60,27 @@ namespace
 						( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
 							type, severity, message );
 	}
+
+	template<class OnValueChangedCallback>
+	struct my_field_descriptor
+	{
+		std::u8string_view label;
+		OnValueChangedCallback on_value_changed;
+
+		auto create_widget() const
+		{
+			return std::make_unique<
+				terraformer::ui::widgets::float_input<terraformer::ui::widgets::knob>
+			>(
+				terraformer::ui::widgets::knob{
+					terraformer::ui::value_maps::asinh_value_map{
+						266.3185546307779f,
+						0.7086205026374324f*6.0f
+					}
+				}
+			);
+		}
+	};
 
 }
 
@@ -186,6 +208,18 @@ int main(int, char**)
 	my_outer_vbox.append(std::ref(my_knob));
 	my_outer_vbox.append(std::ref(float_input_label));
 	my_outer_vbox.append(std::ref(fi));
+
+	terraformer::ui::widgets::form the_form;
+
+	the_form.create_widget(
+		my_field_descriptor{
+			.label = u8"Foobar",
+			.on_value_changed = [](auto const& obj, auto&&...) {
+				printf("%.8g\n", static_cast<float>(obj.value()));
+			}
+		}
+	);
+	my_outer_vbox.append(std::ref(the_form));
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
 
