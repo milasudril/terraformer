@@ -43,25 +43,35 @@ namespace terraformer::ui::widgets
 				m_widgets.push_back(resource{std::move(field_label)});
 			}
 
-			auto field_input_widget = std::make_unique<typename FieldDescriptor::input_widget_type>(
+			using input_widget_type = typename FieldDescriptor::input_widget_type;
+			auto field_input_widget = std::make_unique<input_widget_type>(
 				std::forward<InputWidgetParams>(input_widget_params)...
 			);
 			auto& ret = *field_input_widget;
-			ret.value(field.value_reference.get());
-			ret.on_value_changed([value = field.value_reference, this]<class ... Args>(auto& widget, Args&&... args){
-				using widget_value_type = std::remove_cvref_t<decltype(widget.value())>;
-				auto&& new_val = widget.value();
-				if constexpr(requires(widget_value_type const& val){{FieldDescriptor::is_value_valid(val)};})
-				{
-					if(!FieldDescriptor::is_value_valid(widget.value()))
+			if constexpr(requires(input_widget_type const& widget){{widget.value()};})
+			{
+				ret.value(field.value_reference.get());
+				ret.on_value_changed([value = field.value_reference, this]<class ... Args>(auto& widget, Args&&... args){
+					using widget_value_type = std::remove_cvref_t<decltype(widget.value())>;
+					auto&& new_val = widget.value();
+					if constexpr(requires(widget_value_type const& val){{FieldDescriptor::is_value_valid(val)};})
 					{
-						widget.value(value);
-						return;
+						if(!FieldDescriptor::is_value_valid(widget.value()))
+						{
+							widget.value(value);
+							return;
+						}
 					}
-				}
-				value.get() = std::forward<widget_value_type>(new_val);
-				m_on_content_updated(*this, std::forward<Args>(args)...);
-			});
+					value.get() = std::forward<widget_value_type>(new_val);
+					m_on_content_updated(*this, std::forward<Args>(args)...);
+				});
+			}
+			else
+			{
+				ret.on_content_updated([this]<class ... Args>(auto&, Args&&... args) {
+					m_on_content_updated(*this, std::forward<Args>(args)...);
+				});
+			}
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
 			return ret;

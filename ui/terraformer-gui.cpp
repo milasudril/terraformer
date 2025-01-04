@@ -196,6 +196,13 @@ int main(int, char**)
 		std::reference_wrapper<float> value_reference;
 	};
 
+	struct my_other_field_descriptor
+	{
+		std::u8string_view label;
+		using input_widget_type = terraformer::ui::widgets::form;
+
+	};
+
 	float current_value = 1100.0f;
 	the_form.create_widget(
 		my_field_descriptor{
@@ -209,6 +216,26 @@ int main(int, char**)
 			}
 		}
 	);
+	auto& subform = the_form.create_widget(
+		my_other_field_descriptor{
+			.label = u8"A subform"
+		},
+		terraformer::ui::main::widget_orientation::vertical
+	);
+	float other_value = 4600.0f;
+	subform.create_widget(
+		my_field_descriptor{
+			.label = u8"Kaka",
+			.value_reference = std::ref(other_value)
+		},
+		terraformer::ui::widgets::knob{
+			terraformer::ui::value_maps::asinh_value_map{
+				266.3185546307779f,
+				0.7086205026374324f*6.0f
+			}
+		}
+	);
+
 	the_form.on_content_updated([&current_value](auto&&...){
 		printf("Content updated: %.8g\n", current_value);
 	});
