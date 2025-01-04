@@ -90,15 +90,18 @@ void terraformer::ui::main::theme_updated(
 			);
 
 			auto const children = get_children_callbacks[k](widget_pointers[k]);
-			contexts.push_back(
-				context{
-					.widgets = children,
-					.instance_info{
-						.section_level = instance_info.section_level + 1,
-						.paragraph_index = 0
+			if(!children.element_indices().empty())
+			{
+				contexts.push_back(
+					context{
+						.widgets = children,
+						.instance_info{
+							.section_level = current_context.instance_info.section_level + 1,
+							.paragraph_index = 0
+						}
 					}
-				}
-			);
+				);
+			}
 		}
 	}
 }
