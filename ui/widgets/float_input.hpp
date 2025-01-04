@@ -64,7 +64,6 @@ namespace terraformer::ui::widgets
 	private:
 		ControlWidget m_input_widget;
 		text_to_float_input m_textbox;
-		main::widget_collection m_widgets;
 		main::widget_user_interaction_handler<float_input> m_on_value_changed{no_operation_tag{}};
 
 		void init()
