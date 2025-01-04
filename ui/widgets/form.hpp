@@ -26,6 +26,13 @@ namespace terraformer::ui::widgets
 			}
 		{ is_transparent = false; }
 
+		template<class Function>
+		form& on_content_updated(Function&& func)
+		{
+			m_on_content_updated = std::forward<Function>(func);
+			return *this;
+		};
+
 		template<class FieldDescriptor, class ... InputWidgetParams>
 		auto& create_widget(FieldDescriptor const& field, InputWidgetParams&&... input_widget_params)
 		{
@@ -41,7 +48,7 @@ namespace terraformer::ui::widgets
 			);
 			auto& ret = *field_input_widget;
 			ret.value(field.value_reference.get());
-			ret.on_value_changed([value = field.value_reference](auto& widget, auto&&...){
+			ret.on_value_changed([value = field.value_reference, this]<class ... Args>(auto& widget, Args&&... args){
 				using widget_value_type = std::remove_cvref_t<decltype(widget.value())>;
 				auto&& new_val = widget.value();
 				if constexpr(requires(widget_value_type const& val){{FieldDescriptor::is_value_valid(val)};})
@@ -53,6 +60,7 @@ namespace terraformer::ui::widgets
 					}
 				}
 				value.get() = std::forward<widget_value_type>(new_val);
+				m_on_content_updated(*this, std::forward<Args>(args)...);
 			});
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
@@ -66,6 +74,10 @@ namespace terraformer::ui::widgets
 			constexpr vtable(std::type_identity<StoredType>){}
 		};
 		using resource = unique_resource<vtable>;
+
+		using user_interaction_handler = main::widget_user_interaction_handler<form>;
+		user_interaction_handler m_on_content_updated{no_operation_tag{}};
+
 		single_array<unique_resource<vtable>> m_widgets;
 	};
 }

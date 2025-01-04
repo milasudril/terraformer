@@ -209,6 +209,9 @@ int main(int, char**)
 			}
 		}
 	);
+	the_form.on_content_updated([&current_value](auto&&...){
+		printf("Content updated: %.8g\n", current_value);
+	});
 	my_outer_vbox.append(std::ref(the_form));
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
