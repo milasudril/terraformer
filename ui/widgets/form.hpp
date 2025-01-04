@@ -26,17 +26,34 @@ namespace terraformer::ui::widgets
 			}
 		{ is_transparent = false; }
 
-		template<class FieldDescriptor>
-		auto& create_widget(FieldDescriptor&& field)
+		template<class FieldDescriptor, class ... InputWidgetParams>
+		auto& create_widget(FieldDescriptor const& field, InputWidgetParams&&... input_widget_params)
 		{
-			auto field_label = std::make_unique<label>();
-			field_label->text(field.label);
-			append(std::ref(*field_label) ,ui::main::widget_geometry{});
-			m_widgets.push_back(resource{std::move(field_label)});
+			{
+				auto field_label = std::make_unique<label>();
+				field_label->text(field.label);
+				append(std::ref(*field_label) ,ui::main::widget_geometry{});
+				m_widgets.push_back(resource{std::move(field_label)});
+			}
 
-			auto field_input_widget = field.create_widget();
+			auto field_input_widget = std::make_unique<typename FieldDescriptor::input_widget_type>(
+				std::forward<InputWidgetParams>(input_widget_params)...
+			);
 			auto& ret = *field_input_widget;
-			ret.on_value_changed(std::move(field.on_value_changed));
+			ret.value(field.value_reference.get());
+			ret.on_value_changed([value = field.value_reference](auto& widget, auto&&...){
+				using widget_value_type = std::remove_cvref_t<decltype(widget.value())>;
+				auto&& new_val = widget.value();
+				if constexpr(requires(widget_value_type const& val){{FieldDescriptor::is_value_valid(val)};})
+				{
+					if(!FieldDescriptor::is_value_valid(widget.value()))
+					{
+						widget.value(value);
+						return;
+					}
+				}
+				value.get() = std::forward<widget_value_type>(new_val);
+			});
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
 			return ret;
