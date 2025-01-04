@@ -44,7 +44,6 @@ namespace terraformer::ui::widgets
 
  		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend)
 		{
-			// TODO: There will be multiple "group" widgets, and code duplication should be avoided
 			auto const null_texture = m_null_texture->get_backend_resource(backend).get();
 			return main::widget_layer_stack{
 				.background = main::widget_layer{
