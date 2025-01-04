@@ -67,8 +67,6 @@ namespace terraformer::ui::widgets
 		main::widget_collection m_widgets;
 		main::widget_user_interaction_handler<float_input> m_on_value_changed{no_operation_tag{}};
 
-		main::immutable_shared_texture m_null_texture;
-
 		void init()
 		{
 			append(std::ref(m_input_widget), terraformer::ui::main::widget_geometry{});
