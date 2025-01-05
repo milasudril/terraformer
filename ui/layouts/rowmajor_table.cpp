@@ -11,11 +11,11 @@ terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 	auto x_offset = no_outer_margin?0.0f : margin_x;
 	auto y_offset = no_outer_margin?0.0f : margin_y;
 
-	auto const* const cols = m_colwidths.get();
+	auto const* const cols = m_fixdim_cellsizes.get();
 	size_t col = 0;
-	auto const colcount = m_colcount;
-	auto row = m_rowheights.element_indices().front();
-	auto const rowcount = std::size(m_rowheights);
+	auto const colcount = m_fixdim_cellcount;
+	auto row = m_dyndim_cellsizes.element_indices().front();
+	auto const rowcount = std::size(m_dyndim_cellsizes);
 
 	for(auto k : widgets.element_indices())
 	{
@@ -30,7 +30,7 @@ terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 		++col;
 		if(col == colcount)
 		{
-			y_offset += m_rowheights[row];
+			y_offset += m_dyndim_cellsizes[row];
 			++row;
 			if(row == rowcount)
 			{ break; }
@@ -51,10 +51,10 @@ void terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
 )
 {
 	auto const sizes = widgets.sizes();
-	auto cols = m_colwidths.get();
-	auto const colcount = m_colcount;
+	auto cols = m_fixdim_cellsizes.get();
+	auto const colcount = m_fixdim_cellcount;
 	std::fill_n(cols, colcount, 0.0f);
-	m_rowheights.clear();
+	m_dyndim_cellsizes.clear();
 	auto max_height = 0.0f;
 	size_t col = 0;
 	auto const indices = widgets.element_indices();
@@ -71,16 +71,16 @@ void terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
 		if(col == colcount)
 		{
 			col = 0;
-			m_rowheights.push_back(max_height);
+			m_dyndim_cellsizes.push_back(max_height);
 			max_height = 0.0f;
 		}
 	}
 	if(col != 0)
-	{ m_rowheights.push_back(max_height); }
+	{ m_dyndim_cellsizes.push_back(max_height); }
 
 	m_height = std::accumulate(
-		std::begin(m_rowheights),
-		std::end(m_rowheights),
+		std::begin(m_dyndim_cellsizes),
+		std::end(m_dyndim_cellsizes),
 		no_outer_margin? 0.0f : margin_y
 	);
 	m_width = std::accumulate(cols, cols + colcount, margin_x)
