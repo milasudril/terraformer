@@ -139,9 +139,11 @@ int main(int, char**)
 
 	plain_corner nw;
 	plain_corner ne;
+	plain_corner sw;
+	plain_corner se;
 
 	terraformer::ui::widgets::form main_form{
-		terraformer::ui::main::widget_orientation::horizontal
+		terraformer::ui::main::widget_orientation::vertical
 	};
 
 	{
@@ -149,7 +151,7 @@ int main(int, char**)
 			plain_corner_field_descriptor{
 				.label = u8"NW"
 			},
-			terraformer::ui::main::widget_orientation::vertical
+			terraformer::ui::main::widget_orientation::horizontal
 		);
 		bind(nw, subform);
 	}
@@ -162,6 +164,26 @@ int main(int, char**)
 			terraformer::ui::main::widget_orientation::horizontal
 		);
 		bind(ne, subform);
+	}
+
+	{
+		auto& subform = main_form.create_widget(
+			plain_corner_field_descriptor{
+				.label = u8"SW"
+			},
+			terraformer::ui::main::widget_orientation::horizontal
+		);
+		bind(sw, subform);
+	}
+
+	{
+		auto& subform = main_form.create_widget(
+			plain_corner_field_descriptor{
+				.label = u8"SE"
+			},
+			terraformer::ui::main::widget_orientation::horizontal
+		);
+		bind(se, subform);
 	}
 
 	main_form.on_content_updated([&nw](auto&&...){
