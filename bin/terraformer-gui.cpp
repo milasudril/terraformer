@@ -187,7 +187,7 @@ int main(int, char**)
 	my_outer_vbox.append(std::ref(float_input_label));
 	my_outer_vbox.append(std::ref(fi));
 
-	terraformer::ui::widgets::form the_form;
+	terraformer::ui::widgets::form main_form;
 
 	struct my_field_descriptor
 	{
@@ -204,7 +204,7 @@ int main(int, char**)
 	};
 
 	float current_value = 1100.0f;
-	the_form.create_widget(
+	main_form.create_widget(
 		my_field_descriptor{
 			.label = u8"Foobar",
 			.value_reference = std::ref(current_value)
@@ -216,7 +216,7 @@ int main(int, char**)
 			}
 		}
 	);
-	auto& subform = the_form.create_widget(
+	auto& subform = main_form.create_widget(
 		my_other_field_descriptor{
 			.label = u8"A subform"
 		},
@@ -236,10 +236,10 @@ int main(int, char**)
 		}
 	);
 
-	the_form.on_content_updated([&current_value](auto&&...){
+	main_form.on_content_updated([&current_value](auto&&...){
 		printf("Content updated: %.8g\n", current_value);
 	});
-	my_outer_vbox.append(std::ref(the_form));
+	my_outer_vbox.append(std::ref(main_form));
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
 
