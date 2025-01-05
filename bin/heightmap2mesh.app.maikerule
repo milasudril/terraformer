@@ -1,4 +1,4 @@
 {
 	"target":{"name":"heightmap2mesh"}
-	,"dependencies":[{"ref":"app/heightmap2mesh.o", "rel":"implementation"}]
+	,"dependencies":[{"ref":"app/cli/heightmap2mesh.o", "rel":"implementation"}]
 }
