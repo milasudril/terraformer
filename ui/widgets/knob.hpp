@@ -55,14 +55,14 @@ namespace terraformer::ui::widgets
 			geosimd::turns{1.0/6.0},
 			geosimd::turns{5.0/6.0}
 		};
-		rgba_pixel m_bg_tint;
-		rgba_pixel m_fg_tint;
+		rgba_pixel m_bg_tint{};
+		rgba_pixel m_fg_tint{};
 
 		main::immutable_shared_texture m_null_texture;
 		main::immutable_shared_texture m_handle;
 		main::immutable_shared_texture m_hand;
 
-		main::fb_size m_current_size;
+		main::fb_size m_current_size{};
 	};
 }
 

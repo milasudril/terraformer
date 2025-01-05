@@ -21,7 +21,7 @@ namespace terraformer::ui::widgets
 		using widget_group::compute_size;
 
 		explicit float_input(
-			ControlWidget&& input_widget,
+			ControlWidget&& input_widget = ControlWidget{},
 			main::widget_orientation orientation = main::widget_orientation::horizontal
 		):
 			widget_group{
@@ -31,10 +31,6 @@ namespace terraformer::ui::widgets
 					layouts::columnmajor_table::algorithm
 			},
 			m_input_widget{std::move(input_widget)}
-		{ init(); }
-
-		explicit float_input(main::widget_orientation orientation = main::widget_orientation::horizontal):
-			widget_group{orientation == main::widget_orientation::horizontal? 2u : 1u}
 		{ init(); }
 
 		template<class Function>

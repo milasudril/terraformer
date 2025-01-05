@@ -1,0 +1,96 @@
+#ifndef TERRAFORMER_GUI_PLAIN_HPP
+#define TERRAFORMER_GUI_PLAIN_HPP
+
+#include "lib/generators/plain_generator/plain.hpp"
+#include "ui/widgets/form.hpp"
+#include "ui/value_maps/asinh_value_map.hpp"
+#include "ui/value_maps/qurt_value_map.hpp"
+#include "ui/widgets/knob.hpp"
+#include "ui/widgets/float_input.hpp"
+
+namespace terraformer::app
+{
+	struct plain_corner_descriptor_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	struct global_elevation_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
+	struct plain_derivative_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
+	auto& bind(std::u8string_view field_name, plain_corner_descriptor& field_value, ui::widgets::form& form)
+	{
+		auto& ret = form.create_widget(
+			plain_corner_descriptor_form_field{
+				.label = field_name,
+			}
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"Elevation/m",
+				.value_reference = std::ref(field_value.elevation)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::asinh_value_map{
+					266.3185546307779f,
+					0.7086205026374324f*6.0f
+				}
+			}
+		);
+
+		ret.create_widget(
+			plain_derivative_form_field{
+				.label = u8"d/dx",
+				.value_reference = std::reference_wrapper(field_value.ddx)
+			},
+			terraformer::ui::widgets::knob{terraformer::ui::value_maps::qurt_value_map{3.0f}}
+		);
+
+		ret.create_widget(
+			plain_derivative_form_field{
+				.label = u8"d/dy",
+				.value_reference = std::reference_wrapper(field_value.ddy)
+			},
+			terraformer::ui::widgets::knob{terraformer::ui::value_maps::qurt_value_map{3.0f}}
+		);
+
+		return ret;
+	}
+
+	struct plain_descriptor_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	auto& bind(std::u8string_view field_name, plain_descriptor& field_value, ui::widgets::form& form)
+	{
+		auto& ret = form.create_widget(
+			plain_descriptor_form_field{
+				.label = field_name
+			}
+		);
+
+		bind(u8"NW", field_value.nw, ret);
+		bind(u8"NE", field_value.ne, ret);
+		bind(u8"SW", field_value.sw, ret);
+		bind(u8"SE", field_value.se, ret);
+
+		return ret;
+	}
+}
+
+#endif
