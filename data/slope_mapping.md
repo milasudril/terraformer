@@ -18,8 +18,6 @@ $$
 
 for n = 4 and n = 2
 
-
-
 Gives
 
 Parameter | Value
