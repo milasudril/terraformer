@@ -26,7 +26,8 @@ namespace terraformer::ui::widgets
 				orientation == main::widget_orientation::vertical?
 					layouts::rowmajor_table::algorithm:
 					layouts::columnmajor_table::algorithm
-			}
+			},
+			m_orientation{orientation}
 		{ is_transparent = false; }
 
 		template<class Function>
@@ -47,7 +48,14 @@ namespace terraformer::ui::widgets
 			}
 
 			using input_widget_type = typename FieldDescriptor::input_widget_type;
-			auto field_input_widget = std::make_unique<input_widget_type>(
+			auto field_input_widget = []<class ... T>(main::widget_orientation orientation, T&&... input_widget_params){
+				if constexpr(std::is_same_v<input_widget_type, form>)
+				{ return std::make_unique<form>(orientation); }
+				return std::make_unique<input_widget_type>(std::forward<T>(input_widget_params)...);
+			}(
+				m_orientation == main::widget_orientation::vertical?
+					main::widget_orientation::horizontal:
+					main::widget_orientation::vertical,
 				std::forward<InputWidgetParams>(input_widget_params)...
 			);
 			auto& ret = *field_input_widget;
@@ -75,6 +83,7 @@ namespace terraformer::ui::widgets
 					m_on_content_updated(*this, std::forward<Args>(args)...);
 				});
 			}
+
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
 			return ret;
@@ -92,6 +101,7 @@ namespace terraformer::ui::widgets
 		user_interaction_handler m_on_content_updated{no_operation_tag{}};
 
 		single_array<unique_resource<vtable>> m_widgets;
+		main::widget_orientation m_orientation;
 	};
 }
 

@@ -79,7 +79,7 @@ int main(int, char**)
 	terraformer::plain_descriptor plain;
 
 	terraformer::ui::widgets::form main_form{
-		terraformer::ui::main::widget_orientation::vertical
+		terraformer::ui::main::widget_orientation::horizontal
 	};
 
 	terraformer::app::bind(u8"Plain settings", plain, main_form);
