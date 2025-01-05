@@ -19,10 +19,10 @@ namespace terraformer::ui::widgets
 		using widget_group::get_layout;
 		using widget_group::compute_size;
 
-		explicit form(main::widget_orientation orientation = main::widget_orientation::horizontal):
+		explicit form(main::widget_orientation orientation = main::widget_orientation::vertical):
 			widget_group{
 				2u,
-				orientation == main::widget_orientation::horizontal?
+				orientation == main::widget_orientation::vertical?
 					layouts::rowmajor_table::algorithm:
 					layouts::columnmajor_table::algorithm
 			}

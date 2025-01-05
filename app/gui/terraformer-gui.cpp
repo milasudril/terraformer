@@ -159,7 +159,7 @@ int main(int, char**)
 			plain_corner_field_descriptor{
 				.label = u8"NE"
 			},
-			terraformer::ui::main::widget_orientation::vertical
+			terraformer::ui::main::widget_orientation::horizontal
 		);
 		bind(ne, subform);
 	}
