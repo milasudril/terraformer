@@ -14,6 +14,7 @@ namespace terraformer::ui::layouts
 {
 	class columnmajor_table:public table
 	{
+	public:
 		static scaling update_widget_locations(
 			common_params const&,
 			state const& state,

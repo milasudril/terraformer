@@ -5,10 +5,11 @@
 
 #include "./label.hpp"
 #include "ui/layouts/rowmajor_table.hpp"
+#include "ui/layouts/columnmajor_table.hpp"
 
 namespace terraformer::ui::widgets
 {
-	class form:private widget_group<layouts::rowmajor_table>
+	class form:private widget_group<layouts::table>
 	{
 	public:
 		using widget_group::handle_event;
@@ -20,9 +21,10 @@ namespace terraformer::ui::widgets
 
 		explicit form(main::widget_orientation orientation = main::widget_orientation::horizontal):
 			widget_group{
+				2u,
 				orientation == main::widget_orientation::horizontal?
-					static_cast<size_t>(2) :
-					static_cast<size_t>(1)
+					layouts::rowmajor_table::algorithm:
+					layouts::columnmajor_table::algorithm
 			}
 		{ is_transparent = false; }
 
