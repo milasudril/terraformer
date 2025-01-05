@@ -13,6 +13,7 @@
 #include "ui/widgets/float_input.hpp"
 #include "ui/value_maps/log_value_map.hpp"
 #include "ui/value_maps/asinh_value_map.hpp"
+#include "ui/value_maps/qurt_value_map.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/form.hpp"
 
@@ -102,15 +103,15 @@ namespace
 				.label = u8"d/dx",
 				.value_reference = std::ref(point.ddx)
 			},
-			terraformer::ui::widgets::knob{}
+			terraformer::ui::widgets::knob{terraformer::ui::value_maps::qurt_value_map{3.0f}}
 		);
 
 		form.create_widget(
 			float_field_descriptor{
-				.label = u8"d/dx",
+				.label = u8"d/dy",
 				.value_reference = std::ref(point.ddy)
 			},
-			terraformer::ui::widgets::knob{}
+			terraformer::ui::widgets::knob{terraformer::ui::value_maps::qurt_value_map{3.0f}}
 		);
 	}
 }
@@ -136,19 +137,35 @@ int main(int, char**)
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback( MessageCallback, 0 );
 
-	plain_corner current_value;
+	plain_corner nw;
+	plain_corner ne;
 
-	terraformer::ui::widgets::form main_form;
-	auto& subform = main_form.create_widget(
-		plain_corner_field_descriptor{
-			.label = u8"NW"
-		},
-		terraformer::ui::main::widget_orientation::vertical
-	);
-	bind(current_value, subform);
+	terraformer::ui::widgets::form main_form{
+		terraformer::ui::main::widget_orientation::horizontal
+	};
 
-	main_form.on_content_updated([&current_value](auto&&...){
-		printf("Content updated: %.8g\n", current_value.elevation);
+	{
+		auto& subform = main_form.create_widget(
+			plain_corner_field_descriptor{
+				.label = u8"NW"
+			},
+			terraformer::ui::main::widget_orientation::vertical
+		);
+		bind(nw, subform);
+	}
+
+	{
+		auto& subform = main_form.create_widget(
+			plain_corner_field_descriptor{
+				.label = u8"NE"
+			},
+			terraformer::ui::main::widget_orientation::vertical
+		);
+		bind(ne, subform);
+	}
+
+	main_form.on_content_updated([&nw](auto&&...){
+		printf("Content updated: %.8g\n", nw.elevation);
 	});
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
