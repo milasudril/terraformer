@@ -58,6 +58,63 @@ namespace
 	}
 }
 
+namespace
+{
+	struct plain_corner
+	{
+		float elevation = 840.0f;
+		float ddx = 0.0f;
+		float ddy = 0.0f;
+	};
+
+	struct plain_corner_field_descriptor
+	{
+		std::u8string_view label;
+		using input_widget_type = terraformer::ui::widgets::form;
+	};
+
+	void bind(plain_corner& point, terraformer::ui::widgets::form& form)
+	{
+		struct float_field_descriptor
+		{
+			std::u8string_view label;
+			std::reference_wrapper<float> value_reference;
+			using input_widget_type = terraformer::ui::widgets::float_input<
+				terraformer::ui::widgets::knob
+			>;
+		};
+
+		form.create_widget(
+			float_field_descriptor{
+				.label = u8"Elevation",
+				.value_reference = std::ref(point.elevation)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::asinh_value_map{
+					266.3185546307779f,
+					0.7086205026374324f*6.0f
+				}
+			}
+		);
+
+		form.create_widget(
+			float_field_descriptor{
+				.label = u8"d/dx",
+				.value_reference = std::ref(point.ddx)
+			},
+			terraformer::ui::widgets::knob{}
+		);
+
+		form.create_widget(
+			float_field_descriptor{
+				.label = u8"d/dx",
+				.value_reference = std::ref(point.ddy)
+			},
+			terraformer::ui::widgets::knob{}
+		);
+	}
+}
+
 int main(int, char**)
 {
 	auto& gui_ctxt = terraformer::ui::wsapi::context::get_instance();
@@ -79,57 +136,19 @@ int main(int, char**)
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback( MessageCallback, 0 );
 
+	plain_corner current_value;
+
 	terraformer::ui::widgets::form main_form;
-
-	struct my_field_descriptor
-	{
-		std::u8string_view label;
-		using input_widget_type = terraformer::ui::widgets::float_input<terraformer::ui::widgets::knob>;
-		std::reference_wrapper<float> value_reference;
-	};
-
-	struct my_other_field_descriptor
-	{
-		std::u8string_view label;
-		using input_widget_type = terraformer::ui::widgets::form;
-
-	};
-
-	float current_value = 1100.0f;
-	main_form.create_widget(
-		my_field_descriptor{
-			.label = u8"Foobar",
-			.value_reference = std::ref(current_value)
-		},
-		terraformer::ui::widgets::knob{
-			terraformer::ui::value_maps::asinh_value_map{
-				266.3185546307779f,
-				0.7086205026374324f*6.0f
-			}
-		}
-	);
 	auto& subform = main_form.create_widget(
-		my_other_field_descriptor{
-			.label = u8"A subform"
+		plain_corner_field_descriptor{
+			.label = u8"NW"
 		},
 		terraformer::ui::main::widget_orientation::vertical
 	);
-	float other_value = 4600.0f;
-	subform.create_widget(
-		my_field_descriptor{
-			.label = u8"Kaka",
-			.value_reference = std::ref(other_value)
-		},
-		terraformer::ui::widgets::knob{
-			terraformer::ui::value_maps::asinh_value_map{
-				266.3185546307779f,
-				0.7086205026374324f*6.0f
-			}
-		}
-	);
+	bind(current_value, subform);
 
 	main_form.on_content_updated([&current_value](auto&&...){
-		printf("Content updated: %.8g\n", current_value);
+		printf("Content updated: %.8g\n", current_value.elevation);
 	});
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
