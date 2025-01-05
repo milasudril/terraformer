@@ -1,4 +1,4 @@
 {
 	"target":{"name":"terraformer-gui"}
-	,"dependencies":[{"ref":"./terraformer-gui.o", "rel":"implementation"}]
+	,"dependencies":[{"ref":"app/terraformer-gui.o", "rel":"implementation"}]
 }
