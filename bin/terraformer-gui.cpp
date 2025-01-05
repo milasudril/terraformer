@@ -83,110 +83,6 @@ int main(int, char**)
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback( MessageCallback, 0 );
 
-	terraformer::ui::widgets::label foo;
-	foo.text(u8"Hello, World");
-	terraformer::ui::widgets::toggle_button bar;
-	bar.text(u8"Click me!")
-		.value(false)
-		.on_value_changed([&foo](auto const& obj, terraformer::ui::main::window_ref window, auto){
-			if(obj.value())
-			{
-				foo.value(u8"Value is true");
-				window.set_title(u8"True");
-			}
-			else
-			{
-				foo.value(u8"Value is false");
-				window.set_title(u8"False");
-			}
-		});
-	terraformer::ui::widgets::vbox my_vbox;
-
-	my_vbox.append(std::ref(foo));
-	my_vbox.append(std::ref(bar));
-
-	terraformer::ui::widgets::vbox my_outer_vbox;
-
-	terraformer::ui::widgets::button ok;
-	ok.text(u8"Ok");
-
-	terraformer::ui::widgets::button cancel;
-	cancel.text(u8"Cancel");
-
-	terraformer::ui::widgets::single_line_text_input my_input;
-	my_input
-		.use_size_from_placeholder(u8"Write your text here")
-		.on_value_changed([](auto const& obj, terraformer::ui::main::window_ref window, auto){
-				window.set_title(obj.value().c_str());
-			}
-		)
-		.on_step_up([](auto&&...){
-			puts("Step up");
-		})
-		.on_step_down([](auto&&...){
-			puts("Step down");
-		});
-
-	terraformer::ui::widgets::label slider_label_asinh;
-	slider_label_asinh.text(u8"A slider (asinh)");
-	terraformer::ui::widgets::slider my_asinh_slider{
-		std::in_place_type_t<terraformer::ui::value_maps::asinh_value_map>{},
-		490.0f,
-		4.0f
-	};
-	my_asinh_slider.on_value_changed([](auto const& obj, auto&&...) {
-		printf("%.8g\n", static_cast<float>(obj.value()));
-	});
-
-	terraformer::ui::widgets::label slider_label_log;
-	slider_label_log.text(u8"A slider (log)");
-	terraformer::ui::widgets::slider my_log_slider{
-		terraformer::ui::value_maps::log_value_map{
-			1.0f,
-			10000.0f,
-			10.0f
-		}
-	};
-	printf("Current value = %.8g\n", my_log_slider.value());
-
-	my_log_slider.on_value_changed([](auto const& obj, auto&&...) {
-		printf("%.8g\n", static_cast<float>(obj.value()));
-	});
-
-	terraformer::ui::widgets::label knob_label;
-	knob_label.text(u8"A knob");
-	terraformer::ui::widgets::knob my_knob{};
-	printf("Current value = %.8g\n", my_log_slider.value());
-
-	terraformer::ui::widgets::label float_input_label;
-	float_input_label.text(u8"Float input");
-
-	terraformer::ui::widgets::float_input fi{
-		terraformer::ui::widgets::knob{
-			terraformer::ui::value_maps::asinh_value_map{
-				266.3185546307779f,
-				0.7086205026374324f*6.0f
-			}
-		}
-	};
-
-	my_knob.on_value_changed([](auto const& obj, auto&&...) {
-		printf("%.8g\n", static_cast<float>(obj.value()));
-	});
-
-	my_outer_vbox.append(std::ref(ok));
-	my_outer_vbox.append(std::ref(my_vbox));
-	my_outer_vbox.append(std::ref(cancel));
-	my_outer_vbox.append(std::ref(my_input));
-	my_outer_vbox.append(std::ref(slider_label_asinh));
-	my_outer_vbox.append(std::ref(my_asinh_slider));
-	my_outer_vbox.append(std::ref(slider_label_log));
-	my_outer_vbox.append(std::ref(my_log_slider));
-	my_outer_vbox.append(std::ref(knob_label));
-	my_outer_vbox.append(std::ref(my_knob));
-	my_outer_vbox.append(std::ref(float_input_label));
-	my_outer_vbox.append(std::ref(fi));
-
 	terraformer::ui::widgets::form main_form;
 
 	struct my_field_descriptor
@@ -239,7 +135,6 @@ int main(int, char**)
 	main_form.on_content_updated([&current_value](auto&&...){
 		printf("Content updated: %.8g\n", current_value);
 	});
-	my_outer_vbox.append(std::ref(main_form));
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
 
@@ -249,7 +144,7 @@ int main(int, char**)
 		terraformer::ui::drawing_api::gl_widget_layer_stack_renderer{},
 		terraformer::ui::drawing_api::gl_frame_renderer{},
 		error_handler{},
-		std::ref(my_outer_vbox)
+		std::ref(main_form)
 	};
 
 	mainwin.set_event_handler<mainwin_tag>(std::ref(event_dispatcher));
