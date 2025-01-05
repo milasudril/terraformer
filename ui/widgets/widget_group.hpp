@@ -38,8 +38,8 @@ namespace terraformer::ui::widgets
 			auto const& panel = instance_info.section_level%2 == 0?
 				new_theme.main_panel :
 				new_theme.other_panel;
-			layout.margin_x = panel.padding;
-			layout.margin_y = panel.padding;
+			layout.params.margin_x = panel.padding;
+			layout.params.margin_y = panel.padding;
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
 			m_null_texture = new_theme.misc_textures.null;
