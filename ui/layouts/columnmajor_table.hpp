@@ -15,8 +15,8 @@ namespace terraformer::ui::layouts
 	{
 	public:
 		explicit columnmajor_table(size_t rowcount):
-			m_rowcount{rowcount},
-			m_rowheights{std::make_unique<float[]>(rowcount)}
+			m_fixdim_cellcount{rowcount},
+			m_fixdim_cellsizes{std::make_unique<float[]>(rowcount)}
 		{}
 
 		scaling update_widget_locations(main::widget_collection_ref& widgets) const;
@@ -28,9 +28,9 @@ namespace terraformer::ui::layouts
 		bool no_outer_margin = false;
 
 	private:
-		size_t m_rowcount;
-		std::unique_ptr<float[]> m_rowheights;
-		single_array<float> m_colwidths;
+		size_t m_fixdim_cellcount;
+		std::unique_ptr<float[]> m_fixdim_cellsizes;
+		single_array<float> m_dyndim_cellsizes;
 		float m_width;
 		float m_height;
 	};
