@@ -1,3 +1,4 @@
+//@	{"dependencies_extra": [{"ref": "./plain.o", "rel": "implementation"}]}"}}
 
 #include "lib/common/span_2d.hpp"
 
@@ -17,4 +18,10 @@ namespace terraformer
 		plain_corner_descriptor sw;
 		plain_corner_descriptor se;
 	};
+
+	void replace_pixels(
+		span_2d<float> output,
+		float pixel_size,
+		plain_descriptor const& params
+	);
 }
