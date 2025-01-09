@@ -5,6 +5,8 @@
 #include "lib/common/ranges.hpp"
 
 #include <cmath>
+#include <cassert>
+#include <algorithm>
 
 namespace terraformer
 {
@@ -91,6 +93,37 @@ namespace terraformer
 		{ return lerp(left, right, t); }
 		else
 		{ return (1.0f - t)*left + t*right; }
+	}
+
+	template<
+		std::ranges::random_access_range RangeX,
+		std::ranges::random_access_range RangeY,
+		boundary_sampling_policy U
+	>
+	constexpr auto interp(RangeX&& x_vals, RangeY&& y_vals, float param, U const& bsp)
+	{
+		auto const i_x_1 = static_cast<int32_t>(
+			bsp(
+				static_cast<uint32_t>(
+					std::find_if(
+						std::begin(x_vals),
+						std::end(x_vals),
+						[param](auto const val){
+							return val > param;
+						}
+					) - std::begin(x_vals)
+				),
+				static_cast<uint32_t>(std::size(x_vals))
+			)
+		);
+
+		auto const i_x_0 = bsp(i_x_1 - 1, static_cast<uint32_t>(std::size(x_vals)));
+
+		auto const dx = x_vals[i_x_1] - x_vals[i_x_0];
+		auto const dy = y_vals[i_x_1] - y_vals[i_x_0];
+		auto const t = (param - x_vals[i_x_0])/dx;
+
+		return y_vals[i_x_0] + t*dy;
 	}
 
 	template<class T, boundary_sampling_policy U>
