@@ -37,7 +37,7 @@ namespace terraformer::ui::theming
 		}
 
 		constexpr rgba_pixel operator()(float t) const
-		{ return interp(m_lut, static_cast<float>(std::size(m_lut))*t, wrap_around_at_boundary{}) + rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}; }
+		{ return interp_eqdist(m_lut, static_cast<float>(std::size(m_lut))*t, wrap_around_at_boundary{}) + rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}; }
 
 	private:
 		fixed_intensity_colormap() = default;

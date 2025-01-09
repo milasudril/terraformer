@@ -31,7 +31,7 @@ terraformer::displaced_curve terraformer::displace_xy(std::span<location const> 
 		auto const d = distance_xy(c[k], c[k - 1]);
 		c_distance += d;
 		auto const sample_at = c_distance/dy.sample_period;
-		auto const val = interp(dy.offsets, sample_at, clamp_at_boundary{});
+		auto const val = interp_eqdist(dy.offsets, sample_at, clamp_at_boundary{});
 		auto const t = c[k + 1] - c[k - 1];
 		auto const n = direction{displacement{t[1], -t[0], 0.0f}};
 		displaced_curve::index_type const output_index{k};
@@ -44,7 +44,7 @@ terraformer::displaced_curve terraformer::displace_xy(std::span<location const> 
 		auto const d = distance_xy(c[k], c[k - 1]);
 		c_distance += d;
 		auto const sample_at = c_distance/dy.sample_period;
-		auto const val = interp(dy.offsets, sample_at, clamp_at_boundary{});
+		auto const val = interp_eqdist(dy.offsets, sample_at, clamp_at_boundary{});
 		auto const t = c[k] - c[k - 1];
 		auto const n = direction{displacement{t[1], -t[0], 0.0f}};
 		displaced_curve::index_type const output_index{k};

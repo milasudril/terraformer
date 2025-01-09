@@ -64,7 +64,7 @@ namespace terraformer
 	}
 
 	template<std::ranges::random_access_range R, boundary_sampling_policy U>
-	constexpr auto interp(R&& lut, float value, U&& bsp)
+	constexpr auto interp_eqdist(R&& lut, float value, U const& bsp)
 	{
 		using array_type = std::remove_cvref_t<R>;
 

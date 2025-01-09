@@ -20,7 +20,7 @@ TESTCASE(terraformer_interp_wrap_around)
 
 	for(int k = -16; k != 32; ++k)
 	{
-		auto const val = terraformer::interp(vals, 0.5f*static_cast<float>(k), terraformer::wrap_around_at_boundary{});
+		auto const val = terraformer::interp_eqdist(vals, 0.5f*static_cast<float>(k), terraformer::wrap_around_at_boundary{});
 
 		if(k != -1 && k != 15 && k != 31)
 		{ EXPECT_EQ(val, 0.5f*static_cast<float>((k + 16)%16)/8.0f); }

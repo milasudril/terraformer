@@ -136,7 +136,7 @@ terraformer::image terraformer::apply_colormap(grayscale_image const& src,
 		for(uint32_t x = 0; x != ret.width(); ++x)
 		{
 			auto const xi = static_cast<float>(std::size(colors) - 1)*(src(x, y) - min)/z_range;
-			ret(x, y) = interp(colors, xi, clamp_at_boundary{});
+			ret(x, y) = interp_eqdist(colors, xi, clamp_at_boundary{});
 		}
 	}
 

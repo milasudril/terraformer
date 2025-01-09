@@ -107,7 +107,7 @@ namespace terraformer
 		{ std::copy_n(src.m_signal.get(), m_signal_length, m_signal.get()); }
 
 		float operator()(float x) const
-		{ return interp(std::span{m_signal.get(), m_signal_length}, x/m_dx, wrap_around_at_boundary{}); }
+		{ return interp_eqdist(std::span{m_signal.get(), m_signal_length}, x/m_dx, wrap_around_at_boundary{}); }
 
 		float dx() const { return m_dx; }
 
