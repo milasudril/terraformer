@@ -2,6 +2,7 @@
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "ui/value_maps/asinh_value_map.hpp"
+#include "lib/pixel_store/intensity.hpp"
 
 #include <pretty/base.hpp>
 #include <pretty/plot.hpp>
@@ -52,13 +53,13 @@ void dump_color_array(std::span<std::pair<terraformer::rgba_pixel, float> const>
 
 int main()
 {
+	using perceptual_color_intensity = terraformer::intensity<0.5673828125f, 1.0f, 0.060546875f>;
 	static constexpr std::array<float, 4> x_vals{0.0f, 0.5f, 11.0f/12.0f, 12.0f/12.0f};
 	static constexpr std::array<terraformer::rgba_pixel, 4> y_vals{
-//		terraformer::rgba_pixel{0.5f, 0.0f, 0.5f, 1.0f},
-		terraformer::rgba_pixel{0.0f, 0.0f, 1.0f, 1.0f},
-		terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f},
-		terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 1.0f},
-		terraformer::rgba_pixel{0.3333f, 0.3333f, 0.3333f, 1.0f}
+		normalize(terraformer::rgba_pixel{0.0f, 0.0f, 1.0f, 1.0f}, perceptual_color_intensity(0.5f)),
+		normalize(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f}, perceptual_color_intensity(0.5f + 1.0f/6.0f)),
+		normalize(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 1.0f}, perceptual_color_intensity(0.5f + 2.0f/6.0f)),
+		normalize(terraformer::rgba_pixel{0.3333f, 0.3333f, 0.3333f, 1.0f}, perceptual_color_intensity(0.5f + 3.0f/6.0f)),
 	};
 
 	static constexpr terraformer::multi_span<float const, terraformer::rgba_pixel const> span{
