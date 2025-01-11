@@ -172,7 +172,7 @@ namespace terraformer
 		using index_type = multi_span<ParamType const, OutputType const>::index_type;
 		index_type m_last_index{};
 		ParamType m_last_param{};
-		multi_span<ParamType const, ParamType const> m_lut{};
+		multi_span<ParamType const, OutputType const> m_lut{};
 	};
 
 	template<class T, boundary_sampling_policy U>

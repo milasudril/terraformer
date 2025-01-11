@@ -130,6 +130,11 @@ namespace terraformer
 		return a += b;
 	}
 
+	constexpr auto operator-(rgba_pixel a, rgba_pixel b)
+	{
+		return a -= b;
+	}
+
 	constexpr rgba_pixel black() { return rgba_pixel{0.0f, 0.0f, 0.0f}; }
 
 	constexpr rgba_pixel red() { return rgba_pixel{1.0f, 0.0f, 0.0f}; }
