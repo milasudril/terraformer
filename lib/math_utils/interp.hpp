@@ -4,6 +4,7 @@
 #include "./boundary_sampling_policy.hpp"
 #include "./boundary_sampling_policies.hpp"
 #include "lib/common/ranges.hpp"
+#include "lib/array_classes/multi_span.hpp"
 
 #include <cmath>
 #include <cassert>
@@ -122,6 +123,57 @@ namespace terraformer
 
 		return y_vals[left] + t*dy;
 	}
+
+	template<class ParamType, class OutputType>
+	class linear_interpolation_table
+	{
+	public:
+		constexpr explicit linear_interpolation_table(multi_span<ParamType const, OutputType const> lut):
+			m_last_index{lut.element_indices().front()},
+			m_last_param{lut.template get<0>().front()},
+			m_lut{lut}
+		{}
+
+		constexpr auto operator()(ParamType x)
+		{
+			auto const params = m_lut.template get<0>();
+			auto const indices = m_lut.element_indices();
+			auto const start_search_at = x < m_last_param? indices.front() : m_last_index;
+
+			auto index = indices.bound();
+			for(auto k = start_search_at; k != indices.bound(); ++k)
+			{
+				if(params[k] > x)
+				{
+					index = k;
+					break;
+				}
+			}
+
+			auto const left = (index == indices.front())? indices.front() : index - 1;
+			auto const right = std::min(index, indices.back());
+
+			auto const output_vals = m_lut.template get<1>();
+
+			m_last_param = x;
+			m_last_index = left;
+
+			if(right == left)
+			{ return output_vals[left]; }
+
+			auto const dx = params[right] - params[left];
+			auto const dy = output_vals[right] - output_vals[left];
+			auto const t = (x - params[left])/dx;
+
+			return output_vals[left] + t*dy;
+		}
+
+	private:
+		using index_type = multi_span<ParamType const, OutputType const>::index_type;
+		index_type m_last_index{};
+		ParamType m_last_param{};
+		multi_span<ParamType const, ParamType const> m_lut{};
+	};
 
 	template<class T, boundary_sampling_policy U>
 	requires(random_access_input_range_2d<T, float>)

@@ -22,16 +22,16 @@ namespace terraformer
 			using b2 = tuple<Index + 1, Types...>;
 
 		public:
-			tuple() = default;
+			constexpr tuple() = default;
 
 			template<class X, class ... Y>
-			explicit tuple(X&& first, Y&&... other):
+			constexpr explicit tuple(X&& first, Y&&... other):
 				b1{std::forward<X>(first)},
 				b2{std::forward<Y>(other)...}
 			{}
 
 			bool operator==(tuple const&) const = default;
-			bool operator!=(tuple const&) const = default;
+		 bool operator!=(tuple const&) const = default;
 		};
 
 		template<std::size_t Index, class T>
@@ -39,7 +39,7 @@ namespace terraformer
 		{
 		public:
 			bool operator==(tuple const&) const = default;
-			bool operator!=(tuple const&) const = default;
+			 bool operator!=(tuple const&) const = default;
 
 			[[nodiscard]] constexpr T& get() &
 			{ return m_value; }
@@ -99,12 +99,12 @@ namespace terraformer
 
 		template<class ... U>
 		requires(... && same_as_unqual<Types, U>)
-		explicit tuple(U&&... t):base{std::forward<U>(t)...}{}
+		constexpr explicit tuple(U&&... t):base{std::forward<U>(t)...}{}
 
-		tuple(tuple&&) = default;
-		tuple(tuple const&) = default;
-		tuple& operator=(tuple&&) = default;
-		tuple& operator=(tuple const&) = default;
+		constexpr tuple(tuple&&) = default;
+		constexpr tuple(tuple const&) = default;
+		constexpr tuple& operator=(tuple&&) = default;
+		constexpr tuple& operator=(tuple const&) = default;
 
 		bool operator==(tuple const&) const = default;
 		bool operator!=(tuple const&) const = default;
@@ -154,27 +154,27 @@ namespace terraformer
 	}
 
 	template<class ... Types>
-	[[nodiscard]] bool operator==(tuple<Types const&...> const& a, tuple<Types...> const& b)
+	[[nodiscard]] constexpr bool operator==(tuple<Types const&...> const& a, tuple<Types...> const& b)
 	{
 		return tuple_detail::equal(std::make_index_sequence<sizeof...(Types)>{}, a, b);
 	}
 
 	template<class ... Types>
-	[[nodiscard]] bool operator==(tuple<Types...> const& a,
+	[[nodiscard]] constexpr bool operator==(tuple<Types...> const& a,
 		tuple<Types const&...> const& b)
 	{
 		return b == a;
 	}
 
 	template<class ... Types>
-	[[nodiscard]] bool operator!=(tuple<Types const&...> const& a,
+	[[nodiscard]] constexpr bool operator!=(tuple<Types const&...> const& a,
 		tuple<Types...> const& b)
 	{
 		return !(a == b);
 	}
 
 	template<class ... Types>
-	[[nodiscard]] bool operator!=(tuple<Types...> const& a,
+	[[nodiscard]] constexpr bool operator!=(tuple<Types...> const& a,
 		tuple<Types const&...> const& b)
 	{
 		return !(b == a);

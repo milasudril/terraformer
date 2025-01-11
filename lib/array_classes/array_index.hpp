@@ -61,7 +61,7 @@ namespace terraformer
 
 	template<class T, class Rep>
 	constexpr auto make_byte_size(array_size<T, Rep> size)
-	{ return byte_size{(sizeof(T)*size).get()}; }
+	{ return byte_size<size_t>{(sizeof(T)*size).get()}; }
 
 	template<class T, class Rep>
 	constexpr auto operator+(array_size<T, Rep> a, array_size<T, Rep> b)

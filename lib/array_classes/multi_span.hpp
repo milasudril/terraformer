@@ -53,50 +53,50 @@ namespace terraformer
 
 		multi_span() noexcept = default;
 
-		explicit multi_span(T*... pointers, size_t size) noexcept:
+		constexpr explicit multi_span(T*... pointers, size_t size) noexcept:
 			m_storage{pointers...},
 			m_size{size}
 		{}
 
-		explicit multi_span(T*... pointers, size_type size) noexcept:
+		constexpr explicit multi_span(T*... pointers, size_type size) noexcept:
 			m_storage{pointers...},
 			m_size{size}
 		{}
 
-		explicit multi_span(storage_type const& storage, size_t size) noexcept:
+		constexpr explicit multi_span(storage_type const& storage, size_t size) noexcept:
 			m_storage{storage},
 			m_size{size}
 		{}
 
-		explicit multi_span(storage_type const& storage, size_type size) noexcept:
+		constexpr explicit multi_span(storage_type const& storage, size_type size) noexcept:
 			m_storage{storage},
 			m_size{size}
 		{}
 
 		template<class = void>
 		requires(... && std::is_const_v<T>)
-		explicit multi_span(multi_span<std::remove_const_t<T>...> span):
+		constexpr explicit multi_span(multi_span<std::remove_const_t<T>...> const& span):
 			m_storage{terraformer::apply([](auto const&... args){
 				return tuple{static_cast<T*>(args)...};
 			}, span.pointers())},
 			m_size{span.size()}
 		{}
 
-		auto element_indices() const noexcept
+		constexpr auto element_indices() const noexcept
 		{ return index_range{index_type{}, index_type{} + m_size.get()}; }
 
-		auto size() const noexcept
+		constexpr auto size() const noexcept
 		{ return m_size; }
 
-		auto empty() const noexcept
+		constexpr auto empty() const noexcept
 		{ return m_size.get() == 0; }
 
 		template<size_t From, class ... Arg>
-		void assign(index_type index, Arg&&... args)
+		constexpr void assign(index_type index, Arg&&... args)
 		{ assign_values<From>(m_storage, index, std::forward<Arg>(args)...); }
 
 		template<size_t AttributeIndex>
-		auto get() const noexcept
+		constexpr auto get() const noexcept
 		{
 			using sel_attribute_type = attribute_type<AttributeIndex>;
 			auto const ptr = m_storage.template get<AttributeIndex>();
@@ -111,10 +111,10 @@ namespace terraformer
 
 		template<class Type>
 		requires(has_type<Type>())
-		auto get_by_type() const noexcept
+		constexpr auto get_by_type() const noexcept
 		{ return get<get_index_from_type<Type, std::remove_const_t<T>...>()>(); }
 
-		reference operator[](index_type index) const noexcept
+		constexpr reference operator[](index_type index) const noexcept
 		{
 			assert(index < m_size);
 			return terraformer::apply(
@@ -125,7 +125,7 @@ namespace terraformer
 			);
 		}
 
-		auto const& pointers() const noexcept
+		constexpr auto const& pointers() const noexcept
 		{ return m_storage; }
 
 	private:

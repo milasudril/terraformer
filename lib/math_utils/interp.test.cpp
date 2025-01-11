@@ -46,3 +46,24 @@ TESTCASE(terraformer_interp_clamp)
 
 	EXPECT_EQ(terraformer::interp(x_vals, y_vals, 1.25f), 1.0f);
 }
+
+TESTCASE(terraformer_interp_2_clamp)
+{
+	static constexpr std::array<float, 4> x_vals{0.0f, 0.5f, 0.75f, 1.0f};
+	static constexpr std::array<float, 4> y_vals{0.f, 1.0f/3.0f, 2.0f/3.0f, 1.0f};
+
+	static constexpr terraformer::multi_span<float const, float const> span{
+		std::data(x_vals),
+		std::data(y_vals),
+		std::size(x_vals)
+	};
+
+	terraformer::linear_interpolation_table lut{span};
+
+	EXPECT_EQ(lut(0.25f), 1.0f/6.0f);
+	EXPECT_EQ(lut(0.75f), 2.0f/3.0f);
+	EXPECT_EQ(lut(0.0f), 0.0f);
+	EXPECT_EQ(lut(1.0f), 1.0f);
+	EXPECT_EQ(lut(-0.25f), 0.0f);
+	EXPECT_EQ(lut(1.25f), 1.0f);
+}
