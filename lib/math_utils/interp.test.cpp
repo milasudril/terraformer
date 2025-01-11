@@ -5,7 +5,7 @@
 
 #include <testfwk/testfwk.hpp>
 
-TESTCASE(terraformer_interp_wrap_around)
+TESTCASE(terraformer_interp_eqdist_wrap_around)
 {
 	std::array<float, 8> vals{
 		0.0f,
@@ -27,4 +27,22 @@ TESTCASE(terraformer_interp_wrap_around)
 		else
 		{ EXPECT_EQ(val, 0.5f*(vals[0] + vals[7])); }
 	}
+}
+
+TESTCASE(terraformer_interp_clamp)
+{
+	std::array<float, 4> x_vals{0.0f, 0.5f, 0.75f, 1.0f};
+	std::array<float, 4> y_vals{0.f, 1.0f/3.0f, 2.0f/3.0f, 1.0f};
+
+	EXPECT_EQ(terraformer::interp(x_vals, y_vals, 0.25f), 1.0f/6.0f);
+
+	EXPECT_EQ(terraformer::interp(x_vals, y_vals, 0.75f), 2.0f/3.0f);
+
+	EXPECT_EQ(terraformer::interp(x_vals, y_vals, 0.0f), 0.0f);
+
+	EXPECT_EQ(terraformer::interp(x_vals, y_vals, 1.0f), 1.0f);
+
+	EXPECT_EQ(terraformer::interp(x_vals, y_vals, -0.25f), 0.0f);
+
+	EXPECT_EQ(terraformer::interp(x_vals, y_vals, 1.25f), 1.0f);
 }

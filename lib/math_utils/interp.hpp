@@ -2,6 +2,7 @@
 #define TERRAFORMER_INTERP_HPP
 
 #include "./boundary_sampling_policy.hpp"
+#include "./boundary_sampling_policies.hpp"
 #include "lib/common/ranges.hpp"
 
 #include <cmath>
@@ -97,33 +98,29 @@ namespace terraformer
 
 	template<
 		std::ranges::random_access_range RangeX,
-		std::ranges::random_access_range RangeY,
-		boundary_sampling_policy U
+		std::ranges::random_access_range RangeY
 	>
-	constexpr auto interp(RangeX&& x_vals, RangeY&& y_vals, float param, U const& bsp)
+	constexpr auto interp(RangeX&& x_vals, RangeY&& y_vals, float param)
 	{
-		auto const i_x_1 = static_cast<int32_t>(
-			bsp(
-				static_cast<uint32_t>(
-					std::find_if(
-						std::begin(x_vals),
-						std::end(x_vals),
-						[param](auto const val){
-							return val > param;
-						}
-					) - std::begin(x_vals)
-				),
-				static_cast<uint32_t>(std::size(x_vals))
-			)
+		constexpr terraformer::clamp_at_boundary bsp{};
+
+		auto const index = static_cast<int32_t>(
+			std::find_if(std::begin(x_vals), std::end(x_vals), [param](auto const val){
+				return val > param;
+			}) - std::begin(x_vals)
 		);
 
-		auto const i_x_0 = bsp(i_x_1 - 1, static_cast<uint32_t>(std::size(x_vals)));
+		auto const left = bsp(index - 1, static_cast<uint32_t>(std::size(x_vals)));
+		auto const right = bsp(index, static_cast<uint32_t>(std::size(x_vals)));
 
-		auto const dx = x_vals[i_x_1] - x_vals[i_x_0];
-		auto const dy = y_vals[i_x_1] - y_vals[i_x_0];
-		auto const t = (param - x_vals[i_x_0])/dx;
+		if(right == left)
+		{ return y_vals[left]; }
 
-		return y_vals[i_x_0] + t*dy;
+		auto const dx = x_vals[right] - x_vals[left];
+		auto const dy = y_vals[right] - y_vals[left];
+		auto const t = (param - x_vals[left])/dx;
+
+		return y_vals[left] + t*dy;
 	}
 
 	template<class T, boundary_sampling_policy U>
