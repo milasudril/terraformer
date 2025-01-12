@@ -13,6 +13,8 @@
 #include "ui/wsapi/native_window.hpp"
 #include "ui/widgets/form.hpp"
 
+#include "lib/pixel_store/image_io.hpp"
+
 namespace
 {
 	struct mainwin_tag
@@ -82,10 +84,15 @@ int main(int, char**)
 		terraformer::ui::main::widget_orientation::horizontal
 	};
 
-	terraformer::app::bind(u8"Plain settings", plain, main_form);
+	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
+	plain_form.on_content_updated([&plain](auto&&...){
+		terraformer::grayscale_image output{512, 512};
+		replace_pixels(output.pixels(), 96.0f, plain);
+		store(output, "/dev/shm/slask.exr");
+	});
 
 	main_form.on_content_updated([](auto&&...){
-		printf("Content updated\n");
+		printf("Main: Content updated\n");
 	});
 
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
