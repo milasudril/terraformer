@@ -38,6 +38,18 @@ void make_colored_cell(html_color rgb, size_t index, size_t colspan = 1)
 	);
 }
 
+void siformat(float value)
+{
+	static constexpr std::array<char const*, 21> prefixes{
+		"q", "r", "y", "z", "a", "f", "p", "n", "µ", "m","",
+		"k", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"
+	};
+
+	auto scaled_exponent = value != 0.0f? static_cast<int>(std::log10(std::abs(value)))/3 : 0;
+	value /= std::pow(10.0f, static_cast<float>(scaled_exponent*3));
+	printf("%.8g %s\n<br>", value, prefixes[scaled_exponent + 10]);
+}
+
 void dump_color_array(std::span<std::pair<terraformer::rgba_pixel, float> const> colors)
 {
 	puts("<table>");
@@ -45,6 +57,7 @@ void dump_color_array(std::span<std::pair<terraformer::rgba_pixel, float> const>
 	{
 		puts("<tr>");
 		make_colored_cell(make_html_color(colors[k - 1].first), k);
+		siformat(colors[k - 1].second);
 		printf("<td>%.2g</td>", colors[k - 1].second);
 		puts("</tr>");
 	}
