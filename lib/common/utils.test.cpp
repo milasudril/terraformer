@@ -261,10 +261,22 @@ TESTCASE(terraformer_scientific_to_natural_faulty_input)
 		EXPECT_EQ(res, "!347e6");
 	}
 
-	// Too many fraction separtors in mantissa
+	// Too many fraction separators in mantissa
 	{
 		auto res = terraformer::scientific_to_natural("+34.34.7e6");
 		EXPECT_EQ(res, "+34.34.7e6");
+	}
+
+	// Fraction separator at front
+	{
+		auto res = terraformer::scientific_to_natural("+.34e6");
+		EXPECT_EQ(res, "+.34e6");
+	}
+
+	// Fraction separator at back
+	{
+		auto res = terraformer::scientific_to_natural("+34.e6");
+		EXPECT_EQ(res, "+34.e6");
 	}
 
 	// Invalid chars in mantissa

@@ -182,6 +182,9 @@ std::string terraformer::scientific_to_natural(std::string_view input)
 	auto const mantissa_digits = std::string_view{mantissa_digits_begin, std::end(mantissa)};
 	if(std::ranges::count_if(mantissa_digits, is_frac_separator) > 1)
 	{ return std::string{input}; }
+	auto const frac_separator_loc = std::ranges::find_if(mantissa_digits, is_frac_separator);
+	if(frac_separator_loc == &mantissa_digits.front() || frac_separator_loc == &mantissa_digits.back())
+	{ return std::string{input}; }
 	if(!std::ranges::all_of(mantissa_digits, valid_char_mantissa))
 	{ return std::string{input}; }
 	auto const mantissa_sign = (mantissa_digits_begin != std::begin(mantissa))?
@@ -204,5 +207,17 @@ std::string terraformer::scientific_to_natural(std::string_view input)
 	if(exponent_sign != '+' && exponent_sign != '-')
 	{ return std::string{input}; }
 
-	throw std::runtime_error{"Unimplemented"};
+	std::string ret;
+	if(mantissa_sign != '+')
+	{ ret += mantissa_sign; }
+
+	auto exp_value = 0;
+	std::from_chars(std::begin(exponent_digits), std::end(exponent_digits), exp_value);
+
+	if(exponent_sign == '+')
+	{
+
+	}
+
+	return ret;
 }
