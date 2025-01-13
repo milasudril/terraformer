@@ -219,3 +219,75 @@ TESTCASE(terraformer_utf8_utf32_roundtrip)
 
 	EXPECT_EQ(encoded, input_string);
 }
+
+TESTCASE(terraformer_scientific_to_natural_faulty_input)
+{
+	// Too many e
+	{
+		auto res1 = terraformer::scientific_to_natural("1e655e78");
+		EXPECT_EQ(res1, "1e655e78");
+
+		auto res2 = terraformer::scientific_to_natural("1E655e78");
+		EXPECT_EQ(res2, "1E655e78");
+
+		auto res3 = terraformer::scientific_to_natural("1E655E78");
+		EXPECT_EQ(res3, "1E655E78");
+
+		auto res4 = terraformer::scientific_to_natural("1e655E78");
+		EXPECT_EQ(res4, "1e655E78");
+	}
+
+	// Start with e
+	{
+		auto res = terraformer::scientific_to_natural("e54");
+		EXPECT_EQ(res, "e54");
+	}
+
+	// End with e
+	{
+		auto res = terraformer::scientific_to_natural("54e");
+		EXPECT_EQ(res, "54e");
+	}
+
+	// Too many leading chars in mantissa
+	{
+		auto res = terraformer::scientific_to_natural("+ 347e6");
+		EXPECT_EQ(res, "+ 347e6");
+	}
+
+	// Wrong sign char in mantissa
+	{
+		auto res = terraformer::scientific_to_natural("!347e6");
+		EXPECT_EQ(res, "!347e6");
+	}
+
+	// Too many fraction separtors in mantissa
+	{
+		auto res = terraformer::scientific_to_natural("+34.34.7e6");
+		EXPECT_EQ(res, "+34.34.7e6");
+	}
+
+	// Invalid chars in mantissa
+	{
+		auto res = terraformer::scientific_to_natural("+6434a.67e7");
+		EXPECT_EQ(res, "+6434a.67e7");
+	}
+
+	// Too many leading chars in exponent
+	{
+		auto res = terraformer::scientific_to_natural("+467.67e+ 7");
+		EXPECT_EQ(res, "+467.67e+ 7");
+	}
+
+	// Invalid chars in exponent
+	{
+		auto res = terraformer::scientific_to_natural("+467.67e+745d");
+		EXPECT_EQ(res, "+467.67e+745d");
+	}
+
+	// Wrong sign char in mantissa
+	{
+		auto res = terraformer::scientific_to_natural("+347e!6");
+		EXPECT_EQ(res, "+347e!6");
+	}
+}

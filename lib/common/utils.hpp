@@ -164,6 +164,8 @@ namespace terraformer
 		return ret;
 	}
 
+	std::string scientific_to_natural(std::string_view input);
+
 }
 
 #endif

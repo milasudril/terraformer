@@ -2,6 +2,7 @@
 
 #include "./utils.hpp"
 #include <bit>
+#include <algorithm>
 
 namespace
 {
@@ -155,4 +156,53 @@ std::u32string terraformer::to_utf32(std::u8string_view str)
 	{ throw std::runtime_error{"Invalid UTF-8 sequence"}; }
 
 	return ret;
+}
+
+std::string terraformer::scientific_to_natural(std::string_view input)
+{
+	auto const is_e = [](char value){ return value == 'E' || value == 'e'; };
+	auto const is_digit = [](char value){ return value >= '0' && value <= '9'; };
+	auto const is_frac_separator = [](char value){ return value == '.'; };
+	auto const valid_char_mantissa = [is_digit, is_frac_separator](char value){
+		return is_digit(value) || is_frac_separator(value);
+	};
+
+	if(std::ranges::count_if(input, is_e) != 1)
+	{ return std::string{input}; }
+
+	auto const e_offset = std::ranges::find_if(input, is_e);
+	if(e_offset == &input.back() || e_offset == &input.front())
+	{ return std::string{input}; }
+
+	// Since delimiter is not at begin or end, mantissa must have length 1
+	auto const mantissa = std::string_view{std::begin(input), e_offset};
+	auto const mantissa_digits_begin = std::ranges::find_if(mantissa, is_digit);
+	if(mantissa_digits_begin - std::begin(mantissa) >= 2)
+	{ return std::string{input}; }
+	auto const mantissa_digits = std::string_view{mantissa_digits_begin, std::end(mantissa)};
+	if(std::ranges::count_if(mantissa_digits, is_frac_separator) > 1)
+	{ return std::string{input}; }
+	if(!std::ranges::all_of(mantissa_digits, valid_char_mantissa))
+	{ return std::string{input}; }
+	auto const mantissa_sign = (mantissa_digits_begin != std::begin(mantissa))?
+		mantissa.front() : '+';
+	if(mantissa_sign != '+' && mantissa_sign != '-')
+	{ return std::string{input}; }
+	//auto const mantissa_digit_count = std::ranges::count_if(mantissa_digits, is_digit);
+
+
+	// Since delimiter is not at begin or end, exponent must have length 1
+	auto const exponent = std::string_view{e_offset + 1, std::end(input)};
+	auto const exponent_digits_begin = std::ranges::find_if(exponent, is_digit);
+	if(exponent_digits_begin - std::begin(exponent) >= 2)
+	{ return std::string{input}; }
+	auto const exponent_digits = std::string_view{exponent_digits_begin, std::end(exponent)};
+	if(!std::ranges::all_of(exponent_digits, is_digit))
+	{ return std::string{input}; }
+	auto const exponent_sign = (exponent_digits_begin != std::begin(exponent))?
+		exponent.front() : '+';
+	if(exponent_sign != '+' && exponent_sign != '-')
+	{ return std::string{input}; }
+
+	throw std::runtime_error{"Unimplemented"};
 }
