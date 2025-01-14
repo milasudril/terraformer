@@ -163,9 +163,6 @@ std::string terraformer::scientific_to_natural(std::string_view input)
 	auto const is_e = [](char value){ return value == 'E' || value == 'e'; };
 	auto const is_digit = [](char value){ return value >= '0' && value <= '9'; };
 	auto const is_frac_separator = [](char value){ return value == '.'; };
-	auto const valid_char_mantissa = [is_digit, is_frac_separator](char value){
-		return is_digit(value) || is_frac_separator(value);
-	};
 
 	if(std::ranges::count_if(input, is_e) != 1)
 	{ return std::string{input}; }
@@ -185,7 +182,12 @@ std::string terraformer::scientific_to_natural(std::string_view input)
 	auto const frac_separator_loc = std::ranges::find_if(mantissa_digits, is_frac_separator);
 	if(frac_separator_loc == &mantissa_digits.front() || frac_separator_loc == &mantissa_digits.back())
 	{ return std::string{input}; }
-	if(!std::ranges::all_of(mantissa_digits, valid_char_mantissa))
+	auto const mantissa_int = std::string_view{mantissa_digits_begin, frac_separator_loc};
+	auto const mantissa_frac = frac_separator_loc == std::end(mantissa_digits)?
+		std::string_view{} : std::string_view{frac_separator_loc + 1, std::end(mantissa_digits)};
+	if(!std::ranges::all_of(mantissa_int, is_digit))
+	{ return std::string{input}; }
+	if(!std::ranges::all_of(mantissa_frac, is_digit))
 	{ return std::string{input}; }
 	auto const mantissa_sign = (mantissa_digits_begin != std::begin(mantissa))?
 		mantissa.front() : '+';
@@ -211,12 +213,28 @@ std::string terraformer::scientific_to_natural(std::string_view input)
 	if(mantissa_sign != '+')
 	{ ret += mantissa_sign; }
 
-	auto exp_value = 0;
+	size_t exp_value = 0;
 	std::from_chars(std::begin(exponent_digits), std::end(exponent_digits), exp_value);
 
 	if(exponent_sign == '+')
 	{
+		ret += mantissa_int;
+		size_t k = 0;
+		for(; k != std::min(std::size(mantissa_frac), exp_value); ++k)
+		{ ret += mantissa_frac[k]; }
 
+		if(k != std::size(mantissa_frac))
+		{
+			ret += '.';
+			for(; k != std::size(mantissa_frac); ++k)
+			{ ret += mantissa_frac[k];}
+		}
+		else
+		if(k != exp_value)
+		{
+			for(;k != exp_value; ++k)
+			{ ret += '0'; }
+		}
 	}
 
 	return ret;

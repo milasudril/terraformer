@@ -279,10 +279,16 @@ TESTCASE(terraformer_scientific_to_natural_faulty_input)
 		EXPECT_EQ(res, "+34.e6");
 	}
 
-	// Invalid chars in mantissa
+	// Invalid chars in mantissa (int part)
 	{
 		auto res = terraformer::scientific_to_natural("+6434a.67e7");
 		EXPECT_EQ(res, "+6434a.67e7");
+	}
+
+	// Invalid chars in mantissa (frac part)
+	{
+		auto res = terraformer::scientific_to_natural("+6434.6s7e7");
+		EXPECT_EQ(res, "+6434.6s7e7");
 	}
 
 	// Too many leading chars in exponent
@@ -301,5 +307,80 @@ TESTCASE(terraformer_scientific_to_natural_faulty_input)
 	{
 		auto res = terraformer::scientific_to_natural("+347e!6");
 		EXPECT_EQ(res, "+347e!6");
+	}
+}
+
+TESTCASE(terraformer_scientific_to_natural_correct_input)
+{
+	//Positive number no sign, positive exponent no sign
+	{
+		auto res0 = terraformer::scientific_to_natural("3256.45e0");
+		EXPECT_EQ(res0, "3256.45");
+
+		auto res1 = terraformer::scientific_to_natural("3256.45e1");
+		EXPECT_EQ(res1, "32564.5");
+
+		auto res2 = terraformer::scientific_to_natural("3256.45e2");
+		EXPECT_EQ(res2, "325645");
+
+		auto res3 = terraformer::scientific_to_natural("3256.45e3");
+		EXPECT_EQ(res3, "3256450");
+
+		auto res_no_frac = terraformer::scientific_to_natural("325645e3");
+		EXPECT_EQ(res_no_frac, "325645000");
+	}
+
+	//Positive number no sign, positive exponent sign
+	{
+		auto res0 = terraformer::scientific_to_natural("3256.45e+0");
+		EXPECT_EQ(res0, "3256.45");
+
+		auto res1 = terraformer::scientific_to_natural("3256.45e+1");
+		EXPECT_EQ(res1, "32564.5");
+
+		auto res2 = terraformer::scientific_to_natural("3256.45e+2");
+		EXPECT_EQ(res2, "325645");
+
+		auto res3 = terraformer::scientific_to_natural("3256.45e+3");
+		EXPECT_EQ(res3, "3256450");
+
+		auto res_no_frac = terraformer::scientific_to_natural("325645e+03");
+		EXPECT_EQ(res_no_frac, "325645000");
+	}
+
+	//Positive number sign, positive exponent sign
+	{
+		auto res0 = terraformer::scientific_to_natural("+3256.45e+0");
+		EXPECT_EQ(res0, "3256.45");
+
+		auto res1 = terraformer::scientific_to_natural("+3256.45e+1");
+		EXPECT_EQ(res1, "32564.5");
+
+		auto res2 = terraformer::scientific_to_natural("+3256.45e+2");
+		EXPECT_EQ(res2, "325645");
+
+		auto res3 = terraformer::scientific_to_natural("+3256.45e+3");
+		EXPECT_EQ(res3, "3256450");
+
+		auto res_no_frac = terraformer::scientific_to_natural("+325645e+09");
+		EXPECT_EQ(res_no_frac, "325645000000000");
+	}
+
+	//Negative number
+	{
+		auto res0 = terraformer::scientific_to_natural("-3256.45e0");
+		EXPECT_EQ(res0, "-3256.45");
+
+		auto res1 = terraformer::scientific_to_natural("-3256.45e1");
+		EXPECT_EQ(res1, "-32564.5");
+
+		auto res2 = terraformer::scientific_to_natural("-3256.45e2");
+		EXPECT_EQ(res2, "-325645");
+
+		auto res3 = terraformer::scientific_to_natural("-3256.45e3");
+		EXPECT_EQ(res3, "-3256450");
+
+		auto res_no_frac = terraformer::scientific_to_natural("-325645e3");
+		EXPECT_EQ(res_no_frac, "-325645000");
 	}
 }
