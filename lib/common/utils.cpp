@@ -193,8 +193,6 @@ std::string terraformer::scientific_to_natural(std::string_view input)
 		mantissa.front() : '+';
 	if(mantissa_sign != '+' && mantissa_sign != '-')
 	{ return std::string{input}; }
-	//auto const mantissa_digit_count = std::ranges::count_if(mantissa_digits, is_digit);
-
 
 	// Since delimiter is not at begin or end, exponent must have length 1
 	auto const exponent = std::string_view{e_offset + 1, std::end(input)};
@@ -234,6 +232,27 @@ std::string terraformer::scientific_to_natural(std::string_view input)
 		{
 			for(;k != exp_value; ++k)
 			{ ret += '0'; }
+		}
+	}
+	else
+	{
+		if(exp_value >= std::size(mantissa_int))
+		{
+			ret += "0.";
+			for(size_t k = 0; k != exp_value - std::size(mantissa_int); ++k)
+			{ ret += '0';}
+			std::ranges::copy(mantissa_int, std::back_inserter(ret));
+			std::ranges::copy(mantissa_frac, std::back_inserter(ret));
+		}
+		else
+		{
+			size_t k = 0;
+			for(; k != std::size(mantissa_int) - exp_value; ++k)
+			{ ret += mantissa_int[k]; }
+			ret += '.';
+			for(; k != std::size(mantissa_int); ++k)
+			{ ret += mantissa_int[k]; }
+			std::ranges::copy(mantissa_frac, std::back_inserter(ret));
 		}
 	}
 

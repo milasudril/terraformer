@@ -366,7 +366,7 @@ TESTCASE(terraformer_scientific_to_natural_correct_input)
 		EXPECT_EQ(res_no_frac, "325645000000000");
 	}
 
-	//Negative number
+	//Negative number positive exponent
 	{
 		auto res0 = terraformer::scientific_to_natural("-3256.45e0");
 		EXPECT_EQ(res0, "-3256.45");
@@ -382,5 +382,23 @@ TESTCASE(terraformer_scientific_to_natural_correct_input)
 
 		auto res_no_frac = terraformer::scientific_to_natural("-325645e3");
 		EXPECT_EQ(res_no_frac, "-325645000");
+	}
+
+	//Negative number negative exponent
+	{
+		auto res0 = terraformer::scientific_to_natural("-3256.45e-0");
+		EXPECT_EQ(res0, "-3256.45");
+
+		auto res1 = terraformer::scientific_to_natural("-3256.45e-1");
+		EXPECT_EQ(res1, "-325.645");
+
+		auto res2 = terraformer::scientific_to_natural("-3256.45e-2");
+		EXPECT_EQ(res2, "-32.5645");
+
+		auto res4 = terraformer::scientific_to_natural("-3256.45e-4");
+		EXPECT_EQ(res4, "-0.325645");
+
+		auto res5 = terraformer::scientific_to_natural("-3256.45e-5");
+		EXPECT_EQ(res5, "-0.0325645");
 	}
 }
