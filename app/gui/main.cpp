@@ -3,6 +3,7 @@
 //@	}
 
 #include "./plain.hpp"
+
 #include "ui/drawing_api/gl_surface_configuration.hpp"
 #include "ui/drawing_api/gl_resource_factory.hpp"
 #include "ui/drawing_api/gl_frame_renderer.hpp"
@@ -14,6 +15,8 @@
 #include "ui/widgets/form.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
+#include "lib/execution/task_receiver.hpp"
+#include "lib/execution/notifying_task.hpp"
 
 namespace
 {
@@ -55,6 +58,14 @@ namespace
 						( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
 							type, severity, message );
 	}
+
+	struct task_completed_event
+	{};
+
+	void trigger(task_completed_event)
+	{
+		puts("Operation completed");
+	}
 }
 
 int main(int, char**)
@@ -85,12 +96,27 @@ int main(int, char**)
 	};
 
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
-	plain_form.on_content_updated([&plain](auto&&...){
-#if 0
-		terraformer::grayscale_image output{512, 512};
-		replace_pixels(output.pixels(), 96.0f, plain);
-		store(output, "/dev/shm/slask.exr");
-#endif
+
+	terraformer::task_receiver<
+		terraformer::notifying_task<
+			task_completed_event,
+			terraformer::move_only_function<void()>
+		>
+	> task_receiver;
+
+	plain_form.on_content_updated([&plain, &task_receiver]<class ... Args>(Args&&...){
+		task_receiver.replace_pending_task(
+			terraformer::notifying_task{
+				task_completed_event{},
+				terraformer::move_only_function<void()>{
+					[&plain]() {
+						terraformer::grayscale_image output{512, 512};
+						replace_pixels(output.pixels(), 96.0f, plain);
+						store(output, "/dev/shm/slask.exr");
+					}
+				}
+			}
+		);
 	});
 
 	main_form.on_content_updated([](auto&&...){

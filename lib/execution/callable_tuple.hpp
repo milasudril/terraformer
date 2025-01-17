@@ -17,6 +17,9 @@ namespace terraformer
 		decltype(auto) operator()() const
 		{ return std::apply(m_func, m_args); }
 
+		decltype(auto) operator()()
+		{ return std::apply(m_func, m_args); }
+
 	private:
 		Callable m_func;
 		[[no_unique_address]] std::tuple<Args...> m_args;
