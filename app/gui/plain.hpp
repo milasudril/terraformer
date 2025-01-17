@@ -43,7 +43,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.elevation)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{10000.0f}
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
 		);
 
