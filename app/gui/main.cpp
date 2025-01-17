@@ -86,9 +86,11 @@ int main(int, char**)
 
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 	plain_form.on_content_updated([&plain](auto&&...){
+#if 0
 		terraformer::grayscale_image output{512, 512};
 		replace_pixels(output.pixels(), 96.0f, plain);
 		store(output, "/dev/shm/slask.exr");
+#endif
 	});
 
 	main_form.on_content_updated([](auto&&...){

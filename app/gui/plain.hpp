@@ -3,8 +3,7 @@
 
 #include "lib/generators/plain_generator/plain.hpp"
 #include "ui/widgets/form.hpp"
-#include "ui/value_maps/asinh_value_map.hpp"
-#include "ui/value_maps/qurt_value_map.hpp"
+#include "ui/value_maps/sqrt_value_map.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
 
@@ -44,10 +43,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.elevation)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::asinh_value_map{
-					266.3185546307779f,
-					0.7086205026374324f*6.0f
-				}
+				terraformer::ui::value_maps::sqrt_value_map{10000.0f}
 			}
 		);
 
@@ -56,7 +52,7 @@ namespace terraformer::app
 				.label = u8"d/dx",
 				.value_reference = std::reference_wrapper(field_value.ddx)
 			},
-			terraformer::ui::widgets::knob{terraformer::ui::value_maps::qurt_value_map{3.0f}}
+			terraformer::ui::widgets::knob{terraformer::ui::value_maps::sqrt_value_map{1.0f}}
 		);
 
 		ret.create_widget(
@@ -64,7 +60,7 @@ namespace terraformer::app
 				.label = u8"d/dy",
 				.value_reference = std::reference_wrapper(field_value.ddy)
 			},
-			terraformer::ui::widgets::knob{terraformer::ui::value_maps::qurt_value_map{3.0f}}
+			terraformer::ui::widgets::knob{terraformer::ui::value_maps::sqrt_value_map{1.0f}}
 		);
 
 		return ret;
