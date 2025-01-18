@@ -78,5 +78,7 @@ namespace terraformer
 	template<float RedWeight, float GreenWeight, float BlueWeight>
 	inline auto to_string(intensity<RedWeight, GreenWeight, BlueWeight> x)
 	{ return std::to_string(x.value()); }
+
+	using perceptual_color_intensity = terraformer::intensity<0.5673828125f, 1.0f, 0.060546875f>;
 }
 #endif

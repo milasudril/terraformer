@@ -8,8 +8,6 @@
 
 namespace terraformer::ui::theming
 {
-	using perceptual_color_intensity = terraformer::intensity<0.5673828125f, 1.0f, 0.060546875f>;
-
 	class fixed_intensity_colormap
 	{
 	public:
