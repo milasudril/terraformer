@@ -55,6 +55,8 @@ namespace terraformer::ui::widgets
 		void theme_updated(main::config const& cfg, main::widget_instance_info)
 		{
 			m_null_texture = cfg.misc_textures.null;
+			m_fg_tint = cfg.output_area.colors.foreground;
+			m_border_thickness = static_cast<uint32_t>(cfg.input_area.border_thickness);
 		}
 
 	private:
@@ -68,6 +70,9 @@ namespace terraformer::ui::widgets
 		};
 		std::mutex m_image_mutex;
 		main::unique_texture m_image{image{1, 1}};
+		main::unique_texture m_frame{image{1 ,1}};
+		rgba_pixel m_fg_tint;
+		unsigned int m_border_thickness = 0;
 		main::immutable_shared_texture m_null_texture;
 	};
 }
