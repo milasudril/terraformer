@@ -13,6 +13,7 @@
 #include "ui/theming/theme_loader.hpp"
 #include "ui/wsapi/native_window.hpp"
 #include "ui/widgets/form.hpp"
+#include "ui/widgets/false_color_image_view.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/execution/task_receiver.hpp"
