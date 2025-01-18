@@ -3,6 +3,7 @@
 #ifndef TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 #define TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 
+#include "./value_map.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
 #include "lib/common/move_only_function.hpp"
@@ -130,23 +131,7 @@ namespace terraformer::ui::widgets
 		internal_value_type m_value;
 		state m_state_current = state::released;
 
-		struct value_map_vtable
-		{
-			template<class ValueMap>
-			constexpr explicit value_map_vtable(std::type_identity<ValueMap>):
-				from_value{[](void const* obj, float value){
-					return static_cast<ValueMap const*>(obj)->from_value(value);
-				}},
-				to_value{[](void const* obj, float value){
-					return static_cast<ValueMap const*>(obj)->to_value(value);
-				}}
-			{}
-
-			float (*from_value)(void const*, float);
-			float (*to_value)(void const*, float);
-		};
-
-		unique_resource<value_map_vtable> m_value_map{
+		type_erased_value_map m_value_map{
 			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
 		};
 	};
