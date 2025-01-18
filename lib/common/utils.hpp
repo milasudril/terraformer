@@ -166,6 +166,7 @@ namespace terraformer
 
 	std::string scientific_to_natural(std::string_view input);
 
+	std::string siformat(float value, size_t n_digits);
 }
 
 #endif

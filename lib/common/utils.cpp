@@ -3,6 +3,7 @@
 #include "./utils.hpp"
 #include <bit>
 #include <algorithm>
+#include <format>
 
 namespace
 {
@@ -257,4 +258,19 @@ std::string terraformer::scientific_to_natural(std::string_view input)
 	}
 
 	return ret;
+}
+
+std::string terraformer::siformat(float value, size_t n_digits)
+{
+	static constexpr std::array<char const*, 21> prefixes{
+		"q", "r", "y", "z", "a", "f", "p", "n", "µ", "m","",
+		"k", "M", "G", "T", "P", "E", "Z", "Y", "R", "Q"
+	};
+
+	auto scaled_exponent = value != 0.0f? static_cast<int>(std::log10(std::abs(value)))/3 : 0;
+	value /= std::pow(10.0f, static_cast<float>(scaled_exponent*3));
+	auto formatted_value = scientific_to_natural(std::format("{:.{}e}", value, n_digits + 1));
+	formatted_value += " ";
+	formatted_value += prefixes[scaled_exponent + 10];
+	return formatted_value;
 }
