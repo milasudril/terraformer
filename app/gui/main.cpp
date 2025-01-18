@@ -15,6 +15,7 @@
 #include "ui/wsapi/native_window.hpp"
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/false_color_image_view.hpp"
+#include "ui/widgets/colorbar.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/execution/task_receiver.hpp"
@@ -101,6 +102,19 @@ int main(int, char**)
 	auto& heightmap_view = main_form.create_widget(
 		heightmap_field_descriptor{
 			.label = u8"Current heightmap"
+		},
+		terraformer::global_elevation_map,
+		terraformer::get_elevation_color_lut()
+	);
+
+	struct colorbar_field_descriptor
+	{
+		std::u8string_view label;
+		using input_widget_type = terraformer::ui::widgets::colorbar;
+	};
+	main_form.create_widget(
+		colorbar_field_descriptor{
+			.label = u8""
 		},
 		terraformer::global_elevation_map,
 		terraformer::get_elevation_color_lut()
