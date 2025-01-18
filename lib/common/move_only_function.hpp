@@ -92,7 +92,7 @@ namespace terraformer
 			&& !std::is_same_v<std::decay_t<Func>, stateless_callback>
 		)
 		move_only_function(Func&& f):
-			m_handle{new Func(std::forward<Func>(f))},
+			m_handle{new std::remove_cvref_t<Func>(std::forward<Func>(f))},
 			m_function{[](void* handle, Args... args){
 				auto& obj = *static_cast<Func*>(handle);
 				return obj(std::forward<Args>(args)...);

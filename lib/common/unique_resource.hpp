@@ -65,20 +65,20 @@ namespace terraformer
 		template<class OwnedType>
 		explicit unique_resource(std::unique_ptr<OwnedType> obj):
 			m_handle{obj.release()},
-			m_vtable_pointer{&resource_reference<Vtable>::template s_vtable<OwnedType>}
+			m_vtable_pointer{&resource_reference<Vtable>::template s_vtable<std::remove_cvref_t<OwnedType>>}
 		{ }
 
 		template<class OwnedType>
 		requires(!std::is_same_v<std::remove_cvref_t<OwnedType>, unique_resource>)
 		explicit unique_resource(OwnedType&& obj):
-			m_handle{new OwnedType(std::forward<OwnedType>(obj))},
-			m_vtable_pointer{&resource_reference<Vtable>::template s_vtable<OwnedType>}
+			m_handle{new std::remove_cvref_t<OwnedType>(std::forward<OwnedType>(obj))},
+			m_vtable_pointer{&resource_reference<Vtable>::template s_vtable<std::remove_cvref_t<OwnedType>>}
 		{ }
 
 		template<class OwnedType, class... Args>
 		explicit unique_resource(std::in_place_type_t<OwnedType>, Args&&... args):
 			m_handle{new OwnedType(std::forward<Args>(args)...)},
-			m_vtable_pointer{&resource_reference<Vtable>::template s_vtable<OwnedType>}
+			m_vtable_pointer{&resource_reference<Vtable>::template s_vtable<std::remove_cvref_t<OwnedType>>}
 		{}
 
 		~unique_resource()

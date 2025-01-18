@@ -3,6 +3,7 @@
 //@	}
 
 #include "./plain.hpp"
+#include "./elevation_color_map.hpp"
 
 #include "ui/drawing_api/gl_surface_configuration.hpp"
 #include "ui/drawing_api/gl_resource_factory.hpp"
@@ -59,15 +60,6 @@ namespace
 						( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
 							type, severity, message );
 	}
-
-	struct task_completed_event
-	{};
-
-	void trigger(task_completed_event)
-	{
-		printf("Trigger: %u\n", gettid());
-		puts("Operation completed");
-	}
 }
 
 int main(int, char**)
@@ -99,40 +91,34 @@ int main(int, char**)
 
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
-	terraformer::task_receiver<
-		terraformer::notifying_task<
-			task_completed_event,
-			terraformer::move_only_function<void()>
-		>
-	> task_receiver;
-
-	plain_form.on_content_updated([&plain, &task_receiver]<class ... Args>(Args&&...){
-		printf("Event: %u\n", gettid());
-		task_receiver.replace_pending_task(
-			terraformer::notifying_task{
-				task_completed_event{},
-				terraformer::move_only_function<void()>{
-					[&plain]() {
-						terraformer::grayscale_image output{512, 512};
-						replace_pixels(output.pixels(), 96.0f, plain);
-						store(output, "/dev/shm/slask.exr");
-					}
-				}
-			}
-		);
-	});
+	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
 
 	struct heightmap_field_descriptor
 	{
 		std::u8string_view label;
 		using input_widget_type = terraformer::ui::widgets::false_color_image_view;
 	};
-
-	main_form.create_widget(
+	auto& heightmap_view = main_form.create_widget(
 		heightmap_field_descriptor{
 			.label = u8"Current heightmap"
-		}
+		},
+		terraformer::global_elevation_map,
+		terraformer::get_elevation_color_lut()
 	);
+
+	plain_form.on_content_updated([&plain, &task_receiver, &heightmap_view, &gui_ctxt]<class ... Args>(Args&&...){
+		printf("Event: %u\n", gettid());
+		task_receiver.replace_pending_task(
+			[&plain, &heightmap_view, &gui_ctxt]() {
+				terraformer::grayscale_image output{512, 512};
+				replace_pixels(output.pixels(), 96.0f, plain);
+				heightmap_view.show_image(output);
+				gui_ctxt.notify_main_loop();
+				//store(output, "/dev/shm/slask.exr");
+			}
+		);
+	});
+
 	main_form.on_content_updated([](auto&&...){
 		printf("Main: Content updated\n");
 	});
