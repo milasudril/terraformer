@@ -56,7 +56,7 @@ namespace terraformer::ui::widgets
 		{
 			m_null_texture = cfg.misc_textures.null;
 			m_fg_tint = cfg.output_area.colors.foreground;
-			m_border_thickness = static_cast<uint32_t>(cfg.input_area.border_thickness);
+			m_border_thickness = static_cast<uint32_t>(cfg.output_area.border_thickness);
 		}
 
 	private:

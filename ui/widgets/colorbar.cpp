@@ -1,6 +1,7 @@
 //@	{"target": {"name":"colorbar.o", "rel":"implementation"}}
 
 #include "./colorbar.hpp"
+#include "ui/drawing_api/image_generators.hpp"
 
 void terraformer::ui::widgets::colorbar::update_colorbar()
 {
@@ -18,6 +19,26 @@ void terraformer::ui::widgets::colorbar::update_colorbar()
 		}
 	}
 	m_image = std::move(output_image);
+}
+
+void terraformer::ui::widgets::colorbar::update_frame()
+{
+	auto output_frame = generate(
+		drawing_api::flat_rectangle{
+			.domain_size = span_2d_extents {
+				.width = 32,
+				.height = 515
+			},
+			.origin_x = 0u,
+			.origin_y = 0u,
+			.width = 32,
+			.height = 512,
+			.border_thickness = m_border_thickness,
+			.border_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+			.fill_color = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
+		}
+	);
+	m_frame = std::move(output_frame);
 }
 
 terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::colorbar::prepare_for_presentation(main::graphics_backend_ref backend)
@@ -55,8 +76,8 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::colorbar::pr
 		.frame = main::widget_layer{
 			.offset = displacement{},
 			.rotation = geosimd::turn_angle{},
-			.texture = null_texture,
-			.tints = std::array<rgba_pixel, 4>{}
+			.texture = m_frame.get_backend_resource(backend).get(),
+			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
 		},
 		.input_marker{
 			.offset = displacement{},

@@ -51,7 +51,7 @@ namespace terraformer::ui::theming
 			.output_area{
 				.colors = color_scheme.output_area,
 				.padding = 4.0f,
-				.border_thickness = 0.0f,
+				.border_thickness = 1.0f,
 				.font = body_text
 			},
 			.status_indicator = color_scheme.status_indicator,
