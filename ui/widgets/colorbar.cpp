@@ -2,7 +2,7 @@
 
 #include "./colorbar.hpp"
 #include "ui/drawing_api/image_generators.hpp"
-#include "lib/common/string_converter.hpp"
+#include "lib/common/utils.hpp"
 
 #include <format>
 
@@ -45,20 +45,15 @@ void terraformer::ui::widgets::colorbar::update_frame()
 	);
 
 	auto const value_map_ptr = m_value_map.get().get_pointer();
-	auto const from_value = m_value_map.get().get_vtable().from_value;
 	auto const to_value = m_value_map.get().get_vtable().to_value;
 
 	for(uint32_t index = 0; index != 13; ++index)
 	{
 		auto const intensity = static_cast<float>(index)/12;
 		auto const value = to_value(value_map_ptr, intensity);
-		auto const value_string = std::format("{:.1e}", value);
-		// TODO: Render value string
-		// NOTE: value_map_ptr is not used to produce the gradient => Create a separate label generator function
-		auto const printed_value = num_string_converter<float>{}.convert(value_string);
-		auto const actual_intensity = from_value(value_map_ptr, printed_value);
+		printf("%s\n", siformat(value, 2).c_str());
 
-		auto const y = static_cast<uint32_t>((1.0f - actual_intensity)*(h - 1) + 0.5f);
+		auto const y = static_cast<uint32_t>((1.0f - intensity)*(h - 1) + 0.5f);
 		for(uint32_t x = 0; x != w; ++x)
 		{
 			if(x < w/4 || x >= w - w/4)

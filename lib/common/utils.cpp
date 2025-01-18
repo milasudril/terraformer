@@ -269,7 +269,11 @@ std::string terraformer::siformat(float value, size_t n_digits)
 
 	auto scaled_exponent = value != 0.0f? static_cast<int>(std::log10(std::abs(value)))/3 : 0;
 	value /= std::pow(10.0f, static_cast<float>(scaled_exponent*3));
-	auto formatted_value = scientific_to_natural(std::format("{:.{}e}", value, n_digits + 1));
+	auto formatted_value = scientific_to_natural(std::format(
+		"{:.{}e}",
+		value,
+		std::max(n_digits, static_cast<size_t>(1)) - 1)
+	);
 	formatted_value += " ";
 	formatted_value += prefixes[scaled_exponent + 10];
 	return formatted_value;
