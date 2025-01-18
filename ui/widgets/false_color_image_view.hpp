@@ -6,6 +6,9 @@
 #include "./value_map.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
+#include "ui/value_maps/affine_value_map.hpp"
+
+#include <mutex>
 
 namespace terraformer::ui::widgets
 {
@@ -14,31 +17,57 @@ namespace terraformer::ui::widgets
 	public:
 		false_color_image_view() = default;
 
+		using widget_with_default_actions::handle_event;
+
 		template<class ValueMap, class ColorMap>
 		explicit false_color_image_view(ValueMap&& vm, ColorMap&& cm):
 			m_value_map{std::forward<ValueMap>(vm)},
-			m_color_map{std::forward<ColorMap>(vm)}
+			m_color_map{std::forward<ColorMap>(cm)}
 		{ }
-
-		void regenerate_textures();
 
 		void show_image(span_2d<float const> image);
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
-		scaling compute_size(main::widget_width_request req);
+		scaling compute_size(main::widget_width_request)
+		{
+			std::lock_guard lock{m_image_mutex};
+			return scaling{
+				static_cast<float>(m_image.frontend_resource().width()),
+				static_cast<float>(m_image.frontend_resource().height()),
+				1.0f
+			};
+		}
 
-		scaling compute_size(main::widget_height_request req);
+		scaling compute_size(main::widget_height_request)
+		{
+			std::lock_guard lock{m_image_mutex};
+			return scaling{
+				static_cast<float>(m_image.frontend_resource().width()),
+				static_cast<float>(m_image.frontend_resource().height()),
+				1.0f
+			};
+		}
 
 		void handle_event(main::fb_size)
 		{}
 
-		void theme_updated(main::config const& cfg, main::widget_instance_info);
+		void theme_updated(main::config const& cfg, main::widget_instance_info)
+		{
+			m_null_texture = cfg.misc_textures.null;
+		}
 
 	private:
-		type_erased_value_map m_value_map;
-		move_only_function<rgba_pixel(float)> m_color_map;
-		main::unique_texture m_image;
+		type_erased_value_map m_value_map{
+			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
+		};
+		move_only_function<rgba_pixel(float)> m_color_map{
+			[](float val){
+				return rgba_pixel{val, val, val, 1.0f};
+			}
+		};
+		std::mutex m_image_mutex;
+		main::unique_texture m_image{image{1, 1}};
 		main::immutable_shared_texture m_null_texture;
 	};
 }

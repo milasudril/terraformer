@@ -78,6 +78,7 @@ namespace terraformer::ui::widgets
 				});
 			}
 			else
+			if constexpr(requires(input_widget_type const& widget){{widget.on_content_updated()};})
 			{
 				ret.on_content_updated([this]<class ... Args>(auto&, Args&&... args) {
 					m_on_content_updated(*this, std::forward<Args>(args)...);

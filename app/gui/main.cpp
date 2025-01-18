@@ -65,6 +65,7 @@ namespace
 
 	void trigger(task_completed_event)
 	{
+		printf("Trigger: %u\n", gettid());
 		puts("Operation completed");
 	}
 }
@@ -106,6 +107,7 @@ int main(int, char**)
 	> task_receiver;
 
 	plain_form.on_content_updated([&plain, &task_receiver]<class ... Args>(Args&&...){
+		printf("Event: %u\n", gettid());
 		task_receiver.replace_pending_task(
 			terraformer::notifying_task{
 				task_completed_event{},
@@ -120,6 +122,17 @@ int main(int, char**)
 		);
 	});
 
+	struct heightmap_field_descriptor
+	{
+		std::u8string_view label;
+		using input_widget_type = terraformer::ui::widgets::false_color_image_view;
+	};
+
+	main_form.create_widget(
+		heightmap_field_descriptor{
+			.label = u8"Current heightmap"
+		}
+	);
 	main_form.on_content_updated([](auto&&...){
 		printf("Main: Content updated\n");
 	});
