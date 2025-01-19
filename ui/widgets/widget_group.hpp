@@ -9,7 +9,7 @@ namespace terraformer::ui::widgets
 	class widget_group:public main::widget_with_default_actions, public main::widget_collection
 	{
 	public:
-		widget_group() = delete;
+		widget_group() = default;
 		widget_group(widget_group&&) = delete;
 		widget_group& operator=(widget_group&&) = delete;
 		widget_group(widget_group const&) = delete;
