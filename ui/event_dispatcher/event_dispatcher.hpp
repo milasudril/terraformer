@@ -108,7 +108,7 @@ namespace terraformer::ui::main
 		{
 			if(try_dispatch(event, m_mouse_widget, window, ui_controller{*this}))
 			{ return; }
-				
+
 			auto const res = find_recursive(event.where, m_root_collection);
 
 			if(res != m_hot_widget)
@@ -239,7 +239,6 @@ namespace terraformer::ui::main
 					.origin = location{-1.0f, 1.0f, 0.0f},
 					.size = box_size
 				};
-				apply_offsets(root, displacement{0.0f, 0.0f, 0.0f});
 
 				m_root_collection.get_attributes().widget_layer_stacks().front() = prepare_for_presentation(root, backend);
 			}

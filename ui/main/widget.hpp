@@ -103,10 +103,13 @@ namespace terraformer::ui::main
 		{ return m_prepare_for_presentation_callback(m_widget, backend); }
 
 		template<class Renderer>
-		void render(Renderer renderer)
+		void render(Renderer renderer, displacement offset)
 		{
-			value_of(renderer).render(m_geometry.where, m_geometry.origin, m_geometry.size, m_layers);
+			value_of(renderer).render(m_geometry.where + offset, m_geometry.origin, m_geometry.size, m_layers);
 		}
+
+		widget_geometry const& geometry() const
+		{ return m_geometry; }
 
 	private:
 		void* m_widget = nullptr;
@@ -205,9 +208,9 @@ namespace terraformer::ui::main
 	}
 
 	template<class Renderer>
-	inline void show_widgets(Renderer renderer, root_widget& root)
+	inline void show_widgets(Renderer renderer, root_widget& root, displacement offset = displacement{0.0f, 0.0f, 0.0f})
 	{
-		root.render(renderer);
+		root.render(renderer, offset);
 		auto& children = root.children();
 		auto const widget_states = children.widget_states();
 		for(auto k : children.element_indices())
@@ -215,7 +218,7 @@ namespace terraformer::ui::main
 			if(!widget_states[k].hidden) [[likely]]
 			{
 				root_widget next_root{children, k};
-				show_widgets(renderer, next_root);
+				show_widgets(renderer, next_root, root.geometry().where + offset - location{0.0f, 0.0f, 0.0f});
 			}
 		}
 	}
