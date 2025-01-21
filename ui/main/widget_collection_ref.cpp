@@ -27,7 +27,8 @@ terraformer::ui::main::find_recursive_result terraformer::ui::main::find_recursi
 
 	find_recursive_result retval{
 		widget_collection_ref{},
-		widget_collection_view::npos
+		widget_collection_view::npos,
+		offset
 	};
 
 	while(!contexts.empty())
@@ -39,7 +40,9 @@ terraformer::ui::main::find_recursive_result terraformer::ui::main::find_recursi
 		if(i == widget_collection_view::npos)
 		{ continue; }
 
-		retval = find_recursive_result{current_context.widgets, i};
+		retval = find_recursive_result{
+			current_context.widgets, i, current_context.offset
+		};
 
 		auto const widget_pointers = current_context.widgets.widget_pointers();
 		auto const get_children_callbacks = current_context.widgets.get_children_callbacks();

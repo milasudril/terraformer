@@ -260,9 +260,11 @@ namespace terraformer::ui::main
 
 		explicit find_recursive_result(
 			widget_collection_ref const& widgets,
-			widget_collection_ref::index_type index
+			widget_collection_ref::index_type index,
+			displacement offset
 		):m_widgets{widgets},
-			m_index{index}
+			m_index{index},
+			m_offset{offset}
 		{}
 
 		bool operator==(find_recursive_result const& other) const
@@ -289,9 +291,13 @@ namespace terraformer::ui::main
 		auto index() const
 		{ return m_index; }
 
+		auto geometric_offset() const
+		{ return m_offset; }
+
 	private:
 		widget_collection_ref m_widgets{};
 		widget_collection_ref::index_type m_index{widget_collection_ref::npos};
+		displacement m_offset;
 	};
 
 	template<class EventType, class ... Args>
@@ -305,8 +311,9 @@ namespace terraformer::ui::main
 		if constexpr(requires{e.where;})
 		{
 			auto const geoms = res.widgets().widget_geometries();
-			e.where.x -= geoms[res.index()].where[0];
-			e.where.y -= geoms[res.index()].where[1];
+			auto const offset = res.geometric_offset();
+			e.where.x -= geoms[res.index()].where[0] + offset[0];
+			e.where.y -= geoms[res.index()].where[1] + offset[1];
 		}
 		callbacks[res.index()](widgets[res.index()], std::forward<EventType>(e), std::forward<Args>(args)...);
 
