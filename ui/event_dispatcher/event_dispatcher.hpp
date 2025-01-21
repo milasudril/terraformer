@@ -255,7 +255,7 @@ namespace terraformer::ui::main
 				auto const color = m_config.mouse_kbd_tracking.colors.mouse_focus_color;
 				auto const border_thickness = m_config.mouse_kbd_tracking.border_thickness;
 				m_frame_renderer.render(
-					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
+					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f} + m_hot_widget.geometric_offset(),
 					geometry.origin,
 					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
 					widget_frame{
