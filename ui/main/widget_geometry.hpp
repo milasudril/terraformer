@@ -17,12 +17,12 @@ namespace terraformer::ui::main
 		[[nodiscard]] constexpr bool operator!=(widget_geometry const&) const = default;
 	};
 
-	[[nodiscard]] inline bool inside(cursor_position pos, widget_geometry const& box)
+	[[nodiscard]] inline bool inside(location pos, widget_geometry const& box)
 	{
 		auto const r = 0.5*box.size;
 		auto const offset_to_origin = (location{0.0f, 0.0f, 0.0f} - box.origin).apply(r);
 		auto const object_midpoint = box.where + offset_to_origin;
-		auto const dr = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - object_midpoint;
+		auto const dr = pos - object_midpoint;
 		return std::abs(dr[0]) < r[0] && std::abs(dr[1]) < r[1];
 	}
 }

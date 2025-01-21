@@ -221,11 +221,11 @@ namespace terraformer::ui::main
 		widget_collection_ref_impl<IsConstB> const& b)
 	{ return std::data(a.widget_pointers()) == std::data(b.widget_pointers()); }
 
-	inline auto find(cursor_position pos, span<widget_geometry const> geoms)
+	inline auto find(cursor_position pos, span<widget_geometry const> geoms, displacement offset)
 	{
 		return std::ranges::find_if(
 			geoms,
-			[pos](auto const& obj) {
+			[pos = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - offset](auto const& obj) {
 				return inside(pos, obj);
 			}
 		);
@@ -244,9 +244,9 @@ namespace terraformer::ui::main
 		}
 	};
 
-	inline auto find(cursor_position pos, widget_collection_view const& widgets)
+	inline auto find(cursor_position pos, widget_collection_view const& widgets, displacement offset)
 	{
-		auto const i = find(pos, widgets.widget_geometries());
+		auto const i = find(pos, widgets.widget_geometries(), offset);
 		if(i == std::end(widgets.widget_geometries())) [[likely]]
 		{ return widget_collection_view::npos; }
 
@@ -313,7 +313,11 @@ namespace terraformer::ui::main
 		return true;
 	}
 
-	find_recursive_result find_recursive(cursor_position pos, widget_collection_ref const& widgets);
+	find_recursive_result find_recursive(
+		cursor_position pos,
+		widget_collection_ref const& widgets,
+		displacement offset = displacement{0.0f, 0.0f, 0.0f}
+	);
 
 	void theme_updated(
 		widget_collection_view const& widgets,

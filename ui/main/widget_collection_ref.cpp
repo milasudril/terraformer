@@ -4,19 +4,24 @@
 
 #include "lib/array_classes/single_array.hpp"
 
-terraformer::ui::main::find_recursive_result
-terraformer::ui::main::find_recursive(cursor_position pos, widget_collection_ref const& widgets)
+terraformer::ui::main::find_recursive_result terraformer::ui::main::find_recursive(
+	cursor_position pos,
+	widget_collection_ref const& widgets,
+	displacement offset
+)
 {
 	struct context
 	{
 		widget_collection_ref widgets;
+		displacement offset;
 	};
 
 	single_array<context> contexts;
 	contexts.reserve(decltype(contexts)::size_type{16});
 	contexts.push_back(
 		context{
-			.widgets = widgets
+			.widgets = widgets,
+			.offset = offset
 		}
 	);
 
@@ -30,7 +35,7 @@ terraformer::ui::main::find_recursive(cursor_position pos, widget_collection_ref
 		auto const current_context = contexts.back();
 		contexts.pop_back();
 
-		auto const i = find(pos, current_context.widgets.as_view());
+		auto const i = find(pos, current_context.widgets.as_view(), current_context.offset);
 		if(i == widget_collection_view::npos)
 		{ continue; }
 
@@ -38,9 +43,11 @@ terraformer::ui::main::find_recursive(cursor_position pos, widget_collection_ref
 
 		auto const widget_pointers = current_context.widgets.widget_pointers();
 		auto const get_children_callbacks = current_context.widgets.get_children_callbacks();
+		auto const widget_geometries = current_context.widgets.widget_geometries();
 		contexts.push_back(
 			context{
-				.widgets = get_children_callbacks[i](widget_pointers[i])
+				.widgets = get_children_callbacks[i](widget_pointers[i]),
+				.offset = widget_geometries[i].where + current_context.offset - location{0.0f, 0.0f, 0.0f}
 			}
 		);
 	}
