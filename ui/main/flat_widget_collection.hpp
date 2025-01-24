@@ -9,13 +9,13 @@
 
 namespace terraformer::ui::main
 {
-	template<auto Tag>
+	template<class WidgetCollection>
 	class widget_tree_address_impl
 	{
 	public:
 		widget_tree_address_impl() = default;
 
-		explicit widget_tree_address_impl(widget_collection_view collection, widget_collection_view::index_type index):
+		explicit widget_tree_address_impl(WidgetCollection const& collection, WidgetCollection::index_type index):
 			m_collection{collection},
 			m_index{index}
 		{}
@@ -27,19 +27,19 @@ namespace terraformer::ui::main
 		{ return m_index; }
 
 		bool is_valid() const
-		{ return m_index != widget_collection_view::index_type{static_cast<size_t>(-1)}; }
+		{ return m_index != typename WidgetCollection::index_type{static_cast<size_t>(-1)}; }
 
 	private:
-		widget_collection_view m_collection{};
-		widget_collection_view::index_type m_index{static_cast<size_t>(-1)};
+		WidgetCollection m_collection{};
+		typename WidgetCollection::index_type m_index{static_cast<size_t>(-1)};
 	};
 
-	using widget_tree_address = widget_tree_address_impl<0>;
-	using widget_tree_address_parent = widget_tree_address_impl<1>;
+	using widget_tree_address = widget_tree_address_impl<widget_collection_view>;
 
 	class flat_widget_collection_view
 	{
 	public:
+		using widget_tree_address_parent = widget_tree_address_impl<flat_widget_collection_view>;
 		using widget_span = multi_span<
 			void* const,
 			widget_tree_address const,
@@ -97,6 +97,8 @@ namespace terraformer::ui::main
 	private:
 		widget_span m_span;
 	};
+
+	using widget_tree_address_parent = flat_widget_collection_view::widget_tree_address_parent;
 
 	template<class EventType, class... Args>
 	bool try_dispatch(

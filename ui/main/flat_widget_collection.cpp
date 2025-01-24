@@ -40,6 +40,8 @@ void terraformer::ui::main::flatten(widget_tree_address const& widget, flat_widg
 			kfl_callbacks[index]
 		);
 
+		widget_tree_address_parent const parent_address{ret.attributes(), ret.element_indices().back()};
+
 		auto const get_children = current.address.collection().get_children_const_callbacks();
 		auto const children = get_children[index](ptr);
 		auto const indices = children.element_indices();
@@ -49,7 +51,7 @@ void terraformer::ui::main::flatten(widget_tree_address const& widget, flat_widg
 			contexts.push_back(
 				context{
 					.address = widget_tree_address{children, index_child},
-					.parent_address = widget_tree_address_parent{current.address.collection(), index}
+					.parent_address = parent_address
 				}
 			);
 		}
