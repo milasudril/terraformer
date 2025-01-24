@@ -100,6 +100,21 @@ namespace terraformer::ui::main
 
 	using widget_tree_address_parent = flat_widget_collection_view::widget_tree_address_parent;
 
+	template<class UnaryFunc>
+	void visit_ancestors(widget_tree_address_parent const& start_at, UnaryFunc&& func)
+	{
+		auto i = start_at;
+		while(i.is_valid())
+		{
+			auto const& collection = i.collection();
+			auto const addresses = collection.addresses();
+			auto const parents = collection.parents();
+			func(addresses[i.index()]);
+			i = parents[i.index()];
+		}
+	}
+
+
 	template<class EventType, class... Args>
 	bool try_dispatch(
 		EventType&& e,
