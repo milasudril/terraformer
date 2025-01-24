@@ -9,10 +9,13 @@
 
 namespace terraformer::ui::main
 {
-	class widget_tree_address
+	template<auto Tag>
+	class widget_tree_address_impl
 	{
 	public:
-		explicit widget_tree_address(widget_collection_view collection, widget_collection_view::index_type index):
+		widget_tree_address_impl() = default;
+
+		explicit widget_tree_address_impl(widget_collection_view collection, widget_collection_view::index_type index):
 			m_collection{collection},
 			m_index{index}
 		{}
@@ -23,10 +26,16 @@ namespace terraformer::ui::main
 		auto index() const
 		{ return m_index; }
 
+		bool is_valid() const
+		{ return m_index != widget_collection_view::index_type{static_cast<size_t>(-1)}; }
+
 	private:
-		widget_collection_view m_collection;
-		widget_collection_view::index_type m_index;
+		widget_collection_view m_collection{};
+		widget_collection_view::index_type m_index{static_cast<size_t>(-1)};
 	};
+
+	using widget_tree_address = widget_tree_address_impl<0>;
+	using widget_tree_address_parent = widget_tree_address_impl<1>;
 
 	class flat_widget_collection_view
 	{
@@ -34,6 +43,7 @@ namespace terraformer::ui::main
 		using widget_span = multi_span<
 			void* const,
 			widget_tree_address const,
+			widget_tree_address_parent const,
 			std::reference_wrapper<widget_state const> const,
 			keyboard_button_callback const,
 			typing_callback const,
@@ -80,6 +90,9 @@ namespace terraformer::ui::main
 
 		auto addresses() const
 		{ return m_span.get_by_type<widget_tree_address>(); }
+
+		auto parents() const
+		{ return m_span.get_by_type<widget_tree_address_parent>(); }
 
 	private:
 		widget_span m_span;
