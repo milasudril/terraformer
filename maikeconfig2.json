@@ -9,6 +9,7 @@
             "app": {
                 "compiler": {
                     "config": {
+											"cflags":["-no-pie"]
                     },
                     "recipe": "cxx_linker.py",
                     "use_get_tags": 0
@@ -39,7 +40,9 @@
                             "-Wsuggest-override",
 														"-Wno-error=deprecated-declarations",
                             "-I.",
-                            "-fconcepts-diagnostics-depth=3"
+                            "-fconcepts-diagnostics-depth=3",
+                            "-fno-pie",
+                            "-fno-pic"
                         ],
                         "iquote": [
                             "."
@@ -69,7 +72,10 @@
                             "-Wno-psabi",
                             "-Werror",
                             "-fconcepts-diagnostics-depth=3",
-                            "-Wno-error=deprecated-declarations"
+                            "-Wno-error=deprecated-declarations",
+                            "-fno-pie",
+                            "-no-pie",
+                            "-fno-pic"
                         ],
                         "iquote": [
                             "."
