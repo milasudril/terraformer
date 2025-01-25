@@ -103,6 +103,9 @@ namespace terraformer::ui::main
 		auto element_indices()
 		{ return m_objects.element_indices(); }
 
+		void clear()
+		{ m_objects.clear(); }
+
 	private:
 		widget_array m_objects;
 	};

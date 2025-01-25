@@ -145,8 +145,9 @@ int main(int, char**)
 		terraformer::ui::drawing_api::gl_widget_layer_stack_renderer{},
 		terraformer::ui::drawing_api::gl_frame_renderer{},
 		error_handler{},
-		std::ref(main_form)
 	};
+
+	event_dispatcher.set_root_widget(std::ref(main_form));
 
 	mainwin.set_event_handler<mainwin_tag>(std::ref(event_dispatcher));
 	gui_ctxt.wait_events(

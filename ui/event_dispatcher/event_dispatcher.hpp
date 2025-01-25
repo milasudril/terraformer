@@ -47,21 +47,25 @@ namespace terraformer::ui::main
 	class event_dispatcher
 	{
 	public:
-		template<class Cfg, class Wc, class Cr, class Fr, class Eh, widget Widget>
+		template<class Cfg, class Wc, class Cr, class Fr, class Eh>
 		explicit event_dispatcher(
 			Cfg&& cfg,
 			Wc&& wc,
 			Cr&& cr,
 			Fr&& fr,
-			Eh&& eh,
-			std::reference_wrapper<Widget> root
+			Eh&& eh
 		):
 		m_config{std::forward<Cfg>(cfg)},
 		m_window_controller{std::forward<Wc>(wc)},
 		m_content_renderer{std::forward<Cr>(cr)},
 		m_frame_renderer{std::forward<Fr>(fr)},
 		m_error_handler{std::forward<Eh>(eh)}
+		{ }
+
+		template<widget Widget>
+		void set_root_widget(std::reference_wrapper<Widget> root)
 		{
+			m_root_collection.clear();
 			m_root_collection.append(root, widget_geometry{});
 			m_flat_collection = flatten(std::as_const(m_root_collection).get_attributes());
 			main::theme_updated(m_root_collection, m_config);
@@ -336,10 +340,8 @@ namespace terraformer::ui::main
 		flat_widget_collection m_flat_collection;
 	};
 
-		template<class Cfg, class Wc, class Cr, class Fr, class Eh, widget Widget>
-		event_dispatcher(Cfg&&, Wc&&, Cr&&, Fr&&, Eh&&, std::reference_wrapper<Widget> root) ->
-			event_dispatcher<Wc, Cr, Fr, Eh>;
+	template<class Cfg, class Wc, class Cr, class Fr, class Eh>
+	event_dispatcher(Cfg&&, Wc&&, Cr&&, Fr&&, Eh&&) -> event_dispatcher<Wc, Cr, Fr, Eh>;
 }
-
 
 #endif
