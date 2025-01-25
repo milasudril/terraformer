@@ -173,23 +173,6 @@ namespace terraformer::ui::main
 		}
 	}
 
-	inline void apply_offsets(root_widget& root, displacement root_offset)
-	{
-		auto& children = root.children();
-		auto const widget_geometries = children.widget_geometries();
-		for(auto k : children.element_indices())
-		{ widget_geometries[k].where += root_offset; }
-
-		for(auto k : children.element_indices())
-		{
-			root_widget next_root{children, k};
-			apply_offsets(
-				next_root,
-				widget_geometries[k].where - location{0.0f, 0.0f, 0.0f}
-			);
-		}
-	}
-
 	inline widget_layer_stack prepare_for_presentation(root_widget& root, graphics_backend_ref backend)
 	{
 		auto ret = root.prepare_for_presentation(backend);
