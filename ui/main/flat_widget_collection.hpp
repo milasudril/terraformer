@@ -36,10 +36,27 @@ namespace terraformer::ui::main
 
 	using widget_tree_address = widget_tree_address_impl<widget_collection_view>;
 
+	template<class WidgetCollection>
+	class widget_tree_address_parent_impl
+	{
+	public:
+		widget_tree_address_parent_impl() = default;
+
+		widget_tree_address_parent_impl(typename WidgetCollection::index_type index):
+			m_index{index}
+		{}
+
+		operator WidgetCollection::index_type() const
+		{ return m_index; }
+
+	private:
+		typename WidgetCollection::index_type m_index{static_cast<size_t>(-1)};
+	};
+
 	class flat_widget_collection_view
 	{
 	public:
-		using widget_tree_address_parent = widget_tree_address_impl<flat_widget_collection_view>;
+		using widget_tree_address_parent = widget_tree_address_parent_impl<flat_widget_collection_view>;
 		using widget_span = multi_span<
 			void* const,
 			widget_tree_address const,
@@ -98,22 +115,21 @@ namespace terraformer::ui::main
 		widget_span m_span;
 	};
 
-	using widget_tree_address_parent = flat_widget_collection_view::widget_tree_address_parent;
-
 	template<class UnaryFunc>
-	void visit_ancestors(widget_tree_address_parent const& start_at, UnaryFunc&& func)
+	void ascend_tree(
+		flat_widget_collection_view const& widgets,
+		flat_widget_collection_view::index_type index,
+		UnaryFunc&& func
+	)
 	{
-		auto i = start_at;
-		while(i.is_valid())
+		while(index != flat_widget_collection_view::npos)
 		{
-			auto const& collection = i.collection();
-			auto const addresses = collection.addresses();
-			auto const parents = collection.parents();
-			func(addresses[i.index()]);
-			i = parents[i.index()];
+			auto const addresses = widgets.addresses();
+			auto const parents = widgets.parents();
+			func(addresses[index]);
+			index = parents[index];
 		}
 	}
-
 
 	template<class EventType, class... Args>
 	bool try_dispatch(
