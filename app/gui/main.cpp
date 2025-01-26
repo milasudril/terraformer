@@ -84,12 +84,23 @@ int main(int, char**)
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback( MessageCallback, 0 );
 
-	terraformer::plain_descriptor plain;
+
+	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
+
+	terraformer::ui::main::event_dispatcher event_dispatcher{
+		terraformer::ui::theming::load_default_config(),
+		window_controller{},
+		terraformer::ui::drawing_api::gl_widget_layer_stack_renderer{},
+		terraformer::ui::drawing_api::gl_frame_renderer{},
+		error_handler{},
+	};
 
 	terraformer::ui::widgets::form main_form{
+		terraformer::ui::main::widget_collection::iterator_invalidation_handler_ref{std::ref(event_dispatcher)},
 		terraformer::ui::main::widget_orientation::horizontal
 	};
 
+	terraformer::plain_descriptor plain;
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
@@ -136,16 +147,6 @@ int main(int, char**)
 	main_form.on_content_updated([](auto&&...){
 		printf("Main: Content updated\n");
 	});
-
-	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
-
-	terraformer::ui::main::event_dispatcher event_dispatcher{
-		terraformer::ui::theming::load_default_config(),
-		window_controller{},
-		terraformer::ui::drawing_api::gl_widget_layer_stack_renderer{},
-		terraformer::ui::drawing_api::gl_frame_renderer{},
-		error_handler{},
-	};
 
 	event_dispatcher.set_root_widget(std::ref(main_form));
 

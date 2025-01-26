@@ -10,11 +10,36 @@ namespace terraformer::ui::main
 	class widget_collection
 	{
 	public:
+		class iterator_invalidation_handler_ref
+		{
+		public:
+			template<class Listener>
+			explicit iterator_invalidation_handler_ref(std::reference_wrapper<Listener> listener):
+				m_listener{&listener.get()},
+				m_callback{
+					[](void* handle, widget_collection const& source){
+						static_cast<Listener*>(handle)->iterators_invalidated(source);
+					}
+				}
+			{}
+
+			void notify_listener(widget_collection const& source) const
+			{ m_callback(m_listener, source); }
+
+		private:
+			void* m_listener;
+			void (*m_callback)(void*, widget_collection const&);
+		};
+
 		using widget_array = compatible_multi_array_t<widget_collection_ref::widget_span>;
 
 		using index_type = widget_array::index_type;
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
+
+		explicit widget_collection(iterator_invalidation_handler_ref iihr):
+			m_iihr{iihr}
+		{}
 
 		template<class Widget>
 		requires widget<Widget>
@@ -79,9 +104,12 @@ namespace terraformer::ui::main
 					return static_cast<Widget*>(obj)->get_layout();
 				}
 			);
-
+			m_iihr.notify_listener(*this);
 			return *this;
 		}
+
+		auto iterator_invalidation_handler() const
+		{ return m_iihr; }
 
 		widget_collection& append(widget_collection_ref::widget_span::reference const& val)
 		{
@@ -91,6 +119,7 @@ namespace terraformer::ui::main
 				},
 				val
 			);
+			m_iihr.notify_listener(*this);
 			return *this;
 		}
 
@@ -104,10 +133,14 @@ namespace terraformer::ui::main
 		{ return m_objects.element_indices(); }
 
 		void clear()
-		{ m_objects.clear(); }
+		{
+			m_objects.clear();
+			m_iihr.notify_listener(*this);
+		}
 
 	private:
 		widget_array m_objects;
+		iterator_invalidation_handler_ref m_iihr;
 	};
 
 	inline auto find_recursive(cursor_position pos, widget_collection& widgets)

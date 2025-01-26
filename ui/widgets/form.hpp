@@ -20,8 +20,13 @@ namespace terraformer::ui::widgets
 		using widget_group::get_layout;
 		using widget_group::compute_size;
 
-		explicit form(main::widget_orientation orientation = main::widget_orientation::vertical):
+
+		explicit form(
+			iterator_invalidation_handler_ref iihr,
+			main::widget_orientation orientation = main::widget_orientation::vertical
+		):
 			widget_group{
+				iihr,
 				2u,
 				orientation == main::widget_orientation::vertical?
 					layouts::rowmajor_table::algorithm:
@@ -48,11 +53,18 @@ namespace terraformer::ui::widgets
 			}
 
 			using input_widget_type = typename FieldDescriptor::input_widget_type;
-			auto field_input_widget = []<class ... T>(main::widget_orientation orientation, T&&... input_widget_params){
+			auto field_input_widget = []<class ... T>(
+				iterator_invalidation_handler_ref iihr,
+				main::widget_orientation orientation, T&&... input_widget_params
+			){
 				if constexpr(std::is_same_v<input_widget_type, form>)
-				{ return std::make_unique<form>(orientation); }
-				return std::make_unique<input_widget_type>(std::forward<T>(input_widget_params)...);
+				{ return std::make_unique<form>(iihr, orientation); }
+				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, T...>)
+				{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
+				else
+				{ return std::make_unique<input_widget_type>(std::forward<T>(input_widget_params)...); }
 			}(
+				iterator_invalidation_handler(),
 				m_orientation == main::widget_orientation::vertical?
 					main::widget_orientation::horizontal:
 					main::widget_orientation::vertical,

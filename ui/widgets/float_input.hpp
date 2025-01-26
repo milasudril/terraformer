@@ -21,10 +21,12 @@ namespace terraformer::ui::widgets
 		using widget_group::compute_size;
 
 		explicit float_input(
+			iterator_invalidation_handler_ref iihr,
 			ControlWidget&& input_widget = ControlWidget{},
 			main::widget_orientation orientation = main::widget_orientation::horizontal
 		):
 			widget_group{
+				iihr,
 				2u,
 				orientation == main::widget_orientation::horizontal?
 					layouts::rowmajor_table::algorithm:

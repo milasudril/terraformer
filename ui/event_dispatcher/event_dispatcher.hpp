@@ -59,7 +59,8 @@ namespace terraformer::ui::main
 		m_window_controller{std::forward<Wc>(wc)},
 		m_content_renderer{std::forward<Cr>(cr)},
 		m_frame_renderer{std::forward<Fr>(fr)},
-		m_error_handler{std::forward<Eh>(eh)}
+		m_error_handler{std::forward<Eh>(eh)},
+		m_root_collection{main::widget_collection::iterator_invalidation_handler_ref{std::ref(*this)}}
 		{ }
 
 		template<widget Widget>
@@ -67,8 +68,13 @@ namespace terraformer::ui::main
 		{
 			m_root_collection.clear();
 			m_root_collection.append(root, widget_geometry{});
-			m_flat_collection = flatten(std::as_const(m_root_collection).get_attributes());
 			main::theme_updated(m_root_collection, m_config);
+		}
+
+		void iterators_invalidated(widget_collection const& src)
+		{
+			if(&src == &m_root_collection)
+			{ m_update_flat_collection = true; }
 		}
 
 		template<class Tag>
@@ -133,6 +139,8 @@ namespace terraformer::ui::main
 		template<class Tag>
 		void handle_event(Tag, window_ref window, keyboard_button_event const& event)
 		{
+			update_flat_widget_collection();
+
 			auto const nav_step = get_form_navigation_step_size(event);
 			auto const next_widget = find_next_wrap_around(
 				m_flat_collection.attributes().widget_states(),
@@ -281,6 +289,7 @@ namespace terraformer::ui::main
 
 			if(m_keyboard_widget != flat_widget_collection::npos)
 			{
+				update_flat_widget_collection();
 				location where{0.0f, 0.0f, 0.0f};
 				ascend_tree(
 					m_flat_collection.attributes(),
@@ -324,6 +333,15 @@ namespace terraformer::ui::main
 			}
 		}
 
+		void update_flat_widget_collection()
+		{
+			if(m_update_flat_collection) [[unlikely]]
+			{
+				m_flat_collection = flatten(std::as_const(m_root_collection).get_attributes());
+				m_update_flat_collection = false;
+			}
+		}
+
 	private:
 		config m_config;
 		WindowController m_window_controller;
@@ -338,6 +356,7 @@ namespace terraformer::ui::main
 		// A widget collection is currently necessary to set m_hot_widget properly
 		widget_collection m_root_collection;
 		flat_widget_collection m_flat_collection;
+		bool m_update_flat_collection{false};
 	};
 
 	template<class Cfg, class Wc, class Cr, class Fr, class Eh>

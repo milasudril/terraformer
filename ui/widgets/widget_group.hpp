@@ -9,16 +9,15 @@ namespace terraformer::ui::widgets
 	class widget_group:public main::widget_with_default_actions, public main::widget_collection
 	{
 	public:
-		widget_group() = default;
 		widget_group(widget_group&&) = delete;
 		widget_group& operator=(widget_group&&) = delete;
 		widget_group(widget_group const&) = delete;
 		widget_group& operator=(widget_group const&) = delete;
 
-		template<class Head, class ... LayoutArgs>
-		requires(!std::is_same_v<std::remove_cvref_t<Head>, widget_group>)
-		explicit widget_group(Head&& first, LayoutArgs&&... args):
-			layout{std::forward<Head>(first), std::forward<LayoutArgs>(args)...}
+		template<class ... LayoutArgs>
+		explicit widget_group(iterator_invalidation_handler_ref iihr, LayoutArgs&&... args):
+			widget_collection{iihr},
+			layout{std::forward<LayoutArgs>(args)...}
 		{ }
 
 		Layout layout;
