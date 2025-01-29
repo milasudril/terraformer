@@ -196,7 +196,7 @@ namespace terraformer::ui::main
 			value_of(m_frame_renderer)
 				.set_viewport(0, 0, size.width, size.height)
 				.set_world_transform(location{-1.0f, 1.0f, 0.0f}, size);
-
+			m_current_size = size;
 			// TODO: Should update size here as well
 		}
 
@@ -237,7 +237,7 @@ namespace terraformer::ui::main
 			{
 				root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
 				// TODO: Pick width/height based on window size
-				auto const box_size = compute_size(root);
+				auto const box_size = compute_size(root, m_current_size);
 				confirm_sizes(
 					root,
 					fb_size{
@@ -357,6 +357,7 @@ namespace terraformer::ui::main
 		widget_collection m_root_collection;
 		flat_widget_collection m_flat_collection;
 		bool m_update_flat_collection{false};
+		fb_size m_current_size;
 	};
 
 	template<class Cfg, class Wc, class Cr, class Fr, class Eh>

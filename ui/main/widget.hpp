@@ -124,7 +124,7 @@ namespace terraformer::ui::main
 		widget_geometry m_geometry{};
 	};
 
-	inline scaling compute_size(root_widget& root)
+	inline scaling compute_size(root_widget& root, fb_size available_size)
 	{
 		// TODO: Decide which dimension to minimize. Should be determined by parent
 		auto const initial_size = root.compute_size(widget_width_request{});
@@ -136,7 +136,7 @@ namespace terraformer::ui::main
 			if(!widget_states[k].collapsed) [[likely]]
 			{
 				root_widget next_root{children, k};
-				sizes[k] = compute_size(next_root);
+				sizes[k] = compute_size(next_root, available_size);
 			}
 		}
 
