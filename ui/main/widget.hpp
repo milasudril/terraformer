@@ -126,6 +126,8 @@ namespace terraformer::ui::main
 
 	inline scaling compute_size(root_widget& root, fb_size available_size)
 	{
+		// FIXME: This needs to be a two-pass algorithm. First find min-sizes, then run
+		//        the layout.
 		// TODO: Decide which dimension to minimize. Should be determined by parent
 		auto const initial_size = root.compute_size(widget_width_request{});
 		auto& children = root.children();
