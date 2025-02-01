@@ -138,6 +138,15 @@ namespace terraformer
 		auto& operator[](index_type index) const noexcept
 		{ return deref(data(), index); }
 
+		template<class U>
+		T value_or(index_type index, U&& default_value) const noexcept
+		{
+			if(index < m_size)
+			{ return (*this)[index]; }
+
+			return T{std::forward<U>(default_value)};
+		}
+
 		operator span<T, index_type, size_type>() noexcept
 		{ return span<T, index_type, size_type>{begin(), end()}; }
 
