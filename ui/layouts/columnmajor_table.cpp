@@ -50,14 +50,14 @@ void terraformer::ui::layouts::columnmajor_table::minimize_cell_sizes(
 void terraformer::ui::layouts::columnmajor_table::adjust_cell_sizes(
 	struct params const& params,
 	state& state,
-	main::fb_size available_size
+	scaling available_size
 )
 {
 	single_array<size_t> rows_to_expand;
 	auto const rowcount = state.m_fixdim_cellcount;
 	auto rows = state.m_fixdim_cellsizes.get();
 	auto fixed_height = params.no_outer_margin? 0.0f : 2.0f*params.margin_y;
-	auto const available_height = static_cast<float>(available_size.height);
+	auto const available_height = available_size[1];
 	for(size_t k = 0; k != rowcount; ++k)
 	{
 		using index_type = single_array<row_height>::index_type;
@@ -98,13 +98,13 @@ void terraformer::ui::layouts::columnmajor_table::adjust_cell_sizes(
 	single_array<single_array<float>::index_type> cols_to_expand;
 	span<float> cols{state.m_dyndim_cellsizes};
 	auto fixed_width = params.no_outer_margin? 0.0f : 2.0f*params.margin_x;
-	auto const available_width = static_cast<float>(available_size.width);
+	auto const available_width = available_size[0];
 	for(auto k : cols.element_indices())
 	{
 		using index_type = single_array<column_width>::index_type;
 		index_type const index{k.get()};
 
-		fixed_width +=  std::visit(
+		fixed_width += std::visit(
 			overload{
 				[k, cols](column_width::minimize) {
 					return cols[k];

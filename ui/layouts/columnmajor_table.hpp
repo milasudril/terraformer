@@ -35,7 +35,7 @@ namespace terraformer::ui::layouts
 		static void adjust_cell_sizes(
 			struct params const& params,
 			state& state,
-			main::fb_size available_size
+			scaling available_size
 		);
 
 		using table::update_widget_locations;
