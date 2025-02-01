@@ -16,16 +16,22 @@ namespace terraformer::ui::layouts
 	class rowmajor_table:public table
 	{
 	public:
-		static scaling update_widget_locations(
-			common_params const&,
-			state const& state,
-			main::widget_collection_ref& widgets
-		);
-
 		static void minimize_cell_sizes(
 			common_params const& params,
 			state& state,
 			main::widget_collection_ref const& widgets
+		);
+
+		static void adjust_cell_sizes(
+			struct params const& params,
+			state& state,
+			scaling available_size
+		);
+
+		static scaling update_widget_locations(
+			common_params const&,
+			state const& state,
+			main::widget_collection_ref& widgets
 		);
 
 		static constexpr table::algorithm algorithm{

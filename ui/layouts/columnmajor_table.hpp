@@ -15,11 +15,6 @@ namespace terraformer::ui::layouts
 	class columnmajor_table:public table
 	{
 	public:
-		static scaling update_widget_locations(
-			common_params const&,
-			state const& state,
-			main::widget_collection_ref& widgets
-		);
 
 		static void minimize_cell_sizes(
 			common_params const& params,
@@ -27,16 +22,23 @@ namespace terraformer::ui::layouts
 			main::widget_collection_ref const& widgets
 		);
 
-		static constexpr table::algorithm algorithm{
-			.update_widget_locations = update_widget_locations,
-			.minimize_cell_sizes = minimize_cell_sizes
-		};
+		static scaling update_widget_locations(
+			common_params const&,
+			state const& state,
+			main::widget_collection_ref& widgets
+		);
 
 		static void adjust_cell_sizes(
 			struct params const& params,
 			state& state,
 			scaling available_size
 		);
+
+		static constexpr table::algorithm algorithm{
+			.update_widget_locations = update_widget_locations,
+			.minimize_cell_sizes = minimize_cell_sizes
+		};
+
 
 		using table::update_widget_locations;
 		using table::minimize_cell_sizes;
