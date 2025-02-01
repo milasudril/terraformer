@@ -5,9 +5,11 @@
 
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/math_utils/ratio.hpp"
 #include "ui/main/widget_collection_ref.hpp"
 
 #include <memory>
+#include <variant>
 
 namespace terraformer::ui::layouts
 {
@@ -21,6 +23,24 @@ namespace terraformer::ui::layouts
 			single_array<float> m_dyndim_cellsizes;
 			float m_width;
 			float m_height;
+		};
+
+
+		template<auto DimensionTag>
+		struct cell_size
+		{
+			struct minimize{};
+			struct expand{};
+			std::variant<minimize, expand, ratio, float> value;
+		};
+
+		using column_width = cell_size<0>;
+		using row_height = cell_size<1>;
+
+		struct params:common_params
+		{
+			single_array<column_width> column_widths;
+			single_array<row_height> row_heights;
 		};
 
 		struct algorithm
@@ -46,7 +66,7 @@ namespace terraformer::ui::layouts
 		void minimize_cell_sizes(main::widget_collection_ref const& widgets)
 		{ return m_algo.minimize_cell_sizes(params, m_state, widgets); }
 
-		common_params params;
+		struct params params;
 
 	private:
 		algorithm m_algo;
