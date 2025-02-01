@@ -134,6 +134,15 @@ void terraformer::ui::layouts::columnmajor_table::adjust_cell_sizes(
 		for(auto k : cols_to_expand.element_indices())
 		{ cols[cols_to_expand[k]] = avg_col_width; }
 	}
+
+	state.m_width = std::accumulate(
+		std::begin(cols),
+		std::end(cols),
+		params.no_outer_margin?
+			0.0f:params.margin_x
+	);
+	state.m_height = std::accumulate(rows, rows + rowcount, params.margin_y)
+		 - (params.no_outer_margin? 2.0f*params.margin_y : 0.0f);
 }
 
 terraformer::scaling
