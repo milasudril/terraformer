@@ -32,6 +32,12 @@ namespace terraformer::ui::layouts
 			.minimize_cell_sizes = minimize_cell_sizes
 		};
 
+		static void adjust_cell_sizes(
+			struct params const& params,
+			state& state,
+			main::fb_size available_size
+		);
+
 		using table::update_widget_locations;
 		using table::minimize_cell_sizes;
 
