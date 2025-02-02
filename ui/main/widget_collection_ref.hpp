@@ -32,7 +32,8 @@ namespace terraformer::ui::main
 	template<class T>
 	concept layout_policy = requires(T obj, widget_collection_ref& widgets)
 	{
-		{std::as_const(obj).update_widget_locations(widgets)} -> std::same_as<scaling>;
+		{obj.minimize_cell_sizes(widgets)} -> std::same_as<scaling>;
+		{std::as_const(obj).update_widget_locations(widgets)} -> std::same_as<void>;
 	};
 
 	class layout_policy_ref
@@ -45,9 +46,7 @@ namespace terraformer::ui::main
 				}
 			},
 			m_update_widget_locations{
-				[](void const*, widget_collection_ref&){
-					return scaling{};
-				}
+				[](void const*, widget_collection_ref&){}
 			}
 		{}
 
@@ -61,21 +60,22 @@ namespace terraformer::ui::main
 			},
 			m_update_widget_locations{
 				[](void const* handle, widget_collection_ref& widgets){
-					return static_cast<LayoutPolicy const*>(handle)->update_widget_locations(widgets);
+					static_cast<LayoutPolicy const*>(handle)->update_widget_locations(widgets);
 				}
 			}
 		{}
 
-		scaling update_widget_locations(widget_collection_ref& widgets) const
-		{ return m_update_widget_locations(m_handle, widgets); }
 
 		scaling minimize_cell_sizes(widget_collection_ref const& widgets) const
 		{ return m_minimize_cell_sizes(m_handle, widgets); }
 
+		void update_widget_locations(widget_collection_ref& widgets) const
+		{ m_update_widget_locations(m_handle, widgets); }
+
 	private:
 		void* m_handle;
 		scaling (*m_minimize_cell_sizes)(void*, widget_collection_ref const&);
-		scaling (*m_update_widget_locations)(void const*, widget_collection_ref&);
+		void (*m_update_widget_locations)(void const*, widget_collection_ref&);
 	};
 
 	template<class EventType, class ... Args>

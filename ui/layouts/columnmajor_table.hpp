@@ -22,7 +22,7 @@ namespace terraformer::ui::layouts
 			main::widget_collection_ref const& widgets
 		);
 
-		static scaling update_widget_locations(
+		static void update_widget_locations(
 			common_params const&,
 			state const& state,
 			main::widget_collection_ref& widgets
@@ -35,8 +35,8 @@ namespace terraformer::ui::layouts
 		);
 
 		static constexpr table::algorithm algorithm{
-			.update_widget_locations = update_widget_locations,
-			.minimize_cell_sizes = minimize_cell_sizes
+			.minimize_cell_sizes = minimize_cell_sizes,
+			.update_widget_locations = update_widget_locations
 		};
 
 

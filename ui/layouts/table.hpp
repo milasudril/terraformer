@@ -45,8 +45,8 @@ namespace terraformer::ui::layouts
 
 		struct algorithm
 		{
-			scaling (*update_widget_locations)(common_params const&, state const&, main::widget_collection_ref&);
 			scaling (*minimize_cell_sizes)(common_params const&, state&, main::widget_collection_ref const&);
+			void (*update_widget_locations)(common_params const&, state const&, main::widget_collection_ref&);
 		};
 
 		explicit table(size_t fixdim_cellcount, algorithm algo):
@@ -60,11 +60,11 @@ namespace terraformer::ui::layouts
 			}
 		{}
 
-		scaling update_widget_locations(main::widget_collection_ref& widgets) const
-		{ return m_algo.update_widget_locations(params, m_state, widgets); }
-
 		scaling minimize_cell_sizes(main::widget_collection_ref const& widgets)
 		{ return m_algo.minimize_cell_sizes(params, m_state, widgets); }
+
+		void update_widget_locations(main::widget_collection_ref& widgets) const
+		{ m_algo.update_widget_locations(params, m_state, widgets); }
 
 		struct params params;
 

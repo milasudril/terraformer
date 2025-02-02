@@ -146,7 +146,7 @@ void terraformer::ui::layouts::rowmajor_table::adjust_cell_sizes(
 		 - (params.no_outer_margin? 2.0f*params.margin_x : 0.0f);
 }
 
-terraformer::scaling
+void
 terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 	common_params const& params,
 	state const& state,
@@ -184,10 +184,4 @@ terraformer::ui::layouts::rowmajor_table::update_widget_locations(
 			x_offset = params.no_outer_margin? 0.0f : params.margin_x;
 		}
 	}
-
-	return scaling{
-		state.m_width,
-		state.m_height,
-		1.0f,
-	};
 }
