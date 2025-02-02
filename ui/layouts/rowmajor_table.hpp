@@ -16,7 +16,7 @@ namespace terraformer::ui::layouts
 	class rowmajor_table:public table
 	{
 	public:
-		static void minimize_cell_sizes(
+		static scaling minimize_cell_sizes(
 			common_params const& params,
 			state& state,
 			main::widget_collection_ref const& widgets

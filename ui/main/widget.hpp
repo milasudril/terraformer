@@ -69,7 +69,7 @@ namespace terraformer::ui::main
 				.width = static_cast<int>(widgets.widget_geometries()[index].size[0]),
 				.height = static_cast<int>(widgets.widget_geometries()[index].size[1])
 			},
-			m_layout{widgets.get_layout_callbacks()[index](m_widget)},
+				m_layout{widgets.get_layout_callbacks()[index](m_widget)},
 			m_prepare_for_presentation_callback{widgets.render_callbacks()[index]},
 			m_layers{widgets.widget_layer_stacks()[index]},
 			m_geometry{widgets.widget_geometries()[index]}
@@ -92,12 +92,11 @@ namespace terraformer::ui::main
 			{ m_size_confirmed(m_widget, size); }
 		}
 
-		scaling run_layout()
-		{
-			// TODO: Cell minimization and widget positioning should be separate
-			m_layout.minimize_cell_sizes(m_children);
-			return m_layout.update_widget_locations(m_children);
-		}
+		scaling minimize_cell_sizes()
+		{ return m_layout.minimize_cell_sizes(m_children); }
+
+		void update_widget_locations()
+		{ m_layout.update_widget_locations(m_children); }
 
 		widget_layer_stack prepare_for_presentation(graphics_backend_ref backend)
 		{ return m_prepare_for_presentation_callback(m_widget, backend); }
@@ -140,7 +139,8 @@ namespace terraformer::ui::main
 			}
 		}
 
-		auto const size_from_layout = root.run_layout();
+		auto const size_from_layout = root.minimize_cell_sizes();
+		root.update_widget_locations();
 
 		return scaling{
 			std::max(initial_size[0], size_from_layout[0]),

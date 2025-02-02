@@ -2,7 +2,7 @@
 
 #include "./rowmajor_table.hpp"
 
-void terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
+terraformer::scaling terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
 	common_params const& params,
 	state& state,
 	main::widget_collection_ref const& widgets
@@ -37,13 +37,16 @@ void terraformer::ui::layouts::rowmajor_table::minimize_cell_sizes(
 	if(col != 0)
 	{ state.m_dyndim_cellsizes.push_back(max_height); }
 
-	state.m_height = std::accumulate(
-		std::begin(state.m_dyndim_cellsizes),
-		std::end(state.m_dyndim_cellsizes),
-		params.no_outer_margin? 0.0f : params.margin_y
-	);
-	state.m_width = std::accumulate(cols, cols + colcount, params.margin_x)
-		- (params.no_outer_margin? 2.0f*params.margin_x : 0.0f);
+	return scaling{
+		std::accumulate(cols, cols + colcount, params.margin_x)
+			- (params.no_outer_margin? 2.0f*params.margin_x : 0.0f),
+		std::accumulate(
+			std::begin(state.m_dyndim_cellsizes),
+			std::end(state.m_dyndim_cellsizes),
+			params.no_outer_margin? 0.0f : params.margin_y
+		),
+		1.0f
+	};
 }
 
 void terraformer::ui::layouts::rowmajor_table::adjust_cell_sizes(

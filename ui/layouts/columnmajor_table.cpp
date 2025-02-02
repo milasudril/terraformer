@@ -3,7 +3,7 @@
 #include "./columnmajor_table.hpp"
 #include "lib/common/utils.hpp"
 
-void terraformer::ui::layouts::columnmajor_table::minimize_cell_sizes(
+terraformer::scaling terraformer::ui::layouts::columnmajor_table::minimize_cell_sizes(
 	common_params const& params,
 	state& state,
 	main::widget_collection_ref const& widgets
@@ -37,14 +37,17 @@ void terraformer::ui::layouts::columnmajor_table::minimize_cell_sizes(
 	if(row != 0)
 	{ state.m_dyndim_cellsizes.push_back(max_width); }
 
-	state.m_width = std::accumulate(
-		std::begin(state.m_dyndim_cellsizes),
-		std::end(state.m_dyndim_cellsizes),
-		params.no_outer_margin?
-			0.0f:params.margin_x
-	);
-	state.m_height = std::accumulate(rows, rows + rowcount, params.margin_y)
-		 - (params.no_outer_margin? 2.0f*params.margin_y : 0.0f);
+	return scaling{
+		state.m_width = std::accumulate(
+			std::begin(state.m_dyndim_cellsizes),
+			std::end(state.m_dyndim_cellsizes),
+			params.no_outer_margin?
+				0.0f:params.margin_x
+		),
+		state.m_height = std::accumulate(rows, rows + rowcount, params.margin_y)
+			- (params.no_outer_margin? 2.0f*params.margin_y : 0.0f),
+		1.0f
+	};
 }
 
 void terraformer::ui::layouts::columnmajor_table::adjust_cell_sizes(

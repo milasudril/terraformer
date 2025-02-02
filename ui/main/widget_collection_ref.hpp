@@ -39,27 +39,29 @@ namespace terraformer::ui::main
 	{
 	public:
 		layout_policy_ref():
+			m_minimize_cell_sizes{
+				[](void*, widget_collection_ref const&){
+					return scaling{};
+				}
+			},
 			m_update_widget_locations{
 				[](void const*, widget_collection_ref&){
 					return scaling{};
 				}
-			},
-			m_minimize_cell_sizes{
-				[](void*, widget_collection_ref const&){}
 			}
 		{}
 
 		template<layout_policy LayoutPolicy>
 		explicit layout_policy_ref(std::reference_wrapper<LayoutPolicy> policy):
 			m_handle{&policy.get()},
+			m_minimize_cell_sizes{
+				[](void* handle, widget_collection_ref const& widgets) {
+					return static_cast<LayoutPolicy*>(handle)->minimize_cell_sizes(widgets);
+				}
+			},
 			m_update_widget_locations{
 				[](void const* handle, widget_collection_ref& widgets){
 					return static_cast<LayoutPolicy const*>(handle)->update_widget_locations(widgets);
-				}
-			},
-			m_minimize_cell_sizes{
-				[](void* handle, widget_collection_ref const& widgets) {
-					static_cast<LayoutPolicy*>(handle)->minimize_cell_sizes(widgets);
 				}
 			}
 		{}
@@ -67,13 +69,13 @@ namespace terraformer::ui::main
 		scaling update_widget_locations(widget_collection_ref& widgets) const
 		{ return m_update_widget_locations(m_handle, widgets); }
 
-		void minimize_cell_sizes(widget_collection_ref const& widgets) const
-		{ m_minimize_cell_sizes(m_handle, widgets); }
+		scaling minimize_cell_sizes(widget_collection_ref const& widgets) const
+		{ return m_minimize_cell_sizes(m_handle, widgets); }
 
 	private:
 		void* m_handle;
+		scaling (*m_minimize_cell_sizes)(void*, widget_collection_ref const&);
 		scaling (*m_update_widget_locations)(void const*, widget_collection_ref&);
-		void (*m_minimize_cell_sizes)(void*, widget_collection_ref const&);
 	};
 
 	template<class EventType, class ... Args>
