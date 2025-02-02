@@ -113,6 +113,9 @@ namespace terraformer::ui::main
 		widget_geometry const& geometry() const
 		{ return m_geometry; }
 
+		bool has_layout() const
+		{ return m_layout.is_valid(); }
+
 	private:
 		void* m_widget = nullptr;
 		widget_collection_ref m_children;
@@ -154,6 +157,7 @@ namespace terraformer::ui::main
 	inline scaling adjust_cell_sizes(root_widget& root, scaling available_size)
 	{
 		auto const new_size = root.adjust_cell_sizes(available_size);
+		printf("%.8g %.8g\n", new_size[0], new_size[1]);
 		auto& children = root.children();
 		auto const widget_states = children.widget_states();
 		auto const sizes = children.sizes();
@@ -162,7 +166,8 @@ namespace terraformer::ui::main
 			if(!widget_states[k].collapsed) [[likely]]
 			{
 				root_widget next_root{children, k};
-				sizes[k] = adjust_cell_sizes(next_root, new_size);
+				if(next_root.has_layout())
+				{ sizes[k] = adjust_cell_sizes(next_root, new_size); }
 			}
 		}
 		return new_size;

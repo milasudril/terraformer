@@ -41,14 +41,15 @@ namespace terraformer::ui::main
 	{
 	public:
 		layout_policy_ref():
+			m_handle{nullptr},
 			m_minimize_cell_sizes{
 				[](void*, widget_collection_ref const&){
 					return scaling{};
 				}
 			},
 			m_adjust_cell_sizes{
-				[](void*, scaling){
-					return scaling{};
+				[](void*, scaling available_size){
+					return available_size;
 				}
 			},
 			m_update_widget_locations{
@@ -85,6 +86,9 @@ namespace terraformer::ui::main
 
 		void update_widget_locations(widget_collection_ref& widgets) const
 		{ m_update_widget_locations(m_handle, widgets); }
+
+		bool is_valid() const
+		{ return m_handle != nullptr; }
 
 	private:
 		void* m_handle;
