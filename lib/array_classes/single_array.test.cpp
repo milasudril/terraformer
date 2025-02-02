@@ -162,3 +162,25 @@ TESTCASE(terraformer_single_array_move_assign)
 	EXPECT_EQ(std::size(array).get(), 3);
 	EXPECT_EQ(std::size(other).get(), 0);
 }
+
+TESTCASE(terraformer_single_array_replace_beyond_current_size)
+{
+	terraformer::single_array<default_constructible_type> foo;
+	default_constructible_type::expect_ctor(12);
+	default_constructible_type::expect_move_assign(1);
+	foo.insert_or_assign(decltype(foo)::index_type{10}, 123);
+	EXPECT_EQ(std::size(foo).get(), 11);
+}
+
+TESTCASE(terraformer_single_array_replace_within_current_size)
+{
+	terraformer::single_array<default_constructible_type> foo;
+	default_constructible_type::expect_ctor(11);
+	foo.resize(decltype(foo)::size_type{11});
+	EXPECT_EQ(std::size(foo).get(), 11);
+
+	default_constructible_type::expect_ctor(1);
+	default_constructible_type::expect_move_assign(1);
+	foo.insert_or_assign(decltype(foo)::index_type{10}, 123);
+	EXPECT_EQ(std::size(foo).get(), 11);
+}

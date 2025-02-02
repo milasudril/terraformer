@@ -99,6 +99,16 @@ namespace terraformer
 			m_size = new_size;
 		}
 
+
+		template<class Arg>
+		requires (std::is_same_v<std::remove_cvref_t<Arg>, T> || std::is_convertible_v<Arg, T>)
+		void insert_or_assign(index_type index, Arg&& elem)
+		{
+			if(size_type{index} >= size()) [[unlikely]]
+			{ resize(size_type{index} + size_type{1}); }
+			(*this)[index] = std::forward<Arg>(elem);
+		}
+
 		void pop_back()
 		{ truncate_from(index_type{(m_size - size_type{1}).get()}); }
 
@@ -119,7 +129,7 @@ namespace terraformer
 			if(new_size > m_size)
 			{
 				if(new_size > m_capacity)
-				{ reserve(new_size); }
+				{ reserve(std::max(new_size, static_cast<size_t>(2)*m_capacity)); }
 				std::uninitialized_default_construct_n(end(), (new_size - m_size).get());
 				m_size = new_size;
 				return;
