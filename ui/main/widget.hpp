@@ -95,6 +95,9 @@ namespace terraformer::ui::main
 		scaling minimize_cell_sizes()
 		{ return m_layout.minimize_cell_sizes(m_children); }
 
+		scaling adjust_cell_sizes(scaling available_size)
+		{ return m_layout.adjust_cell_sizes(available_size); }
+
 		void update_widget_locations()
 		{ m_layout.update_widget_locations(m_children); }
 
@@ -146,6 +149,23 @@ namespace terraformer::ui::main
 			std::max(initial_size[1], size_from_layout[1]),
 			std::max(initial_size[2], size_from_layout[2])
 		};
+	}
+
+	inline scaling adjust_cell_sizes(root_widget& root, scaling available_size)
+	{
+		auto const new_size = root.adjust_cell_sizes(available_size);
+		auto& children = root.children();
+		auto const widget_states = children.widget_states();
+		auto const sizes = children.sizes();
+		for(auto k : children.element_indices())
+		{
+			if(!widget_states[k].collapsed) [[likely]]
+			{
+				root_widget next_root{children, k};
+				sizes[k] = adjust_cell_sizes(next_root, new_size);
+			}
+		}
+		return new_size;
 	}
 
 	inline void update_widget_locations(root_widget& root)
