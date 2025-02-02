@@ -44,6 +44,7 @@ namespace terraformer::ui::layouts
 		struct algorithm
 		{
 			scaling (*minimize_cell_sizes)(common_params const&, state&, main::widget_collection_ref const&);
+			scaling (*adjust_cell_sizes)(struct params const&, state&, scaling available_size);
 			void (*update_widget_locations)(common_params const&, state const&, main::widget_collection_ref&);
 		};
 

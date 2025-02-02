@@ -36,6 +36,7 @@ namespace terraformer::ui::layouts
 
 		static constexpr table::algorithm algorithm{
 			.minimize_cell_sizes = minimize_cell_sizes,
+			.adjust_cell_sizes = adjust_cell_sizes,
 			.update_widget_locations = update_widget_locations
 		};
 
