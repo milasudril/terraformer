@@ -21,8 +21,6 @@ namespace terraformer::ui::layouts
 			size_t m_fixdim_cellcount;
 			std::unique_ptr<float[]> m_fixdim_cellsizes;
 			single_array<float> m_dyndim_cellsizes;
-			float m_width;
-			float m_height;
 		};
 
 
@@ -54,9 +52,7 @@ namespace terraformer::ui::layouts
 			m_state{
 				.m_fixdim_cellcount = fixdim_cellcount,
 				.m_fixdim_cellsizes = std::make_unique<float[]>(fixdim_cellcount),
-				.m_dyndim_cellsizes = single_array<float>{},
-				.m_width = 0.0f,
-				.m_height = 0.0f
+				.m_dyndim_cellsizes = single_array<float>{}
 			}
 		{}
 

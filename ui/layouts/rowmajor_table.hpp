@@ -22,7 +22,7 @@ namespace terraformer::ui::layouts
 			main::widget_collection_ref const& widgets
 		);
 
-		static void adjust_cell_sizes(
+		static scaling adjust_cell_sizes(
 			struct params const& params,
 			state& state,
 			scaling available_size

@@ -49,7 +49,7 @@ terraformer::scaling terraformer::ui::layouts::rowmajor_table::minimize_cell_siz
 	};
 }
 
-void terraformer::ui::layouts::rowmajor_table::adjust_cell_sizes(
+terraformer::scaling terraformer::ui::layouts::rowmajor_table::adjust_cell_sizes(
 	struct params const& params,
 	state& state,
 	scaling available_size
@@ -136,14 +136,17 @@ void terraformer::ui::layouts::rowmajor_table::adjust_cell_sizes(
 		{ rows[rows_to_expand[k]] = avg_row_height; }
 	}
 
-	state.m_height = std::accumulate(
-		std::begin(rows),
-		std::end(rows),
-		params.no_outer_margin?
-			0.0f:params.margin_y
-	);
-	state.m_width = std::accumulate(cols, cols + colcount, params.margin_x)
-		 - (params.no_outer_margin? 2.0f*params.margin_x : 0.0f);
+	return scaling{
+		std::accumulate(cols, cols + colcount, params.margin_x)
+			- (params.no_outer_margin? 2.0f*params.margin_x : 0.0f),
+		std::accumulate(
+			std::begin(rows),
+			std::end(rows),
+			params.no_outer_margin?
+				0.0f:params.margin_y
+		),
+		1.0f
+	};
 }
 
 void

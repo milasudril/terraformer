@@ -22,16 +22,16 @@ namespace terraformer::ui::layouts
 			main::widget_collection_ref const& widgets
 		);
 
+		static scaling adjust_cell_sizes(
+			struct params const& params,
+			state& state,
+			scaling available_size
+		);
+
 		static void update_widget_locations(
 			common_params const&,
 			state const& state,
 			main::widget_collection_ref& widgets
-		);
-
-		static void adjust_cell_sizes(
-			struct params const& params,
-			state& state,
-			scaling available_size
 		);
 
 		static constexpr table::algorithm algorithm{

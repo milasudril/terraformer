@@ -38,19 +38,19 @@ terraformer::scaling terraformer::ui::layouts::columnmajor_table::minimize_cell_
 	{ state.m_dyndim_cellsizes.push_back(max_width); }
 
 	return scaling{
-		state.m_width = std::accumulate(
+		std::accumulate(
 			std::begin(state.m_dyndim_cellsizes),
 			std::end(state.m_dyndim_cellsizes),
 			params.no_outer_margin?
 				0.0f:params.margin_x
 		),
-		state.m_height = std::accumulate(rows, rows + rowcount, params.margin_y)
+		std::accumulate(rows, rows + rowcount, params.margin_y)
 			- (params.no_outer_margin? 2.0f*params.margin_y : 0.0f),
 		1.0f
 	};
 }
 
-void terraformer::ui::layouts::columnmajor_table::adjust_cell_sizes(
+terraformer::scaling terraformer::ui::layouts::columnmajor_table::adjust_cell_sizes(
 	struct params const& params,
 	state& state,
 	scaling available_size
@@ -138,14 +138,17 @@ void terraformer::ui::layouts::columnmajor_table::adjust_cell_sizes(
 		{ cols[cols_to_expand[k]] = avg_col_width; }
 	}
 
-	state.m_width = std::accumulate(
-		std::begin(cols),
-		std::end(cols),
-		params.no_outer_margin?
-			0.0f:params.margin_x
-	);
-	state.m_height = std::accumulate(rows, rows + rowcount, params.margin_y)
-		 - (params.no_outer_margin? 2.0f*params.margin_y : 0.0f);
+	return scaling{
+		std::accumulate(
+			std::begin(cols),
+			std::end(cols),
+			params.no_outer_margin?
+				0.0f:params.margin_x
+		),
+		std::accumulate(rows, rows + rowcount, params.margin_y)
+		 - (params.no_outer_margin? 2.0f*params.margin_y : 0.0f),
+		 1.0f
+	};
 }
 
 void
