@@ -140,13 +140,27 @@ namespace terraformer::ui::main
 		}
 
 		auto const size_from_layout = root.minimize_cell_sizes();
-		root.update_widget_locations();
 
 		return scaling{
 			std::max(initial_size[0], size_from_layout[0]),
 			std::max(initial_size[1], size_from_layout[1]),
 			std::max(initial_size[2], size_from_layout[2])
 		};
+	}
+
+	inline void update_widget_locations(root_widget& root)
+	{
+		root.update_widget_locations();
+		auto& children = root.children();
+		auto const widget_states = children.widget_states();
+		for(auto k : children.element_indices())
+		{
+			if(!widget_states[k].collapsed) [[likely]]
+			{
+				root_widget next_root{children, k};
+				update_widget_locations(next_root);
+			}
+		}
 	}
 
 	inline void confirm_sizes(root_widget& root, fb_size size)
