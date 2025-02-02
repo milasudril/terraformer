@@ -60,6 +60,9 @@ namespace terraformer::ui::layouts
 		scaling minimize_cell_sizes(main::widget_collection_ref const& widgets)
 		{ return m_algo.minimize_cell_sizes(params, m_state, widgets); }
 
+		scaling adjust_cell_sizes(scaling available_size)
+		{ return m_algo.adjust_cell_sizes(params, m_state, available_size); }
+
 		void update_widget_locations(main::widget_collection_ref& widgets) const
 		{ m_algo.update_widget_locations(params, m_state, widgets); }
 
