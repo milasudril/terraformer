@@ -4,6 +4,42 @@
 
 #include "lib/array_classes/single_array.hpp"
 
+terraformer::scaling
+terraformer::ui::main::run(minimize_cell_sizes_context const& ctxt)
+{
+  // TODO: Decide which dimension to minimize. Should be determined by parent
+	auto const initial_size = ctxt.compute_size(ctxt.current_widget, widget_width_request{});
+	
+	auto const widget_pointers = ctxt.children.widget_pointers();
+	auto const widget_states = ctxt.children.widget_states();
+	auto const get_children_callbacks = ctxt.children.get_children_callbacks();	
+	auto const get_layout_callbacks = ctxt.children.get_layout_callbacks();
+	auto const size_callbacks = ctxt.children.compute_size_given_height_callbacks();
+	auto const sizes = ctxt.children.sizes();
+	for(auto k : ctxt.children.element_indices())
+	{
+		if(!widget_states[k].collapsed) [[likely]]
+		{
+			sizes[k] = run(minimize_cell_sizes_context{
+				.current_widget = widget_pointers[k],
+				.compute_size = size_callbacks[k],
+				.children = get_children_callbacks[k](widget_pointers[k]),
+				.current_layout = get_layout_callbacks[k](widget_pointers[k])
+			});
+		}
+		else
+		{ sizes[k] = scaling{0.0f, 0.0f, 0.0f}; }
+	}
+
+	auto const size_from_layout = ctxt.current_layout.minimize_cell_sizes(ctxt.children);
+	
+	return scaling{
+		std::max(initial_size[0], size_from_layout[0]),
+		std::max(initial_size[1], size_from_layout[1]),
+		std::max(initial_size[2], size_from_layout[2])
+	};
+}
+
 terraformer::ui::main::find_recursive_result terraformer::ui::main::find_recursive(
 	cursor_position pos,
 	widget_collection_ref const& widgets,
