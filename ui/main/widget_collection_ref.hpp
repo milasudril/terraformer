@@ -264,7 +264,7 @@ namespace terraformer::ui::main
 			return widget_collection_view{widget_span_const{get_span()}};
 		}
 	};
-			
+
 	struct minimize_cell_sizes_context
 	{
 		void* current_widget;
@@ -272,8 +272,17 @@ namespace terraformer::ui::main
 		widget_collection_ref children;
 		layout_policy_ref current_layout;
 	};
-	
-	scaling run(minimize_cell_sizes_context const& ctxt);	
+
+	scaling run(minimize_cell_sizes_context const& ctxt);
+
+	struct adjust_cell_sizes_context
+	{
+		void* current_widget;
+		widget_collection_ref children;
+		layout_policy_ref current_layout;
+	};
+
+	scaling run(adjust_cell_sizes_context const& ctxt, scaling available_size);
 
 	inline auto find(cursor_position pos, widget_collection_view const& widgets, displacement offset)
 	{

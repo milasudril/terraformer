@@ -9,10 +9,10 @@ terraformer::ui::main::run(minimize_cell_sizes_context const& ctxt)
 {
   // TODO: Decide which dimension to minimize. Should be determined by parent
 	auto const initial_size = ctxt.compute_size(ctxt.current_widget, widget_width_request{});
-	
+
 	auto const widget_pointers = ctxt.children.widget_pointers();
 	auto const widget_states = ctxt.children.widget_states();
-	auto const get_children_callbacks = ctxt.children.get_children_callbacks();	
+	auto const get_children_callbacks = ctxt.children.get_children_callbacks();
 	auto const get_layout_callbacks = ctxt.children.get_layout_callbacks();
 	auto const size_callbacks = ctxt.children.compute_size_given_height_callbacks();
 	auto const sizes = ctxt.children.sizes();
@@ -32,12 +32,37 @@ terraformer::ui::main::run(minimize_cell_sizes_context const& ctxt)
 	}
 
 	auto const size_from_layout = ctxt.current_layout.minimize_cell_sizes(ctxt.children);
-	
+
 	return scaling{
 		std::max(initial_size[0], size_from_layout[0]),
 		std::max(initial_size[1], size_from_layout[1]),
 		std::max(initial_size[2], size_from_layout[2])
 	};
+}
+
+terraformer::scaling
+terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling available_size)
+{
+	auto const new_size = ctxt.current_layout.adjust_cell_sizes(available_size);
+	auto const widget_pointers = ctxt.children.widget_pointers();
+	auto const widget_states = ctxt.children.widget_states();
+	auto const get_children_callbacks = ctxt.children.get_children_callbacks();
+	auto const get_layout_callbacks = ctxt.children.get_layout_callbacks();
+	for(auto k : ctxt.children.element_indices())
+	{
+		if(!widget_states[k].collapsed) [[likely]]
+		{
+			run(
+				adjust_cell_sizes_context{
+					.current_widget = widget_pointers[k],
+					.children = get_children_callbacks[k](widget_pointers[k]),
+					.current_layout = get_layout_callbacks[k](widget_pointers[k])
+				},
+				new_size
+			);
+		}
+	}
+	return new_size;
 }
 
 terraformer::ui::main::find_recursive_result terraformer::ui::main::find_recursive(
