@@ -93,7 +93,7 @@ namespace terraformer::ui::main
 		}
 
 		scaling minimize_cell_sizes()
-		{ return m_layout.minimize_cell_sizes(m_children); }
+		{ return m_layout.set_default_cell_sizes(m_children.as_view()); }
 
 		scaling adjust_cell_sizes(scaling available_size)
 		{ return m_layout.adjust_cell_sizes(available_size); }

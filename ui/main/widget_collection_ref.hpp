@@ -30,9 +30,14 @@ namespace terraformer::ui::main
 	};
 
 	template<class T>
-	concept layout_policy = requires(T obj, widget_collection_ref& widgets, scaling available_size)
+	concept layout_policy = requires(
+		T obj,
+		widget_collection_ref& widgets,
+		widget_collection_view const& widgets_view,
+		scaling available_size
+	)
 	{
-		{obj.minimize_cell_sizes(widgets)} -> std::same_as<scaling>;
+		{obj.set_default_cell_sizes(widgets_view)} -> std::same_as<scaling>;
 		{obj.adjust_cell_sizes(available_size)} -> std::same_as<scaling>;
 		{std::as_const(obj).update_widget_locations(widgets)} -> std::same_as<void>;
 	};
@@ -42,8 +47,8 @@ namespace terraformer::ui::main
 	public:
 		layout_policy_ref():
 			m_handle{nullptr},
-			m_minimize_cell_sizes{
-				[](void*, widget_collection_ref const&){
+			m_set_default_cell_sizes{
+				[](void*, widget_collection_view const&){
 					return scaling{};
 				}
 			},
@@ -60,9 +65,9 @@ namespace terraformer::ui::main
 		template<layout_policy LayoutPolicy>
 		explicit layout_policy_ref(std::reference_wrapper<LayoutPolicy> policy):
 			m_handle{&policy.get()},
-			m_minimize_cell_sizes{
-				[](void* handle, widget_collection_ref const& widgets) {
-					return static_cast<LayoutPolicy*>(handle)->minimize_cell_sizes(widgets);
+			m_set_default_cell_sizes{
+				[](void* handle, widget_collection_view const& widgets) {
+					return static_cast<LayoutPolicy*>(handle)->set_default_cell_sizes(widgets);
 				}
 			},
 			m_adjust_cell_sizes{
@@ -78,8 +83,8 @@ namespace terraformer::ui::main
 		{}
 
 
-		scaling minimize_cell_sizes(widget_collection_ref const& widgets) const
-		{ return m_minimize_cell_sizes(m_handle, widgets); }
+		scaling set_default_cell_sizes(widget_collection_view const& widgets) const
+		{ return m_set_default_cell_sizes(m_handle, widgets); }
 
 		scaling adjust_cell_sizes(scaling available_size) const
 		{ return m_adjust_cell_sizes(m_handle, available_size); }
@@ -92,7 +97,7 @@ namespace terraformer::ui::main
 
 	private:
 		void* m_handle;
-		scaling (*m_minimize_cell_sizes)(void*, widget_collection_ref const&);
+		scaling (*m_set_default_cell_sizes)(void*, widget_collection_view const&);
 		scaling (*m_adjust_cell_sizes)(void*, scaling);
 		void (*m_update_widget_locations)(void const*, widget_collection_ref&);
 	};

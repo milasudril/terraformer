@@ -3,10 +3,10 @@
 #include "./columnmajor_table.hpp"
 #include "lib/common/utils.hpp"
 
-terraformer::scaling terraformer::ui::layouts::columnmajor_table::minimize_cell_sizes(
+terraformer::scaling terraformer::ui::layouts::columnmajor_table::set_default_cell_sizes(
 	common_params const& params,
 	state& state,
-	main::widget_collection_ref const& widgets
+	main::widget_collection_view const& widgets
 )
 {
 	auto const sizes = widgets.sizes();

@@ -31,7 +31,7 @@ terraformer::ui::main::run(minimize_cell_sizes_context const& ctxt)
 		{ sizes[k] = scaling{0.0f, 0.0f, 0.0f}; }
 	}
 
-	auto const size_from_layout = ctxt.current_layout.minimize_cell_sizes(ctxt.children);
+	auto const size_from_layout = ctxt.current_layout.set_default_cell_sizes(ctxt.children.as_view());
 
 	return scaling{
 		std::max(initial_size[0], size_from_layout[0]),
