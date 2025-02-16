@@ -39,3 +39,24 @@ float terraformer::ui::layouts::table::compute_remaining_size(
 	return remaining_size;
 
 }
+
+terraformer::single_array<terraformer::single_array<float>::index_type>
+terraformer::ui::layouts::table::collect_expanding_cells(
+	span<cell_size const> specified_sizes,
+	size_t total_cell_count
+)
+{
+	terraformer::single_array<single_array<float>::index_type> ret;
+	ret.reserve(decltype(ret)::size_type{total_cell_count});
+
+	for(size_t k = 0; k != total_cell_count; ++k)
+	{
+		using index_type = single_array<cell_size>::index_type;
+		index_type const index{k};
+		auto val = specified_sizes.value_or(index, cell_size::use_default{});
+		if(std::holds_alternative<cell_size::expand>(val.value))
+		{ret.push_back(decltype(ret)::value_type{k});}
+	}
+
+	return ret;
+}

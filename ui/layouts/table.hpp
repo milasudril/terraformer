@@ -46,6 +46,9 @@ namespace terraformer::ui::layouts
 			bool no_outer_margin
 		);
 
+		single_array<single_array<float>::index_type>
+		collect_expanding_cells(span<cell_size const> specified_sizes, size_t total_cell_count);
+
 		template<auto DimensionTag>
 		struct cell_size_with_tag
 		{
