@@ -38,7 +38,7 @@ namespace terraformer::ui::layouts
 			single_array<cell_size> row_heights;
 		};
 
-		float compute_remaining_size(
+		static float compute_remaining_size(
 			span<cell_size const> specified_sizes,
 			span<float const> default_sizes,
 			float available_size,
@@ -47,7 +47,7 @@ namespace terraformer::ui::layouts
 		);
 
 		single_array<single_array<float>::index_type>
-		collect_expanding_cells(span<cell_size const> specified_sizes, size_t total_cell_count);
+		static collect_expanding_cells(span<cell_size const> specified_sizes, size_t total_cell_count);
 
 		template<auto DimensionTag>
 		struct cell_size_with_tag
