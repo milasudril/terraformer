@@ -39,6 +39,15 @@ namespace terraformer
 		constexpr auto& operator[](index_type index) const
 		{ return m_begin[index.get()]; }
 
+		template<class U>
+		T value_or(index_type index, U&& default_value) const noexcept
+		{
+			if(index < size())
+			{ return (*this)[index]; }
+
+			return T{std::forward<U>(default_value)};
+		}
+
 		constexpr auto data() const
 		{ return m_begin; }
 

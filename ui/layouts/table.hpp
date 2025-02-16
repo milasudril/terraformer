@@ -25,7 +25,6 @@ namespace terraformer::ui::layouts
 			single_array<float> m_dyndim_cellsizes;
 		};
 
-		template<auto DimensionTag>
 		struct cell_size
 		{
 			struct use_default{};
@@ -33,8 +32,30 @@ namespace terraformer::ui::layouts
 			std::variant<use_default, expand, ratio, float> value;
 		};
 
-		using column_width = cell_size<0>;
-		using row_height = cell_size<1>;
+		struct params2:common_params
+		{
+			single_array<cell_size> column_widths;
+			single_array<cell_size> row_heights;
+		};
+
+		float compute_remaining_size(
+			span<cell_size const> specified_sizes,
+			span<float const> default_sizes,
+			float available_size,
+			float margin,
+			bool no_outer_margin
+		);
+
+		template<auto DimensionTag>
+		struct cell_size_with_tag
+		{
+			struct use_default{};
+			struct expand{};
+			std::variant<use_default, expand, ratio, float> value;
+		};
+
+		using column_width = cell_size_with_tag<0>;
+		using row_height = cell_size_with_tag<1>;
 
 		struct params:common_params
 		{
