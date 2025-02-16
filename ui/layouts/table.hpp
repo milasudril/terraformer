@@ -1,3 +1,5 @@
+//@	{"dependencies_extra":[{"ref":"./table.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_UI_LAYOUTS_TABLE_HPP
 #define TERRAFORMER_UI_LAYOUTS_TABLE_HPP
 
@@ -23,13 +25,12 @@ namespace terraformer::ui::layouts
 			single_array<float> m_dyndim_cellsizes;
 		};
 
-
 		template<auto DimensionTag>
 		struct cell_size
 		{
-			struct minimize{};
+			struct use_default{};
 			struct expand{};
-			std::variant<minimize, expand, ratio, float> value;
+			std::variant<use_default, expand, ratio, float> value;
 		};
 
 		using column_width = cell_size<0>;
@@ -40,6 +41,18 @@ namespace terraformer::ui::layouts
 			single_array<column_width> column_widths;
 			single_array<row_height> row_heights;
 		};
+
+		float compute_remaining_width(
+			struct params const& params,
+			span<float const> cell_widths,
+			float available_width
+		);
+
+		float compute_remaining_height(
+			struct params const& params,
+			span<float const> cell_heights,
+			float available_height
+		);
 
 		struct algorithm
 		{

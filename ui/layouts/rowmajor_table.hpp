@@ -28,6 +28,13 @@ namespace terraformer::ui::layouts
 			scaling available_size
 		);
 
+		static scaling get_cellsizes_into(
+			struct params const& params,
+			state& state,
+			span<scaling> sizes,
+			scaling available_size
+		);
+
 		static void update_widget_locations(
 			common_params const&,
 			state const& state,

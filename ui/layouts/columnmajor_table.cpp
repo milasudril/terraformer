@@ -68,7 +68,7 @@ terraformer::scaling terraformer::ui::layouts::columnmajor_table::adjust_cell_si
 
 		fixed_height += std::visit(
 			overload{
-				[k, rows](row_height::minimize){
+				[k, rows](row_height::use_default){
 					return rows[k];
 				},
 				[k, &rows_to_expand](row_height::expand){
@@ -85,7 +85,7 @@ terraformer::scaling terraformer::ui::layouts::columnmajor_table::adjust_cell_si
 					return value;
 				}
 			},
-			params.row_heights.value_or(index, row_height::minimize{}).value
+			params.row_heights.value_or(index, row_height::use_default{}).value
 		);
 	}
 	if(!rows_to_expand.empty())
@@ -109,7 +109,7 @@ terraformer::scaling terraformer::ui::layouts::columnmajor_table::adjust_cell_si
 
 		fixed_width += std::visit(
 			overload{
-				[k, cols](column_width::minimize) {
+				[k, cols](column_width::use_default) {
 					return cols[k];
 				},
 				[k, &cols_to_expand](column_width::expand){
@@ -126,7 +126,7 @@ terraformer::scaling terraformer::ui::layouts::columnmajor_table::adjust_cell_si
 					return value;
 				}
 			},
-			params.column_widths.value_or(index, column_width::minimize{}).value
+			params.column_widths.value_or(index, column_width::use_default{}).value
 		);
 	}
 	if(!cols_to_expand.empty())
