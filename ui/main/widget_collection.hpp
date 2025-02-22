@@ -53,6 +53,8 @@ namespace terraformer::ui::main
 				&w.get(),
 				initial_state,
 				scaling{},
+				computed_width{},
+				computed_height{},
 				initial_geometry,
 				widget_layer_stack{},
 				[](void* obj, graphics_backend_ref backend) {

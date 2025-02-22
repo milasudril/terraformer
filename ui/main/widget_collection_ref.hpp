@@ -29,6 +29,12 @@ namespace terraformer::ui::main
 		size_t paragraph_index;
 	};
 
+	struct computed_width
+	{ float value; };
+
+	struct computed_height
+	{ float value; };
+
 	template<class T>
 	concept layout_policy = requires(
 		T obj,
@@ -141,6 +147,8 @@ namespace terraformer::ui::main
 			void*,
 			widget_state,
 			scaling,
+			computed_width,
+			computed_height,
 			widget_geometry,
 			widget_layer_stack,
 			prepare_for_presentation_callback,
@@ -204,6 +212,12 @@ namespace terraformer::ui::main
 
 		auto sizes() const
 		{ return m_span.template get_by_type<scaling>(); }
+
+		auto computed_widths() const
+		{ return m_span.template get_by_type<computed_width>(); }
+
+		auto computed_heights() const
+		{ return m_span.template get_by_type<computed_height>(); }
 
 		auto widget_geometries() const
 		{ return m_span.template get_by_type<widget_geometry>(); }
