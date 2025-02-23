@@ -112,14 +112,10 @@ namespace terraformer::ui::main
 	using event_callback_t = void (*)(void*, EventType, Args...);
 
 	struct widget_width_request
-	{
-		std::optional<float> height;
-	};
+	{ float height; };
 
 	struct widget_height_request
-	{
-		std::optional<float> width;
-	};
+	{ float width; };
 
 	using cursor_enter_callback = event_callback_t<cursor_enter_event const&, window_ref, ui_controller>;
 	using cursor_leave_callback = event_callback_t<cursor_leave_event const&, window_ref, ui_controller>;
