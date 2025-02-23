@@ -5,9 +5,9 @@
 #include "lib/array_classes/single_array.hpp"
 
 terraformer::scaling
-terraformer::ui::main::run(minimize_cell_width_context const& ctxt)
+terraformer::ui::main::run(set_cell_width_context const& ctxt)
 {
-	auto const initial_size = ctxt.compute_size(ctxt.current_widget, widget_height_request{});
+	auto const initial_size = ctxt.compute_size(ctxt.current_widget, ctxt.new_size);
 
 	auto const widget_pointers = ctxt.children.widget_pointers();
 	auto const widget_states = ctxt.children.widget_states();
@@ -19,8 +19,11 @@ terraformer::ui::main::run(minimize_cell_width_context const& ctxt)
 	{
 		if(!widget_states[k].collapsed) [[likely]]
 		{
-			sizes[k] = run(minimize_cell_width_context{
+			sizes[k] = run(set_cell_width_context{
 				.current_widget = widget_pointers[k],
+				.new_size = widget_height_request{
+					.width = sizes[k][0]
+				},
 				.compute_size = size_callbacks[k],
 				.children = get_children_callbacks[k](widget_pointers[k]),
 				.current_layout = get_layout_callbacks[k](widget_pointers[k])
@@ -40,9 +43,9 @@ terraformer::ui::main::run(minimize_cell_width_context const& ctxt)
 }
 
 terraformer::scaling
-terraformer::ui::main::run(minimize_cell_height_context const& ctxt)
+terraformer::ui::main::run(set_cell_height_context const& ctxt)
 {
-	auto const initial_size = ctxt.compute_size(ctxt.current_widget, widget_width_request{});
+	auto const initial_size = ctxt.compute_size(ctxt.current_widget, ctxt.new_size);
 
 	auto const widget_pointers = ctxt.children.widget_pointers();
 	auto const widget_states = ctxt.children.widget_states();
@@ -54,8 +57,11 @@ terraformer::ui::main::run(minimize_cell_height_context const& ctxt)
 	{
 		if(!widget_states[k].collapsed) [[likely]]
 		{
-			sizes[k] = run(minimize_cell_height_context{
+			sizes[k] = run(set_cell_height_context{
 				.current_widget = widget_pointers[k],
+				.new_size = widget_width_request{
+					.height = sizes[k][1]
+				},
 				.compute_size = size_callbacks[k],
 				.children = get_children_callbacks[k](widget_pointers[k]),
 				.current_layout = get_layout_callbacks[k](widget_pointers[k])

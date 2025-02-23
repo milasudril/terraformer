@@ -280,22 +280,23 @@ namespace terraformer::ui::main
 		}
 	};
 
-	template<class MinimizerCallback>
-	struct minimize_cell_size
+	template<class RequestType>
+	struct set_default_cell_size
 	{
 		void* current_widget;
-		MinimizerCallback compute_size;
+		RequestType new_size;
+		scaling (*compute_size)(void*, RequestType);
 		widget_collection_ref children;
 		layout_policy_ref current_layout;
 	};
 
-	using minimize_cell_width_context = minimize_cell_size<compute_size_given_width_callback>;
+	using set_cell_width_context = set_default_cell_size<widget_height_request>;
 
-	scaling run(minimize_cell_width_context const& ctxt);
+	scaling run(set_cell_width_context const& ctxt);
 
-	using minimize_cell_height_context = minimize_cell_size<compute_size_given_height_callback>;
+	using set_cell_height_context = set_default_cell_size<widget_width_request>;
 
-	scaling run(minimize_cell_height_context const& ctxt);
+	scaling run(set_cell_height_context const& ctxt);
 
 	struct adjust_cell_sizes_context
 	{
