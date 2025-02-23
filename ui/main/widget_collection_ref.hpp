@@ -284,15 +284,15 @@ namespace terraformer::ui::main
 		}
 	};
 
-	struct minimize_cell_sizes_context
+	struct minimize_cell_width_context
 	{
 		void* current_widget;
-		compute_size_given_height_callback compute_size;
+		compute_size_given_width_callback compute_size;
 		widget_collection_ref children;
 		layout_policy_ref current_layout;
 	};
 
-	scaling run(minimize_cell_sizes_context const& ctxt);
+	scaling run(minimize_cell_width_context const& ctxt);
 
 	struct adjust_cell_sizes_context
 	{

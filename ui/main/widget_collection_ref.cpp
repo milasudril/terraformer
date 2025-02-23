@@ -5,22 +5,21 @@
 #include "lib/array_classes/single_array.hpp"
 
 terraformer::scaling
-terraformer::ui::main::run(minimize_cell_sizes_context const& ctxt)
+terraformer::ui::main::run(minimize_cell_width_context const& ctxt)
 {
-  // TODO: Decide which dimension to minimize. Should be determined by parent
-	auto const initial_size = ctxt.compute_size(ctxt.current_widget, widget_width_request{});
+	auto const initial_size = ctxt.compute_size(ctxt.current_widget, widget_height_request{});
 
 	auto const widget_pointers = ctxt.children.widget_pointers();
 	auto const widget_states = ctxt.children.widget_states();
 	auto const get_children_callbacks = ctxt.children.get_children_callbacks();
 	auto const get_layout_callbacks = ctxt.children.get_layout_callbacks();
-	auto const size_callbacks = ctxt.children.compute_size_given_height_callbacks();
+	auto const size_callbacks = ctxt.children.compute_size_given_width_callbacks();
 	auto const sizes = ctxt.children.sizes();
 	for(auto k : ctxt.children.element_indices())
 	{
 		if(!widget_states[k].collapsed) [[likely]]
 		{
-			sizes[k] = run(minimize_cell_sizes_context{
+			sizes[k] = run(minimize_cell_width_context{
 				.current_widget = widget_pointers[k],
 				.compute_size = size_callbacks[k],
 				.children = get_children_callbacks[k](widget_pointers[k]),
