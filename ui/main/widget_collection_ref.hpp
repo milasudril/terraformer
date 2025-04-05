@@ -307,6 +307,25 @@ namespace terraformer::ui::main
 
 	scaling run(adjust_cell_sizes_context const& ctxt, scaling available_size);
 
+	struct set_cell_widths_context
+	{
+		void* current_widget;
+		widget_collection_ref children;
+		layout_policy_ref current_layout;
+	};
+
+	scaling run(set_cell_widths_context const& ctxt);
+
+	struct set_cell_heights_context
+	{
+		void* current_widget;
+		widget_collection_ref children;
+		layout_policy_ref current_layout;
+	};
+
+	scaling run(set_cell_heights_context const& ctxt);
+
+
 	inline auto find(cursor_position pos, widget_collection_view const& widgets, displacement offset)
 	{
 		auto const i = find(pos, widgets.widget_geometries(), offset);
