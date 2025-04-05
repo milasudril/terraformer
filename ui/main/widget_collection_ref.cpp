@@ -80,9 +80,9 @@ terraformer::ui::main::run(set_cell_height_context const& ctxt)
 	};
 }
 
-terraformer::scaling run(set_cell_widths_context const& ctxt, float available_width)
+terraformer::scaling terraformer::ui::main::run(set_cell_widths_context const& ctxt, float available_width)
 {
-	auto const new_size = ctxt.current_layout.set_cell_widths(available_size);
+	auto const new_size = ctxt.current_layout.set_cell_widths(available_width);
 	auto const widget_pointers = ctxt.children.widget_pointers();
 	auto const widget_states = ctxt.children.widget_states();
 	auto const get_children_callbacks = ctxt.children.get_children_callbacks();
@@ -103,8 +103,6 @@ terraformer::scaling run(set_cell_widths_context const& ctxt, float available_wi
 	}
 	return new_size;
 }
-
-terraformer::scaling run(set_cell_heights_context const& ctxt, float available_height);
 
 terraformer::scaling
 terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling available_size)

@@ -100,6 +100,8 @@ namespace terraformer::ui::main
 
 		bool is_valid() const
 		{ return m_handle != nullptr; }
+		
+		terraformer::scaling set_cell_widths(float available_width) const;
 
 	private:
 		void* m_handle;
@@ -314,7 +316,7 @@ namespace terraformer::ui::main
 		layout_policy_ref current_layout;
 	};
 
-	scaling run(set_cell_widths_context const& ctxt);
+	scaling run(set_cell_widths_context const& ctxt, float available_width);
 
 	struct set_cell_heights_context
 	{
@@ -323,7 +325,7 @@ namespace terraformer::ui::main
 		layout_policy_ref current_layout;
 	};
 
-	scaling run(set_cell_heights_context const& ctxt);
+	scaling run(set_cell_heights_context const& ctxt, float available_height);
 
 
 	inline auto find(cursor_position pos, widget_collection_view const& widgets, displacement offset)
