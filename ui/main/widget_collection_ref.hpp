@@ -46,6 +46,7 @@ namespace terraformer::ui::main
 		{obj.set_default_cell_sizes(widgets_view)} -> std::same_as<scaling>;
 		{obj.adjust_cell_sizes(available_size)} -> std::same_as<scaling>;
 		{std::as_const(obj).update_widget_locations(widgets)} -> std::same_as<void>;
+		// TODO: Add set_cell_widths
 	};
 
 	class layout_policy_ref
@@ -85,7 +86,13 @@ namespace terraformer::ui::main
 				[](void const* handle, widget_collection_ref& widgets){
 					static_cast<LayoutPolicy const*>(handle)->update_widget_locations(widgets);
 				}
+			},
+			m_set_cell_widths{
+				[](void* handle, float available_width) {
+					return static_cast<LayoutPolicy const*>(handle)->set_cell_widths(available_width);
+				}
 			}
+			
 		{}
 
 
@@ -101,13 +108,15 @@ namespace terraformer::ui::main
 		bool is_valid() const
 		{ return m_handle != nullptr; }
 		
-		terraformer::scaling set_cell_widths(float available_width) const;
+		terraformer::scaling set_cell_widths(float available_width) const
+		{ return m_set_cell_widths(m_handle, available_width); }
 
 	private:
 		void* m_handle;
 		scaling (*m_set_default_cell_sizes)(void*, widget_collection_view const&);
 		scaling (*m_adjust_cell_sizes)(void*, scaling);
 		void (*m_update_widget_locations)(void const*, widget_collection_ref&);
+		scaling (*m_set_cell_widths)(void*, float);
 	};
 
 	template<class EventType, class ... Args>
