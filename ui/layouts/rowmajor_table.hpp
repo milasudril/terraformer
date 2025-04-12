@@ -28,11 +28,10 @@ namespace terraformer::ui::layouts
 			scaling available_size
 		);
 
-		static terraformer::scaling get_widget_sizes_into(
+		static void get_widget_sizes_into(
 			struct params2 const& params,
 			state& state,
-			scaling available_size,
-			main::widget_collection_ref const& widgets
+			scaling available_size
 		);
 
 		static void update_widget_locations(
