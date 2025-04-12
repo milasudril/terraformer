@@ -28,11 +28,11 @@ namespace terraformer::ui::layouts
 			scaling available_size
 		);
 
-		static terraformer::scaling get_widget_sizes_into(
-			struct params2 const& params,
+		static scaling get_cellsizes_into(
+			struct params const& params,
 			state& state,
-			scaling available_size,
-			main::widget_collection_ref const& widgets
+			span<scaling> sizes,
+			scaling available_size
 		);
 
 		static void update_widget_locations(
@@ -43,11 +43,7 @@ namespace terraformer::ui::layouts
 
 		static constexpr table::algorithm algorithm{
 			.set_default_cell_sizes = set_default_cell_sizes,
-			.adjust_cell_sizes = [](struct params const&,
-				state&,
-				scaling available_size){
-				return available_size;
-			},
+			.adjust_cell_sizes = adjust_cell_sizes,
 			.update_widget_locations = update_widget_locations
 		};
 
