@@ -86,13 +86,15 @@ namespace terraformer::ui::main
 				[](void const* handle, widget_collection_ref& widgets){
 					static_cast<LayoutPolicy const*>(handle)->update_widget_locations(widgets);
 				}
-			},
+			}
+#if 0
 			m_set_cell_widths{
 				[](void* handle, float available_width) {
 					return static_cast<LayoutPolicy const*>(handle)->set_cell_widths(available_width);
 				}
 			}
-			
+#endif
+
 		{}
 
 
@@ -107,7 +109,7 @@ namespace terraformer::ui::main
 
 		bool is_valid() const
 		{ return m_handle != nullptr; }
-		
+
 		terraformer::scaling set_cell_widths(float available_width) const
 		{ return m_set_cell_widths(m_handle, available_width); }
 

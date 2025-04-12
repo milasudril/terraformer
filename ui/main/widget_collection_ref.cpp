@@ -80,6 +80,7 @@ terraformer::ui::main::run(set_cell_height_context const& ctxt)
 	};
 }
 
+#if 0
 terraformer::scaling terraformer::ui::main::run(set_cell_widths_context const& ctxt, float available_width)
 {
 	auto const new_size = ctxt.current_layout.set_cell_widths(available_width);
@@ -92,7 +93,7 @@ terraformer::scaling terraformer::ui::main::run(set_cell_widths_context const& c
 		if(!widget_states[k].collapsed) [[likely]]
 		{
 			run(
-				adjust_cell_sizes_context{
+				set_cell_widths_context{
 					.current_widget = widget_pointers[k],
 					.children = get_children_callbacks[k](widget_pointers[k]),
 					.current_layout = get_layout_callbacks[k](widget_pointers[k])
@@ -128,6 +129,7 @@ terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling availa
 	}
 	return new_size;
 }
+#endif
 
 terraformer::ui::main::find_recursive_result terraformer::ui::main::find_recursive(
 	cursor_position pos,
