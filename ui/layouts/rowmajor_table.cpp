@@ -49,13 +49,14 @@ terraformer::scaling terraformer::ui::layouts::rowmajor_table::set_default_cell_
 	};
 }
 
-void terraformer::ui::layouts::rowmajor_table::get_widget_sizes_into(
+terraformer::scaling terraformer::ui::layouts::rowmajor_table::get_widget_sizes_into(
 	struct params2 const& params,
 	state& state,
-	scaling available_size
+	scaling available_size,
+	main::widget_collection_ref const& widgets
 )
 {
-	update_sizes(
+	auto const width = update_sizes(
 		params.column_widths,
 		span{
 			state.m_fixdim_cellsizes.get(),
@@ -66,13 +67,42 @@ void terraformer::ui::layouts::rowmajor_table::get_widget_sizes_into(
 		params.no_outer_margin
 	);
 
-	update_sizes(
+	auto const height = update_sizes(
 		params.row_heights,
 		state.m_dyndim_cellsizes,
 		available_size[1],
 		params.margin_y,
 		params.no_outer_margin
 	);
+
+	auto const widget_states = widgets.widget_states();
+	auto const widget_sizes = widgets.sizes();
+	auto const cols = state.m_fixdim_cellsizes.get();
+	auto const& rows = state.m_dyndim_cellsizes;
+	auto const colcount = state.m_fixdim_cellcount;
+	auto const rowcount = std::size(state.m_dyndim_cellsizes);
+	auto row = state.m_dyndim_cellsizes.element_indices().front();
+	size_t col = 0;
+
+	for(auto k : widgets.element_indices())
+	{
+		if(widget_states[k].maximized)
+		{ widget_sizes[k] = scaling{cols[col], rows[row], 1.0f}; }
+
+		if(col == colcount)
+		{
+			++row;
+			if(row == rowcount)
+			{ break; }
+			col = 0;
+		}
+	}
+
+	return scaling{
+		width,
+		height,
+		1.0f
+	};
 }
 
 terraformer::scaling terraformer::ui::layouts::rowmajor_table::adjust_cell_sizes(
