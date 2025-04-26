@@ -1,6 +1,10 @@
 #ifndef TERRAFORMER_UI_MAIN_LAYOUT_HPP
 #define TERRAFORMER_UI_MAIN_LAYOUT_HPP
 
+#include "lib/common/spaces.hpp"
+
+#include <span>
+
 namespace terraformer::ui::main
 {
 	/**
