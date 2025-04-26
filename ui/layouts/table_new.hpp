@@ -1,9 +1,12 @@
+//@	{"dependencies_extra":[{"ref":"./table_new.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_UI_LAYOUTS_TABLE_NEW_HPP
 #define TERRAFORMER_UI_LAYOUTS_TABLE_NEW_HPP
 
 #include "lib/common/spaces.hpp"
 
 #include <span>
+#include <memory>
 
 namespace terraformer::ui::layouts
 {
@@ -37,12 +40,12 @@ namespace terraformer::ui::layouts
 
 		enum class cell_order:size_t{row_major, column_major};
 
-		explicit table(row_count num_rows):
+		explicit table_new(row_count num_rows):
 			m_cell_order{cell_order::column_major},
 			m_rows{num_rows}
 		{}
 
-		explicit table(column_count num_cols):
+		explicit table_new(column_count num_cols):
 			m_cell_order{cell_order::row_major},
 			m_cols{num_cols}
 		{}
