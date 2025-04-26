@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_UI_LAYOUTS_TABLE_NEW_HPP
 #define TERRAFORMER_UI_LAYOUTS_TABLE_NEW_HPP
 
-#include "lib/common/spaces.hpp"
+#include "ui/main/widget_geometry.hpp"
 
 #include <span>
 #include <memory>
@@ -97,7 +97,18 @@ namespace terraformer::ui::layouts
 		/**
 		 * Fetches all cell locations into locs_out
 		 */
-		void get_cell_locations_into(std::span<location> locs_out) const;
+		void get_cell_locations_into(std::span<main::widget_geometry> locs_out) const;
+		static void get_cell_locations_into(
+			std::span<main::widget_geometry> locs_out,
+			row_array const& row_heights,
+			column_array const& col_widths
+		);
+		static void get_cell_locations_into(
+			std::span<main::widget_geometry> locs_out,
+			column_array const& col_widths,
+			row_array const& row_heights
+		);
+
 
 	private:
 		cell_order m_cell_order;

@@ -145,3 +145,84 @@ void terraformer::ui::layouts::table_new::get_cell_sizes_into(std::span<scaling>
 			break;
 	}
 }
+
+void terraformer::ui::layouts::table_new::get_cell_locations_into(
+	std::span<main::widget_geometry> locs_out,
+	row_array const& row_heights,
+	column_array const& col_widths
+)
+{
+	// TODO: Add support for margins
+	// TODO: Origin should be fetched from sparse array
+	// TODO: WHat about widget sizes
+	size_t colcount = std::size(col_widths);
+	auto loc_x = 0.0f;
+	auto loc_y = 0.0f;
+	size_t current_row = 0;
+	size_t current_col = 0;
+	for(auto& item : locs_out)
+	{
+		item = main::widget_geometry{
+			.where = location{loc_x, loc_y, 1.0f},
+			.origin = location{-1.0f, 1.0f, 0.0f},
+			.size = scaling{col_widths[current_col], row_heights[current_row], 1.0f},
+		};
+		loc_x += col_widths[current_col];
+		++current_col;
+
+		if(current_col == colcount)
+		{
+			current_col = 0;
+			loc_x = 0.0f;
+			loc_y -= row_heights[current_row];
+			++current_row;
+		}
+	}
+}
+
+void terraformer::ui::layouts::table_new::get_cell_locations_into(
+	std::span<main::widget_geometry> locs_out,
+	column_array const& col_widths,
+	row_array const& row_heights
+)
+{
+	// TODO: Add support for margins
+	// TODO: Origin should be fetched from sparse array
+	// TODO: WHat about widget sizes
+	auto const rowcount = std::size(row_heights);
+	auto loc_x = 0.0f;
+	auto loc_y = 0.0f;
+	size_t current_row = 0;
+	size_t current_col = 0;
+	for(auto& item : locs_out)
+	{
+		item = main::widget_geometry{
+			.where = location{loc_x, loc_y, 1.0f},
+			.origin = location{-1.0f, 1.0f, 0.0f},
+			.size = scaling{col_widths[current_col], row_heights[current_row], 1.0f},
+		};
+		loc_y -= row_heights[current_row];
+		++current_row;
+
+		if(current_row == rowcount)
+		{
+			current_row = 0;
+			loc_y = 0.0f;
+			loc_x += col_widths[current_col];
+			++current_col;
+		}
+	}
+}
+
+void terraformer::ui::layouts::table_new::get_cell_locations_into(std::span<main::widget_geometry> locs_out) const
+{
+	switch(m_cell_order)
+	{
+		case cell_order::row_major:
+			get_cell_locations_into(locs_out, m_rows, m_cols);
+			break;
+		case cell_order::column_major:
+			get_cell_locations_into(locs_out, m_cols, m_rows);
+			break;
+	}
+}
