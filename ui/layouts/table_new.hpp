@@ -33,6 +33,9 @@ namespace terraformer::ui::layouts
 				m_size{size}
 			{}
 
+			size_t size() const
+			{ return m_size.value; }
+
 		private:
 			std::unique_ptr<float[]> m_values;
 			cell_count<tag> m_size{};
