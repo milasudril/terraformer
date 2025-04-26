@@ -42,6 +42,12 @@ namespace terraformer::ui::layouts
 			float operator[](size_t index) const
 			{ return m_values.get()[index]; }
 
+			float const* begin() const
+			{ return m_values.get(); }
+
+			float const* end() const
+			{ return m_values.get() + std::size(*this); }
+
 		private:
 			std::unique_ptr<float[]> m_values;
 			cell_count<tag> m_size{};
@@ -109,6 +115,7 @@ namespace terraformer::ui::layouts
 			row_array const& row_heights
 		);
 
+		scaling get_dimensions() const;
 
 	private:
 		cell_order m_cell_order;

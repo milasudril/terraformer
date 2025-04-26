@@ -3,6 +3,7 @@
 #include "./table_new.hpp"
 
 #include "lib/common/utils.hpp"
+#include <numeric>
 
 terraformer::ui::layouts::table_new::row_array
 terraformer::ui::layouts::table_new::set_cell_sizes_to(
@@ -225,4 +226,13 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(std::span<main
 			get_cell_locations_into(locs_out, m_cols, m_rows);
 			break;
 	}
+}
+
+terraformer::scaling terraformer::ui::layouts::table_new::get_dimensions() const
+{
+	// TODO: Add support for margins
+	auto const width = std::accumulate(std::begin(m_cols), std::end(m_cols), 0.0f);
+	auto const height = std::accumulate(std::begin(m_rows), std::end(m_rows), 0.0f);
+
+	return scaling{width, height, 1.0f};
 }
