@@ -66,10 +66,8 @@ namespace terraformer::ui::layouts
 		 * Sets cell sizes to the absolute value given by the sizes
 		 */
 		void set_cell_sizes_to(std::span<scaling const> sizes_in);
-
 		static row_array set_cell_sizes_to(std::span<scaling const> sizes_in, column_array& col_widths);
-
-		static column_array set_cell_sizes_to(std::span<scaling const> sizes_in, row_array& row_widths);
+		static column_array set_cell_sizes_to(std::span<scaling const> sizes_in, row_array& row_heights);
 
 		/**
 		 * Adjusts cell widths given available_width
@@ -82,9 +80,19 @@ namespace terraformer::ui::layouts
 		void adjust_cell_heights(float available_height);
 
 		/**
-		 * Fetches the current cell sizes, and returns the size of the layout
+		 * Fetches the current cell sizes
 		 */
-		scaling get_cell_sizes_into(std::span<scaling> sizes_out) const;
+		void get_cell_sizes_into(std::span<scaling> sizes_out) const;
+		static void get_cell_sizes_into(
+			std::span<scaling> sizes_out,
+			row_array const& row_heights,
+			column_array const& col_widths
+		);
+		static void get_cell_sizes_into(
+			std::span<scaling> sizes_out,
+			column_array const& col_widths,
+			row_array const& row_heights
+		);
 
 		/**
 		 * Fetches all cell locations into locs_out
