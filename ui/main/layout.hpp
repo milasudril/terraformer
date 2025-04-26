@@ -1,9 +1,10 @@
 #ifndef TERRAFORMER_UI_MAIN_LAYOUT_HPP
 #define TERRAFORMER_UI_MAIN_LAYOUT_HPP
 
-#include "lib/common/spaces.hpp"
+#include "ui/main/widget_geometry.hpp"
 
 #include <span>
+#include <utility>
 
 namespace terraformer::ui::main
 {
@@ -37,7 +38,7 @@ namespace terraformer::ui::main
 		float available_width,
 		float available_height.
 		std::span<scaling> sizes_out,
-		std::span<location> locs_out
+		std::span<widget_geometry> locs_out
 	)
 	{
 		/**
@@ -56,14 +57,15 @@ namespace terraformer::ui::main
 		{obj.adjust_cell_heights(available_height)} -> std::same_as<void>;
 
 		/**
-		 * Fetches the current cell sizes, and returns the size of the layout
-		 */
-		{obj.get_cell_sizes_into(sizes_out)} -> std::same_as<scaling>;
-
-		/**
 		 * Fetches all cell locations into locs_out
 		 */
-		{obj.get_cell_locations_into(locs_out)} -> std::same_as<void>;
+		{std::as_const(obj).get_cell_locations_into(locs_out)} -> std::same_as<void>;
+
+		/**
+		 * Returns the space occupied by the layout
+		 */
+		{std::as_const(obj).get_dimensions()} -> std::same_as<scaling>;
+
 	}
 }
 
