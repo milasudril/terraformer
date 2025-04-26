@@ -172,6 +172,9 @@ namespace terraformer
 	struct overload : Ts...
 	{ using Ts::operator()...; };
 
+	inline size_t ceil_div(size_t x, size_t y)
+	{ return x / y + (x % y == 0? 0 : 1); }
+
 }
 
 #endif

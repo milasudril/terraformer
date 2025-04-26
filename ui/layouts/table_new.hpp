@@ -36,10 +36,19 @@ namespace terraformer::ui::layouts
 			size_t size() const
 			{ return m_size.value; }
 
+			float& operator[](size_t index)
+			{ return m_values.get()[index]; }
+
+			float operator[](size_t index) const
+			{ return m_values.get()[index]; }
+
 		private:
 			std::unique_ptr<float[]> m_values;
 			cell_count<tag> m_size{};
 		};
+
+		using row_array = cell_size_array<cell_array_tag::rows>;
+		using column_array = cell_size_array<cell_array_tag::columns>;
 
 		enum class cell_order:size_t{row_major, column_major};
 
@@ -57,6 +66,10 @@ namespace terraformer::ui::layouts
 		 * Sets cell sizes to the absolute value given by the sizes
 		 */
 		void set_cell_sizes_to(std::span<scaling const> sizes_in);
+
+		static row_array set_cell_sizes_to(std::span<scaling const> sizes_in, column_array& col_widths);
+
+		static column_array set_cell_sizes_to(std::span<scaling const> sizes_in, row_array& row_widths);
 
 		/**
 		 * Adjusts cell widths given available_width
@@ -80,8 +93,8 @@ namespace terraformer::ui::layouts
 
 	private:
 		cell_order m_cell_order;
-		cell_size_array<cell_array_tag::rows> m_rows;
-		cell_size_array<cell_array_tag::columns> m_cols;
+		row_array m_rows;
+		column_array m_cols;
 	};
 }
 
