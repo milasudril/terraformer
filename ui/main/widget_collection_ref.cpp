@@ -4,6 +4,7 @@
 
 #include "lib/array_classes/single_array.hpp"
 
+#if 0
 terraformer::scaling
 terraformer::ui::main::run(set_cell_width_context const& ctxt)
 {
@@ -41,7 +42,9 @@ terraformer::ui::main::run(set_cell_width_context const& ctxt)
 		std::max(initial_size[2], size_from_layout[2])
 	};
 }
+#endif
 
+#if 0
 terraformer::scaling
 terraformer::ui::main::run(set_cell_height_context const& ctxt)
 {
@@ -79,6 +82,7 @@ terraformer::ui::main::run(set_cell_height_context const& ctxt)
 		std::max(initial_size[2], size_from_layout[2])
 	};
 }
+#endif
 
 #if 0
 terraformer::scaling terraformer::ui::main::run(set_cell_widths_context const& ctxt, float available_width)

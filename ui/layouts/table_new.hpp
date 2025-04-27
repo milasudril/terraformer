@@ -58,6 +58,20 @@ namespace terraformer::ui::layouts
 
 		enum class cell_order:size_t{row_major, column_major};
 
+		explicit table_new(size_t fixdim_size, cell_order cell_order):
+			m_cell_order{cell_order}
+		{
+			switch(m_cell_order)
+			{
+				case cell_order::row_major:
+					m_cols = column_array{column_count{fixdim_size}};
+					break;
+				case cell_order::column_major:
+					m_rows = row_array{row_count{fixdim_size}};
+					break;
+			}
+		}
+
 		explicit table_new(row_count num_rows):
 			m_cell_order{cell_order::column_major},
 			m_rows{num_rows}
@@ -78,12 +92,18 @@ namespace terraformer::ui::layouts
 		/**
 		 * Adjusts cell widths given available_width
 		 */
-		void adjust_cell_widths(float available_width);
+		void adjust_cell_widths([[maybe_unused]] float available_width)
+		{
+			//TODO
+		}
 
 		/**
 		 * Adjusts cell heights given available_height
 		 */
-		void adjust_cell_heights(float available_height);
+		void adjust_cell_heights([[maybe_unused]] float available_height)
+		{
+			//TODO
+		}
 
 		/**
 		 * Fetches the current cell sizes

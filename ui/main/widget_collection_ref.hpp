@@ -147,7 +147,7 @@ namespace terraformer::ui::main
 	using compute_size_given_width_callback = scaling (*)(void*, widget_height_request);
 	using get_children_callback = widget_collection_ref (*)(void*);
 	using get_children_const_callback = widget_collection_view (*)(void const*);
-	using get_layout_callback = layout_policy_ref (*)(void*);
+	using get_layout_callback = layout_ref (*)(void*);
 
 	template<bool IsConst>
 	class widget_collection_ref_impl

@@ -3,14 +3,14 @@
 
 #include "./widget_group.hpp"
 #include "./text_to_float_input.hpp"
-#include "ui/layouts/rowmajor_table.hpp"
+#include "ui/layouts/table_new.hpp"
 #include "ui/layouts/columnmajor_table.hpp"
 #include "ui/main/widget_collection.hpp"
 
 namespace terraformer::ui::widgets
 {
 	template<class ControlWidget>
-	class float_input:private widget_group<layouts::table>
+	class float_input:private widget_group<layouts::table_new>
 	{
 	public:
 		using widget_group::handle_event;
@@ -28,9 +28,9 @@ namespace terraformer::ui::widgets
 			widget_group{
 				iihr,
 				2u,
-				orientation == main::widget_orientation::horizontal?
-					layouts::rowmajor_table::algorithm:
-					layouts::columnmajor_table::algorithm
+				orientation == main::widget_orientation::vertical?
+					layouts::table_new::cell_order::row_major:
+					layouts::table_new::cell_order::column_major
 			},
 			m_input_widget{std::move(input_widget)}
 		{ init(); }
@@ -81,7 +81,7 @@ namespace terraformer::ui::widgets
 					m_on_value_changed(*this, std::forward<Args>(args)...);
 				})
 				.value(m_input_widget.value());
-			layout.params.no_outer_margin = true;
+		//	layout.params.no_outer_margin = true;
 		}
 	};
 }

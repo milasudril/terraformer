@@ -97,16 +97,18 @@ namespace terraformer::ui::main
 			static_cast<T const*>(obj)->get_cell_sizes_into(sizes_out);
 		},
 		.get_cell_locations_into = [](void const* obj, std::span<location> locs_out){
-			static_cast<T const*>(obj)->get_cell_sizes_into(locs_out);
+			static_cast<T const*>(obj)->get_cell_locations_into(locs_out);
 		},
 		.get_dimensions = [](void const* obj){
-			return static_cast<T const*>(obj)->get_dimensions(obj);
+			return static_cast<T const*>(obj)->get_dimensions();
 		}
 	};
 
 	class layout_ref
 	{
 	public:
+		layout_ref() = default;
+
 		template<layout T>
 		explicit layout_ref(T& layout):
 			m_vtable{&layout_vtable_v<T>},
@@ -131,9 +133,12 @@ namespace terraformer::ui::main
 		scaling get_dimensions() const
 		{ return m_vtable->get_dimensions(m_object); }
 
+		bool is_valid() const
+		{ return m_vtable != nullptr; }
+
 	private:
-		layout_vtable const* m_vtable;
-		void* m_object;
+		layout_vtable const* m_vtable{nullptr};
+		void* m_object{nullptr};
 	};
 }
 

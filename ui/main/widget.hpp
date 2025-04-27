@@ -7,6 +7,7 @@
 #include "lib/array_classes/multi_span.hpp"
 #include "lib/common/value_accessor.hpp"
 #include "lib/common/move_only_function.hpp"
+#include "lib/array_classes/single_array.hpp"
 
 #include <utility>
 #include <type_traits>
@@ -48,7 +49,7 @@ namespace terraformer::ui::main
 		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
-		{ obj.get_layout() } -> std::same_as<layout_policy_ref>;
+		{ obj.get_layout() } -> std::same_as<layout_ref>;
 		{ obj.compute_size(w_req) } -> std::same_as<scaling>;
 		{ obj.compute_size(h_req) } -> std::same_as<scaling>;
 	};
@@ -69,7 +70,7 @@ namespace terraformer::ui::main
 				.width = static_cast<int>(widgets.widget_geometries()[index].size[0]),
 				.height = static_cast<int>(widgets.widget_geometries()[index].size[1])
 			},
-				m_layout{widgets.get_layout_callbacks()[index](m_widget)},
+			m_layout{widgets.get_layout_callbacks()[index](m_widget)},
 			m_prepare_for_presentation_callback{widgets.render_callbacks()[index]},
 			m_layers{widgets.widget_layer_stacks()[index]},
 			m_geometry{widgets.widget_geometries()[index]}
@@ -88,18 +89,13 @@ namespace terraformer::ui::main
 
 		void confirm_size(fb_size size)
 		{
-			if(m_old_size != size)
-			{ m_size_confirmed(m_widget, size); }
+		//	if(m_old_size != size)
+			{
+				puts("Calling size_confirmed");
+				m_size_confirmed(m_widget, size);
+
+			}
 		}
-
-		scaling minimize_cell_sizes()
-		{ return m_layout.set_default_cell_sizes(m_children.as_view()); }
-
-		scaling adjust_cell_sizes(scaling available_size)
-		{ return m_layout.adjust_cell_sizes(available_size); }
-
-		void update_widget_locations()
-		{ m_layout.update_widget_locations(m_children); }
 
 		widget_layer_stack prepare_for_presentation(graphics_backend_ref backend)
 		{ return m_prepare_for_presentation_callback(m_widget, backend); }
@@ -113,8 +109,8 @@ namespace terraformer::ui::main
 		widget_geometry const& geometry() const
 		{ return m_geometry; }
 
-		bool has_layout() const
-		{ return m_layout.is_valid(); }
+		layout_ref get_layout() const
+		{ return m_layout; }
 
 	private:
 		void* m_widget = nullptr;
@@ -123,7 +119,7 @@ namespace terraformer::ui::main
 		compute_size_given_height_callback m_compute_size_given_height = [](void*, widget_width_request){return scaling{};};
 		event_callback_t<fb_size> m_size_confirmed = [](void*, fb_size){};
 		fb_size m_old_size{};
-		layout_policy_ref m_layout;
+		layout_ref m_layout;
 		prepare_for_presentation_callback m_prepare_for_presentation_callback = [](void*, graphics_backend_ref){return widget_layer_stack{}; };
 		widget_layer_stack m_layers{};
 		widget_geometry m_geometry{};
@@ -145,7 +141,29 @@ namespace terraformer::ui::main
 			}
 		}
 
-		auto const size_from_layout = root.minimize_cell_sizes();
+		auto const layout = root.get_layout();
+		if(!layout.is_valid())
+		{ return initial_size; }
+
+		layout.set_cell_sizes_to(sizes);
+		{
+			// TODO: Update widget locations
+			single_array locs_out(array_size<location>{children.size()});
+			layout.get_cell_locations_into(locs_out);
+			auto const widget_geometries = children.widget_geometries();
+			for(auto k : children.element_indices())
+			{
+				widget_geometries[k] = widget_geometry{
+					.where = locs_out[array_index<location>{k.get()}],
+					// TODO: Add support for widget alignment within the cell. 0.0f should mean centered.
+					.origin = location{-1.0f, 1.0f, 0.0f},
+					// TODO: Widget size and cell size could be different
+					.size = sizes[k]
+				};
+			}
+		}
+
+		auto const size_from_layout = layout.get_dimensions();
 
 		return scaling{
 			std::max(initial_size[0], size_from_layout[0]),
@@ -154,6 +172,7 @@ namespace terraformer::ui::main
 		};
 	}
 
+#if 0
 	inline scaling adjust_cell_sizes(root_widget& root, scaling available_size)
 	{
 		auto const new_size = root.adjust_cell_sizes(available_size);
@@ -187,9 +206,11 @@ namespace terraformer::ui::main
 			}
 		}
 	}
+#endif
 
 	inline void confirm_sizes(root_widget& root, fb_size size)
 	{
+		printf("Confirm size %d %d\n", size.width, size.height);
 		root.confirm_size(size);
 		auto children = root.children();
 		auto const widget_states = children.widget_states();
@@ -269,8 +290,8 @@ namespace terraformer::ui::main
 		[[nodiscard]] widget_collection_view get_children() const
 		{ return widget_collection_view{}; }
 
-		[[nodiscard]] layout_policy_ref get_layout() const
-		{ return layout_policy_ref{}; }
+		[[nodiscard]] layout_ref get_layout() const
+		{ return layout_ref{}; }
 
 		[[nodiscard]] scaling compute_size(widget_width_request) const
 		{ return scaling{}; }

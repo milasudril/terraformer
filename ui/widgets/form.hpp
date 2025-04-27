@@ -4,13 +4,13 @@
 #define TERRAFORMER_UI_WIDGETS_FORM_HPP
 
 #include "./label.hpp"
-#include "ui/layouts/rowmajor_table.hpp"
+#include "ui/layouts/table_new.hpp"
 #include "ui/layouts/columnmajor_table.hpp"
 #include "ui/widgets/widget_group.hpp"
 
 namespace terraformer::ui::widgets
 {
-	class form:private widget_group<layouts::table>
+	class form:private widget_group<layouts::table_new>
 	{
 	public:
 		using widget_group::handle_event;
@@ -29,8 +29,8 @@ namespace terraformer::ui::widgets
 				iihr,
 				2u,
 				orientation == main::widget_orientation::vertical?
-					layouts::rowmajor_table::algorithm:
-					layouts::columnmajor_table::algorithm
+					layouts::table_new::cell_order::row_major:
+					layouts::table_new::cell_order::column_major
 			},
 			m_orientation{orientation}
 		{ is_transparent = false; }

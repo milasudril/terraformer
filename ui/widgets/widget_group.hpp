@@ -23,8 +23,8 @@ namespace terraformer::ui::widgets
 		Layout layout;
 		bool is_transparent = true;
 
-		main::layout_policy_ref get_layout()
-		{ return main::layout_policy_ref{std::ref(layout)}; }
+		main::layout_ref get_layout()
+		{ return main::layout_ref{layout}; }
 
 		main::widget_collection_ref get_children()
 		{ return get_attributes(); }
@@ -37,8 +37,8 @@ namespace terraformer::ui::widgets
 			auto const& panel = instance_info.section_level%2 == 0?
 				new_theme.main_panel :
 				new_theme.other_panel;
-			layout.params.margin_x = panel.padding;
-			layout.params.margin_y = panel.padding;
+		//	layout.params.margin_x = panel.padding;
+		//	layout.params.margin_y = panel.padding;
 			m_background = panel.background_texture;
 			m_background_tint = panel.colors.background;
 			m_null_texture = new_theme.misc_textures.null;
