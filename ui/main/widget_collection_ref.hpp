@@ -12,6 +12,7 @@
 #include "./window_ref.hpp"
 #include "./widget_layer_stack.hpp"
 #include "./graphics_backend_ref.hpp"
+#include "./layout.hpp"
 
 #include <concepts>
 #include <utility>

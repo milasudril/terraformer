@@ -32,11 +32,11 @@ namespace terraformer::ui::main
 	 *  * Set layout cell widths to default
 	 */
 	template<class T>
-	concept layout(
+	concept layout = requires(
 		T& obj,
 		std::span<scaling const> sizes_in,
 		float available_width,
-		float available_height.
+		float available_height,
 		std::span<scaling> sizes_out,
 		std::span<location> locs_out
 	)
@@ -77,13 +77,13 @@ namespace terraformer::ui::main
 		void (*set_cell_sizes_to)(void*, std::span<scaling const>);
 		void (*adjust_cell_widths)(void*, float);
 		void (*adjust_cell_heights)(void*, float);
-		void (*get_cell_sizes_into(void const*, std::span<scaling>);
+		void (*get_cell_sizes_into)(void const*, std::span<scaling>);
 		void (*get_cell_locations_into)(void const*, std::span<location>);
 		scaling (*get_dimensions)(void const*);
 	};
 
 	template<layout T>
-	constexpr layout_vtable layout_vtable_v{
+	inline constexpr layout_vtable layout_vtable_v{
 		.set_cell_sizes_to = [](void* obj, std::span<scaling const> vals) {
 			static_cast<T*>(obj)->set_cell_sizes_to(vals);
 		},
@@ -99,7 +99,7 @@ namespace terraformer::ui::main
 		.get_cell_locations_into = [](void const* obj, std::span<location> locs_out){
 			static_cast<T const*>(obj)->get_cell_sizes_into(locs_out);
 		},
-		scaling (*get_dimensions)(void const* obj){
+		.get_dimensions = [](void const* obj){
 			return static_cast<T const*>(obj)->get_dimensions(obj);
 		}
 	};
@@ -110,29 +110,29 @@ namespace terraformer::ui::main
 		template<layout T>
 		explicit layout_ref(T& layout):
 			m_vtable{&layout_vtable_v<T>},
-			m_handle{&layout}
+			m_object{&layout}
 		{}
 
 		void set_cell_sizes_to(std::span<scaling const> vals) const
-		{ m_vtable->set_cell_sizes_to(m_obj, vals); }
+		{ m_vtable->set_cell_sizes_to(m_object, vals); }
 
 		void adjust_cell_widths(float available_width) const
-		{ m_vtable->adjust_cell_widths(m_obj, available_width); }
+		{ m_vtable->adjust_cell_widths(m_object, available_width); }
 
 		void adjust_cell_heights(float available_height) const
-		{ m_vtable->adjust_cell_heights(m_obj, available_height); }
+		{ m_vtable->adjust_cell_heights(m_object, available_height); }
 
 		void get_cell_sizes_into(std::span<scaling> sizes_out) const
-		{ m_vtable->get_cell_sizes_into(m_obj, sizes_out); }
+		{ m_vtable->get_cell_sizes_into(m_object, sizes_out); }
 
 		void get_cell_locations_into(std::span<location> locs_out) const
-		{ m_vtable->get_cell_locations_into(m_obj, locs_out); }
+		{ m_vtable->get_cell_locations_into(m_object, locs_out); }
 
 		scaling get_dimensions() const
-		{ m_table->get_dimensions(m_obj); }
+		{ return m_vtable->get_dimensions(m_object); }
 
 	private:
-		vtable const* m_vtable;
+		layout_vtable const* m_vtable;
 		void* m_object;
 	};
 }
