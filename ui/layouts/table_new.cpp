@@ -148,14 +148,14 @@ void terraformer::ui::layouts::table_new::get_cell_sizes_into(std::span<scaling>
 }
 
 void terraformer::ui::layouts::table_new::get_cell_locations_into(
-	std::span<main::widget_geometry> locs_out,
+	std::span<location> locs_out,
 	row_array const& row_heights,
 	column_array const& col_widths
 )
 {
 	// TODO: Add support for margins
 	// TODO: Origin should be fetched from sparse array
-	// TODO: WHat about widget sizes
+	// TODO: What about widget sizes
 	size_t colcount = std::size(col_widths);
 	auto loc_x = 0.0f;
 	auto loc_y = 0.0f;
@@ -163,11 +163,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	size_t current_col = 0;
 	for(auto& item : locs_out)
 	{
-		item = main::widget_geometry{
-			.where = location{loc_x, loc_y, 1.0f},
-			.origin = location{-1.0f, 1.0f, 0.0f},
-			.size = scaling{col_widths[current_col], row_heights[current_row], 1.0f},
-		};
+		item = location{loc_x, loc_y, 1.0f},
 		loc_x += col_widths[current_col];
 		++current_col;
 
@@ -182,14 +178,13 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 }
 
 void terraformer::ui::layouts::table_new::get_cell_locations_into(
-	std::span<main::widget_geometry> locs_out,
+	std::span<location> locs_out,
 	column_array const& col_widths,
 	row_array const& row_heights
 )
 {
 	// TODO: Add support for margins
 	// TODO: Origin should be fetched from sparse array
-	// TODO: WHat about widget sizes
 	auto const rowcount = std::size(row_heights);
 	auto loc_x = 0.0f;
 	auto loc_y = 0.0f;
@@ -197,11 +192,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	size_t current_col = 0;
 	for(auto& item : locs_out)
 	{
-		item = main::widget_geometry{
-			.where = location{loc_x, loc_y, 1.0f},
-			.origin = location{-1.0f, 1.0f, 0.0f},
-			.size = scaling{col_widths[current_col], row_heights[current_row], 1.0f},
-		};
+		item = location{loc_x, loc_y, 1.0f},
 		loc_y -= row_heights[current_row];
 		++current_row;
 
@@ -215,7 +206,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	}
 }
 
-void terraformer::ui::layouts::table_new::get_cell_locations_into(std::span<main::widget_geometry> locs_out) const
+void terraformer::ui::layouts::table_new::get_cell_locations_into(std::span<location> locs_out) const
 {
 	switch(m_cell_order)
 	{
@@ -231,6 +222,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(std::span<main
 terraformer::scaling terraformer::ui::layouts::table_new::get_dimensions() const
 {
 	// TODO: Add support for margins
+	// TODO: Does alignment affect the true cell size
 	auto const width = std::accumulate(std::begin(m_cols), std::end(m_cols), 0.0f);
 	auto const height = std::accumulate(std::begin(m_rows), std::end(m_rows), 0.0f);
 

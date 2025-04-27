@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_UI_MAIN_LAYOUT_HPP
 #define TERRAFORMER_UI_MAIN_LAYOUT_HPP
 
-#include "ui/main/widget_geometry.hpp"
+#include "lib/common/spaces.hpp"
 
 #include <span>
 #include <utility>
@@ -38,7 +38,7 @@ namespace terraformer::ui::main
 		float available_width,
 		float available_height.
 		std::span<scaling> sizes_out,
-		std::span<widget_geometry> locs_out
+		std::span<location> locs_out
 	)
 	{
 		/**
