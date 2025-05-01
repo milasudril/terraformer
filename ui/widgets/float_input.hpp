@@ -29,8 +29,8 @@ namespace terraformer::ui::widgets
 				iihr,
 				2u,
 				orientation == main::widget_orientation::vertical?
-					layouts::table_new::cell_order::row_major:
-					layouts::table_new::cell_order::column_major
+					layouts::table_new::cell_order::column_major:
+					layouts::table_new::cell_order::row_major
 			},
 			m_input_widget{std::move(input_widget)}
 		{ init(); }

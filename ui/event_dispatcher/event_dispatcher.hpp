@@ -247,8 +247,8 @@ namespace terraformer::ui::main
 						1.0f
 					}
 				);
-				update_widget_locations(root);
 #endif
+				update_widget_locations(root);
 				confirm_sizes(
 					root,
 					fb_size{

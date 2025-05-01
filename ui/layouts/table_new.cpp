@@ -81,11 +81,11 @@ void terraformer::ui::layouts::table_new::set_cell_sizes_to(std::span<scaling co
 	switch(m_cell_order)
 	{
 		case cell_order::row_major:
-			m_rows = cell_size_array{row_count{ceil_div(std::size(sizes_in), std::size(m_cols))}};
+			m_rows = set_cell_sizes_to(sizes_in, m_cols);
 			break;
 
 		case cell_order::column_major:
-			m_cols = cell_size_array{column_count{ceil_div(std::size(sizes_in), std::size(m_rows))}};
+			m_cols = set_cell_sizes_to(sizes_in, m_rows);
 			break;
 	}
 }
@@ -163,7 +163,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	size_t current_col = 0;
 	for(auto& item : locs_out)
 	{
-		item = location{loc_x, loc_y, 1.0f},
+		item = location{loc_x, loc_y, 0.0f},
 		loc_x += col_widths[current_col];
 		++current_col;
 
@@ -192,7 +192,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	size_t current_col = 0;
 	for(auto& item : locs_out)
 	{
-		item = location{loc_x, loc_y, 1.0f},
+		item = location{loc_x, loc_y, 0.0f},
 		loc_y -= row_heights[current_row];
 		++current_row;
 

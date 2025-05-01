@@ -89,11 +89,9 @@ namespace terraformer::ui::main
 
 		void confirm_size(fb_size size)
 		{
-		//	if(m_old_size != size)
+			if(m_old_size != size)
 			{
-				puts("Calling size_confirmed");
 				m_size_confirmed(m_widget, size);
-
 			}
 		}
 
@@ -125,10 +123,16 @@ namespace terraformer::ui::main
 		widget_geometry m_geometry{};
 	};
 
-	inline scaling minimize_size(root_widget& root)
+	inline scaling minimize_size(root_widget& root, size_t level = 0)
 	{
 		// TODO: Decide which dimension to minimize. Should be determined by parent
+
 		auto const initial_size = root.compute_size(widget_width_request{});
+		/*
+		for(size_t k = 0; k != level; ++k)
+		{ printf("   "); }
+		printf("Initial size %.8g %.8g\n", initial_size[0], initial_size[1]);*/
+
 		auto& children = root.children();
 		auto const widget_states = children.widget_states();
 		auto const sizes = children.sizes();
@@ -137,7 +141,12 @@ namespace terraformer::ui::main
 			if(!widget_states[k].collapsed) [[likely]]
 			{
 				root_widget next_root{children, k};
-				sizes[k] = minimize_size(next_root);
+				sizes[k] = minimize_size(next_root, level + 1);
+				/*
+				for(size_t k = 0; k != level + 1; ++k)
+				{ printf("   "); }
+				printf("Resulting size %.8g %.8g\n", sizes[k][0], sizes[k][1]);
+				*/
 			}
 		}
 
@@ -146,24 +155,12 @@ namespace terraformer::ui::main
 		{ return initial_size; }
 
 		layout.set_cell_sizes_to(sizes);
-		{
-			// TODO: Update widget locations
-			single_array locs_out(array_size<location>{children.size()});
-			layout.get_cell_locations_into(locs_out);
-			auto const widget_geometries = children.widget_geometries();
-			for(auto k : children.element_indices())
-			{
-				widget_geometries[k] = widget_geometry{
-					.where = locs_out[array_index<location>{k.get()}],
-					// TODO: Add support for widget alignment within the cell. 0.0f should mean centered.
-					.origin = location{-1.0f, 1.0f, 0.0f},
-					// TODO: Widget size and cell size could be different
-					.size = sizes[k]
-				};
-			}
-		}
-
 		auto const size_from_layout = layout.get_dimensions();
+		/*
+		for(size_t k = 0; k != level; ++k)
+		{ printf("   "); }
+		printf("Size from layout = %.8g, %.8g\n\n", size_from_layout[0],size_from_layout[1]);
+		*/
 
 		return scaling{
 			std::max(initial_size[0], size_from_layout[0]),
@@ -191,26 +188,37 @@ namespace terraformer::ui::main
 		}
 		return new_size;
 	}
+#endif
 
 	inline void update_widget_locations(root_widget& root)
 	{
-		root.update_widget_locations();
-		auto& children = root.children();
-		auto const widget_states = children.widget_states();
+		auto const layout = root.get_layout();
+		if(!layout.is_valid())
+		{ return; }
+
+		auto const children = root.children();
+		single_array locs_out(array_size<location>{children.size()});
+		layout.get_cell_locations_into(locs_out);
+		auto const widget_sizes = children.sizes();
+		layout.get_cell_sizes_into(widget_sizes);
+		auto const widget_geometries = children.widget_geometries();
 		for(auto k : children.element_indices())
 		{
-			if(!widget_states[k].collapsed) [[likely]]
-			{
-				root_widget next_root{children, k};
-				update_widget_locations(next_root);
-			}
+			widget_geometries[k].where = locs_out[array_index<location>{k.get()}];
+				// TODO: Add support for widget alignment within the cell. 0.0f should mean centered.
+			widget_geometries[k].origin = location{-1.0f, 1.0f, 0.0f};
+		}
+
+		for(auto k : children.element_indices())
+		{
+			// TODO Check if widget is collapsed
+			root_widget next_root{children, k};
+			update_widget_locations(next_root);
 		}
 	}
-#endif
 
 	inline void confirm_sizes(root_widget& root, fb_size size)
 	{
-		printf("Confirm size %d %d\n", size.width, size.height);
 		root.confirm_size(size);
 		auto children = root.children();
 		auto const widget_states = children.widget_states();
