@@ -199,8 +199,6 @@ namespace terraformer::ui::main
 		auto const children = root.children();
 		single_array locs_out(array_size<location>{children.size()});
 		layout.get_cell_locations_into(locs_out);
-		auto const widget_sizes = children.sizes();
-		layout.get_cell_sizes_into(widget_sizes);
 		auto const widget_geometries = children.widget_geometries();
 		for(auto k : children.element_indices())
 		{
