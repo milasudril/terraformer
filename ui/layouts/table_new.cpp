@@ -154,8 +154,6 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 )
 {
 	// TODO: Add support for margins
-	// TODO: Origin should be fetched from sparse array
-	// TODO: What about widget sizes
 	size_t colcount = std::size(col_widths);
 	auto loc_x = 0.0f;
 	auto loc_y = 0.0f;

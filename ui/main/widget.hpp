@@ -123,15 +123,11 @@ namespace terraformer::ui::main
 		widget_geometry m_geometry{};
 	};
 
-	inline scaling minimize_size(root_widget& root, size_t level = 0)
+	inline scaling minimize_size(root_widget& root)
 	{
 		// TODO: Decide which dimension to minimize. Should be determined by parent
 
 		auto const initial_size = root.compute_size(widget_width_request{});
-		/*
-		for(size_t k = 0; k != level; ++k)
-		{ printf("   "); }
-		printf("Initial size %.8g %.8g\n", initial_size[0], initial_size[1]);*/
 
 		auto& children = root.children();
 		auto const widget_states = children.widget_states();
@@ -141,12 +137,7 @@ namespace terraformer::ui::main
 			if(!widget_states[k].collapsed) [[likely]]
 			{
 				root_widget next_root{children, k};
-				sizes[k] = minimize_size(next_root, level + 1);
-				/*
-				for(size_t k = 0; k != level + 1; ++k)
-				{ printf("   "); }
-				printf("Resulting size %.8g %.8g\n", sizes[k][0], sizes[k][1]);
-				*/
+				sizes[k] = minimize_size(next_root);
 			}
 		}
 
@@ -156,11 +147,6 @@ namespace terraformer::ui::main
 
 		layout.set_cell_sizes_to(sizes);
 		auto const size_from_layout = layout.get_dimensions();
-		/*
-		for(size_t k = 0; k != level; ++k)
-		{ printf("   "); }
-		printf("Size from layout = %.8g, %.8g\n\n", size_from_layout[0],size_from_layout[1]);
-		*/
 
 		return scaling{
 			std::max(initial_size[0], size_from_layout[0]),
@@ -227,6 +213,7 @@ namespace terraformer::ui::main
 			if(!widget_states[k].collapsed) [[likely]]
 			{
 				root_widget next_root{children, k};
+				// TODO: If widget is maximized, use size cell size
 				confirm_sizes(
 					next_root,
 					fb_size{
