@@ -6,7 +6,7 @@
 #include <numeric>
 
 terraformer::ui::layouts::table_new::row_array
-terraformer::ui::layouts::table_new::set_cell_sizes_to(
+terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
 	std::span<scaling const> sizes_in,
 	column_array& col_widths
 )
@@ -40,7 +40,7 @@ terraformer::ui::layouts::table_new::set_cell_sizes_to(
 }
 
 terraformer::ui::layouts::table_new::column_array
-terraformer::ui::layouts::table_new::set_cell_sizes_to(
+terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
 	std::span<scaling const> sizes_in,
 	row_array& row_heights
 )
@@ -73,7 +73,7 @@ terraformer::ui::layouts::table_new::set_cell_sizes_to(
 	return ret;
 }
 
-void terraformer::ui::layouts::table_new::set_cell_sizes_to(std::span<scaling const> sizes_in)
+void terraformer::ui::layouts::table_new::set_default_cell_sizes_to(std::span<scaling const> sizes_in)
 {
 	if(std::size(sizes_in) == 0)
 	{ return; }
@@ -81,11 +81,11 @@ void terraformer::ui::layouts::table_new::set_cell_sizes_to(std::span<scaling co
 	switch(m_cell_order)
 	{
 		case cell_order::row_major:
-			m_rows = set_cell_sizes_to(sizes_in, m_cols);
+			m_rows = set_default_cell_sizes_to(sizes_in, m_cols);
 			break;
 
 		case cell_order::column_major:
-			m_cols = set_cell_sizes_to(sizes_in, m_rows);
+			m_cols = set_default_cell_sizes_to(sizes_in, m_rows);
 			break;
 	}
 }

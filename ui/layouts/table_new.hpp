@@ -85,9 +85,9 @@ namespace terraformer::ui::layouts
 		/**
 		 * Sets cell sizes to the absolute value given by the sizes
 		 */
-		void set_cell_sizes_to(std::span<scaling const> sizes_in);
-		static row_array set_cell_sizes_to(std::span<scaling const> sizes_in, column_array& col_widths);
-		static column_array set_cell_sizes_to(std::span<scaling const> sizes_in, row_array& row_heights);
+		void set_default_cell_sizes_to(std::span<scaling const> sizes_in);
+		static row_array set_default_cell_sizes_to(std::span<scaling const> sizes_in, column_array& col_widths);
+		static column_array set_default_cell_sizes_to(std::span<scaling const> sizes_in, row_array& row_heights);
 
 		/**
 		 * Adjusts cell widths given available_width

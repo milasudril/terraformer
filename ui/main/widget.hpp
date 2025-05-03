@@ -145,7 +145,7 @@ namespace terraformer::ui::main
 		if(!layout.is_valid())
 		{ return initial_size; }
 
-		layout.set_cell_sizes_to(sizes);
+		layout.set_default_cell_sizes_to(sizes);
 		auto const size_from_layout = layout.get_dimensions();
 
 		return scaling{

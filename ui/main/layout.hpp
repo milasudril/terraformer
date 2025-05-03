@@ -44,7 +44,7 @@ namespace terraformer::ui::main
 		/**
 		 * Sets cell sizes to the absolute value given by the sizes
 		 */
-		{obj.set_cell_sizes_to(sizes_in)} -> std::same_as<void>;
+		{obj.set_default_cell_sizes_to(sizes_in)} -> std::same_as<void>;
 
 		/**
 		 * Adjusts cell widths given available_width
@@ -74,7 +74,7 @@ namespace terraformer::ui::main
 
 	struct layout_vtable
 	{
-		void (*set_cell_sizes_to)(void*, std::span<scaling const>);
+		void (*set_default_cell_sizes_to)(void*, std::span<scaling const>);
 		void (*adjust_cell_widths)(void*, float);
 		void (*adjust_cell_heights)(void*, float);
 		void (*get_cell_sizes_into)(void const*, std::span<scaling>);
@@ -84,8 +84,8 @@ namespace terraformer::ui::main
 
 	template<layout T>
 	inline constexpr layout_vtable layout_vtable_v{
-		.set_cell_sizes_to = [](void* obj, std::span<scaling const> vals) {
-			static_cast<T*>(obj)->set_cell_sizes_to(vals);
+		.set_default_cell_sizes_to = [](void* obj, std::span<scaling const> vals) {
+			static_cast<T*>(obj)->set_default_cell_sizes_to(vals);
 		},
 		.adjust_cell_widths = [](void* obj, float available_width){
 			static_cast<T*>(obj)->adjust_cell_widths(available_width);
@@ -115,8 +115,8 @@ namespace terraformer::ui::main
 			m_object{&layout}
 		{}
 
-		void set_cell_sizes_to(std::span<scaling const> vals) const
-		{ m_vtable->set_cell_sizes_to(m_object, vals); }
+		void set_default_cell_sizes_to(std::span<scaling const> vals) const
+		{ m_vtable->set_default_cell_sizes_to(m_object, vals); }
 
 		void adjust_cell_widths(float available_width) const
 		{ m_vtable->adjust_cell_widths(m_object, available_width); }
