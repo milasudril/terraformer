@@ -21,7 +21,7 @@ namespace terraformer::ui::widgets
 		{ }
 
 		Layout layout;
-		bool is_transparent = true;
+		bool is_transparent = false;
 
 		main::layout_ref get_layout()
 		{ return main::layout_ref{layout}; }

@@ -62,7 +62,7 @@ terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
 		{
 			current_row = 0;
 			ret[current_col] = col_width;
-			col_width = 0.0f;
+			col_width =0.0f;
 			++current_col;
 		}
 	}
@@ -150,26 +150,26 @@ void terraformer::ui::layouts::table_new::get_cell_sizes_into(std::span<scaling>
 void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	std::span<location> locs_out,
 	row_array const& row_heights,
-	column_array const& col_widths
+	column_array const& col_widths,
+	common_params const& params
 )
 {
-	// TODO: Add support for margins
 	size_t colcount = std::size(col_widths);
-	auto loc_x = 0.0f;
-	auto loc_y = 0.0f;
+	auto loc_x = params.no_outer_margin? 0.0f : params.margin_x;
+	auto loc_y = params.no_outer_margin? 0.0f : -params.margin_y;
 	size_t current_row = 0;
 	size_t current_col = 0;
 	for(auto& item : locs_out)
 	{
 		item = location{loc_x, loc_y, 0.0f},
-		loc_x += col_widths[current_col];
+		loc_x += col_widths[current_col] + params.margin_x;
 		++current_col;
 
 		if(current_col == colcount)
 		{
 			current_col = 0;
-			loc_x = 0.0f;
-			loc_y -= row_heights[current_row];
+			loc_x = params.no_outer_margin? 0.0f : params.margin_x;
+			loc_y -= (row_heights[current_row] + params.margin_y);
 			++current_row;
 		}
 	}
@@ -178,27 +178,26 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	std::span<location> locs_out,
 	column_array const& col_widths,
-	row_array const& row_heights
+	row_array const& row_heights,
+	common_params const& params
 )
 {
-	// TODO: Add support for margins
-	// TODO: Origin should be fetched from sparse array
 	auto const rowcount = std::size(row_heights);
-	auto loc_x = 0.0f;
-	auto loc_y = 0.0f;
+	auto loc_x = params.no_outer_margin? 0.0f : params.margin_x;
+	auto loc_y = params.no_outer_margin? 0.0f : -params.margin_y;
 	size_t current_row = 0;
 	size_t current_col = 0;
 	for(auto& item : locs_out)
 	{
 		item = location{loc_x, loc_y, 0.0f},
-		loc_y -= row_heights[current_row];
+		loc_y -= (row_heights[current_row] + params.margin_y);
 		++current_row;
 
 		if(current_row == rowcount)
 		{
 			current_row = 0;
-			loc_y = 0.0f;
-			loc_x += col_widths[current_col];
+			loc_y = params.no_outer_margin? 0.0f : -params.margin_y;
+			loc_x += col_widths[current_col] + params.margin_x;
 			++current_col;
 		}
 	}
@@ -209,20 +208,20 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(std::span<loca
 	switch(m_cell_order)
 	{
 		case cell_order::row_major:
-			get_cell_locations_into(locs_out, m_rows, m_cols);
+			get_cell_locations_into(locs_out, m_rows, m_cols, m_params);
 			break;
 		case cell_order::column_major:
-			get_cell_locations_into(locs_out, m_cols, m_rows);
+			get_cell_locations_into(locs_out, m_cols, m_rows, m_params);
 			break;
 	}
 }
 
 terraformer::scaling terraformer::ui::layouts::table_new::get_dimensions() const
 {
-	// TODO: Add support for margins
-	// TODO: Does alignment affect the true cell size
-	auto const width = std::accumulate(std::begin(m_cols), std::end(m_cols), 0.0f);
-	auto const height = std::accumulate(std::begin(m_rows), std::end(m_rows), 0.0f);
+	auto const width = std::accumulate(std::begin(m_cols), std::end(m_cols), 0.0f)
+		+	(static_cast<float>(std::size(m_cols)) + (m_params.no_outer_margin? -1.0f : 1.0f))*m_params.margin_x;
+	auto const height = std::accumulate(std::begin(m_rows), std::end(m_rows), 0.0f)
+		+	(static_cast<float>(std::size(m_rows)) + (m_params.no_outer_margin? -1.0f : 1.0f))*m_params.margin_y;
 
 	return scaling{width, height, 1.0f};
 }

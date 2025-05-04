@@ -81,7 +81,8 @@ namespace terraformer::ui::widgets
 					m_on_value_changed(*this, std::forward<Args>(args)...);
 				})
 				.value(m_input_widget.value());
-		//	layout.params.no_outer_margin = true;
+			layout.params().no_outer_margin = true;
+			is_transparent = true;
 		}
 	};
 }
