@@ -273,12 +273,22 @@ namespace terraformer::ui::main
 					.size = box_size
 				};
 
-				m_root_collection.get_attributes().widget_layer_stacks().front() = prepare_for_presentation(root, backend);
+				m_root_collection.get_attributes().widget_layer_stacks().front() = run(
+					prepare_for_presentation_context{
+						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
+					},
+					backend
+				);
 			}
 
 			{
 				root_widget root{m_root_collection.get_attributes(), m_root_collection.element_indices().front()};
-				show_widgets(std::ref(m_content_renderer), root);
+				run(
+					show_widget_context{
+						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
+					},
+					std::ref(m_content_renderer)
+				);
 			}
 
 			if(m_hot_widget != find_recursive_result{}

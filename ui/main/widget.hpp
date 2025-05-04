@@ -144,23 +144,6 @@ namespace terraformer::ui::main
 	}
 #endif
 
-	inline widget_layer_stack prepare_for_presentation(root_widget& root, graphics_backend_ref backend)
-	{
-		auto ret = root.prepare_for_presentation(backend);
-		auto& children = root.children();
-		auto const widget_states = children.widget_states();
-		auto const layer_stacks = children.widget_layer_stacks();
-		for(auto k : children.element_indices())
-		{
-			if(!widget_states[k].hidden) [[likely]]
-			{
-				root_widget next_root{children, k};
-				layer_stacks[k] = prepare_for_presentation(next_root, backend);
-			}
-		}
-		return ret;
-	}
-
 	template<class Renderer>
 	inline void show_widgets(Renderer renderer, root_widget& root, displacement offset = displacement{0.0f, 0.0f, 0.0f})
 	{

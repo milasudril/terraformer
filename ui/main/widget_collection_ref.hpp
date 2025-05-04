@@ -14,6 +14,9 @@
 #include "./graphics_backend_ref.hpp"
 #include "./layout.hpp"
 
+#include "lib/common/value_accessor.hpp"
+
+
 #include <concepts>
 #include <utility>
 #include <functional>
@@ -385,6 +388,90 @@ namespace terraformer::ui::main
 	};
 
 	void run(confirm_widget_size_context const& ctxt, fb_size size);
+
+	class prepare_for_presentation_context
+	{
+	public:
+		explicit prepare_for_presentation_context(
+			widget_collection_ref const& widgets,
+			widget_collection_ref::index_type index
+		):
+			m_widget{widgets.widget_pointers()[index]},
+			m_old_size{
+				.width = static_cast<int>(widgets.widget_geometries()[index].size[0]),
+				.height = static_cast<int>(widgets.widget_geometries()[index].size[1])
+			},
+			m_prepare_for_presentation_callback{widgets.render_callbacks()[index]},
+			m_children{widgets.get_children_callbacks()[index](m_widget)}
+		{ }
+
+		widget_collection_ref const& children() const
+		{ return m_children; }
+
+		widget_layer_stack prepare_for_presentation(graphics_backend_ref backend) const
+		{ return m_prepare_for_presentation_callback(m_widget, backend); }
+
+	private:
+		void* m_widget;
+		fb_size m_old_size;
+		prepare_for_presentation_callback m_prepare_for_presentation_callback = [](void*, graphics_backend_ref){return widget_layer_stack{}; };
+		widget_collection_ref m_children;
+	};
+
+	widget_layer_stack run(prepare_for_presentation_context const& ctxt, graphics_backend_ref backend);
+
+	class show_widget_context
+	{
+	public:
+		explicit show_widget_context(
+			widget_collection_ref const& widgets,
+			widget_collection_ref::index_type index
+		):
+			m_widget{widgets.widget_pointers()[index]},
+			m_geometry{widgets.widget_geometries()[index]},
+			m_layers{widgets.widget_layer_stacks()[index]},
+			m_children{widgets.get_children_callbacks()[index](m_widget)}
+		{ }
+
+		widget_collection_ref const& children() const
+		{ return m_children; }
+
+		template<class Renderer>
+		void render(Renderer renderer, displacement offset) const
+		{ value_of(renderer).render(m_geometry.where + offset, m_geometry.origin, m_geometry.size, m_layers); }
+
+		widget_geometry const& geometry() const
+		{ return m_geometry; }
+
+	private:
+		void* m_widget;
+		widget_geometry m_geometry{};
+		widget_layer_stack m_layers{};
+		widget_collection_ref m_children;
+	};
+
+	template<class Renderer>
+	void run(
+		show_widget_context const& ctxt,
+		Renderer renderer,
+		displacement offset = displacement{0.0f, 0.0f, 0.0f}
+	)
+	{
+		ctxt.render(renderer, offset);
+		auto& children = ctxt.children();
+		auto const widget_states = children.widget_states();
+		for(auto k : children.element_indices())
+		{
+			if(!widget_states[k].hidden) [[likely]]
+			{
+				run(
+					show_widget_context{children, k},
+					renderer,
+					ctxt.geometry().where + offset - location{0.0f, 0.0f, 0.0f}
+				);
+			}
+		}
+	}
 
 	template<class RequestType>
 	struct set_default_cell_size

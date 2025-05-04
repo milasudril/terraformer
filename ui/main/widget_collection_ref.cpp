@@ -82,6 +82,24 @@ void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, fb_size
 	}
 }
 
+terraformer::ui::main::widget_layer_stack
+terraformer::ui::main::run(
+	prepare_for_presentation_context const& ctxt,
+	graphics_backend_ref backend
+)
+{
+	auto ret = ctxt.prepare_for_presentation(backend);
+	auto& children = ctxt.children();
+	auto const widget_states = children.widget_states();
+	auto const layer_stacks = children.widget_layer_stacks();
+	for(auto k : children.element_indices())
+	{
+		if(!widget_states[k].hidden) [[likely]]
+		{ layer_stacks[k] = run(prepare_for_presentation_context{children, k}, backend); }
+	}
+	return ret;
+}
+
 #if 0
 terraformer::scaling
 terraformer::ui::main::run(set_cell_width_context const& ctxt)
