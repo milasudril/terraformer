@@ -251,11 +251,6 @@ namespace terraformer::ui::main
 				);
 #endif
 				run(
-					update_widget_location_context{
-						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
-				});
-
-				run(
 					confirm_widget_size_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					},
@@ -264,6 +259,11 @@ namespace terraformer::ui::main
 						.height = static_cast<int>(box_size[1])
 					}
 				);
+
+				run(
+					update_widget_location_context{
+						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
+				});
 
 				m_root_collection.get_attributes().widget_geometries().front() = widget_geometry{
 					.where = location{0.0f, 0.0f, 0.0f},
