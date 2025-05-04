@@ -144,31 +144,6 @@ namespace terraformer::ui::main
 	}
 #endif
 
-	inline void confirm_sizes(root_widget& root, fb_size size)
-	{
-		root.confirm_size(size);
-		auto children = root.children();
-		auto const widget_states = children.widget_states();
-		auto const widget_geometries = children.widget_geometries();
-		auto const widget_sizes = children.sizes();
-		for(auto k : children.element_indices())
-		{
-			if(!widget_states[k].collapsed) [[likely]]
-			{
-				root_widget next_root{children, k};
-				// TODO: If widget is maximized, use size cell size
-				confirm_sizes(
-					next_root,
-					fb_size{
-						.width = static_cast<int>(widget_sizes[k][0]),
-						.height = static_cast<int>(widget_sizes[k][1])
-					}
-				);
-				widget_geometries[k].size = widget_sizes[k];
-			}
-		}
-	}
-
 	inline widget_layer_stack prepare_for_presentation(root_widget& root, graphics_backend_ref backend)
 	{
 		auto ret = root.prepare_for_presentation(backend);

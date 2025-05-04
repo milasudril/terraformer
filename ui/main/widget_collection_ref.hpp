@@ -352,6 +352,31 @@ namespace terraformer::ui::main
 
 	void run(update_widget_location_context const& ctxt);
 
+	class confirm_widget_size_context
+	{
+	public:
+		explicit confirm_widget_size_context(
+			widget_collection_ref const& widgets,
+			widget_collection_ref::index_type index
+		):
+			m_widget{widgets.widget_pointers()[index]},
+			m_size_confirmed{widgets.event_callbacks<fb_size>()[index]},
+			m_children{widgets.get_children_callbacks()[index](m_widget)}
+		{ }
+
+		widget_collection_ref const& children() const
+		{ return m_children; }
+
+		void confirm_size(fb_size size) const
+		{ m_size_confirmed(m_widget, size); }
+
+	private:
+		void* m_widget;
+		event_callback_t<fb_size> m_size_confirmed = [](void*, fb_size){};
+		widget_collection_ref m_children;
+	};
+
+	void run(confirm_widget_size_context const& ctxt, fb_size size);
 
 	template<class RequestType>
 	struct set_default_cell_size
