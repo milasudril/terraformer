@@ -3,6 +3,8 @@
 #ifndef TERRAFORMER_UI_LAYOUTS_TABLE_NEW_HPP
 #define TERRAFORMER_UI_LAYOUTS_TABLE_NEW_HPP
 
+#include "./common_params.hpp"
+
 #include "lib/common/spaces.hpp"
 
 #include <span>
@@ -137,10 +139,14 @@ namespace terraformer::ui::layouts
 
 		scaling get_dimensions() const;
 
+		auto& params()
+		{ return m_params; }
+
 	private:
 		cell_order m_cell_order;
 		row_array m_rows;
 		column_array m_cols;
+		common_params m_params{};
 	};
 }
 
