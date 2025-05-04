@@ -123,38 +123,6 @@ namespace terraformer::ui::main
 		widget_geometry m_geometry{};
 	};
 
-	inline scaling minimize_size(root_widget& root)
-	{
-		// TODO: Decide which dimension to minimize. Should be determined by parent
-
-		auto const initial_size = root.compute_size(widget_width_request{});
-
-		auto& children = root.children();
-		auto const widget_states = children.widget_states();
-		auto const sizes = children.sizes();
-		for(auto k : children.element_indices())
-		{
-			if(!widget_states[k].collapsed) [[likely]]
-			{
-				root_widget next_root{children, k};
-				sizes[k] = minimize_size(next_root);
-			}
-		}
-
-		auto const layout = root.get_layout();
-		if(!layout.is_valid())
-		{ return initial_size; }
-
-		layout.set_default_cell_sizes_to(sizes);
-		auto const size_from_layout = layout.get_dimensions();
-
-		return scaling{
-			std::max(initial_size[0], size_from_layout[0]),
-			std::max(initial_size[1], size_from_layout[1]),
-			std::max(initial_size[2], size_from_layout[2])
-		};
-	}
-
 #if 0
 	inline scaling adjust_cell_sizes(root_widget& root, scaling available_size)
 	{

@@ -4,6 +4,36 @@
 
 #include "lib/array_classes/single_array.hpp"
 
+
+terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const& ctxt)
+{
+	// TODO: Decide which dimension to minimize. Should be determined by parent
+
+	auto const initial_size = ctxt.compute_size(widget_width_request{});
+
+	auto& children = ctxt.children();
+	auto const widget_states = children.widget_states();
+	auto const sizes = children.sizes();
+	for(auto k : children.element_indices())
+	{
+		if(!widget_states[k].collapsed) [[likely]]
+		{ sizes[k] = run(minimize_cell_size_context{children, k}); }
+	}
+
+	auto const layout = ctxt.get_layout();
+	if(!layout.is_valid())
+	{ return initial_size; }
+
+	layout.set_default_cell_sizes_to(sizes);
+	auto const size_from_layout = layout.get_dimensions();
+
+	return scaling{
+		std::max(initial_size[0], size_from_layout[0]),
+		std::max(initial_size[1], size_from_layout[1]),
+		std::max(initial_size[2], size_from_layout[2])
+	};
+}
+
 #if 0
 terraformer::scaling
 terraformer::ui::main::run(set_cell_width_context const& ctxt)

@@ -294,6 +294,38 @@ namespace terraformer::ui::main
 		}
 	};
 
+	class minimize_cell_size_context
+	{
+	public:
+		explicit minimize_cell_size_context(
+			widget_collection_ref const& widgets,
+			widget_collection_ref::index_type index
+		):
+			m_widget{widgets.widget_pointers()[index]},
+			m_compute_size_given_height{widgets.compute_size_given_height_callbacks()[index]},
+			m_children{widgets.get_children_callbacks()[index](m_widget)},
+			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
+		{ }
+
+		scaling compute_size(widget_width_request req) const
+		{ return m_compute_size_given_height(m_widget, req); }
+
+		widget_collection_ref const& children() const
+		{ return m_children; }
+
+		layout_ref get_layout() const
+		{ return m_layout; }
+
+	private:
+		void* m_widget;
+		scaling (*m_compute_size_given_height)(void*, widget_width_request);
+		widget_collection_ref m_children;
+		layout_ref m_layout;
+	};
+
+	scaling run(minimize_cell_size_context const& ctxt);
+
+
 	template<class RequestType>
 	struct set_default_cell_size
 	{
