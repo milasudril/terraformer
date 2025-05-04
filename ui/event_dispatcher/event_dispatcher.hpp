@@ -252,7 +252,10 @@ namespace terraformer::ui::main
 					}
 				);
 #endif
-				update_widget_locations(root);
+				run(
+					update_widget_location_context{
+						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
+				});
 				confirm_sizes(
 					root,
 					fb_size{
