@@ -360,6 +360,10 @@ namespace terraformer::ui::main
 			widget_collection_ref::index_type index
 		):
 			m_widget{widgets.widget_pointers()[index]},
+			m_old_size{
+				.width = static_cast<int>(widgets.widget_geometries()[index].size[0]),
+				.height = static_cast<int>(widgets.widget_geometries()[index].size[1])
+			},
 			m_size_confirmed{widgets.event_callbacks<fb_size>()[index]},
 			m_children{widgets.get_children_callbacks()[index](m_widget)}
 		{ }
@@ -368,10 +372,14 @@ namespace terraformer::ui::main
 		{ return m_children; }
 
 		void confirm_size(fb_size size) const
-		{ m_size_confirmed(m_widget, size); }
+		{
+			if(size != m_old_size)
+			{ m_size_confirmed(m_widget, size); }
+		}
 
 	private:
 		void* m_widget;
+		fb_size m_old_size;
 		event_callback_t<fb_size> m_size_confirmed = [](void*, fb_size){};
 		widget_collection_ref m_children;
 	};
