@@ -45,18 +45,18 @@ void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, fb_size
 	auto const widget_sizes = children.sizes();
 	for(auto k : children.element_indices())
 	{
-		if(!widget_states[k].collapsed) [[likely]]
-		{
+		if(widget_states[k].collapsed) [[unlikely]]
+		{ continue; }
+
 			// TODO: If widget is maximized, use size cell size
-			run(
-				confirm_widget_size_context{children, k},
-				fb_size{
-					.width = static_cast<int>(widget_sizes[k][0]),
-					.height = static_cast<int>(widget_sizes[k][1])
-				}
-			);
-			widget_geometries[k].size = widget_sizes[k];
-		}
+		run(
+			confirm_widget_size_context{children, k},
+			fb_size{
+				.width = static_cast<int>(widget_sizes[k][0]),
+				.height = static_cast<int>(widget_sizes[k][1])
+			}
+		);
+		widget_geometries[k].size = widget_sizes[k];
 	}
 }
 
