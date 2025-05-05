@@ -34,30 +34,6 @@ terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const
 	};
 }
 
-void terraformer::ui::main::run(update_widget_location_context const& ctxt)
-{
-	auto const layout = ctxt.get_layout();
-	if(!layout.is_valid())
-	{ return; }
-
-	auto const children = ctxt.children();
-	single_array locs_out(array_size<location>{children.size()});
-	layout.get_cell_locations_into(locs_out);
-	auto const widget_geometries = children.widget_geometries();
-	for(auto k : children.element_indices())
-	{
-		widget_geometries[k].where = locs_out[array_index<location>{k.get()}];
-			// TODO: Add support for widget alignment within the cell. 0.0f should mean centered.
-		widget_geometries[k].origin = location{-1.0f, 1.0f, 0.0f};
-	}
-
-	for(auto k : children.element_indices())
-	{
-		// TODO Check if widget is collapsed
-		run(update_widget_location_context{children, k});
-	}
-}
-
 void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, fb_size size)
 {
 	ctxt.confirm_size(size);
@@ -79,6 +55,30 @@ void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, fb_size
 			);
 			widget_geometries[k].size = widget_sizes[k];
 		}
+	}
+}
+
+void terraformer::ui::main::run(update_widget_location_context const& ctxt)
+{
+	auto const layout = ctxt.get_layout();
+	if(!layout.is_valid())
+	{ return; }
+
+	auto const children = ctxt.children();
+	single_array locs_out(array_size<location>{children.size()});
+	layout.get_cell_locations_into(locs_out);
+	auto const widget_geometries = children.widget_geometries();
+	for(auto k : children.element_indices())
+	{
+		widget_geometries[k].where = locs_out[array_index<location>{k.get()}];
+			// TODO: Add support for widget alignment within the cell. 0.0f should mean centered.
+		widget_geometries[k].origin = location{-1.0f, 1.0f, 0.0f};
+	}
+
+	for(auto k : children.element_indices())
+	{
+		// TODO Check if widget is collapsed
+		run(update_widget_location_context{children, k});
 	}
 }
 

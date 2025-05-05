@@ -328,33 +328,6 @@ namespace terraformer::ui::main
 
 	scaling run(minimize_cell_size_context const& ctxt);
 
-	class update_widget_location_context
-	{
-	public:
-		explicit update_widget_location_context(
-			widget_collection_ref const& widgets,
-			widget_collection_ref::index_type index
-		):
-			m_widget{widgets.widget_pointers()[index]},
-			m_children{widgets.get_children_callbacks()[index](m_widget)},
-			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
-		{ }
-
-		widget_collection_ref const& children() const
-		{ return m_children; }
-
-		layout_ref get_layout() const
-		{ return m_layout; }
-
-	private:
-		void* m_widget;
-		widget_collection_ref m_children;
-		layout_ref m_layout;
-	};
-
-
-	void run(update_widget_location_context const& ctxt);
-
 	class confirm_widget_size_context
 	{
 	public:
@@ -388,6 +361,32 @@ namespace terraformer::ui::main
 	};
 
 	void run(confirm_widget_size_context const& ctxt, fb_size size);
+
+	class update_widget_location_context
+	{
+	public:
+		explicit update_widget_location_context(
+			widget_collection_ref const& widgets,
+			widget_collection_ref::index_type index
+		):
+			m_widget{widgets.widget_pointers()[index]},
+			m_children{widgets.get_children_callbacks()[index](m_widget)},
+			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
+		{ }
+
+		widget_collection_ref const& children() const
+		{ return m_children; }
+
+		layout_ref get_layout() const
+		{ return m_layout; }
+
+	private:
+		void* m_widget;
+		widget_collection_ref m_children;
+		layout_ref m_layout;
+	};
+
+	void run(update_widget_location_context const& ctxt);
 
 	class prepare_for_presentation_context
 	{
