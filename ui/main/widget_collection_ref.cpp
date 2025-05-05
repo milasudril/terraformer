@@ -16,7 +16,9 @@ terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const
 	auto const sizes = children.sizes();
 	for(auto k : children.element_indices())
 	{
-		if(!widget_states[k].collapsed) [[likely]]
+		if(widget_states[k].collapsed) [[unlikely]]
+		{ sizes[k] = scaling{0.0f, 0.0f, 0.0f}; }
+		else
 		{ sizes[k] = run(minimize_cell_size_context{children, k}); }
 	}
 
