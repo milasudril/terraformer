@@ -67,19 +67,20 @@ void terraformer::ui::main::run(update_widget_location_context const& ctxt)
 	{ return; }
 
 	auto const children = ctxt.children();
+
 	single_array locs_out(array_size<location>{children.size()});
 	layout.get_cell_locations_into(locs_out);
+
 	auto const widget_geometries = children.widget_geometries();
+	auto const widget_states = children.widget_states();
 	for(auto k : children.element_indices())
 	{
+		if(widget_states[k].collapsed) [[unlikely]]
+		{ continue; }
+
 		widget_geometries[k].where = locs_out[array_index<location>{k.get()}];
 			// TODO: Add support for widget alignment within the cell. 0.0f should mean centered.
 		widget_geometries[k].origin = location{-1.0f, 1.0f, 0.0f};
-	}
-
-	for(auto k : children.element_indices())
-	{
-		// TODO Check if widget is collapsed
 		run(update_widget_location_context{children, k});
 	}
 }
