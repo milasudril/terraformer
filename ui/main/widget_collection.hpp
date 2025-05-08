@@ -90,7 +90,7 @@ namespace terraformer::ui::main
 				[](void* obj, widget_height_request req) -> scaling{
 					return static_cast<Widget*>(obj)->compute_size(req);
 				},
-				[](void* obj, fb_size size) {
+				[](void* obj, scaling size) {
 					static_cast<Widget*>(obj)->handle_event(size);
 				},
 				[](void* obj, config const& new_theme, widget_instance_info instance_info) {

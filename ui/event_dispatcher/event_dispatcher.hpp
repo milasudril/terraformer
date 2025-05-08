@@ -254,10 +254,7 @@ namespace terraformer::ui::main
 					confirm_widget_size_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					},
-					fb_size{
-						.width = static_cast<int>(box_size[0]),
-						.height = static_cast<int>(box_size[1])
-					}
+					box_size
 				);
 
 				run(

@@ -51,7 +51,7 @@ namespace terraformer::ui::widgets
 			};
 		}
 
-		void handle_event(main::fb_size)
+		void handle_event(scaling)
 		{}
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info)

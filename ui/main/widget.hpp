@@ -17,7 +17,7 @@ namespace terraformer::ui::main
 	template<class T>
 	concept widget = requires(
 		T& obj,
-		fb_size size,
+		scaling size,
 		cursor_enter_event const& cee,
 		cursor_leave_event const& cle,
 		cursor_motion_event const& cme,
@@ -68,7 +68,7 @@ namespace terraformer::ui::main
 		void handle_event(keyboard_focus_enter_event, window_ref, ui_controller){}
 		void handle_event(keyboard_focus_leave_event, window_ref, ui_controller){}
 		void handle_event(typing_event, window_ref, ui_controller){}
-		void handle_event(fb_size) {}
+		void handle_event(scaling) {}
 
 		void theme_updated(config const&, widget_instance_info) {}
 

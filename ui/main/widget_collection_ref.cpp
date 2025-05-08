@@ -36,7 +36,7 @@ terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const
 	};
 }
 
-void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, fb_size size)
+void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, scaling size)
 {
 	ctxt.confirm_size(size);
 	auto children = ctxt.children();
@@ -48,13 +48,10 @@ void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, fb_size
 		if(widget_states[k].collapsed) [[unlikely]]
 		{ continue; }
 
-			// TODO: If widget is maximized, use size cell size
+		// TODO: If widget is maximized, use size cell size
 		run(
 			confirm_widget_size_context{children, k},
-			fb_size{
-				.width = static_cast<int>(widget_sizes[k][0]),
-				.height = static_cast<int>(widget_sizes[k][1])
-			}
+			widget_sizes[k]
 		);
 		widget_geometries[k].size = widget_sizes[k];
 	}
