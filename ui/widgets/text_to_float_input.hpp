@@ -16,6 +16,7 @@ namespace terraformer::ui::widgets
 		using single_line_text_input::get_layout;
 		using single_line_text_input::get_children;
 		using single_line_text_input::compute_size;
+		using single_line_text_input::confirm_size;
 
 		text_to_float_input()
 		{ use_size_from_placeholder(u8"-1.175494351e-38"); }

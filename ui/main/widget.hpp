@@ -45,7 +45,7 @@ namespace terraformer::ui::main
 		{ obj.handle_event(kfe, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(kfl, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(te, wr, ui_ctrl) } -> std::same_as<void>;
-		{ obj.handle_event(std::as_const(size)) } -> std::same_as<void>;
+		{ obj.confirm_size(std::as_const(size)) } -> std::same_as<scaling>;
 		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
@@ -68,9 +68,10 @@ namespace terraformer::ui::main
 		void handle_event(keyboard_focus_enter_event, window_ref, ui_controller){}
 		void handle_event(keyboard_focus_leave_event, window_ref, ui_controller){}
 		void handle_event(typing_event, window_ref, ui_controller){}
-		void handle_event(scaling) {}
 
 		void theme_updated(config const&, widget_instance_info) {}
+
+		scaling confirm_size(scaling size) { return size; }
 
 		[[nodiscard]] widget_collection_ref get_children()
 		{ return widget_collection_ref{}; }

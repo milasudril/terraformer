@@ -36,13 +36,14 @@ namespace terraformer::ui::widgets
 
 		scaling compute_size(main::widget_height_request req);
 
-		void handle_event(scaling size)
+		scaling confirm_size(scaling size)
 		{
 			m_current_size = main::fb_size{
 				.width = static_cast<int>(size[0]),
 				.height = static_cast<int>(size[1])
 			};
 			m_dirty_bits |= track_dirty;
+			return size;
 		}
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);

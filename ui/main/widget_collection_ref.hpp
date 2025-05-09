@@ -142,10 +142,10 @@ namespace terraformer::ui::main
 	using typing_callback = event_callback_t<typing_event, window_ref, ui_controller>;
 	using keyboard_focus_enter_callback = event_callback_t<keyboard_focus_enter_event, window_ref, ui_controller>;
 	using keyboard_focus_leave_callback = event_callback_t<keyboard_focus_leave_event, window_ref, ui_controller>;
-	using size_callback = event_callback_t<scaling>;
 	using prepare_for_presentation_callback = widget_layer_stack (*)(void*, graphics_backend_ref);
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
 
+	using size_callback = scaling (*)(void*, scaling);
 	using compute_size_given_height_callback = scaling (*)(void*, widget_width_request);
 	using compute_size_given_width_callback = scaling (*)(void*, widget_height_request);
 	using get_children_callback = widget_collection_ref (*)(void*);
@@ -337,27 +337,28 @@ namespace terraformer::ui::main
 		):
 			m_widget{widgets.widget_pointers()[index]},
 			m_old_size{widgets.widget_geometries()[index].size},
-			m_size_confirmed{widgets.event_callbacks<scaling>()[index]},
+			m_size_confirmed{widgets.size_callbacks()[index]},
 			m_children{widgets.get_children_callbacks()[index](m_widget)}
 		{ }
 
 		widget_collection_ref const& children() const
 		{ return m_children; }
 
-		void confirm_size(scaling size) const
+		scaling confirm_size(scaling size) const
 		{
 			if(size != m_old_size)
-			{ m_size_confirmed(m_widget, size); }
+			{ return m_size_confirmed(m_widget, size); }
+			return m_old_size;
 		}
 
 	private:
 		void* m_widget;
 		scaling m_old_size;
-		size_callback m_size_confirmed = [](void*, scaling){};
+		size_callback m_size_confirmed = [](void*, scaling size){ return size; };
 		widget_collection_ref m_children;
 	};
 
-	void run(confirm_widget_size_context const& ctxt, scaling size);
+	scaling run(confirm_widget_size_context const& ctxt, scaling size);
 
 	class update_widget_location_context
 	{

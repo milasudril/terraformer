@@ -19,7 +19,7 @@ namespace terraformer::ui::widgets
 		using widget_group::get_children;
 		using widget_group::get_layout;
 		using widget_group::compute_size;
-
+		using widget_group::confirm_size;
 
 		explicit form(
 			iterator_invalidation_handler_ref iihr,

@@ -36,10 +36,10 @@ terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const
 	};
 }
 
-void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, scaling size)
+terraformer::scaling terraformer::ui::main::run(confirm_widget_size_context const& ctxt, scaling size)
 {
-	ctxt.confirm_size(size);
-	auto children = ctxt.children();
+	auto const new_size = ctxt.confirm_size(size);
+	auto const children = ctxt.children();
 	auto const widget_states = children.widget_states();
 	auto const widget_geometries = children.widget_geometries();
 	auto const widget_sizes = children.sizes();
@@ -49,12 +49,13 @@ void terraformer::ui::main::run(confirm_widget_size_context const& ctxt, scaling
 		{ continue; }
 
 		// TODO: If widget is maximized, use size cell size
-		run(
+
+		widget_geometries[k].size = run(
 			confirm_widget_size_context{children, k},
 			widget_sizes[k]
 		);
-		widget_geometries[k].size = widget_sizes[k];
 	}
+	return new_size;
 }
 
 void terraformer::ui::main::run(update_widget_location_context const& ctxt)
