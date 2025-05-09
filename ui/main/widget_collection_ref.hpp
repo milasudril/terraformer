@@ -353,7 +353,7 @@ namespace terraformer::ui::main
 	private:
 		void* m_widget;
 		scaling m_old_size;
-		event_callback_t<scaling> m_size_confirmed = [](void*, scaling){};
+		size_callback m_size_confirmed = [](void*, scaling){};
 		widget_collection_ref m_children;
 	};
 
