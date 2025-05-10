@@ -161,14 +161,14 @@ namespace terraformer::ui::widgets
 
 		scaling confirm_size(scaling size)
 		{
-			printf("Confirm size %p %d x %d -> %.8g x %.8g\n",
+			auto const wanted_size = compute_size(main::widget_height_request{.width = size[0]});
 				this, m_current_size.width, m_current_size.height, size[0], size[1]);
 			m_current_size = main::fb_size{
-				.width = static_cast<int>(size[0]),
-				.height = static_cast<int>(size[1])
+				.width = static_cast<int>(wanted_size[0]),
+				.height = static_cast<int>(wanted_size[1])
 			};
 			m_dirty_bits |= host_textures_dirty;
-			return size;
+			return wanted_size;
 		}
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);

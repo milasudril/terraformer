@@ -293,7 +293,7 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 	};
 }
 
-terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_height_request)
+terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_height_request value)
 {
 	if(m_placeholder.has_value())
 	{
@@ -325,7 +325,7 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 	{ regenerate_text_mask(); }
 
 	return scaling{
-		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
+		std::max(static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin, value.width),
 		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
 		1.0f
 	};
