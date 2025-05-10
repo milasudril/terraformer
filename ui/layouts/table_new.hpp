@@ -6,9 +6,11 @@
 #include "./common_params.hpp"
 
 #include "lib/common/spaces.hpp"
+#include "lib/math_utils/ratio.hpp"
 
 #include <span>
 #include <memory>
+#include <variant>
 
 namespace terraformer::ui::layouts
 {
@@ -61,6 +63,16 @@ namespace terraformer::ui::layouts
 		template<class Value>
 		using column_array = cell_size_array<Value, cell_array_tag::columns>;
 
+		struct cell_size
+		{
+			struct use_default{};
+			struct expand{};
+			struct fixed
+			{ float value; };
+
+			std::variant<use_default, expand, ratio, fixed> value;
+		};
+
 		enum class cell_order:size_t{row_major, column_major};
 
 		explicit table_new(size_t fixdim_size, cell_order cell_order):
@@ -70,21 +82,25 @@ namespace terraformer::ui::layouts
 			{
 				case cell_order::row_major:
 					m_cols = column_array<float>{column_count{fixdim_size}};
+					m_cols_user = column_array<cell_size>{column_count{fixdim_size}};
 					break;
 				case cell_order::column_major:
 					m_rows = row_array<float>{row_count{fixdim_size}};
+					m_rows_user = row_array<cell_size>{row_count{fixdim_size}};
 					break;
 			}
 		}
 
 		explicit table_new(row_count num_rows):
 			m_cell_order{cell_order::column_major},
-			m_rows{num_rows}
+			m_rows{num_rows},
+			m_rows_user{num_rows}
 		{}
 
 		explicit table_new(column_count num_cols):
 			m_cell_order{cell_order::row_major},
-			m_cols{num_cols}
+			m_cols{num_cols},
+			m_cols_user{num_cols}
 		{}
 
 		/**
@@ -157,6 +173,8 @@ namespace terraformer::ui::layouts
 		cell_order m_cell_order;
 		row_array<float> m_rows;
 		column_array<float> m_cols;
+		row_array<cell_size> m_rows_user;
+		column_array<cell_size> m_cols_user;
 		common_params m_params{};
 	};
 }
