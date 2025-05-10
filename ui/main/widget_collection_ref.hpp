@@ -475,52 +475,6 @@ namespace terraformer::ui::main
 		}
 	}
 
-	template<class RequestType>
-	struct set_default_cell_size
-	{
-		void* current_widget;
-		RequestType new_size;
-		scaling (*compute_size)(void*, RequestType);
-		widget_collection_ref children;
-		layout_policy_ref current_layout;
-	};
-
-	using set_cell_width_context = set_default_cell_size<widget_height_request>;
-
-	scaling run(set_cell_width_context const& ctxt);
-
-	using set_cell_height_context = set_default_cell_size<widget_width_request>;
-
-	scaling run(set_cell_height_context const& ctxt);
-
-	struct adjust_cell_sizes_context
-	{
-		void* current_widget;
-		widget_collection_ref children;
-		layout_policy_ref current_layout;
-	};
-
-	scaling run(adjust_cell_sizes_context const& ctxt, scaling available_size);
-
-	struct set_cell_widths_context
-	{
-		void* current_widget;
-		widget_collection_ref children;
-		layout_policy_ref current_layout;
-	};
-
-	scaling run(set_cell_widths_context const& ctxt, float available_width);
-
-	struct set_cell_heights_context
-	{
-		void* current_widget;
-		widget_collection_ref children;
-		layout_policy_ref current_layout;
-	};
-
-	scaling run(set_cell_heights_context const& ctxt, float available_height);
-
-
 	inline auto find(cursor_position pos, widget_collection_view const& widgets, displacement offset)
 	{
 		auto const i = find(pos, widgets.widget_geometries(), offset);
