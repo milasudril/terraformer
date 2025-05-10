@@ -2,8 +2,8 @@
 #define TERRAFORMER_UI_MAIN_LAYOUT_HPP
 
 #include "lib/common/spaces.hpp"
+#include "lib/array_classes/span.hpp"
 
-#include <span>
 #include <utility>
 
 namespace terraformer::ui::main
@@ -34,11 +34,11 @@ namespace terraformer::ui::main
 	template<class T>
 	concept layout = requires(
 		T& obj,
-		std::span<scaling const> sizes_in,
+		span<scaling const> sizes_in,
 		float available_width,
 		float available_height,
-		std::span<scaling> sizes_out,
-		std::span<location> locs_out
+		span<scaling> sizes_out,
+		span<location> locs_out
 	)
 	{
 		/**
@@ -74,17 +74,17 @@ namespace terraformer::ui::main
 
 	struct layout_vtable
 	{
-		void (*set_default_cell_sizes_to)(void*, std::span<scaling const>);
+		void (*set_default_cell_sizes_to)(void*, span<scaling const>);
 		void (*adjust_cell_widths)(void*, float);
 		void (*adjust_cell_heights)(void*, float);
-		void (*get_cell_sizes_into)(void const*, std::span<scaling>);
-		void (*get_cell_locations_into)(void const*, std::span<location>);
+		void (*get_cell_sizes_into)(void const*, span<scaling>);
+		void (*get_cell_locations_into)(void const*, span<location>);
 		scaling (*get_dimensions)(void const*);
 	};
 
 	template<layout T>
 	inline constexpr layout_vtable layout_vtable_v{
-		.set_default_cell_sizes_to = [](void* obj, std::span<scaling const> vals) {
+		.set_default_cell_sizes_to = [](void* obj, span<scaling const> vals) {
 			static_cast<T*>(obj)->set_default_cell_sizes_to(vals);
 		},
 		.adjust_cell_widths = [](void* obj, float available_width){
@@ -93,10 +93,10 @@ namespace terraformer::ui::main
 		.adjust_cell_heights = [](void* obj, float available_height){
 			static_cast<T*>(obj)->adjust_cell_heights(available_height);
 		},
-		.get_cell_sizes_into = [](void const* obj, std::span<scaling> sizes_out){
+		.get_cell_sizes_into = [](void const* obj, span<scaling> sizes_out){
 			static_cast<T const*>(obj)->get_cell_sizes_into(sizes_out);
 		},
-		.get_cell_locations_into = [](void const* obj, std::span<location> locs_out){
+		.get_cell_locations_into = [](void const* obj, span<location> locs_out){
 			static_cast<T const*>(obj)->get_cell_locations_into(locs_out);
 		},
 		.get_dimensions = [](void const* obj){
@@ -115,7 +115,7 @@ namespace terraformer::ui::main
 			m_object{&layout}
 		{}
 
-		void set_default_cell_sizes_to(std::span<scaling const> vals) const
+		void set_default_cell_sizes_to(span<scaling const> vals) const
 		{ m_vtable->set_default_cell_sizes_to(m_object, vals); }
 
 		void adjust_cell_widths(float available_width) const
@@ -124,10 +124,10 @@ namespace terraformer::ui::main
 		void adjust_cell_heights(float available_height) const
 		{ m_vtable->adjust_cell_heights(m_object, available_height); }
 
-		void get_cell_sizes_into(std::span<scaling> sizes_out) const
+		void get_cell_sizes_into(span<scaling> sizes_out) const
 		{ m_vtable->get_cell_sizes_into(m_object, sizes_out); }
 
-		void get_cell_locations_into(std::span<location> locs_out) const
+		void get_cell_locations_into(span<location> locs_out) const
 		{ m_vtable->get_cell_locations_into(m_object, locs_out); }
 
 		scaling get_dimensions() const

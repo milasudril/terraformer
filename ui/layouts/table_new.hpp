@@ -7,6 +7,7 @@
 
 #include "lib/common/spaces.hpp"
 #include "lib/math_utils/ratio.hpp"
+#include "lib/array_classes/span.hpp"
 
 #include <span>
 #include <memory>
@@ -38,9 +39,9 @@ namespace terraformer::ui::layouts
 				m_size{size}
 			{}
 
-			explicit cell_size_array(std::span<Value const> vals):
-				m_values{std::make_unique_for_overwrite<Value[]>(std::size(vals))},
-				m_size{cell_count<tag>{std::size(vals)}}
+			explicit cell_size_array(span<Value const> vals):
+				m_values{std::make_unique_for_overwrite<Value[]>(std::size(vals).get())},
+				m_size{cell_count<tag>{std::size(vals).get()}}
 			{ std::copy(std::begin(vals), std::end(vals), std::begin(*this)); }
 
 			size_t size() const
@@ -85,10 +86,10 @@ namespace terraformer::ui::layouts
 			std::variant<use_default, expand, ratio, fixed> value;
 		};
 
-		row_array<cell_size> rows(std::span<cell_size const> sizes)
+		row_array<cell_size> rows(span<cell_size const> sizes)
 		{ return row_array<cell_size>{sizes}; }
 
-		column_array<cell_size> columns(std::span<cell_size const> sizes)
+		column_array<cell_size> columns(span<cell_size const> sizes)
 		{ return column_array<cell_size>{sizes}; }
 
 		enum class cell_order:size_t{row_major, column_major};
@@ -136,13 +137,13 @@ namespace terraformer::ui::layouts
 		/**
 		 * Sets cell sizes to the absolute value given by the sizes
 		 */
-		void set_default_cell_sizes_to(std::span<scaling const> sizes_in);
+		void set_default_cell_sizes_to(span<scaling const> sizes_in);
 		static row_array<float> set_default_cell_sizes_to(
-			std::span<scaling const> sizes_in,
+			span<scaling const> sizes_in,
 			column_array<float>& col_widths
 		);
 		static column_array<float> set_default_cell_sizes_to(
-			std::span<scaling const> sizes_in,
+			span<scaling const> sizes_in,
 			row_array<float>& row_heights
 		);
 
@@ -165,14 +166,14 @@ namespace terraformer::ui::layouts
 		/**
 		 * Fetches the current cell sizes
 		 */
-		void get_cell_sizes_into(std::span<scaling> sizes_out) const;
+		void get_cell_sizes_into(span<scaling> sizes_out) const;
 		static void get_cell_sizes_into(
-			std::span<scaling> sizes_out,
+			span<scaling> sizes_out,
 			row_array<float> const& row_heights,
 			column_array<float> const& col_widths
 		);
 		static void get_cell_sizes_into(
-			std::span<scaling> sizes_out,
+			span<scaling> sizes_out,
 			column_array<float> const& col_widths,
 			row_array<float> const& row_heights
 		);
@@ -180,15 +181,15 @@ namespace terraformer::ui::layouts
 		/**
 		 * Fetches all cell locations into locs_out
 		 */
-		void get_cell_locations_into(std::span<location> locs_out) const;
+		void get_cell_locations_into(span<location> locs_out) const;
 		static void get_cell_locations_into(
-			std::span<location> locs_out,
+			span<location> locs_out,
 			row_array<float> const& row_heights,
 			column_array<float> const& col_widths,
 			common_params const& params
 		);
 		static void get_cell_locations_into(
-			std::span<location> locs_out,
+			span<location> locs_out,
 			column_array<float> const& col_widths,
 			row_array<float> const& row_heights,
 			common_params const& params
