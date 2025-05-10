@@ -11,6 +11,7 @@
 #include <span>
 #include <memory>
 #include <variant>
+#include <algorithm>
 
 namespace terraformer::ui::layouts
 {
@@ -37,6 +38,11 @@ namespace terraformer::ui::layouts
 				m_size{size}
 			{}
 
+			explicit cell_size_array(std::span<Value const> vals):
+				m_values{std::make_unique_for_overwrite<Value[]>(std::size(vals))},
+				m_size{cell_count<tag>{std::size(vals)}}
+			{ std::copy(std::begin(vals), std::end(vals), std::begin(*this)); }
+
 			size_t size() const
 			{ return m_size.value; }
 
@@ -50,6 +56,12 @@ namespace terraformer::ui::layouts
 			{ return m_values.get(); }
 
 			Value const* end() const
+			{ return m_values.get() + std::size(*this); }
+
+			Value* begin()
+			{ return m_values.get(); }
+
+			Value* end()
 			{ return m_values.get() + std::size(*this); }
 
 		private:
@@ -72,6 +84,12 @@ namespace terraformer::ui::layouts
 
 			std::variant<use_default, expand, ratio, fixed> value;
 		};
+
+		row_array<cell_size> rows(std::span<cell_size const> sizes)
+		{ return row_array<cell_size>{sizes}; }
+
+		column_array<cell_size> columns(std::span<cell_size const> sizes)
+		{ return column_array<cell_size>{sizes}; }
 
 		enum class cell_order:size_t{row_major, column_major};
 
@@ -97,10 +115,22 @@ namespace terraformer::ui::layouts
 			m_rows_user{num_rows}
 		{}
 
+		explicit table_new(row_array<cell_size>&& rows):
+			m_cell_order{cell_order::column_major},
+			m_rows{row_count{std::size(rows)}},
+			m_rows_user{std::move(rows)}
+		{}
+
 		explicit table_new(column_count num_cols):
 			m_cell_order{cell_order::row_major},
 			m_cols{num_cols},
 			m_cols_user{num_cols}
+		{}
+
+		explicit table_new(column_array<cell_size>&& cols):
+			m_cell_order{cell_order::row_major},
+			m_cols{column_count{std::size(cols)}},
+			m_cols_user{std::move(cols)}
 		{}
 
 		/**
