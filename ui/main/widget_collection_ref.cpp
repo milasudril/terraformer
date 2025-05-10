@@ -55,7 +55,6 @@ terraformer::scaling terraformer::ui::main::run(confirm_widget_size_context cons
 		if(widget_states[k].collapsed) [[unlikely]]
 		{ continue; }
 
-		// TODO: Only read from cell_sizes if widget is maximized
 		auto size = (layout.is_valid() && widget_states[k].maximized)?
 			cell_sizes[array_index<scaling>{k.get()}] : widget_sizes[k];
 
