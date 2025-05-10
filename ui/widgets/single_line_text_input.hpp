@@ -161,6 +161,8 @@ namespace terraformer::ui::widgets
 
 		scaling confirm_size(scaling size)
 		{
+			printf("Confirm size %p %d x %d -> %.8g x %.8g\n",
+				this, m_current_size.width, m_current_size.height, size[0], size[1]);
 			m_current_size = main::fb_size{
 				.width = static_cast<int>(size[0]),
 				.height = static_cast<int>(size[1])

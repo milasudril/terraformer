@@ -43,17 +43,22 @@ terraformer::scaling terraformer::ui::main::run(confirm_widget_size_context cons
 	auto const widget_states = children.widget_states();
 	auto const widget_geometries = children.widget_geometries();
 	auto const widget_sizes = children.sizes();
+
+	// TODO: Want ot have a permanent array of cell sizes
+	single_array cell_sizes{static_cast<array_size<scaling>>(std::size(children).get())};
+	auto const layout = ctxt.get_layout();
+	if(layout.is_valid())
+	{ layout.get_cell_sizes_into(cell_sizes); }
+
 	for(auto k : children.element_indices())
 	{
 		if(widget_states[k].collapsed) [[unlikely]]
 		{ continue; }
 
-		// TODO: If widget is maximized, use size cell size
+		// TODO: Only read from cell_sizes if widget is maximized
+		auto size = layout.is_valid()? cell_sizes[array_index<scaling>{k.get()}] : widget_sizes[k];
 
-		widget_geometries[k].size = run(
-			confirm_widget_size_context{children, k},
-			widget_sizes[k]
-		);
+		widget_geometries[k].size = run(confirm_widget_size_context{children, k}, size);
 	}
 	return new_size;
 }

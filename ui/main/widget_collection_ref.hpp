@@ -338,7 +338,8 @@ namespace terraformer::ui::main
 			m_widget{widgets.widget_pointers()[index]},
 			m_old_size{widgets.widget_geometries()[index].size},
 			m_size_confirmed{widgets.size_callbacks()[index]},
-			m_children{widgets.get_children_callbacks()[index](m_widget)}
+			m_children{widgets.get_children_callbacks()[index](m_widget)},
+			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
 		{ }
 
 		widget_collection_ref const& children() const
@@ -351,11 +352,15 @@ namespace terraformer::ui::main
 			return m_old_size;
 		}
 
+		layout_ref get_layout() const
+		{ return m_layout; }
+
 	private:
 		void* m_widget;
 		scaling m_old_size;
 		size_callback m_size_confirmed = [](void*, scaling size){ return size; };
 		widget_collection_ref m_children;
+		layout_ref m_layout;
 	};
 
 	scaling run(confirm_widget_size_context const& ctxt, scaling size);
