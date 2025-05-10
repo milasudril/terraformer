@@ -131,11 +131,9 @@ float terraformer::ui::layouts::table_new::adjust_cell_sizes(
 	}
 	remaining_size -= (no_outer_margin? 0.0f : margin);
 
+	auto const num_to_expand = static_cast<float>(std::size(sizes_to_expand).get());
 	for(auto k : sizes_to_expand.element_indices())
-	{
-		actual_sizes[sizes_to_expand[k]] = remaining_size
-			/static_cast<float>(std::size(sizes_to_expand).get());
-	}
+	{ actual_sizes[sizes_to_expand[k]] = remaining_size/num_to_expand; }
 
 	return std::accumulate(std::begin(actual_sizes), std::end(actual_sizes), no_outer_margin? 0.0f : margin);
 }
