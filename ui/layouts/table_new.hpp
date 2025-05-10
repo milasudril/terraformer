@@ -65,6 +65,12 @@ namespace terraformer::ui::layouts
 			Value* end()
 			{ return m_values.get() + std::size(*this); }
 
+			operator span<Value>()
+			{ return span<Value>{std::begin(*this), std::end(*this)}; }
+
+			operator span<Value const>() const
+			{ return span<Value const>{std::cbegin(*this), std::cend(*this)}; }
+
 		private:
 			std::unique_ptr<Value[]> m_values;
 			cell_count<tag> m_size{};
@@ -150,18 +156,22 @@ namespace terraformer::ui::layouts
 		/**
 		 * Adjusts cell widths given available_width
 		 */
-		void adjust_cell_widths([[maybe_unused]] float available_width)
-		{
-			//TODO
-		}
+		void adjust_cell_widths(float available_width)
+		{ adjust_cell_sizes(m_cols_user, m_cols, available_width, m_params.margin_x, m_params.no_outer_margin); }
 
 		/**
 		 * Adjusts cell heights given available_height
 		 */
-		void adjust_cell_heights([[maybe_unused]] float available_height)
-		{
-			//TODO
-		}
+		void adjust_cell_heights(float available_height)
+		{ adjust_cell_sizes(m_rows_user, m_rows, available_height, m_params.margin_y, m_params.no_outer_margin); }
+
+		static float adjust_cell_sizes(
+			span<cell_size const> specified_sizes,
+			span<float> actual_sizes,
+			float available_size,
+			float margin,
+			bool no_outer_margin
+		);
 
 		/**
 		 * Fetches the current cell sizes

@@ -3,6 +3,8 @@
 #include "./table_new.hpp"
 
 #include "lib/common/utils.hpp"
+#include "lib/array_classes/single_array.hpp"
+
 #include <numeric>
 
 terraformer::ui::layouts::table_new::row_array<float>
@@ -88,6 +90,54 @@ void terraformer::ui::layouts::table_new::set_default_cell_sizes_to(span<scaling
 			m_cols = set_default_cell_sizes_to(sizes_in, m_rows);
 			break;
 	}
+}
+
+float terraformer::ui::layouts::table_new::adjust_cell_sizes(
+	span<cell_size const> specified_sizes,
+	span<float> actual_sizes,
+	float available_size,
+	float margin,
+	bool no_outer_margin
+)
+{
+	float remaining_size = available_size - (no_outer_margin? 0.0f : margin);
+	single_array<decltype(actual_sizes)::index_type> sizes_to_expand;
+	for(auto k : actual_sizes.element_indices())
+	{
+		using index_type = single_array<cell_size>::index_type;
+		index_type const index{k.get()};
+
+		remaining_size -= std::visit(
+			overload{
+				[k, actual_sizes](cell_size::use_default){
+					return actual_sizes[k];
+				},
+				[&sizes_to_expand, k, width = margin](cell_size::expand){
+					sizes_to_expand.push_back(k);
+					return width;
+				},
+				[k, actual_sizes, available_size](ratio ratio){
+					auto const new_size = ratio*available_size;
+					actual_sizes[k] = new_size;
+					return new_size;
+				},
+				[k, actual_sizes](cell_size::fixed value){
+					actual_sizes[k] = value.value;
+					return value.value;
+				}
+			},
+			specified_sizes.value_or(index, cell_size::use_default{}).value
+		);
+	}
+	remaining_size -= (no_outer_margin? 0.0f : margin);
+
+	for(auto k : sizes_to_expand.element_indices())
+	{
+		actual_sizes[sizes_to_expand[k]] = remaining_size
+			/static_cast<float>(std::size(sizes_to_expand).get());
+	}
+
+	return std::accumulate(std::begin(actual_sizes), std::end(actual_sizes), no_outer_margin? 0.0f : margin);
 }
 
 void terraformer::ui::layouts::table_new::get_cell_sizes_into(
