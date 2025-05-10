@@ -24,39 +24,42 @@ namespace terraformer::ui::layouts
 		using row_count = cell_count<cell_array_tag::rows>;
 		using column_count = cell_count<cell_array_tag::columns>;
 
-		template<cell_array_tag tag>
+		template<class Value, cell_array_tag tag>
 		class cell_size_array
 		{
 		public:
 			cell_size_array() = default;
 
 			explicit cell_size_array(cell_count<tag> size):
-				m_values{std::make_unique<float[]>(size.value)},
+				m_values{std::make_unique<Value[]>(size.value)},
 				m_size{size}
 			{}
 
 			size_t size() const
 			{ return m_size.value; }
 
-			float& operator[](size_t index)
+			Value& operator[](size_t index)
 			{ return m_values.get()[index]; }
 
-			float operator[](size_t index) const
+			Value operator[](size_t index) const
 			{ return m_values.get()[index]; }
 
-			float const* begin() const
+			Value const* begin() const
 			{ return m_values.get(); }
 
-			float const* end() const
+			Value const* end() const
 			{ return m_values.get() + std::size(*this); }
 
 		private:
-			std::unique_ptr<float[]> m_values;
+			std::unique_ptr<Value[]> m_values;
 			cell_count<tag> m_size{};
 		};
 
-		using row_array = cell_size_array<cell_array_tag::rows>;
-		using column_array = cell_size_array<cell_array_tag::columns>;
+		template<class Value>
+		using row_array = cell_size_array<Value, cell_array_tag::rows>;
+
+		template<class Value>
+		using column_array = cell_size_array<Value, cell_array_tag::columns>;
 
 		enum class cell_order:size_t{row_major, column_major};
 
@@ -66,10 +69,10 @@ namespace terraformer::ui::layouts
 			switch(m_cell_order)
 			{
 				case cell_order::row_major:
-					m_cols = column_array{column_count{fixdim_size}};
+					m_cols = column_array<float>{column_count{fixdim_size}};
 					break;
 				case cell_order::column_major:
-					m_rows = row_array{row_count{fixdim_size}};
+					m_rows = row_array<float>{row_count{fixdim_size}};
 					break;
 			}
 		}
@@ -88,13 +91,13 @@ namespace terraformer::ui::layouts
 		 * Sets cell sizes to the absolute value given by the sizes
 		 */
 		void set_default_cell_sizes_to(std::span<scaling const> sizes_in);
-		static row_array set_default_cell_sizes_to(
+		static row_array<float> set_default_cell_sizes_to(
 			std::span<scaling const> sizes_in,
-			column_array& col_widths
+			column_array<float>& col_widths
 		);
-		static column_array set_default_cell_sizes_to(
+		static column_array<float> set_default_cell_sizes_to(
 			std::span<scaling const> sizes_in,
-			row_array& row_heights
+			row_array<float>& row_heights
 		);
 
 		/**
@@ -119,13 +122,13 @@ namespace terraformer::ui::layouts
 		void get_cell_sizes_into(std::span<scaling> sizes_out) const;
 		static void get_cell_sizes_into(
 			std::span<scaling> sizes_out,
-			row_array const& row_heights,
-			column_array const& col_widths
+			row_array<float> const& row_heights,
+			column_array<float> const& col_widths
 		);
 		static void get_cell_sizes_into(
 			std::span<scaling> sizes_out,
-			column_array const& col_widths,
-			row_array const& row_heights
+			column_array<float> const& col_widths,
+			row_array<float> const& row_heights
 		);
 
 		/**
@@ -134,14 +137,14 @@ namespace terraformer::ui::layouts
 		void get_cell_locations_into(std::span<location> locs_out) const;
 		static void get_cell_locations_into(
 			std::span<location> locs_out,
-			row_array const& row_heights,
-			column_array const& col_widths,
+			row_array<float> const& row_heights,
+			column_array<float> const& col_widths,
 			common_params const& params
 		);
 		static void get_cell_locations_into(
 			std::span<location> locs_out,
-			column_array const& col_widths,
-			row_array const& row_heights,
+			column_array<float> const& col_widths,
+			row_array<float> const& row_heights,
 			common_params const& params
 		);
 
@@ -152,8 +155,8 @@ namespace terraformer::ui::layouts
 
 	private:
 		cell_order m_cell_order;
-		row_array m_rows;
-		column_array m_cols;
+		row_array<float> m_rows;
+		column_array<float> m_cols;
 		common_params m_params{};
 	};
 }
