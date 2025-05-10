@@ -235,7 +235,7 @@ namespace terraformer::ui::main
 		{
 			{
 				// TODO: Pick width/height based on window size
-				auto const box_size = run(
+				auto box_size = run(
 					minimize_cell_size_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					}
@@ -250,7 +250,7 @@ namespace terraformer::ui::main
 					}
 				);
 #endif
-				run(
+				box_size = run(
 					confirm_widget_size_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					},
