@@ -27,10 +27,19 @@ namespace terraformer::ui::widgets
 		):
 			widget_group{
 				iihr,
-				2u,
 				orientation == main::widget_orientation::vertical?
-					layouts::table_new::cell_order::row_major:
-					layouts::table_new::cell_order::column_major
+					layouts::table_new{
+						layouts::table_new::columns(
+							layouts::table_new::cell_size::use_default{},
+							layouts::table_new::cell_size::expand{}
+						)
+					}
+					:layouts::table_new{
+						layouts::table_new::rows(
+							layouts::table_new::cell_size::use_default{},
+							layouts::table_new::cell_size::expand{}
+						)
+					}
 			},
 			m_orientation{orientation}
 		{ is_transparent = false; }

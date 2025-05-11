@@ -92,11 +92,36 @@ namespace terraformer::ui::layouts
 			std::variant<use_default, expand, ratio, fixed> value;
 		};
 
-		row_array<cell_size> rows(span<cell_size const> sizes)
+		static row_array<cell_size> rows(span<cell_size const> sizes)
 		{ return row_array<cell_size>{sizes}; }
 
-		column_array<cell_size> columns(span<cell_size const> sizes)
+		static row_array<cell_size> rows(std::initializer_list<cell_size> const& sizes)
+		{ return row_array<cell_size>{span{std::begin(sizes), std::end(sizes)}}; }
+
+		template<class Head, class ... Tail>
+		static row_array<cell_size> rows(Head&& h, Tail&&... t)
+		{
+			return rows({
+				cell_size{.value = std::forward<Head>(h)},
+				cell_size{.value = std::forward<Tail>(t)}...
+			});
+		}
+
+		static column_array<cell_size> columns(span<cell_size const> sizes)
 		{ return column_array<cell_size>{sizes}; }
+
+		static column_array<cell_size> columns(std::initializer_list<cell_size> const& sizes)
+		{ return column_array<cell_size>{span{std::begin(sizes), std::end(sizes)}}; }
+
+		template<class Head, class ... Tail>
+		static column_array<cell_size> columns(Head&& h, Tail&&... t)
+		{
+			return columns({
+				cell_size{.value = std::forward<Head>(h)},
+				cell_size{.value = std::forward<Tail>(t)}...
+			});
+		}
+
 
 		enum class cell_order:size_t{row_major, column_major};
 
