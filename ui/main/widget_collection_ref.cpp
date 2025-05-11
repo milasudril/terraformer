@@ -57,6 +57,7 @@ void terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling a
 	layout.adjust_cell_widths(available_size[0]);
 	layout.adjust_cell_heights(available_size[1]);
 	single_array cell_sizes{static_cast<array_size<scaling>>(std::size(children).get())};
+	layout.get_cell_sizes_into(cell_sizes);
 
 	for(auto k : children.element_indices())
 	{
