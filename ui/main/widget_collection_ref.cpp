@@ -36,6 +36,41 @@ terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const
 	};
 }
 
+terraformer::scaling terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling available_size)
+{
+	// FIXME: Only operate on layouts
+	auto const layout = ctxt.get_layout();
+	auto const children = ctxt.children();
+
+	single_array cell_sizes{static_cast<array_size<scaling>>(std::size(children).get())};
+	auto ret  = ctxt.current_size();
+
+	if(layout.is_valid())
+	{
+		// TODO: Should probably run width and height separately
+		//       (Changing width may change cell heights)
+		layout.adjust_cell_widths(available_size[0]);
+		layout.adjust_cell_heights(available_size[1]);
+		layout.get_cell_sizes_into(cell_sizes);
+		ret = available_size;  //layout.get_dimensions();
+	}
+
+	auto const widget_states = children.widget_states();
+	auto const widget_sizes = children.sizes();
+	for(auto k : children.element_indices())
+	{
+		if(widget_states[k].collapsed) [[unlikely]]
+		{ continue; }
+
+		auto size = (layout.is_valid() && widget_states[k].maximized)?
+			cell_sizes[array_index<scaling>{k.get()}] : widget_sizes[k];
+
+		widget_sizes[k] = run(adjust_cell_sizes_context{children, k}, size);
+	}
+	return ret;
+
+}
+
 terraformer::scaling terraformer::ui::main::run(confirm_widget_size_context const& ctxt, scaling size)
 {
 	auto const new_size = ctxt.confirm_size(size);

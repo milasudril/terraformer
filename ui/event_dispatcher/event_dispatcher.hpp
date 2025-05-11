@@ -240,16 +240,18 @@ namespace terraformer::ui::main
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					}
 				);
-#if 0
-				auto const box_size = adjust_cell_sizes(
-					root,
+
+				box_size = run(
+					adjust_cell_sizes_context{
+						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
+					},
 					scaling{
 						static_cast<float>(m_current_size.width),
 						static_cast<float>(m_current_size.height),
 						1.0f
 					}
 				);
-#endif
+
 				box_size = run(
 					confirm_widget_size_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
