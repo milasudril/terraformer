@@ -11,7 +11,6 @@
 #include "lib/array_classes/single_array.hpp"
 
 #include <span>
-#include <memory>
 #include <variant>
 #include <algorithm>
 
@@ -51,6 +50,11 @@ namespace terraformer::ui::layouts
 
 			Value operator[](size_t index) const
 			{ return m_values[array_index<Value>{index}]; }
+
+			template<class Arg>
+			requires (std::is_same_v<std::remove_cvref_t<Arg>, Value> || std::is_convertible_v<Arg, Value>)
+			void insert_or_assign(size_t index, Arg&& elem)
+			{ m_values.insert_or_assign(array_index<Value>{index}, std::forward<Arg>(elem)); }
 
 			Value const* begin() const
 			{ return std::begin(m_values); }
