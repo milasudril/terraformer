@@ -237,6 +237,23 @@ namespace terraformer::ui::layouts
 		auto& params()
 		{ return m_params; }
 
+		template<class T>
+		auto& set_record_size(size_t index, T&& value)
+		{
+			switch(m_cell_order)
+			{
+				case cell_order::row_major:
+					m_rows_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
+					return *this;
+
+				case cell_order::column_major:
+					m_cols_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
+					return *this;
+			}
+
+			__builtin_unreachable();
+		}
+
 	private:
 		cell_order m_cell_order;
 		row_array<float> m_rows;
