@@ -20,6 +20,12 @@ namespace terraformer
 		explicit single_array(size_type size)
 		{ resize(size); }
 
+		single_array(span<value_type const> vals):
+			m_storage{make_byte_size<T>(std::size(vals))},
+			m_size{std::size(vals)},
+			m_capacity{std::size(vals)}
+		{ std::uninitialized_copy_n(vals.begin(), m_size.get(), m_storage.template interpret_as<T>()); }
+
 		single_array(single_array&& other) noexcept:
 			m_storage{std::exchange(other.m_storage, memory_block{})},
 			m_size{std::exchange(other.m_size, size_type{})},

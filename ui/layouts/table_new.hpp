@@ -8,6 +8,7 @@
 #include "lib/common/spaces.hpp"
 #include "lib/math_utils/ratio.hpp"
 #include "lib/array_classes/span.hpp"
+#include "lib/array_classes/single_array.hpp"
 
 #include <span>
 #include <memory>
@@ -35,35 +36,33 @@ namespace terraformer::ui::layouts
 			cell_size_array() = default;
 
 			explicit cell_size_array(cell_count<tag> size):
-				m_values{std::make_unique<Value[]>(size.value)},
-				m_size{size}
+				m_values{array_size<Value>{size.value}}
 			{}
 
 			explicit cell_size_array(span<Value const> vals):
-				m_values{std::make_unique_for_overwrite<Value[]>(std::size(vals).get())},
-				m_size{cell_count<tag>{std::size(vals).get()}}
+				m_values{vals}
 			{ std::copy(std::begin(vals), std::end(vals), std::begin(*this)); }
 
 			size_t size() const
-			{ return m_size.value; }
+			{ return std::size(m_values).get(); }
 
 			Value& operator[](size_t index)
-			{ return m_values.get()[index]; }
+			{ return m_values[array_index<Value>{index}]; }
 
 			Value operator[](size_t index) const
-			{ return m_values.get()[index]; }
+			{ return m_values[array_index<Value>{index}]; }
 
 			Value const* begin() const
-			{ return m_values.get(); }
+			{ return std::begin(m_values); }
 
 			Value const* end() const
-			{ return m_values.get() + std::size(*this); }
+			{ return std::end(m_values); }
 
 			Value* begin()
-			{ return m_values.get(); }
+			{ return std::begin(m_values); }
 
 			Value* end()
-			{ return m_values.get() + std::size(*this); }
+			{ return std::end(m_values); }
 
 			operator span<Value>()
 			{ return span<Value>{std::begin(*this), std::end(*this)}; }
@@ -72,8 +71,7 @@ namespace terraformer::ui::layouts
 			{ return span<Value const>{std::cbegin(*this), std::cend(*this)}; }
 
 		private:
-			std::unique_ptr<Value[]> m_values;
-			cell_count<tag> m_size{};
+			single_array<Value> m_values;
 		};
 
 		template<class Value>
