@@ -336,6 +336,7 @@ namespace terraformer::ui::main
 			widget_collection_ref::index_type index
 		):
 			m_widget{widgets.widget_pointers()[index]},
+			m_default_size{widgets.sizes()[index]},
 			m_children{widgets.get_children_callbacks()[index](m_widget)},
 			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
 		{ }
@@ -346,13 +347,17 @@ namespace terraformer::ui::main
 		layout_ref get_layout() const
 		{ return m_layout; }
 
+		scaling default_size() const
+		{ return m_default_size; }
+
 	private:
 		void* m_widget;
+		scaling m_default_size;
 		widget_collection_ref m_children;
 		layout_ref m_layout;
 	};
 
-	void run(adjust_cell_sizes_context const& ctxt, scaling available_size);
+	scaling run(adjust_cell_sizes_context const& ctxt, scaling available_size);
 
 	class confirm_widget_size_context
 	{

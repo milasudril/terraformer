@@ -91,7 +91,7 @@ namespace terraformer::ui::layouts
 			struct fixed
 			{ float value; };
 
-			std::variant<use_default, expand, ratio, fixed> value;
+			std::variant<use_default, expand, ratio, fixed> value = use_default{};
 		};
 
 		static row_array<cell_size> rows(span<cell_size const> sizes)

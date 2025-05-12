@@ -36,11 +36,13 @@ terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const
 	};
 }
 
-void terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling available_size)
+terraformer::scaling terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling available_size)
 {
 	auto const layout = ctxt.get_layout();
 	auto const children = ctxt.children();
 	auto const widget_states = children.widget_states();
+	auto const widget_sizes = children.sizes();
+
 	if(!layout.is_valid())
 	{
 		for(auto k : children.element_indices())
@@ -49,9 +51,9 @@ void terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling a
 			{ continue; }
 
 			// If there is no layout, assume that every child can use the entire space
-			run(adjust_cell_sizes_context{children, k}, available_size);
+			widget_sizes[k] = run(adjust_cell_sizes_context{children, k}, available_size);
 		}
-		return;
+		return ctxt.default_size();
 	}
 
 	layout.adjust_cell_widths(available_size[0]);
@@ -64,8 +66,10 @@ void terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling a
 		if(widget_states[k].collapsed) [[unlikely]]
 		{ continue; }
 
-		run(adjust_cell_sizes_context{children, k}, cell_sizes[array_index<scaling>{k.get()}]);
+		widget_sizes[k] = run(adjust_cell_sizes_context{children, k}, cell_sizes[array_index<scaling>{k.get()}]);
 	}
+
+	return layout.get_dimensions();
 }
 
 terraformer::scaling terraformer::ui::main::run(confirm_widget_size_context const& ctxt, scaling size)

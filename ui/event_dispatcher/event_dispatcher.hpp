@@ -241,7 +241,7 @@ namespace terraformer::ui::main
 					}
 				);
 
-				run(
+				box_size = run(
 					adjust_cell_sizes_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					},
