@@ -16,6 +16,7 @@ terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
 	auto const colcount = std::size(col_widths);
 	row_array<float> ret{row_count{ceil_div(std::size(sizes_in).get(), colcount)}};
 
+	std::ranges::fill(col_widths, 0.0f);
 	size_t current_row = 0;
 	size_t current_col = 0;
 	auto row_height = 0.0f;
@@ -50,6 +51,7 @@ terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
 	auto const rowcount = std::size(row_heights);
 	column_array<float> ret{column_count{ceil_div(std::size(sizes_in).get(), rowcount)}};
 
+	std::ranges::fill(row_heights, 0.0f);
 	size_t current_row = 0;
 	size_t current_col = 0;
 	auto col_width = 0.0f;
