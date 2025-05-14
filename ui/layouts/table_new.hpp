@@ -248,7 +248,22 @@ namespace terraformer::ui::layouts
 					m_cols_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
 					return *this;
 			}
+			__builtin_unreachable();
+		}
 
+		template<class T>
+		auto& set_field_size(size_t index, T&& value)
+		{
+			switch(m_cell_order)
+			{
+				case cell_order::row_major:
+					m_cols_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
+					return *this;
+
+				case cell_order::column_major:
+					m_rows_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
+					return *this;
+			}
 			__builtin_unreachable();
 		}
 
