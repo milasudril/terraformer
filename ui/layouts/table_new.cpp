@@ -102,42 +102,41 @@ float terraformer::ui::layouts::table_new::adjust_cell_sizes(
 	bool no_outer_margin
 )
 {
-	float remaining_size = available_size - (no_outer_margin? 0.0f : margin);
-	single_array<decltype(actual_sizes)::index_type> sizes_to_expand;
+	auto size_of_fixed_cells = 0.0f;
+	single_array<decltype(actual_sizes)::index_type> cells_to_expand;
 	for(auto k : actual_sizes.element_indices())
 	{
 		using index_type = single_array<cell_size>::index_type;
 		index_type const index{k.get()};
 
-		remaining_size -= std::visit(
+		size_of_fixed_cells += std::visit(
 			overload{
 				[k, actual_sizes](cell_size::use_default){
 					return actual_sizes[k];
 				},
-				[&sizes_to_expand, k, width = margin](cell_size::expand){
-					sizes_to_expand.push_back(k);
-					return width;
-				},
-				[k, actual_sizes, available_size](ratio ratio){
-					auto const new_size = ratio*available_size;
-					actual_sizes[k] = new_size;
-					return new_size;
-				},
-				[k, actual_sizes](cell_size::fixed value){
-					actual_sizes[k] = value.value;
-					return value.value;
+				[&cells_to_expand, k](cell_size::expand){
+					cells_to_expand.push_back(k);
+					return 0.0f;
 				}
 			},
 			specified_sizes.value_or(index, cell_size::use_default{}).value
 		);
 	}
-	remaining_size -= (no_outer_margin? 0.0f : margin);
 
-	auto const num_to_expand = static_cast<float>(std::size(sizes_to_expand).get());
-	for(auto k : sizes_to_expand.element_indices())
-	{ actual_sizes[sizes_to_expand[k]] = remaining_size/num_to_expand; }
+	if(cells_to_expand.empty())
+	{ return 0.0f; }
 
-	return std::accumulate(std::begin(actual_sizes), std::end(actual_sizes), no_outer_margin? 0.0f : margin);
+	auto const size_of_margins = margin*static_cast<float>(
+		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
+	);
+
+	auto const space_for_expanding_cells = available_size - size_of_margins - size_of_fixed_cells;
+
+	auto const num_to_expand = static_cast<float>(std::size(cells_to_expand).get());
+	for(auto k : cells_to_expand.element_indices())
+	{ actual_sizes[cells_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
+
+	return 0.0f;
 }
 
 void terraformer::ui::layouts::table_new::get_cell_sizes_into(
@@ -273,5 +272,5 @@ terraformer::scaling terraformer::ui::layouts::table_new::get_dimensions() const
 	auto const height = std::accumulate(std::begin(m_rows), std::end(m_rows), 0.0f)
 		+	(static_cast<float>(std::size(m_rows)) + (m_params.no_outer_margin? -1.0f : 1.0f))*m_params.margin_y;
 
-	return scaling{width, height, 1.0f};
+	return scaling{std::max(width, m_params.margin_x), std::max(height, m_params.margin_y), 1.0f};
 }
