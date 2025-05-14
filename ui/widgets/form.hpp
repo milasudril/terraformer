@@ -109,10 +109,6 @@ namespace terraformer::ui::widgets
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
 
-			if(m_record_count == 0)
-			{ layout.set_record_size(0, layouts::table_new::cell_size::expand{}); }
-
-			++m_record_count;
 			return ret;
 		}
 
@@ -129,8 +125,6 @@ namespace terraformer::ui::widgets
 
 		single_array<unique_resource<vtable>> m_widgets;
 		main::widget_orientation m_orientation;
-
-		size_t m_record_count{};
 	};
 }
 

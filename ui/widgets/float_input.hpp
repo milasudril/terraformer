@@ -83,7 +83,7 @@ namespace terraformer::ui::widgets
 				})
 				.value(m_input_widget.value());
 			layout.params().no_outer_margin = true;
-			is_transparent = false;
+			is_transparent = true;
 		}
 	};
 }
