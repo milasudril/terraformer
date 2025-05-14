@@ -190,7 +190,7 @@ namespace terraformer::ui::layouts
 		void adjust_cell_heights(float available_height)
 		{ adjust_cell_sizes(m_rows_user, m_rows, available_height, m_params.margin_y, m_params.no_outer_margin); }
 
-		static float adjust_cell_sizes(
+		static void adjust_cell_sizes(
 			span<cell_size const> specified_sizes,
 			span<float> actual_sizes,
 			float available_size,

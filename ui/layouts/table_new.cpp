@@ -94,7 +94,7 @@ void terraformer::ui::layouts::table_new::set_default_cell_sizes_to(span<scaling
 	}
 }
 
-float terraformer::ui::layouts::table_new::adjust_cell_sizes(
+void terraformer::ui::layouts::table_new::adjust_cell_sizes(
 	span<cell_size const> specified_sizes,
 	span<float> actual_sizes,
 	float available_size,
@@ -124,7 +124,7 @@ float terraformer::ui::layouts::table_new::adjust_cell_sizes(
 	}
 
 	if(cells_to_expand.empty())
-	{ return 0.0f; }
+	{ return; }
 
 	auto const size_of_margins = margin*static_cast<float>(
 		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
@@ -136,7 +136,7 @@ float terraformer::ui::layouts::table_new::adjust_cell_sizes(
 	for(auto k : cells_to_expand.element_indices())
 	{ actual_sizes[cells_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
 
-	return 0.0f;
+	return;
 }
 
 void terraformer::ui::layouts::table_new::get_cell_sizes_into(
