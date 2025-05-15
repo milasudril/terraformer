@@ -109,7 +109,7 @@ namespace terraformer::ui::widgets
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
 
-			if constexpr(requires(FieldDescriptor const& f){{f.expand_widget} -> std::same_as<bool>;})
+			if constexpr(requires(FieldDescriptor const& f){{f.expand_widget} -> std::convertible_to<bool>;})
 			{
 				if(field.expand_widget)
 				{

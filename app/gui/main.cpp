@@ -109,10 +109,12 @@ int main(int, char**)
 	{
 		std::u8string_view label;
 		using input_widget_type = terraformer::ui::widgets::false_color_image_view;
+		bool expand_widget;
 	};
 	auto& heightmap_view = main_form.create_widget(
 		heightmap_field_descriptor{
-			.label = u8"Current heightmap"
+			.label = u8"Current heightmap",
+			.expand_widget = true
 		},
 		terraformer::global_elevation_map,
 		terraformer::get_elevation_color_lut()
