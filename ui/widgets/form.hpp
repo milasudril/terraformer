@@ -109,6 +109,20 @@ namespace terraformer::ui::widgets
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
 
+			if constexpr(requires(FieldDescriptor const& f){{f.expand_widget} -> std::same_as<bool>;})
+			{
+				if(field.expand_widget)
+				{
+					auto const record_count = std::size(m_widgets).get()/2 - 1;
+					layout.set_record_size(record_count, layouts::table_new::cell_size::expand{});
+
+					auto const widget_attributes = get_children();
+					auto const last_element = widget_attributes.element_indices().back();
+					auto const widget_states = widget_attributes.widget_states();
+					widget_states[last_element].maximized = true;
+				}
+			}
+
 			return ret;
 		}
 
