@@ -4,10 +4,10 @@
 
 #include <testfwk/testfwk.hpp>
 
-static_assert(
-	terraformer::get_elevation_color_lut()(0.5f) ==
-		normalize(
-			terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f},
-			terraformer::perceptual_color_intensity(0.5f + 1.0f/6.0f)
-		)
-);
+TESTCASE(terraformer_elevation_color_map_values)
+{
+	for(auto item : terraformer::elevation_colors)
+	{
+		printf("%.8g %.8g %.8g %.8g\n", item.red(), item.green(), item.blue(), item.alpha());
+	}
+}

@@ -10,10 +10,14 @@ namespace terraformer
 {
 	constexpr std::array<float, 4> elevation_levels{0.0f, 0.5f, 11.0f/12.0f, 12.0f/12.0f};
 	constexpr std::array<terraformer::rgba_pixel, 4> elevation_colors{
-		normalize(terraformer::rgba_pixel{0.0f, 0.0f, 1.0f, 1.0f}, perceptual_color_intensity(0.5f)),
-		normalize(terraformer::rgba_pixel{0.0f, 1.0f, 0.0f, 1.0f}, perceptual_color_intensity(0.5f + 1.0f/6.0f)),
-		normalize(terraformer::rgba_pixel{1.0f, 0.0f, 0.0f, 1.0f}, perceptual_color_intensity(0.5f + 2.0f/6.0f)),
-		normalize(terraformer::rgba_pixel{0.3333f, 0.3333f, 0.3333f, 1.0f}, perceptual_color_intensity(0.5f + 3.0f/6.0f))
+		rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
+		+ normalize(rgba_pixel{0.0f, 0.0f, 1.0f, 0.0f}, perceptual_color_intensity(0.5f)),
+		rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
+		+ normalize(rgba_pixel{0.0f, 1.0f, 0.0f, 0.0f}, perceptual_color_intensity(0.5f + 1.0f/6.0f)),
+		rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
+		+ normalize(rgba_pixel{1.0f, 0.0f, 0.0f, 0.0f}, perceptual_color_intensity(0.5f + 2.0f/6.0f)),
+		rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
+		+ normalize(rgba_pixel{0.3333f, 0.3333f, 0.3333f, 0.0f}, perceptual_color_intensity(0.5f + 3.0f/6.0f))
 	};
 
 	constexpr auto get_elevation_color_lut()
