@@ -4,12 +4,12 @@
 #define TERRAFORMER_UI_WIDGETS_FORM_HPP
 
 #include "./label.hpp"
-#include "ui/layouts/table_new.hpp"
+#include "ui/layouts/table.hpp"
 #include "ui/widgets/widget_group.hpp"
 
 namespace terraformer::ui::widgets
 {
-	class form:private widget_group<layouts::table_new>
+	class form:private widget_group<layouts::table>
 	{
 	public:
 		using widget_group::handle_event;
@@ -27,16 +27,16 @@ namespace terraformer::ui::widgets
 			widget_group{
 				iihr,
 				orientation == main::widget_orientation::vertical?
-					layouts::table_new{
-						layouts::table_new::columns(
-							layouts::table_new::cell_size::use_default{},
-							layouts::table_new::cell_size::expand{}
+					layouts::table{
+						layouts::table::columns(
+							layouts::table::cell_size::use_default{},
+							layouts::table::cell_size::expand{}
 						)
 					}
-					:layouts::table_new{
-						layouts::table_new::rows(
-							layouts::table_new::cell_size::use_default{},
-							layouts::table_new::cell_size::expand{}
+					:layouts::table{
+						layouts::table::rows(
+							layouts::table::cell_size::use_default{},
+							layouts::table::cell_size::expand{}
 						)
 					}
 			},
@@ -113,7 +113,7 @@ namespace terraformer::ui::widgets
 				if(field.expand_widget)
 				{
 					auto const record_count = std::size(m_widgets).get()/2 - 1;
-					layout.set_record_size(record_count, layouts::table_new::cell_size::expand{});
+					layout.set_record_size(record_count, layouts::table::cell_size::expand{});
 
 					auto const widget_attributes = get_children();
 					auto const last_element = widget_attributes.element_indices().back();

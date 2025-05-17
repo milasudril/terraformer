@@ -1,7 +1,7 @@
-//@	{"dependencies_extra":[{"ref":"./table_new.o", "rel":"implementation"}]}
+//@	{"dependencies_extra":[{"ref":"./table.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_UI_LAYOUTS_TABLE_NEW_HPP
-#define TERRAFORMER_UI_LAYOUTS_TABLE_NEW_HPP
+#ifndef TERRAFORMER_UI_LAYOUTS_TABLE_HPP
+#define TERRAFORMER_UI_LAYOUTS_TABLE_HPP
 
 #include "./common_params.hpp"
 
@@ -16,7 +16,7 @@
 
 namespace terraformer::ui::layouts
 {
-	class table_new
+	class table
 	{
 	public:
 		enum class cell_array_tag:int{rows, columns};
@@ -125,7 +125,7 @@ namespace terraformer::ui::layouts
 
 		enum class cell_order:size_t{row_major, column_major};
 
-		explicit table_new(size_t fixdim_size, cell_order cell_order):
+		explicit table(size_t fixdim_size, cell_order cell_order):
 			m_cell_order{cell_order}
 		{
 			switch(m_cell_order)
@@ -141,25 +141,25 @@ namespace terraformer::ui::layouts
 			}
 		}
 
-		explicit table_new(row_count num_rows):
+		explicit table(row_count num_rows):
 			m_cell_order{cell_order::column_major},
 			m_rows{num_rows},
 			m_rows_user{num_rows}
 		{}
 
-		explicit table_new(row_array<cell_size>&& rows):
+		explicit table(row_array<cell_size>&& rows):
 			m_cell_order{cell_order::column_major},
 			m_rows{row_count{std::size(rows)}},
 			m_rows_user{std::move(rows)}
 		{}
 
-		explicit table_new(column_count num_cols):
+		explicit table(column_count num_cols):
 			m_cell_order{cell_order::row_major},
 			m_cols{num_cols},
 			m_cols_user{num_cols}
 		{}
 
-		explicit table_new(column_array<cell_size>&& cols):
+		explicit table(column_array<cell_size>&& cols):
 			m_cell_order{cell_order::row_major},
 			m_cols{column_count{std::size(cols)}},
 			m_cols_user{std::move(cols)}

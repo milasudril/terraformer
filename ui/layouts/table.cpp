@@ -1,14 +1,14 @@
-//@	{"target": {"name":"table_new.o"}}
+//@	{"target": {"name":"table.o"}}
 
-#include "./table_new.hpp"
+#include "./table.hpp"
 
 #include "lib/common/utils.hpp"
 #include "lib/array_classes/single_array.hpp"
 
 #include <numeric>
 
-terraformer::ui::layouts::table_new::row_array<float>
-terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
+terraformer::ui::layouts::table::row_array<float>
+terraformer::ui::layouts::table::set_default_cell_sizes_to(
 	span<scaling const> sizes_in,
 	column_array<float>& col_widths
 )
@@ -42,8 +42,8 @@ terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
 	return ret;
 }
 
-terraformer::ui::layouts::table_new::column_array<float>
-terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
+terraformer::ui::layouts::table::column_array<float>
+terraformer::ui::layouts::table::set_default_cell_sizes_to(
 	span<scaling const> sizes_in,
 	row_array<float>& row_heights
 )
@@ -77,7 +77,7 @@ terraformer::ui::layouts::table_new::set_default_cell_sizes_to(
 	return ret;
 }
 
-void terraformer::ui::layouts::table_new::set_default_cell_sizes_to(span<scaling const> sizes_in)
+void terraformer::ui::layouts::table::set_default_cell_sizes_to(span<scaling const> sizes_in)
 {
 	if(sizes_in.empty())
 	{ return; }
@@ -94,7 +94,7 @@ void terraformer::ui::layouts::table_new::set_default_cell_sizes_to(span<scaling
 	}
 }
 
-void terraformer::ui::layouts::table_new::adjust_cell_sizes(
+void terraformer::ui::layouts::table::adjust_cell_sizes(
 	span<cell_size const> specified_sizes,
 	span<float> actual_sizes,
 	float available_size,
@@ -139,7 +139,7 @@ void terraformer::ui::layouts::table_new::adjust_cell_sizes(
 	return;
 }
 
-void terraformer::ui::layouts::table_new::get_cell_sizes_into(
+void terraformer::ui::layouts::table::get_cell_sizes_into(
 	span<scaling> sizes_out,
 	row_array<float> const& row_heights,
 	column_array<float> const& col_widths
@@ -161,7 +161,7 @@ void terraformer::ui::layouts::table_new::get_cell_sizes_into(
 	}
 }
 
-void terraformer::ui::layouts::table_new::get_cell_sizes_into(
+void terraformer::ui::layouts::table::get_cell_sizes_into(
 	span<scaling> sizes_out,
 	column_array<float> const& col_widths,
 	row_array<float> const& row_heights
@@ -183,7 +183,7 @@ void terraformer::ui::layouts::table_new::get_cell_sizes_into(
 	}
 }
 
-void terraformer::ui::layouts::table_new::get_cell_sizes_into(span<scaling> sizes_out) const
+void terraformer::ui::layouts::table::get_cell_sizes_into(span<scaling> sizes_out) const
 {
 	switch(m_cell_order)
 	{
@@ -196,7 +196,7 @@ void terraformer::ui::layouts::table_new::get_cell_sizes_into(span<scaling> size
 	}
 }
 
-void terraformer::ui::layouts::table_new::get_cell_locations_into(
+void terraformer::ui::layouts::table::get_cell_locations_into(
 	span<location> locs_out,
 	row_array<float> const& row_heights,
 	column_array<float> const& col_widths,
@@ -224,7 +224,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	}
 }
 
-void terraformer::ui::layouts::table_new::get_cell_locations_into(
+void terraformer::ui::layouts::table::get_cell_locations_into(
 	span<location> locs_out,
 	column_array<float> const& col_widths,
 	row_array<float> const& row_heights,
@@ -252,7 +252,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(
 	}
 }
 
-void terraformer::ui::layouts::table_new::get_cell_locations_into(span<location> locs_out) const
+void terraformer::ui::layouts::table::get_cell_locations_into(span<location> locs_out) const
 {
 	switch(m_cell_order)
 	{
@@ -265,7 +265,7 @@ void terraformer::ui::layouts::table_new::get_cell_locations_into(span<location>
 	}
 }
 
-terraformer::scaling terraformer::ui::layouts::table_new::get_dimensions() const
+terraformer::scaling terraformer::ui::layouts::table::get_dimensions() const
 {
 	auto const width = std::accumulate(std::begin(m_cols), std::end(m_cols), 0.0f)
 		+	(static_cast<float>(std::size(m_cols)) + (m_params.no_outer_margin? -1.0f : 1.0f))*m_params.margin_x;
