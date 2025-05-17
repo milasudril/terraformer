@@ -4,7 +4,6 @@
 #include "./widget_group.hpp"
 #include "./text_to_float_input.hpp"
 #include "ui/layouts/table_new.hpp"
-#include "ui/layouts/columnmajor_table.hpp"
 #include "ui/main/widget_collection.hpp"
 
 namespace terraformer::ui::widgets

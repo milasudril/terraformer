@@ -5,7 +5,6 @@
 
 #include "./label.hpp"
 #include "ui/layouts/table_new.hpp"
-#include "ui/layouts/columnmajor_table.hpp"
 #include "ui/widgets/widget_group.hpp"
 
 namespace terraformer::ui::widgets
