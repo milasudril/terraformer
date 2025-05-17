@@ -168,13 +168,13 @@ namespace terraformer::ui::layouts
 		/**
 		 * Sets cell sizes to the absolute value given by the sizes
 		 */
-		void set_default_cell_sizes_to(span<scaling const> sizes_in);
+		void set_default_cell_sizes_to(span<box_size const> sizes_in);
 		static row_array<float> set_default_cell_sizes_to(
-			span<scaling const> sizes_in,
+			span<box_size const> sizes_in,
 			column_array<float>& col_widths
 		);
 		static column_array<float> set_default_cell_sizes_to(
-			span<scaling const> sizes_in,
+			span<box_size const> sizes_in,
 			row_array<float>& row_heights
 		);
 
@@ -201,14 +201,14 @@ namespace terraformer::ui::layouts
 		/**
 		 * Fetches the current cell sizes
 		 */
-		void get_cell_sizes_into(span<scaling> sizes_out) const;
+		void get_cell_sizes_into(span<box_size> sizes_out) const;
 		static void get_cell_sizes_into(
-			span<scaling> sizes_out,
+			span<box_size> sizes_out,
 			row_array<float> const& row_heights,
 			column_array<float> const& col_widths
 		);
 		static void get_cell_sizes_into(
-			span<scaling> sizes_out,
+			span<box_size> sizes_out,
 			column_array<float> const& col_widths,
 			row_array<float> const& row_heights
 		);
@@ -230,7 +230,7 @@ namespace terraformer::ui::layouts
 			common_params const& params
 		);
 
-		scaling get_dimensions() const;
+		box_size get_dimensions() const;
 
 		auto& params()
 		{ return m_params; }

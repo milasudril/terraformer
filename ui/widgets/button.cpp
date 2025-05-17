@@ -114,29 +114,29 @@ terraformer::ui::widgets::button::prepare_for_presentation(main::graphics_backen
 	};
 }
 
-terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget_width_request)
+terraformer::box_size terraformer::ui::widgets::button::compute_size(main::widget_width_request)
 {
 	// TODO: Use height to find required width (multi-line)
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
-	return scaling{
+	return box_size{
 		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
 		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
-		1.0f
+		0.0f
 	};
 }
 
-terraformer::scaling terraformer::ui::widgets::button::compute_size(main::widget_height_request)
+terraformer::box_size terraformer::ui::widgets::button::compute_size(main::widget_height_request)
 {
 	// TODO: Use width to find required height (multi-line)
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
-	return scaling{
+	return box_size{
 		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
 		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
-		1.0f
+		0.0f
 	};
 }
 

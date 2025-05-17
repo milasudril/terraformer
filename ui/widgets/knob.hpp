@@ -18,11 +18,11 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
-		scaling compute_size(main::widget_width_request req);
+		box_size compute_size(main::widget_width_request req);
 
-		scaling compute_size(main::widget_height_request req);
+		box_size compute_size(main::widget_height_request req);
 
-		scaling confirm_size(scaling size)
+		box_size confirm_size(box_size size)
 		{
 			m_current_size = main::fb_size{
 				.width = static_cast<int>(size[0]),

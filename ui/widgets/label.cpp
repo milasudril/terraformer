@@ -29,30 +29,30 @@ void terraformer::ui::widgets::label::regenerate_textures()
 	m_dirty_bits &= ~host_textures_dirty;
 }
 
-terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_width_request)
+terraformer::box_size terraformer::ui::widgets::label::compute_size(main::widget_width_request)
 {
 	// TODO: Use height to find required width (multi-line)
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
-	return scaling{
-		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
-		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
-		1.0f
-	};
+	return box_size{
+		static_cast<float>(m_rendered_text.width()),
+		static_cast<float>(m_rendered_text.height()),
+		0.0f
+	} + m_margin*displacement{2.0f, 2.0f, 0.0f};
 }
 
-terraformer::scaling terraformer::ui::widgets::label::compute_size(main::widget_height_request)
+terraformer::box_size terraformer::ui::widgets::label::compute_size(main::widget_height_request)
 {
 // TODO: Use width to find required height (multi-line)
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
-	return scaling{
-		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
-		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
-		1.0f
-	};
+	return box_size{
+		static_cast<float>(m_rendered_text.width()),
+		static_cast<float>(m_rendered_text.height()),
+		0.0f
+	} + m_margin*displacement{2.0f, 2.0f, 0.0f};
 }
 
 void terraformer::ui::widgets::label::theme_updated(main::config const& cfg, main::widget_instance_info)

@@ -90,22 +90,22 @@ terraformer::ui::widgets::slider::prepare_for_presentation(main::graphics_backen
 	};
 }
 
-terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_width_request)
+terraformer::box_size terraformer::ui::widgets::slider::compute_size(main::widget_width_request)
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
 	if(m_orientation == main::widget_orientation::horizontal)
-	{ return scaling{2.0f*track_margin() + 8.0f*w, h, 1.0f}; }
-	return scaling{w, 2.0f*track_margin() + 8.0f*h, 1.0f};
+	{ return box_size{2.0f*track_margin() + 8.0f*w, h, 0.0f}; }
+	return box_size{w, 2.0f*track_margin() + 8.0f*h, 0.0f};
 }
 
-terraformer::scaling terraformer::ui::widgets::slider::compute_size(main::widget_height_request)
+terraformer::box_size terraformer::ui::widgets::slider::compute_size(main::widget_height_request)
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
 	if(m_orientation == main::widget_orientation::horizontal)
-	{ return scaling{2.0f*track_margin() + 8.0f*w, h, 1.0f}; }
-	return scaling{w, 2.0f*track_margin() + 8.0f*h, 1.0f};
+	{ return box_size{2.0f*track_margin() + 8.0f*w, h, 0.0f}; }
+	return box_size{w, 2.0f*track_margin() + 8.0f*h, 0.0f};
 }
 
 void terraformer::ui::widgets::slider::theme_updated(main::config const& cfg, main::widget_instance_info)

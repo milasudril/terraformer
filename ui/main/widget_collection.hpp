@@ -41,8 +41,7 @@ namespace terraformer::ui::main
 			m_iihr{iihr}
 		{}
 
-		template<class Widget>
-		requires widget<Widget>
+		template<widget Widget>
 		widget_collection& append(
 			std::reference_wrapper<Widget> w,
 			widget_geometry const& initial_geometry,
@@ -52,7 +51,7 @@ namespace terraformer::ui::main
 			m_objects.push_back(
 				&w.get(),
 				initial_state,
-				scaling{},
+				box_size{},
 				initial_geometry,
 				widget_layer_stack{},
 				[](void* obj, graphics_backend_ref backend) {
@@ -82,13 +81,13 @@ namespace terraformer::ui::main
 				[](void* obj, keyboard_focus_leave_event kle, window_ref wr, ui_controller ui_ctrl) {
 					static_cast<Widget*>(obj)->handle_event(kle, wr, ui_ctrl);
 				},
-				[](void* obj, widget_width_request req) -> scaling{
+				[](void* obj, widget_width_request req) {
 					return static_cast<Widget*>(obj)->compute_size(req);
 				},
-				[](void* obj, widget_height_request req) -> scaling{
+				[](void* obj, widget_height_request req) {
 					return static_cast<Widget*>(obj)->compute_size(req);
 				},
-				[](void* obj, scaling size) {
+				[](void* obj, box_size size) {
 					return static_cast<Widget*>(obj)->confirm_size(size);
 				},
 				[](void* obj, config const& new_theme, widget_instance_info instance_info) {

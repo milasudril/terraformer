@@ -4,6 +4,7 @@
 #define TERRAFORMER_UI_WIDGETS_FORM_HPP
 
 #include "./label.hpp"
+
 #include "ui/layouts/table.hpp"
 #include "ui/widgets/widget_group.hpp"
 

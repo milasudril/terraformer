@@ -97,17 +97,18 @@ namespace terraformer::ui::widgets
 		void handle_event(main::keyboard_focus_leave_event, main::window_ref, main::ui_controller)
 		{ m_state_saved = std::exchange(m_state_to_display, state::released); }
 
-		scaling compute_size(main::widget_width_request req);
+		box_size compute_size(main::widget_width_request req);
 
-		scaling compute_size(main::widget_height_request req);
+		box_size compute_size(main::widget_height_request req);
 
-		void handle_event(scaling size)
+		box_size confirm_size(box_size size)
 		{
 			m_current_size = main::fb_size{
 				.width = static_cast<int>(size[0]),
 				.height = static_cast<int>(size[1])
 			};
 			m_dirty_bits |= host_textures_dirty;
+			return size;
 		}
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);

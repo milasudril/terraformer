@@ -5,7 +5,7 @@
 #include "lib/array_classes/single_array.hpp"
 
 
-terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const& ctxt)
+terraformer::box_size terraformer::ui::main::run(minimize_cell_size_context const& ctxt)
 {
 	// TODO: Decide which dimension to minimize. Should be determined by parent
 
@@ -17,7 +17,7 @@ terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const
 	for(auto k : children.element_indices())
 	{
 		if(widget_states[k].collapsed) [[unlikely]]
-		{ sizes[k] = scaling{0.0f, 0.0f, 0.0f}; }
+		{ sizes[k] = box_size{}; }
 		else
 		{ sizes[k] = run(minimize_cell_size_context{children, k}); }
 	}
@@ -29,14 +29,10 @@ terraformer::scaling terraformer::ui::main::run(minimize_cell_size_context const
 	layout.set_default_cell_sizes_to(sizes);
 	auto const size_from_layout = layout.get_dimensions();
 
-	return scaling{
-		std::max(initial_size[0], size_from_layout[0]),
-		std::max(initial_size[1], size_from_layout[1]),
-		std::max(initial_size[2], size_from_layout[2])
-	};
+	return max(initial_size, size_from_layout);
 }
 
-terraformer::scaling terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, scaling available_size)
+terraformer::box_size terraformer::ui::main::run(adjust_cell_sizes_context const& ctxt, box_size available_size)
 {
 	auto const layout = ctxt.get_layout();
 	auto const children = ctxt.children();
@@ -58,7 +54,7 @@ terraformer::scaling terraformer::ui::main::run(adjust_cell_sizes_context const&
 
 	layout.adjust_cell_widths(available_size[0]);
 	layout.adjust_cell_heights(available_size[1]);
-	single_array cell_sizes{static_cast<array_size<scaling>>(std::size(children).get())};
+	single_array cell_sizes{static_cast<array_size<box_size>>(std::size(children).get())};
 	layout.get_cell_sizes_into(cell_sizes);
 
 	for(auto k : children.element_indices())
@@ -66,13 +62,13 @@ terraformer::scaling terraformer::ui::main::run(adjust_cell_sizes_context const&
 		if(widget_states[k].collapsed) [[unlikely]]
 		{ continue; }
 
-		widget_sizes[k] = run(adjust_cell_sizes_context{children, k}, cell_sizes[array_index<scaling>{k.get()}]);
+		widget_sizes[k] = run(adjust_cell_sizes_context{children, k}, cell_sizes[array_index<box_size>{k.get()}]);
 	}
 
 	return layout.get_dimensions();
 }
 
-terraformer::scaling terraformer::ui::main::run(confirm_widget_size_context const& ctxt, scaling size)
+terraformer::box_size terraformer::ui::main::run(confirm_widget_size_context const& ctxt, box_size size)
 {
 	auto const new_size = ctxt.confirm_size(size);
 	auto const children = ctxt.children();
@@ -81,7 +77,7 @@ terraformer::scaling terraformer::ui::main::run(confirm_widget_size_context cons
 	auto const widget_sizes = children.sizes();
 
 	// TODO: Want to have a permanent array of cell sizes
-	single_array cell_sizes{static_cast<array_size<scaling>>(std::size(children).get())};
+	single_array cell_sizes{static_cast<array_size<box_size>>(std::size(children).get())};
 	auto const layout = ctxt.get_layout();
 	if(layout.is_valid())
 	{ layout.get_cell_sizes_into(cell_sizes); }
@@ -92,7 +88,7 @@ terraformer::scaling terraformer::ui::main::run(confirm_widget_size_context cons
 		{ continue; }
 
 		auto size = (layout.is_valid() && widget_states[k].maximized)?
-			cell_sizes[array_index<scaling>{k.get()}] : widget_sizes[k];
+			cell_sizes[array_index<box_size>{k.get()}] : widget_sizes[k];
 
 		widget_geometries[k].size = run(confirm_widget_size_context{children, k}, size);
 	}

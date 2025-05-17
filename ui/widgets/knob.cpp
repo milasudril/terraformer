@@ -49,18 +49,18 @@ terraformer::ui::widgets::knob::prepare_for_presentation(main::graphics_backend_
 	};
 }
 
-terraformer::scaling terraformer::ui::widgets::knob::compute_size(main::widget_width_request)
+terraformer::box_size terraformer::ui::widgets::knob::compute_size(main::widget_width_request)
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
-	return scaling{w, h, 1.0f};
+	return box_size{w, h, 0.0f};
 }
 
-terraformer::scaling terraformer::ui::widgets::knob::compute_size(main::widget_height_request)
+terraformer::box_size terraformer::ui::widgets::knob::compute_size(main::widget_height_request)
 {
 	auto const w = static_cast<float>(m_handle->frontend_resource().width());
 	auto const h = static_cast<float>(m_handle->frontend_resource().height());
-	return scaling{w, h, 1.0f};
+	return box_size{w, h, 0.0f};
 }
 
 void terraformer::ui::widgets::knob::theme_updated(main::config const& cfg, main::widget_instance_info)

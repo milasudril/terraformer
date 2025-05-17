@@ -11,7 +11,7 @@ namespace terraformer::ui::main
 	{
 		location where;
 		location origin;
-		scaling size;
+		box_size size;
 
 		[[nodiscard]] constexpr bool operator==(widget_geometry const&) const = default;
 		[[nodiscard]] constexpr bool operator!=(widget_geometry const&) const = default;
@@ -19,7 +19,7 @@ namespace terraformer::ui::main
 
 	[[nodiscard]] inline bool inside(location pos, widget_geometry const& box)
 	{
-		auto const r = 0.5*box.size;
+		auto const r = to_scaling(0.5*box.size);
 		auto const offset_to_origin = (location{0.0f, 0.0f, 0.0f} - box.origin).apply(r);
 		auto const object_midpoint = box.where + offset_to_origin;
 		auto const dr = pos - object_midpoint;

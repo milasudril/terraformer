@@ -9,7 +9,7 @@
 
 terraformer::ui::layouts::table::row_array<float>
 terraformer::ui::layouts::table::set_default_cell_sizes_to(
-	span<scaling const> sizes_in,
+	span<box_size const> sizes_in,
 	column_array<float>& col_widths
 )
 {
@@ -44,7 +44,7 @@ terraformer::ui::layouts::table::set_default_cell_sizes_to(
 
 terraformer::ui::layouts::table::column_array<float>
 terraformer::ui::layouts::table::set_default_cell_sizes_to(
-	span<scaling const> sizes_in,
+	span<box_size const> sizes_in,
 	row_array<float>& row_heights
 )
 {
@@ -77,7 +77,7 @@ terraformer::ui::layouts::table::set_default_cell_sizes_to(
 	return ret;
 }
 
-void terraformer::ui::layouts::table::set_default_cell_sizes_to(span<scaling const> sizes_in)
+void terraformer::ui::layouts::table::set_default_cell_sizes_to(span<box_size const> sizes_in)
 {
 	if(sizes_in.empty())
 	{ return; }
@@ -140,7 +140,7 @@ void terraformer::ui::layouts::table::adjust_cell_sizes(
 }
 
 void terraformer::ui::layouts::table::get_cell_sizes_into(
-	span<scaling> sizes_out,
+	span<box_size> sizes_out,
 	row_array<float> const& row_heights,
 	column_array<float> const& col_widths
 )
@@ -150,7 +150,7 @@ void terraformer::ui::layouts::table::get_cell_sizes_into(
 	size_t current_col = 0;
 	for(auto& item : sizes_out)
 	{
-		item = scaling{col_widths[current_col], row_heights[current_row], 1.0f};
+		item = box_size{col_widths[current_col], row_heights[current_row], 1.0f};
 		++current_col;
 
 		if(current_col == colcount)
@@ -162,7 +162,7 @@ void terraformer::ui::layouts::table::get_cell_sizes_into(
 }
 
 void terraformer::ui::layouts::table::get_cell_sizes_into(
-	span<scaling> sizes_out,
+	span<box_size> sizes_out,
 	column_array<float> const& col_widths,
 	row_array<float> const& row_heights
 )
@@ -172,7 +172,7 @@ void terraformer::ui::layouts::table::get_cell_sizes_into(
 	size_t current_col = 0;
 	for(auto& item : sizes_out)
 	{
-		item = scaling{col_widths[current_col], row_heights[current_row], 1.0f};
+		item = box_size{col_widths[current_col], row_heights[current_row], 1.0f};
 		++current_row;
 
 		if(current_row == rowcount)
@@ -183,7 +183,7 @@ void terraformer::ui::layouts::table::get_cell_sizes_into(
 	}
 }
 
-void terraformer::ui::layouts::table::get_cell_sizes_into(span<scaling> sizes_out) const
+void terraformer::ui::layouts::table::get_cell_sizes_into(span<box_size> sizes_out) const
 {
 	switch(m_cell_order)
 	{
@@ -265,12 +265,12 @@ void terraformer::ui::layouts::table::get_cell_locations_into(span<location> loc
 	}
 }
 
-terraformer::scaling terraformer::ui::layouts::table::get_dimensions() const
+terraformer::box_size terraformer::ui::layouts::table::get_dimensions() const
 {
 	auto const width = std::accumulate(std::begin(m_cols), std::end(m_cols), 0.0f)
 		+	(static_cast<float>(std::size(m_cols)) + (m_params.no_outer_margin? -1.0f : 1.0f))*m_params.margin_x;
 	auto const height = std::accumulate(std::begin(m_rows), std::end(m_rows), 0.0f)
 		+	(static_cast<float>(std::size(m_rows)) + (m_params.no_outer_margin? -1.0f : 1.0f))*m_params.margin_y;
 
-	return scaling{std::max(width, m_params.margin_x), std::max(height, m_params.margin_y), 1.0f};
+	return box_size{std::max(width, m_params.margin_x), std::max(height, m_params.margin_y), 1.0f};
 }

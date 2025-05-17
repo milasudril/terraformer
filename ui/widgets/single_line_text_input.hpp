@@ -155,14 +155,14 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
-		scaling compute_size(main::widget_width_request req);
+		box_size compute_size(main::widget_width_request req);
 
-		scaling compute_size(main::widget_height_request req);
+		box_size compute_size(main::widget_height_request req);
 
-		scaling confirm_size(scaling size)
+		box_size confirm_size(box_size size)
 		{
 			auto const wanted_size = compute_size(main::widget_height_request{.width = size[0]});
-			auto const actual_size = scaling{
+			auto const actual_size = box_size{
 				std::max(wanted_size[0], size[0]),
 				wanted_size[1],
 				wanted_size[2],
@@ -290,7 +290,7 @@ namespace terraformer::ui::widgets
 		static constexpr auto host_textures_dirty = 0x2;
 		static constexpr auto recompute_size = 0x4;
 		unsigned int m_dirty_bits = text_dirty | host_textures_dirty;
-		scaling m_widget_size;
+		box_size m_widget_size;
 		float m_margin = 0;
 		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;

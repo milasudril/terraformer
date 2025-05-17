@@ -33,26 +33,23 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
-		scaling compute_size(main::widget_width_request)
+		box_size compute_size(main::widget_width_request)
 		{
-			return scaling{
+			return box_size{
 				static_cast<float>(m_image.frontend_resource().width()),
 				static_cast<float>(m_image.frontend_resource().height()),
-				1.0f
+				0.0f
 			};
 		}
 
-		scaling compute_size(main::widget_height_request)
+		box_size compute_size(main::widget_height_request)
 		{
-			return scaling{
+			return box_size{
 				static_cast<float>(m_image.frontend_resource().width()),
 				static_cast<float>(m_image.frontend_resource().height()),
-				1.0f
+				0.0f
 			};
 		}
-
-		void handle_event(scaling)
-		{}
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info)
 		{

@@ -53,9 +53,9 @@ namespace terraformer::ui::main
 	using prepare_for_presentation_callback = widget_layer_stack (*)(void*, graphics_backend_ref);
 	using theme_updated_callback = event_callback_t<config const&, widget_instance_info>;
 
-	using size_callback = scaling (*)(void*, scaling);
-	using compute_size_given_height_callback = scaling (*)(void*, widget_width_request);
-	using compute_size_given_width_callback = scaling (*)(void*, widget_height_request);
+	using size_callback = box_size (*)(void*, box_size);
+	using compute_size_given_height_callback = box_size (*)(void*, widget_width_request);
+	using compute_size_given_width_callback = box_size (*)(void*, widget_height_request);
 	using get_children_callback = widget_collection_ref (*)(void*);
 	using get_children_const_callback = widget_collection_view (*)(void const*);
 	using get_layout_callback = layout_ref (*)(void*);
@@ -67,7 +67,7 @@ namespace terraformer::ui::main
 		using widget_span_mutable = multi_span<
 			void*,
 			widget_state,
-			scaling,
+			box_size,
 			widget_geometry,
 			widget_layer_stack,
 			prepare_for_presentation_callback,
@@ -130,7 +130,7 @@ namespace terraformer::ui::main
 		}
 
 		auto sizes() const
-		{ return m_span.template get_by_type<scaling>(); }
+		{ return m_span.template get_by_type<box_size>(); }
 
 		auto widget_geometries() const
 		{ return m_span.template get_by_type<widget_geometry>(); }
@@ -210,7 +210,7 @@ namespace terraformer::ui::main
 			m_layout{widgets.get_layout_callbacks()[index](m_widget)}
 		{ }
 
-		scaling compute_size(widget_width_request req) const
+		box_size compute_size(widget_width_request req) const
 		{ return m_compute_size_given_height(m_widget, req); }
 
 		widget_collection_ref const& children() const
@@ -221,12 +221,12 @@ namespace terraformer::ui::main
 
 	private:
 		void* m_widget;
-		scaling (*m_compute_size_given_height)(void*, widget_width_request);
+		compute_size_given_height_callback m_compute_size_given_height;
 		widget_collection_ref m_children;
 		layout_ref m_layout;
 	};
 
-	scaling run(minimize_cell_size_context const& ctxt);
+	box_size run(minimize_cell_size_context const& ctxt);
 
 	class adjust_cell_sizes_context
 	{
@@ -247,17 +247,17 @@ namespace terraformer::ui::main
 		layout_ref get_layout() const
 		{ return m_layout; }
 
-		scaling default_size() const
+		box_size default_size() const
 		{ return m_default_size; }
 
 	private:
 		void* m_widget;
-		scaling m_default_size;
+		box_size m_default_size;
 		widget_collection_ref m_children;
 		layout_ref m_layout;
 	};
 
-	scaling run(adjust_cell_sizes_context const& ctxt, scaling available_size);
+	box_size run(adjust_cell_sizes_context const& ctxt, box_size available_size);
 
 	class confirm_widget_size_context
 	{
@@ -276,7 +276,7 @@ namespace terraformer::ui::main
 		widget_collection_ref const& children() const
 		{ return m_children; }
 
-		scaling confirm_size(scaling size) const
+		box_size confirm_size(box_size size) const
 		{
 			if(size != m_old_size)
 			{ return m_size_confirmed(m_widget, size); }
@@ -288,13 +288,13 @@ namespace terraformer::ui::main
 
 	private:
 		void* m_widget;
-		scaling m_old_size;
-		size_callback m_size_confirmed = [](void*, scaling size){ return size; };
+		box_size m_old_size;
+		size_callback m_size_confirmed = [](void*, box_size size){ return size; };
 		widget_collection_ref m_children;
 		layout_ref m_layout;
 	};
 
-	scaling run(confirm_widget_size_context const& ctxt, scaling size);
+	box_size run(confirm_widget_size_context const& ctxt, box_size size);
 
 	class update_widget_location_context
 	{
@@ -371,7 +371,7 @@ namespace terraformer::ui::main
 
 		template<class Renderer>
 		void render(Renderer renderer, displacement offset) const
-		{ value_of(renderer).render(m_geometry.where + offset, m_geometry.origin, m_geometry.size, m_layers); }
+		{ value_of(renderer).render(m_geometry.where + offset, m_geometry.origin, to_scaling(m_geometry.size), m_layers); }
 
 		widget_geometry const& geometry() const
 		{ return m_geometry; }

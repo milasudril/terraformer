@@ -17,7 +17,7 @@ namespace terraformer::ui::main
 	template<class T>
 	concept widget = requires(
 		T& obj,
-		scaling size,
+		box_size size,
 		cursor_enter_event const& cee,
 		cursor_leave_event const& cle,
 		cursor_motion_event const& cme,
@@ -45,13 +45,13 @@ namespace terraformer::ui::main
 		{ obj.handle_event(kfe, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(kfl, wr, ui_ctrl) } -> std::same_as<void>;
 		{ obj.handle_event(te, wr, ui_ctrl) } -> std::same_as<void>;
-		{ obj.confirm_size(std::as_const(size)) } -> std::same_as<scaling>;
+		{ obj.confirm_size(std::as_const(size)) } -> std::same_as<box_size>;
 		{ obj.theme_updated(cfg, instance_info) } -> std::same_as<void>;
 		{ obj.get_children() } -> std::same_as<widget_collection_ref>;
 		{ std::as_const(obj).get_children() } -> std::same_as<widget_collection_view>;
 		{ obj.get_layout() } -> std::same_as<layout_ref>;
-		{ obj.compute_size(w_req) } -> std::same_as<scaling>;
-		{ obj.compute_size(h_req) } -> std::same_as<scaling>;
+		{ obj.compute_size(w_req) } -> std::same_as<box_size>;
+		{ obj.compute_size(h_req) } -> std::same_as<box_size>;
 	};
 
 	template<class WidgetType>
@@ -71,7 +71,7 @@ namespace terraformer::ui::main
 
 		void theme_updated(config const&, widget_instance_info) {}
 
-		scaling confirm_size(scaling size) { return size; }
+		box_size confirm_size(box_size size) { return size; }
 
 		[[nodiscard]] widget_collection_ref get_children()
 		{ return widget_collection_ref{}; }
@@ -82,11 +82,11 @@ namespace terraformer::ui::main
 		[[nodiscard]] layout_ref get_layout() const
 		{ return layout_ref{}; }
 
-		[[nodiscard]] scaling compute_size(widget_width_request) const
-		{ return scaling{}; }
+		[[nodiscard]] box_size compute_size(widget_width_request) const
+		{ return box_size{}; }
 
-		[[nodiscard]] scaling compute_size(widget_height_request) const
-		{ return scaling{}; }
+		[[nodiscard]] box_size compute_size(widget_height_request) const
+		{ return box_size{}; }
 	};
 
 	static_assert(widget<widget_with_default_actions>);

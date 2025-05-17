@@ -259,7 +259,7 @@ void terraformer::ui::widgets::single_line_text_input::handle_event(main::keyboa
 	}
 }
 
-terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_width_request)
+terraformer::box_size terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_width_request)
 {
 	if(m_placeholder.has_value())
 	{
@@ -275,7 +275,7 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 			.run(*m_font);
 
 		auto const temp = render(result);
-		return scaling{
+		return box_size{
 			static_cast<float>(temp.width()) + 2.0f*m_margin,
 			static_cast<float>(temp.height()) + 2.0f*m_margin,
 			1.0f
@@ -286,14 +286,14 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
-	return scaling{
+	return box_size{
 		static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin,
 		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
 		1.0f
 	};
 }
 
-terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_height_request value)
+terraformer::box_size terraformer::ui::widgets::single_line_text_input::compute_size(main::widget_height_request value)
 {
 	if(m_placeholder.has_value())
 	{
@@ -311,11 +311,11 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 
 			auto const temp = render(result);
 			m_dirty_bits &= ~recompute_size;
-			m_widget_size = scaling{
-				static_cast<float>(temp.width()) + 2.0f*m_margin,
-				static_cast<float>(temp.height()) + 2.0f*m_margin,
-				1.0f
-			};
+			m_widget_size = box_size{
+				static_cast<float>(temp.width()),
+				static_cast<float>(temp.height()),
+				0.0f
+			} + m_margin*displacement{2.0f, 2.0f, 0.0f};;
 			return m_widget_size;
 		}
 		return m_widget_size;
@@ -324,11 +324,11 @@ terraformer::scaling terraformer::ui::widgets::single_line_text_input::compute_s
 	if(m_dirty_bits & text_dirty)
 	{ regenerate_text_mask(); }
 
-	return scaling{
-		std::max(static_cast<float>(m_rendered_text.width()) + 2.0f*m_margin, value.width),
-		static_cast<float>(m_rendered_text.height()) + 2.0f*m_margin,
-		1.0f
-	};
+	return box_size{
+		std::max(static_cast<float>(m_rendered_text.width()), value.width),
+		static_cast<float>(m_rendered_text.height()),
+		0.0f
+	} + m_margin*displacement{2.0f, 2.0f, 0.0f};
 }
 
 void terraformer::ui::widgets::single_line_text_input::theme_updated(main::config const& cfg, main::widget_instance_info)

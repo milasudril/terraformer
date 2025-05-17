@@ -235,28 +235,28 @@ namespace terraformer::ui::main
 		{
 			{
 				// TODO: Pick width/height based on window size
-				auto box_size = run(
+				auto ui_size = run(
 					minimize_cell_size_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					}
 				);
 
-				box_size = run(
+				ui_size = run(
 					adjust_cell_sizes_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					},
-					scaling{
+					box_size{
 						static_cast<float>(m_current_size.width),
 						static_cast<float>(m_current_size.height),
-						1.0f
+						0.0f
 					}
 				);
 
-				box_size = run(
+				ui_size = run(
 					confirm_widget_size_context{
 						m_root_collection.get_attributes(), m_root_collection.element_indices().front()
 					},
-					box_size
+					ui_size
 				);
 
 				run(
@@ -267,7 +267,7 @@ namespace terraformer::ui::main
 				m_root_collection.get_attributes().widget_geometries().front() = widget_geometry{
 					.where = location{0.0f, 0.0f, 0.0f},
 					.origin = location{-1.0f, 1.0f, 0.0f},
-					.size = box_size
+					.size = ui_size
 				};
 
 				m_root_collection.get_attributes().widget_layer_stacks().front() = run(
@@ -296,7 +296,7 @@ namespace terraformer::ui::main
 				m_frame_renderer.render(
 					geometry.where + border_thickness*displacement{-1.0f, 1.0f, 0.0f} + m_hot_widget.geometric_offset(),
 					geometry.origin,
-					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
+					to_scaling(geometry.size + 2.0f*border_thickness*displacement{1.0f, 1.0f, 0.0f}),
 					widget_frame{
 						.thickness = border_thickness,
 						.texture = m_config.misc_textures.white->get_backend_resource(backend).get(),
@@ -341,7 +341,7 @@ namespace terraformer::ui::main
 				m_frame_renderer.render(
 					where + border_thickness*displacement{-1.0f, 1.0f, 0.0f},
 					geometry.origin,
-					geometry.size + 2.0f*border_thickness*scaling{1.0f, 1.0f, 0.0f},
+					to_scaling(geometry.size + border_thickness*displacement{2.0f, 2.0f, 0.0f}),
 					widget_frame{
 						.thickness = border_thickness,
 						.texture = m_config.misc_textures.white->get_backend_resource(backend).get(),
