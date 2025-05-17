@@ -112,9 +112,6 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
-		main::layout_policy_ref get_layout() const
-		{ return main::layout_policy_ref{}; }
-
 		main::widget_collection_ref get_children()
 		{ return main::widget_collection_ref{}; }
 
