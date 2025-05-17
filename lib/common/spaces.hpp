@@ -4,6 +4,7 @@
 #include <geosimd/euclidian_space.hpp>
 #include <geosimd/rotation.hpp>
 #include <geosimd/scaling.hpp>
+#include <geosimd/box_size.hpp>
 
 namespace terraformer
 {
@@ -14,6 +15,7 @@ namespace terraformer
 	using direction = geom_space::direction;
 	using rotation = geosimd::rotation<geom_space>;
 	using scaling = geosimd::scaling<geom_space>;
+	using box_size = geosimd::box_size<geom_space>;
 	inline constexpr auto origin = geosimd::origin<geosimd::euclidian_space<float, 3>>();
 
 	using hires_geom_space = geosimd::euclidian_space<double, 3>;
