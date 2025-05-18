@@ -4,6 +4,7 @@
 #include "./elevation_color_map.hpp"
 
 #include "ui/widgets/form.hpp"
+#include "ui/widgets/widget_canvas.hpp"
 #include "ui/widgets/false_color_image_view.hpp"
 #include "ui/widgets/contour_view.hpp"
 
@@ -15,7 +16,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		bool expand_widget;
-		using input_widget_type = ui::widgets::form;
+		using input_widget_type = ui::widgets::widget_canvas;
 	};
 
 	template<class View>
