@@ -120,13 +120,12 @@ int main(int, char**)
 		terraformer::get_elevation_color_lut()
 	);
 
-	plain_form.on_content_updated([&plain, &task_receiver, &heightmap_view, &gui_ctxt]<class ... Args>(Args&&...){
+	plain_form.on_content_updated([&plain, &task_receiver, &heightmap_view, &gui_ctxt, &heightmap]<class ... Args>(Args&&...){
 		printf("Event: %u\n", gettid());
 		task_receiver.replace_pending_task(
-			[&plain, &heightmap_view, &gui_ctxt]() {
-				terraformer::grayscale_image output{512, 512};
-				replace_pixels(output.pixels(), 96.0f, plain);
-				heightmap_view.show_image(output);
+			[&plain, &heightmap_view, &gui_ctxt, &heightmap]() {
+				replace_pixels(heightmap.pixels(), 96.0f, plain);
+				heightmap_view.refresh();
 				gui_ctxt.notify_main_loop();
 				//store(output, "/dev/shm/slask.exr");
 			}

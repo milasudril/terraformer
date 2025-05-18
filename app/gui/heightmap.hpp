@@ -29,14 +29,14 @@ namespace terraformer::app
 
 	auto& bind(std::u8string_view field_name, std::reference_wrapper<grayscale_image const> field_value, ui::widgets::form& form)
 	{
-		auto& subform = form.create_widget(
+		auto& ret = form.create_widget(
 			heightmap_form_field{
 				.label = field_name,
 				.expand_widget = true
 			}
 		);
 
-		auto& ret = subform.create_widget(
+		auto& imgview = ret.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::false_color_image_view>{
 				.label = field_name,
 				.value_reference = field_value,
@@ -45,6 +45,10 @@ namespace terraformer::app
 			terraformer::global_elevation_map,
 			terraformer::get_elevation_color_lut()
 		);
+
+		ret.set_refresh_function([&imgview, field_value](){
+			imgview.show_image(field_value.get().pixels());
+		});
 
 		return ret;
 	}
