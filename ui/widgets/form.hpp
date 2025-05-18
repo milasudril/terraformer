@@ -1,5 +1,3 @@
-//@	{"dependencies_extra":[{"ref":"./button.o", "rel":"implementation"}]}
-
 #ifndef TERRAFORMER_UI_WIDGETS_FORM_HPP
 #define TERRAFORMER_UI_WIDGETS_FORM_HPP
 
