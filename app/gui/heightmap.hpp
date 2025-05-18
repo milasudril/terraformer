@@ -5,6 +5,7 @@
 
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/false_color_image_view.hpp"
+#include "ui/widgets/contour_view.hpp"
 
 #include "lib/pixel_store/image.hpp"
 
@@ -38,7 +39,7 @@ namespace terraformer::app
 
 		auto& imgview = ret.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::false_color_image_view>{
-				.label = field_name,
+				.label = u8"Heatmap",
 				.value_reference = field_value,
 				.expand_widget = true
 			},
@@ -46,8 +47,18 @@ namespace terraformer::app
 			terraformer::get_elevation_color_lut()
 		);
 
-		ret.set_refresh_function([&imgview, field_value](){
+		auto& contours = ret.create_widget(
+			heightmap_part_form_field<terraformer::ui::widgets::contour_view>{
+				.label = u8"Level curves",
+				.value_reference = field_value,
+				.expand_widget = true
+			},
+			100.0f
+		);
+
+		ret.set_refresh_function([field_value, &imgview, &contours](){
 			imgview.show_image(field_value.get().pixels());
+			contours.show_image(field_value.get().pixels());
 		});
 
 		return ret;
