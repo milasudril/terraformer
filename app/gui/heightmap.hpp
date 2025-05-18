@@ -10,19 +10,23 @@
 
 namespace terraformer::app
 {
-	struct heightmap_field_descriptor
+	struct heightmap_form_field
+	{};
+
+	template<class View>
+	struct heightmap_part_form_field
 	{
 		std::u8string_view label;
 		std::reference_wrapper<grayscale_image const> value_reference;
 		bool expand_widget;
 
-		using input_widget_type = terraformer::ui::widgets::false_color_image_view;
+		using input_widget_type = View;
 	};
 
 	auto& bind(std::u8string_view field_name, std::reference_wrapper<grayscale_image const> field_value, ui::widgets::form& form)
 	{
 		auto& ret = form.create_widget(
-			heightmap_field_descriptor{
+			heightmap_part_form_field<terraformer::ui::widgets::false_color_image_view>{
 				.label = field_name,
 				.value_reference = field_value,
 				.expand_widget = true
