@@ -3,6 +3,7 @@
 //@	}
 
 #include "./plain.hpp"
+#include "./heightmap.hpp"
 #include "./elevation_color_map.hpp"
 
 #include "ui/drawing_api/gl_surface_configuration.hpp"
@@ -14,8 +15,6 @@
 #include "ui/theming/theme_loader.hpp"
 #include "ui/wsapi/native_window.hpp"
 #include "ui/widgets/form.hpp"
-#include "ui/widgets/false_color_image_view.hpp"
-#include "ui/widgets/contour_view.hpp"
 #include "ui/widgets/colorbar.hpp"
 
 #include "lib/pixel_store/image_io.hpp"
@@ -104,22 +103,10 @@ int main(int, char**)
 	terraformer::plain_descriptor plain;
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
+	terraformer::grayscale_image heightmap{512, 512};
+	auto& heightmap_view = terraformer::app::bind(u8"Current heightmap", heightmap, main_form);
+
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
-
-	struct heightmap_field_descriptor
-	{
-		std::u8string_view label;
-		using input_widget_type = terraformer::ui::widgets::contour_view;
-		bool expand_widget;
-	};
-	auto& heightmap_view = main_form.create_widget(
-		heightmap_field_descriptor{
-			.label = u8"Current heightmap",
-			.expand_widget = true
-		},
-		100.0f
-	);
-
 	struct colorbar_field_descriptor
 	{
 		std::u8string_view label;
