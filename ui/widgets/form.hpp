@@ -64,10 +64,11 @@ namespace terraformer::ui::widgets
 			using input_widget_type = typename FieldDescriptor::input_widget_type;
 			auto field_input_widget = []<class ... T>(
 				iterator_invalidation_handler_ref iihr,
-				main::widget_orientation orientation, T&&... input_widget_params
+				main::widget_orientation orientation,
+				T&&... input_widget_params
 			){
-				if constexpr(std::is_same_v<input_widget_type, form>)
-				{ return std::make_unique<form>(iihr, orientation); }
+				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, main::widget_orientation, T...>)
+				{ return std::make_unique<input_widget_type>(iihr, orientation, std::forward<T>(input_widget_params)...); }
 				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, T...>)
 				{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
 				else
@@ -99,7 +100,9 @@ namespace terraformer::ui::widgets
 				});
 			}
 			else
-			if constexpr(std::is_same_v<input_widget_type, form>)
+			if constexpr(requires(input_widget_type& obj, main::widget_user_interaction_handler<input_widget_type>&& callback){
+				{obj.on_content_updated(std::move(callback))};
+			})
 			{
 				ret.on_content_updated([this]<class ... Args>(auto&, Args&&... args) {
 					m_on_content_updated(*this, std::forward<Args>(args)...);
