@@ -18,8 +18,8 @@ namespace terraformer::ui::widgets
 		using widget_group::get_layout;
 		using widget_group::compute_size;
 		using widget_group::confirm_size;
-
-		using refresh_function = move_only_function<void()>;
+		using widget_group::set_refresh_function;
+		using widget_group::refresh;
 
 		explicit form(
 			iterator_invalidation_handler_ref iihr,
@@ -41,7 +41,6 @@ namespace terraformer::ui::widgets
 						)
 					}
 			},
-			m_refresh_func{[](){}},
 			m_orientation{orientation}
 		{ is_transparent = false; }
 
@@ -127,16 +126,6 @@ namespace terraformer::ui::widgets
 			return ret;
 		}
 
-		template<class Callable>
-		void set_refresh_function(Callable&& cb)
-		{
-			m_refresh_func = std::forward<Callable>(cb);
-			m_refresh_func();
-		}
-
-		void refresh()
-		{ m_refresh_func(); }
-
 	private:
 		struct vtable
 		{
@@ -149,7 +138,6 @@ namespace terraformer::ui::widgets
 		user_interaction_handler m_on_content_updated{no_operation_tag{}};
 
 		single_array<unique_resource<vtable>> m_widgets;
-		refresh_function m_refresh_func;
 		main::widget_orientation m_orientation;
 	};
 }

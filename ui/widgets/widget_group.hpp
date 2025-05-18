@@ -14,10 +14,13 @@ namespace terraformer::ui::widgets
 		widget_group(widget_group const&) = delete;
 		widget_group& operator=(widget_group const&) = delete;
 
+		using refresh_function = move_only_function<void()>;
+
 		template<class ... LayoutArgs>
 		explicit widget_group(iterator_invalidation_handler_ref iihr, LayoutArgs&&... args):
 			widget_collection{iihr},
-			layout{std::forward<LayoutArgs>(args)...}
+			layout{std::forward<LayoutArgs>(args)...},
+			m_refresh_func{[](){}}
 		{ }
 
 		Layout layout;
@@ -92,10 +95,21 @@ namespace terraformer::ui::widgets
 			};
 		}
 
+		template<class Callable>
+		void set_refresh_function(Callable&& cb)
+		{
+			m_refresh_func = std::forward<Callable>(cb);
+			m_refresh_func();
+		}
+
+		void refresh()
+		{ m_refresh_func(); }
+
 	private:
 		main::immutable_shared_texture m_background;
 		main::immutable_shared_texture m_null_texture;
 		rgba_pixel m_background_tint;
+		refresh_function m_refresh_func;
 	};
 }
 
