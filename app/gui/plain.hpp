@@ -34,7 +34,8 @@ namespace terraformer::app
 		auto& ret = form.create_widget(
 			plain_corner_descriptor_form_field{
 				.label = field_name,
-			}
+			},
+			ui::main::widget_orientation::vertical
 		);
 
 		ret.create_widget(
