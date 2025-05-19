@@ -3,12 +3,12 @@
 
 #include "./label.hpp"
 
-#include "ui/layouts/table.hpp"
+#include "ui/layouts/none.hpp"
 #include "ui/widgets/widget_group.hpp"
 
 namespace terraformer::ui::widgets
 {
-	class widget_canvas:private widget_group<layouts::table>
+	class widget_canvas:private widget_group<layouts::none>
 	{
 	public:
 		using widget_group::handle_event;
@@ -24,10 +24,10 @@ namespace terraformer::ui::widgets
 		explicit widget_canvas(iterator_invalidation_handler_ref iihr):
 			widget_group{
 				iihr,
-				layouts::table{
-					layouts::table::rows(
-						layouts::table::cell_size::use_default{},
-						layouts::table::cell_size::expand{}
+				layouts::none{
+					layouts::none::rows(
+						layouts::none::cell_size::use_default{},
+						layouts::none::cell_size::expand{}
 					)
 				}
 			}
@@ -93,7 +93,7 @@ namespace terraformer::ui::widgets
 				if(field.expand_widget)
 				{
 					auto const record_count = std::size(m_widgets).get();
-					layout.set_record_size(record_count, layouts::table::cell_size::expand{});
+					layout.set_record_size(record_count, layouts::none::cell_size::expand{});
 
 					auto const widget_attributes = get_children();
 					auto const last_element = widget_attributes.element_indices().back();
@@ -106,17 +106,17 @@ namespace terraformer::ui::widgets
 		}
 
 	private:
-		struct vtable
+		struct vnone
 		{
 			template<class StoredType>
-			constexpr vtable(std::type_identity<StoredType>){}
+			constexpr vnone(std::type_identity<StoredType>){}
 		};
-		using resource = unique_resource<vtable>;
+		using resource = unique_resource<vnone>;
 
 		using user_interaction_handler = main::widget_user_interaction_handler<widget_canvas>;
 		user_interaction_handler m_on_content_updated{no_operation_tag{}};
 
-		single_array<unique_resource<vtable>> m_widgets;
+		single_array<unique_resource<vnone>> m_widgets;
 	};
 }
 
