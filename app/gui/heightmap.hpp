@@ -6,7 +6,7 @@
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/widget_canvas.hpp"
 #include "ui/widgets/false_color_image_view.hpp"
-#include "ui/widgets/contour_view.hpp"
+#include "ui/widgets/contour_plot.hpp"
 
 #include "lib/pixel_store/image.hpp"
 
@@ -49,7 +49,7 @@ namespace terraformer::app
 		);
 
 		auto& contours = ret.create_widget(
-			heightmap_part_form_field<terraformer::ui::widgets::contour_view>{
+			heightmap_part_form_field<terraformer::ui::widgets::contour_plot>{
 				.label = u8"Level curves",
 				.value_reference = field_value,
 				.expand_widget = true

@@ -1,9 +1,9 @@
-//@	{"target": {"name":"contour_view.o", "rel":"implementation"}}
+//@	{"target": {"name":"contour_plot.o", "rel":"implementation"}}
 
-#include "./contour_view.hpp"
+#include "./contour_plot.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 
-void terraformer::ui::widgets::contour_view::show_image(span_2d<float const> input_image)
+void terraformer::ui::widgets::contour_plot::show_image(span_2d<float const> input_image)
 {
 	auto const w = input_image.width();
 	auto const h = input_image.height();
@@ -54,7 +54,7 @@ void terraformer::ui::widgets::contour_view::show_image(span_2d<float const> inp
 	m_frame = std::move(output_frame);
 }
 
-terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::contour_view::prepare_for_presentation(main::graphics_backend_ref backend)
+terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::contour_plot::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
 

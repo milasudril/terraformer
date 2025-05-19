@@ -1,7 +1,7 @@
-//@	{"dependencies_extra":[{"ref":"./contour_view.o", "rel":"implementation"}]}
+//@	{"dependencies_extra":[{"ref":"./contour_plot.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_UI_WIDGETS_CONTOUR_VIEW_HPP
-#define TERRAFORMER_UI_WIDGETS_CONTOUR_VIEW_HPP
+#ifndef TERRAFORMER_UI_WIDGETS_CONTOUR_PLOT_HPP
+#define TERRAFORMER_UI_WIDGETS_CONTOUR_PLOT_HPP
 
 #include "./value_map.hpp"
 #include "ui/main/widget.hpp"
@@ -12,14 +12,14 @@
 
 namespace terraformer::ui::widgets
 {
-	class contour_view:public main::widget_with_default_actions
+	class contour_plot:public main::widget_with_default_actions
 	{
 	public:
-		contour_view() = default;
+		contour_plot() = default;
 
 		using widget_with_default_actions::handle_event;
 
-		explicit contour_view(float dz):
+		explicit contour_plot(float dz):
 			m_dz{dz}
 		{ }
 
