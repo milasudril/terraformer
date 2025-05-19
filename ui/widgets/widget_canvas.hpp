@@ -21,11 +21,11 @@ namespace terraformer::ui::widgets
 		using widget_group::set_refresh_function;
 		using widget_group::refresh;
 
-		explicit widget_canvas(iterator_invalidation_handler_ref iihr):
-			widget_group{
-				iihr,
-				layouts::none{layouts::none::cell_size_mode::expand}
-			}
+		explicit widget_canvas(
+			iterator_invalidation_handler_ref iihr,
+			layouts::none::cell_size_mode cell_size_mode
+		):
+			widget_group{iihr, cell_size_mode}
 		{ is_transparent = false; }
 
 		template<class Function>

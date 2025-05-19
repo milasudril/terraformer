@@ -35,7 +35,8 @@ namespace terraformer::app
 			heightmap_form_field{
 				.label = field_name,
 				.expand_widget = true
-			}
+			},
+			ui::layouts::none::cell_size_mode::expand
 		);
 
 		auto& imgview = ret.create_widget(
