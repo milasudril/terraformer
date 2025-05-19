@@ -107,18 +107,6 @@ int main(int, char**)
 	auto& heightmap_view = terraformer::app::bind(u8"Current heightmap", heightmap, main_form);
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
-	struct colorbar_field_descriptor
-	{
-		std::u8string_view label;
-		using input_widget_type = terraformer::ui::widgets::colorbar;
-	};
-	main_form.create_widget(
-		colorbar_field_descriptor{
-			.label = u8""
-		},
-		terraformer::global_elevation_map,
-		terraformer::get_elevation_color_lut()
-	);
 
 	plain_form.on_content_updated([&plain, &task_receiver, &heightmap_view, &gui_ctxt, &heightmap]<class ... Args>(Args&&...){
 		printf("Event: %u\n", gettid());

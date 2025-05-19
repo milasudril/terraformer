@@ -8,6 +8,15 @@
 
 namespace terraformer::ui::widgets
 {
+	template<class First, class ... Types>
+	struct pick_first
+	{
+		using type = First;
+	};
+
+	template<class ... Types>
+	using pick_first_t = typename pick_first<Types...>::type;
+
 	class form:private widget_group<layouts::table>
 	{
 	public:
@@ -68,7 +77,14 @@ namespace terraformer::ui::widgets
 				T&&... input_widget_params
 			){
 				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, main::widget_orientation, T...>)
-				{ return std::make_unique<input_widget_type>(iihr, orientation, std::forward<T>(input_widget_params)...); }
+				{
+					if constexpr(sizeof...(InputWidgetParams))
+					{
+						if constexpr(std::is_same_v<std::remove_cvref_t<pick_first_t<InputWidgetParams...>>, orientation>)
+						{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
+					}
+					return std::make_unique<input_widget_type>(iihr, orientation, std::forward<T>(input_widget_params)...);
+				}
 				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, T...>)
 				{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
 				else
