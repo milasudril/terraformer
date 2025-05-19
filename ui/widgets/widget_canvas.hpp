@@ -24,12 +24,7 @@ namespace terraformer::ui::widgets
 		explicit widget_canvas(iterator_invalidation_handler_ref iihr):
 			widget_group{
 				iihr,
-				layouts::none{
-					layouts::none::rows(
-						layouts::none::cell_size::use_default{},
-						layouts::none::cell_size::expand{}
-					)
-				}
+				layouts::none{layouts::none::cell_size_mode::expand}
 			}
 		{ is_transparent = false; }
 
@@ -92,9 +87,6 @@ namespace terraformer::ui::widgets
 			{
 				if(field.expand_widget)
 				{
-					auto const record_count = std::size(m_widgets).get();
-					layout.set_record_size(record_count, layouts::none::cell_size::expand{});
-
 					auto const widget_attributes = get_children();
 					auto const last_element = widget_attributes.element_indices().back();
 					auto const widget_states = widget_attributes.widget_states();
