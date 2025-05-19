@@ -54,13 +54,6 @@ namespace terraformer::ui::widgets
 		template<class FieldDescriptor, class ... InputWidgetParams>
 		auto& create_widget(FieldDescriptor const& field, InputWidgetParams&&... input_widget_params)
 		{
-			{
-				auto field_label = std::make_unique<label>();
-				field_label->text(field.label);
-				append(std::ref(*field_label) ,ui::main::widget_geometry{});
-				m_widgets.push_back(resource{std::move(field_label)});
-			}
-
 			using input_widget_type = typename FieldDescriptor::input_widget_type;
 			auto field_input_widget = []<class ... T>(
 				iterator_invalidation_handler_ref iihr,
@@ -116,7 +109,7 @@ namespace terraformer::ui::widgets
 			{
 				if(field.expand_widget)
 				{
-					auto const record_count = std::size(m_widgets).get()/2 - 1;
+					auto const record_count = std::size(m_widgets).get();
 					layout.set_record_size(record_count, layouts::table::cell_size::expand{});
 
 					auto const widget_attributes = get_children();
