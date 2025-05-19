@@ -21,27 +21,16 @@ namespace terraformer::ui::widgets
 		using widget_group::set_refresh_function;
 		using widget_group::refresh;
 
-		explicit widget_canvas(
-			iterator_invalidation_handler_ref iihr,
-			main::widget_orientation orientation = main::widget_orientation::vertical
-		):
+		explicit widget_canvas(iterator_invalidation_handler_ref iihr):
 			widget_group{
 				iihr,
-				orientation == main::widget_orientation::vertical?
-					layouts::table{
-						layouts::table::columns(
-							layouts::table::cell_size::use_default{},
-							layouts::table::cell_size::expand{}
-						)
-					}
-					:layouts::table{
-						layouts::table::rows(
-							layouts::table::cell_size::use_default{},
-							layouts::table::cell_size::expand{}
-						)
-					}
-			},
-			m_orientation{orientation}
+				layouts::table{
+					layouts::table::rows(
+						layouts::table::cell_size::use_default{},
+						layouts::table::cell_size::expand{}
+					)
+				}
+			}
 		{ is_transparent = false; }
 
 		template<class Function>
@@ -57,20 +46,14 @@ namespace terraformer::ui::widgets
 			using input_widget_type = typename FieldDescriptor::input_widget_type;
 			auto field_input_widget = []<class ... T>(
 				iterator_invalidation_handler_ref iihr,
-				main::widget_orientation orientation,
 				T&&... input_widget_params
 			){
-				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, main::widget_orientation, T...>)
-				{ return std::make_unique<input_widget_type>(iihr, orientation, std::forward<T>(input_widget_params)...); }
 				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, T...>)
 				{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
 				else
 				{ return std::make_unique<input_widget_type>(std::forward<T>(input_widget_params)...); }
 			}(
 				iterator_invalidation_handler(),
-				m_orientation == main::widget_orientation::vertical?
-					main::widget_orientation::horizontal:
-					main::widget_orientation::vertical,
 				std::forward<InputWidgetParams>(input_widget_params)...
 			);
 			auto& ret = *field_input_widget;
@@ -134,7 +117,6 @@ namespace terraformer::ui::widgets
 		user_interaction_handler m_on_content_updated{no_operation_tag{}};
 
 		single_array<unique_resource<vtable>> m_widgets;
-		main::widget_orientation m_orientation;
 	};
 }
 
