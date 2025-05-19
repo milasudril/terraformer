@@ -27,7 +27,9 @@ void terraformer::ui::widgets::contour_plot::show_image(span_2d<float const> inp
 		{
 			auto const ddx = img_posterized(x + 1, y) - img_posterized(x - 1, y);
 			auto const ddy = img_posterized(x, y + 1) - img_posterized(x, y - 1);
-			auto const val = std::abs(ddx) + std::abs(ddy) > 0.0f;
+
+			// NOTE: From the quantization above, the maximum gradient size is known to be sqrt(2)
+			auto const val = std::sqrt(ddx*ddx + ddy*ddy)/std::numbers::sqrt2_v<float>;
 			output_image(x, y) = val*rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 		}
 	}
