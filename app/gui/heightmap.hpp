@@ -16,14 +16,14 @@ namespace terraformer::app
 	struct heightmap_chart_form_field
 	{
 		std::u8string_view label;
-		bool expand_widget;
+		bool expand_layout_cell;
 		using input_widget_type = ui::widgets::form;
 	};
 
 	struct heightmap_data_area_form_field
 	{
 		std::u8string_view label;
-		bool expand_widget;
+		bool expand_layout_cell;
 		using input_widget_type = ui::widgets::widget_canvas;
 	};
 
@@ -32,7 +32,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		std::reference_wrapper<grayscale_image const> value_reference;
-		bool expand_widget;
+		bool expand_layout_cell;
 
 		using input_widget_type = View;
 	};
@@ -40,7 +40,7 @@ namespace terraformer::app
 	struct colorbar_form_field
 	{
 		std::u8string_view label;
-		bool expand_widget;
+		bool expand_layout_cell;
 		using input_widget_type = terraformer::ui::widgets::colorbar;
 	};
 
@@ -49,7 +49,7 @@ namespace terraformer::app
 		auto& ret = form.create_widget(
 			heightmap_chart_form_field{
 				.label = field_name,
-				.expand_widget = true
+				.expand_layout_cell = true
 			},
 			ui::main::widget_orientation::horizontal
 		);
@@ -57,7 +57,7 @@ namespace terraformer::app
 		auto& data_area = ret.create_widget(
 			heightmap_data_area_form_field{
 				.label = u8"",
-				.expand_widget = true
+				.expand_layout_cell = true
 			},
 			ui::layouts::none::cell_size_mode::expand
 		);
@@ -65,7 +65,7 @@ namespace terraformer::app
 		ret.create_widget(
 			colorbar_form_field{
 				.label = u8"Elevation/m",
-				.expand_widget = false
+				.expand_layout_cell = true
 			},
 			global_elevation_map,
 			get_elevation_color_lut()
@@ -75,7 +75,7 @@ namespace terraformer::app
 			heightmap_part_form_field<terraformer::ui::widgets::false_color_image_view>{
 				.label = u8"Heatmap",
 				.value_reference = field_value,
-				.expand_widget = true
+				.expand_layout_cell = true
 			},
 			terraformer::global_elevation_map,
 			terraformer::get_elevation_color_lut()
@@ -85,7 +85,7 @@ namespace terraformer::app
 			heightmap_part_form_field<terraformer::ui::widgets::contour_plot>{
 				.label = u8"Level curves",
 				.value_reference = field_value,
-				.expand_widget = true
+				.expand_layout_cell = true
 			},
 			100.0f
 		);

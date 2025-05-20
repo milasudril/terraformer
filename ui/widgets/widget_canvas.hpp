@@ -83,9 +83,9 @@ namespace terraformer::ui::widgets
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
 
-			if constexpr(requires(FieldDescriptor const& f){{f.expand_widget} -> std::convertible_to<bool>;})
+			if constexpr(requires(FieldDescriptor const& f){{f.expand_layout_cell} -> std::convertible_to<bool>;})
 			{
-				if(field.expand_widget)
+				if(field.expand_layout_cell)
 				{
 					auto const widget_attributes = get_children();
 					auto const last_element = widget_attributes.element_indices().back();
