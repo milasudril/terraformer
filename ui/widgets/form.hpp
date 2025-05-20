@@ -142,6 +142,14 @@ namespace terraformer::ui::widgets
 				}
 			}
 
+			if constexpr(requires(FieldDescriptor const& f){{f.maximize_widget} -> std::convertible_to<bool>;})
+			{
+				auto const widget_attributes = get_children();
+				auto const last_element = widget_attributes.element_indices().back();
+				auto const widget_states = widget_attributes.widget_states();
+				widget_states[last_element].maximized = field.maximize_widget;
+			}
+
 			return ret;
 		}
 

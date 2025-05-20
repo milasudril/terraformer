@@ -32,7 +32,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		std::reference_wrapper<grayscale_image const> value_reference;
-		bool expand_layout_cell;
+		bool maximize_widget;
 
 		using input_widget_type = View;
 	};
@@ -40,7 +40,7 @@ namespace terraformer::app
 	struct colorbar_form_field
 	{
 		std::u8string_view label;
-		bool expand_layout_cell;
+		bool maximize_widget;
 		using input_widget_type = terraformer::ui::widgets::colorbar;
 	};
 
@@ -65,7 +65,7 @@ namespace terraformer::app
 		ret.create_widget(
 			colorbar_form_field{
 				.label = u8"Elevation/m",
-				.expand_layout_cell = true
+				.maximize_widget = true
 			},
 			global_elevation_map,
 			get_elevation_color_lut()
@@ -75,7 +75,7 @@ namespace terraformer::app
 			heightmap_part_form_field<terraformer::ui::widgets::false_color_image_view>{
 				.label = u8"Heatmap",
 				.value_reference = field_value,
-				.expand_layout_cell = true
+				.maximize_widget = true
 			},
 			terraformer::global_elevation_map,
 			terraformer::get_elevation_color_lut()
@@ -85,7 +85,7 @@ namespace terraformer::app
 			heightmap_part_form_field<terraformer::ui::widgets::contour_plot>{
 				.label = u8"Level curves",
 				.value_reference = field_value,
-				.expand_layout_cell = true
+				.maximize_widget = true
 			},
 			100.0f
 		);
