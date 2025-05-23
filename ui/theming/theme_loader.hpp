@@ -40,18 +40,21 @@ namespace terraformer::ui::theming
 				.colors = color_scheme.input_area,
 				.padding = 3.0f,
 				.border_thickness = 1.0f,
+				.min_img_height = 240.0f,
 				.font = body_text
 			},
 			.command_area{
 				.colors = color_scheme.command_area,
 				.padding = 2.0f,
 				.border_thickness = 2.0f,
+				.min_img_height = 240.0f,
 				.font = body_text
 			},
 			.output_area{
 				.colors = color_scheme.output_area,
 				.padding = 4.0f,
 				.border_thickness = 1.0f,
+				.min_img_height = 240.0f,
 				.font = body_text
 			},
 			.status_indicator = color_scheme.status_indicator,

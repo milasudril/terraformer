@@ -82,6 +82,7 @@ namespace terraformer::ui::main
 		widget_colors colors;
 		float padding;
 		float border_thickness;
+		float min_img_height;
 		std::shared_ptr<font_handling::font const> font;
 	};
 
