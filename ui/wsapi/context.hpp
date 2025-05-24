@@ -9,6 +9,7 @@
 
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/execution/blocking_queue.hpp"
 
 #include <GLFW/glfw3.h>
 #include <GL/glew.h>
@@ -93,6 +94,7 @@ namespace terraformer::ui::wsapi
 			while(true)
 			{
 				glfwPollEvents();
+				dispatch_user_events();
 				if(f(args...))
 				{ return; }
 			}
@@ -104,6 +106,7 @@ namespace terraformer::ui::wsapi
 			while(true)
 			{
 				glfwWaitEvents();
+				dispatch_user_events();
 				if(f(args...))
 				{ return; }
 			}
@@ -112,12 +115,34 @@ namespace terraformer::ui::wsapi
 		void notify_main_loop()
 		{ glfwPostEmptyEvent(); }
 
+		void dispatch_user_events()
+		{
+			while(true)
+			{
+				auto res = m_user_events.try_pop();
+				if(!res.has_value())
+				{ return; }
+
+				(*res)();
+			}
+		}
+
+		template<class Callback>
+		context& post_event(Callback&& cb)
+		{
+			m_user_events.push(std::forward<Callback>(cb));
+			return*this;
+		}
+
 	private:
 		context()
 		{ glfwInit(); }
 
 		~context()
 		{ glfwTerminate(); }
+
+		blocking_queue<move_only_function<void()>> m_user_events;
+
 	};
 }
 

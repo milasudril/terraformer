@@ -34,7 +34,6 @@ void terraformer::ui::widgets::contour_plot::show_image(span_2d<float const> inp
 		}
 	}
 
-
 	auto output_frame = generate(
 		drawing_api::flat_rectangle{
 			.domain_size = span_2d_extents {
@@ -51,7 +50,6 @@ void terraformer::ui::widgets::contour_plot::show_image(span_2d<float const> inp
 		}
 	);
 
-	std::lock_guard lock{m_image_mutex};
 	m_image = std::move(output_image);
 	m_frame = std::move(output_frame);
 }
@@ -60,7 +58,6 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::contour_plot
 {
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
 
-	std::lock_guard lock{m_image_mutex};
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},

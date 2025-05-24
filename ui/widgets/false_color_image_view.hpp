@@ -9,8 +9,6 @@
 #include "ui/main/graphics_backend_ref.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
 
-#include <mutex>
-
 namespace terraformer::ui::widgets
 {
 	class false_color_image_view:
@@ -34,7 +32,6 @@ namespace terraformer::ui::widgets
 
 		box_size compute_size(main::widget_width_request wr)
 		{
-			std::lock_guard lock{m_image_mutex};
 			auto const img_width = static_cast<float>(m_image.frontend_resource().width());
 			auto const img_height = static_cast<float>(m_image.frontend_resource().height());
 			auto const h = std::max(wr.height, m_min_img_height);
@@ -44,7 +41,6 @@ namespace terraformer::ui::widgets
 
 		box_size compute_size(main::widget_height_request hr)
 		{
-			std::lock_guard lock{m_image_mutex};
 			auto const img_width = static_cast<float>(m_image.frontend_resource().width());
 			auto const img_height = static_cast<float>(m_image.frontend_resource().height());;
 			auto const w_temp = hr.width;
@@ -75,7 +71,7 @@ namespace terraformer::ui::widgets
 				return rgba_pixel{val, val, val, 1.0f};
 			}
 		};
-		std::mutex m_image_mutex;
+
 		main::unique_texture m_image{image{1, 1}};
 		main::unique_texture m_frame{image{1 ,1}};
 		rgba_pixel m_fg_tint;

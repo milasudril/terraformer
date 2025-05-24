@@ -103,18 +103,22 @@ int main(int, char**)
 	terraformer::plain_descriptor plain;
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
-	terraformer::grayscale_image heightmap{512, 512};
+	terraformer::grayscale_image heightmap{4, 4};
 	auto& heightmap_view = terraformer::app::bind(u8"Current heightmap", heightmap, main_form);
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
 
-	plain_form.on_content_updated([&plain, &task_receiver, &heightmap_view, &gui_ctxt, &heightmap]<class ... Args>(Args&&...){
-		printf("Event: %u\n", gettid());
+	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &heightmap](auto&&...){
 		task_receiver.replace_pending_task(
-			[&plain, &heightmap_view, &gui_ctxt, &heightmap]() {
-				replace_pixels(heightmap.pixels(), 96.0f, plain);
-				heightmap_view.refresh();
-				gui_ctxt.notify_main_loop();
+			[plain, &heightmap, &heightmap_view, &gui_ctxt]() {
+				terraformer::grayscale_image new_heightmap{512, 512};
+				replace_pixels(new_heightmap.pixels(), 96.0f, plain);
+				gui_ctxt
+					.post_event([&heightmap, hm = std::move(new_heightmap), &heightmap_view]() mutable {
+						heightmap = std::move(hm);
+						heightmap_view.refresh();
+					})
+					.notify_main_loop();
 				//store(output, "/dev/shm/slask.exr");
 			}
 		);

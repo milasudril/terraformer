@@ -37,7 +37,6 @@ void terraformer::ui::widgets::false_color_image_view::show_image(span_2d<float 
 		}
 	);
 
-	std::lock_guard lock{m_image_mutex};
 	m_image = std::move(output_image);
 	m_frame = std::move(output_frame);
 }
@@ -46,7 +45,6 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::false_color_
 {
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
 
-	std::lock_guard lock{m_image_mutex};
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},

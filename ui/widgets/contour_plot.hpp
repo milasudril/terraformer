@@ -8,8 +8,6 @@
 #include "ui/main/graphics_backend_ref.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
 
-#include <mutex>
-
 namespace terraformer::ui::widgets
 {
 	class contour_plot:public main::widget_with_default_actions
@@ -29,7 +27,6 @@ namespace terraformer::ui::widgets
 
 		box_size compute_size(main::widget_width_request)
 		{
-			std::lock_guard lock{m_image_mutex};
 			return box_size{
 				static_cast<float>(m_image.frontend_resource().width()),
 				static_cast<float>(m_image.frontend_resource().height()),
@@ -39,7 +36,6 @@ namespace terraformer::ui::widgets
 
 		box_size compute_size(main::widget_height_request)
 		{
-			std::lock_guard lock{m_image_mutex};
 			return box_size{
 				static_cast<float>(m_image.frontend_resource().width()),
 				static_cast<float>(m_image.frontend_resource().height()),
@@ -59,7 +55,6 @@ namespace terraformer::ui::widgets
 
 	private:
 		float m_dz;
-		std::mutex m_image_mutex;
 		main::unique_texture m_image{image{1, 1}};
 		main::unique_texture m_frame{image{1 ,1}};
 		rgba_pixel m_fg_tint;
