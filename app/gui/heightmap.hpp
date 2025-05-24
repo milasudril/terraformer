@@ -31,6 +31,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		std::reference_wrapper<grayscale_image const> value_reference;
+		bool expand_layout_cell;
 		bool maximize_widget;
 
 		using input_widget_type = View;
@@ -53,26 +54,18 @@ namespace terraformer::app
 			ui::main::widget_orientation::horizontal
 		);
 
-		auto& data_area = ret.create_widget(
-			heightmap_data_area_form_field{
-				.label = u8"",
-				.expand_layout_cell = true
-			},
-			ui::layouts::none::cell_size_mode::expand
-		);
-
-
-		auto& imgview = data_area.create_widget(
+		auto& imgview = ret.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::false_color_image_view>{
 				.label = u8"Heatmap",
 				.value_reference = field_value,
+				.expand_layout_cell = true,
 				.maximize_widget = true
 			},
 			terraformer::global_elevation_map,
 			terraformer::get_elevation_color_lut()
 		);
 
-		data_area.set_refresh_function([field_value, &imgview](){
+		ret.set_refresh_function([field_value, &imgview](){
 			imgview.show_image(field_value.get().pixels());
 		});
 
@@ -85,7 +78,7 @@ namespace terraformer::app
 			get_elevation_color_lut()
 		);
 
-		return data_area;
+		return ret;
 	}
 }
 
