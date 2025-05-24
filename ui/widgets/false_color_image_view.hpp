@@ -4,6 +4,7 @@
 #define TERRAFORMER_UI_WIDGETS_FALSE_COLOR_IMAGE_VIEW_HPP
 
 #include "./value_map.hpp"
+#include "./image_view.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
@@ -12,7 +13,9 @@
 
 namespace terraformer::ui::widgets
 {
-	class false_color_image_view:public main::widget_with_default_actions
+	class false_color_image_view:
+		public main::widget_with_default_actions,
+		public image_view<grayscale_image>
 	{
 	public:
 		false_color_image_view() = default;
