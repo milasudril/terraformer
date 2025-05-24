@@ -44,7 +44,7 @@ namespace terraformer::ui::widgets
 			schedule_redraw();
 		}
 
-		void set_queidistant(float dz)
+		void set_level_curve_interval(float dz)
 		{
 			m_dz = dz;
 			schedule_redraw();

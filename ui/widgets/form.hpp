@@ -63,6 +63,8 @@ namespace terraformer::ui::widgets
 		template<class FieldDescriptor, class ... InputWidgetParams>
 		auto& create_widget(FieldDescriptor const& field, InputWidgetParams&&... input_widget_params)
 		{
+			// FIXME: Need a special case for widgets where the label is on the widget itself
+			// (toggle_button)
 			{
 				auto field_label = std::make_unique<label>();
 				field_label->text(field.label);

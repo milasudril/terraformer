@@ -164,6 +164,7 @@ namespace terraformer::ui::widgets
 		using button::get_layout;
 		using button::get_children;
 		using button::compute_size;
+		using button::confirm_size;
 
 		template<class Function>
 		toggle_button& on_value_changed(Function&& func)

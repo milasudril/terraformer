@@ -51,7 +51,7 @@ namespace terraformer::app
 		ret.create_widget(
 			plain_derivative_form_field{
 				.label = u8"d/dx",
-				.value_reference = std::reference_wrapper(field_value.ddx)
+				.value_reference = std::ref(field_value.ddx)
 			},
 			terraformer::ui::widgets::knob{terraformer::ui::value_maps::sqrt_value_map{1.0f}}
 		);
@@ -59,7 +59,7 @@ namespace terraformer::app
 		ret.create_widget(
 			plain_derivative_form_field{
 				.label = u8"d/dy",
-				.value_reference = std::reference_wrapper(field_value.ddy)
+				.value_reference = std::ref(field_value.ddy)
 			},
 			terraformer::ui::widgets::knob{terraformer::ui::value_maps::sqrt_value_map{1.0f}}
 		);
