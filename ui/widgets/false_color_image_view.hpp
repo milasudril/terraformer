@@ -30,6 +30,9 @@ namespace terraformer::ui::widgets
 
 		image apply_filter(span_2d<float const> input) const;
 
+		static rgba_pixel get_tint()
+		{ return rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}; }
+
 	private:
 		type_erased_value_map m_value_map{
 			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f

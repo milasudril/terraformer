@@ -3,63 +3,32 @@
 #ifndef TERRAFORMER_UI_WIDGETS_CONTOUR_PLOT_HPP
 #define TERRAFORMER_UI_WIDGETS_CONTOUR_PLOT_HPP
 
-#include "./value_map.hpp"
+#include "./basic_image_view.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
 
 namespace terraformer::ui::widgets
 {
-	class contour_plot:public main::widget_with_default_actions
+	class contour_plot:public basic_image_view<float, contour_plot>
 	{
 	public:
-		contour_plot() = default;
+		using basic_image_view<float, contour_plot>::handle_event;
+		using basic_image_view<float, contour_plot>::compute_size;
+		using basic_image_view<float, contour_plot>::confirm_size;
+		using basic_image_view<float, contour_plot>::show_image;
+		using basic_image_view<float, contour_plot>::prepare_for_presentation;
 
-		using widget_with_default_actions::handle_event;
+		contour_plot() = default;
 
 		explicit contour_plot(float dz):
 			m_dz{dz}
 		{ }
 
-		void show_image(span_2d<float const> image);
-
-		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
-
-		box_size compute_size(main::widget_width_request)
-		{
-			return box_size{
-				static_cast<float>(m_image.frontend_resource().width()),
-				static_cast<float>(m_image.frontend_resource().height()),
-				0.0f
-			};
-		}
-
-		box_size compute_size(main::widget_height_request)
-		{
-			return box_size{
-				static_cast<float>(m_image.frontend_resource().width()),
-				static_cast<float>(m_image.frontend_resource().height()),
-				0.0f
-			};
-		}
-
-		void handle_event(scaling)
-		{}
-
-		void theme_updated(main::config const& cfg, main::widget_instance_info)
-		{
-			m_null_texture = cfg.misc_textures.null;
-			m_fg_tint = cfg.output_area.colors.foreground;
-			m_border_thickness = static_cast<uint32_t>(cfg.output_area.border_thickness);
-		}
+		image apply_filter(span_2d<float const> image) const;
 
 	private:
 		float m_dz;
-		main::unique_texture m_image{image{1, 1}};
-		main::unique_texture m_frame{image{1 ,1}};
-		rgba_pixel m_fg_tint;
-		unsigned int m_border_thickness = 0;
-		main::immutable_shared_texture m_null_texture;
 	};
 }
 

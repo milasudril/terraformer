@@ -62,6 +62,11 @@ namespace terraformer::ui::widgets
 
 			auto const null_texture = m_cfg.null_texture->get_backend_resource(backend).get();
 			auto const fg_tint = m_cfg.fg_tint;
+			auto const img_tint = [this](rgba_pixel default_tint){
+				if constexpr(requires(PresentationFilter const& f){f.get_tint();})
+				{ return static_cast<PresentationFilter const&>(*this).get_tint(); }
+				return default_tint;
+			}(fg_tint);
 
 			return main::widget_layer_stack{
 				.background = main::widget_layer{
@@ -84,12 +89,7 @@ namespace terraformer::ui::widgets
 					.offset = displacement{},
 					.rotation = geosimd::turn_angle{},
 					.texture = m_image.get_backend_resource(backend).get(),
-					.tints = std::array<rgba_pixel, 4>{
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
-						rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
-					}
+					.tints = std::array{img_tint, img_tint, img_tint, img_tint}
 				},
 				.frame = main::widget_layer{
 					.offset = displacement{},
