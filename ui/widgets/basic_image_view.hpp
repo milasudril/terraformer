@@ -110,8 +110,8 @@ namespace terraformer::ui::widgets
 			};
 		}
 
-		bool is_source_image_dirty() const
-		{ return m_source_image_dirty; }
+		void schedule_redraw()
+		{ m_source_image_dirty = true; }
 
 		span_2d<PixelType const> current_image() const
 		{ return m_current_image.pixels(); }

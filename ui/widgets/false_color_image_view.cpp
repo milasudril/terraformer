@@ -26,7 +26,9 @@ terraformer::ui::widgets::false_color_image_view::apply_filter(span_2d<float con
 std::optional<terraformer::image>
 terraformer::ui::widgets::false_color_image_view::create_foreground(span_2d<float const> input_image) const
 {
-	puts("Hej");
+	if(!m_show_level_curves)
+	{ return std::nullopt; }
+
 	auto const w = input_image.width();
 	auto const h = input_image.height();
 

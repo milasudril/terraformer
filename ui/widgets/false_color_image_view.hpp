@@ -32,8 +32,23 @@ namespace terraformer::ui::widgets
 
 		std::optional<image> create_foreground(span_2d<float const> pixels) const;
 
-		static rgba_pixel get_tint()
-		{ return rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}; }
+		void show_level_curves()
+		{
+			m_show_level_curves = true;
+			schedule_redraw();
+		}
+
+		void hide_level_curves()
+		{
+			m_show_level_curves = false;
+			schedule_redraw();
+		}
+
+		void set_queidistant(float dz)
+		{
+			m_dz = dz;
+			schedule_redraw();
+		}
 
 	private:
 		type_erased_value_map m_value_map{
@@ -46,6 +61,7 @@ namespace terraformer::ui::widgets
 		};
 
 		float m_dz{100.0f};
+		bool m_show_level_curves{true};
 	};
 }
 
