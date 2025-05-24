@@ -33,6 +33,9 @@ namespace terraformer::ui::widgets
 			m_source_image_dirty = true;
 		}
 
+		static std::optional<image> create_foreground(span_2d<PixelType const>)
+		{ return std::nullopt; }
+
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend)
 		{
 			auto const null_texture = m_cfg.null_texture;
@@ -40,12 +43,8 @@ namespace terraformer::ui::widgets
 			{
 			//	auto const resized_image = resize(m_current_image, m_adjusted_box);
 				m_background = static_cast<PresentationFilter const&>(*this).apply_filter(m_current_image.pixels());
-				m_foreground = [](PresentationFilter const& filter, span_2d<PixelType const> pixels) ->
-					std::optional<main::unique_texture>{
-					if constexpr(requires(){{filter.create_foreground(pixels)};})
-					{ return main::unique_texture{filter.create_foreground(pixels)}; }
-					return std::nullopt;
-				}(static_cast<PresentationFilter const&>(*this), m_current_image.pixels());
+				auto fg = static_cast<PresentationFilter const&>(*this).create_foreground(m_current_image.pixels());
+				m_foreground = fg.has_value()? std::move(fg) : std::optional<main::unique_texture>{};
 				auto const full_box = m_adjusted_box + 2.0f*m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
 				auto const w = static_cast<uint32_t>(full_box[0]);
 				auto const h = static_cast<uint32_t>(full_box[1]);

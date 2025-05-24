@@ -23,9 +23,10 @@ terraformer::ui::widgets::false_color_image_view::apply_filter(span_2d<float con
 	return output_image;
 }
 
-terraformer::image
+std::optional<terraformer::image>
 terraformer::ui::widgets::false_color_image_view::create_foreground(span_2d<float const> input_image) const
 {
+	puts("Hej");
 	auto const w = input_image.width();
 	auto const h = input_image.height();
 
