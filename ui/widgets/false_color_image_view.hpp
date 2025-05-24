@@ -30,6 +30,8 @@ namespace terraformer::ui::widgets
 
 		image apply_filter(span_2d<float const> input) const;
 
+		image create_foreground(span_2d<float const> pixels) const;
+
 		static rgba_pixel get_tint()
 		{ return rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}; }
 
@@ -42,6 +44,8 @@ namespace terraformer::ui::widgets
 				return rgba_pixel{val, val, val, 1.0f};
 			}
 		};
+
+		float m_dz{100.0f};
 	};
 }
 

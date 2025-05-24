@@ -35,10 +35,17 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend)
 		{
+			auto const null_texture = m_cfg.null_texture;
 			if(m_source_image_dirty)
 			{
 			//	auto const resized_image = resize(m_current_image, m_adjusted_box);
-				m_image = static_cast<PresentationFilter const&>(*this).apply_filter(m_current_image.pixels());
+				m_background = static_cast<PresentationFilter const&>(*this).apply_filter(m_current_image.pixels());
+				m_foreground = [](PresentationFilter const& filter, span_2d<PixelType const> pixels) ->
+					std::optional<main::unique_texture>{
+					if constexpr(requires(){{filter.create_foreground(pixels)};})
+					{ return main::unique_texture{filter.create_foreground(pixels)}; }
+					return std::nullopt;
+				}(static_cast<PresentationFilter const&>(*this), m_current_image.pixels());
 				auto const full_box = m_adjusted_box + 2.0f*m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
 				auto const w = static_cast<uint32_t>(full_box[0]);
 				auto const h = static_cast<uint32_t>(full_box[1]);
@@ -60,36 +67,34 @@ namespace terraformer::ui::widgets
 				m_source_image_dirty = false;
 			}
 
-			auto const null_texture = m_cfg.null_texture->get_backend_resource(backend).get();
+			auto const bg_tint = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f};
 			auto const fg_tint = m_cfg.fg_tint;
-			auto const img_tint = [this](rgba_pixel default_tint){
-				if constexpr(requires(PresentationFilter const& f){f.get_tint();})
-				{ return static_cast<PresentationFilter const&>(*this).get_tint(); }
-				return default_tint;
-			}(fg_tint);
 
 			return main::widget_layer_stack{
 				.background = main::widget_layer{
 					.offset = displacement{},
 					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
-					.tints = std::array<rgba_pixel, 4>{}
+					.texture = m_background.get_backend_resource(backend).get(),
+					.tints = std::array<rgba_pixel, 4>{bg_tint, bg_tint, bg_tint, bg_tint}
 				},
 				.sel_bg_mask = main::widget_layer_mask{
 					.offset = displacement{},
-					.texture = null_texture
+					.texture = null_texture->get_backend_resource(backend).get()
 				},
 				.selection_background = main::widget_layer{
 					.offset = displacement{},
 					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
+					.texture = null_texture->get_backend_resource(backend).get(),
 					.tints = std::array<rgba_pixel, 4>{}
 				},
 				.foreground = main::widget_layer{
 					.offset = displacement{},
 					.rotation = geosimd::turn_angle{},
-					.texture = m_image.get_backend_resource(backend).get(),
-					.tints = std::array{img_tint, img_tint, img_tint, img_tint}
+					.texture = (m_foreground.has_value()?
+							 m_foreground->get_backend_resource(backend)
+							:null_texture->get_backend_resource(backend)
+						).get(),
+					.tints = std::array{fg_tint, fg_tint, fg_tint, fg_tint}
 				},
 				.frame = main::widget_layer{
 					.offset = displacement{},
@@ -100,7 +105,7 @@ namespace terraformer::ui::widgets
 				.input_marker{
 					.offset = displacement{},
 					.rotation = geosimd::turn_angle{},
-					.texture = null_texture,
+					.texture = null_texture->get_backend_resource(backend).get(),
 					.tints = std::array<rgba_pixel, 4>{}
 				}
 			};
@@ -160,7 +165,8 @@ namespace terraformer::ui::widgets
 		box_size m_current_box;
 		box_size m_adjusted_box;
 		bool m_source_image_dirty = false;
-		main::unique_texture m_image{image{1, 1}};
+		main::unique_texture m_background{image{1, 1}};
+		std::optional<main::unique_texture> m_foreground;
 		main::unique_texture m_frame{image{1 ,1}};
 
 		basic_image_view_config m_cfg;

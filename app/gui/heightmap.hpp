@@ -6,7 +6,6 @@
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/widget_canvas.hpp"
 #include "ui/widgets/false_color_image_view.hpp"
-#include "ui/widgets/contour_plot.hpp"
 #include "ui/widgets/colorbar.hpp"
 
 #include "lib/pixel_store/image.hpp"
@@ -73,18 +72,8 @@ namespace terraformer::app
 			terraformer::get_elevation_color_lut()
 		);
 
-		auto& contours = data_area.create_widget(
-			heightmap_part_form_field<terraformer::ui::widgets::contour_plot>{
-				.label = u8"Level curves",
-				.value_reference = field_value,
-				.maximize_widget = true
-			},
-			100.0f
-		);
-
-		data_area.set_refresh_function([field_value, &imgview, &contours](){
+		data_area.set_refresh_function([field_value, &imgview](){
 			imgview.show_image(field_value.get().pixels());
-			contours.show_image(field_value.get().pixels());
 		});
 
 		ret.create_widget(
