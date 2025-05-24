@@ -139,7 +139,7 @@ namespace terraformer::ui::widgets
 			auto const new_box = m_current_box.fit_xy_keep_z(
 				size + 2.0f*m_cfg.border_thickness*displacement{-1.0f, -1.0f, 0.0f}
 			);
-			m_source_image_dirty = (new_box != m_adjusted_box);
+			m_source_image_dirty = (new_box != m_adjusted_box || m_source_image_dirty);
 			m_adjusted_box = new_box;
 			return new_box + 2.0f*m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
 		}

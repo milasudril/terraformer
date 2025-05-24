@@ -49,7 +49,7 @@ namespace terraformer::app
 		auto& ret = form.create_widget(
 			heightmap_chart_form_field{
 				.label = field_name,
-				.expand_layout_cell = false
+				.expand_layout_cell = true
 			},
 			ui::main::widget_orientation::horizontal
 		);
@@ -57,7 +57,7 @@ namespace terraformer::app
 		auto& data_area = ret.create_widget(
 			heightmap_data_area_form_field{
 				.label = u8"",
-				.expand_layout_cell = false
+				.expand_layout_cell = true
 			},
 			ui::layouts::none::cell_size_mode::expand
 		);
@@ -67,7 +67,7 @@ namespace terraformer::app
 			heightmap_part_form_field<terraformer::ui::widgets::false_color_image_view>{
 				.label = u8"Heatmap",
 				.value_reference = field_value,
-				.maximize_widget = false
+				.maximize_widget = true
 			},
 			terraformer::global_elevation_map,
 			terraformer::get_elevation_color_lut()
@@ -77,7 +77,7 @@ namespace terraformer::app
 			heightmap_part_form_field<terraformer::ui::widgets::contour_plot>{
 				.label = u8"Level curves",
 				.value_reference = field_value,
-				.maximize_widget = false
+				.maximize_widget = true
 			},
 			100.0f
 		);
@@ -90,7 +90,7 @@ namespace terraformer::app
 		ret.create_widget(
 			colorbar_form_field{
 				.label = u8"Elevation/m",
-				.maximize_widget = false
+				.maximize_widget = true
 			},
 			global_elevation_map,
 			get_elevation_color_lut()
