@@ -19,6 +19,7 @@ namespace terraformer
 		{ return Callable(std::forward<Args>(args)...); }
 	};
 
+	// TODO: C++23: Replace with std with the benefit of const correctness
 	template<class R, class... Args>
 	class move_only_function<R(Args...)>
 	{
@@ -103,7 +104,7 @@ namespace terraformer
 			}}
 		{}
 
-		R operator()(Args... args)
+		R operator()(Args... args) const
 		{ return m_function(m_handle, std::forward<Args>(args)...); }
 
 		operator bool() const
