@@ -26,11 +26,11 @@ terraformer::ui::widgets::false_color_image_view::apply_filter(span_2d<float con
 std::optional<terraformer::image>
 terraformer::ui::widgets::false_color_image_view::create_foreground(span_2d<float const> input_image) const
 {
-	if(!m_show_level_curves)
-	{ return std::nullopt; }
-
 	auto const w = input_image.width();
 	auto const h = input_image.height();
+
+	if(!m_show_level_curves || h < 3 || w < 3)
+	{ return std::nullopt; }
 
 	grayscale_image img_posterized{w, h};
 	auto const dz = m_dz;
@@ -42,8 +42,6 @@ terraformer::ui::widgets::false_color_image_view::create_foreground(span_2d<floa
 	}
 
 	image output_image{w, h};
-	assert(h > 2);
-	assert(w > 2);
 
 	for(uint32_t y = 1; y != h - 1; ++y)
 	{
