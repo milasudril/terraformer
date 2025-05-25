@@ -38,7 +38,7 @@ terraformer::ui::widgets::false_color_image_view::create_foreground(span_2d<floa
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		for(uint32_t x = 0; x != w; ++x)
-		{ img_posterized(x, y) = std::round(input_image(x, y)/dz); }
+		{ img_posterized(x, y) = std::floor(input_image(x, y)/dz); }
 	}
 
 	image output_image{w, h};
