@@ -89,8 +89,8 @@ namespace terraformer::ui::widgets
 				append(std::ref(m_labels[k]), terraformer::ui::main::widget_geometry{});
 				layout.set_record_size(k, layouts::table::cell_size::expand{});
 			}
-			layout.params().no_outer_margin = true;
-			layout.params().margin_x = 0.0f;
+			layout.params().no_outer_margin = false;
+			layout.params().margin_x = 1.0f*m_marker_length;
 			layout.params().margin_y = 0.0f;
 
 			update_colorbar();
@@ -100,7 +100,8 @@ namespace terraformer::ui::widgets
 		main::unique_texture m_image;
 		main::unique_texture m_frame;
 		rgba_pixel m_fg_tint;
-		unsigned int m_border_thickness = 0;
+		float m_marker_length = 8.0f;
+		uint32_t m_border_thickness;
 		main::immutable_shared_texture m_null_texture;
 		std::array<label, 13> m_labels;
 	};

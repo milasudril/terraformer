@@ -41,6 +41,7 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(26, rect.input_marker.offset[0], rect.input_marker.offset[1])
 				.set_uniform(27, static_cast<float>(to_rad(rect.foreground.rotation).value))
 				.set_uniform(28, rect.background.offset[0], rect.background.offset[1])
+				.set_uniform(29, rect.frame.offset[0], rect.frame.offset[1])
 				.bind();
 
 			assert(rect.background.texture);
@@ -140,6 +141,7 @@ layout (location = 25) uniform vec2 fg_offset;
 layout (location = 26) uniform vec2 input_marker_offset;
 layout (location = 27) uniform float fg_0_rotation;
 layout (location = 28) uniform vec2 bg_offset;
+layout (location = 29) uniform vec2 frame_offset;
 
 in vec2 uv;
 in vec4 background_tint;
@@ -176,7 +178,7 @@ void main()
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
 	vec4 fg_0 = sample_cropped(foreground, uv - fg_offset, fg_0_rotation)*foreground_tint;
 	vec4 fg_1 = sample_cropped(input_marker, uv - input_marker_offset, 0.0)*input_marker_tint;
-	vec4 fg_2 = sample_scaled(frame, uv)*frame_tint;
+	vec4 fg_2 = sample_cropped(frame, uv - frame_offset, 0.0)*frame_tint;
 
 	// This assumes that pre-multiplied alpha is used
 	vec4 result = bg_1 + bg_0*(1 - bg_1.w*bg_mask);

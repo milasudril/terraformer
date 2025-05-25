@@ -9,7 +9,8 @@
 void terraformer::ui::widgets::colorbar::update_colorbar()
 {
 	auto const w = static_cast<uint32_t>(m_size[0] + 0.5f);
-	auto const h = static_cast<uint32_t>(m_size[1] + 0.5f);
+	auto const h_label = m_size[1]/static_cast<float>(std::size(m_labels));
+	auto const h = static_cast<uint32_t>(m_size[1] + 0.5f - h_label);
 	image output_image{w, h};
 
 	for(uint32_t y = 0; y != h; ++y)
@@ -26,7 +27,8 @@ void terraformer::ui::widgets::colorbar::update_colorbar()
 void terraformer::ui::widgets::colorbar::update_frame()
 {
 	auto const w = static_cast<uint32_t>(m_size[0] + 0.5f);
-	auto const h = static_cast<uint32_t>(m_size[1] + 0.5f);
+	auto const h_label = m_size[1]/static_cast<float>(std::size(m_labels));
+	auto const h = static_cast<uint32_t>(m_size[1] + 0.5f - h_label);
 	auto output_frame = generate(
 		drawing_api::flat_rectangle{
 			.domain_size = span_2d_extents {
@@ -43,14 +45,17 @@ void terraformer::ui::widgets::colorbar::update_frame()
 		}
 	);
 
-	for(uint32_t index = 0; index != 14; ++index)
+	auto const marker_length = static_cast<uint32_t>(m_marker_length);
+	for(uint32_t index = 0; index != std::size(m_labels); ++index)
 	{
-		auto const intensity = static_cast<float>(index)/13;
+		auto const intensity = static_cast<float>(index)/static_cast<float>(std::size(m_labels) - 1);
 		auto const y = static_cast<uint32_t>((1.0f - intensity)*static_cast<float>(h - 1) + 0.5f);
 		for(uint32_t x = 0; x != w; ++x)
 		{
-			if(x < w/4 || x >= w - w/4)
+			if(x < marker_length || x >= w - marker_length)
 			{ output_frame(x, y) = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}; }
+			else
+			{ output_frame(x, y) = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}; }
 		}
 	}
 
@@ -60,6 +65,8 @@ void terraformer::ui::widgets::colorbar::update_frame()
 terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::colorbar::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
+	auto const h_label = m_size[1]/static_cast<float>(std::size(m_labels));
+	auto const scale_offset = 0.5f*displacement{0.0f, h_label, 0.0f};
 
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
@@ -79,7 +86,7 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::colorbar::pr
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.foreground = main::widget_layer{
-			.offset = displacement{},
+			.offset = scale_offset,
 			.rotation = geosimd::turn_angle{},
 			.texture = m_image.get_backend_resource(backend).get(),
 			.tints = std::array<rgba_pixel, 4>{
@@ -90,7 +97,7 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::colorbar::pr
 			}
 		},
 		.frame = main::widget_layer{
-			.offset = displacement{},
+			.offset = scale_offset,
 			.rotation = geosimd::turn_angle{},
 			.texture = m_frame.get_backend_resource(backend).get(),
 			.tints = std::array{m_fg_tint, m_fg_tint, m_fg_tint, m_fg_tint}
