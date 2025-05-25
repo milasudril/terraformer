@@ -40,6 +40,7 @@ namespace terraformer::ui::drawing_api
 				.set_uniform(25, rect.foreground.offset[0], rect.foreground.offset[1])
 				.set_uniform(26, rect.input_marker.offset[0], rect.input_marker.offset[1])
 				.set_uniform(27, static_cast<float>(to_rad(rect.foreground.rotation).value))
+				.set_uniform(28, rect.background.offset[0], rect.background.offset[1])
 				.bind();
 
 			assert(rect.background.texture);
@@ -138,6 +139,7 @@ layout (binding = 5) uniform sampler2D frame;
 layout (location = 25) uniform vec2 fg_offset;
 layout (location = 26) uniform vec2 input_marker_offset;
 layout (location = 27) uniform float fg_0_rotation;
+layout (location = 28) uniform vec2 bg_offset;
 
 in vec2 uv;
 in vec4 background_tint;
@@ -169,7 +171,7 @@ vec4 sample_cropped(sampler2D tex, vec2 uv, float rot_angle)
 
 void main()
 {
-	vec4 bg_0 = sample_scaled(background, uv)*background_tint;
+	vec4 bg_0 = sample_scaled(background, uv - bg_offset)*background_tint;
 	float bg_mask = sample_cropped(bg_layer_mask, uv - fg_offset, 0.0).r;
 	vec4 bg_1 = sample_scaled(selection_background, uv)*selection_background_tint;
 	vec4 fg_0 = sample_cropped(foreground, uv - fg_offset, fg_0_rotation)*foreground_tint;

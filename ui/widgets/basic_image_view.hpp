@@ -40,6 +40,7 @@ namespace terraformer::ui::widgets
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend)
 		{
 			auto const null_texture = m_cfg.null_texture;
+			auto const border_displacement = m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
 			if(m_source_image_dirty)
 			{
 				auto const input_pixels = std::as_const(m_current_image).pixels();
@@ -47,7 +48,7 @@ namespace terraformer::ui::widgets
 				m_background = static_cast<PresentationFilter const&>(*this).apply_filter(resized_image.pixels());
 				auto fg = static_cast<PresentationFilter const&>(*this).create_foreground(resized_image.pixels());
 				m_foreground = fg.has_value()? std::move(fg) : std::optional<main::unique_texture>{};
-				auto const full_box = m_adjusted_box + 2.0f*m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
+				auto const full_box = m_adjusted_box + 2.0f*border_displacement;
 				auto const w = static_cast<uint32_t>(full_box[0]);
 				auto const h = static_cast<uint32_t>(full_box[1]);
 				m_frame =  generate(
@@ -73,7 +74,7 @@ namespace terraformer::ui::widgets
 
 			return main::widget_layer_stack{
 				.background = main::widget_layer{
-					.offset = displacement{},
+					.offset = border_displacement,
 					.rotation = geosimd::turn_angle{},
 					.texture = m_background.get_backend_resource(backend).get(),
 					.tints = std::array<rgba_pixel, 4>{bg_tint, bg_tint, bg_tint, bg_tint}
@@ -89,7 +90,7 @@ namespace terraformer::ui::widgets
 					.tints = std::array<rgba_pixel, 4>{}
 				},
 				.foreground = main::widget_layer{
-					.offset = displacement{},
+					.offset = border_displacement,
 					.rotation = geosimd::turn_angle{},
 					.texture = (m_foreground.has_value()?
 							 m_foreground->get_backend_resource(backend)
@@ -104,7 +105,7 @@ namespace terraformer::ui::widgets
 					.tints = std::array{fg_tint, fg_tint, fg_tint, fg_tint}
 				},
 				.input_marker{
-					.offset = displacement{},
+					.offset = border_displacement,
 					.rotation = geosimd::turn_angle{},
 					.texture = null_texture->get_backend_resource(backend).get(),
 					.tints = std::array<rgba_pixel, 4>{}
