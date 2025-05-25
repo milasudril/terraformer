@@ -63,8 +63,20 @@ namespace terraformer::ui::widgets
 		template<class FieldDescriptor, class ... InputWidgetParams>
 		auto& create_widget(FieldDescriptor const& field, InputWidgetParams&&... input_widget_params)
 		{
-			// FIXME: Need a special case for widgets where the label is on the widget itself
-			// (toggle_button)
+			using input_widget_type = typename FieldDescriptor::input_widget_type;
+
+			bool label_on_input_field = false;
+			if constexpr(requires(){{field.label_on_input_field};})
+			{
+				static_assert(requires(input_widget_type& widget){{widget.text(field.label)};});
+				label_on_input_field = field.label_on_input_field;
+
+				// TODO: Span record so input field replaces label
+				auto field_label = std::make_unique<label>();
+				append(std::ref(*field_label) ,ui::main::widget_geometry{});
+				m_widgets.push_back(resource{std::move(field_label)});
+			}
+			else
 			{
 				auto field_label = std::make_unique<label>();
 				field_label->text(field.label);
@@ -72,7 +84,6 @@ namespace terraformer::ui::widgets
 				m_widgets.push_back(resource{std::move(field_label)});
 			}
 
-			using input_widget_type = typename FieldDescriptor::input_widget_type;
 			auto field_input_widget = []<class ... T>(
 				iterator_invalidation_handler_ref iihr,
 				main::widget_orientation orientation,
@@ -98,7 +109,15 @@ namespace terraformer::ui::widgets
 					main::widget_orientation::vertical,
 				std::forward<InputWidgetParams>(input_widget_params)...
 			);
+
 			auto& ret = *field_input_widget;
+
+			if constexpr(requires(input_widget_type& widget){{widget.text(field.label)};})
+			{
+				if(label_on_input_field)
+				{ ret.text(field.label); }
+			}
+
 			if constexpr(requires(input_widget_type const& widget){{widget.value()};})
 			{
 				ret.value(field.value_reference.get());
@@ -134,8 +153,7 @@ namespace terraformer::ui::widgets
 			{
 				if(field.expand_layout_cell)
 				{
-					auto const record_count = std::size(m_widgets).get()/2 - 1;
-					layout.set_record_size(record_count, layouts::table::cell_size::expand{});
+					layout.set_record_size(m_record_count, layouts::table::cell_size::expand{});
 
 					auto const widget_attributes = get_children();
 					auto const last_element = widget_attributes.element_indices().back();
@@ -152,6 +170,7 @@ namespace terraformer::ui::widgets
 				widget_states[last_element].maximized = field.maximize_widget;
 			}
 
+			++m_record_count;
 			return ret;
 		}
 
@@ -168,6 +187,8 @@ namespace terraformer::ui::widgets
 
 		single_array<unique_resource<vtable>> m_widgets;
 		main::widget_orientation m_orientation;
+
+		size_t m_record_count = 0;
 	};
 }
 

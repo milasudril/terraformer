@@ -32,6 +32,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		std::reference_wrapper<bool> value_reference;
+		bool label_on_input_field;
 		using input_widget_type = ui::widgets::toggle_button;
 	};
 
@@ -53,7 +54,8 @@ namespace terraformer::app
 		ret.create_widget(
 			level_curves_visible_form_field{
 				.label = u8"Visible",
-				.value_reference = std::ref(field_value.visible)
+				.value_reference = std::ref(field_value.visible),
+				.label_on_input_field = true
 			}
 		);
 
