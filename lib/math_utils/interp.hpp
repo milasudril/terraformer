@@ -4,7 +4,9 @@
 #include "./boundary_sampling_policy.hpp"
 #include "./boundary_sampling_policies.hpp"
 #include "lib/common/ranges.hpp"
+#include "lib/common/spaces.hpp"
 #include "lib/array_classes/multi_span.hpp"
+#include "lib/pixel_store/image.hpp"
 
 #include <cmath>
 #include <cassert>
@@ -200,6 +202,32 @@ namespace terraformer
 		auto const z_x0 = (1.0f - static_cast<float>(xi)) * z_00 + static_cast<float>(xi) * z_10;
 		auto const z_x1 = (1.0f - static_cast<float>(xi)) * z_01 + static_cast<float>(xi) * z_11;
 		return (1.0f - eta)*z_x0 + eta*z_x1;
+	}
+
+	template<class T>
+	basic_image<T> resample(span_2d<T const> input, scaling factor)
+	{
+		auto const input_width = static_cast<float>(input.width());
+		auto const input_height = static_cast<float>(input.height());
+
+		auto const output_width = static_cast<uint32_t>(factor[0]*input_width + 0.5f);
+		auto const output_height = static_cast<uint32_t>(factor[1]*input_height + 0.5f);
+
+		basic_image<T> ret{output_width, output_height};
+
+		// TODO: This algorithm is only suitable for upscaling. Downscaling needs an
+		//       anti-alias filter
+		for(uint32_t y = 0; y != output_height; ++y)
+		{
+			for(uint32_t x = 0; x != output_width; ++x)
+			{
+				auto const src_pixel = displacement{static_cast<float>(x), static_cast<float>(y), 0.0f}.apply_inv(factor);
+
+				ret(x, y) = interp(input, src_pixel[0], src_pixel[1], clamp_at_boundary{});
+			}
+		}
+
+		return ret;
 	}
 }
 

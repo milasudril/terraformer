@@ -6,6 +6,7 @@
 #include "ui/value_maps/affine_value_map.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 
+#include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
 
 namespace terraformer::ui::widgets
@@ -41,9 +42,10 @@ namespace terraformer::ui::widgets
 			auto const null_texture = m_cfg.null_texture;
 			if(m_source_image_dirty)
 			{
-			//	auto const resized_image = resize(m_current_image, m_adjusted_box);
-				m_background = static_cast<PresentationFilter const&>(*this).apply_filter(m_current_image.pixels());
-				auto fg = static_cast<PresentationFilter const&>(*this).create_foreground(m_current_image.pixels());
+				auto const input_pixels = std::as_const(m_current_image).pixels();
+				auto const resized_image = resample(input_pixels, m_adjusted_box/m_current_box);
+				m_background = static_cast<PresentationFilter const&>(*this).apply_filter(resized_image.pixels());
+				auto fg = static_cast<PresentationFilter const&>(*this).create_foreground(resized_image.pixels());
 				m_foreground = fg.has_value()? std::move(fg) : std::optional<main::unique_texture>{};
 				auto const full_box = m_adjusted_box + 2.0f*m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
 				auto const w = static_cast<uint32_t>(full_box[0]);
