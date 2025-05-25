@@ -39,7 +39,7 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend)
 		{
-			auto const null_texture = m_cfg.null_texture;
+			auto& null_texture = m_cfg.null_texture->get_backend_resource(backend);
 			auto const border_displacement = m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
 			if(m_source_image_dirty)
 			{
@@ -81,12 +81,12 @@ namespace terraformer::ui::widgets
 				},
 				.sel_bg_mask = main::widget_layer_mask{
 					.offset = displacement{},
-					.texture = null_texture->get_backend_resource(backend).get()
+					.texture = null_texture.get()
 				},
 				.selection_background = main::widget_layer{
 					.offset = displacement{},
 					.rotation = geosimd::turn_angle{},
-					.texture = null_texture->get_backend_resource(backend).get(),
+					.texture = null_texture.get(),
 					.tints = std::array<rgba_pixel, 4>{}
 				},
 				.foreground = main::widget_layer{
@@ -94,7 +94,7 @@ namespace terraformer::ui::widgets
 					.rotation = geosimd::turn_angle{},
 					.texture = (m_foreground.has_value()?
 							 m_foreground->get_backend_resource(backend)
-							:null_texture->get_backend_resource(backend)
+							:null_texture
 						).get(),
 					.tints = std::array{fg_tint, fg_tint, fg_tint, fg_tint}
 				},
@@ -107,7 +107,7 @@ namespace terraformer::ui::widgets
 				.input_marker{
 					.offset = border_displacement,
 					.rotation = geosimd::turn_angle{},
-					.texture = null_texture->get_backend_resource(backend).get(),
+					.texture = null_texture.get(),
 					.tints = std::array<rgba_pixel, 4>{}
 				}
 			};
@@ -143,8 +143,11 @@ namespace terraformer::ui::widgets
 
 		box_size confirm_size(box_size size)
 		{
-			auto const new_box = m_current_box.fit_xy_keep_z(
-				size + 2.0f*m_cfg.border_thickness*displacement{-1.0f, -1.0f, 0.0f}
+			auto const new_box = max(
+				m_current_box.fit_xy_keep_z(
+					size + 2.0f*m_cfg.border_thickness*displacement{-1.0f, -1.0f, 0.0f}
+				),
+				box_size{1.0f, 1.0f, 0.0f}
 			);
 			m_source_image_dirty = (new_box != m_adjusted_box || m_source_image_dirty);
 			m_adjusted_box = new_box;
