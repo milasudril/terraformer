@@ -18,7 +18,6 @@ namespace terraformer::ui::widgets
 		using widget_group::get_children;
 		using widget_group::get_layout;
 		using widget_group::compute_size;
-		using widget_group::confirm_size;
 
 		template<class ValueMap, class ColorMap>
 		explicit colorbar(iterator_invalidation_handler_ref iihr, ValueMap&& vm, ColorMap&& cm):
@@ -60,6 +59,17 @@ namespace terraformer::ui::widgets
 			}
 		}
 
+		box_size confirm_size(box_size size_in)
+		{
+			if(size_in != m_size)
+			{
+				m_size = size_in;
+				update_colorbar();
+				update_frame();
+			}
+			return size_in;
+		}
+
 	private:
 		type_erased_value_map m_value_map{
 			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
@@ -86,6 +96,7 @@ namespace terraformer::ui::widgets
 			update_colorbar();
 			update_frame();
 		}
+		box_size m_size;
 		main::unique_texture m_image;
 		main::unique_texture m_frame;
 		rgba_pixel m_fg_tint;

@@ -8,10 +8,9 @@
 
 void terraformer::ui::widgets::colorbar::update_colorbar()
 {
-	image output_image{32, 512};
-
-	auto const h = output_image.height();
-	auto const w = output_image.width();
+	auto const w = static_cast<uint32_t>(m_size[0] + 0.5f);
+	auto const h = static_cast<uint32_t>(m_size[1] + 0.5f);
+	image output_image{w, h};
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
@@ -26,8 +25,8 @@ void terraformer::ui::widgets::colorbar::update_colorbar()
 
 void terraformer::ui::widgets::colorbar::update_frame()
 {
-	constexpr auto h = 512;
-	constexpr auto w  = 32;
+	auto const w = static_cast<uint32_t>(m_size[0] + 0.5f);
+	auto const h = static_cast<uint32_t>(m_size[1] + 0.5f);
 	auto output_frame = generate(
 		drawing_api::flat_rectangle{
 			.domain_size = span_2d_extents {
@@ -44,16 +43,10 @@ void terraformer::ui::widgets::colorbar::update_frame()
 		}
 	);
 
-	auto const value_map_ptr = m_value_map.get().get_pointer();
-	auto const to_value = m_value_map.get().get_vtable().to_value;
-
-	for(uint32_t index = 0; index != 13; ++index)
+	for(uint32_t index = 0; index != 14; ++index)
 	{
-		auto const intensity = static_cast<float>(index)/12;
-		auto const value = to_value(value_map_ptr, intensity);
-		printf("%s\n", siformat(value, 2).c_str());
-
-		auto const y = static_cast<uint32_t>((1.0f - intensity)*(h - 1) + 0.5f);
+		auto const intensity = static_cast<float>(index)/13;
+		auto const y = static_cast<uint32_t>((1.0f - intensity)*static_cast<float>(h - 1) + 0.5f);
 		for(uint32_t x = 0; x != w; ++x)
 		{
 			if(x < w/4 || x >= w - w/4)
