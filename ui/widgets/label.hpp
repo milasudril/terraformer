@@ -52,6 +52,9 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(const main::config& cfg, main::widget_instance_info);
 
+		void set_margin(float new_val)
+		{ m_margin = new_val; }
+
 	private:
 		std::basic_string<char8_t> m_text;
 		basic_image<uint8_t> m_rendered_text;
@@ -62,7 +65,6 @@ namespace terraformer::ui::widgets
 		unsigned int m_dirty_bits = text_dirty | host_textures_dirty;
 
 		float m_margin = 0;
-		unsigned int m_border_thickness = 0;
 		std::shared_ptr<font_handling::font const> m_font;
 		rgba_pixel m_fg_tint;
 
