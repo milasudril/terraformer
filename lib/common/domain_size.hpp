@@ -5,9 +5,8 @@ namespace terraformer
 {
 	struct domain_size
 	{
-		uint32_t width;
-		uint32_t height;
-		float pixel_size;
+		float width;
+		float height;
 	};
 }
 

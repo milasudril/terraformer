@@ -117,15 +117,13 @@ int main(int, char**)
 	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &heightmap_img = heightmap.data](auto&&...){
 		task_receiver.replace_pending_task(
 			[plain, &heightmap_img, &heightmap_view, &gui_ctxt]() {
-				terraformer::grayscale_image new_heightmap{512, 512};
-				replace_pixels(new_heightmap.pixels(), 96.0f, plain);
 				gui_ctxt
-					.post_event([&heightmap_img, hm = std::move(new_heightmap), &heightmap_view]() mutable {
+					.post_event([&heightmap_img, hm = generate(terraformer::domain_size{1024.0f, 1024.0f}, plain), &heightmap_view]() mutable {
 						heightmap_img = std::move(hm);
 						heightmap_view.refresh();
 					})
 					.notify_main_loop();
-				//store(output, "/dev/shm/slask.exr");
+				store(generate(terraformer::domain_size{1024.0f, 1024.0f}, plain), "/dev/shm/slask.exr");
 			}
 		);
 	});

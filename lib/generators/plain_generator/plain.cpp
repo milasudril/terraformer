@@ -68,3 +68,16 @@ void terraformer::replace_pixels(
 		}
 	}
 }
+
+terraformer::grayscale_image terraformer::generate(domain_size const& size, plain_descriptor const& params)
+{
+	auto const size_factor = std::min(size.width, size.height);
+	auto const min_pixel_count = 16.0f;  // Assume at most 4 periods (taking 4 samples per period)
+	auto const w_scaled = min_pixel_count*size.width/size_factor;
+	auto const h_scaled = min_pixel_count*size.height/size_factor;
+	auto const pixel_size = size_factor/min_pixel_count;
+
+	grayscale_image ret{static_cast<uint32_t>(w_scaled + 0.5f), static_cast<uint32_t>(h_scaled + 0.5f)};
+	replace_pixels(ret.pixels(), pixel_size, params);
+	return ret;
+}

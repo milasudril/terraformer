@@ -3,7 +3,9 @@
 #ifndef TERRAFORMER_PLAIN_GENERATOR_HPP
 #define TERRAFORMER_PLAIN_GENERATOR_HPP
 
+#include "lib/common/domain_size.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/pixel_store/image.hpp"
 
 namespace terraformer
 {
@@ -27,6 +29,8 @@ namespace terraformer
 		float pixel_size,
 		plain_descriptor const& params
 	);
+
+	grayscale_image generate(domain_size const& dom_size, plain_descriptor const& params);
 }
 
 #endif
