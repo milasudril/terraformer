@@ -55,6 +55,9 @@ namespace terraformer::ui::widgets
 		void set_margin(float new_val)
 		{ m_margin = new_val; }
 
+		uint32_t text_height() const
+		{ return m_rendered_text.height(); }
+
 	private:
 		std::basic_string<char8_t> m_text;
 		basic_image<uint8_t> m_rendered_text;

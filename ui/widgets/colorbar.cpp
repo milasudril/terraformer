@@ -65,8 +65,8 @@ void terraformer::ui::widgets::colorbar::update_frame()
 terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::colorbar::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
-	auto const h_label = m_size[1]/static_cast<float>(std::size(m_labels));
-	auto const scale_offset = 0.5f*displacement{0.0f, h_label, 0.0f};
+	auto const h_label = 0.875f*static_cast<float>(m_labels[0].text_height());
+	auto const scale_offset = displacement{0.0f, h_label, 0.0f};
 
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
