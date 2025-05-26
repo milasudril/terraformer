@@ -103,6 +103,7 @@ namespace terraformer::ui::widgets
 			layout.set_record_size(1, layouts::table::cell_size::expand{});
 			append(std::ref(m_label), main::widget_geometry{});
 			append(std::ref(m_colorbar), main::widget_geometry{});
+			is_transparent = true;
 			auto const attributes = get_attributes();
 			auto const widget_states = attributes.widget_states();
 			widget_states[attributes.element_indices().back()].maximized = true;
