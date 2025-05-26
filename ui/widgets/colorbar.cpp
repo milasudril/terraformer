@@ -4,7 +4,7 @@
 #include "ui/drawing_api/image_generators.hpp"
 #include "lib/common/utils.hpp"
 
-#include <format>
+#include <algorithm>
 
 void terraformer::ui::widgets::colorbar::update_colorbar()
 {
@@ -128,6 +128,15 @@ terraformer::box_size terraformer::ui::widgets::colorbar::confirm_size(box_size 
 {
 	if(size_in != m_size)
 	{
+		auto const w_max = static_cast<float>(
+			std::ranges::max_element
+				(m_labels, [](auto const& a, auto const& b){
+				return a.text_width() < b.text_width();
+			})->text_width()
+		);
+
+		size_in[0] = w_max + 3.0f*m_marker_length;
+
 		m_size = size_in;
 		update_colorbar();
 		update_frame();

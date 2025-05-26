@@ -58,6 +58,9 @@ namespace terraformer::ui::widgets
 		uint32_t text_height() const
 		{ return m_rendered_text.height(); }
 
+		uint32_t text_width() const
+		{ return m_rendered_text.width(); }
+
 	private:
 		std::basic_string<char8_t> m_text;
 		basic_image<uint8_t> m_rendered_text;
