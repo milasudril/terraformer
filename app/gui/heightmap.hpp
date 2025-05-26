@@ -47,7 +47,8 @@ namespace terraformer::app
 		auto& ret = form.create_widget(
 			level_curves_descriptor_form_field{
 				.label = field_name
-			}
+			},
+			terraformer::ui::main::widget_orientation::horizontal
 		);
 
 		ret.create_widget(
@@ -136,7 +137,7 @@ namespace terraformer::app
 
 		auto& imgview = ret.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
-				.label = u8"Output",
+				.label = u8"Preview",
 				.value_reference = field_value.value.data,
 				.expand_layout_cell = true,
 				.maximize_widget = true
@@ -146,7 +147,14 @@ namespace terraformer::app
 			terraformer::get_elevation_color_lut()
 		);
 
-		auto& level_curves = bind(u8"Level curves", field_value.value.level_curves, ret);
+		auto& settings_form = ret.create_widget(
+			heightmap_chart_form_field{
+				.label = u8"Settings",
+				.expand_layout_cell = false
+			}
+		);
+
+		auto& level_curves = bind(u8"Level curves", field_value.value.level_curves, settings_form);
 		level_curves.on_content_updated([&level_curves = field_value.value.level_curves, &imgview](auto&&...){
 			if(level_curves.visible)
 			{ imgview.show_level_curves(); }
