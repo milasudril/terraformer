@@ -7,6 +7,7 @@
 #include "ui/widgets/widget_canvas.hpp"
 #include "ui/widgets/false_color_image_view.hpp"
 #include "ui/widgets/colorbar.hpp"
+#include "ui/widgets/heatmap_view.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
@@ -127,25 +128,15 @@ namespace terraformer::app
 		);
 
 		auto& imgview = ret.create_widget(
-			heightmap_part_form_field<terraformer::ui::widgets::false_color_image_view>{
+			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
 				.label = u8"",
 				.value_reference = std::as_const(field_value.data),
 				.expand_layout_cell = true,
 				.maximize_widget = true
 			},
+			u8"Elevation/m",
 			terraformer::global_elevation_map,
 			terraformer::get_elevation_color_lut()
-		);
-
-
-		ret.create_widget(
-			colorbar_form_field{
-				.label = u8"",
-				.maximize_widget = true
-			},
-			u8"Elevation/m",
-			global_elevation_map,
-			get_elevation_color_lut()
 		);
 
 		auto& level_curves = bind(u8"Level curves", field_value.level_curves, ret);

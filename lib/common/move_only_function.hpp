@@ -95,11 +95,11 @@ namespace terraformer
 		move_only_function(Func&& f):
 			m_handle{new std::remove_cvref_t<Func>(std::forward<Func>(f))},
 			m_function{[](void* handle, Args... args){
-				auto& obj = *static_cast<Func*>(handle);
+				auto& obj = *static_cast<std::remove_cvref_t<Func>*>(handle);
 				return obj(std::forward<Args>(args)...);
 			}},
 			m_dtor{[](void* handle){
-				auto obj = static_cast<Func*>(handle);
+				auto obj = static_cast<std::remove_cvref_t<Func>*>(handle);
 				delete obj;
 			}}
 		{}
