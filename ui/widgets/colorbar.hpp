@@ -46,29 +46,9 @@ namespace terraformer::ui::widgets
 
 		void update_frame();
 
-		void update_labels()
-		{
-			auto const value_map_ptr = m_value_map.get().get_pointer();
-			auto const to_value = m_value_map.get().get_vtable().to_value;
-			for(size_t k = 0; k != std::size(m_labels); ++k)
-			{
-				auto const intensity = 1.0f - static_cast<float>(k)/static_cast<float>(std::size(m_labels) - 1);
-				auto const value = to_value(value_map_ptr, intensity);
-				// TODO: siformat should return u8
-				m_labels[k].value(reinterpret_cast<char8_t const*>(siformat(value, 2).c_str()));
-			}
-		}
+		void update_labels();
 
-		box_size confirm_size(box_size size_in)
-		{
-			if(size_in != m_size)
-			{
-				m_size = size_in;
-				update_colorbar();
-				update_frame();
-			}
-			return size_in;
-		}
+		box_size confirm_size(box_size size_in);
 
 	private:
 		type_erased_value_map m_value_map{
@@ -80,22 +60,8 @@ namespace terraformer::ui::widgets
 			}
 		};
 
-		void init()
-		{
-			update_labels();
-			for(size_t k = 0; k!= std::size(m_labels); ++k)
-			{
-				m_labels[k].set_margin(0.0f);
-				append(std::ref(m_labels[k]), terraformer::ui::main::widget_geometry{});
-				layout.set_record_size(k, layouts::table::cell_size::expand{});
-			}
-			layout.params().no_outer_margin = false;
-			layout.params().margin_x = 1.0f*m_marker_length;
-			layout.params().margin_y = 0.0f;
+		void init();
 
-			update_colorbar();
-			update_frame();
-		}
 		box_size m_size;
 		main::unique_texture m_image;
 		main::unique_texture m_frame;
