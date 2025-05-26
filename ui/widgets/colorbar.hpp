@@ -36,7 +36,6 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info)
 		{
-			puts("Theme updated");
 			m_null_texture = cfg.misc_textures.null;
 			m_fg_tint = cfg.output_area.colors.foreground;
 			m_marker_length = 8.0f * cfg.output_area.border_thickness;
