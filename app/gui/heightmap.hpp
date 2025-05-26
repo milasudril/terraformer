@@ -5,8 +5,6 @@
 
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/widget_canvas.hpp"
-#include "ui/widgets/false_color_image_view.hpp"
-#include "ui/widgets/colorbar.hpp"
 #include "ui/widgets/heatmap_view.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/knob.hpp"
@@ -104,13 +102,6 @@ namespace terraformer::app
 		using input_widget_type = View;
 	};
 
-	struct colorbar_form_field
-	{
-		std::u8string_view label;
-		bool maximize_widget;
-		using input_widget_type = terraformer::ui::widgets::labeled_colorbar;
-	};
-
 	struct level_curves_form_field
 	{
 		std::u8string_view label;
@@ -123,13 +114,12 @@ namespace terraformer::app
 			heightmap_chart_form_field{
 				.label = field_name,
 				.expand_layout_cell = true
-			},
-			ui::main::widget_orientation::horizontal
+			}
 		);
 
 		auto& imgview = ret.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
-				.label = u8"",
+				.label = u8"Heatmap",
 				.value_reference = std::as_const(field_value.data),
 				.expand_layout_cell = true,
 				.maximize_widget = true
