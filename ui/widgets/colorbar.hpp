@@ -36,8 +36,11 @@ namespace terraformer::ui::widgets
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info)
 		{
+			puts("Theme updated");
 			m_null_texture = cfg.misc_textures.null;
 			m_fg_tint = cfg.output_area.colors.foreground;
+			m_marker_length = 8.0f * cfg.output_area.border_thickness;
+			layout.params().margin_x = m_marker_length;
 			m_border_thickness = static_cast<uint32_t>(cfg.output_area.border_thickness);
 			update_frame();
 		}
@@ -66,7 +69,7 @@ namespace terraformer::ui::widgets
 		main::unique_texture m_image;
 		main::unique_texture m_frame;
 		rgba_pixel m_fg_tint;
-		float m_marker_length = 8.0f;
+		float m_marker_length;
 		uint32_t m_border_thickness;
 		main::immutable_shared_texture m_null_texture;
 		std::array<label, 13> m_labels;

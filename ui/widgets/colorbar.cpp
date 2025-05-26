@@ -157,9 +157,5 @@ void terraformer::ui::widgets::colorbar::init()
 		layout.set_record_size(k, layouts::table::cell_size::expand{});
 	}
 	layout.params().no_outer_margin = false;
-	layout.params().margin_x = 1.0f*m_marker_length;
 	layout.params().margin_y = 0.0f;
-
-	update_colorbar();
-	update_frame();
 }
