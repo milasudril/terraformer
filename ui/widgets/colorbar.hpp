@@ -39,6 +39,7 @@ namespace terraformer::ui::widgets
 			m_null_texture = cfg.misc_textures.null;
 			m_fg_tint = cfg.output_area.colors.foreground;
 			m_marker_length = 8.0f * cfg.output_area.border_thickness;
+			layout.params().margin_y = 0.0f;
 			layout.params().margin_x = m_marker_length;
 			m_border_thickness = static_cast<uint32_t>(cfg.output_area.border_thickness);
 			update_frame();
@@ -99,9 +100,6 @@ namespace terraformer::ui::widgets
 		{
 			m_label.text(label);
 			m_label.set_margin(0.0f);
-			layout.params().margin_x = 0.0f;
-			layout.params().margin_y = 0.0f;
-			layout.params().no_outer_margin = true;
 			layout.set_record_size(1, layouts::table::cell_size::expand{});
 			append(std::ref(m_label), main::widget_geometry{});
 			append(std::ref(m_colorbar), main::widget_geometry{});
@@ -109,6 +107,14 @@ namespace terraformer::ui::widgets
 			auto const widget_states = attributes.widget_states();
 			widget_states[attributes.element_indices().back()].maximized = true;
 
+		}
+
+		void theme_updated(main::config const& new_theme, main::widget_instance_info instance_info)
+		{
+			widget_group::theme_updated(new_theme, instance_info);
+			layout.params().margin_x = 0.0f;
+			layout.params().margin_y = 0.0f;
+			layout.params().no_outer_margin = false;
 		}
 
 	private:
