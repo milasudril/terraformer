@@ -107,7 +107,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		bool maximize_widget;
-		using input_widget_type = terraformer::ui::widgets::colorbar;
+		using input_widget_type = terraformer::ui::widgets::labeled_colorbar;
 	};
 
 	struct level_curves_form_field
@@ -140,9 +140,10 @@ namespace terraformer::app
 
 		ret.create_widget(
 			colorbar_form_field{
-				.label = u8"Elevation/m",
+				.label = u8"",
 				.maximize_widget = true
 			},
+			u8"Elevation/m",
 			global_elevation_map,
 			get_elevation_color_lut()
 		);

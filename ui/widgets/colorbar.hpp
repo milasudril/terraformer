@@ -73,6 +73,50 @@ namespace terraformer::ui::widgets
 		main::immutable_shared_texture m_null_texture;
 		std::array<label, 13> m_labels;
 	};
+
+	class labeled_colorbar:private widget_group<layouts::table>
+	{
+	public:
+		using widget_group::handle_event;
+		using widget_group::get_children;
+		using widget_group::get_layout;
+		using widget_group::compute_size;
+		using widget_group::confirm_size;
+		using widget_group::theme_updated;
+		using widget_group::prepare_for_presentation;
+
+		template<class ValueMap, class ColorMap>
+		explicit labeled_colorbar(
+			iterator_invalidation_handler_ref iihr,
+			std::u8string_view label,
+			ValueMap&& vm, ColorMap&& cm
+		):widget_group{
+				iihr,
+				1u,
+				layouts::table::cell_order::row_major
+			},
+			m_colorbar{iihr, std::forward<ValueMap>(vm), std::forward<ColorMap>(cm)}
+		{
+			m_label.text(label);
+			m_label.set_margin(0.0f);
+			layout.params().margin_x = 0.0f;
+			layout.params().margin_y = 0.0f;
+			layout.params().no_outer_margin = true;
+			layout.set_record_size(1, layouts::table::cell_size::expand{});
+			append(std::ref(m_label), main::widget_geometry{});
+			append(std::ref(m_colorbar), main::widget_geometry{});
+			auto const attributes = get_attributes();
+			auto const widget_states = attributes.widget_states();
+			widget_states[attributes.element_indices().back()].maximized = true;
+
+		}
+
+	private:
+		label m_label;
+		colorbar m_colorbar;
+
+	};
+
 }
 
 #endif
