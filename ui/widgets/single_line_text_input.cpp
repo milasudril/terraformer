@@ -63,9 +63,6 @@ void terraformer::ui::widgets::single_line_text_input::regenerate_textures()
 	// Add one to get inclusive boundaries
 	auto const sel_end = horz_offset_from_index(m_glyphs, m_sel_range.end()) + 1.0f;
 
-	printf("begin = %zu, end = %zu, cursor = %zu\n", m_sel_range.begin(), m_sel_range.end(), m_insert_offset);
-	printf("sel_begin = %.8g, sel_end = %.8g\n", sel_begin, sel_end);
-
 	m_selection_mask = generate(
 		drawing_api::flat_rectangle{
 			.domain_size = span_2d_extents {
