@@ -137,7 +137,7 @@ namespace terraformer::app
 
 		auto& imgview = ret.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
-				.label = u8"Preview",
+				.label = u8"Output",
 				.value_reference = field_value.value.data,
 				.expand_layout_cell = true,
 				.maximize_widget = true
@@ -182,7 +182,7 @@ namespace terraformer::app
 		);
 
 		auto& heatmap = bind(
-			u8"Heatmap",
+			u8"Heatmap view",
 			make_tagged_value<terraformer::ui::widgets::heatmap_view>(field_value),
 			ret
 		);
