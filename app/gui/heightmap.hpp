@@ -108,6 +108,50 @@ namespace terraformer::app
 		using input_widget_type = terraformer::ui::widgets::form;
 	};
 
+	template<class Tag, class Value>
+	struct tagged_value
+	{
+		using tag_type = Tag;
+		Value value;
+	};
+
+	template<class Tag, class Value>
+	constexpr auto make_tagged_value(Value&& val)
+	{
+		return tagged_value<Tag, Value>{std::forward<Value>(val)};
+	}
+
+	auto& bind(
+		std::u8string_view field_name,
+		tagged_value<terraformer::ui::widgets::heatmap_view, heightmap_descriptor&> field_value,
+		ui::widgets::form& form
+	)
+	{
+		auto& ret = form.create_widget(
+			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
+				.label = field_name,
+				.value_reference = field_value.value.data,
+				.expand_layout_cell = true,
+				.maximize_widget = true
+			},
+			u8"Elevation/m",
+			terraformer::global_elevation_map,
+			terraformer::get_elevation_color_lut()
+		);
+
+		auto& level_curves = bind(u8"Level curves", field_value.value.level_curves, form);
+		level_curves.on_content_updated([&level_curves = field_value.value.level_curves, &ret](auto&&...){
+			if(level_curves.visible)
+			{ ret.show_level_curves(); }
+			else
+			{ ret.hide_level_curves(); }
+
+			ret.set_level_curve_interval(level_curves.interval);
+		});
+
+		return ret;
+	}
+
 	auto& bind(std::u8string_view field_name, heightmap_descriptor& field_value, ui::widgets::form& form)
 	{
 		auto& ret = form.create_widget(
@@ -117,7 +161,10 @@ namespace terraformer::app
 			}
 		);
 
-		auto& imgview = ret.create_widget(
+		auto& heatmap = bind(u8"Heatmap", make_tagged_value<terraformer::ui::widgets::heatmap_view>(field_value), ret);
+
+#if 0
+		auto& heatmap = ret.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
 				.label = u8"Heatmap",
 				.value_reference = std::as_const(field_value.data),
@@ -130,19 +177,19 @@ namespace terraformer::app
 		);
 
 		auto& level_curves = bind(u8"Level curves", field_value.level_curves, ret);
-		level_curves.on_content_updated([&level_curves = field_value.level_curves, &imgview](auto&&...){
+		level_curves.on_content_updated([&level_curves = field_value.level_curves, &heatmap](auto&&...){
 			if(level_curves.visible)
-			{ imgview.show_level_curves(); }
+			{ heatmap.show_level_curves(); }
 			else
-			{ imgview.hide_level_curves(); }
+			{ heatmap.hide_level_curves(); }
 
-			imgview.set_level_curve_interval(level_curves.interval);
+			heatmap.set_level_curve_interval(level_curves.interval);
 		});
 
-		ret.set_refresh_function([&field_value, &imgview](){
-			imgview.show_image(std::as_const(field_value).data.pixels());
+#endif
+		ret.set_refresh_function([&field_value, &heatmap](){
+			heatmap.show_image(std::as_const(field_value).data.pixels());
 		});
-
 		return ret;
 	}
 }
