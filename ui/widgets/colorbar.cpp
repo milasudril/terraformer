@@ -137,6 +137,9 @@ terraformer::box_size terraformer::ui::widgets::colorbar::confirm_size(box_size 
 
 		size_in[0] = w_max + 3.0f*m_marker_length;
 
+		auto const h_label = m_size[1]/static_cast<float>(std::size(m_labels));
+		size_in = max(size_in, box_size{0.0f, 2.0f + h_label, 0.0f});
+
 		m_size = size_in;
 		update_colorbar();
 		update_frame();
