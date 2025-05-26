@@ -128,8 +128,15 @@ namespace terraformer::app
 	)
 	{
 		auto& ret = form.create_widget(
-			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
+			heightmap_chart_form_field{
 				.label = field_name,
+				.expand_layout_cell = true
+			}
+		);
+
+		auto& imgview = ret.create_widget(
+			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
+				.label = u8"Output",
 				.value_reference = field_value.value.data,
 				.expand_layout_cell = true,
 				.maximize_widget = true
@@ -139,17 +146,17 @@ namespace terraformer::app
 			terraformer::get_elevation_color_lut()
 		);
 
-		auto& level_curves = bind(u8"Level curves", field_value.value.level_curves, form);
-		level_curves.on_content_updated([&level_curves = field_value.value.level_curves, &ret](auto&&...){
+		auto& level_curves = bind(u8"Level curves", field_value.value.level_curves, ret);
+		level_curves.on_content_updated([&level_curves = field_value.value.level_curves, &imgview](auto&&...){
 			if(level_curves.visible)
-			{ ret.show_level_curves(); }
+			{ imgview.show_level_curves(); }
 			else
-			{ ret.hide_level_curves(); }
+			{ imgview.hide_level_curves(); }
 
-			ret.set_level_curve_interval(level_curves.interval);
+			imgview.set_level_curve_interval(level_curves.interval);
 		});
 
-		return ret;
+		return imgview;
 	}
 
 	auto& bind(std::u8string_view field_name, heightmap_descriptor& field_value, ui::widgets::form& form)
@@ -158,35 +165,12 @@ namespace terraformer::app
 			heightmap_chart_form_field{
 				.label = field_name,
 				.expand_layout_cell = true
-			}
+			},
+			terraformer::ui::main::widget_orientation::horizontal
 		);
 
 		auto& heatmap = bind(u8"Heatmap", make_tagged_value<terraformer::ui::widgets::heatmap_view>(field_value), ret);
 
-#if 0
-		auto& heatmap = ret.create_widget(
-			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
-				.label = u8"Heatmap",
-				.value_reference = std::as_const(field_value.data),
-				.expand_layout_cell = true,
-				.maximize_widget = true
-			},
-			u8"Elevation/m",
-			terraformer::global_elevation_map,
-			terraformer::get_elevation_color_lut()
-		);
-
-		auto& level_curves = bind(u8"Level curves", field_value.level_curves, ret);
-		level_curves.on_content_updated([&level_curves = field_value.level_curves, &heatmap](auto&&...){
-			if(level_curves.visible)
-			{ heatmap.show_level_curves(); }
-			else
-			{ heatmap.hide_level_curves(); }
-
-			heatmap.set_level_curve_interval(level_curves.interval);
-		});
-
-#endif
 		ret.set_refresh_function([&field_value, &heatmap](){
 			heatmap.show_image(std::as_const(field_value).data.pixels());
 		});
