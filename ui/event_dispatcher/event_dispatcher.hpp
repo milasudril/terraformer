@@ -90,13 +90,15 @@ namespace terraformer::ui::main
 			{
 				if(event.action == mouse_button_action::press)
 				{ m_keyboard_widget = flat_widget_collection::npos; }
-				printf("%d mbe in the void\n", getpid());
 			}
 			else
 			if(event.action == mouse_button_action::press)
 			{
 				if(res.state().accepts_keyboard_input())
-				{ set_keyboard_focus(find(res, m_flat_collection), window); }
+				{
+					update_flat_widget_collection();
+					set_keyboard_focus(find(res, m_flat_collection), window);
+				}
 				else
 				{ m_keyboard_widget = flat_widget_collection::npos; }
 				m_mouse_widget = res;
@@ -212,9 +214,7 @@ namespace terraformer::ui::main
 
 		void set_keyboard_focus(flat_widget_collection::index_type new_widget, window_ref window)
 		{
-			if(new_widget == m_keyboard_widget ||
-				!(new_widget.within(m_flat_collection.element_indices()))
-			)
+			if(new_widget == m_keyboard_widget || !(new_widget.within(m_flat_collection.element_indices())))
 			{ return; }
 
 			try_dispatch(keyboard_focus_enter_event{}, m_flat_collection.attributes(), new_widget, window, ui_controller{*this});
