@@ -130,10 +130,6 @@ int main(int, char**)
 		);
 	});
 
-	main_form.on_content_updated([](auto&&...){
-		printf("Main: Content updated\n");
-	});
-
 	event_dispatcher.set_root_widget(std::ref(main_form));
 
 	mainwin.set_event_handler<mainwin_tag>(std::ref(event_dispatcher));

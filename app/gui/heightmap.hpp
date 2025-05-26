@@ -156,7 +156,11 @@ namespace terraformer::app
 			imgview.set_level_curve_interval(level_curves.interval);
 		});
 
-		return imgview;
+		ret.set_refresh_function([&image = field_value.value.data, &imgview](){
+			imgview.show_image(std::as_const(image).pixels());
+		});
+
+		return ret;
 	}
 
 	auto& bind(std::u8string_view field_name, heightmap_descriptor& field_value, ui::widgets::form& form)
@@ -169,11 +173,16 @@ namespace terraformer::app
 			terraformer::ui::main::widget_orientation::horizontal
 		);
 
-		auto& heatmap = bind(u8"Heatmap", make_tagged_value<terraformer::ui::widgets::heatmap_view>(field_value), ret);
+		auto& heatmap = bind(
+			u8"Heatmap",
+			make_tagged_value<terraformer::ui::widgets::heatmap_view>(field_value),
+			ret
+		);
 
-		ret.set_refresh_function([&field_value, &heatmap](){
-			heatmap.show_image(std::as_const(field_value).data.pixels());
+		ret.set_refresh_function([&heatmap](){
+			heatmap.refresh();
 		});
+
 		return ret;
 	}
 }
