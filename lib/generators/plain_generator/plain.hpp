@@ -1,5 +1,8 @@
 //@	{"dependencies_extra": [{"ref": "./plain.o", "rel": "implementation"}]}"}}
 
+#ifndef TERRAFORMER_PLAIN_GENERATOR_HPP
+#define TERRAFORMER_PLAIN_GENERATOR_HPP
+
 #include "lib/common/span_2d.hpp"
 
 namespace terraformer
@@ -25,3 +28,5 @@ namespace terraformer
 		plain_descriptor const& params
 	);
 }
+
+#endif
