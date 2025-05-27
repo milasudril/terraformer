@@ -1,13 +1,10 @@
 #ifndef TERRAFORMER_DOMAIN_SIZE_HPP
 #define TERRAFORMER_DOMAIN_SIZE_HPP
 
+#include "./domain_size.hpp"
+
 namespace terraformer
 {
-	struct domain_size
-	{
-		float width = 4096.0f;
-		float height = 4096.0f;
-	};
 }
 
 #endif

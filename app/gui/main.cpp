@@ -2,6 +2,7 @@
 //@		"target":{"name": "main.o"}
 //@	}
 
+#include "./domain_size.hpp"
 #include "./plain.hpp"
 #include "./heightmap.hpp"
 #include "./elevation_color_map.hpp"
@@ -100,6 +101,8 @@ int main(int, char**)
 		terraformer::ui::main::widget_orientation::horizontal
 	};
 
+	terraformer::domain_size domain_size;
+	terraformer::app::bind(u8"Domain size", domain_size, main_form);
 	terraformer::plain_descriptor plain;
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
