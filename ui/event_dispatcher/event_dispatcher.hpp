@@ -142,14 +142,31 @@ namespace terraformer::ui::main
 			update_flat_widget_collection();
 
 			auto const nav_step = get_form_navigation_step_size(event);
-			auto const next_widget = find_next_wrap_around(
-				m_flat_collection.attributes().widget_states(),
-				m_keyboard_widget,
-				nav_step,
-				[](auto item){
-					return item.get().accepts_keyboard_input();
-				}
-			);
+			auto next_widget = m_keyboard_widget;
+			do
+			{
+				next_widget = find_next_wrap_around(
+					m_flat_collection.attributes().widget_states(),
+					next_widget,
+					nav_step,
+					[](auto item){
+						return item.get().accepts_keyboard_input();
+					}
+				);
+
+				// Check no parent widget has disabled interaction
+				// TODO: Can the check be made within find_next_wrap_around
+				auto const res = ascend_tree_until(
+					m_flat_collection.attributes(),
+					next_widget,
+					[](auto const& item) {
+						return item.collection().widget_states()[item.index()].interaction_is_disabled();
+					}
+				);
+				if(res == flat_widget_collection::npos)
+				{ break; }
+			}
+			while(next_widget != m_keyboard_widget);
 
 			if(next_widget == m_keyboard_widget)
 			{

@@ -131,6 +131,24 @@ namespace terraformer::ui::main
 		}
 	}
 
+	template<class UnaryFunc>
+	auto ascend_tree_until(
+		flat_widget_collection_view const& widgets,
+		flat_widget_collection_view::index_type index,
+		UnaryFunc&& func
+	)
+	{
+		while(index != flat_widget_collection_view::npos)
+		{
+			auto const addresses = widgets.addresses();
+			auto const parents = widgets.parents();
+			if(func(addresses[index]))
+			{ return index; }
+			index = parents[index];
+		}
+		return index;
+	}
+
 	template<class EventType, class... Args>
 	bool try_dispatch(
 		EventType&& e,

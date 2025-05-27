@@ -18,6 +18,9 @@ namespace terraformer::ui::main
 		focus_indicator_mode cursor_focus_indicator_mode:2;
 		focus_indicator_mode kbd_focus_indicator_mode:2;
 
+		constexpr bool interaction_is_disabled() const
+		{ return disabled || hidden || collapsed; }
+
 		constexpr bool accepts_mouse_input() const
 		{ return !(disabled || hidden || collapsed) && mbe_sensitive; }
 
@@ -36,7 +39,7 @@ namespace terraformer::ui::main
 				|| cursor_focus_indicator_mode == focus_indicator_mode::always_visible;
 		}
 	};
-	
+
 	static_assert(sizeof(widget_state) == sizeof(uint16_t));
 
 }
