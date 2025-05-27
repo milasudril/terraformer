@@ -106,9 +106,14 @@ namespace terraformer::app
 		return settings_form;
 	}
 
+	enum class heightmap_active_view:size_t{
+		heatmap
+	};
+
 	struct heightmap_view_descriptor
 	{
 		std::reference_wrapper<grayscale_image const> data;
+		heightmap_active_view active_view = heightmap_active_view::heatmap;
 		heatmap_view_attributes heatmap_presentation_attributes;
 	};
 
@@ -118,7 +123,6 @@ namespace terraformer::app
 		bool expand_layout_cell;
 		using input_widget_type = ui::widgets::form;
 	};
-
 
 	struct heatmap_view_descriptor
 	{
