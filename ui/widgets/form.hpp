@@ -185,6 +185,28 @@ namespace terraformer::ui::widgets
 			return ret;
 		}
 
+		void hide_field_value(std::u8string_view field_name)
+		{
+			auto const i = m_fields.find(field_name);
+			if(i == std::end(m_fields))
+			{ return; }
+
+			auto const widget_attributes = get_children();
+			auto const widget_states = widget_attributes.widget_states();
+			widget_states[i->second].collapsed = true;
+		}
+
+		void show_field_value(std::u8string_view field_name)
+		{
+			auto const i = m_fields.find(field_name);
+			if(i == std::end(m_fields))
+			{ return; }
+
+			auto const widget_attributes = get_children();
+			auto const widget_states = widget_attributes.widget_states();
+			widget_states[i->second].collapsed = false;
+		}
+
 	private:
 		struct vtable
 		{
@@ -201,7 +223,22 @@ namespace terraformer::ui::widgets
 
 		size_t m_record_count = 0;
 
-		std::unordered_map<std::u8string, main::widget_collection_ref::index_type> m_fields;
+		struct string_hash
+		{
+			using hash_type = std::hash<std::u8string_view>;
+			using is_transparent = void;
+
+			std::size_t operator()(char8_t const* str) const        { return hash_type{}(str); }
+			std::size_t operator()(std::u8string_view str) const   { return hash_type{}(str); }
+			std::size_t operator()(std::u8string const& str) const { return hash_type{}(str); }
+		};
+
+		std::unordered_map<
+			std::u8string,
+			main::widget_collection_ref::index_type,
+			string_hash,
+			std::equal_to<>
+		> m_fields;
 	};
 }
 
