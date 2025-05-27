@@ -71,10 +71,15 @@ namespace terraformer::app
 		return ret;
 	}
 
+	struct heatmap_view_attributes
+	{
+		level_curves_descriptor level_curves;
+	};
+
 	struct heightmap_view_descriptor
 	{
 		std::reference_wrapper<grayscale_image const> data;
-		level_curves_descriptor level_curves;
+		heatmap_view_attributes heatmap_presentation_attributes;
 	};
 
 	struct heightmap_chart_form_field
@@ -105,11 +110,11 @@ namespace terraformer::app
 	{
 		explicit heatmap_view_descriptor(heightmap_view_descriptor& main_view):
 			data{main_view.data},
-			level_curves{main_view.level_curves}
+			presentation_attributes{main_view.heatmap_presentation_attributes}
 		{}
 
 		std::reference_wrapper<grayscale_image const> data;
-		std::reference_wrapper<level_curves_descriptor> level_curves;
+		std::reference_wrapper<heatmap_view_attributes> presentation_attributes;
 	};
 
 	auto& bind(
@@ -144,8 +149,8 @@ namespace terraformer::app
 			}
 		);
 
-		auto& level_curves = bind(u8"Level curves", field_value.level_curves.get(), settings_form);
-		level_curves.on_content_updated([&level_curves = field_value.level_curves.get(), &imgview](auto&&...){
+		auto& level_curves = bind(u8"Level curves", field_value.presentation_attributes.get().level_curves, settings_form);
+		level_curves.on_content_updated([&level_curves = field_value.presentation_attributes.get().level_curves, &imgview](auto&&...){
 			if(level_curves.visible)
 			{ imgview.show_level_curves(); }
 			else

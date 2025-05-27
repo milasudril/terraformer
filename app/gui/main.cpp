@@ -107,9 +107,11 @@ int main(int, char**)
 
 	terraformer::app::heightmap_view_descriptor heightmap_view_info{
 		.data = std::ref(heightmap),
-		.level_curves = terraformer::app::level_curves_descriptor{
-			.interval = 100.0f,
-			.visible = true
+		.heatmap_presentation_attributes{
+			.level_curves = terraformer::app::level_curves_descriptor{
+				.interval = 100.0f,
+				.visible = true
+			}
 		}
 	};
 	auto& heightmap_view = terraformer::app::bind(u8"Current heightmap", heightmap_view_info, main_form);
