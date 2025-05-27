@@ -75,6 +75,12 @@ int main(int, char**)
 				.major = 4,
 				.minor = 6
 			}
+		},
+		terraformer::ui::wsapi::window_configuration{
+			.geometry{
+				.width = 977,
+				.height = 626
+			}
 		}
 	};
 
