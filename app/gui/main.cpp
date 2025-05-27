@@ -103,7 +103,7 @@ int main(int, char**)
 	terraformer::plain_descriptor plain;
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
-	terraformer::app::heightmap_descriptor heightmap{
+	terraformer::app::heightmap_view_descriptor heightmap{
 		.data = terraformer::grayscale_image{4, 4},
 		.level_curves = terraformer::app::level_curves_descriptor{
 			.interval = 100.0f,

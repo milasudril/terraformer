@@ -72,7 +72,7 @@ namespace terraformer::app
 		return ret;
 	}
 
-	struct heightmap_descriptor
+	struct heightmap_view_descriptor
 	{
 		grayscale_image data;
 		level_curves_descriptor level_curves;
@@ -124,7 +124,7 @@ namespace terraformer::app
 
 	auto& bind(
 		std::u8string_view field_name,
-		tagged_value<terraformer::ui::widgets::heatmap_view, heightmap_descriptor&> field_value,
+		tagged_value<terraformer::ui::widgets::heatmap_view, heightmap_view_descriptor&> field_value,
 		ui::widgets::form& form
 	)
 	{
@@ -171,7 +171,7 @@ namespace terraformer::app
 		return ret;
 	}
 
-	auto& bind(std::u8string_view field_name, heightmap_descriptor& field_value, ui::widgets::form& form)
+	auto& bind(std::u8string_view field_name, heightmap_view_descriptor& field_value, ui::widgets::form& form)
 	{
 		auto& ret = form.create_widget(
 			heightmap_chart_form_field{
