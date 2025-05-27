@@ -78,7 +78,18 @@ namespace terraformer::ui::widgets
 			}
 			else
 			{
-				auto field_label = std::make_unique<label>();
+				auto field_label = std::make_unique<interactive_label>();
+				field_label->on_activated([this, label = std::u8string{field.label}](auto&& ...){
+					auto const i = m_fields.find(label);
+					if(i == std::end(m_fields))
+					{ return; }
+
+					auto const widget_attributes = get_children();
+					auto const widget_states = widget_attributes.widget_states();
+					auto const is_collapsed = widget_states[i->second].collapsed;
+					widget_states[i->second].collapsed = !is_collapsed;
+				});
+
 				field_label->text(field.label);
 				append(std::ref(*field_label) ,ui::main::widget_geometry{});
 				m_widgets.push_back(resource{std::move(field_label)});
@@ -149,26 +160,26 @@ namespace terraformer::ui::widgets
 			append(std::ref(ret), ui::main::widget_geometry{});
 			m_widgets.push_back(resource{std::move(field_input_widget)});
 
+			auto const widget_attributes = get_children();
+			auto const last_element = widget_attributes.element_indices().back();
+
 			if constexpr(requires(FieldDescriptor const& f){{f.expand_layout_cell} -> std::convertible_to<bool>;})
 			{
 				if(field.expand_layout_cell)
 				{
-					layout.set_record_size(m_record_count, layouts::table::cell_size::expand{});
-
-					auto const widget_attributes = get_children();
-					auto const last_element = widget_attributes.element_indices().back();
 					auto const widget_states = widget_attributes.widget_states();
+					layout.set_record_size(m_record_count, layouts::table::cell_size::expand{});
 					widget_states[last_element].maximized = true;
 				}
 			}
 
 			if constexpr(requires(FieldDescriptor const& f){{f.maximize_widget} -> std::convertible_to<bool>;})
 			{
-				auto const widget_attributes = get_children();
-				auto const last_element = widget_attributes.element_indices().back();
 				auto const widget_states = widget_attributes.widget_states();
 				widget_states[last_element].maximized = field.maximize_widget;
 			}
+
+			m_fields.insert(std::pair{field.label, last_element});
 
 			++m_record_count;
 			return ret;
@@ -189,6 +200,8 @@ namespace terraformer::ui::widgets
 		main::widget_orientation m_orientation;
 
 		size_t m_record_count = 0;
+
+		std::unordered_map<std::u8string, main::widget_collection_ref::index_type> m_fields;
 	};
 }
 
