@@ -79,6 +79,83 @@ namespace terraformer::ui::widgets
 
 		main::fb_size m_current_size;
 	};
+
+	class interactive_label:private label
+	{
+	public:
+		enum class state{released, pressed};
+
+		using label::label;
+		using label::handle_event;
+		using label::prepare_for_presentation;
+		using label::text;
+		using label::theme_updated;
+		using label::get_layout;
+		using label::get_children;
+		using label::compute_size;
+		using label::confirm_size;
+
+		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller)
+		{ m_state_saved = std::exchange(m_state_to_display, state::released); }
+
+		void handle_event(main::cursor_enter_event const&, main::window_ref, main::ui_controller)
+		{ m_state_to_display = m_state_saved; }
+
+		void handle_event(main::mouse_button_event const& mbe, main::window_ref window, main::ui_controller ui_ctrl)
+		{
+			if(mbe.button == 0)
+			{
+				switch(mbe.action)
+				{
+					case main::mouse_button_action::press:
+						m_state_to_display = state::pressed;
+						break;
+
+					case main::mouse_button_action::release:
+						if(m_state_to_display == state::pressed)
+						{ m_on_activated(*this, window, ui_ctrl); }
+						m_state_to_display = state::released;
+						m_state_saved = state::released;
+						break;
+				}
+			}
+		}
+
+		void handle_event(main::keyboard_button_event const& kbe, main::window_ref window, main::ui_controller ui_ctrl)
+		{
+			switch(to_builtin_command_id(kbe))
+			{
+				case main::builtin_command_id::button_press:
+					m_state_to_display = state::pressed;
+					break;
+
+				case main::builtin_command_id::button_release:
+					if(m_state_to_display == state::pressed)
+					{ m_on_activated(*this, window, ui_ctrl); }
+					m_state_to_display = state::released;
+					m_state_saved = state::released;
+					break;
+
+				default:
+					break;
+			}
+		}
+
+		void handle_event(main::keyboard_focus_leave_event, main::window_ref, main::ui_controller)
+		{ m_state_saved = std::exchange(m_state_to_display, state::released); }
+
+		template<class Function>
+		interactive_label& on_activated(Function&& func)
+		{
+			m_on_activated = std::forward<Function>(func);
+			return *this;
+		}
+
+	private:
+		main::widget_user_interaction_handler<interactive_label> m_on_activated{no_operation_tag{}};
+		state m_state_to_display = state::released;
+		state m_state_saved = state::released;
+	};
 }
 
 #endif

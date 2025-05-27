@@ -86,14 +86,11 @@ namespace terraformer::ui::main
 		{
 			auto const res = find_recursive(event.where, m_root_collection);
 
-			if(!try_dispatch(event, res, window, ui_controller{*this}))
-			{
-				if(event.action == mouse_button_action::press)
-				{ m_keyboard_widget = flat_widget_collection::npos; }
-			}
-			else
 			if(event.action == mouse_button_action::press)
 			{
+				if(!try_dispatch(event, res, window, ui_controller{*this}))
+				{ m_keyboard_widget = flat_widget_collection::npos; }
+
 				if(res.state().accepts_keyboard_input())
 				{
 					update_flat_widget_collection();
@@ -101,6 +98,7 @@ namespace terraformer::ui::main
 				}
 				else
 				{ m_keyboard_widget = flat_widget_collection::npos; }
+
 				m_mouse_widget = res;
 				printf("mouse_widget = %zu\n", m_mouse_widget.index().get());
 			}
