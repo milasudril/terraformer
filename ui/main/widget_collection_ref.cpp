@@ -132,8 +132,10 @@ terraformer::ui::main::run(
 	auto const layer_stacks = children.widget_layer_stacks();
 	for(auto k : children.element_indices())
 	{
-		if(!widget_states[k].hidden) [[likely]]
-		{ layer_stacks[k] = run(prepare_for_presentation_context{children, k}, backend); }
+		if(widget_states[k].hidden || widget_states[k].collapsed) [[unlikely]]
+		{ continue; }
+
+		layer_stacks[k] = run(prepare_for_presentation_context{children, k}, backend);
 	}
 	return ret;
 }

@@ -395,14 +395,14 @@ namespace terraformer::ui::main
 		auto const widget_states = children.widget_states();
 		for(auto k : children.element_indices())
 		{
-			if(!widget_states[k].hidden) [[likely]]
-			{
-				run(
-					show_widget_context{children, k},
-					renderer,
-					ctxt.geometry().where + offset - location{0.0f, 0.0f, 0.0f}
-				);
-			}
+			if(widget_states[k].hidden || widget_states[k].collapsed) [[unlikely]]
+			{ continue; }
+
+			run(
+				show_widget_context{children, k},
+				renderer,
+				ctxt.geometry().where + offset - location{0.0f, 0.0f, 0.0f}
+			);
 		}
 	}
 
