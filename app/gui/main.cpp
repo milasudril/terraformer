@@ -2,7 +2,7 @@
 //@		"target":{"name": "main.o"}
 //@	}
 
-#include "./domain_size.hpp"
+#include "./map_sheet.hpp"
 #include "./plain.hpp"
 #include "./heightmap.hpp"
 #include "./elevation_color_map.hpp"
@@ -101,8 +101,8 @@ int main(int, char**)
 		terraformer::ui::main::widget_orientation::horizontal
 	};
 
-	terraformer::domain_size domain_size;
-	terraformer::app::bind(u8"Domain size", domain_size, main_form);
+	terraformer::map_sheet_descriptor map_sheet;
+	terraformer::app::bind(u8"Heightmap parameters", map_sheet, main_form);
 	terraformer::plain_descriptor plain;
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
@@ -121,11 +121,12 @@ int main(int, char**)
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
 
-	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &heightmap_img = heightmap](auto&&...){
+	auto& domain_size = map_sheet.domain_size;
+	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &domain_size, &heightmap_img = heightmap](auto&&...){
 		task_receiver.replace_pending_task(
-			[plain, &heightmap_img, &heightmap_view, &gui_ctxt]() {
+			[plain, domain_size, &heightmap_img, &heightmap_view, &gui_ctxt]() {
 				gui_ctxt
-					.post_event([&heightmap_img, hm = generate(terraformer::domain_size{8192.0f, 8192.0f}, plain), &heightmap_view]() mutable {
+					.post_event([&heightmap_img, hm = generate(domain_size, plain), &heightmap_view]() mutable {
 						heightmap_img = std::move(hm);
 						heightmap_view.refresh();
 					})

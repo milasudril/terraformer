@@ -69,7 +69,7 @@ void terraformer::replace_pixels(
 	}
 }
 
-terraformer::grayscale_image terraformer::generate(domain_size const& size, plain_descriptor const& params)
+terraformer::grayscale_image terraformer::generate(domain_size_descriptor const& size, plain_descriptor const& params)
 {
 	auto const size_factor = std::min(size.width, size.height);
 	// Assume a bandwidth of at most 4 periods

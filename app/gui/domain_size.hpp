@@ -23,7 +23,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	auto& bind(std::u8string_view field_name, domain_size& field_value, ui::widgets::form& form)
+	auto& bind(std::u8string_view field_name, domain_size_descriptor& field_value, ui::widgets::form& form)
 	{
 		auto& ret = form.create_widget(
 			domain_size_form_field{

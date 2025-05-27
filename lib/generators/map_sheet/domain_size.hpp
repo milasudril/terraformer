@@ -3,7 +3,7 @@
 
 namespace terraformer
 {
-	struct domain_size
+	struct domain_size_descriptor
 	{
 		float width = 4096.0f;
 		float height = 4096.0f;

@@ -29,7 +29,7 @@ namespace terraformer
 		plain_descriptor const& params
 	);
 
-	grayscale_image generate(domain_size const& dom_size, plain_descriptor const& params);
+	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor const& params);
 }
 
 #endif
