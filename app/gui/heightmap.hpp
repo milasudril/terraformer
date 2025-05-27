@@ -3,6 +3,7 @@
 
 #include "./elevation_color_map.hpp"
 #include "./domain_size.hpp"
+#include "./plain.hpp"
 
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/heatmap_view.hpp"
@@ -201,6 +202,24 @@ namespace terraformer::app
 
 		return ret;
 	}
+	struct heightmap_generator_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	auto& bind(std::u8string_view field_name, heightmap_generator_descriptor& field_value, ui::widgets::form& form)
+	{
+		auto& ret = form.create_widget(
+			heightmap_generator_form_field{
+				.label = field_name
+			}
+		);
+
+		bind(u8"Plain", field_value.plain, ret);
+
+		return ret;
+	}
 
 	struct heightmap_form_field
 	{
@@ -217,6 +236,8 @@ namespace terraformer::app
 		);
 
 		bind(u8"Domain size", field_value.domain_size, ret);
+
+		bind(u8"Generators", field_value.generators, ret);
 
 		return ret;
 	}

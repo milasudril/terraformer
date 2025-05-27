@@ -102,9 +102,7 @@ int main(int, char**)
 	};
 
 	terraformer::heightmap_descriptor heightmap;
-	terraformer::app::bind(u8"Heightmap parameters", heightmap, main_form);
-	terraformer::plain_descriptor plain;
-	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
+	auto& heightmap_form = terraformer::app::bind(u8"Heightmap parameters", heightmap, main_form);
 
 	terraformer::grayscale_image output{4, 4};
 
@@ -121,12 +119,11 @@ int main(int, char**)
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
 
-	auto& domain_size = heightmap.domain_size;
-	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &domain_size, &heightmap_img = output](auto&&...){
+	heightmap_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &heightmap, &heightmap_img = output](auto&&...){
 		task_receiver.replace_pending_task(
-			[plain, domain_size, &heightmap_img, &heightmap_view, &gui_ctxt]() {
+			[heightmap, &heightmap_img, &heightmap_view, &gui_ctxt]() {
 				gui_ctxt
-					.post_event([&heightmap_img, hm = generate(domain_size, plain), &heightmap_view]() mutable {
+					.post_event([&heightmap_img, hm = generate(heightmap.domain_size, heightmap.generators.plain), &heightmap_view]() mutable {
 						heightmap_img = std::move(hm);
 						heightmap_view.refresh();
 					})
