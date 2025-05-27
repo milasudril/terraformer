@@ -4,7 +4,6 @@
 #include "./elevation_color_map.hpp"
 
 #include "ui/widgets/form.hpp"
-#include "ui/widgets/widget_canvas.hpp"
 #include "ui/widgets/heatmap_view.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/knob.hpp"
@@ -83,13 +82,6 @@ namespace terraformer::app
 		std::u8string_view label;
 		bool expand_layout_cell;
 		using input_widget_type = ui::widgets::form;
-	};
-
-	struct heightmap_data_area_form_field
-	{
-		std::u8string_view label;
-		bool expand_layout_cell;
-		using input_widget_type = ui::widgets::widget_canvas;
 	};
 
 	template<class View>
