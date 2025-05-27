@@ -4,6 +4,7 @@
 #include "./elevation_color_map.hpp"
 #include "./domain_size.hpp"
 #include "./plain.hpp"
+#include "./rolling_hills.hpp"
 
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/heatmap_view.hpp"
@@ -218,6 +219,8 @@ namespace terraformer::app
 
 		bind(u8"Plain", field_value.plain, ret);
 		ret.hide_field_value(u8"Plain");
+		bind(u8"Rolling hills", field_value.rolling_hills, ret);
+		//ret.hide_field_value(u8"Rolling hills");
 
 		return ret;
 	}

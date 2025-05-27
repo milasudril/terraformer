@@ -2,6 +2,7 @@
 #define TERRAFORMER_HEIGHTMAP_DESCRIPTOR_HPP
 
 #include "lib/generators/plain_generator/plain.hpp"
+#include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 
 namespace terraformer
@@ -9,6 +10,7 @@ namespace terraformer
 	struct heightmap_generator_descriptor
 	{
 		plain_descriptor plain;
+		rolling_hills_descriptor rolling_hills;
 	};
 
 	struct heightmap_descriptor

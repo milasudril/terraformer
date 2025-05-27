@@ -10,8 +10,8 @@ namespace terraformer
 {
 	struct rolling_hills_descriptor
 	{
-		float wavelength_x;
-		float wavelength_y;
+		float wavelength_x = 4096.0f;
+		float wavelength_y = 4096.0f;
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, rolling_hills_descriptor const& params);
