@@ -118,12 +118,12 @@ int main(int, char**)
 		task_receiver.replace_pending_task(
 			[plain, &heightmap_img, &heightmap_view, &gui_ctxt]() {
 				gui_ctxt
-					.post_event([&heightmap_img, hm = generate(terraformer::domain_size{1024.0f, 1024.0f}, plain), &heightmap_view]() mutable {
+					.post_event([&heightmap_img, hm = generate(terraformer::domain_size{8192.0f, 8192.0f}, plain), &heightmap_view]() mutable {
 						heightmap_img = std::move(hm);
 						heightmap_view.refresh();
 					})
 					.notify_main_loop();
-				store(generate(terraformer::domain_size{1024.0f, 1024.0f}, plain), "/dev/shm/slask.exr");
+			//	store(generate(terraformer::domain_size{8192.0f, 8192.0f}, plain), "/dev/shm/slask.exr");
 			}
 		);
 	});
