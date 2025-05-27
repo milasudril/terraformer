@@ -14,6 +14,17 @@
 
 namespace terraformer::app
 {
+	template<class View>
+	struct heightmap_part_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<grayscale_image const> value_reference;
+		bool expand_layout_cell;
+		bool maximize_widget;
+
+		using input_widget_type = View;
+	};
+
 	struct level_curves_descriptor
 	{
 		float interval = 100.0f;
@@ -76,6 +87,25 @@ namespace terraformer::app
 		level_curves_descriptor level_curves;
 	};
 
+	struct heatmap_view_attributes_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	auto& bind(std::u8string_view field_name, heatmap_view_attributes& field_value, ui::widgets::form& form)
+	{
+		auto& settings_form = form.create_widget(
+			heatmap_view_attributes_form_field{
+				.label = field_name
+			}
+		);
+
+		bind(u8"Level curves", field_value.level_curves, settings_form);
+
+		return settings_form;
+	}
+
 	struct heightmap_view_descriptor
 	{
 		std::reference_wrapper<grayscale_image const> data;
@@ -89,22 +119,6 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	template<class View>
-	struct heightmap_part_form_field
-	{
-		std::u8string_view label;
-		std::reference_wrapper<grayscale_image const> value_reference;
-		bool expand_layout_cell;
-		bool maximize_widget;
-
-		using input_widget_type = View;
-	};
-
-	struct level_curves_form_field
-	{
-		std::u8string_view label;
-		using input_widget_type = terraformer::ui::widgets::form;
-	};
 
 	struct heatmap_view_descriptor
 	{
@@ -142,15 +156,8 @@ namespace terraformer::app
 			terraformer::get_elevation_color_lut()
 		);
 
-		auto& settings_form = ret.create_widget(
-			heightmap_chart_form_field{
-				.label = u8"Settings",
-				.expand_layout_cell = false
-			}
-		);
-
-		auto& level_curves = bind(u8"Level curves", field_value.presentation_attributes.get().level_curves, settings_form);
-		level_curves.on_content_updated([&level_curves = field_value.presentation_attributes.get().level_curves, &imgview](auto&&...){
+		auto& settings_form = bind(u8"Settings", field_value.presentation_attributes.get(), ret);
+		settings_form.on_content_updated([&level_curves = field_value.presentation_attributes.get().level_curves, &imgview](auto&&...){
 			if(level_curves.visible)
 			{ imgview.show_level_curves(); }
 			else
