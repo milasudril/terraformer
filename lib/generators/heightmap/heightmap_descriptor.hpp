@@ -16,6 +16,11 @@ namespace terraformer
 		domain_size_descriptor domain_size;
 		heightmap_generator_descriptor generators;
 	};
+
+	inline grayscale_image generate(heightmap_descriptor const& descriptor)
+	{
+		return generate(descriptor.domain_size, descriptor.generators.plain);
+	}
 }
 
 #endif

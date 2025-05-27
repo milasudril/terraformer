@@ -129,7 +129,7 @@ int main(int, char**)
 		task_receiver.replace_pending_task(
 			[heightmap, &heightmap_img, &heightmap_view, &gui_ctxt]() {
 				gui_ctxt
-					.post_event([&heightmap_img, hm = generate(heightmap.domain_size, heightmap.generators.plain), &heightmap_view]() mutable {
+					.post_event([&heightmap_img, hm = generate(heightmap), &heightmap_view]() mutable {
 						heightmap_img = std::move(hm);
 						heightmap_view.refresh();
 					})
