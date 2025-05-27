@@ -103,18 +103,20 @@ int main(int, char**)
 	terraformer::plain_descriptor plain;
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
-	terraformer::app::heightmap_view_descriptor heightmap{
-		.data = terraformer::grayscale_image{4, 4},
+	terraformer::grayscale_image heightmap{4, 4};
+
+	terraformer::app::heightmap_view_descriptor heightmap_view_info{
+		.data = std::ref(heightmap),
 		.level_curves = terraformer::app::level_curves_descriptor{
 			.interval = 100.0f,
 			.visible = true
 		}
 	};
-	auto& heightmap_view = terraformer::app::bind(u8"Current heightmap", heightmap, main_form);
+	auto& heightmap_view = terraformer::app::bind(u8"Current heightmap", heightmap_view_info, main_form);
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
 
-	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &heightmap_img = heightmap.data](auto&&...){
+	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &heightmap_img = heightmap](auto&&...){
 		task_receiver.replace_pending_task(
 			[plain, &heightmap_img, &heightmap_view, &gui_ctxt]() {
 				gui_ctxt

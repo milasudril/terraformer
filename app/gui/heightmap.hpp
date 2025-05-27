@@ -74,7 +74,7 @@ namespace terraformer::app
 
 	struct heightmap_view_descriptor
 	{
-		grayscale_image data;
+		std::reference_wrapper<grayscale_image const> data;
 		level_curves_descriptor level_curves;
 	};
 
@@ -164,8 +164,8 @@ namespace terraformer::app
 			imgview.set_level_curve_interval(level_curves.interval);
 		});
 
-		ret.set_refresh_function([&image = field_value.value.data, &imgview](){
-			imgview.show_image(std::as_const(image).pixels());
+		ret.set_refresh_function([image = field_value.value.data, &imgview](){
+			imgview.show_image(image.get().pixels());
 		});
 
 		return ret;
