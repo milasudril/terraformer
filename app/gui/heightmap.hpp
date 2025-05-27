@@ -109,22 +109,20 @@ namespace terraformer::app
 		using input_widget_type = terraformer::ui::widgets::form;
 	};
 
-	template<class Tag, class Value>
-	struct tagged_value
+	struct heatmap_view_descriptor
 	{
-		using tag_type = Tag;
-		Value value;
-	};
+		explicit heatmap_view_descriptor(heightmap_view_descriptor& main_view):
+			data{main_view.data},
+			level_curves{main_view.level_curves}
+		{}
 
-	template<class Tag, class Value>
-	constexpr auto make_tagged_value(Value&& val)
-	{
-		return tagged_value<Tag, Value>{std::forward<Value>(val)};
-	}
+		std::reference_wrapper<grayscale_image const> data;
+		std::reference_wrapper<level_curves_descriptor> level_curves;
+	};
 
 	auto& bind(
 		std::u8string_view field_name,
-		tagged_value<terraformer::ui::widgets::heatmap_view, heightmap_view_descriptor&> field_value,
+		heatmap_view_descriptor const& field_value,
 		ui::widgets::form& form
 	)
 	{
@@ -138,7 +136,7 @@ namespace terraformer::app
 		auto& imgview = ret.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
 				.label = u8"Output",
-				.value_reference = field_value.value.data,
+				.value_reference = field_value.data,
 				.expand_layout_cell = true,
 				.maximize_widget = true
 			},
@@ -154,8 +152,8 @@ namespace terraformer::app
 			}
 		);
 
-		auto& level_curves = bind(u8"Level curves", field_value.value.level_curves, settings_form);
-		level_curves.on_content_updated([&level_curves = field_value.value.level_curves, &imgview](auto&&...){
+		auto& level_curves = bind(u8"Level curves", field_value.level_curves.get(), settings_form);
+		level_curves.on_content_updated([&level_curves = field_value.level_curves.get(), &imgview](auto&&...){
 			if(level_curves.visible)
 			{ imgview.show_level_curves(); }
 			else
@@ -164,7 +162,7 @@ namespace terraformer::app
 			imgview.set_level_curve_interval(level_curves.interval);
 		});
 
-		ret.set_refresh_function([image = field_value.value.data, &imgview](){
+		ret.set_refresh_function([image = field_value.data, &imgview](){
 			imgview.show_image(image.get().pixels());
 		});
 
@@ -183,7 +181,7 @@ namespace terraformer::app
 
 		auto& heatmap = bind(
 			u8"Heatmap view",
-			make_tagged_value<terraformer::ui::widgets::heatmap_view>(field_value),
+			heatmap_view_descriptor{field_value},
 			ret
 		);
 
