@@ -2,7 +2,7 @@
 //@		"target":{"name": "main.o"}
 //@	}
 
-#include "./map_sheet.hpp"
+#include "./heightmap.hpp"
 #include "./plain.hpp"
 #include "./heightmap.hpp"
 #include "./elevation_color_map.hpp"
@@ -101,15 +101,15 @@ int main(int, char**)
 		terraformer::ui::main::widget_orientation::horizontal
 	};
 
-	terraformer::map_sheet_descriptor map_sheet;
-	terraformer::app::bind(u8"Heightmap parameters", map_sheet, main_form);
+	terraformer::heightmap_descriptor heightmap;
+	terraformer::app::bind(u8"Heightmap parameters", heightmap, main_form);
 	terraformer::plain_descriptor plain;
 	auto& plain_form = terraformer::app::bind(u8"Plain settings", plain, main_form);
 
-	terraformer::grayscale_image heightmap{4, 4};
+	terraformer::grayscale_image output{4, 4};
 
 	terraformer::app::heightmap_view_descriptor heightmap_view_info{
-		.data = std::ref(heightmap),
+		.data = std::ref(output),
 		.heatmap_presentation_attributes{
 			.level_curves = terraformer::app::level_curves_descriptor{
 				.interval = 100.0f,
@@ -121,8 +121,8 @@ int main(int, char**)
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
 
-	auto& domain_size = map_sheet.domain_size;
-	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &domain_size, &heightmap_img = heightmap](auto&&...){
+	auto& domain_size = heightmap.domain_size;
+	plain_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &plain, &domain_size, &heightmap_img = output](auto&&...){
 		task_receiver.replace_pending_task(
 			[plain, domain_size, &heightmap_img, &heightmap_view, &gui_ctxt]() {
 				gui_ctxt

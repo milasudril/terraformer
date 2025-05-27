@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_PLAIN_GENERATOR_HPP
 #define TERRAFORMER_PLAIN_GENERATOR_HPP
 
-#include "lib/generators/map_sheet/domain_size.hpp"
+#include "lib/generators/domain/domain_size.hpp"
 #include "lib/pixel_store/image.hpp"
 
 namespace terraformer

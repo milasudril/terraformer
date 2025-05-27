@@ -2,6 +2,7 @@
 #define TERRAFORMER_GUI_HEIGHTMAP_HPP
 
 #include "./elevation_color_map.hpp"
+#include "./domain_size.hpp"
 
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/heatmap_view.hpp"
@@ -11,6 +12,7 @@
 #include "ui/value_maps/log_value_map.hpp"
 
 #include "lib/pixel_store/image.hpp"
+#include "lib/generators/heightmap/heightmap_descriptor.hpp"
 
 namespace terraformer::app
 {
@@ -196,6 +198,25 @@ namespace terraformer::app
 		ret.set_refresh_function([&heatmap](){
 			heatmap.refresh();
 		});
+
+		return ret;
+	}
+
+	struct heightmap_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	auto& bind(std::u8string_view field_name, heightmap_descriptor& field_value, ui::widgets::form& form)
+	{
+		auto& ret = form.create_widget(
+			domain_size_form_field{
+				.label = field_name,
+			}
+		);
+
+		bind(u8"Domain size", field_value.domain_size, ret);
 
 		return ret;
 	}

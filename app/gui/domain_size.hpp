@@ -6,7 +6,7 @@
 #include "ui/widgets/float_input.hpp"
 #include "ui/value_maps/log_value_map.hpp"
 
-#include "lib/generators/map_sheet/domain_size.hpp"
+#include "lib/generators/domain/domain_size.hpp"
 
 namespace terraformer::app
 {
