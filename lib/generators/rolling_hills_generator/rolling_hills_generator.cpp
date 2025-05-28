@@ -21,12 +21,12 @@ namespace
 		{
 			for(uint32_t x = 0; x != width; ++x)
 			{
-				auto const xf = static_cast<float>(x) - x_0;
-				auto const yf = static_cast<float>(y) - x_y;
+				auto const xi = (static_cast<float>(x) - x_0)/f_x;
+				auto const eta = (static_cast<float>(y) - x_y)/f_y;
 
-				auto const r2 = xf*xf/(w_float*w_float) + yf*yf/(h_float*h_float);
+				auto const r2 = xi*xi + eta*eta;
 
-				ret(x, y) = std::max(1.0f - 4.0f*r2, 0.0f);
+				ret(x, y) = 800.0f/std::sqrt(1.0f + r2*r2);
 			}
 		}
 
@@ -53,8 +53,8 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	auto filter = make_filter(
 		2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u),
 		2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u),
-		w_scaled/params.wavelength_x,
-		h_scaled/params.wavelength_y
+		2.0f*min_pixel_count/params.wavelength_x,
+		2.0f*min_pixel_count/params.wavelength_y
 	);
 
 	store(filter, "/dev/shm/slask.exr");
