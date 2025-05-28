@@ -205,6 +205,31 @@ namespace terraformer
 	}
 
 	template<class T>
+	void add_resampled(span_2d<T const> input, span_2d<T> output, float input_gain)
+	{
+		auto const input_width = static_cast<float>(input.width());
+		auto const input_height = static_cast<float>(input.height());
+
+		auto const output_width = output.width();
+		auto const output_height = output.height();
+
+		auto const sample_factor = box_size{input_width - 1.0f, input_height - 1.0f, 1.0f}
+			/box_size{static_cast<float>(output_width), static_cast<float>(output_height), 1.0f};
+
+		// TODO: This algorithm is only suitable for upscaling. Downscaling needs an
+		//       anti-alias filter
+		for(uint32_t y = 0; y != output_height; ++y)
+		{
+			for(uint32_t x = 0; x != output_width; ++x)
+			{
+				auto const src_pixel = displacement{static_cast<float>(x), static_cast<float>(y), 0.0f}
+					.apply(sample_factor);
+				output(x, y) += input_gain*interp(input, src_pixel[0], src_pixel[1], clamp_at_boundary{});
+			}
+		}
+	}
+
+	template<class T>
 	basic_image<T> resample(span_2d<T const> input, scaling factor)
 	{
 		auto const input_width = static_cast<float>(input.width());
