@@ -174,10 +174,16 @@ namespace terraformer::ui::main
 		widget_collection_ref_impl<IsConstB> const& b)
 	{ return std::data(a.widget_pointers()) == std::data(b.widget_pointers()); }
 
-	inline auto find(cursor_position pos, span<widget_geometry const> geoms, displacement offset)
+	inline auto find(
+		widget_geometry const* first,
+		widget_geometry const* last,
+		cursor_position pos,
+		displacement offset
+	)
 	{
-		return std::ranges::find_if(
-			geoms,
+		return std::find_if(
+			first,
+			last,
 			[pos = location{static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f} - offset](auto const& obj) {
 				return inside(pos, obj);
 			}
@@ -408,11 +414,24 @@ namespace terraformer::ui::main
 
 	inline auto find(cursor_position pos, widget_collection_view const& widgets, displacement offset)
 	{
-		auto const i = find(pos, widgets.widget_geometries(), offset);
-		if(i == std::end(widgets.widget_geometries())) [[likely]]
-		{ return widget_collection_view::npos; }
+		auto const geoms = widgets.widget_geometries();
+		auto const states = widgets.widget_states();
+		auto const element_indices = widgets.element_indices();
 
-		return widgets.element_indices().front() + (i - std::begin(widgets.widget_geometries()));
+		auto i = std::begin(geoms);
+		while(i != std::end(geoms))
+		{
+			i = find(i, std::end(geoms), pos, offset);
+			if(i == std::end(geoms))
+			{ return widget_collection_view::npos; }
+
+			auto const index = element_indices.front() + (i - std::begin(geoms));
+			if(!states[index].interaction_is_disabled())
+			{ return index; }
+
+			++i;
+		}
+		return widget_collection_view::npos;
 	}
 
 	class find_recursive_result
