@@ -2,6 +2,38 @@
 
 #include "./rolling_hills_generator.hpp"
 
+#include "lib/pixel_store/image_io.hpp"
+
+namespace
+{
+	terraformer::grayscale_image make_filter(uint32_t width, uint32_t height, float f_x, float f_y)
+	{
+		printf("f_x = %.8g f_y = %.8g\n", f_x, f_y);
+		f_x *= 2.0f*std::numbers::pi_v<float>;
+		f_y *= 2.0f*std::numbers::pi_v<float>;
+
+		auto const w_float = static_cast<float>(width);
+		auto const h_float = static_cast<float>(height);
+		auto const x_0 = 0.5f*(w_float - 1.0f);
+		auto const x_y = 0.5f*(h_float - 1.0f);
+		terraformer::grayscale_image ret{width, height};
+		for(uint32_t y = 0; y != height; ++y)
+		{
+			for(uint32_t x = 0; x != width; ++x)
+			{
+				auto const xf = static_cast<float>(x) - x_0;
+				auto const yf = static_cast<float>(y) - x_y;
+
+				auto const r2 = xf*xf/(w_float*w_float) + yf*yf/(h_float*h_float);
+
+				ret(x, y) = std::max(1.0f - 4.0f*r2, 0.0f);
+			}
+		}
+
+		return ret;
+	}
+}
+
 terraformer::grayscale_image
 terraformer::generate(domain_size_descriptor const& size, rolling_hills_descriptor const& params)
 {
@@ -18,10 +50,14 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	auto const h_scaled = normalized_f_x > normalized_f_y?
 		min_pixel_count*size.height/size.width : min_pixel_count;
 
-	grayscale_image ret{
+	auto filter = make_filter(
 		2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u),
-		2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u)
-	};
+		2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u),
+		w_scaled/params.wavelength_x,
+		h_scaled/params.wavelength_y
+	);
 
-	return ret;
+	store(filter, "/dev/shm/slask.exr");
+
+	return filter;
 }

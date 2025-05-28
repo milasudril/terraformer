@@ -13,7 +13,7 @@ terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& d
 	auto const output_height = std::max(plain.height(), rolling_hills.height());
 
 	grayscale_image ret{output_width, output_height};
-	add_resampled(plain.pixels(), ret.pixels(), 1.0f);
+//	add_resampled(plain.pixels(), ret.pixels(), 1.0f);
 	add_resampled(rolling_hills.pixels(), ret.pixels(), 1.0f);
 
 	return ret;

@@ -110,7 +110,7 @@ int main(int, char**)
 	terraformer::heightmap_descriptor heightmap;
 	auto& heightmap_form = terraformer::app::bind(u8"Heightmap parameters", heightmap, main_form);
 
-	terraformer::grayscale_image output{4, 4};
+	auto output = generate(heightmap);
 
 	terraformer::app::heightmap_view_descriptor heightmap_view_info{
 		.data = std::ref(output),
