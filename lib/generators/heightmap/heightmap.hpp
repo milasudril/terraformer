@@ -1,3 +1,5 @@
+//@	{"dependencies_extra":[{"ref":"./heigtmap.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_HEIGHTMAP_HPP
 #define TERRAFORMER_HEIGHTMAP_HPP
 
@@ -19,19 +21,7 @@ namespace terraformer
 		heightmap_generator_descriptor generators;
 	};
 
-	inline grayscale_image generate(heightmap_descriptor const& descriptor)
-	{
-		auto const plain = generate(descriptor.domain_size, descriptor.generators.plain);
-		auto const rolling_hills = generate(descriptor.domain_size, descriptor.generators.rolling_hills);
-
-		auto const w_max = std::max(plain.width(), rolling_hills.width());
-		auto const h_max = std::max(plain.height(), rolling_hills.height());
-
-
-		printf("%u %u\n", w_max, h_max);
-
-		return plain;
-	}
+	grayscale_image generate(heightmap_descriptor const& descriptor);
 }
 
 #endif
