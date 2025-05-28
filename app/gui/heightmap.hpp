@@ -14,7 +14,7 @@
 #include "ui/value_maps/log_value_map.hpp"
 
 #include "lib/pixel_store/image.hpp"
-#include "lib/generators/heightmap/heightmap_descriptor.hpp"
+#include "lib/generators/heightmap/heightmap.hpp"
 
 namespace terraformer::app
 {

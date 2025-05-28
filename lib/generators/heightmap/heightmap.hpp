@@ -1,5 +1,5 @@
-#ifndef TERRAFORMER_HEIGHTMAP_DESCRIPTOR_HPP
-#define TERRAFORMER_HEIGHTMAP_DESCRIPTOR_HPP
+#ifndef TERRAFORMER_HEIGHTMAP_HPP
+#define TERRAFORMER_HEIGHTMAP_HPP
 
 #include "lib/generators/plain_generator/plain.hpp"
 #include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
