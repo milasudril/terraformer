@@ -25,8 +25,9 @@ namespace
 				auto const eta = (static_cast<float>(y) - x_y)/f_y;
 
 				auto const r2 = xi*xi + eta*eta;
+				auto const r4 = r2*r2;
 
-				ret(x, y) = 800.0f/std::sqrt(1.0f + r2*r2);
+				ret(x, y) = 2.0f*(1.0f/std::sqrt(1.0f + r4))*(r2/std::sqrt(r4 + 1.0f));
 			}
 		}
 
