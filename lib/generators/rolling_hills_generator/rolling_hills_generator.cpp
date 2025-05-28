@@ -18,8 +18,10 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	auto const h_scaled = normalized_f_x > normalized_f_y?
 		min_pixel_count*size.height/size.width : min_pixel_count;
 
-	return grayscale_image{
-		2*static_cast<uint32_t>(w_scaled + 0.5f),
-		2*static_cast<uint32_t>(h_scaled + 0.5f)
+	grayscale_image ret{
+		2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u),
+		2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u)
 	};
+
+	return ret;
 }
