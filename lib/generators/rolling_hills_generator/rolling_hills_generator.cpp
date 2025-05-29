@@ -6,6 +6,7 @@
 #include "lib/math_utils/dft_engine.hpp"
 
 #include <cassert>
+#include <random>
 
 namespace
 {
@@ -37,8 +38,11 @@ namespace
 		return ret;
 	}
 
-	terraformer::basic_image<std::complex<float>> make_noise(uint32_t width, uint32_t height)
+	terraformer::basic_image<std::complex<float>>
+	make_noise(uint32_t width, uint32_t height, terraformer::rng_seed_type rng_seed)
 	{
+		terraformer::random_generator rng{rng_seed};
+		std::uniform_real_distribution U{0.0f, 1.0f};
 		terraformer::basic_image<std::complex<float>> ret{width, height};
 		auto sign_y = 1.0f;
 		for(uint32_t y = 0; y < height; ++y)
@@ -46,8 +50,7 @@ namespace
 			auto sign_x = 1.0f;
 			for(uint32_t x = 0; x < width; ++x)
 			{
-				auto val = (x == width/2 && y == height/2)? 1.0f : 0.0f;
-				ret(x, y) = val * sign_y * sign_x;
+				ret(x, y) = U(rng) * sign_y * sign_x;
 				sign_x *= -1.0f;
 			}
 			sign_y *= -1.0f;
@@ -83,7 +86,7 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 		2.0f*h_scaled*wh_ratio/params.wavelength_y
 	);
 
-	auto noise = make_noise(w_img, h_img);
+	auto noise = make_noise(w_img, h_img, params.rng_seed);
 
 	dft_execution_plan plan_forward{
 		span_2d_extents{
