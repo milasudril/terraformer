@@ -128,13 +128,14 @@ int main(int, char**)
 	heightmap_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &heightmap, &heightmap_img = output](auto&&...){
 		task_receiver.replace_pending_task(
 			[heightmap, &heightmap_img, &heightmap_view, &gui_ctxt]() {
+				auto result = generate(heightmap);
 				gui_ctxt
-					.post_event([&heightmap_img, hm = generate(heightmap), &heightmap_view]() mutable {
+					.post_event([&heightmap_img, hm = result, &heightmap_view]() mutable {
 						heightmap_img = std::move(hm);
 						heightmap_view.refresh();
 					})
 					.notify_main_loop();
-			//	store(generate(terraformer::domain_size{8192.0f, 8192.0f}, plain), "/dev/shm/slask.exr");
+				store(result, "/dev/shm/slask.exr");
 			}
 		);
 	});
