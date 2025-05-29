@@ -1,4 +1,4 @@
-//@	{"target":{"name":"ridge_curve.test"}}
+//	{"target":{"name":"ridge_curve.test"}}
 
 #include "./ridge_curve.hpp"
 #include "lib/math_utils/dft_engine.hpp"

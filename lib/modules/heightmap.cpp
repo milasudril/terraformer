@@ -1,4 +1,4 @@
-//@	{"target": {"name":"heightmap.o"}}
+/@	{"target": {"name":"heightmap.o"}}
 
 #include "./heightmap.hpp"
 #include "lib/pixel_store/image_io.hpp"

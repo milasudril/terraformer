@@ -1,4 +1,4 @@
-//@	{"target":{"name": "filtered_noise_generator.test"}}
+//	{"target":{"name": "filtered_noise_generator.test"}}
 
 #include "./filtered_noise_generator.hpp"
 #include "lib/pixel_store/image.hpp"

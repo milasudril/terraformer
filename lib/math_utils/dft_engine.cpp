@@ -1,6 +1,6 @@
 //@	{
 //@	"target":{"name":"./dft_engine.o", "type":"object"},
-//@	"dependencies":[{"ref":"fftw3", "origin":"pkg-config"}]
+//@	"dependencies":[{"ref":"fftw3f", "origin":"pkg-config"}]
 //@	}
 
 #include "./dft_engine.hpp"
@@ -9,12 +9,12 @@
 
 terraformer::dft_execution_plan::dft_execution_plan(size_t size, dft_direction dir)
 {
-	auto input_buff  = std::make_unique<std::complex<double>[]>(size);
-	auto output_buff = std::make_unique<std::complex<double>[]>(size);
+	auto input_buff  = std::make_unique<std::complex<float>[]>(size);
+	auto output_buff = std::make_unique<std::complex<float>[]>(size);
 	std::fill_n(input_buff.get(), size, 0);
-	auto input_buff_ptr  = reinterpret_cast<fftw_complex*>(input_buff.get());
-	auto output_buff_ptr = reinterpret_cast<fftw_complex*>(output_buff.get());
-	m_plan = std::unique_ptr<plan_type, plan_deleter>{fftw_plan_dft_1d(static_cast<int>(size),
+	auto input_buff_ptr  = reinterpret_cast<fftwf_complex*>(input_buff.get());
+	auto output_buff_ptr = reinterpret_cast<fftwf_complex*>(output_buff.get());
+	m_plan = std::unique_ptr<plan_type, plan_deleter>{fftwf_plan_dft_1d(static_cast<int>(size),
 	                                                                  input_buff_ptr,
 	                                                                  output_buff_ptr,
 	                                                                  static_cast<int>(dir),
@@ -24,13 +24,13 @@ terraformer::dft_execution_plan::dft_execution_plan(size_t size, dft_direction d
 terraformer::dft_execution_plan::dft_execution_plan(span_2d_extents size, dft_direction dir)
 {
 	auto const n = static_cast<size_t>(size.width)*static_cast<size_t>(size.height);
-	auto input_buff  = std::make_unique<std::complex<double>[]>(n);
-	auto output_buff = std::make_unique<std::complex<double>[]>(n);
+	auto input_buff  = std::make_unique<std::complex<float>[]>(n);
+	auto output_buff = std::make_unique<std::complex<float>[]>(n);
 	std::fill_n(input_buff.get(), n, 0);
-	auto input_buff_ptr  = reinterpret_cast<fftw_complex*>(input_buff.get());
-	auto output_buff_ptr = reinterpret_cast<fftw_complex*>(output_buff.get());
+	auto input_buff_ptr  = reinterpret_cast<fftwf_complex*>(input_buff.get());
+	auto output_buff_ptr = reinterpret_cast<fftwf_complex*>(output_buff.get());
 	m_plan = std::unique_ptr<plan_type, plan_deleter>{
-		fftw_plan_dft_2d(
+		fftwf_plan_dft_2d(
 			size.height,
 			size.width,
 			input_buff_ptr,

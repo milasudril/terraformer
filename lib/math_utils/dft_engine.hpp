@@ -25,25 +25,25 @@ namespace terraformer
 
 		dft_execution_plan() = default;
 
-		void execute(std::complex<double> const* input_buffer, std::complex<double>* output_buffer) const
+		void execute(std::complex<float> const* input_buffer, std::complex<float>* output_buffer) const
 		{
 			// NOTE: The plan is not configured for an inplace transform. Therefore, it is safe to do
 			//       a const_cast on the input buffer.
-			// NOTE: A fftwf_complex is ABI compatible with std::complex<double>
-			auto input_buffer_ptr = reinterpret_cast<fftw_complex*>(const_cast<std::complex<double>*>(input_buffer));
-			auto output_buffer_ptr = reinterpret_cast<fftw_complex*>(output_buffer);
-			fftw_execute_dft(m_plan.get(), input_buffer_ptr, output_buffer_ptr);
+			// NOTE: A fftwf_complex is ABI compatible with std::complex<float>
+			auto input_buffer_ptr = reinterpret_cast<fftwf_complex*>(const_cast<std::complex<float>*>(input_buffer));
+			auto output_buffer_ptr = reinterpret_cast<fftwf_complex*>(output_buffer);
+			fftwf_execute_dft(m_plan.get(), input_buffer_ptr, output_buffer_ptr);
 		}
 
 		explicit operator bool() const { return static_cast<bool>(m_plan); }
 
 	private:
-		using plan_type = std::remove_pointer_t<fftw_plan>;
+		using plan_type = std::remove_pointer_t<fftwf_plan>;
 
 		struct plan_deleter
 		{
-			void operator()(fftw_plan plan)
-			{ if(plan != nullptr) { fftw_destroy_plan(plan); } }
+			void operator()(fftwf_plan plan)
+			{ if(plan != nullptr) { fftwf_destroy_plan(plan); } }
 		};
 
 		std::unique_ptr<plan_type, plan_deleter> m_plan;
