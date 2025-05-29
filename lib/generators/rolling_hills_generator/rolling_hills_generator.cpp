@@ -54,7 +54,6 @@ namespace
 		}
 		return ret;
 	}
-
 }
 
 terraformer::grayscale_image
@@ -75,17 +74,14 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 
 	auto const w_img = 2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u);
 	auto const h_img = 2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u);
-
-	assert(w_img%2 == 0);
-	assert(h_img%2 == 0);
+	auto const wh_ratio = std::max(w_scaled/h_scaled, h_scaled/w_scaled);
 
 	auto const filter = make_filter(
 		w_img,
 		h_img,
-		2.0f*min_pixel_count/params.wavelength_x,
-		2.0f*min_pixel_count/params.wavelength_y
+		2.0f*w_scaled*wh_ratio/params.wavelength_x,
+		2.0f*h_scaled*wh_ratio/params.wavelength_y
 	);
-	store(filter, "/dev/shm/filter.exr");
 
 	auto noise = make_noise(w_img, h_img);
 
@@ -100,8 +96,6 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	terraformer::basic_image<std::complex<float>> transformed_input{w_img, h_img};
 	plan_forward.execute(std::as_const(noise).pixels().data(), transformed_input.pixels().data());
 
-
-
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 		for(uint32_t x = 0; x != w_img; ++x)
@@ -114,7 +108,6 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 		for(uint32_t x = 0; x != w_img; ++x)
 		{ temp(x, y) = transformed_input(x, y).real(); }
 	}
-	store(temp, "/dev/shm/slask.exr");
 
 	dft_execution_plan plan_backward{
 		span_2d_extents{
@@ -133,6 +126,7 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 		auto sign_x = 1.0f;
 		for(uint32_t x = 0; x < w_img; ++x)
 		{
+			assert(std::abs(noise(x, y).imag()) < 1.0f);
 			ret(x, y) = noise(x, y).real() * sign_x * sign_y;
 			sign_x *= -1.0f;
 		}
@@ -146,13 +140,11 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 			{ max = std::max(max, ret(x,y)); }
 	}
 
-
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 			for(uint32_t x = 0; x != w_img; ++x)
 			{ ret(x, y) = 3500.0f*ret(x, y)/max; }
 	}
 
-	//store(ret, "/dev/shm/slask.exr");
 	return ret;
 }
