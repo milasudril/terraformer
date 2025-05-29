@@ -46,6 +46,13 @@ namespace terraformer
 
 	void bytes_to_hex(char* __restrict__ dest,  void const* __restrict__ src, size_t dest_length);
 
+	inline std::string bytes_to_hex(void const* src, size_t src_length)
+	{
+		std::string ret(2*src_length, '0');
+		bytes_to_hex(std::data(ret), src, std::size(ret));
+		return ret;
+	}
+
 	struct hex_to_bytes_result
 	{
 		const char* ptr;

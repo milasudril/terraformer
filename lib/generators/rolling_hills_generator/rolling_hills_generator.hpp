@@ -5,18 +5,17 @@
 
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/pixel_store/image.hpp"
-#include "lib/common/rng.hpp"
 
 namespace terraformer
 {
 	struct rolling_hills_descriptor
 	{
+		std::array<std::byte, 16> rng_seed{};
 		float wavelength_x = 4096.0f;
 		float wavelength_y = 4096.0f;
 		float amplitude = 2048.0f/std::numbers::pi_v<float>;
 		float relative_z_offset = 1.0f;
 		float shape = 1.0f;
-		rng_seed_type rng_seed{generate_rng_seed(system_rng_path)};
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, rolling_hills_descriptor const& params);

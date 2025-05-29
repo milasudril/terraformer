@@ -4,6 +4,7 @@
 
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/math_utils/dft_engine.hpp"
+#include "lib/common/rng.hpp"
 
 #include <cassert>
 #include <random>
@@ -94,7 +95,7 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 		2.0f*h_scaled*wh_ratio/params.wavelength_y
 	);
 
-	auto noise = make_noise(w_img, h_img, params.rng_seed);
+	auto noise = make_noise(w_img, h_img, std::bit_cast<rng_seed_type>(params.rng_seed));
 
 	dft_execution_plan plan_forward{
 		span_2d_extents{
