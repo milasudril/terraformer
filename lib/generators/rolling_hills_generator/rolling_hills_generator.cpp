@@ -57,6 +57,12 @@ namespace
 		}
 		return ret;
 	}
+
+	float apply_shape(float input_value, float shape)
+	{
+		auto const sign = input_value >= 0.0f ? 1.0f : -1.0f;
+		return sign*std::pow(sign*input_value, shape);
+	}
 }
 
 terraformer::grayscale_image
@@ -67,8 +73,10 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	// Assume a bandwidth of at most 6 octaves = 64 periods
 	// Take 4 samples per period
 	// This gives a size of 256 pixels, but the size is multiplied by 2 to guarantee an even number.
-	// Therefore, use 128 pixels as factor
-	auto const min_pixel_count = 128.0f*std::max(normalized_f_x, normalized_f_y);
+	// Therefore, use 128 pixels as factor. Notice that if shape is not 1, the required bandwidth
+	// is increased. For example, expanding sin^4(x) gives a cos(4x) term
+	auto const shape = params.shape;
+	auto const min_pixel_count = std::exp2(std::abs(std::log2(shape)))*128.0f*std::max(normalized_f_x, normalized_f_y);
 
 	auto const w_scaled = normalized_f_x > normalized_f_y?
 		min_pixel_count: min_pixel_count*size.width/size.height;
@@ -147,7 +155,7 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 			for(uint32_t x = 0; x != w_img; ++x)
-			{ ret(x, y) = amplitude*(ret(x, y)/max + relative_offset); }
+			{ ret(x, y) = 2.0f*amplitude*apply_shape(0.5f*(ret(x, y)/max + relative_offset), shape); }
 	}
 
 	return ret;
