@@ -13,26 +13,30 @@ TESTCASE(terraformer_plain_replace_pixels)
 		img.pixels(),
 		4.0f,
 		terraformer::plain_descriptor{
-			.nw = terraformer::plain_corner_descriptor{
-				.elevation = 0.0f,
-				.ddx = -1.0f,
-				.ddy = -1.0f
-			},
+			.n = 0.0f,
 			.ne = terraformer::plain_corner_descriptor{
 				.elevation = 0.0f,
 				.ddx = 1.0f,
 				.ddy = 1.0f
 			},
+			.e = 0.0f,
+			.se = terraformer::plain_corner_descriptor{
+				.elevation = 0.0f,
+				.ddx = 1.0f,
+				.ddy = -1.0f
+			},
+			.s = 0.0f,
 			.sw = terraformer::plain_corner_descriptor{
 				.elevation = 0.0f,
 				.ddx = -1.0f,
 				.ddy = 1.0f
 			},
-			.se = terraformer::plain_corner_descriptor{
+			.w = 0.0f,
+			.nw = terraformer::plain_corner_descriptor{
 				.elevation = 0.0f,
-				.ddx = 1.0f,
+				.ddx = -1.0f,
 				.ddy = -1.0f
-			}
+			},
 		}
 	);
 

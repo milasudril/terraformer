@@ -81,10 +81,46 @@ namespace terraformer::app
 			}
 		);
 
-		bind(u8"NW", field_value.nw, ret);
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"Elevation N/m",
+				.value_reference = std::ref(field_value.n)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
 		bind(u8"NE", field_value.ne, ret);
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"Elevation E/m",
+				.value_reference = std::ref(field_value.e)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
 		bind(u8"SE", field_value.se, ret);
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"Elevation S/m",
+				.value_reference = std::ref(field_value.s)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
 		bind(u8"SW", field_value.sw, ret);
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"Elevation W/m",
+				.value_reference = std::ref(field_value.w)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+		bind(u8"NW", field_value.nw, ret);
 
 		return ret;
 	}

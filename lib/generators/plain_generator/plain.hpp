@@ -8,6 +8,12 @@
 
 namespace terraformer
 {
+	struct plain_edge_descriptor
+	{
+		float xi_0;
+		float elevation;
+	};
+
 	struct plain_corner_descriptor
 	{
 		float elevation = 840.0f;
@@ -17,10 +23,14 @@ namespace terraformer
 
 	struct plain_descriptor
 	{
-		plain_corner_descriptor nw;
+		float n = 840.0f;
 		plain_corner_descriptor ne;
-		plain_corner_descriptor sw;
+		float e = 840.0f;
 		plain_corner_descriptor se;
+		float s = 840.0f;
+		plain_corner_descriptor sw;
+		float w = 840.0f;
+		plain_corner_descriptor nw;
 	};
 
 	void replace_pixels(
