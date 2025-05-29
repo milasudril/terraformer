@@ -143,7 +143,7 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 			for(uint32_t x = 0; x != w_img; ++x)
-			{ ret(x, y) = 3500.0f*ret(x, y)/max; }
+			{ ret(x, y) = params.amplitude*ret(x, y)/max; }
 	}
 
 	return ret;

@@ -12,6 +12,7 @@ namespace terraformer
 	{
 		float wavelength_x = 4096.0f;
 		float wavelength_y = 4096.0f;
+		float amplitude = 2048.0f/std::numbers::pi_v<float>;
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, rolling_hills_descriptor const& params);
