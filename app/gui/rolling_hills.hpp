@@ -6,7 +6,7 @@
 #include "ui/value_maps/log_value_map.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
-#include "ui/widgets/text_to_bytearray_input.hpp"
+#include "ui/widgets/rng_seed_input.hpp"
 
 namespace terraformer::app
 {
@@ -20,7 +20,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		std::reference_wrapper<std::array<std::byte, 16>> value_reference;
-		using input_widget_type = ui::widgets::text_to_bytearray_input<16>;
+		using input_widget_type = ui::widgets::rng_seed_input<16>;
 	};
 
 	struct rolling_hills_wavelength_form_field
@@ -63,7 +63,8 @@ namespace terraformer::app
 			rolling_hills_seed_form_field{
 				.label = u8"Seed",
 				.value_reference = std::ref(field_value.rng_seed)
-			}
+			},
+			ui::main::widget_orientation::vertical
 		);
 
 		ret.create_widget(

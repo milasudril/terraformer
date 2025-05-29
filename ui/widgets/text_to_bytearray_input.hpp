@@ -22,8 +22,9 @@ namespace terraformer::ui::widgets
 		explicit text_to_bytearray_input()
 		{
 			std::u8string placeholder;
+			constexpr char8_t const* digits = u8"0A23456789ABCDEF";
 			for(size_t k = 0; k != 2*NumBytes; ++k)
-			{ placeholder += '0'; }
+			{ placeholder += digits[k%16]; }
 			use_size_from_placeholder(placeholder.c_str());
 		}
 		std::array<std::byte, NumBytes> value() const
