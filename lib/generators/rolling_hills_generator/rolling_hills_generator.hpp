@@ -16,8 +16,7 @@ namespace terraformer
 		float amplitude = 2048.0f/std::numbers::pi_v<float>;
 		float relative_z_offset = 1.0f;
 		float shape = 1.0f;
-		// TODO: Different runs should use different default seeds
-		rng_seed_type rng_seed{};
+		rng_seed_type rng_seed{generate_rng_seed(system_rng_path)};
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, rolling_hills_descriptor const& params);
