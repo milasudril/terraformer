@@ -68,9 +68,9 @@ namespace terraformer::ui::widgets
 					m_textbox.value(random_bit_source{system_rng_path}.get<std::array<std::byte, NumBytes>>());
 					m_on_value_changed(*this, std::forward<Args>(args)...);
 				})
-				.text(u8"Generate");
-			layout.params().no_outer_margin = true;
-			is_transparent = true;
+				.text(u8"Pick new");
+			layout.params().no_outer_margin = false;
+			is_transparent = false;
 		}
 	};
 }

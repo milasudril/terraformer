@@ -11,7 +11,13 @@
 
 namespace
 {
-	terraformer::grayscale_image make_filter(uint32_t width, uint32_t height, float f_x, float f_y)
+	terraformer::grayscale_image make_filter(
+		uint32_t width,
+		uint32_t height,
+		float f_x,
+		float f_y,
+		float theta
+	)
 	{
 		f_x *= 2.0f*std::numbers::pi_v<float>;
 		f_y *= 2.0f*std::numbers::pi_v<float>;
@@ -21,12 +27,17 @@ namespace
 		auto const x_0 = 0.5f*w_float;
 		auto const x_y = 0.5f*h_float;
 		terraformer::grayscale_image ret{width, height};
+		auto const cos_theta = std::cos(theta);
+		auto const sin_theta = std::sin(theta);
 		for(uint32_t y = 0; y != height; ++y)
 		{
 			for(uint32_t x = 0; x != width; ++x)
 			{
-				auto const xi = (static_cast<float>(x) - x_0)/f_x;
-				auto const eta = (static_cast<float>(y) - x_y)/f_y;
+				auto const xi_in = static_cast<float>(x) - x_0;
+				auto const eta_in = static_cast<float>(y) - x_y;
+
+				auto const xi = (xi_in*cos_theta + eta_in*sin_theta)/f_x;
+				auto const eta = (-xi_in*sin_theta + eta_in*cos_theta)/f_y;
 
 				auto const r2 = xi*xi + eta*eta;
 				auto const r4 = r2*r2;
@@ -92,7 +103,8 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 		w_img,
 		h_img,
 		2.0f*w_scaled*wh_ratio/params.wavelength_x,
-		2.0f*h_scaled*wh_ratio/params.wavelength_y
+		2.0f*h_scaled*wh_ratio/params.wavelength_y,
+		2.0f*std::numbers::pi_v<float>*params.filter_orientation
 	);
 
 	auto noise = make_noise(w_img, h_img, std::bit_cast<rng_seed_type>(params.rng_seed));

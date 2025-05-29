@@ -30,6 +30,13 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
+	struct rolling_hills_orientation_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
 	struct rolling_hills_rel_z_offset_form_field
 	{
 		std::u8string_view label;
@@ -84,6 +91,21 @@ namespace terraformer::app
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
+			}
+		);
+
+		ret.create_widget(
+			rolling_hills_orientation_form_field{
+				.label = u8"Filter orientation",
+				.value_reference = std::ref(field_value.filter_orientation)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{-0.25f, 0.25f}
+			}
+		).input_widget().visual_angle_range(
+			closed_closed_interval<geosimd::turn_angle>{
+				geosimd::turns{1.0/4.0},
+				geosimd::turns{3.0/4.0}
 			}
 		);
 

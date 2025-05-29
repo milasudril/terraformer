@@ -13,8 +13,9 @@ namespace terraformer
 		std::array<std::byte, 16> rng_seed{};
 		float wavelength_x = 4096.0f;
 		float wavelength_y = 4096.0f;
-		float amplitude = 2048.0f/std::numbers::pi_v<float>;
+		float filter_orientation = 0.0f;
 		float relative_z_offset = 1.0f;
+		float amplitude = 2048.0f/std::numbers::pi_v<float>;
 		float shape = 1.0f;
 	};
 
