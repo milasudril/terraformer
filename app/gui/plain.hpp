@@ -83,8 +83,8 @@ namespace terraformer::app
 
 		bind(u8"NW", field_value.nw, ret);
 		bind(u8"NE", field_value.ne, ret);
-		bind(u8"SW", field_value.sw, ret);
 		bind(u8"SE", field_value.se, ret);
+		bind(u8"SW", field_value.sw, ret);
 
 		return ret;
 	}
