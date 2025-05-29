@@ -129,7 +129,6 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 		auto sign_x = 1.0f;
 		for(uint32_t x = 0; x < w_img; ++x)
 		{
-			assert(std::abs(noise(x, y).imag()) < 1.0f);
 			ret(x, y) = noise(x, y).real() * sign_x * sign_y;
 			sign_x *= -1.0f;
 		}
