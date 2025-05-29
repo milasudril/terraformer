@@ -138,14 +138,16 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	auto max = ret(0, 0);
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
-			for(uint32_t x = 0; x != w_img; ++x)
-			{ max = std::max(max, ret(x,y)); }
+		for(uint32_t x = 0; x != w_img; ++x)
+		{ max = std::max(max, ret(x,y)); }
 	}
 
+	auto const amplitude = params.amplitude;
+	auto const relative_offset = params.relative_offset;
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 			for(uint32_t x = 0; x != w_img; ++x)
-			{ ret(x, y) = params.amplitude*ret(x, y)/max; }
+			{ ret(x, y) = amplitude*(ret(x, y)/max + relative_offset); }
 	}
 
 	return ret;
