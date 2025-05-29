@@ -151,11 +151,11 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	}
 
 	auto const amplitude = params.amplitude;
-	auto const relative_offset = params.relative_offset;
+	auto const relative_z_offset = params.relative_z_offset;
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 			for(uint32_t x = 0; x != w_img; ++x)
-			{ ret(x, y) = 2.0f*amplitude*apply_shape(0.5f*(ret(x, y)/max + relative_offset), shape); }
+			{ ret(x, y) = 2.0f*amplitude*apply_shape(0.5f*(ret(x, y)/max + relative_z_offset), shape); }
 	}
 
 	return ret;

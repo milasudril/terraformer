@@ -22,7 +22,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	struct rolling_hills_rel_offset_form_field
+	struct rolling_hills_rel_z_offset_form_field
 	{
 		std::u8string_view label;
 		std::reference_wrapper<float> value_reference;
@@ -72,9 +72,9 @@ namespace terraformer::app
 		);
 
 		ret.create_widget(
-			rolling_hills_rel_offset_form_field{
-				.label = u8"Relative offset",
-				.value_reference = std::ref(field_value.relative_offset)
+			rolling_hills_rel_z_offset_form_field{
+				.label = u8"Relative z offset",
+				.value_reference = std::ref(field_value.relative_z_offset)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}

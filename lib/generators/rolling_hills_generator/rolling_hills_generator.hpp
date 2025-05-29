@@ -14,7 +14,7 @@ namespace terraformer
 		float wavelength_x = 4096.0f;
 		float wavelength_y = 4096.0f;
 		float amplitude = 2048.0f/std::numbers::pi_v<float>;
-		float relative_offset = 1.0f;
+		float relative_z_offset = 1.0f;
 		float shape = 1.0f;
 		// TODO: Different runs should use different default seeds
 		rng_seed_type rng_seed{};
