@@ -20,3 +20,55 @@ TESTCASE(terraformer_polynomial_degree_value_derivative)
 	EXPECT_EQ(derivative.coefficients[0], 2.0f);
 	EXPECT_EQ(derivative.coefficients[1], 3.0f*2.0f);
 }
+
+TESTCASE(terraformer_polynomial_add)
+{
+	terraformer::polynomial const p1{
+		1.0f,
+		2.0f,
+		3.0f
+	};
+
+	terraformer::polynomial const p2{
+		1.0f,
+		2.0f,
+		3.0f,
+		4.0f
+	};
+
+	auto const p3 = p1 + p2;
+	EXPECT_EQ(p3.degree(), 3);
+	EXPECT_EQ(p3.coefficients[0], 2.0f);
+	EXPECT_EQ(p3.coefficients[1], 4.0f);
+	EXPECT_EQ(p3.coefficients[2], 6.0f);
+	EXPECT_EQ(p3.coefficients[3], 4.0f);
+
+	auto const p3_other = p2 + p1;
+	EXPECT_EQ(p3_other, p3);
+}
+
+TESTCASE(terraformer_polynomial_multiply)
+{
+	terraformer::polynomial const p1{
+		1.0f,
+		1.0f
+	};
+
+	terraformer::polynomial const p2{
+		1.0f,
+		1.0f
+	};
+
+	auto const p3 = p1*p2;
+	EXPECT_EQ(p3.degree(), 2);
+	EXPECT_EQ(p3.coefficients[0], 1.0f);
+	EXPECT_EQ(p3.coefficients[1], 2.0f);
+	EXPECT_EQ(p3.coefficients[2], 1.0f);
+
+	auto const p4 = p1*p1*p1;
+	EXPECT_EQ(p4.degree(), 3);
+	EXPECT_EQ(p4.coefficients[0], 1.0f);
+	EXPECT_EQ(p4.coefficients[1], 3.0f);
+	EXPECT_EQ(p4.coefficients[2], 3.0f);
+	EXPECT_EQ(p4.coefficients[3], 1.0f);
+}

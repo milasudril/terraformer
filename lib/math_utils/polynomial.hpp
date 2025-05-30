@@ -51,5 +51,30 @@ namespace terraformer
 	template<class ... T>
 	requires (sizeof...(T) > 0)
 	polynomial(T...) -> polynomial<sizeof...(T) - 1>;
+
+	template<size_t Degree1, size_t Degree2>
+	constexpr auto operator*(polynomial<Degree1> const& a, polynomial<Degree2> const& b)
+	{
+		polynomial<Degree1 + Degree2> ret{};
+		for(size_t k = 0; k != std::size(a.coefficients); ++k)
+		{
+			for(size_t l = 0; l != std::size(b.coefficients); ++l)
+			{ ret.coefficients[k + l] += a.coefficients[k]*b.coefficients[l]; }
+		}
+		return ret;
+	}
+
+	template<size_t Degree1, size_t Degree2>
+	constexpr auto operator+(polynomial<Degree1> const& a, polynomial<Degree2> const& b)
+	{
+		polynomial<std::max(Degree1, Degree2)> ret{};
+		for(size_t k = 0; k != std::size(ret.coefficients); ++k)
+		{
+			ret.coefficients[k] = (k < std::size(a.coefficients))? a.coefficients[k] : 0.0f;
+			ret.coefficients[k] += (k < std::size(b.coefficients))? b.coefficients[k] : 0.0f;
+ 		}
+
+		return ret;
+	}
 }
 #endif
