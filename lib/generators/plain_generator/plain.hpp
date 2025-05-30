@@ -31,6 +31,7 @@ namespace terraformer
 		plain_corner_descriptor sw;
 		float w = 840.0f;
 		plain_corner_descriptor nw;
+		float midpoint = 840.0f;
 	};
 
 	void replace_pixels(

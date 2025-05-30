@@ -26,12 +26,24 @@ namespace
 	//  Thus, A(x) = ax^2 - ax = ax(x - 1), which gives, P(x) = a(x(x - 1))^2
 	//  P(x_0) =a(x_0(x_0 - 1))^2 = z_0 <=> a = z_0/((x_0(x_0 - 1))^2)
 	//
-	float midpoint_polynomial(float xi, float actual_elevation, terraformer::plain_edge_descriptor ped)
+	float edge_offset(float xi, float actual_elevation, terraformer::plain_edge_descriptor ped)
 	{
 		auto const denom = ped.xi_0*(ped.xi_0 - 1.0f);
 		auto const a = (ped.elevation - actual_elevation)/(denom*denom);
 		auto const p = xi*(xi - 1.0f);
 		return a*p*p;
+	}
+
+	// P(x) = Ax(x - 1)
+	// P(x_0) = z_0
+	// A = z_0/(x_0(x_0 - 1))
+	float center_offset(float xi, float actual_elevation, float desired_elevation)
+	{
+		auto const xi_0 = 0.5f;
+		auto const denom = xi_0*(xi_0 - 1.0f);
+		auto const a = (desired_elevation - actual_elevation)/denom;
+		auto const p = xi*(xi - 1.0f);
+		return a*p;
 	}
 }
 
@@ -81,11 +93,11 @@ void terraformer::replace_pixels(
 			auto const x_interp_n_cubic = interp(nw_x, ne_x, xi);
 			auto const x_interp_s_cubic = interp(sw_x, se_x, xi);
 
-			auto const x_interp_n = x_interp_n_cubic + midpoint_polynomial(xi, x_interp_n_cubic, plain_edge_descriptor{
+			auto const x_interp_n = x_interp_n_cubic + edge_offset(xi, x_interp_n_cubic, plain_edge_descriptor{
 				.xi_0 = 0.5f,
 				.elevation = params.n
 			});
-			auto const x_interp_s = x_interp_s_cubic + midpoint_polynomial(xi, x_interp_s_cubic, plain_edge_descriptor{
+			auto const x_interp_s = x_interp_s_cubic + edge_offset(xi, x_interp_s_cubic, plain_edge_descriptor{
 				.xi_0 = 0.5f,
 				.elevation = params.s
 			});
@@ -102,7 +114,12 @@ void terraformer::replace_pixels(
 				eta
 			);
 
-			output(x, y) = bicubic_val;
+			auto const elev_lerp = std::lerp(params.w, params.e , xi);
+
+			output(x, y) = bicubic_val + edge_offset(eta, bicubic_val, plain_edge_descriptor{
+				.xi_0 = 0.5f,
+				.elevation = elev_lerp + center_offset(xi, elev_lerp, params.midpoint)
+			});
 		}
 	}
 }

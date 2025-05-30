@@ -121,6 +121,15 @@ namespace terraformer::app
 			}
 		);
 		bind(u8"NW", field_value.nw, ret);
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"Midpoint elevation/m",
+				.value_reference = std::ref(field_value.midpoint)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
 
 		return ret;
 	}
