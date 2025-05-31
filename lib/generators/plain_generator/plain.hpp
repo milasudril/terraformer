@@ -31,8 +31,7 @@ namespace terraformer
 		xm_type e;
 		xm_type s;
 		xm_type w;
-		xm_type c_we;
-		xm_type c_ns;
+		xm_type c;
 	};
 
 	struct plain_descriptor_new

@@ -200,18 +200,8 @@ namespace terraformer::app
 
 		ret.create_widget(
 			plain_midpoint_form_field{
-				.label = u8"C (N - S)",
-				.value_reference = std::ref(field_value.c_ns)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
-			}
-		);
-
-		ret.create_widget(
-			plain_midpoint_form_field{
-				.label = u8"C (W - E)",
-				.value_reference = std::ref(field_value.c_we)
+				.label = u8"C",
+				.value_reference = std::ref(field_value.c)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
