@@ -16,7 +16,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	struct plain_elevation_form_field
+	struct plain_elevations_form_field
 	{
 		std::u8string_view label;
 		using input_widget_type = ui::widgets::form;
@@ -29,7 +29,7 @@ namespace terraformer::app
 	)
 	{
 		auto& ret = form.create_widget(
-			plain_elevation_form_field{
+			plain_elevations_form_field{
 				.label = field_name
 			},
 			ui::main::widget_orientation::vertical
@@ -115,6 +115,78 @@ namespace terraformer::app
 			}
 		);
 
+		return ret;
+	}
+
+	struct plain_midpoint_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<bounded_value<open_open_interval{0.0f, 1.0e+0f}, 5.0e-1f>> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+
+		static constexpr bool is_value_valid(float value)
+		{ return within(open_open_interval{0.0f, 1.0e+0f}, value); }
+	};
+
+	struct plain_midpoints_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	auto& bind(
+		std::u8string_view field_name,
+		plain_midpoint_descriptor& field_value,
+		ui::widgets::form& form
+	)
+	{
+		auto& ret = form.create_widget(
+			plain_elevations_form_field{
+				.label = field_name
+			},
+			ui::main::widget_orientation::vertical
+		);
+
+		ret.create_widget(
+			plain_midpoint_form_field{
+				.label = u8"N",
+				.value_reference = std::ref(field_value.n)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
+		);
+
+		ret.create_widget(
+			plain_midpoint_form_field{
+				.label = u8"E",
+				.value_reference = std::ref(field_value.e)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
+		);
+
+		ret.create_widget(
+			plain_midpoint_form_field{
+				.label = u8"S",
+				.value_reference = std::ref(field_value.s)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
+		);
+
+
+		ret.create_widget(
+			plain_midpoint_form_field{
+				.label = u8"W",
+				.value_reference = std::ref(field_value.w)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
+		);
 
 		return ret;
 	}
@@ -134,6 +206,7 @@ namespace terraformer::app
 		);
 
 		bind(u8"Elevations/m", field_value.elevations, ret);
+		bind(u8"Midpoints", field_value.midpoints, ret);
 
 		return ret;
 	}

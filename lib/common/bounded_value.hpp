@@ -69,5 +69,18 @@ namespace terraformer
 		using T = decltype(DefaultValue);
 		return to_string_helper(static_cast<T>(value));
 	}
+
+	template<
+		auto Interval,
+		typename decltype(Interval)::value_type DefaultValue
+	>
+	inline constexpr auto lerp(
+		bounded_value<Interval, DefaultValue> a,
+		bounded_value<Interval, DefaultValue> b,
+		typename decltype(Interval)::value_type t
+	)
+	{
+		return bounded_value<Interval, DefaultValue>{std::lerp(a, b, t)};
+	}
 }
 #endif

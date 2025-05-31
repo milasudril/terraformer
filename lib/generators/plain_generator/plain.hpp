@@ -4,7 +4,10 @@
 #define TERRAFORMER_PLAIN_GENERATOR_HPP
 
 #include "lib/generators/domain/domain_size.hpp"
+
 #include "lib/pixel_store/image.hpp"
+#include "lib/common/interval.hpp"
+#include "lib/common/bounded_value.hpp"
 
 namespace terraformer
 {
@@ -20,9 +23,19 @@ namespace terraformer
 		float nw = 840.0f;
 	};
 
+	struct plain_midpoint_descriptor
+	{
+		using xm_type = bounded_value<open_open_interval{0.0f, 1.0f}, 0.5f>;
+		xm_type n;
+		xm_type e;
+		xm_type s;
+		xm_type w;
+	};
+
 	struct plain_descriptor_new
 	{
 		plain_control_point_elevation_descriptor elevations;
+		plain_midpoint_descriptor midpoints;
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor_new const& params);

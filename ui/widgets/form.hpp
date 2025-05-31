@@ -139,7 +139,7 @@ namespace terraformer::ui::widgets
 					{
 						if(!FieldDescriptor::is_value_valid(widget.value()))
 						{
-							widget.value(value);
+							widget.value(static_cast<widget_value_type>(value.get()));
 							return;
 						}
 					}
