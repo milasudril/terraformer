@@ -4,11 +4,19 @@
 
 #include <testfwk/testfwk.hpp>
 
+namespace
+{
+	using xm_type = terraformer::bounded_value<
+		terraformer::open_open_interval{0.0f, 1.0f}, 0.5f
+	>;
+}
+
 TESTCASE(terraformer_quintic_polynomial_function_values_with_zero_derivatives)
 {
+
 	auto const p = make_polynomial(
 		terraformer::quintic_polynomial_descriptor{
-			.x_m = 0.75f,
+			.x_m = xm_type{0.75f},
 			.y_0 = 1.0f,
 			.y_m = 2.0f,
 			.y_1 = 1.5f,
@@ -37,7 +45,7 @@ TESTCASE(terraformer_quintic_polynomial_derivatives_with_zero_values)
 {
 	auto const p = make_polynomial(
 		terraformer::quintic_polynomial_descriptor{
-			.x_m = 0.75f,
+			.x_m = xm_type{0.75f},
 			.y_0 = 0.0f,
 			.y_m = 0.0f,
 			.y_1 = 0.0f,
@@ -62,7 +70,7 @@ TESTCASE(terraformer_quintic_polynomial_non_zero_values_and_derivatives)
 {
 	auto const p = make_polynomial(
 		terraformer::quintic_polynomial_descriptor{
-			.x_m = 0.75f,
+			.x_m = xm_type{0.75f},
 			.y_0 = 1.0f,
 			.y_m = 2.0f,
 			.y_1 = 1.5f,

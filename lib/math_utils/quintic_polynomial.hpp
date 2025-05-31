@@ -2,12 +2,14 @@
 #define TERRAFORMER_MATHUTILS_QUINTIC_POLYNOMIAL_HPP
 
 #include "./polynomial.hpp"
+#include "lib/common/interval.hpp"
+#include "lib/common/bounded_value.hpp"
 
 namespace terraformer
 {
 	struct quintic_polynomial_descriptor
 	{
-		float x_m = 0.5f;
+		bounded_value<open_open_interval{0.0f, 1.0f}, 0.5f> x_m{0.5f};
 
 		float y_0 = 0.0f;
 		float y_m = 0.0f;
