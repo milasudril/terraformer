@@ -149,6 +149,17 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
+	auto const y_m_interp = make_polynomial(
+		cubic_spline_control_point{
+			.y = params.elevations.w,
+			.ddx = 0.0f
+		},
+		cubic_spline_control_point{
+			.y = params.elevations.e,
+			.ddx = 0.0f
+		}
+	);
+
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		auto const eta = (static_cast<float>(y) + 0.5f)/h_float;
@@ -163,7 +174,7 @@ terraformer::grayscale_image terraformer::generate(
 				boundary_curve_descriptor{
 				.x_m = lerp(params.midpoints.w, params.midpoints.e, xi),
 				.y_0 = x_interp_n,
-				.y_m = std::lerp(params.elevations.w, params.elevations.e, xi),
+				.y_m = y_m_interp(xi),
 				.y_1 = x_interp_s,
 				.ddx_0 = 0.0f,
 				.ddx_m = 0.0f,
