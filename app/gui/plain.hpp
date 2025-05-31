@@ -115,16 +115,6 @@ namespace terraformer::app
 			}
 		);
 
-		ret.create_widget(
-			global_elevation_form_field{
-				.label = u8"C",
-				.value_reference = std::ref(field_value.c)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
-			}
-		);
-
 		return ret;
 	}
 
@@ -192,16 +182,6 @@ namespace terraformer::app
 			plain_midpoint_form_field{
 				.label = u8"W",
 				.value_reference = std::ref(field_value.w)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
-			}
-		);
-
-		ret.create_widget(
-			plain_midpoint_form_field{
-				.label = u8"C",
-				.value_reference = std::ref(field_value.c)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
