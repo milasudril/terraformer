@@ -53,7 +53,7 @@ terraformer::grayscale_image terraformer::generate(
 	plain_descriptor_new const& params
 )
 {
-//	using xm_type = bounded_value<open_open_interval{0.0f, 1.0f}, 0.5f>;
+	using xm_type = bounded_value<open_open_interval{0.0f, 1.0f}, 0.5f>;
 
 	auto const size_factor = std::min(dom_size.width, dom_size.height);
 	// Assume a bandwidth of at most 4 periods
@@ -99,13 +99,22 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const west_to_east_interior = make_polynomial(
 		quintic_polynomial_descriptor{
-			.x_m = params.midpoints.c,
+			.x_m = params.midpoints.c_we,
 			.y_0 = params.elevations.w,
 			.y_m = params.elevations.c,
 			.y_1 = params.elevations.e,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
+		}
+	);
+
+	auto const ns_midpoint_location = make_polynomial(
+		cubic_polynomial_with_crit_point_descriptor{
+		//	.x_crit = params.midpoints.c_we,
+			.y_0 = params.midpoints.w,
+			.y_crit = params.midpoints.c_ns,
+			.y_1 = params.midpoints.e
 		}
 	);
 
@@ -121,7 +130,8 @@ terraformer::grayscale_image terraformer::generate(
 
 			auto const north_to_south = make_polynomial(
 				quintic_polynomial_descriptor{
-				.x_m = lerp(params.midpoints.w, params.midpoints.e, xi),
+				.x_m = xm_type{ns_midpoint_location(xi)},
+			//	.x_m = lerp(params.midpoints.w, params.midpoints.e, xi),
 				.y_0 = x_interp_n,
 				.y_m = west_to_east_interior(xi),
 				.y_1 = x_interp_s,
