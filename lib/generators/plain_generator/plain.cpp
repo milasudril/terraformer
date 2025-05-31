@@ -97,6 +97,18 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
+	auto const west_to_east_interior = make_polynomial(
+		quintic_polynomial_descriptor{
+			.x_m = params.midpoints.c,
+			.y_0 = params.elevations.w,
+			.y_m = params.elevations.c,
+			.y_1 = params.elevations.e,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	);
+
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		auto const eta = (static_cast<float>(y) + 0.5f)/h_float;
@@ -111,7 +123,7 @@ terraformer::grayscale_image terraformer::generate(
 				quintic_polynomial_descriptor{
 				.x_m = lerp(params.midpoints.w, params.midpoints.e, xi),
 				.y_0 = x_interp_n,
-				.y_m = std::lerp(params.elevations.w, params.elevations.e, xi),
+				.y_m = west_to_east_interior(xi),
 				.y_1 = x_interp_s,
 				.ddx_0 = 0.0f,
 				.ddx_m = 0.0f,
