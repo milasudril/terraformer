@@ -9,17 +9,140 @@
 
 namespace terraformer::app
 {
-	struct plain_corner_descriptor_form_field
-	{
-		std::u8string_view label;
-		using input_widget_type = ui::widgets::form;
-	};
-
 	struct global_elevation_form_field
 	{
 		std::u8string_view label;
 		std::reference_wrapper<float> value_reference;
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
+	struct plain_elevation_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	auto& bind(
+		std::u8string_view field_name,
+		plain_control_point_elevation_descriptor& field_value,
+		ui::widgets::form& form
+	)
+	{
+		auto& ret = form.create_widget(
+			plain_elevation_form_field{
+				.label = field_name
+			},
+			ui::main::widget_orientation::vertical
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"N",
+				.value_reference = std::ref(field_value.n)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"NE",
+				.value_reference = std::ref(field_value.ne)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"E",
+				.value_reference = std::ref(field_value.e)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"SE",
+				.value_reference = std::ref(field_value.se)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"S",
+				.value_reference = std::ref(field_value.s)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"SW",
+				.value_reference = std::ref(field_value.sw)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"W",
+				.value_reference = std::ref(field_value.w)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+
+		ret.create_widget(
+			global_elevation_form_field{
+				.label = u8"NW",
+				.value_reference = std::ref(field_value.nw)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
+			}
+		);
+
+
+		return ret;
+	}
+
+	struct plain_new_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	auto& bind(std::u8string_view field_name, plain_descriptor_new& field_value, ui::widgets::form& form)
+	{
+		auto& ret = form.create_widget(
+			plain_new_form_field{
+				.label = field_name
+			}
+		);
+
+		bind(u8"Elevations/m", field_value.elevations, ret);
+
+		return ret;
+	}
+
+#if 0
+	struct plain_corner_descriptor_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
 	};
 
 	struct plain_derivative_form_field
@@ -133,6 +256,7 @@ namespace terraformer::app
 
 		return ret;
 	}
+#endif
 }
 
 #endif

@@ -4,6 +4,7 @@
 
 #include "lib/common/span_2d.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
+#include "lib/math_utils/quintic_polynomial.hpp"
 
 #include <stdexcept>
 
@@ -46,6 +47,83 @@ namespace
 		return a*p;
 	}
 }
+
+terraformer::grayscale_image terraformer::generate(
+	domain_size_descriptor const& dom_size,
+	plain_descriptor_new const& params
+)
+{
+	auto const size_factor = std::min(dom_size.width, dom_size.height);
+	// Assume a bandwidth of at most 4 periods
+	// Take 4 samples per period
+	// Round up to next value that also contains a factor of 3, which is useful to have
+	auto const min_pixel_count = 24.0f;
+	auto const w_scaled = min_pixel_count*dom_size.width/size_factor;
+	auto const h_scaled = min_pixel_count*dom_size.height/size_factor;
+
+	//auto const pixel_size = size_factor/min_pixel_count;
+
+	grayscale_image ret{static_cast<uint32_t>(w_scaled + 0.5f), static_cast<uint32_t>(h_scaled + 0.5f)};
+
+	auto const w = ret.width();
+	auto const h = ret.height();
+
+	auto const w_float = static_cast<float>(w);
+	auto const h_float = static_cast<float>(h);
+
+	auto const west_to_east_north = make_polynomial(
+		quintic_polynomial_descriptor{
+			.x_m = 0.5f,
+			.y_0 = params.elevations.nw,
+			.y_m = params.elevations.n,
+			.y_1 = params.elevations.ne,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	);
+
+	auto const west_to_east_south = make_polynomial(
+		quintic_polynomial_descriptor{
+			.x_m = 0.5f,
+			.y_0 = params.elevations.sw,
+			.y_m = params.elevations.s,
+			.y_1 = params.elevations.se,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	);
+
+	for(uint32_t y = 0; y != h; ++y)
+	{
+		auto const eta = (static_cast<float>(y) + 0.5f)/h_float;
+		for(uint32_t x = 0; x != w; ++x)
+		{
+			auto const xi = (static_cast<float>(x) + 0.5f)/w_float;
+
+			auto const x_interp_n = west_to_east_north(xi);
+			auto const x_interp_s = west_to_east_south(xi);
+
+			auto const north_to_south = make_polynomial(
+				quintic_polynomial_descriptor{
+				.x_m = 0.5f,
+				.y_0 = x_interp_n,
+				.y_m = std::lerp(params.elevations.w, params.elevations.e, xi),
+				.y_1 = x_interp_s,
+				.ddx_0 = 0.0f,
+				.ddx_m = 0.0f,
+				.ddx_1 = 0.0f
+				}
+			);
+
+			ret(x, y) = north_to_south(eta);
+		}
+	}
+
+	return ret;
+}
+
 
 void terraformer::replace_pixels(
 	terraformer::span_2d<float> output,

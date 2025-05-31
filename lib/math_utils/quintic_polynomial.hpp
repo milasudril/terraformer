@@ -10,11 +10,11 @@ namespace terraformer
 		float x_m = 0.5f;
 
 		float y_0 = 0.0f;
-		float y_m = 1.0f;
-		float y_1 = 0.5f;
-		float ddx_0 = 1.0f;
+		float y_m = 0.0f;
+		float y_1 = 0.0f;
+		float ddx_0 = 0.0f;
 		float ddx_m = 0.0f;
-		float ddx_1 = 1.0f;
+		float ddx_1 = 0.0f;
 	};
 
 	constexpr auto make_polynomial(quintic_polynomial_descriptor const& p)

@@ -132,8 +132,7 @@ namespace terraformer::ui::main
 				m_hot_widget = res;
 			}
 
-			if(!try_dispatch(event, res, window, ui_controller{*this}))
-			{ printf("%d cme in the void\n", getpid()); }
+			try_dispatch(event, res, window, ui_controller{*this});
 		}
 
 		template<class Tag>

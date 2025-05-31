@@ -8,6 +8,25 @@
 
 namespace terraformer
 {
+	struct plain_control_point_elevation_descriptor
+	{
+		float n = 840.0f;
+		float ne = 840.0f;
+		float e = 840.0f;
+		float se = 840.0f;
+		float s = 840.0f;
+		float sw = 840.f;
+		float w = 840.0f;
+		float nw = 840.0f;
+	};
+
+	struct plain_descriptor_new
+	{
+		plain_control_point_elevation_descriptor elevations;
+	};
+
+	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor_new const& params);
+
 	struct plain_edge_descriptor
 	{
 		float xi_0;
