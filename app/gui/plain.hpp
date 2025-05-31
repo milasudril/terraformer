@@ -206,7 +206,7 @@ namespace terraformer::app
 		);
 
 		bind(u8"Elevations/m", field_value.elevations, ret);
-		bind(u8"Midpoints", field_value.midpoints, ret);
+		bind(u8"Edge midpoints", field_value.edge_midpoints, ret);
 
 		return ret;
 	}

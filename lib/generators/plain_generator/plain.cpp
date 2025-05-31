@@ -127,7 +127,7 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const west_to_east_north = boundary_curve(
 		boundary_curve_descriptor{
-			.x_m = params.midpoints.n,
+			.x_m = params.edge_midpoints.n,
 			.y_0 = params.elevations.nw,
 			.y_m = params.elevations.n,
 			.y_1 = params.elevations.ne,
@@ -139,7 +139,7 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const west_to_east_south = boundary_curve(
 		boundary_curve_descriptor{
-			.x_m = params.midpoints.s,
+			.x_m = params.edge_midpoints.s,
 			.y_0 = params.elevations.sw,
 			.y_m = params.elevations.s,
 			.y_1 = params.elevations.se,
@@ -172,7 +172,7 @@ terraformer::grayscale_image terraformer::generate(
 
 			auto const north_to_south = boundary_curve(
 				boundary_curve_descriptor{
-				.x_m = lerp(params.midpoints.w, params.midpoints.e, xi),
+				.x_m = lerp(params.edge_midpoints.w, params.edge_midpoints.e, xi),
 				.y_0 = x_interp_n,
 				.y_m = y_m_interp(xi),
 				.y_1 = x_interp_s,

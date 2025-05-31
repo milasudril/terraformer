@@ -35,7 +35,7 @@ namespace terraformer
 	struct plain_descriptor_new
 	{
 		plain_control_point_elevation_descriptor elevations;
-		plain_midpoint_descriptor midpoints;
+		plain_midpoint_descriptor edge_midpoints;
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor_new const& params);
