@@ -46,6 +46,58 @@ namespace
 		auto const p = xi*(xi - 1.0f);
 		return a*p;
 	}
+
+	struct boundary_curve_descriptor
+	{
+		terraformer::bounded_value<terraformer::open_open_interval{0.0f, 1.0f}, 0.5f> x_m{0.5f};
+
+		float y_0 = 0.0f;
+		float y_m = 0.0f;
+		float y_1 = 0.0f;
+		float ddx_0 = 0.0f;
+		float ddx_m = 0.0f;
+		float ddx_1 = 0.0f;
+	};
+
+	class boundary_curve
+	{
+	public:
+		constexpr explicit boundary_curve(boundary_curve_descriptor const& bcd):
+			m_poly{
+				make_polynomial(
+					terraformer::cubic_spline_control_point{
+						.y = bcd.y_0,
+						.ddx = 0.0f
+					},
+					terraformer::cubic_spline_control_point{
+						.y = bcd.y_m,
+						.ddx = 0.0f
+					}
+				),
+				make_polynomial(
+					terraformer::cubic_spline_control_point{
+						.y = bcd.y_m,
+						.ddx = 0.0f
+					},
+					terraformer::cubic_spline_control_point{
+						.y = bcd.y_1,
+						.ddx = 0.0f
+					}
+				)
+			},
+			m_xm{bcd.x_m}
+		{
+		}
+
+		constexpr float operator()(float x) const
+		{
+			return (x < m_xm)? m_poly[0](x/m_xm) : m_poly[1]((x - m_xm)/(1.0f - m_xm));
+		}
+
+	private:
+		std::array<terraformer::polynomial<3>, 2> m_poly;
+		terraformer::bounded_value<terraformer::open_open_interval{0.0f, 1.0f}, 0.5f> m_xm;
+	};
 }
 
 terraformer::grayscale_image terraformer::generate(
@@ -73,8 +125,8 @@ terraformer::grayscale_image terraformer::generate(
 	auto const w_float = static_cast<float>(w);
 	auto const h_float = static_cast<float>(h);
 
-	auto const west_to_east_north = make_polynomial(
-		quintic_polynomial_descriptor{
+	auto const west_to_east_north = boundary_curve(
+		boundary_curve_descriptor{
 			.x_m = params.midpoints.n,
 			.y_0 = params.elevations.nw,
 			.y_m = params.elevations.n,
@@ -85,8 +137,8 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
-	auto const west_to_east_south = make_polynomial(
-		quintic_polynomial_descriptor{
+	auto const west_to_east_south = boundary_curve(
+		boundary_curve_descriptor{
 			.x_m = params.midpoints.s,
 			.y_0 = params.elevations.sw,
 			.y_m = params.elevations.s,
@@ -107,8 +159,8 @@ terraformer::grayscale_image terraformer::generate(
 			auto const x_interp_n = west_to_east_north(xi);
 			auto const x_interp_s = west_to_east_south(xi);
 
-			auto const north_to_south = make_polynomial(
-				quintic_polynomial_descriptor{
+			auto const north_to_south = boundary_curve(
+				boundary_curve_descriptor{
 				.x_m = lerp(params.midpoints.w, params.midpoints.e, xi),
 				.y_0 = x_interp_n,
 				.y_m = std::lerp(params.elevations.w, params.elevations.e, xi),
