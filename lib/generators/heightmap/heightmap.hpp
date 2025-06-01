@@ -11,7 +11,6 @@ namespace terraformer
 {
 	struct heightmap_generator_descriptor
 	{
-		plain_descriptor_new plain_new;
 		plain_descriptor plain;
 		rolling_hills_descriptor rolling_hills;
 	};

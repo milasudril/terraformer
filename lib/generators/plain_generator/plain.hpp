@@ -23,7 +23,7 @@ namespace terraformer
 		float nw = 840.0f;
 	};
 
-	struct plain_midpoint_descriptor
+	struct plain_edge_midpoint_descriptor
 	{
 		using xm_type = bounded_value<open_open_interval{0.0f, 1.0f}, 0.5f>;
 		xm_type n;
@@ -32,45 +32,11 @@ namespace terraformer
 		xm_type w;
 	};
 
-	struct plain_descriptor_new
-	{
-		plain_control_point_elevation_descriptor elevations;
-		plain_midpoint_descriptor edge_midpoints;
-	};
-
-	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor_new const& params);
-
-	struct plain_edge_descriptor
-	{
-		float xi_0;
-		float elevation;
-	};
-
-	struct plain_corner_descriptor
-	{
-		float elevation = 840.0f;
-		float ddx = 0.0f;
-		float ddy = 0.0f;
-	};
-
 	struct plain_descriptor
 	{
-		float n = 840.0f;
-		plain_corner_descriptor ne;
-		float e = 840.0f;
-		plain_corner_descriptor se;
-		float s = 840.0f;
-		plain_corner_descriptor sw;
-		float w = 840.0f;
-		plain_corner_descriptor nw;
-		float midpoint = 840.0f;
+		plain_control_point_elevation_descriptor elevations;
+		plain_edge_midpoint_descriptor edge_midpoints;
 	};
-
-	void replace_pixels(
-		span_2d<float> output,
-		float pixel_size,
-		plain_descriptor const& params
-	);
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor const& params);
 }

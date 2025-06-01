@@ -217,7 +217,7 @@ namespace terraformer::app
 			}
 		);
 
-		bind(u8"Plain", field_value.plain_new, ret);
+		bind(u8"Plain", field_value.plain, ret);
 		bind(u8"Rolling hills", field_value.rolling_hills, ret);
 
 		return ret;
