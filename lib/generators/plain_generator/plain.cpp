@@ -107,13 +107,48 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
-	auto const y_m_interp = make_polynomial(
+	auto const north_to_south_west = boundary_curve(
+		boundary_curve_descriptor{
+			.x_m = params.edge_midpoints.w,
+			.y_0 = params.elevations.nw,
+			.y_m = params.elevations.w,
+			.y_1 = params.elevations.sw,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	);
+
+	auto const north_to_south_east = boundary_curve(
+		boundary_curve_descriptor{
+			.x_m = params.edge_midpoints.e,
+			.y_0 = params.elevations.ne,
+			.y_m = params.elevations.e,
+			.y_1 = params.elevations.se,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	);
+
+	auto const y_m_interp_ns = make_polynomial(
 		cubic_spline_control_point{
 			.y = params.elevations.w,
 			.ddx = 0.0f
 		},
 		cubic_spline_control_point{
 			.y = params.elevations.e,
+			.ddx = 0.0f
+		}
+	);
+
+	auto const y_m_interp_we = make_polynomial(
+		cubic_spline_control_point{
+			.y = params.elevations.n,
+			.ddx = 0.0f
+		},
+		cubic_spline_control_point{
+			.y = params.elevations.s,
 			.ddx = 0.0f
 		}
 	);
@@ -127,12 +162,14 @@ terraformer::grayscale_image terraformer::generate(
 
 			auto const x_interp_n = west_to_east_north(xi);
 			auto const x_interp_s = west_to_east_south(xi);
+			auto const y_interp_w = north_to_south_west(eta);
+			auto const y_interp_e = north_to_south_east(eta);
 
 			auto const north_to_south = boundary_curve(
 				boundary_curve_descriptor{
 				.x_m = lerp(params.edge_midpoints.w, params.edge_midpoints.e, xi),
 				.y_0 = x_interp_n,
-				.y_m = y_m_interp(xi),
+				.y_m = y_m_interp_ns(xi),
 				.y_1 = x_interp_s,
 				.ddx_0 = 0.0f,
 				.ddx_m = 0.0f,
@@ -140,7 +177,19 @@ terraformer::grayscale_image terraformer::generate(
 				}
 			);
 
-			ret(x, y) = north_to_south(eta);
+			auto const west_to_east = boundary_curve(
+				boundary_curve_descriptor{
+				.x_m = lerp(params.edge_midpoints.n, params.edge_midpoints.s, eta),
+				.y_0 = y_interp_w,
+				.y_m = y_m_interp_we(eta),
+				.y_1 = y_interp_e,
+				.ddx_0 = 0.0f,
+				.ddx_m = 0.0f,
+				.ddx_1 = 0.0f
+				}
+			);
+
+			ret(x, y) = 0.5f*(north_to_south(eta) + west_to_east(xi));
 		}
 	}
 
