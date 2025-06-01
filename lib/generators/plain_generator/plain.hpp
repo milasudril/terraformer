@@ -21,7 +21,6 @@ namespace terraformer
 		float sw = 840.f;
 		float w = 840.0f;
 		float nw = 840.0f;
-		float c = 840.0f;
 	};
 
 	struct plain_edge_midpoint_descriptor
@@ -31,8 +30,6 @@ namespace terraformer
 		xm_type e;
 		xm_type s;
 		xm_type w;
-		xm_type c_ns;
-		xm_type c_we;
 	};
 
 	struct plain_descriptor

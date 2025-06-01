@@ -131,31 +131,7 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
-	auto const y_m_interp_ns = boundary_curve(
-		boundary_curve_descriptor{
-			.x_m = params.edge_midpoints.c_we,
-			.y_0 = params.elevations.w,
-			.y_m = params.elevations.c,
-			.y_1 = params.elevations.e,
-			.ddx_0 = 0.0f,
-			.ddx_m = 0.0f,
-			.ddx_1 = 0.0f
-		}
-	);
-
-	auto const y_m_interp_we = boundary_curve(
-		boundary_curve_descriptor{
-			.x_m = params.edge_midpoints.c_ns,
-			.y_0 = params.elevations.n,
-			.y_m = params.elevations.c,
-			.y_1 = params.elevations.s,
-			.ddx_0 = 0.0f,
-			.ddx_m = 0.0f,
-			.ddx_1 = 0.0f
-		}
-	);
-
-	/* make_polynomial(
+	auto const y_m_interp_ns = make_polynomial(
 		cubic_spline_control_point{
 			.y = params.elevations.w,
 			.ddx = 0.0f
@@ -175,7 +151,7 @@ terraformer::grayscale_image terraformer::generate(
 			.y = params.elevations.s,
 			.ddx = 0.0f
 		}
-	);*/
+	);
 
 	for(uint32_t y = 0; y != h; ++y)
 	{
