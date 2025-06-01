@@ -197,6 +197,13 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
+	struct global_orientation_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
 	auto& bind(std::u8string_view field_name, plain_descriptor& field_value, ui::widgets::form& form)
 	{
 		auto& ret = form.create_widget(
@@ -207,6 +214,22 @@ namespace terraformer::app
 
 		bind(u8"Elevations/m", field_value.elevations, ret);
 		bind(u8"Edge midpoints", field_value.edge_midpoints, ret);
+
+		ret.create_widget(
+			global_orientation_form_field{
+				.label = u8"Orientation",
+				.value_reference = std::ref(field_value.orientation)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{-0.5f, 0.5f}
+			}
+		)
+		.input_widget().visual_angle_range(
+			closed_closed_interval<geosimd::turn_angle>{
+				geosimd::turns{0.0},
+				geosimd::turns{1.0}
+			}
+		);
 
 		return ret;
 	}

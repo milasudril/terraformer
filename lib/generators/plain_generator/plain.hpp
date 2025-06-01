@@ -36,6 +36,7 @@ namespace terraformer
 	{
 		plain_control_point_elevation_descriptor elevations;
 		plain_edge_midpoint_descriptor edge_midpoints;
+		float orientation = 0.0f;
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor const& params);

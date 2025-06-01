@@ -153,12 +153,18 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
+	auto const cos_theta = std::cos(2.0f*std::numbers::pi_v<float>*params.orientation);
+	auto const sin_theta = std::sin(2.0f*std::numbers::pi_v<float>*params.orientation);
+
 	for(uint32_t y = 0; y != h; ++y)
 	{
-		auto const eta = (static_cast<float>(y) + 0.5f)/h_float;
 		for(uint32_t x = 0; x != w; ++x)
 		{
-			auto const xi = (static_cast<float>(x) + 0.5f)/w_float;
+			auto const eta_in = (static_cast<float>(y) + 0.5f)/h_float - 0.5f;
+			auto const xi_in = (static_cast<float>(x) + 0.5f)/w_float - 0.5f;
+
+			auto const xi  =  xi_in*cos_theta + eta_in*sin_theta + 0.5f;
+			auto const eta = -xi_in*sin_theta + eta_in*cos_theta + 0.5f;
 
 			auto const x_interp_n = west_to_east_north(xi);
 			auto const x_interp_s = west_to_east_south(xi);
