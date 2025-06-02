@@ -5,9 +5,16 @@
 
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/pixel_store/image.hpp"
+#include "lib/common/interval.hpp"
 
 namespace terraformer
 {
+	struct rolling_hills_shape_descriptor
+	{
+		closed_closed_interval<float> input_range{-1.0f, 1.0f};
+		float exponent;
+	};
+
 	struct rolling_hills_descriptor
 	{
 		std::array<std::byte, 16> rng_seed{};
