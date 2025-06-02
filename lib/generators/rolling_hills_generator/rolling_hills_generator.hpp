@@ -24,6 +24,7 @@ namespace terraformer
 		float relative_z_offset = 1.0f;
 		float amplitude = 2048.0f/std::numbers::pi_v<float>;
 		float shape = 1.0f;
+		rolling_hills_shape_descriptor shape_new;
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, rolling_hills_descriptor const& params);

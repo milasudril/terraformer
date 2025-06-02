@@ -7,6 +7,7 @@
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
 #include "ui/widgets/rng_seed_input.hpp"
+#include "ui/widgets/interval_input.hpp"
 
 namespace terraformer::app
 {
@@ -56,6 +57,13 @@ namespace terraformer::app
 		std::u8string_view label;
 		std::reference_wrapper<float> value_reference;
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
+	struct rolling_hills_shape_form_field_new
+	{
+		std::u8string_view label;
+		std::reference_wrapper<closed_closed_interval<float>> value_reference;
+		using input_widget_type = ui::widgets::interval_input;
 	};
 
 	auto& bind(std::u8string_view field_name, rolling_hills_descriptor& field_value, ui::widgets::form& form)
@@ -126,6 +134,13 @@ namespace terraformer::app
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f/4.0f, 4.0f, 2.0f}
+			}
+		);
+
+		ret.create_widget(
+			rolling_hills_shape_form_field_new{
+				.label = u8"Input range",
+				.value_reference = std::ref(field_value.shape_new.input_range)
 			}
 		);
 
