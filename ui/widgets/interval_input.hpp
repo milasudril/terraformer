@@ -21,16 +21,11 @@ namespace terraformer::ui::widgets
 		using widget_group::confirm_size;
 
 
-		explicit interval_input(
-			iterator_invalidation_handler_ref iihr,
-			main::widget_orientation orientation = main::widget_orientation::horizontal
-		):
+		explicit interval_input(iterator_invalidation_handler_ref iihr):
 			widget_group{
 				iihr,
 				2u,
-				orientation == main::widget_orientation::vertical?
-					layouts::table::cell_order::column_major:
-					layouts::table::cell_order::row_major
+				layouts::table::cell_order::row_major
 			}
 		{
 			append(std::ref(m_textbox_lower), terraformer::ui::main::widget_geometry{});

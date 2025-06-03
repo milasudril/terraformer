@@ -45,13 +45,6 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	struct rolling_hills_shape_form_field
-	{
-		std::u8string_view label;
-		std::reference_wrapper<float> value_reference;
-		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
-	};
-
 	struct rolling_hills_amplitude_form_field
 	{
 		std::u8string_view label;
@@ -62,9 +55,51 @@ namespace terraformer::app
 	struct rolling_hills_shape_form_field_new
 	{
 		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	struct rolling_hills_shape_exponent_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
+	struct rolling_hills_shape_input_mapping_form_field
+	{
+		std::u8string_view label;
 		std::reference_wrapper<closed_closed_interval<float>> value_reference;
 		using input_widget_type = ui::widgets::interval_input;
 	};
+
+	auto& bind(std::u8string_view field_name, rolling_hills_shape_descriptor& field_value, ui::widgets::form& form)
+	{
+		auto& ret = form.create_widget(
+			rolling_hills_shape_form_field_new{
+				.label = field_name
+			},
+			ui::main::widget_orientation::vertical
+		);
+
+		ret.create_widget(
+			rolling_hills_shape_input_mapping_form_field{
+				.label = u8"Input mapping",
+				.value_reference = std::reference_wrapper(field_value.input_mapping)
+			}
+		);
+
+		ret.create_widget(
+			rolling_hills_shape_exponent_form_field{
+				.label = u8"Exponent",
+				.value_reference = std::reference_wrapper(field_value.exponent)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::log_value_map{0.25f, 4.0f, 2.0f}
+			}
+		);
+
+		return ret;
+	}
 
 	auto& bind(std::u8string_view field_name, rolling_hills_descriptor& field_value, ui::widgets::form& form)
 	{
@@ -127,6 +162,7 @@ namespace terraformer::app
 			}
 		);
 
+#if 0
 		ret.create_widget(
 			rolling_hills_shape_form_field{
 				.label = u8"Shape",
@@ -136,13 +172,9 @@ namespace terraformer::app
 				terraformer::ui::value_maps::log_value_map{1.0f/4.0f, 4.0f, 2.0f}
 			}
 		);
+#endif
 
-		ret.create_widget(
-			rolling_hills_shape_form_field_new{
-				.label = u8"Input range",
-				.value_reference = std::ref(field_value.shape_new.input_range)
-			}
-		);
+		bind(u8"Shape", field_value.shape_new, ret);
 
 		ret.create_widget(
 			rolling_hills_amplitude_form_field{

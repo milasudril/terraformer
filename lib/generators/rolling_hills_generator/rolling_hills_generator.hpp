@@ -11,8 +11,8 @@ namespace terraformer
 {
 	struct rolling_hills_shape_descriptor
 	{
-		closed_closed_interval<float> input_range{-1.0f, 1.0f};
-		float exponent;
+		closed_closed_interval<float> input_mapping{-1.0f, 1.0f};
+		float exponent = 1.0f;
 	};
 
 	struct rolling_hills_descriptor
