@@ -76,16 +76,28 @@ namespace
 		return sign*std::pow(sign*base, exponent);
 	}
 
-	float apply_shape(float input_value, terraformer::rolling_hills_shape_descriptor const& shape)
+	struct shape_output_range
+	{
+		explicit shape_output_range(terraformer::rolling_hills_shape_descriptor const& shape):
+			min{signed_power(shape.input_mapping.min(), shape.exponent)},
+			max{signed_power(shape.input_mapping.max(), shape.exponent)}
+		{}
+
+		float min;
+		float max;
+	};
+
+	float apply_shape(
+		float input_value,
+		terraformer::rolling_hills_shape_descriptor const& shape,
+		shape_output_range output_range
+	)
 	{
 		auto const x_min = shape.input_mapping.min();
 		auto const x_max = shape.input_mapping.max();
 		auto const mapped_value = std::lerp(x_min, x_max, 0.5f*(input_value + 1.0f));
 		auto const shaped_value = signed_power(mapped_value, shape.exponent);
-		auto const y_min = signed_power(x_min, shape.exponent);
-		auto const y_max = signed_power(x_max, shape.exponent);
-
-		return std::lerp(-1.0f, 1.0f, (shaped_value - y_min)/(y_max - y_min));
+		return std::lerp(-1.0f, 1.0f, (shaped_value - output_range.min)/(output_range.max - output_range.min));
 	}
 }
 
@@ -175,12 +187,13 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 		{ max = std::max(max, ret(x,y)); }
 	}
 
+	shape_output_range output_range{params.shape};
 	auto const amplitude = params.amplitude;
 	auto const relative_z_offset = params.relative_z_offset;
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 			for(uint32_t x = 0; x != w_img; ++x)
-			{ ret(x, y) = amplitude*(apply_shape(ret(x, y)/max, params.shape) + relative_z_offset); }
+			{ ret(x, y) = amplitude*(apply_shape(ret(x, y)/max, params.shape, output_range) + relative_z_offset); }
 	}
 
 	return ret;
