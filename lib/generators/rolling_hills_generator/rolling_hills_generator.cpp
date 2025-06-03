@@ -70,6 +70,12 @@ namespace
 		return ret;
 	}
 
+	float clamp(float val, terraformer::closed_closed_interval<float> range)
+	{
+		auto const clamped_val = std::clamp(val, range.min(), range.max());
+		return std::lerp(-1.0f, 1.0f, (clamped_val - range.min())/(range.max() - range.min()));
+	}
+
 	float signed_power(float base, float exponent)
 	{
 		auto const sign = base >= 0.0f? 1.0f : -1.0f;
@@ -95,7 +101,7 @@ namespace
 	{
 		auto const x_min = shape.input_mapping.min();
 		auto const x_max = shape.input_mapping.max();
-		auto const mapped_value = std::lerp(x_min, x_max, 0.5f*(input_value + 1.0f));
+		auto const mapped_value = std::lerp(x_min, x_max, 0.5f*(clamp(input_value, shape.clamp_to) + 1.0f));
 		auto const shaped_value = signed_power(mapped_value, shape.exponent);
 		return std::lerp(-1.0f, 1.0f, (shaped_value - output_range.min)/(output_range.max - output_range.min));
 	}

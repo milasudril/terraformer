@@ -65,6 +65,13 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
+	struct rolling_hills_shape_clamp_to_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<closed_closed_interval<float>> value_reference;
+		using input_widget_type = ui::widgets::interval_input;
+	};
+
 	struct rolling_hills_shape_input_mapping_form_field
 	{
 		std::u8string_view label;
@@ -79,6 +86,13 @@ namespace terraformer::app
 				.label = field_name
 			},
 			ui::main::widget_orientation::vertical
+		);
+
+		ret.create_widget(
+			rolling_hills_shape_clamp_to_form_field{
+				.label = u8"Clamp to",
+				.value_reference = std::reference_wrapper(field_value.clamp_to)
+			}
 		);
 
 		ret.create_widget(
