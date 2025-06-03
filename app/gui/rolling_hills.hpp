@@ -113,8 +113,7 @@ namespace terraformer::app
 			rolling_hills_seed_form_field{
 				.label = u8"Seed",
 				.value_reference = std::ref(field_value.rng_seed)
-			},
-			ui::main::widget_orientation::vertical
+			}
 		);
 
 		ret.create_widget(
