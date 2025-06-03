@@ -21,10 +21,9 @@ namespace terraformer
 		float wavelength_x = 4096.0f;
 		float wavelength_y = 4096.0f;
 		float filter_orientation = 0.0f;
-		float relative_z_offset = 1.0f;
+		rolling_hills_shape_descriptor shape;
 		float amplitude = 2048.0f/std::numbers::pi_v<float>;
-		float shape = 1.0f;
-		rolling_hills_shape_descriptor shape_new;
+		float relative_z_offset = 0.0f;
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, rolling_hills_descriptor const& params);

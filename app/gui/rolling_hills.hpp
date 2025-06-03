@@ -52,7 +52,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	struct rolling_hills_shape_form_field_new
+	struct rolling_hills_shape_form_field
 	{
 		std::u8string_view label;
 		using input_widget_type = ui::widgets::form;
@@ -75,7 +75,7 @@ namespace terraformer::app
 	auto& bind(std::u8string_view field_name, rolling_hills_shape_descriptor& field_value, ui::widgets::form& form)
 	{
 		auto& ret = form.create_widget(
-			rolling_hills_shape_form_field_new{
+			rolling_hills_shape_form_field{
 				.label = field_name
 			},
 			ui::main::widget_orientation::vertical
@@ -151,29 +151,7 @@ namespace terraformer::app
 			}
 		);
 
-		ret.create_widget(
-			rolling_hills_rel_z_offset_form_field{
-				.label = u8"Relative z offset",
-				.value_reference = std::ref(field_value.relative_z_offset)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
-			}
-		);
-
-#if 0
-		ret.create_widget(
-			rolling_hills_shape_form_field{
-				.label = u8"Shape",
-				.value_reference = std::ref(field_value.shape)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1.0f/4.0f, 4.0f, 2.0f}
-			}
-		);
-#endif
-
-		bind(u8"Shape", field_value.shape_new, ret);
+		bind(u8"Shape", field_value.shape, ret);
 
 		ret.create_widget(
 			rolling_hills_amplitude_form_field{
@@ -182,6 +160,16 @@ namespace terraformer::app
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f, 8192.0f, 2.0f}
+			}
+		);
+
+		ret.create_widget(
+			rolling_hills_rel_z_offset_form_field{
+				.label = u8"Relative z offset",
+				.value_reference = std::ref(field_value.relative_z_offset)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 			}
 		);
 

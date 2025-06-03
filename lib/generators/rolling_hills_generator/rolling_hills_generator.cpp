@@ -70,10 +70,22 @@ namespace
 		return ret;
 	}
 
-	float apply_shape(float input_value, float shape)
+	float signed_power(float base, float exponent)
 	{
-		auto const sign = input_value >= 0.0f ? 1.0f : -1.0f;
-		return sign*std::pow(sign*input_value, shape);
+		auto const sign = base >= 0.0f? 1.0f : -1.0f;
+		return sign*std::pow(sign*base, exponent);
+	}
+
+	float apply_shape(float input_value, terraformer::rolling_hills_shape_descriptor const& shape)
+	{
+		auto const x_min = shape.input_mapping.min();
+		auto const x_max = shape.input_mapping.max();
+		auto const mapped_value = std::lerp(x_min, x_max, 0.5f*(input_value + 1.0f));
+		auto const shaped_value = signed_power(mapped_value, shape.exponent);
+		auto const y_min = signed_power(x_min, shape.exponent);
+		auto const y_max = signed_power(x_max, shape.exponent);
+
+		return std::lerp(-1.0f, 1.0f, (shaped_value - y_min)/(y_max - y_min));
 	}
 }
 
@@ -87,8 +99,8 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	// This gives a size of 256 pixels, but the size is multiplied by 2 to guarantee an even number.
 	// Therefore, use 128 pixels as factor. Notice that if shape is not 1, the required bandwidth
 	// is increased. For example, expanding sin^4(x) gives a cos(4x) term
-	auto const shape = params.shape;
-	auto const min_pixel_count = std::exp2(std::abs(std::log2(shape)))*128.0f*std::max(normalized_f_x, normalized_f_y);
+	auto const exponent = params.shape.exponent;
+	auto const min_pixel_count = std::exp2(std::abs(std::log2(exponent)))*128.0f*std::max(normalized_f_x, normalized_f_y);
 
 	auto const w_scaled = normalized_f_x > normalized_f_y?
 		min_pixel_count: min_pixel_count*size.width/size.height;
@@ -168,7 +180,7 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 			for(uint32_t x = 0; x != w_img; ++x)
-			{ ret(x, y) = 2.0f*amplitude*apply_shape(0.5f*(ret(x, y)/max + relative_z_offset), shape); }
+			{ ret(x, y) = amplitude*(apply_shape(ret(x, y)/max, params.shape) + relative_z_offset); }
 	}
 
 	return ret;
