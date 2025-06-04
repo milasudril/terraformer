@@ -156,13 +156,6 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 		{ transformed_input(x, y) *= filter(x, y); }
 	}
 
-	grayscale_image temp{w_img, h_img};
-	for(uint32_t y = 0; y != h_img; ++y)
-	{
-		for(uint32_t x = 0; x != w_img; ++x)
-		{ temp(x, y) = transformed_input(x, y).real(); }
-	}
-
 	dft_execution_plan plan_backward{
 		span_2d_extents{
 			.width = w_img,
@@ -173,24 +166,24 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 
 	plan_backward.execute(std::as_const(transformed_input).pixels().data(), noise.pixels().data());
 
-	grayscale_image ret{w_img, h_img};
+	grayscale_image filtered_output{w_img, h_img};
 	auto sign_y = 1.0f;
 	for(uint32_t y = 0; y < h_img; ++y)
 	{
 		auto sign_x = 1.0f;
 		for(uint32_t x = 0; x < w_img; ++x)
 		{
-			ret(x, y) = noise(x, y).real() * sign_x * sign_y;
+			filtered_output(x, y) = noise(x, y).real() * sign_x * sign_y;
 			sign_x *= -1.0f;
 		}
 		sign_y *= -1.0f;
 	}
 
-	auto max = ret(0, 0);
+	auto max = filtered_output(0, 0);
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 		for(uint32_t x = 0; x != w_img; ++x)
-		{ max = std::max(max, ret(x,y)); }
+		{ max = std::max(max, filtered_output(x, y)); }
 	}
 
 	shape_output_range output_range{params.shape};
@@ -199,8 +192,8 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 			for(uint32_t x = 0; x != w_img; ++x)
-			{ ret(x, y) = amplitude*(apply_shape(ret(x, y)/max, params.shape, output_range) + relative_z_offset); }
+			{ filtered_output(x, y) = amplitude*(apply_shape(filtered_output(x, y)/max, params.shape, output_range) + relative_z_offset); }
 	}
 
-	return ret;
+	return filtered_output;
 }
