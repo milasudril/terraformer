@@ -5,6 +5,7 @@
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/math_utils/dft_engine.hpp"
 #include "lib/common/rng.hpp"
+#include "lib/math_utils/interp.hpp"
 
 #include <cassert>
 #include <random>
@@ -112,13 +113,11 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 {
 	auto const normalized_f_x = size.width/params.wavelength_x;
 	auto const normalized_f_y = size.height/params.wavelength_y;
-	// Assume a bandwidth of at most 6 octaves = 64 periods
-	// Take 4 samples per period
-	// This gives a size of 256 pixels, but the size is multiplied by 2 to guarantee an even number.
-	// Therefore, use 128 pixels as factor. Notice that if shape is not 1, the required bandwidth
-	// is increased. For example, expanding sin^4(x) gives a cos(4x) term
-	auto const exponent = params.shape.exponent;
-	auto const min_pixel_count = std::exp2(std::abs(std::log2(exponent)))*128.0f*std::max(normalized_f_x, normalized_f_y);
+
+	// Assume a bandwidth of at most 6 octaves = 64 periods. Take 4 samples per period. This gives a
+	// size of 256 pixels, but the size is multiplied by 2 to guarantee an even number. Therefore,
+	// use 128 pixels as factor.
+	auto const min_pixel_count = 128.0f*std::max(normalized_f_x, normalized_f_y);
 
 	auto const w_scaled = normalized_f_x > normalized_f_y?
 		min_pixel_count: min_pixel_count*size.width/size.height;
@@ -187,13 +186,23 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	}
 
 	shape_output_range output_range{params.shape};
+	auto const shape_scale_factor = std::ceil(std::exp2(std::abs(std::log2(params.shape.exponent))));
+	auto const w_out = w_img * static_cast<uint32_t>(shape_scale_factor);
+	auto const h_out = w_img * static_cast<uint32_t>(shape_scale_factor);
+	grayscale_image ret{w_out, h_out};
 	auto const amplitude = params.amplitude;
 	auto const relative_z_offset = params.relative_z_offset;
-	for(uint32_t y = 0; y != h_img; ++y)
+	for(uint32_t y = 0; y != h_out; ++y)
 	{
-			for(uint32_t x = 0; x != w_img; ++x)
-			{ filtered_output(x, y) = amplitude*(apply_shape(filtered_output(x, y)/max, params.shape, output_range) + relative_z_offset); }
+		for(uint32_t x = 0; x != w_out; ++x)
+		{
+			auto const x_in = static_cast<float>(x)/shape_scale_factor;
+			auto const y_in = static_cast<float>(y)/shape_scale_factor;
+			auto const input_value = interp(filtered_output, x_in, y_in, wrap_around_at_boundary{});
+
+			ret(x, y) = amplitude*(apply_shape(input_value/max, params.shape, output_range) + relative_z_offset);
+		}
 	}
 
-	return filtered_output;
+	return ret;
 }
