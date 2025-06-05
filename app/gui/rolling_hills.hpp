@@ -31,6 +31,13 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
+	struct rolling_hills_rolloff_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
 	struct rolling_hills_orientation_form_field
 	{
 		std::u8string_view label;
@@ -151,8 +158,28 @@ namespace terraformer::app
 		);
 
 		ret.create_widget(
+			rolling_hills_rolloff_form_field{
+				.label = u8"LF roll-off",
+				.value_reference = std::ref(field_value.filter.lf_rolloff)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{2.0f, 4.0f}
+			}
+		);
+
+		ret.create_widget(
+			rolling_hills_rolloff_form_field{
+				.label = u8"HF roll-off",
+				.value_reference = std::ref(field_value.filter.hf_rolloff)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{2.0f, 4.0f}
+			}
+		);
+
+		ret.create_widget(
 			rolling_hills_orientation_form_field{
-				.label = u8"Filter orientation",
+				.label = u8"Y direction",
 				.value_reference = std::ref(field_value.filter.orientation)
 			},
 			terraformer::ui::widgets::knob{
