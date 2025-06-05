@@ -179,10 +179,15 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	}
 
 	auto max = filtered_output(0, 0);
+	auto min = max;
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 		for(uint32_t x = 0; x != w_img; ++x)
-		{ max = std::max(max, filtered_output(x, y)); }
+		{
+			auto const v = filtered_output(x, y);
+			max = std::max(max, v);
+			min = std::min(min, v);
+		}
 	}
 
 	shape_output_range output_range{params.shape};
@@ -199,8 +204,9 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 			auto const x_in = static_cast<float>(x)/shape_scale_factor;
 			auto const y_in = static_cast<float>(y)/shape_scale_factor;
 			auto const input_value = interp(filtered_output, x_in, y_in, wrap_around_at_boundary{});
+			auto const normalized_value = 2.0f*(input_value - min)/(max - min) - 1.0f;
 
-			ret(x, y) = amplitude*(apply_shape(input_value/max, params.shape, output_range) + relative_z_offset);
+			ret(x, y) = amplitude*(apply_shape(normalized_value, params.shape, output_range) + relative_z_offset);
 		}
 	}
 
