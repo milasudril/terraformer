@@ -28,9 +28,7 @@ namespace terraformer
 	struct rolling_hills_descriptor
 	{
 		std::array<std::byte, 16> rng_seed{};
-		float wavelength_x = 4096.0f;
-		float wavelength_y = 4096.0f;
-		float filter_orientation = 0.0f;
+		rolling_hills_filter_descriptor filter;
 		rolling_hills_shape_descriptor shape;
 		float amplitude = 2048.0f/std::numbers::pi_v<float>;
 		float relative_z_offset = 0.0f;

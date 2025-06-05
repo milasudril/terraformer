@@ -133,7 +133,7 @@ namespace terraformer::app
 		ret.create_widget(
 			rolling_hills_wavelength_form_field{
 				.label = u8"Wavelength x/m",
-				.value_reference = std::ref(field_value.wavelength_x)
+				.value_reference = std::ref(field_value.filter.wavelength_x)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
@@ -143,7 +143,7 @@ namespace terraformer::app
 		ret.create_widget(
 			rolling_hills_wavelength_form_field{
 				.label = u8"Wavelength y/m",
-				.value_reference = std::ref(field_value.wavelength_y)
+				.value_reference = std::ref(field_value.filter.wavelength_y)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
@@ -153,7 +153,7 @@ namespace terraformer::app
 		ret.create_widget(
 			rolling_hills_orientation_form_field{
 				.label = u8"Filter orientation",
-				.value_reference = std::ref(field_value.filter_orientation)
+				.value_reference = std::ref(field_value.filter.orientation)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{-0.25f, 0.25f}

@@ -142,14 +142,7 @@ namespace
 terraformer::grayscale_image
 terraformer::generate(domain_size_descriptor const& size, rolling_hills_descriptor const& params)
 {
-	auto const filter = make_filter(
-		size,
-		rolling_hills_filter_descriptor{
-			.wavelength_x = params.wavelength_x,
-			.wavelength_y = params.wavelength_y,
-			.orientation = params.filter_orientation
-		}
-	);
+	auto const filter = make_filter(size, params.filter);
 
 	auto const w_img = filter.width();
 	auto const h_img = filter.height();
