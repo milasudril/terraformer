@@ -51,6 +51,37 @@ namespace
 		return ret;
 	}
 
+	terraformer::grayscale_image make_filter(
+		terraformer::domain_size_descriptor const& size,
+		terraformer::rolling_hills_filter_descriptor const& params
+	)
+	{
+		auto const normalized_f_x = size.width/params.wavelength_x;
+		auto const normalized_f_y = size.height/params.wavelength_y;
+
+		// Assume a bandwidth of at most 6 octaves = 64 periods. Take 4 samples per period. This gives a
+		// size of 256 pixels, but the size is multiplied by 2 to guarantee an even number. Therefore,
+		// use 128 pixels as factor.
+		auto const min_pixel_count = 128.0f*std::max(normalized_f_x, normalized_f_y);
+
+		auto const w_scaled = normalized_f_x > normalized_f_y?
+			min_pixel_count: min_pixel_count*size.width/size.height;
+		auto const h_scaled = normalized_f_x > normalized_f_y?
+			min_pixel_count*size.height/size.width : min_pixel_count;
+
+		auto const w_img = 2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u);
+		auto const h_img = 2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u);
+		auto const wh_ratio = std::max(w_scaled/h_scaled, h_scaled/w_scaled);
+
+		return make_filter(
+			w_img,
+			h_img,
+			2.0f*w_scaled*wh_ratio/params.wavelength_x,
+			2.0f*h_scaled*wh_ratio/params.wavelength_y,
+			2.0f*std::numbers::pi_v<float>*params.orientation
+		);
+	}
+
 	terraformer::basic_image<std::complex<float>>
 	make_noise(uint32_t width, uint32_t height, terraformer::rng_seed_type rng_seed)
 	{
@@ -111,30 +142,17 @@ namespace
 terraformer::grayscale_image
 terraformer::generate(domain_size_descriptor const& size, rolling_hills_descriptor const& params)
 {
-	auto const normalized_f_x = size.width/params.wavelength_x;
-	auto const normalized_f_y = size.height/params.wavelength_y;
-
-	// Assume a bandwidth of at most 6 octaves = 64 periods. Take 4 samples per period. This gives a
-	// size of 256 pixels, but the size is multiplied by 2 to guarantee an even number. Therefore,
-	// use 128 pixels as factor.
-	auto const min_pixel_count = 128.0f*std::max(normalized_f_x, normalized_f_y);
-
-	auto const w_scaled = normalized_f_x > normalized_f_y?
-		min_pixel_count: min_pixel_count*size.width/size.height;
-	auto const h_scaled = normalized_f_x > normalized_f_y?
-		min_pixel_count*size.height/size.width : min_pixel_count;
-
-	auto const w_img = 2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u);
-	auto const h_img = 2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u);
-	auto const wh_ratio = std::max(w_scaled/h_scaled, h_scaled/w_scaled);
-
 	auto const filter = make_filter(
-		w_img,
-		h_img,
-		2.0f*w_scaled*wh_ratio/params.wavelength_x,
-		2.0f*h_scaled*wh_ratio/params.wavelength_y,
-		2.0f*std::numbers::pi_v<float>*params.filter_orientation
+		size,
+		rolling_hills_filter_descriptor{
+			.wavelength_x = params.wavelength_x,
+			.wavelength_y = params.wavelength_y,
+			.orientation = params.filter_orientation
+		}
 	);
+
+	auto const w_img = filter.width();
+	auto const h_img = filter.height();
 
 	auto noise = make_noise(w_img, h_img, std::bit_cast<rng_seed_type>(params.rng_seed));
 
