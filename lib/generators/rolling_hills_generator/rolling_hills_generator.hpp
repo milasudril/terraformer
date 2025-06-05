@@ -9,6 +9,15 @@
 
 namespace terraformer
 {
+	struct rolling_hills_filter_descriptor
+	{
+		float wavelength_x = 4096.0f;
+		float wavelength_y = 4096.0f;
+		float lf_rolloff = 2.0f;
+		float hf_rolloff = 2.0f;
+		float filter_orientation = 0.0f;
+	};
+
 	struct rolling_hills_shape_descriptor
 	{
 		closed_closed_interval<float> clamp_to{-1.0f, 1.0f};
@@ -19,6 +28,7 @@ namespace terraformer
 	struct rolling_hills_descriptor
 	{
 		std::array<std::byte, 16> rng_seed{};
+		rolling_hills_filter_descriptor filter;
 		float wavelength_x = 4096.0f;
 		float wavelength_y = 4096.0f;
 		float filter_orientation = 0.0f;
