@@ -222,7 +222,13 @@ float terraformer::ui::widgets::range_slider::get_value_from_cursor_loc(main::cu
 			- 2.0f*m_border_thickness;
 		return (static_cast<float>(loc.x) - m_border_thickness)/track_length;
 	}
-	return 0.0f;
+	else
+	{
+		// TODO: Test that this works
+		auto const track_length = static_cast<float>(m_current_size.height)
+			- 2.0f*m_border_thickness;
+		return (static_cast<float>(loc.y + m_current_size.height))/track_length;
+	}
 }
 
 void terraformer::ui::widgets::range_slider::set_value_to_cursor_val(float val)
