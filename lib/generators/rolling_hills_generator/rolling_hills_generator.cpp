@@ -31,10 +31,10 @@ namespace
 		auto const normalized_f_x = size.width/params.wavelength_x;
 		auto const normalized_f_y = size.height/params.wavelength_y;
 
-		// Assume a bandwidth of at most 6 octaves = 64 periods. Take 4 samples per period. This gives a
-		// size of 256 pixels, but the size is multiplied by 2 to guarantee an even number. Therefore,
-		// use 128 pixels as factor.
-		auto const min_pixel_count = 128.0f*std::max(normalized_f_x, normalized_f_y);
+		// Assume a bandwidth of at most 6 octaves = 64 periods. Take 4 samples per period. With a
+		// hf_rolloff of two, this gives a size of 256 pixels, but the size is laterr multiplied by 2 to
+		// guarantee an even number. Therefore, use 128 pixels as factor.
+		auto const min_pixel_count = 2.0f*128.0f*std::max(normalized_f_x, normalized_f_y)/params.hf_rolloff;
 
 		auto const w_scaled = normalized_f_x > normalized_f_y?
 			min_pixel_count: min_pixel_count*size.width/size.height;
@@ -68,6 +68,8 @@ namespace
 		terraformer::grayscale_image ret{params.width, params.height};
 		auto const cos_theta = std::cos(params.y_direction);
 		auto const sin_theta = std::sin(params.y_direction);
+		auto const hf_rolloff = params.hf_rolloff;
+		auto const lf_rolloff = params.lf_rolloff;
 		for(uint32_t y = 0; y != params.height; ++y)
 		{
 			for(uint32_t x = 0; x != params.width; ++x)
@@ -79,10 +81,11 @@ namespace
 				auto const eta = (-xi_in*sin_theta + eta_in*cos_theta)/f_y;
 
 				auto const r2 = xi*xi + eta*eta;
-				auto const r4 = r2*r2;
 
-				ret(x, y) = 2.0f*(1.0f/std::sqrt(1.0f + r4))*(r2/std::sqrt(r4 + 1.0f));
+				auto const lpf = 1.0f/std::sqrt(1.0f + std::pow(r2, hf_rolloff));
+				auto const hpf = std::pow(r2, 0.5f*lf_rolloff)/std::sqrt(1.0f + std::pow(r2, lf_rolloff));
 
+				ret(x, y) = 2.0f*lpf*hpf;
 			}
 		}
 
@@ -211,7 +214,7 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	shape_output_range output_range{params.shape};
 	auto const shape_scale_factor = std::ceil(std::exp2(std::abs(std::log2(params.shape.exponent))));
 	auto const w_out = w_img * static_cast<uint32_t>(shape_scale_factor);
-	auto const h_out = w_img * static_cast<uint32_t>(shape_scale_factor);
+	auto const h_out = h_img * static_cast<uint32_t>(shape_scale_factor);
 	grayscale_image ret{w_out, h_out};
 	auto const amplitude = params.amplitude;
 	auto const relative_z_offset = params.relative_z_offset;
