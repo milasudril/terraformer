@@ -51,6 +51,9 @@ namespace terraformer::ui::font_handling
 			return *this;
 		}
 
+		auto get_font_size() const
+		{ return m_renderer->get_font_size(); }
+
 	private:
 		std::unique_ptr<glyph_renderer> m_renderer;
 		hb_font_handle m_handle;
