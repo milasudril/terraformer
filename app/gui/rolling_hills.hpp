@@ -180,7 +180,7 @@ namespace terraformer::app
 		ret.create_widget(
 			rolling_hills_orientation_form_field{
 				.label = u8"Y direction",
-				.value_reference = std::ref(field_value.filter.orientation)
+				.value_reference = std::ref(field_value.filter.y_direction)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{-0.25f, 0.25f}

@@ -78,7 +78,7 @@ namespace
 			h_img,
 			2.0f*w_scaled*wh_ratio/params.wavelength_x,
 			2.0f*h_scaled*wh_ratio/params.wavelength_y,
-			2.0f*std::numbers::pi_v<float>*params.orientation
+			2.0f*std::numbers::pi_v<float>*params.y_direction
 		);
 	}
 

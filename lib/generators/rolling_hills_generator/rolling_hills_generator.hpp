@@ -15,7 +15,7 @@ namespace terraformer
 		float wavelength_y = 4096.0f;
 		float lf_rolloff = 2.0f;
 		float hf_rolloff = 2.0f;
-		float orientation = 0.0f;
+		float y_direction = 0.0f;
 	};
 
 	struct rolling_hills_shape_descriptor
