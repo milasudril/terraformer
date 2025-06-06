@@ -233,18 +233,33 @@ void terraformer::ui::widgets::range_slider::set_value_to_cursor_val(float val)
 	switch(*m_active_handle)
 	{
 		case -1:
+			if(!within(closed_closed_interval{0.0f, 1.0f}, val))
+			{ return; }
+
 			m_current_range = closed_closed_interval{val, m_current_range.max()};
 			break;
+
 		case 0:
 		{
 			auto const interval_midpoint = m_current_range.min() + 0.5f*(m_current_range.max() - m_current_range.min());
 			auto const offset_to_midpoint = val - interval_midpoint;
-			auto const new_min = std::clamp(m_current_range.min() + offset_to_midpoint, 0.0f, 1.0f);
-			auto const new_max = std::clamp(m_current_range.max() + offset_to_midpoint, 0.0f, 1.0f);
+			auto const new_min = m_current_range.min() + offset_to_midpoint;
+			auto const new_max = m_current_range.max() + offset_to_midpoint;
+
+			if(!within(closed_closed_interval{0.0f, 1.0f}, new_min))
+			{ return; }
+
+			if(!within(closed_closed_interval{0.0f, 1.0f}, new_max))
+			{ return; }
+
 			m_current_range = closed_closed_interval{new_min, new_max};
 			break;
 		}
+
 		case 1:
+			if(!within(closed_closed_interval{0.0f, 1.0f}, val))
+			{ return; }
+
 			m_current_range = closed_closed_interval{m_current_range.min(), val};
 			break;
 	}
