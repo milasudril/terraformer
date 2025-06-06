@@ -18,7 +18,7 @@ namespace terraformer
 		float y_direction = 0.0f;
 	};
 
-	struct normalized_filter_descriptor
+	struct rolling_hills_normalized_filter_descriptor
 	{
 		uint32_t width;
 		uint32_t height;
@@ -29,7 +29,7 @@ namespace terraformer
 		float y_direction;
 	};
 
-	normalized_filter_descriptor make_normalized_filter_descriptor(
+	rolling_hills_normalized_filter_descriptor make_rolling_hills_normalized_filter_descriptor(
 		domain_size_descriptor const& size,
 		rolling_hills_filter_descriptor const& params
 	);

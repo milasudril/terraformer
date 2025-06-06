@@ -12,7 +12,7 @@
 
 namespace
 {
-	terraformer::grayscale_image make_filter(terraformer::normalized_filter_descriptor const& params)
+	terraformer::grayscale_image make_filter(terraformer::rolling_hills_normalized_filter_descriptor const& params)
 	{
 		auto const f_x = params.f_x;
 		auto const f_y = params.f_y;
@@ -105,7 +105,7 @@ namespace
 	}
 }
 
-terraformer::normalized_filter_descriptor terraformer::make_normalized_filter_descriptor(
+terraformer::rolling_hills_normalized_filter_descriptor terraformer::make_rolling_hills_normalized_filter_descriptor(
 	domain_size_descriptor const& size,
 	rolling_hills_filter_descriptor const& params
 )
@@ -125,13 +125,19 @@ terraformer::normalized_filter_descriptor terraformer::make_normalized_filter_de
 
 	auto const w_img = 2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u);
 	auto const h_img = 2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u);
-	auto const wh_ratio = std::max(w_scaled/h_scaled, h_scaled/w_scaled);
 
-	return normalized_filter_descriptor{
+	auto const fs_x = static_cast<float>(w_img)/size.width;
+	auto const fs_y = static_cast<float>(h_img)/size.height;
+	auto const f_x = 1.0f/params.wavelength_x;
+	auto const f_y = 1.0f/params.wavelength_y;
+	auto const f_x_discrete = f_x*static_cast<float>(w_img)/fs_x;
+	auto const f_y_discrete = f_y*static_cast<float>(h_img)/fs_y;
+
+	return rolling_hills_normalized_filter_descriptor{
 		.width = w_img,
 		.height = h_img,
-		.f_x = 4.0f*w_scaled*wh_ratio*std::numbers::pi_v<float>/params.wavelength_x,
-		.f_y = 4.0f*h_scaled*wh_ratio*std::numbers::pi_v<float>/params.wavelength_y,
+		.f_x = f_x_discrete,
+		.f_y = f_y_discrete,
 		.lf_rolloff = params.lf_rolloff,
 		.hf_rolloff = params.hf_rolloff,
 		.y_direction = 2.0f*std::numbers::pi_v<float>*params.y_direction
@@ -141,7 +147,7 @@ terraformer::normalized_filter_descriptor terraformer::make_normalized_filter_de
 terraformer::grayscale_image
 terraformer::generate(domain_size_descriptor const& size, rolling_hills_descriptor const& params)
 {
-	auto const filter = make_filter(make_normalized_filter_descriptor(size, params.filter));
+	auto const filter = make_filter(make_rolling_hills_normalized_filter_descriptor(size, params.filter));
 
 	auto const w_img = filter.width();
 	auto const h_img = filter.height();

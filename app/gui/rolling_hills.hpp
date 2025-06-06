@@ -163,7 +163,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.filter.lf_rolloff)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{1.0f, 4.0f}
+				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
 			}
 		);
 
@@ -173,7 +173,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.filter.hf_rolloff)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{2.0f, 4.0f}
+				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
 			}
 		);
 
