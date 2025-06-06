@@ -12,46 +12,18 @@
 
 namespace
 {
-	terraformer::grayscale_image make_filter(
-		uint32_t width,
-		uint32_t height,
-		float f_x,
-		float f_y,
-		float theta
-	)
+	struct normalized_filter_descriptor
 	{
-		f_x *= 2.0f*std::numbers::pi_v<float>;
-		f_y *= 2.0f*std::numbers::pi_v<float>;
+		uint32_t width;
+		uint32_t height;
+		float f_x;
+		float f_y;
+		float lf_rolloff;
+		float hf_rolloff;
+		float y_direction;
+	};
 
-		auto const w_float = static_cast<float>(width);
-		auto const h_float = static_cast<float>(height);
-		auto const x_0 = 0.5f*w_float;
-		auto const x_y = 0.5f*h_float;
-		terraformer::grayscale_image ret{width, height};
-		auto const cos_theta = std::cos(theta);
-		auto const sin_theta = std::sin(theta);
-		for(uint32_t y = 0; y != height; ++y)
-		{
-			for(uint32_t x = 0; x != width; ++x)
-			{
-				auto const xi_in = static_cast<float>(x) - x_0;
-				auto const eta_in = static_cast<float>(y) - x_y;
-
-				auto const xi = (xi_in*cos_theta + eta_in*sin_theta)/f_x;
-				auto const eta = (-xi_in*sin_theta + eta_in*cos_theta)/f_y;
-
-				auto const r2 = xi*xi + eta*eta;
-				auto const r4 = r2*r2;
-
-				ret(x, y) = 2.0f*(1.0f/std::sqrt(1.0f + r4))*(r2/std::sqrt(r4 + 1.0f));
-
-			}
-		}
-
-		return ret;
-	}
-
-	terraformer::grayscale_image make_filter(
+	normalized_filter_descriptor make_normalized_filter_descriptor(
 		terraformer::domain_size_descriptor const& size,
 		terraformer::rolling_hills_filter_descriptor const& params
 	)
@@ -73,13 +45,48 @@ namespace
 		auto const h_img = 2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u);
 		auto const wh_ratio = std::max(w_scaled/h_scaled, h_scaled/w_scaled);
 
-		return make_filter(
-			w_img,
-			h_img,
-			2.0f*w_scaled*wh_ratio/params.wavelength_x,
-			2.0f*h_scaled*wh_ratio/params.wavelength_y,
-			2.0f*std::numbers::pi_v<float>*params.y_direction
-		);
+		return normalized_filter_descriptor{
+			.width = w_img,
+			.height = h_img,
+			.f_x = 4.0f*w_scaled*wh_ratio*std::numbers::pi_v<float>/params.wavelength_x,
+			.f_y = 4.0f*h_scaled*wh_ratio*std::numbers::pi_v<float>/params.wavelength_y,
+			.lf_rolloff = params.lf_rolloff,
+			.hf_rolloff = params.hf_rolloff,
+			.y_direction = 2.0f*std::numbers::pi_v<float>*params.y_direction
+		};
+	}
+
+	terraformer::grayscale_image make_filter(normalized_filter_descriptor const& params)
+	{
+		auto const f_x = params.f_x;
+		auto const f_y = params.f_y;
+
+		auto const w_float = static_cast<float>(params.width);
+		auto const h_float = static_cast<float>(params.height);
+		auto const x_0 = 0.5f*w_float;
+		auto const x_y = 0.5f*h_float;
+		terraformer::grayscale_image ret{params.width, params.height};
+		auto const cos_theta = std::cos(params.y_direction);
+		auto const sin_theta = std::sin(params.y_direction);
+		for(uint32_t y = 0; y != params.height; ++y)
+		{
+			for(uint32_t x = 0; x != params.width; ++x)
+			{
+				auto const xi_in = static_cast<float>(x) - x_0;
+				auto const eta_in = static_cast<float>(y) - x_y;
+
+				auto const xi = (xi_in*cos_theta + eta_in*sin_theta)/f_x;
+				auto const eta = (-xi_in*sin_theta + eta_in*cos_theta)/f_y;
+
+				auto const r2 = xi*xi + eta*eta;
+				auto const r4 = r2*r2;
+
+				ret(x, y) = 2.0f*(1.0f/std::sqrt(1.0f + r4))*(r2/std::sqrt(r4 + 1.0f));
+
+			}
+		}
+
+		return ret;
 	}
 
 	terraformer::basic_image<std::complex<float>>
@@ -142,7 +149,7 @@ namespace
 terraformer::grayscale_image
 terraformer::generate(domain_size_descriptor const& size, rolling_hills_descriptor const& params)
 {
-	auto const filter = make_filter(size, params.filter);
+	auto const filter = make_filter(make_normalized_filter_descriptor(size, params.filter));
 
 	auto const w_img = filter.width();
 	auto const h_img = filter.height();
