@@ -94,8 +94,6 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
-		void handle_event(main::cursor_enter_event const&, main::window_ref, main::ui_controller) {}
-		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller) {}
 		void handle_event(main::cursor_motion_event const&, main::window_ref, main::ui_controller);
 
 		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller);
