@@ -204,9 +204,12 @@ void terraformer::ui::widgets::range_slider::handle_event(
 
 	if(mbe.button == 0)
 	{
-		auto const cursor_val = get_value_from_cursor_loc(mbe.where);
-		m_active_handle = std::clamp(static_cast<int>(3.0f*cursor_val) - 1, -1, 1);
-		set_value_to_cursor_val(cursor_val);
+		auto const absolute_cursor_val = get_value_from_cursor_loc(mbe.where);
+		auto const interval_length = m_current_range.max() - m_current_range.min();
+		auto const relative_cursor_val = (absolute_cursor_val - m_current_range.min())/interval_length;
+
+		m_active_handle = std::clamp(static_cast<int>(3.0f*relative_cursor_val) - 1, -1, 1);
+		set_value_to_cursor_val(absolute_cursor_val);
 		m_on_value_changed(*this, window, ui_ctrl);
 	}
 }
