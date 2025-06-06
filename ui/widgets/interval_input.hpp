@@ -80,6 +80,7 @@ namespace terraformer::ui::widgets
 
 		interval_input& value(closed_closed_interval<float> new_val)
 		{
+			m_slider.value(new_val);
 			m_textbox_lower.value(new_val.min());
 			m_textbox_upper.value(new_val.max());
 			return *this;

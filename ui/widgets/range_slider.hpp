@@ -75,13 +75,8 @@ namespace terraformer::ui::widgets
 		{
 			auto const ptr = m_value_map.get().get_pointer();
 			auto const mapping_function = m_value_map.get().get_vtable().from_value;
-
-			printf("Set value range to %.8g %.8g\n", new_val.min(), new_val.max());
-
 			auto const mapped_min = std::clamp(mapping_function(ptr, new_val.min()), 0.0f, 1.0f);
 			auto const mapped_max = std::clamp(mapping_function(ptr, new_val.max()), 0.0f, 1.0f);
-
-			printf("Set value mapped to %.8g %.8g\n", mapped_min, mapped_max);
 
 			m_current_range = closed_closed_interval{
 				std::min(mapped_min, mapped_max),
