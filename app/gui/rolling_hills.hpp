@@ -2,6 +2,7 @@
 #define TERRAFORMER_GUI_ROLLING_HILLS_HPP
 
 #include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
+#include "ui/value_maps/affine_value_map.hpp"
 #include "ui/widgets/form.hpp"
 #include "ui/value_maps/log_value_map.hpp"
 #include "ui/widgets/knob.hpp"
@@ -99,14 +100,16 @@ namespace terraformer::app
 			rolling_hills_shape_clamp_to_form_field{
 				.label = u8"Clamp to",
 				.value_reference = std::reference_wrapper(field_value.clamp_to)
-			}
+			},
+			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 		);
 
 		ret.create_widget(
 			rolling_hills_shape_input_mapping_form_field{
 				.label = u8"Input mapping",
 				.value_reference = std::reference_wrapper(field_value.input_mapping)
-			}
+			},
+			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 		);
 
 		ret.create_widget(

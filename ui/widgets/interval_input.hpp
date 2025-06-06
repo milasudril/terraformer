@@ -21,14 +21,18 @@ namespace terraformer::ui::widgets
 		using widget_group::compute_size;
 		using widget_group::confirm_size;
 
-
-		explicit interval_input(iterator_invalidation_handler_ref iihr):
+		template<class ValueMap>
+		requires (!std::is_same_v<std::remove_cvref_t<ValueMap>, range_slider>)
+		explicit interval_input(
+			iterator_invalidation_handler_ref iihr,
+			ValueMap&& vm
+		):
 			widget_group{
 				iihr,
 				1u,
 				layouts::table::cell_order::row_major
 			},
-			m_slider{value_maps::affine_value_map{-1.0f, 1.0f}},
+			m_slider{std::forward<ValueMap>(vm)},
 			m_text_input{
 				iihr,
 				2u,
