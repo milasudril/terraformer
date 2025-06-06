@@ -18,6 +18,22 @@ namespace terraformer
 		float y_direction = 0.0f;
 	};
 
+	struct normalized_filter_descriptor
+	{
+		uint32_t width;
+		uint32_t height;
+		float f_x;
+		float f_y;
+		float lf_rolloff;
+		float hf_rolloff;
+		float y_direction;
+	};
+
+	normalized_filter_descriptor make_normalized_filter_descriptor(
+		domain_size_descriptor const& size,
+		rolling_hills_filter_descriptor const& params
+	);
+
 	struct rolling_hills_shape_descriptor
 	{
 		closed_closed_interval<float> clamp_to{-1.0f, 1.0f};

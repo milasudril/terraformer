@@ -12,51 +12,7 @@
 
 namespace
 {
-	struct normalized_filter_descriptor
-	{
-		uint32_t width;
-		uint32_t height;
-		float f_x;
-		float f_y;
-		float lf_rolloff;
-		float hf_rolloff;
-		float y_direction;
-	};
-
-	normalized_filter_descriptor make_normalized_filter_descriptor(
-		terraformer::domain_size_descriptor const& size,
-		terraformer::rolling_hills_filter_descriptor const& params
-	)
-	{
-		auto const normalized_f_x = size.width/params.wavelength_x;
-		auto const normalized_f_y = size.height/params.wavelength_y;
-
-		// Assume a bandwidth of at most 6 octaves = 64 periods. Take 4 samples per period. With a
-		// hf_rolloff of two, this gives a size of 256 pixels, but the size is laterr multiplied by 2 to
-		// guarantee an even number. Therefore, use 128 pixels as factor.
-		auto const min_pixel_count = 2.0f*128.0f*std::max(normalized_f_x, normalized_f_y)/params.hf_rolloff;
-
-		auto const w_scaled = normalized_f_x > normalized_f_y?
-			min_pixel_count: min_pixel_count*size.width/size.height;
-		auto const h_scaled = normalized_f_x > normalized_f_y?
-			min_pixel_count*size.height/size.width : min_pixel_count;
-
-		auto const w_img = 2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u);
-		auto const h_img = 2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u);
-		auto const wh_ratio = std::max(w_scaled/h_scaled, h_scaled/w_scaled);
-
-		return normalized_filter_descriptor{
-			.width = w_img,
-			.height = h_img,
-			.f_x = 4.0f*w_scaled*wh_ratio*std::numbers::pi_v<float>/params.wavelength_x,
-			.f_y = 4.0f*h_scaled*wh_ratio*std::numbers::pi_v<float>/params.wavelength_y,
-			.lf_rolloff = params.lf_rolloff,
-			.hf_rolloff = params.hf_rolloff,
-			.y_direction = 2.0f*std::numbers::pi_v<float>*params.y_direction
-		};
-	}
-
-	terraformer::grayscale_image make_filter(normalized_filter_descriptor const& params)
+	terraformer::grayscale_image make_filter(terraformer::normalized_filter_descriptor const& params)
 	{
 		auto const f_x = params.f_x;
 		auto const f_y = params.f_y;
@@ -147,6 +103,39 @@ namespace
 		auto const shaped_value = signed_power(mapped_value, shape.exponent);
 		return std::lerp(-1.0f, 1.0f, (shaped_value - output_range.min)/(output_range.max - output_range.min));
 	}
+}
+
+terraformer::normalized_filter_descriptor terraformer::make_normalized_filter_descriptor(
+	domain_size_descriptor const& size,
+	rolling_hills_filter_descriptor const& params
+)
+{
+	auto const normalized_f_x = size.width/params.wavelength_x;
+	auto const normalized_f_y = size.height/params.wavelength_y;
+
+	// Assume a bandwidth of at most 6 octaves = 64 periods. Take 4 samples per period. With a
+	// hf_rolloff of two, this gives a size of 256 pixels, but the size is laterr multiplied by 2 to
+	// guarantee an even number. Therefore, use 128 pixels as factor.
+	auto const min_pixel_count = 2.0f*128.0f*std::max(normalized_f_x, normalized_f_y)/params.hf_rolloff;
+
+	auto const w_scaled = normalized_f_x > normalized_f_y?
+		min_pixel_count: min_pixel_count*size.width/size.height;
+	auto const h_scaled = normalized_f_x > normalized_f_y?
+		min_pixel_count*size.height/size.width : min_pixel_count;
+
+	auto const w_img = 2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u);
+	auto const h_img = 2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u);
+	auto const wh_ratio = std::max(w_scaled/h_scaled, h_scaled/w_scaled);
+
+	return normalized_filter_descriptor{
+		.width = w_img,
+		.height = h_img,
+		.f_x = 4.0f*w_scaled*wh_ratio*std::numbers::pi_v<float>/params.wavelength_x,
+		.f_y = 4.0f*h_scaled*wh_ratio*std::numbers::pi_v<float>/params.wavelength_y,
+		.lf_rolloff = params.lf_rolloff,
+		.hf_rolloff = params.hf_rolloff,
+		.y_direction = 2.0f*std::numbers::pi_v<float>*params.y_direction
+	};
 }
 
 terraformer::grayscale_image
