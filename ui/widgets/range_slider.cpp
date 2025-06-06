@@ -171,3 +171,57 @@ void terraformer::ui::widgets::range_slider::theme_updated(main::config const& c
 
 	m_dirty_bits |= track_dirty | selection_dirty;
 }
+
+void terraformer::ui::widgets::range_slider::handle_event(
+	main::mouse_button_event const& mbe,
+	main::window_ref window,
+	main::ui_controller ui_ctrl
+)
+{
+	if(mbe.action == main::mouse_button_action::release)
+	{
+		m_active_handle.reset();
+		return;
+	}
+
+	if(mbe.button == 0)
+	{
+		if(m_orientation == main::widget_orientation::horizontal)
+		{
+			auto const track_length = static_cast<float>(m_current_size.width)
+				- 2.0f*m_border_thickness;
+			auto const cursor_val = (static_cast<float>(mbe.where.x) - m_border_thickness)
+				/track_length;
+			m_active_handle = std::clamp(static_cast<int>(3.0f*cursor_val) - 1, -1, 1);
+			set_value_to_cursor_val(cursor_val);
+			m_on_value_changed(*this, window, ui_ctrl);
+		}
+	}
+}
+
+void terraformer::ui::widgets::range_slider::set_value_to_cursor_val(float val)
+{
+	if(!m_active_handle.has_value())
+	{ return; }
+
+	switch(*m_active_handle)
+	{
+		case -1:
+			m_current_range = closed_closed_interval{val, m_current_range.max()};
+			break;
+		case 0:
+		{
+			auto const interval_midpoint = m_current_range.min() + 0.5f*(m_current_range.max() - m_current_range.min());
+			auto const offset_to_midpoint = val - interval_midpoint;
+			auto const new_min = std::clamp(m_current_range.min() + offset_to_midpoint, 0.0f, 1.0f);
+			auto const new_max = std::clamp(m_current_range.max() + offset_to_midpoint, 0.0f, 1.0f);
+			m_current_range = closed_closed_interval{new_min, new_max};
+			break;
+		}
+		case 1:
+			m_current_range = closed_closed_interval{m_current_range.min(), val};
+			break;
+	}
+
+	m_dirty_bits |= selection_dirty;
+}
