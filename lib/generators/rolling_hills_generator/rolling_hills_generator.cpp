@@ -126,18 +126,11 @@ terraformer::rolling_hills_normalized_filter_descriptor terraformer::make_rollin
 	auto const w_img = 2u*std::max(static_cast<uint32_t>(w_scaled + 0.5f), 1u);
 	auto const h_img = 2u*std::max(static_cast<uint32_t>(h_scaled + 0.5f), 1u);
 
-	auto const fs_x = static_cast<float>(w_img)/size.width;
-	auto const fs_y = static_cast<float>(h_img)/size.height;
-	auto const f_x = 1.0f/params.wavelength_x;
-	auto const f_y = 1.0f/params.wavelength_y;
-	auto const f_x_discrete = f_x*static_cast<float>(w_img)/fs_x;
-	auto const f_y_discrete = f_y*static_cast<float>(h_img)/fs_y;
-
 	return rolling_hills_normalized_filter_descriptor{
 		.width = w_img,
 		.height = h_img,
-		.f_x = f_x_discrete,
-		.f_y = f_y_discrete,
+		.f_x = normalized_f_x,
+		.f_y = normalized_f_y,
 		.lf_rolloff = params.lf_rolloff,
 		.hf_rolloff = params.hf_rolloff,
 		.y_direction = 2.0f*std::numbers::pi_v<float>*params.y_direction
