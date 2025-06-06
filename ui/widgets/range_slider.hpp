@@ -96,12 +96,13 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::cursor_enter_event const&, main::window_ref, main::ui_controller) {}
 		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller) {}
-		void handle_event(main::cursor_motion_event const&, main::window_ref, main::ui_controller) {}
+		void handle_event(main::cursor_motion_event const&, main::window_ref, main::ui_controller);
 
 		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller);
 
 	private:
 		void set_value_to_cursor_val(float cv);
+		float get_value_from_cursor_loc(main::cursor_position where) const;
 
 		static constexpr unsigned int track_dirty = 0x1;
 		static constexpr unsigned int selection_dirty = 0x2;

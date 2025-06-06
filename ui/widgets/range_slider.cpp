@@ -4,6 +4,7 @@
 
 #include "lib/common/spaces.hpp"
 #include "ui/drawing_api/image_generators.hpp"
+#include "ui/main/events.hpp"
 #include "ui/main/widget.hpp"
 
 void terraformer::ui::widgets::range_slider::regenerate_selection_mask()
@@ -173,6 +174,23 @@ void terraformer::ui::widgets::range_slider::theme_updated(main::config const& c
 }
 
 void terraformer::ui::widgets::range_slider::handle_event(
+	main::cursor_motion_event const& cme,
+	main::window_ref window,
+	main::ui_controller ui_ctrl
+)
+{
+	auto const cursor_val = get_value_from_cursor_loc(cme.where);
+
+	// TODO: Add hot-tracking feature to indicate which part of the selection that will move
+
+	if(m_active_handle.has_value())
+	{
+		set_value_to_cursor_val(cursor_val);
+		m_on_value_changed(*this, window, ui_ctrl);
+	}
+}
+
+void terraformer::ui::widgets::range_slider::handle_event(
 	main::mouse_button_event const& mbe,
 	main::window_ref window,
 	main::ui_controller ui_ctrl
@@ -186,17 +204,22 @@ void terraformer::ui::widgets::range_slider::handle_event(
 
 	if(mbe.button == 0)
 	{
-		if(m_orientation == main::widget_orientation::horizontal)
-		{
-			auto const track_length = static_cast<float>(m_current_size.width)
-				- 2.0f*m_border_thickness;
-			auto const cursor_val = (static_cast<float>(mbe.where.x) - m_border_thickness)
-				/track_length;
-			m_active_handle = std::clamp(static_cast<int>(3.0f*cursor_val) - 1, -1, 1);
-			set_value_to_cursor_val(cursor_val);
-			m_on_value_changed(*this, window, ui_ctrl);
-		}
+		auto const cursor_val = get_value_from_cursor_loc(mbe.where);
+		m_active_handle = std::clamp(static_cast<int>(3.0f*cursor_val) - 1, -1, 1);
+		set_value_to_cursor_val(cursor_val);
+		m_on_value_changed(*this, window, ui_ctrl);
 	}
+}
+
+float terraformer::ui::widgets::range_slider::get_value_from_cursor_loc(main::cursor_position loc) const
+{
+	if(m_orientation == main::widget_orientation::horizontal)
+	{
+		auto const track_length = static_cast<float>(m_current_size.width)
+			- 2.0f*m_border_thickness;
+		return (static_cast<float>(loc.x) - m_border_thickness)/track_length;
+	}
+	return 0.0f;
 }
 
 void terraformer::ui::widgets::range_slider::set_value_to_cursor_val(float val)
