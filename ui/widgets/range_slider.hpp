@@ -86,6 +86,13 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
+		template<class Function>
+		range_slider& on_value_changed(Function&& f)
+		{
+			m_on_value_changed = std::forward<Function>(f);
+			return *this;
+		}
+
 	private:
 		static constexpr unsigned int track_dirty = 0x1;
 		static constexpr unsigned int selection_dirty = 0x2;
@@ -108,6 +115,8 @@ namespace terraformer::ui::widgets
 		type_erased_value_map m_value_map{
 			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
 		};
+
+		main::widget_user_interaction_handler<range_slider> m_on_value_changed{no_operation_tag{}};
 	};
 }
 

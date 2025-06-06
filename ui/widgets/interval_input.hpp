@@ -68,6 +68,18 @@ namespace terraformer::ui::widgets
 					m_on_value_changed(*this, window, ui_ctrl);
 				}
 			);
+			m_slider.on_value_changed(
+				[this](
+					range_slider&,
+					main::window_ref window,
+					main::ui_controller ui_ctrl
+				){
+					auto const new_val = m_slider.value();
+					m_textbox_lower.value(new_val.min());
+					m_textbox_upper.value(new_val.max());
+					m_on_value_changed(*this, window, ui_ctrl);
+				}
+			);
 		}
 
 		closed_closed_interval<float> value() const
