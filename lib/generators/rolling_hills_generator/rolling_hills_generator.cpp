@@ -113,10 +113,33 @@ terraformer::rolling_hills_normalized_filter_descriptor terraformer::make_rollin
 	auto const normalized_f_x = size.width/params.wavelength_x;
 	auto const normalized_f_y = size.height/params.wavelength_y;
 
-	// Assume a bandwidth of at most 6 octaves = 64 periods. Take 4 samples per period. With a
-	// hf_rolloff of two, this gives a size of 256 pixels, but the size is laterr multiplied by 2 to
-	// guarantee an even number. Therefore, use 128 pixels as factor.
-	auto const min_pixel_count = 2.0f*128.0f*std::max(normalized_f_x, normalized_f_y)/params.hf_rolloff;
+	// Assume it is sufficient with an error less than $1/3500 \approx 2^{-12}$. This would resolve
+	// most peaks within 1 meter of vertical resolution, even Mount Everest and K2. Some higher peaks
+	// exist, such as Nanga Parbat, Denali, and Rakaposhi, but all of these are folded mountains, and
+	// not "rolling hills".
+	//
+	// The asymptote of the low-pass filter is
+	//
+	// $\sqrt{\left(\frac{f}{f_0}\right)^{-2n}} = \left(\frac{f}{f_0}\right)^{-n}$, where n is the
+	// roll-off factor. It is required that this value is less than $2^{-12}$. That is
+	//
+	// $\left(\frac{f}{f_0}\right)^{-n} < 2^{-12}$.
+	//
+	// Taking a logarithm of both sides gives
+	//
+	// $-n \log\left(\frac{f}{f_0}\right) < -12\log(2)$
+	//
+	// or
+	//
+	// $\log\left(\frac{f}{f_0}\right) > 12\log(2)/n$
+	//
+	// Therefore, $\frac{f}{f_0}$ has to be greater than $\frac{12}{n}$ octaves, or $2^{12/n}$
+	// periods. Take 4 samples per period, and the required size in pixels becomes $2^{12/n + 2}$.
+	//
+	// To ensure an even number of pixels, the image size will be multiplied by 2 after rounding. The
+	// minimum number of pixels now becomes
+	//
+	auto const min_pixel_count = std::exp2(12.0f/params.hf_rolloff + 1.0f)*std::max(normalized_f_x, normalized_f_y);
 
 	auto const w_scaled = normalized_f_x > normalized_f_y?
 		min_pixel_count: min_pixel_count*size.width/size.height;
