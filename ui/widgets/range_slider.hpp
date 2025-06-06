@@ -4,6 +4,7 @@
 #define TERRAFORMER_UI_WIDGETS_RANGE_SLIDER_HPP
 
 #include "./value_map.hpp"
+#include "ui/main/events.hpp"
 #include "ui/main/texture_types.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
@@ -93,9 +94,36 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
+		void handle_event(main::cursor_enter_event const&, main::window_ref, main::ui_controller) {}
+		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller) {}
+		void handle_event(main::cursor_motion_event const&, main::window_ref, main::ui_controller) {}
+		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller)
+		{
+			if(mbe.action == main::mouse_button_action::release)
+			{
+				m_active_handle.reset();
+				return;
+			}
+
+			if(mbe.button == 0)
+			{
+				if(m_orientation == main::widget_orientation::horizontal)
+				{
+					auto const track_length = static_cast<float>(m_current_size.width)
+						- 2.0f*m_border_thickness;
+					auto const cursor_val = (static_cast<float>(mbe.where.x) - m_border_thickness)
+						/track_length;
+
+					m_active_handle = std::clamp(static_cast<int>(3.0f*cursor_val) - 1, -1, 1);
+				}
+			}
+		}
+
 	private:
 		static constexpr unsigned int track_dirty = 0x1;
 		static constexpr unsigned int selection_dirty = 0x2;
+
+		std::optional<int> m_active_handle;
 
 		unsigned int m_dirty_bits = track_dirty | selection_dirty;
 		main::widget_orientation m_orientation = main::widget_orientation::horizontal;
