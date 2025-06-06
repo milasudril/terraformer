@@ -20,7 +20,7 @@ void terraformer::ui::widgets::range_slider::regenerate_selection_mask()
 		m_selection_mask = generate(
 			drawing_api::flat_rectangle{
 				.domain_size = span_2d_extents {
-					.width = static_cast<uint32_t>(length*track_length + 0.5f),
+					.width = static_cast<uint32_t>(m_current_size.width),
 					.height = static_cast<uint32_t>(m_current_size.height)
 				},
 				.origin_x = static_cast<uint32_t>(sel_begin),
@@ -42,7 +42,7 @@ void terraformer::ui::widgets::range_slider::regenerate_selection_mask()
 			drawing_api::flat_rectangle{
 				.domain_size = span_2d_extents {
 					.width = static_cast<uint32_t>(m_current_size.width),
-					.height = static_cast<uint32_t>(length*track_length + 0.5f)
+					.height = static_cast<uint32_t>(m_current_size.height)
 				},
 				.origin_x = bt,
 				.origin_y = static_cast<uint32_t>(sel_begin),

@@ -28,20 +28,42 @@ namespace terraformer::ui::widgets
 				1u,
 				layouts::table::cell_order::row_major
 			},
+			m_slider{value_maps::affine_value_map{-1.0f, 1.0f}},
 			m_text_input{
 				iihr,
 				2u,
 				layouts::table::cell_order::row_major
 			}
 		{
-			append(std::ref(m_slider), terraformer::ui::main::widget_geometry{});
-			m_text_input.append(std::ref(m_textbox_lower), terraformer::ui::main::widget_geometry{});
-			m_text_input.append(std::ref(m_textbox_upper), terraformer::ui::main::widget_geometry{});
-			append(std::ref(m_text_input), terraformer::ui::main::widget_geometry{});
+			append(std::ref(m_slider), main::widget_geometry{});
+			m_text_input.append(std::ref(m_textbox_lower), main::widget_geometry{});
+			m_text_input.append(std::ref(m_textbox_upper), ui::main::widget_geometry{});
+			append(std::ref(m_text_input), main::widget_geometry{});
 			layout.set_record_size(0, layouts::table::cell_size::expand{});
 			auto const widget_attribs = get_attributes();
 			widget_attribs.widget_states()[widget_attribs.element_indices().front()].maximized = true;
 			m_text_input.layout.params().no_outer_margin = true;
+
+			m_textbox_lower.on_value_changed(
+				[this](
+					single_line_text_input&,
+					main::window_ref window,
+					main::ui_controller ui_ctrl
+				){
+					m_slider.value(closed_closed_interval{m_textbox_lower.value(), m_textbox_upper.value()});
+					m_on_value_changed(*this, window, ui_ctrl);
+				}
+			);
+			m_textbox_upper.on_value_changed(
+				[this](
+					single_line_text_input&,
+					main::window_ref window,
+					main::ui_controller ui_ctrl
+				){
+					m_slider.value(closed_closed_interval{m_textbox_lower.value(), m_textbox_upper.value()});
+					m_on_value_changed(*this, window, ui_ctrl);
+				}
+			);
 		}
 
 		closed_closed_interval<float> value() const
@@ -63,24 +85,6 @@ namespace terraformer::ui::widgets
 		interval_input& on_value_changed(Function&& func)
 		{
 			m_on_value_changed = std::forward<Function>(func);
-			m_textbox_lower.on_value_changed(
-				[this](
-					single_line_text_input&,
-					main::window_ref window,
-					main::ui_controller ui_ctrl
-				){
-					m_on_value_changed(*this, window, ui_ctrl);
-				}
-			);
-			m_textbox_upper.on_value_changed(
-				[this](
-					single_line_text_input&,
-					main::window_ref window,
-					main::ui_controller ui_ctrl
-				){
-					m_on_value_changed(*this, window, ui_ctrl);
-				}
-			);
 			return *this;
 		}
 

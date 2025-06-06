@@ -3,11 +3,14 @@
 #ifndef TERRAFORMER_UI_WIDGETS_RANGE_SLIDER_HPP
 #define TERRAFORMER_UI_WIDGETS_RANGE_SLIDER_HPP
 
-#include "lib/pixel_store/rgba_pixel.hpp"
-#include "lib/common/interval.hpp"
+#include "./value_map.hpp"
 #include "ui/main/texture_types.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
+#include "ui/value_maps/affine_value_map.hpp"
+
+#include "lib/pixel_store/rgba_pixel.hpp"
+#include "lib/common/interval.hpp"
 
 namespace terraformer::ui::widgets
 {
@@ -15,6 +18,19 @@ namespace terraformer::ui::widgets
 	{
 	public:
 		using widget_with_default_actions::handle_event;
+
+		range_slider() = default;
+
+		template<class ValueMap>
+		requires (!std::is_same_v<std::remove_cvref_t<ValueMap>, range_slider>)
+		explicit range_slider(ValueMap&& vm):
+			m_value_map{std::forward<ValueMap>(vm)}
+		{ value(closed_closed_interval<float>{0.0f, 1.0f}); }
+
+		template<class ValueMap, class... Args>
+		explicit range_slider(std::in_place_type_t<ValueMap>, Args&&... args):
+			m_value_map{std::in_place_type_t<ValueMap>{}, std::forward<Args>(args)...}
+		{ value(closed_closed_interval<float>{0.0f, 1.0f}); }
 
 		range_slider& orientation(main::widget_orientation new_orientation)
 		{
@@ -46,11 +62,31 @@ namespace terraformer::ui::widgets
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
 		closed_closed_interval<float> value() const
-		{ return m_current_range; }
+		{
+			auto const ptr = m_value_map.get().get_pointer();
+			auto const mapping_function = m_value_map.get().get_vtable().to_value;
+			return closed_closed_interval{
+				mapping_function(ptr, m_current_range.min()),
+				mapping_function(ptr, m_current_range.max())
+			};
+		}
 
 		range_slider& value(closed_closed_interval<float> new_val)
 		{
-			m_current_range = new_val;
+			auto const ptr = m_value_map.get().get_pointer();
+			auto const mapping_function = m_value_map.get().get_vtable().from_value;
+
+			printf("Set value range to %.8g %.8g\n", new_val.min(), new_val.max());
+
+			auto const mapped_min = std::clamp(mapping_function(ptr, new_val.min()), 0.0f, 1.0f);
+			auto const mapped_max = std::clamp(mapping_function(ptr, new_val.max()), 0.0f, 1.0f);
+
+			printf("Set value mapped to %.8g %.8g\n", mapped_min, mapped_max);
+
+			m_current_range = closed_closed_interval{
+				std::min(mapped_min, mapped_max),
+				std::max(mapped_min, mapped_max)
+			};
 			m_dirty_bits |= selection_dirty;
 			return *this;
 		}
@@ -73,6 +109,10 @@ namespace terraformer::ui::widgets
 		float m_border_thickness;
 		unsigned int m_track_size;
 		closed_closed_interval<float> m_current_range{0.0f, 1.0f};
+
+		type_erased_value_map m_value_map{
+			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
+		};
 	};
 }
 
