@@ -5,6 +5,7 @@
 
 #include "./value_map.hpp"
 #include "ui/main/events.hpp"
+#include "ui/main/keyboard_button_event.hpp"
 #include "ui/main/texture_types.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
@@ -96,7 +97,9 @@ namespace terraformer::ui::widgets
 
 		void handle_event(main::cursor_motion_event const&, main::window_ref, main::ui_controller);
 
-		void handle_event(main::mouse_button_event const& mbe, main::window_ref, main::ui_controller);
+		void handle_event(main::mouse_button_event const&, main::window_ref, main::ui_controller);
+
+		void handle_event(main::keyboard_button_event const&, main::window_ref, main::ui_controller);
 
 	private:
 		void set_value_to_cursor_val(float cv);

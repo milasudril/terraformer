@@ -4,7 +4,9 @@
 
 #include "lib/common/spaces.hpp"
 #include "ui/drawing_api/image_generators.hpp"
+#include "ui/main/builtin_command_id.hpp"
 #include "ui/main/events.hpp"
+#include "ui/main/keyboard_button_event.hpp"
 #include "ui/main/widget.hpp"
 
 void terraformer::ui::widgets::range_slider::regenerate_selection_mask()
@@ -214,6 +216,137 @@ void terraformer::ui::widgets::range_slider::handle_event(
 	}
 }
 
+void terraformer::ui::widgets::range_slider::handle_event(
+	main::keyboard_button_event const& kbe,
+	main::window_ref window,
+	main::ui_controller controller
+)
+{
+	// TODO: Add "gears" to make speed variable
+	auto const dx = 1.0f/64.0f;
+
+	if(static_cast<bool>(kbe.modifiers & main::modifier_keys::control)
+		&& static_cast<bool>(kbe.modifiers & main::modifier_keys::shift))
+	{
+		auto kbe_without_modifiers = kbe;
+		kbe_without_modifiers.modifiers = main::modifier_keys::none;
+		switch(to_builtin_command_id(kbe_without_modifiers))
+		{
+			case main::builtin_command_id::step_left:
+			case main::builtin_command_id::step_down:
+			{
+				auto const new_min = m_current_range.min() - dx;
+				auto const new_max = m_current_range.max() - dx;
+
+				if(!within(closed_closed_interval{0.0f, 1.0f}, new_min))
+				{ return; }
+
+				if(!within(closed_closed_interval{0.0f, 1.0f}, new_max))
+				{ return; }
+
+				m_current_range = closed_closed_interval{new_min, new_max};
+				m_dirty_bits |= selection_dirty;
+				m_on_value_changed(*this, window, controller);
+				return;
+			}
+
+			case main::builtin_command_id::step_right:
+			case main::builtin_command_id::step_up:
+			{
+				auto const new_min = m_current_range.min() + dx;
+				auto const new_max = m_current_range.max() + dx;
+
+				if(!within(closed_closed_interval{0.0f, 1.0f}, new_min))
+				{ return; }
+
+				if(!within(closed_closed_interval{0.0f, 1.0f}, new_max))
+				{ return; }
+
+				m_current_range = closed_closed_interval{new_min, new_max};
+				m_dirty_bits |= selection_dirty;
+				m_on_value_changed(*this, window, controller);
+				return;
+			}
+			default:
+				return;
+		}
+	}
+
+	if(static_cast<bool>(kbe.modifiers & main::modifier_keys::control))
+	{
+		auto kbe_without_modifiers = kbe;
+		kbe_without_modifiers.modifiers = main::modifier_keys::none;
+		switch(to_builtin_command_id(kbe_without_modifiers))
+		{
+			case main::builtin_command_id::step_left:
+			case main::builtin_command_id::step_down:
+			{
+				auto const new_min = std::clamp(m_current_range.min() - dx, 0.0f, 1.0f);
+				m_current_range = closed_closed_interval{new_min, m_current_range.max()};
+				m_dirty_bits |= selection_dirty;
+				m_on_value_changed(*this, window, controller);
+				return;
+			}
+
+			case main::builtin_command_id::step_right:
+			case main::builtin_command_id::step_up:
+			{
+				auto const new_min = std::clamp(m_current_range.min() + dx, 0.0f, 1.0f);
+				m_current_range = closed_closed_interval{new_min, m_current_range.max()};
+				m_dirty_bits |= selection_dirty;
+				m_on_value_changed(*this, window, controller);
+				return;
+			}
+
+			case main::builtin_command_id::go_to_begin:
+				m_current_range = closed_closed_interval{0.0f, m_current_range.max()};
+				m_dirty_bits |= selection_dirty;
+				m_on_value_changed(*this, window, controller);
+				break;
+
+			default:
+				return;
+		}
+	}
+
+	if(static_cast<bool>(kbe.modifiers & main::modifier_keys::shift))
+	{
+		auto kbe_without_modifiers = kbe;
+		kbe_without_modifiers.modifiers = main::modifier_keys::none;
+		switch(to_builtin_command_id(kbe_without_modifiers))
+		{
+			case main::builtin_command_id::step_left:
+			case main::builtin_command_id::step_down:
+			{
+				auto const new_max = std::clamp(m_current_range.max() - dx, 0.0f, 1.0f);
+				m_current_range = closed_closed_interval{m_current_range.min(), new_max};
+				m_dirty_bits |= selection_dirty;
+				m_on_value_changed(*this, window, controller);
+				return;
+			}
+
+			case main::builtin_command_id::step_right:
+			case main::builtin_command_id::step_up:
+			{
+				auto const new_max = std::clamp(m_current_range.max() + dx, 0.0f, 1.0f);
+				m_current_range = closed_closed_interval{m_current_range.min(), new_max};
+				m_dirty_bits |= selection_dirty;
+				m_on_value_changed(*this, window, controller);
+				return;
+			}
+
+			case main::builtin_command_id::go_to_end:
+				m_current_range = closed_closed_interval{m_current_range.min(), 1.0f};
+				m_dirty_bits |= selection_dirty;
+				m_on_value_changed(*this, window, controller);
+				break;
+
+			default:
+				return;
+		}
+	}
+}
+
 float terraformer::ui::widgets::range_slider::get_value_from_cursor_loc(main::cursor_position loc) const
 {
 	if(m_orientation == main::widget_orientation::horizontal)
@@ -239,11 +372,11 @@ void terraformer::ui::widgets::range_slider::set_value_to_cursor_val(float val)
 	switch(*m_active_handle)
 	{
 		case -1:
-			if(!within(closed_closed_interval{0.0f, 1.0f}, val))
-			{ return; }
-
-			m_current_range = closed_closed_interval{val, m_current_range.max()};
+		{
+			auto const new_val = std::clamp(val, 0.0f, 1.0f);
+			m_current_range = closed_closed_interval{new_val, m_current_range.max()};
 			break;
+		}
 
 		case 0:
 		{
@@ -263,11 +396,11 @@ void terraformer::ui::widgets::range_slider::set_value_to_cursor_val(float val)
 		}
 
 		case 1:
-			if(!within(closed_closed_interval{0.0f, 1.0f}, val))
-			{ return; }
-
-			m_current_range = closed_closed_interval{m_current_range.min(), val};
+		{
+			auto const new_val = std::clamp(val, 0.0f, 1.0f);
+			m_current_range = closed_closed_interval{m_current_range.min(), new_val};
 			break;
+		}
 	}
 
 	m_dirty_bits |= selection_dirty;

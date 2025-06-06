@@ -1,9 +1,8 @@
-//@	{"dependencies_extra":[{"ref":"./slider.o", "rel":"implementation"}]}
-
 #ifndef TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 #define TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 
 #include "./value_map.hpp"
+#include "ui/main/builtin_command_id.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
 #include "lib/common/move_only_function.hpp"
@@ -107,6 +106,17 @@ namespace terraformer::ui::widgets
 					m_value = internal_value_type{m_value + dx, clamp_tag{}};
 					m_on_value_changed(derived(), window, controller);
 					break;
+
+				case main::builtin_command_id::go_to_begin:
+					m_value = internal_value_type{0.0f, clamp_tag{}};
+					m_on_value_changed(derived(), window, controller);
+					break;
+
+				case main::builtin_command_id::go_to_end:
+					m_value = internal_value_type{1.0f, clamp_tag{}};
+					m_on_value_changed(derived(), window, controller);
+					break;
+
 				default:
 
 					break;
