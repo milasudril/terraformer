@@ -34,9 +34,32 @@ namespace terraformer
 		rolling_hills_filter_descriptor const& params
 	);
 
+	struct rolling_hills_smooth_clamp_descriptor
+	{
+		float scale;
+		float offset;
+		float k;
+
+		float min() const
+		{ return offset - scale; }
+	};
+
+	float clamp(float value, rolling_hills_smooth_clamp_descriptor const& params);
+
+	struct rolling_hills_clamp_to_descriptor
+	{
+		closed_closed_interval<float> input_range;
+		float hardness;
+	};
+
+	rolling_hills_smooth_clamp_descriptor make_rolling_hills_smooth_clamp_descriptor(
+		rolling_hills_clamp_to_descriptor const& params
+	);
+
 	struct rolling_hills_shape_descriptor
 	{
 		closed_closed_interval<float> clamp_to{-1.0f, 1.0f};
+		float clamp_hardness = 1.0f - 1.0f/128.0f;
 		closed_closed_interval<float> input_mapping{0.0f, 1.0f};
 		float exponent = 2.0f;
 	};

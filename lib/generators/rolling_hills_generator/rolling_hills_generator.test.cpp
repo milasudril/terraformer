@@ -182,3 +182,23 @@ TESTCASE(terraformer_rolling_hills_generator_make_normalized_filter_descriptor_t
 	EXPECT_EQ(res.f_x, f_x_discrete);
 	EXPECT_EQ(res.f_y, f_y_discrete);
 }
+
+TESTCASE(terraformer_rolling_hills_generator_make_rolling_hills_smooth_clamp_descriptor)
+{
+	auto const smooth_clamp_params = make_rolling_hills_smooth_clamp_descriptor(
+		terraformer::rolling_hills_clamp_to_descriptor{
+			.input_range = terraformer::closed_closed_interval{0.0f, 1.0f},
+			.hardness = 1.0f - 1.0f/128.0f
+		}
+	);
+
+	EXPECT_EQ(smooth_clamp_params.min(), 0.0f);
+
+	auto const dx = 1.0f/16.0f;
+	auto const x_0 = -1.0f;
+	for(size_t k = 0; k != 33; ++k)
+	{
+		auto const x = x_0 + static_cast<float>(k)*dx;
+		printf("%.8g %.8g\n", x, clamp(x, smooth_clamp_params));
+	}
+}

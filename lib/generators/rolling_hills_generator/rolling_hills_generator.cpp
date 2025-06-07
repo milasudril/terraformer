@@ -68,10 +68,29 @@ namespace
 		return ret;
 	}
 
-	float clamp(float val, terraformer::closed_closed_interval<float> range)
+	float hardness_to_smoothstep_exponent(float scale, float hardness)
 	{
-		auto const clamped_val = std::clamp(val, range.min(), range.max());
-		return std::lerp(-1.0f, 1.0f, (clamped_val - range.min())/(range.max() - range.min()));
+		auto k_low = 0.0f;
+		auto k_high = 1.0f;
+		auto const y_0 = scale * hardness;
+
+		while (1.0f + std::pow(scale, -k_high) - std::pow(y_0, -k_high) >= 0.0f)
+		{ k_high = k_high * 2.0f; }
+
+		while (true)
+		{
+			auto const k_mid = 0.5f*(k_low + k_high);
+			auto const value = 1.0f + std::pow(scale, -k_mid) - std::pow(y_0, -k_mid);
+
+			if (std::abs(value) < 1.0f / 1024.0f)
+			{ return k_mid; }
+
+			if (value < 0.0f)
+			{ k_high = k_mid; }
+			else
+			if (value > 0.0f)
+			{ k_low = k_mid; }
+		}
 	}
 
 	float signed_power(float base, float exponent)
@@ -94,12 +113,17 @@ namespace
 	float apply_shape(
 		float input_value,
 		terraformer::rolling_hills_shape_descriptor const& shape,
-		shape_output_range output_range
+		shape_output_range output_range,
+		terraformer::rolling_hills_smooth_clamp_descriptor const& smooth_clamp_params
 	)
 	{
 		auto const x_min = shape.input_mapping.min();
 		auto const x_max = shape.input_mapping.max();
-		auto const mapped_value = std::lerp(x_min, x_max, 0.5f*(clamp(input_value, shape.clamp_to) + 1.0f));
+		auto const mapped_value = std::lerp(
+			x_min,
+			x_max,
+			0.5f*(clamp(input_value, smooth_clamp_params) + 1.0f)
+		);
 		auto const shaped_value = signed_power(mapped_value, shape.exponent);
 		return std::lerp(-1.0f, 1.0f, (shaped_value - output_range.min)/(output_range.max - output_range.min));
 	}
@@ -158,6 +182,27 @@ terraformer::rolling_hills_normalized_filter_descriptor terraformer::make_rollin
 		.hf_rolloff = params.hf_rolloff,
 		.y_direction = 2.0f*std::numbers::pi_v<float>*params.y_direction
 	};
+}
+
+terraformer::rolling_hills_smooth_clamp_descriptor
+terraformer::make_rolling_hills_smooth_clamp_descriptor(rolling_hills_clamp_to_descriptor const& params)
+{
+	auto const scale = 0.5f*(params.input_range.max() - params.input_range.min());
+	return rolling_hills_smooth_clamp_descriptor{
+		.scale = 0.5f*(params.input_range.max() - params.input_range.min()),
+		.offset = 0.5f*(params.input_range.max() + params.input_range.min()),
+		.k = hardness_to_smoothstep_exponent(scale, params.hardness)
+	};
+}
+
+float terraformer::clamp(float value, terraformer::rolling_hills_smooth_clamp_descriptor const& params)
+{
+	auto const x = value - params.offset;
+	auto const clamped_val =
+		  x/std::pow(1.0f + std::pow(std::abs(x/params.scale), params.k), 1.0f/params.k)
+		+ params.offset;
+
+	return std::lerp(-1.0f, 1.0f, 0.5f*(clamped_val - params.min())/params.scale);
 }
 
 terraformer::grayscale_image
@@ -229,6 +274,12 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	grayscale_image ret{w_out, h_out};
 	auto const amplitude = params.amplitude;
 	auto const relative_z_offset = params.relative_z_offset;
+	auto const smooth_clamp_params = make_rolling_hills_smooth_clamp_descriptor(
+		rolling_hills_clamp_to_descriptor{
+			.input_range = params.shape.clamp_to,
+			.hardness = params.shape.clamp_hardness
+		}
+	);
 	for(uint32_t y = 0; y != h_out; ++y)
 	{
 		for(uint32_t x = 0; x != w_out; ++x)
@@ -238,7 +289,15 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 			auto const input_value = interp(filtered_output, x_in, y_in, wrap_around_at_boundary{});
 			auto const normalized_value = 2.0f*(input_value - min)/(max - min) - 1.0f;
 
-			ret(x, y) = amplitude*(apply_shape(normalized_value, params.shape, output_range) + relative_z_offset);
+			ret(x, y) = amplitude*(
+				apply_shape(
+					normalized_value,
+					params.shape,
+					output_range,
+					smooth_clamp_params
+				)
+				+ relative_z_offset
+			);
 		}
 	}
 
