@@ -71,7 +71,7 @@ namespace terraformer
 		rolling_hills_filter_descriptor filter;
 		rolling_hills_shape_descriptor shape;
 		float amplitude = 4096.0f/(4.0f*std::numbers::pi_v<float>);
-		float relative_z_offset = 0.5f;
+		float relative_z_offset = 0.0f;
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, rolling_hills_descriptor const& params);
