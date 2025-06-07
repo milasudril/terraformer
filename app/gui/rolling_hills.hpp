@@ -80,6 +80,16 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::interval_input;
 	};
 
+	struct rolling_hills_shape_clamp_to_hardness_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<bounded_value<open_open_interval{0.0f, 1.0f}, 1.0f - 1.0f/128.0f>> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+
+		static constexpr bool is_value_valid(float value)
+		{ return within(open_open_interval{0.0f, 1.0e+0f}, value); }
+	};
+
 	struct rolling_hills_shape_input_mapping_form_field
 	{
 		std::u8string_view label;
@@ -102,6 +112,16 @@ namespace terraformer::app
 				.value_reference = std::reference_wrapper(field_value.clamp_to)
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
+		);
+
+		ret.create_widget(
+			rolling_hills_shape_clamp_to_hardness_field{
+				.label = u8"Clamp to hardness",
+				.value_reference = std::reference_wrapper(field_value.clamp_hardness)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
 		);
 
 		ret.create_widget(

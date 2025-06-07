@@ -6,6 +6,7 @@
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/interval.hpp"
+#include "lib/common/bounded_value.hpp"
 
 namespace terraformer
 {
@@ -59,7 +60,7 @@ namespace terraformer
 	struct rolling_hills_shape_descriptor
 	{
 		closed_closed_interval<float> clamp_to{-1.0f, 1.0f};
-		float clamp_hardness = 1.0f - 1.0f/128.0f;
+		bounded_value<open_open_interval{0.0f, 1.0f}, 1.0f - 1.0f/128.0f> clamp_hardness;
 		closed_closed_interval<float> input_mapping{0.0f, 1.0f};
 		float exponent = 2.0f;
 	};

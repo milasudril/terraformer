@@ -70,6 +70,11 @@ namespace
 
 	float hardness_to_smoothstep_exponent(float scale, float hardness)
 	{
+		// TODO: Should improve this function
+		//
+		// 1. Prove that 1.0f + std::pow(scale, -k) - std::pow(y_0, -k) is montone in k
+		// 2. Use the derivative and Newtons method
+
 		auto k_low = 0.0f;
 		auto k_high = 1.0f;
 		auto const y_0 = scale * hardness;
