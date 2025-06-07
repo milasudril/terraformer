@@ -50,21 +50,23 @@ namespace terraformer::ui::widgets
 
 			m_textbox_lower.on_value_changed(
 				[this](
-					single_line_text_input&,
+					text_to_float_input& src,
 					main::window_ref window,
 					main::ui_controller ui_ctrl
 				){
 					m_slider.value(closed_closed_interval{m_textbox_lower.value(), m_textbox_upper.value()});
+					src.value(m_slider.value().min());
 					m_on_value_changed(*this, window, ui_ctrl);
 				}
 			);
 			m_textbox_upper.on_value_changed(
 				[this](
-					single_line_text_input&,
+					text_to_float_input& src,
 					main::window_ref window,
 					main::ui_controller ui_ctrl
 				){
 					m_slider.value(closed_closed_interval{m_textbox_lower.value(), m_textbox_upper.value()});
+					src.value(m_slider.value().min());
 					m_on_value_changed(*this, window, ui_ctrl);
 				}
 			);
@@ -83,12 +85,7 @@ namespace terraformer::ui::widgets
 		}
 
 		closed_closed_interval<float> value() const
-		{
-			return closed_closed_interval{
-				m_textbox_lower.value(),
-				m_textbox_upper.value()
-			};
-		}
+		{ return m_slider.value(); }
 
 		interval_input& value(closed_closed_interval<float> new_val)
 		{
