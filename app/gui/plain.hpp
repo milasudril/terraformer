@@ -43,7 +43,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-9999.9999");
 
 		ret.create_widget(
 			global_elevation_form_field{
@@ -53,7 +54,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-9999.9999");
 
 		ret.create_widget(
 			global_elevation_form_field{
@@ -63,7 +65,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-9999.9999");
 
 		ret.create_widget(
 			global_elevation_form_field{
@@ -73,7 +76,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-9999.9999");
 
 		ret.create_widget(
 			global_elevation_form_field{
@@ -83,7 +87,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-9999.9999");
 
 		ret.create_widget(
 			global_elevation_form_field{
@@ -93,7 +98,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-9999.9999");
 
 		ret.create_widget(
 			global_elevation_form_field{
@@ -103,7 +109,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-9999.9999");
 
 		ret.create_widget(
 			global_elevation_form_field{
@@ -113,7 +120,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-9999.9999");
 
 		return ret;
 	}
@@ -155,7 +163,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"0.00019329926");
 
 		ret.create_widget(
 			plain_midpoint_form_field{
@@ -165,7 +174,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"0.00019329926");
 
 		ret.create_widget(
 			plain_midpoint_form_field{
@@ -175,8 +185,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
 			}
-		);
-
+		)
+		.set_textbox_placeholder_string(u8"0.00019329926");
 
 		ret.create_widget(
 			plain_midpoint_form_field{
@@ -186,7 +196,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"0.00019329926");
 
 		return ret;
 	}
@@ -224,6 +235,7 @@ namespace terraformer::app
 				terraformer::ui::value_maps::affine_value_map{-0.5f, 0.5f}
 			}
 		)
+		.set_textbox_placeholder_string(u8"-0.123456789")
 		.input_widget().visual_angle_range(
 			closed_closed_interval<geosimd::turn_angle>{
 				geosimd::turns{0.0},

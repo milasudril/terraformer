@@ -39,7 +39,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f, 65536.0f, 2.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
 
 		ret.create_widget(
 			domain_length_form_field{
@@ -49,7 +50,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f, 65536.0f, 2.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
 
 		return ret;
 	}

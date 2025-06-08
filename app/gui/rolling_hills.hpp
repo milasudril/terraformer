@@ -122,7 +122,8 @@ namespace terraformer::app
 				.value_reference = std::reference_wrapper(field_value.range)
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-0.123456789");
 
 		ret.create_widget(
 			rolling_hills_shape_clamp_to_hardness_field{
@@ -152,7 +153,8 @@ namespace terraformer::app
 				.value_reference = std::reference_wrapper(field_value.input_mapping)
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
-		);
+		)
+		.set_textbox_placeholder_string(u8"-0.123456789");;
 
 		ret.create_widget(
 			rolling_hills_shape_exponent_form_field{
@@ -162,7 +164,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{0.25f, 4.0f, 2.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"0.123456789");
 
 		return ret;
 	}
@@ -190,7 +193,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
 
 		ret.create_widget(
 			rolling_hills_wavelength_form_field{
@@ -200,7 +204,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
 
 		ret.create_widget(
 			rolling_hills_rolloff_form_field{
@@ -210,7 +215,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
 
 		ret.create_widget(
 			rolling_hills_rolloff_form_field{
@@ -220,7 +226,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
 
 		ret.create_widget(
 			rolling_hills_orientation_form_field{
@@ -230,7 +237,9 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{-0.25f, 0.25f}
 			}
-		).input_widget().visual_angle_range(
+		)
+		.set_textbox_placeholder_string(u8"-0.123456789")
+		.input_widget().visual_angle_range(
 			closed_closed_interval<geosimd::turn_angle>{
 				geosimd::turns{1.0/4.0},
 				geosimd::turns{3.0/4.0}
@@ -249,7 +258,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f, 8192.0f, 2.0f}
 			}
-		);
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
 
 		ret.create_widget(
 			rolling_hills_rel_z_offset_form_field{
@@ -259,8 +269,8 @@ namespace terraformer::app
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 			}
-		);
-
+		)
+		.set_textbox_placeholder_string(u8"-0.123456789");
 
 		return ret;
 	}

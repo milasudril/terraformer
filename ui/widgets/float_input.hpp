@@ -58,6 +58,13 @@ namespace terraformer::ui::widgets
 		ControlWidget const& input_widget() const
 		{ return m_input_widget; }
 
+		template<class StringType>
+		float_input& set_textbox_placeholder_string(StringType&& placeholder)
+		{
+			m_textbox.use_size_from_placeholder(std::forward<StringType>(placeholder));
+			return *this;
+		}
+
 		// TODO: It could be a good idea to only show ControlWidget when we have keyboard/mouse focus
 		// This will save precious space
 

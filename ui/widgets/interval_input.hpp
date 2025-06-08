@@ -102,6 +102,14 @@ namespace terraformer::ui::widgets
 			return *this;
 		}
 
+		template<class StringType>
+		interval_input& set_textbox_placeholder_string(StringType const& placeholder)
+		{
+			m_textbox_lower.use_size_from_placeholder(placeholder);
+			m_textbox_upper.use_size_from_placeholder(placeholder);
+			return *this;
+		}
+
 
 	private:
 		range_slider m_slider;

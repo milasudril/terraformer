@@ -135,7 +135,7 @@ terraformer::ui::widgets::range_slider::prepare_for_presentation(main::graphics_
 terraformer::box_size terraformer::ui::widgets::range_slider::compute_size(main::widget_width_request)
 {
 	auto const short_side = 1.5f*static_cast<float>(m_track_size);
-	auto const long_side = short_side*4.0f*3.0f;
+	auto const long_side = short_side*6.0f;
 
 	if(m_orientation == main::widget_orientation::horizontal)
 	{
@@ -150,7 +150,7 @@ terraformer::box_size terraformer::ui::widgets::range_slider::compute_size(main:
 terraformer::box_size terraformer::ui::widgets::range_slider::compute_size(main::widget_height_request)
 {
 	auto const short_side = 1.5f*static_cast<float>(m_track_size);
-	auto const long_side = short_side*4.0f*3.0f;
+	auto const long_side = short_side*6.0f;
 
 	if(m_orientation == main::widget_orientation::horizontal)
 	{
