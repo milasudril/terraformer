@@ -166,7 +166,7 @@ void terraformer::ui::widgets::range_slider::theme_updated(main::config const& c
 {
 	m_bg_tint = cfg.input_area.colors.background;
 	m_fg_tint = cfg.input_area.colors.foreground;
-	m_sel_tint = cfg.input_area.colors.selection;
+	m_sel_tint = cfg.status_indicator.info_indication;
 	m_border_thickness = static_cast<uint32_t>(cfg.input_area.border_thickness);
 	m_null_texture = cfg.misc_textures.null;
 	m_background = cfg.misc_textures.white;
