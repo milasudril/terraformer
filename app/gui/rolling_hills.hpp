@@ -73,7 +73,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	struct rolling_hills_shape_clamp_to_form_field
+	struct rolling_hills_shape_clamp_to_input_range_form_field
 	{
 		std::u8string_view label;
 		std::reference_wrapper<closed_closed_interval<float>> value_reference;
@@ -97,6 +97,45 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::interval_input;
 	};
 
+	struct rolling_hills_shape_clamp_to_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+	auto& bind(
+		std::u8string_view field_name,
+		rolling_hills_clamp_to_descriptor& field_value,
+		ui::widgets::form& form
+	)
+	{
+		auto& ret = form.create_widget(
+			rolling_hills_shape_clamp_to_form_field{
+				.label = field_name
+			}
+		);
+
+		ret.create_widget(
+			rolling_hills_shape_clamp_to_input_range_form_field{
+				.label = u8"Input range",
+				.value_reference = std::reference_wrapper(field_value.input_range)
+			},
+			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
+		);
+
+		ret.create_widget(
+			rolling_hills_shape_clamp_to_hardness_field{
+				.label = u8"Hardness",
+				.value_reference = std::reference_wrapper(field_value.hardness)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
+		);
+
+		return ret;
+	}
+
 	auto& bind(std::u8string_view field_name, rolling_hills_shape_descriptor& field_value, ui::widgets::form& form)
 	{
 		auto& ret = form.create_widget(
@@ -106,23 +145,7 @@ namespace terraformer::app
 			ui::main::widget_orientation::vertical
 		);
 
-		ret.create_widget(
-			rolling_hills_shape_clamp_to_form_field{
-				.label = u8"Clamp to",
-				.value_reference = std::reference_wrapper(field_value.clamp_to.input_range)
-			},
-			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
-		);
-
-		ret.create_widget(
-			rolling_hills_shape_clamp_to_hardness_field{
-				.label = u8"Clamp to hardness",
-				.value_reference = std::reference_wrapper(field_value.clamp_to.hardness)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
-			}
-		);
+		bind(u8"Clamping", field_value.clamp_to, ret);
 
 		ret.create_widget(
 			rolling_hills_shape_input_mapping_form_field{
