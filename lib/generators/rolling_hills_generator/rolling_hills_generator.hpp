@@ -49,7 +49,7 @@ namespace terraformer
 
 	struct rolling_hills_clamp_to_descriptor
 	{
-		closed_closed_interval<float> input_range{-1.0f, 1.0f};
+		closed_closed_interval<float> range{-1.0f, 1.0f};
 		bounded_value<open_open_interval{0.0f, 1.0f}, 1.0f - 1.0f/128.0f> hardness;
 	};
 

@@ -188,7 +188,7 @@ TESTCASE(terraformer_rolling_hills_generator_make_rolling_hills_smooth_clamp_des
 {
 	auto const smooth_clamp_params = make_rolling_hills_smooth_clamp_descriptor(
 		terraformer::rolling_hills_clamp_to_descriptor{
-			.input_range = terraformer::closed_closed_interval{0.0f, 1.0f},
+			.range = terraformer::closed_closed_interval{0.0f, 1.0f},
 			.hardness = terraformer::bounded_value<terraformer::open_open_interval{0.0f, 1.0f}, 1.0f - 1.0f/128.0f>{}
 		}
 	);

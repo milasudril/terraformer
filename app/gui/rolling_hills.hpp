@@ -118,8 +118,8 @@ namespace terraformer::app
 
 		ret.create_widget(
 			rolling_hills_shape_clamp_to_input_range_form_field{
-				.label = u8"Input range",
-				.value_reference = std::reference_wrapper(field_value.input_range)
+				.label = u8"Range",
+				.value_reference = std::reference_wrapper(field_value.range)
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 		);

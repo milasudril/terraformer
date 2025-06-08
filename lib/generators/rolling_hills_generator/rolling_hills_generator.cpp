@@ -192,10 +192,10 @@ terraformer::rolling_hills_normalized_filter_descriptor terraformer::make_rollin
 terraformer::rolling_hills_smooth_clamp_descriptor
 terraformer::make_rolling_hills_smooth_clamp_descriptor(rolling_hills_clamp_to_descriptor const& params)
 {
-	auto const scale = 0.5f*(params.input_range.max() - params.input_range.min());
+	auto const scale = 0.5f*(params.range.max() - params.range.min());
 	return rolling_hills_smooth_clamp_descriptor{
-		.scale = 0.5f*(params.input_range.max() - params.input_range.min()),
-		.offset = 0.5f*(params.input_range.max() + params.input_range.min()),
+		.scale = 0.5f*(params.range.max() - params.range.min()),
+		.offset = 0.5f*(params.range.max() + params.range.min()),
 		.k = hardness_to_smoothstep_exponent(scale, params.hardness)
 	};
 }
