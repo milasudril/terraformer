@@ -109,6 +109,9 @@ terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main:
 			m_fg_tint*m_cursor_intensity
 		};
 
+	auto const sel_tint = m_sel_range.begin() == m_sel_range.end()?
+		rgba_pixel(0.0f, 0.0f, 0.0f, 0.0f):m_sel_tint;
+
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
@@ -125,7 +128,7 @@ terraformer::ui::widgets::single_line_text_input::prepare_for_presentation(main:
 			.offset = displacement{},
 			.rotation = geosimd::turn_angle{},
 			.texture = m_background->get_backend_resource(backend).get(),
-			.tints = std::array{m_sel_tint, m_sel_tint, m_sel_tint, m_sel_tint}
+			.tints = std::array{sel_tint, sel_tint, sel_tint, sel_tint}
 		},
 		.foreground = main::widget_layer{
 			.offset = fg_offset,
