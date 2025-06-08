@@ -88,19 +88,18 @@ namespace terraformer::ui::main
 
 			if(event.action == mouse_button_action::press)
 			{
-				if(!try_dispatch(event, res, window, ui_controller{*this}))
-				{ m_keyboard_widget = flat_widget_collection::npos; }
+				auto new_keyboard_widget = flat_widget_collection::npos;
+				try_dispatch(event, res, window, ui_controller{*this});
 
 				if(res.state().accepts_keyboard_input())
 				{
 					update_flat_widget_collection();
-					set_keyboard_focus(find(res, m_flat_collection), window);
+					new_keyboard_widget = find(res, m_flat_collection);
 				}
-				else
-				{ m_keyboard_widget = flat_widget_collection::npos; }
+
+				set_keyboard_focus(new_keyboard_widget, window);
 
 				m_mouse_widget = res;
-				printf("mouse_widget = %zu\n", m_mouse_widget.index().get());
 			}
 
 			if(event.action == mouse_button_action::release)
@@ -109,7 +108,6 @@ namespace terraformer::ui::main
 				if(m_mouse_widget != res)
 				{ try_dispatch(cursor_leave_event{}, m_mouse_widget, window, ui_controller{*this}); }
 				m_mouse_widget = find_recursive_result{};
-				printf("mouse_widget = %zu\n", m_mouse_widget.index().get());
 			}
 		}
 
@@ -228,10 +226,19 @@ namespace terraformer::ui::main
 
 		void set_keyboard_focus(flat_widget_collection::index_type new_widget, window_ref window)
 		{
-			if(new_widget == m_keyboard_widget || !(new_widget.within(m_flat_collection.element_indices())))
+			if(new_widget == m_keyboard_widget)
 			{ return; }
 
-			try_dispatch(keyboard_focus_enter_event{}, m_flat_collection.attributes(), new_widget, window, ui_controller{*this});
+			if(new_widget.within(m_flat_collection.element_indices()))
+			{
+				try_dispatch(
+					keyboard_focus_enter_event{},
+					m_flat_collection.attributes(),
+					new_widget,
+					window,
+					ui_controller{*this}
+				);
+			}
 
 			try_dispatch(keyboard_focus_leave_event{}, m_flat_collection.attributes(), m_keyboard_widget, window, ui_controller{*this});
 
