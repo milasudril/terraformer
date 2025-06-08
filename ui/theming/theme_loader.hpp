@@ -19,7 +19,7 @@ namespace terraformer::ui::theming
 		auto black_texture = std::make_shared<main::staged_texture const>(generate_black_texture());
 
 		font_handling::font_mapper fonts;
-		auto const fontfile = fonts.get_path("sans-serif");
+		auto const fontfile = fonts.get_path("Andika, Verdana, Comic Sans MS, sans-serif");
 		auto const body_text = std::make_shared<font_handling::font>(fontfile);
 		body_text->set_font_size(11);
 
