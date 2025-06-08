@@ -279,7 +279,7 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 	grayscale_image ret{w_out, h_out};
 	auto const amplitude = params.amplitude;
 	auto const relative_z_offset = params.relative_z_offset;
-	auto const smooth_clamp_params = make_rolling_hills_smooth_clamp_descriptor(params.shape.clamp_to);
+	auto const smooth_clamp_params = make_rolling_hills_smooth_clamp_descriptor(params.clamp_to);
 	for(uint32_t y = 0; y != h_out; ++y)
 	{
 		for(uint32_t x = 0; x != w_out; ++x)

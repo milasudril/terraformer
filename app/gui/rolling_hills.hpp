@@ -145,8 +145,6 @@ namespace terraformer::app
 			ui::main::widget_orientation::vertical
 		);
 
-		bind(u8"Clamping", field_value.clamp_to, ret);
-
 		ret.create_widget(
 			rolling_hills_shape_input_mapping_form_field{
 				.label = u8"Input mapping",
@@ -237,6 +235,8 @@ namespace terraformer::app
 				geosimd::turns{3.0/4.0}
 			}
 		);
+
+		bind(u8"Clamp to", field_value.clamp_to, ret);
 
 		bind(u8"Shape", field_value.shape, ret);
 

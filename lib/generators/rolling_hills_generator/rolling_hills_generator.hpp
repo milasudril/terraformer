@@ -59,7 +59,6 @@ namespace terraformer
 
 	struct rolling_hills_shape_descriptor
 	{
-		rolling_hills_clamp_to_descriptor clamp_to;
 		closed_closed_interval<float> input_mapping{0.0f, 1.0f};
 		float exponent = 2.0f;
 	};
@@ -68,6 +67,7 @@ namespace terraformer
 	{
 		std::array<std::byte, 16> rng_seed{};
 		rolling_hills_filter_descriptor filter;
+		rolling_hills_clamp_to_descriptor clamp_to;
 		rolling_hills_shape_descriptor shape;
 		float amplitude = 4096.0f/(4.0f*std::numbers::pi_v<float>);
 		float relative_z_offset = 0.0f;
