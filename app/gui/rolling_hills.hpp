@@ -109,7 +109,7 @@ namespace terraformer::app
 		ret.create_widget(
 			rolling_hills_shape_clamp_to_form_field{
 				.label = u8"Clamp to",
-				.value_reference = std::reference_wrapper(field_value.clamp_to)
+				.value_reference = std::reference_wrapper(field_value.clamp_to.input_range)
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 		);
@@ -117,7 +117,7 @@ namespace terraformer::app
 		ret.create_widget(
 			rolling_hills_shape_clamp_to_hardness_field{
 				.label = u8"Clamp to hardness",
-				.value_reference = std::reference_wrapper(field_value.clamp_hardness)
+				.value_reference = std::reference_wrapper(field_value.clamp_to.hardness)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
