@@ -78,6 +78,7 @@ namespace terraformer::app
 		std::u8string_view label;
 		std::reference_wrapper<closed_closed_interval<float>> value_reference;
 		using input_widget_type = ui::widgets::interval_input;
+		bool maximize_widget;
 	};
 
 	struct rolling_hills_shape_clamp_to_hardness_field
@@ -94,6 +95,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		std::reference_wrapper<closed_closed_interval<float>> value_reference;
+		bool maximize_widget;
 		using input_widget_type = ui::widgets::interval_input;
 	};
 
@@ -119,7 +121,8 @@ namespace terraformer::app
 		ret.create_widget(
 			rolling_hills_shape_clamp_to_input_range_form_field{
 				.label = u8"Range",
-				.value_reference = std::reference_wrapper(field_value.range)
+				.value_reference = std::reference_wrapper(field_value.range),
+				.maximize_widget = true
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 		)
@@ -150,7 +153,8 @@ namespace terraformer::app
 		ret.create_widget(
 			rolling_hills_shape_input_mapping_form_field{
 				.label = u8"Input mapping",
-				.value_reference = std::reference_wrapper(field_value.input_mapping)
+				.value_reference = std::reference_wrapper(field_value.input_mapping),
+				.maximize_widget = true
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 		)

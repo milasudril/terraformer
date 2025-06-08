@@ -40,13 +40,17 @@ namespace terraformer::ui::widgets
 			}
 		{
 			append(std::ref(m_slider), main::widget_geometry{});
+
 			m_text_input.append(std::ref(m_textbox_lower), main::widget_geometry{});
 			m_text_input.append(std::ref(m_textbox_upper), ui::main::widget_geometry{});
 			append(std::ref(m_text_input), main::widget_geometry{});
-			layout.set_record_size(0, layouts::table::cell_size::expand{});
+			layout.set_field_size(0, layouts::table::cell_size::expand{});
 			auto const widget_attribs = get_attributes();
 			widget_attribs.widget_states()[widget_attribs.element_indices().front()].maximized = true;
 			m_text_input.layout.params().no_outer_margin = true;
+			m_text_input.is_transparent = true;
+			m_text_input.layout.set_field_size(0, layouts::table::cell_size::expand{});
+			m_text_input.layout.set_field_size(1, layouts::table::cell_size::expand{});
 
 			m_textbox_lower.on_value_changed(
 				[this](
