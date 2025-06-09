@@ -78,8 +78,8 @@ int main(int, char**)
 		},
 		terraformer::ui::wsapi::window_configuration{
 			.geometry{
-				.width = 977,
-				.height = 626
+				.width = 1200,
+				.height = 720
 			}
 		}
 	};
