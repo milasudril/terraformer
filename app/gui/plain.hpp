@@ -2,7 +2,9 @@
 #define TERRAFORMER_GUI_PLAIN_HPP
 
 #include "lib/generators/plain_generator/plain.hpp"
+#include "ui/main/widget.hpp"
 #include "ui/widgets/form.hpp"
+#include "ui/widgets/table.hpp"
 #include "ui/value_maps/sqrt_value_map.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
@@ -22,6 +24,12 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
+	struct plain_elevation_table_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::table;
+	};
+
 	auto& bind(
 		std::u8string_view field_name,
 		plain_control_point_elevation_descriptor& field_value,
@@ -33,6 +41,19 @@ namespace terraformer::app
 				.label = field_name
 			},
 			ui::main::widget_orientation::vertical
+		);
+
+		form.create_widget(
+			plain_elevation_table_form_field{
+				.label = field_name
+			},
+			ui::main::widget_orientation::vertical,
+			std::array{
+				u8"Point",
+				u8"Elevation/m",
+				u8"∂/∂x",
+				u8"∂/∂y"
+			}
 		);
 
 		ret.create_widget(

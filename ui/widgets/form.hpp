@@ -100,16 +100,17 @@ namespace terraformer::ui::widgets
 				main::widget_orientation orientation,
 				T&&... input_widget_params
 			){
-				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, main::widget_orientation, T...>)
+				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, main::widget_orientation, std::remove_cvref_t<T>...>)
 				{
 					if constexpr(sizeof...(InputWidgetParams))
 					{
-						if constexpr(std::is_same_v<std::remove_cvref_t<pick_first_t<InputWidgetParams...>>, orientation>)
+						if constexpr(std::is_same_v<std::remove_cvref_t<pick_first_t<InputWidgetParams...>>, main::widget_orientation>)
 						{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
 					}
 					return std::make_unique<input_widget_type>(iihr, orientation, std::forward<T>(input_widget_params)...);
 				}
-				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, T...>)
+				else
+				if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, std::remove_cvref_t<T>...>)
 				{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
 				else
 				{ return std::make_unique<input_widget_type>(std::forward<T>(input_widget_params)...); }
