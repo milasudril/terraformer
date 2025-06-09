@@ -108,7 +108,12 @@ int main(int, char**)
 	};
 
 	terraformer::heightmap_descriptor heightmap;
-	auto& heightmap_form = terraformer::app::bind(u8"Heightmap parameters", heightmap, main_form);
+	auto& heightmap_form = main_form.create_widget(
+		terraformer::app::heightmap_form_field{
+			.label = u8"Heightmap parameters",
+		}
+	);
+	terraformer::app::bind(heightmap, heightmap_form);
 
 	auto output = generate(heightmap);
 
@@ -121,7 +126,16 @@ int main(int, char**)
 			}
 		}
 	};
-	auto& heightmap_view = terraformer::app::bind(u8"Current heightmap", heightmap_view_info, main_form);
+
+	auto& heightmap_view = main_form.create_widget(
+		terraformer::app::heightmap_chart_form_field{
+			.label = u8"Current heightmap",
+			.expand_layout_cell = true
+		},
+		terraformer::ui::main::widget_orientation::horizontal
+	);
+
+	terraformer::app::bind(heightmap_view_info, heightmap_view);
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
 
