@@ -194,7 +194,14 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.plain, plain);
-		bind(u8"Rolling hills", field_value.rolling_hills, form);
+
+
+		auto& rolling_hills = form.create_widget(
+			rolling_hills_descriptor_form_field{
+				.label = u8"Rolling hills"
+			}
+		);
+		bind(field_value.rolling_hills, rolling_hills);
 	}
 
 	struct heightmap_form_field
