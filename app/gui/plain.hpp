@@ -18,6 +18,13 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
+	struct plain_control_point_slope_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
 	struct plain_boundary_point_form_field
 	{
 		std::u8string_view label;
@@ -43,6 +50,28 @@ namespace terraformer::app
 			}
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
+
+		parent.create_widget(
+			plain_control_point_slope_form_field{
+				.label = u8"∂/∂x",
+				.value_reference = std::ref(field_value.ddx)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{1.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"-0.073242545");
+
+		parent.create_widget(
+			plain_control_point_slope_form_field{
+				.label = u8"∂/∂y",
+				.value_reference = std::ref(field_value.ddy)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::sqrt_value_map{1.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"-0.073242545");
 	}
 
 	void bind(plain_boundary_descriptor& field_value, ui::widgets::form& parent)
