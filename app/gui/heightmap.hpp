@@ -188,7 +188,12 @@ namespace terraformer::app
 
 	void bind(heightmap_generator_descriptor& field_value, ui::widgets::form& form)
 	{
-		bind(u8"Plain", field_value.plain, form);
+		auto& plain = form.create_widget(
+			plain_form_field{
+				.label = u8"Plain"
+			}
+		);
+		bind(field_value.plain, plain);
 		bind(u8"Rolling hills", field_value.rolling_hills, form);
 	}
 

@@ -22,20 +22,9 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	auto& bind(
-		std::u8string_view field_name,
-		plain_control_point_elevation_descriptor& field_value,
-		ui::widgets::form& form
-	)
+	void bind(plain_control_point_elevation_descriptor& field_value, ui::widgets::form& form)
 	{
-		auto& ret = form.create_widget(
-			plain_elevations_form_field{
-				.label = field_name
-			},
-			ui::main::widget_orientation::vertical
-		);
-
-		ret.create_widget(
+		form.create_widget(
 			global_elevation_form_field{
 				.label = u8"N",
 				.value_reference = std::ref(field_value.n)
@@ -46,7 +35,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
 
-		ret.create_widget(
+		form.create_widget(
 			global_elevation_form_field{
 				.label = u8"NE",
 				.value_reference = std::ref(field_value.ne)
@@ -57,7 +46,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
 
-		ret.create_widget(
+		form.create_widget(
 			global_elevation_form_field{
 				.label = u8"E",
 				.value_reference = std::ref(field_value.e)
@@ -68,7 +57,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
 
-		ret.create_widget(
+		form.create_widget(
 			global_elevation_form_field{
 				.label = u8"SE",
 				.value_reference = std::ref(field_value.se)
@@ -79,7 +68,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
 
-		ret.create_widget(
+		form.create_widget(
 			global_elevation_form_field{
 				.label = u8"S",
 				.value_reference = std::ref(field_value.s)
@@ -90,7 +79,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
 
-		ret.create_widget(
+		form.create_widget(
 			global_elevation_form_field{
 				.label = u8"SW",
 				.value_reference = std::ref(field_value.sw)
@@ -101,7 +90,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
 
-		ret.create_widget(
+		form.create_widget(
 			global_elevation_form_field{
 				.label = u8"W",
 				.value_reference = std::ref(field_value.w)
@@ -112,7 +101,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
 
-		ret.create_widget(
+		form.create_widget(
 			global_elevation_form_field{
 				.label = u8"NW",
 				.value_reference = std::ref(field_value.nw)
@@ -122,8 +111,6 @@ namespace terraformer::app
 			}
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
-
-		return ret;
 	}
 
 	struct plain_midpoint_form_field
@@ -142,20 +129,9 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	auto& bind(
-		std::u8string_view field_name,
-		plain_edge_midpoint_descriptor& field_value,
-		ui::widgets::form& form
-	)
+	void bind(plain_edge_midpoint_descriptor& field_value, ui::widgets::form& form)
 	{
-		auto& ret = form.create_widget(
-			plain_elevations_form_field{
-				.label = field_name
-			},
-			ui::main::widget_orientation::vertical
-		);
-
-		ret.create_widget(
+		form.create_widget(
 			plain_midpoint_form_field{
 				.label = u8"N",
 				.value_reference = std::ref(field_value.n)
@@ -166,7 +142,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"0.00019329926");
 
-		ret.create_widget(
+		form.create_widget(
 			plain_midpoint_form_field{
 				.label = u8"E",
 				.value_reference = std::ref(field_value.e)
@@ -177,7 +153,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"0.00019329926");
 
-		ret.create_widget(
+		form.create_widget(
 			plain_midpoint_form_field{
 				.label = u8"S",
 				.value_reference = std::ref(field_value.s)
@@ -188,7 +164,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"0.00019329926");
 
-		ret.create_widget(
+		form.create_widget(
 			plain_midpoint_form_field{
 				.label = u8"W",
 				.value_reference = std::ref(field_value.w)
@@ -198,8 +174,6 @@ namespace terraformer::app
 			}
 		)
 		.set_textbox_placeholder_string(u8"0.00019329926");
-
-		return ret;
 	}
 
 	struct plain_form_field
@@ -215,18 +189,25 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	auto& bind(std::u8string_view field_name, plain_descriptor& field_value, ui::widgets::form& form)
+	void bind(plain_descriptor& field_value, ui::widgets::form& form)
 	{
-		auto& ret = form.create_widget(
-			plain_form_field{
-				.label = field_name
-			}
+		auto& elevations = form.create_widget(
+			plain_elevations_form_field{
+				.label = u8"Elevations/m",
+			},
+			ui::main::widget_orientation::vertical
 		);
+		bind(field_value.elevations, elevations);
 
-		bind(u8"Elevations/m", field_value.elevations, ret);
-		bind(u8"Edge midpoints", field_value.edge_midpoints, ret);
+		auto& midpoints = form.create_widget(
+			plain_elevations_form_field{
+				.label = u8"Edge midpoints"
+			},
+			ui::main::widget_orientation::vertical
+		);
+		bind(field_value.edge_midpoints, midpoints);
 
-		ret.create_widget(
+		form.create_widget(
 			global_orientation_form_field{
 				.label = u8"Orientation",
 				.value_reference = std::ref(field_value.orientation)
@@ -242,8 +223,6 @@ namespace terraformer::app
 				geosimd::turns{1.0}
 			}
 		);
-
-		return ret;
 	}
 }
 
