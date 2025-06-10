@@ -11,16 +11,23 @@
 
 namespace terraformer
 {
-	struct plain_control_point_elevation_descriptor
+	struct plain_control_point_descriptor
 	{
-		float n = 840.0f;
-		float ne = 840.0f;
-		float e = 840.0f;
-		float se = 840.0f;
-		float s = 840.0f;
-		float sw = 840.f;
-		float w = 840.0f;
-		float nw = 840.0f;
+		float elevation = 840.0f;
+		float ddx = 0.0f;
+		float ddy = 0.0f;
+	};
+
+	struct plain_boundary_descriptor
+	{
+		plain_control_point_descriptor n;
+		plain_control_point_descriptor ne;
+		plain_control_point_descriptor e;
+		plain_control_point_descriptor se;
+		plain_control_point_descriptor s;
+		plain_control_point_descriptor sw;
+		plain_control_point_descriptor w;
+		plain_control_point_descriptor nw;
 	};
 
 	struct plain_edge_midpoint_descriptor
@@ -34,7 +41,7 @@ namespace terraformer
 
 	struct plain_descriptor
 	{
-		plain_control_point_elevation_descriptor elevations;
+		plain_boundary_descriptor boundary;
 		plain_edge_midpoint_descriptor edge_midpoints;
 		float orientation = 0.0f;
 	};

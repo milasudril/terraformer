@@ -11,14 +11,14 @@
 
 namespace terraformer::app
 {
-	struct global_elevation_form_field
+	struct plain_control_point_elevation_form_field
 	{
 		std::u8string_view label;
 		std::reference_wrapper<float> value_reference;
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	struct plain_elevations_form_field
+	struct plain_boundary_point_form_field
 	{
 		std::u8string_view label;
 		using input_widget_type = ui::widgets::form;
@@ -27,92 +27,16 @@ namespace terraformer::app
 	struct plain_elevation_table_form_field
 	{
 		std::u8string_view label;
-		using input_widget_type = ui::widgets::table;
+		// TODO: Should use table instead of form
+		using input_widget_type = ui::widgets::form;
 	};
 
-	void bind(plain_control_point_elevation_descriptor& field_value, ui::widgets::form& parent)
+	void bind(plain_control_point_descriptor& field_value, ui::widgets::form& parent)
 	{
 		parent.create_widget(
-			global_elevation_form_field{
-				.label = u8"N",
-				.value_reference = std::ref(field_value.n)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"-9999.9999");
-
-		parent.create_widget(
-			global_elevation_form_field{
-				.label = u8"NE",
-				.value_reference = std::ref(field_value.ne)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"-9999.9999");
-
-		parent.create_widget(
-			global_elevation_form_field{
-				.label = u8"E",
-				.value_reference = std::ref(field_value.e)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"-9999.9999");
-
-		parent.create_widget(
-			global_elevation_form_field{
-				.label = u8"SE",
-				.value_reference = std::ref(field_value.se)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"-9999.9999");
-
-		parent.create_widget(
-			global_elevation_form_field{
-				.label = u8"S",
-				.value_reference = std::ref(field_value.s)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"-9999.9999");
-
-		parent.create_widget(
-			global_elevation_form_field{
-				.label = u8"SW",
-				.value_reference = std::ref(field_value.sw)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"-9999.9999");
-
-		parent.create_widget(
-			global_elevation_form_field{
-				.label = u8"W",
-				.value_reference = std::ref(field_value.w)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"-9999.9999");
-
-		parent.create_widget(
-			global_elevation_form_field{
-				.label = u8"NW",
-				.value_reference = std::ref(field_value.nw)
+			plain_control_point_elevation_form_field{
+				.label = u8"Elevation/m",
+				.value_reference = std::ref(field_value.elevation)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::sqrt_value_map{6400.0f}
@@ -120,6 +44,66 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
 	}
+
+	void bind(plain_boundary_descriptor& field_value, ui::widgets::form& parent)
+	{
+		auto& n = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"N"
+			}
+		);
+		bind(field_value.n, n);
+
+		auto& ne = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"NE"
+			}
+		);
+		bind(field_value.ne, ne);
+
+		auto& e = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"E"
+			}
+		);
+		bind(field_value.e, e);
+
+		auto& se = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"SE"
+			}
+		);
+		bind(field_value.se, se);
+
+		auto& s = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"S"
+			}
+		);
+		bind(field_value.s, s);
+
+		auto& sw = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"SW"
+			}
+		);
+		bind(field_value.sw, sw);
+
+		auto& w = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"W"
+			}
+		);
+		bind(field_value.w, w);
+
+		auto& nw = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"NW"
+			}
+		);
+		bind(field_value.nw, nw);
+	}
+
 
 	struct plain_midpoint_form_field
 	{
@@ -199,6 +183,7 @@ namespace terraformer::app
 
 	void bind(plain_descriptor& field_value, ui::widgets::form& parent)
 	{
+#if 0
 		parent.create_widget(
 			plain_elevation_table_form_field{
 				.label = u8"Control points"
@@ -211,17 +196,18 @@ namespace terraformer::app
 				u8"∂/∂y"
 			}
 		);
+#endif
 
-		auto& elevations = parent.create_widget(
-			plain_elevations_form_field{
-				.label = u8"Elevations/m",
+		auto& boundary = parent.create_widget(
+			plain_elevation_table_form_field{
+				.label = u8"Control points",
 			},
 			ui::main::widget_orientation::vertical
 		);
-		bind(field_value.elevations, elevations);
+		bind(field_value.boundary, boundary);
 
 		auto& midpoints = parent.create_widget(
-			plain_elevations_form_field{
+			plain_midpoints_form_field{
 				.label = u8"Edge midpoints"
 			},
 			ui::main::widget_orientation::vertical

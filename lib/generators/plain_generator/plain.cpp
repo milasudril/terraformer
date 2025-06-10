@@ -86,9 +86,9 @@ terraformer::grayscale_image terraformer::generate(
 	auto const west_to_east_north = boundary_curve(
 		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
-			.y_0 = params.elevations.nw,
-			.y_m = params.elevations.n,
-			.y_1 = params.elevations.ne,
+			.y_0 = params.boundary.nw.elevation,
+			.y_m = params.boundary.n.elevation,
+			.y_1 = params.boundary.ne.elevation,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -98,9 +98,9 @@ terraformer::grayscale_image terraformer::generate(
 	auto const west_to_east_south = boundary_curve(
 		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.s,
-			.y_0 = params.elevations.sw,
-			.y_m = params.elevations.s,
-			.y_1 = params.elevations.se,
+			.y_0 = params.boundary.sw.elevation,
+			.y_m = params.boundary.s.elevation,
+			.y_1 = params.boundary.se.elevation,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -110,9 +110,9 @@ terraformer::grayscale_image terraformer::generate(
 	auto const north_to_south_west = boundary_curve(
 		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.w,
-			.y_0 = params.elevations.nw,
-			.y_m = params.elevations.w,
-			.y_1 = params.elevations.sw,
+			.y_0 = params.boundary.nw.elevation,
+			.y_m = params.boundary.w.elevation,
+			.y_1 = params.boundary.sw.elevation,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -122,9 +122,9 @@ terraformer::grayscale_image terraformer::generate(
 	auto const north_to_south_east = boundary_curve(
 		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.e,
-			.y_0 = params.elevations.ne,
-			.y_m = params.elevations.e,
-			.y_1 = params.elevations.se,
+			.y_0 = params.boundary.ne.elevation,
+			.y_m = params.boundary.e.elevation,
+			.y_1 = params.boundary.se.elevation,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -133,22 +133,22 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const y_m_interp_ns = make_polynomial(
 		cubic_spline_control_point{
-			.y = params.elevations.w,
+			.y = params.boundary.w.elevation,
 			.ddx = 0.0f
 		},
 		cubic_spline_control_point{
-			.y = params.elevations.e,
+			.y = params.boundary.e.elevation,
 			.ddx = 0.0f
 		}
 	);
 
 	auto const y_m_interp_we = make_polynomial(
 		cubic_spline_control_point{
-			.y = params.elevations.n,
+			.y = params.boundary.n.elevation,
 			.ddx = 0.0f
 		},
 		cubic_spline_control_point{
-			.y = params.elevations.s,
+			.y = params.boundary.s.elevation,
 			.ddx = 0.0f
 		}
 	);
