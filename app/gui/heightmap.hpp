@@ -56,9 +56,9 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	void bind(level_curves_descriptor& field_value, ui::widgets::form& form)
+	void bind(level_curves_descriptor& field_value, ui::widgets::form& parent)
 	{
-		form.create_widget(
+		parent.create_widget(
 			level_curves_visible_form_field{
 				.label = u8"Visible",
 				.value_reference = std::ref(field_value.visible),
@@ -66,7 +66,7 @@ namespace terraformer::app
 			}
 		);
 
-		form.create_widget(
+		parent.create_widget(
 			level_curves_interval_form_field{
 				.label = u8"Interval/m",
 				.value_reference = std::ref(field_value.interval)
@@ -89,9 +89,9 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	void bind(heatmap_view_attributes& field_value, ui::widgets::form& form)
+	void bind(heatmap_view_attributes& field_value, ui::widgets::form& parent)
 	{
-		auto& level_curves_form = form.create_widget(
+		auto& level_curves_form = parent.create_widget(
 			level_curves_descriptor_form_field{
 				.label = u8"Level curves"
 			},
@@ -130,9 +130,9 @@ namespace terraformer::app
 		std::reference_wrapper<heatmap_view_attributes> presentation_attributes;
 	};
 
-	void bind(heatmap_view_descriptor const& field_value, ui::widgets::form& form)
+	void bind(heatmap_view_descriptor const& field_value, ui::widgets::form& parent)
 	{
-		auto& imgview = form.create_widget(
+		auto& imgview = parent.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
 				.label = u8"Output",
 				.value_reference = field_value.data,
@@ -144,7 +144,7 @@ namespace terraformer::app
 			terraformer::get_elevation_color_lut()
 		);
 
-		auto& settings_form = form.create_widget(
+		auto& settings_form = parent.create_widget(
 			heatmap_view_attributes_form_field{
 				.label = u8"Settings"
 			}
@@ -159,14 +159,14 @@ namespace terraformer::app
 			imgview.set_level_curve_interval(level_curves.interval);
 		});
 
-		form.set_refresh_function([image = field_value.data, &imgview](){
+		parent.set_refresh_function([image = field_value.data, &imgview](){
 			imgview.show_image(image.get().pixels());
 		});
 	}
 
-	void bind(heightmap_view_descriptor& field_value, ui::widgets::form& form)
+	void bind(heightmap_view_descriptor& field_value, ui::widgets::form& parent)
 	{
-		auto& heatmap = form.create_widget(
+		auto& heatmap = parent.create_widget(
 			heightmap_chart_form_field{
 				.label = u8"Heatmap view",
 				.expand_layout_cell = true
@@ -175,7 +175,7 @@ namespace terraformer::app
 
 		bind(heatmap_view_descriptor{field_value}, heatmap);
 
-		form.set_refresh_function([&heatmap](){
+		parent.set_refresh_function([&heatmap](){
 			heatmap.refresh();
 		});
 	}
@@ -186,9 +186,9 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	void bind(heightmap_generator_descriptor& field_value, ui::widgets::form& form)
+	void bind(heightmap_generator_descriptor& field_value, ui::widgets::form& parent)
 	{
-		auto& plain = form.create_widget(
+		auto& plain = parent.create_widget(
 			plain_form_field{
 				.label = u8"Plain"
 			}
@@ -196,7 +196,7 @@ namespace terraformer::app
 		bind(field_value.plain, plain);
 
 
-		auto& rolling_hills = form.create_widget(
+		auto& rolling_hills = parent.create_widget(
 			rolling_hills_descriptor_form_field{
 				.label = u8"Rolling hills"
 			}
@@ -210,16 +210,16 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	void bind(heightmap_descriptor& field_value, ui::widgets::form& form)
+	void bind(heightmap_descriptor& field_value, ui::widgets::form& parent)
 	{
-		auto& domain_size_form = form.create_widget(
+		auto& domain_size_form = parent.create_widget(
 			domain_size_form_field{
 				.label = u8"Domain size",
 			}
 		);
 		bind(field_value.domain_size, domain_size_form);
 
-		auto& generators = form.create_widget(
+		auto& generators = parent.create_widget(
 			heightmap_generator_form_field{
 				.label = u8"Generators"
 			}

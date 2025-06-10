@@ -23,9 +23,9 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	void bind(domain_size_descriptor& field_value, ui::widgets::form& form)
+	void bind(domain_size_descriptor& field_value, ui::widgets::form& parent)
 	{
-		form.create_widget(
+		parent.create_widget(
 			domain_length_form_field{
 				.label = u8"Width/m",
 				.value_reference = std::ref(field_value.width)
@@ -36,7 +36,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
 
-		form.create_widget(
+		parent.create_widget(
 			domain_length_form_field{
 				.label = u8"Height/m",
 				.value_reference = std::ref(field_value.height)
