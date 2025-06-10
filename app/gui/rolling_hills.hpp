@@ -105,94 +105,12 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	auto& bind(
-		std::u8string_view field_name,
-		rolling_hills_clamp_to_descriptor& field_value,
-		ui::widgets::form& form
-	)
+	void bind(rolling_hills_filter_descriptor& field_value, ui::widgets::form& parent)
 	{
-		auto& ret = form.create_widget(
-			rolling_hills_shape_clamp_to_form_field{
-				.label = field_name
-			},
-			ui::main::widget_orientation::vertical
-		);
-
-		ret.create_widget(
-			rolling_hills_shape_clamp_to_input_range_form_field{
-				.label = u8"Range",
-				.value_reference = std::reference_wrapper(field_value.range),
-				.maximize_widget = true
-			},
-			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
-		)
-		.set_textbox_placeholder_string(u8"-0.123456789");
-
-		ret.create_widget(
-			rolling_hills_shape_clamp_to_hardness_field{
-				.label = u8"Hardness",
-				.value_reference = std::reference_wrapper(field_value.hardness)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
-			}
-		);
-
-		return ret;
-	}
-
-	auto& bind(std::u8string_view field_name, rolling_hills_shape_descriptor& field_value, ui::widgets::form& form)
-	{
-		auto& ret = form.create_widget(
-			rolling_hills_shape_form_field{
-				.label = field_name
-			},
-			ui::main::widget_orientation::vertical
-		);
-
-		ret.create_widget(
-			rolling_hills_shape_input_mapping_form_field{
-				.label = u8"Input mapping",
-				.value_reference = std::reference_wrapper(field_value.input_mapping),
-				.maximize_widget = true
-			},
-			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
-		)
-		.set_textbox_placeholder_string(u8"-0.123456789");;
-
-		ret.create_widget(
-			rolling_hills_shape_exponent_form_field{
-				.label = u8"Exponent",
-				.value_reference = std::reference_wrapper(field_value.exponent)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{0.25f, 4.0f, 2.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"0.123456789");
-
-		return ret;
-	}
-
-	auto& bind(std::u8string_view field_name, rolling_hills_descriptor& field_value, ui::widgets::form& form)
-	{
-		auto& ret = form.create_widget(
-			rolling_hills_descriptor_form_field{
-				.label = field_name,
-			}
-		);
-
-		ret.create_widget(
-			rolling_hills_seed_form_field{
-				.label = u8"Seed",
-				.value_reference = std::ref(field_value.rng_seed)
-			}
-		);
-
-		ret.create_widget(
+		parent.create_widget(
 			rolling_hills_wavelength_form_field{
 				.label = u8"Wavelength x/m",
-				.value_reference = std::ref(field_value.filter.wavelength_x)
+				.value_reference = std::ref(field_value.wavelength_x)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
@@ -200,10 +118,10 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
 
-		ret.create_widget(
+		parent.create_widget(
 			rolling_hills_wavelength_form_field{
 				.label = u8"Wavelength y/m",
-				.value_reference = std::ref(field_value.filter.wavelength_y)
+				.value_reference = std::ref(field_value.wavelength_y)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
@@ -211,10 +129,10 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
 
-		ret.create_widget(
+		parent.create_widget(
 			rolling_hills_rolloff_form_field{
 				.label = u8"LF roll-off",
-				.value_reference = std::ref(field_value.filter.lf_rolloff)
+				.value_reference = std::ref(field_value.lf_rolloff)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
@@ -222,10 +140,10 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
 
-		ret.create_widget(
+		parent.create_widget(
 			rolling_hills_rolloff_form_field{
 				.label = u8"HF roll-off",
-				.value_reference = std::ref(field_value.filter.hf_rolloff)
+				.value_reference = std::ref(field_value.hf_rolloff)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
@@ -233,10 +151,10 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
 
-		ret.create_widget(
+		parent.create_widget(
 			rolling_hills_orientation_form_field{
 				.label = u8"Y direction",
-				.value_reference = std::ref(field_value.filter.y_direction)
+				.value_reference = std::ref(field_value.y_direction)
 			},
 			terraformer::ui::widgets::knob{
 				terraformer::ui::value_maps::affine_value_map{-0.25f, 0.25f}
@@ -249,12 +167,83 @@ namespace terraformer::app
 				geosimd::turns{3.0/4.0}
 			}
 		);
+	}
 
-		bind(u8"Clamp to", field_value.clamp_to, ret);
+	void bind(rolling_hills_clamp_to_descriptor& field_value, ui::widgets::form& parent)
+	{
+		parent.create_widget(
+			rolling_hills_shape_clamp_to_input_range_form_field{
+				.label = u8"Range",
+				.value_reference = std::reference_wrapper(field_value.range),
+				.maximize_widget = true
+			},
+			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
+		)
+		.set_textbox_placeholder_string(u8"-0.123456789");
 
-		bind(u8"Shape", field_value.shape, ret);
+		parent.create_widget(
+			rolling_hills_shape_clamp_to_hardness_field{
+				.label = u8"Hardness",
+				.value_reference = std::reference_wrapper(field_value.hardness)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
+		);
+	}
 
-		ret.create_widget(
+	void bind(rolling_hills_shape_descriptor& field_value, ui::widgets::form& parent)
+	{
+		parent.create_widget(
+			rolling_hills_shape_input_mapping_form_field{
+				.label = u8"Input mapping",
+				.value_reference = std::reference_wrapper(field_value.input_mapping),
+				.maximize_widget = true
+			},
+			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
+		)
+		.set_textbox_placeholder_string(u8"-0.123456789");;
+
+		parent.create_widget(
+			rolling_hills_shape_exponent_form_field{
+				.label = u8"Exponent",
+				.value_reference = std::reference_wrapper(field_value.exponent)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::log_value_map{0.25f, 4.0f, 2.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"0.123456789");
+	}
+
+	void bind(rolling_hills_descriptor& field_value, ui::widgets::form& parent)
+	{
+		parent.create_widget(
+			rolling_hills_seed_form_field{
+				.label = u8"Seed",
+				.value_reference = std::ref(field_value.rng_seed)
+			}
+		);
+
+		bind(field_value.filter, parent);
+
+		auto& clamp_to = parent.create_widget(
+			rolling_hills_shape_clamp_to_form_field{
+				.label = u8"Clamp to"
+			},
+			ui::main::widget_orientation::vertical
+		);
+		bind(field_value.clamp_to, clamp_to);
+
+		auto& shape = parent.create_widget(
+			rolling_hills_shape_form_field{
+				.label = u8"Shape"
+			},
+			ui::main::widget_orientation::vertical
+		);
+		bind(field_value.shape, shape);
+
+		parent.create_widget(
 			rolling_hills_amplitude_form_field{
 				.label = u8"Amplitude/m",
 				.value_reference = std::ref(field_value.amplitude)
@@ -265,7 +254,7 @@ namespace terraformer::app
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
 
-		ret.create_widget(
+		parent.create_widget(
 			rolling_hills_rel_z_offset_form_field{
 				.label = u8"Relative z offset",
 				.value_reference = std::ref(field_value.relative_z_offset)
@@ -275,8 +264,6 @@ namespace terraformer::app
 			}
 		)
 		.set_textbox_placeholder_string(u8"-0.123456789");
-
-		return ret;
 	}
 }
 
