@@ -105,6 +105,70 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
+	void bind(rolling_hills_filter_descriptor& field_value, ui::widgets::form& parent)
+	{
+		parent.create_widget(
+			rolling_hills_wavelength_form_field{
+				.label = u8"Wavelength x/m",
+				.value_reference = std::ref(field_value.wavelength_x)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
+
+		parent.create_widget(
+			rolling_hills_wavelength_form_field{
+				.label = u8"Wavelength y/m",
+				.value_reference = std::ref(field_value.wavelength_y)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
+
+		parent.create_widget(
+			rolling_hills_rolloff_form_field{
+				.label = u8"LF roll-off",
+				.value_reference = std::ref(field_value.lf_rolloff)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
+
+		parent.create_widget(
+			rolling_hills_rolloff_form_field{
+				.label = u8"HF roll-off",
+				.value_reference = std::ref(field_value.hf_rolloff)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"9999.9999");
+
+		parent.create_widget(
+			rolling_hills_orientation_form_field{
+				.label = u8"Y direction",
+				.value_reference = std::ref(field_value.y_direction)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{-0.25f, 0.25f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"-0.123456789")
+		.input_widget().visual_angle_range(
+			closed_closed_interval<geosimd::turn_angle>{
+				geosimd::turns{1.0/4.0},
+				geosimd::turns{3.0/4.0}
+			}
+		);
+	}
+
 	void bind(rolling_hills_clamp_to_descriptor& field_value, ui::widgets::form& form)
 	{
 		form.create_widget(
@@ -161,66 +225,7 @@ namespace terraformer::app
 			}
 		);
 
-		form.create_widget(
-			rolling_hills_wavelength_form_field{
-				.label = u8"Wavelength x/m",
-				.value_reference = std::ref(field_value.filter.wavelength_x)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"9999.9999");
-
-		form.create_widget(
-			rolling_hills_wavelength_form_field{
-				.label = u8"Wavelength y/m",
-				.value_reference = std::ref(field_value.filter.wavelength_y)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"9999.9999");
-
-		form.create_widget(
-			rolling_hills_rolloff_form_field{
-				.label = u8"LF roll-off",
-				.value_reference = std::ref(field_value.filter.lf_rolloff)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"9999.9999");
-
-		form.create_widget(
-			rolling_hills_rolloff_form_field{
-				.label = u8"HF roll-off",
-				.value_reference = std::ref(field_value.filter.hf_rolloff)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"9999.9999");
-
-		form.create_widget(
-			rolling_hills_orientation_form_field{
-				.label = u8"Y direction",
-				.value_reference = std::ref(field_value.filter.y_direction)
-			},
-			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{-0.25f, 0.25f}
-			}
-		)
-		.set_textbox_placeholder_string(u8"-0.123456789")
-		.input_widget().visual_angle_range(
-			closed_closed_interval<geosimd::turn_angle>{
-				geosimd::turns{1.0/4.0},
-				geosimd::turns{3.0/4.0}
-			}
-		);
+		bind(field_value.filter, form);
 
 		auto& clamp_to = form.create_widget(
 			rolling_hills_shape_clamp_to_form_field{
