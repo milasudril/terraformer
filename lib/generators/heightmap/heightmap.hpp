@@ -1,4 +1,4 @@
-//@	{"dependencies_extra":[{"ref":"./heigtmap.o", "rel":"implementation"}]}
+//@	{"dependencies_extra":[{"ref":"./heightmap.o", "rel":"implementation"}]}
 
 #ifndef TERRAFORMER_HEIGHTMAP_HPP
 #define TERRAFORMER_HEIGHTMAP_HPP

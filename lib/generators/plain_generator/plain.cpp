@@ -62,7 +62,7 @@ namespace
 	};
 }
 
-terraformer::grayscale_image terraformer::generate(
+terraformer::plain terraformer::generate(
 	domain_size_descriptor const& dom_size,
 	plain_descriptor const& params
 )
@@ -75,10 +75,19 @@ terraformer::grayscale_image terraformer::generate(
 	auto const w_scaled = min_pixel_count*dom_size.width/size_factor;
 	auto const h_scaled = min_pixel_count*dom_size.height/size_factor;
 
-	grayscale_image ret{static_cast<uint32_t>(w_scaled + 0.5f), static_cast<uint32_t>(h_scaled + 0.5f)};
+	plain ret{
+		.z_interp = grayscale_image{
+			static_cast<uint32_t>(w_scaled + 0.5f),
+			static_cast<uint32_t>(h_scaled + 0.5f)
+		},
+		.z_grad = grayscale_image{
+			static_cast<uint32_t>(w_scaled + 0.5f),
+			static_cast<uint32_t>(h_scaled + 0.5f)
+		}
+	};
 
-	auto const w = ret.width();
-	auto const h = ret.height();
+	auto const w = ret.z_interp.width();
+	auto const h = ret.z_interp.height();
 
 	auto const w_float = static_cast<float>(w);
 	auto const h_float = static_cast<float>(h);
@@ -195,7 +204,7 @@ terraformer::grayscale_image terraformer::generate(
 				}
 			);
 
-			ret(x, y) = 0.5f*(north_to_south(eta) + west_to_east(xi));
+			ret.z_interp(x, y) = 0.5f*(north_to_south(eta) + west_to_east(xi));
 		}
 	}
 
