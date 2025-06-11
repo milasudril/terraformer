@@ -140,7 +140,7 @@ terraformer::plain terraformer::generate(
 		}
 	);
 
-	auto const y_m_interp_ns = make_polynomial(
+	auto const y_m_ns = make_polynomial(
 		cubic_spline_control_point{
 			.y = params.boundary.w.elevation,
 			.ddx = 0.0f
@@ -151,7 +151,7 @@ terraformer::plain terraformer::generate(
 		}
 	);
 
-	auto const y_m_interp_we = make_polynomial(
+	auto const y_m_we = make_polynomial(
 		cubic_spline_control_point{
 			.y = params.boundary.n.elevation,
 			.ddx = 0.0f
@@ -175,17 +175,12 @@ terraformer::plain terraformer::generate(
 			auto const xi  =  xi_in*cos_theta + eta_in*sin_theta + 0.5f;
 			auto const eta = -xi_in*sin_theta + eta_in*cos_theta + 0.5f;
 
-			auto const x_interp_n = west_to_east_north(xi);
-			auto const x_interp_s = west_to_east_south(xi);
-			auto const y_interp_w = north_to_south_west(eta);
-			auto const y_interp_e = north_to_south_east(eta);
-
 			auto const north_to_south = boundary_curve(
 				boundary_curve_descriptor{
 				.x_m = lerp(params.edge_midpoints.w, params.edge_midpoints.e, xi),
-				.y_0 = x_interp_n,
-				.y_m = y_m_interp_ns(xi),
-				.y_1 = x_interp_s,
+				.y_0 = west_to_east_north(xi),
+				.y_m = y_m_ns(xi),
+				.y_1 = west_to_east_south(xi),
 				.ddx_0 = 0.0f,
 				.ddx_m = 0.0f,
 				.ddx_1 = 0.0f
@@ -195,9 +190,9 @@ terraformer::plain terraformer::generate(
 			auto const west_to_east = boundary_curve(
 				boundary_curve_descriptor{
 				.x_m = lerp(params.edge_midpoints.n, params.edge_midpoints.s, eta),
-				.y_0 = y_interp_w,
-				.y_m = y_m_interp_we(eta),
-				.y_1 = y_interp_e,
+				.y_0 = north_to_south_west(eta),
+				.y_m = y_m_we(eta),
+				.y_1 = north_to_south_east(eta),
 				.ddx_0 = 0.0f,
 				.ddx_m = 0.0f,
 				.ddx_1 = 0.0f
