@@ -187,6 +187,18 @@ terraformer::plain terraformer::generate(
 				}
 			);
 
+			auto const north_to_south_grad = boundary_curve(
+				boundary_curve_descriptor{
+				.x_m = lerp(params.edge_midpoints.w, params.edge_midpoints.e, xi),
+				.y_0 = 0.0f,
+				.y_m = 0.0f,
+				.y_1 = 0.0f,
+				.ddx_0 = 0.0f,
+				.ddx_m = 0.0f,
+				.ddx_1 = 0.0f
+				}
+			);
+
 			auto const west_to_east = boundary_curve(
 				boundary_curve_descriptor{
 				.x_m = lerp(params.edge_midpoints.n, params.edge_midpoints.s, eta),
@@ -199,7 +211,20 @@ terraformer::plain terraformer::generate(
 				}
 			);
 
+			auto const west_to_east_grad = boundary_curve(
+				boundary_curve_descriptor{
+				.x_m = lerp(params.edge_midpoints.n, params.edge_midpoints.s, eta),
+				.y_0 = 0.0f,
+				.y_m = 0.0f,
+				.y_1 = 0.0f,
+				.ddx_0 = 0.0f,
+				.ddx_m = 0.0f,
+				.ddx_1 = 0.0f
+				}
+			);
+
 			ret.z_interp(x, y) = 0.5f*(north_to_south(eta) + west_to_east(xi));
+			ret.z_grad(x, y) = 0.5f*(north_to_south_grad(eta) + west_to_east_grad(xi));
 		}
 	}
 
