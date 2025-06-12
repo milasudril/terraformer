@@ -138,8 +138,8 @@ terraformer::plain terraformer::generate(
 	auto const w_float = static_cast<float>(w);
 	auto const h_float = static_cast<float>(h);
 
-	auto const pixel_size_x = dom_size.width/(w_float - 1.0f);
-	// auto const pixel_size_y = dom_size.height/(h_float - 1.0f);
+	//auto const pixel_size_x = dom_size.width/(w_float - 1.0f);
+	auto const pixel_size_y = dom_size.height/(h_float - 1.0f);
 
 	auto const west_to_east_north_interp = boundary_curve_interp(
 		boundary_curve_interp_descriptor{
@@ -174,6 +174,24 @@ terraformer::plain terraformer::generate(
 			.y_0 = params.boundary.ne.elevation,
 			.y_m = params.boundary.e.elevation,
 			.y_1 = params.boundary.se.elevation
+		}
+	);
+
+	auto const ddy_0 = boundary_curve_interp(
+		boundary_curve_interp_descriptor{
+			.x_m = params.edge_midpoints.n,
+			.y_0 = params.boundary.nw.ddy*pixel_size_y,
+			.y_m = params.boundary.n.ddy*pixel_size_y,
+			.y_1 = params.boundary.ne.ddy*pixel_size_y
+		}
+	);
+
+	auto const ddy_1 = boundary_curve_interp(
+		boundary_curve_interp_descriptor{
+			.x_m = params.edge_midpoints.n,
+			.y_0 = params.boundary.sw.ddy*pixel_size_y,
+			.y_m = params.boundary.s.ddy*pixel_size_y,
+			.y_1 = params.boundary.se.ddy*pixel_size_y
 		}
 	);
 
@@ -224,9 +242,9 @@ terraformer::plain terraformer::generate(
 			auto const north_to_south_grad = boundary_curve_grad(
 				boundary_curve_grad_descriptor{
 					.x_m = lerp(params.edge_midpoints.w, params.edge_midpoints.e, xi),
-					.ddx_0 = std::lerp(params.boundary.nw.ddy, params.boundary.ne.ddy, xi)*pixel_size_x,
-					.ddx_m = std::lerp(params.boundary.w.ddy, params.boundary.e.ddy, xi)*pixel_size_x,
-					.ddx_1 = std::lerp(params.boundary.sw.ddy, params.boundary.se.ddy, xi)*pixel_size_x
+					.ddx_0 = ddy_0(xi),
+					.ddx_m = std::lerp(params.boundary.w.ddy, params.boundary.e.ddy, xi)*pixel_size_y,
+					.ddx_1 = ddy_1(xi)
 				}
 			);
 
