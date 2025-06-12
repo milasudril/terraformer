@@ -4,6 +4,9 @@
 
 #include "lib/math_utils/interp.hpp"
 
+#include "lib/pixel_store/image_io.hpp"
+
+
 terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& descriptor)
 {
 	auto const plain = generate(descriptor.domain_size, descriptor.generators.plain);
@@ -21,14 +24,10 @@ terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& d
 	grayscale_image ret{output_width, output_height};
 
 	{
-		auto const w_in = static_cast<float>(plain.z_grad.width());
-		auto const h_in = static_cast<float>(plain.z_grad.height());
 		add_resampled(plain.z_interp.pixels(), ret.pixels(), 1.0f);
-		auto const scale = std::sqrt(
-			(static_cast<float>(output_width)*static_cast<float>(output_height))/
-			(w_in*h_in)
-		);
-		add_resampled(plain.z_grad.pixels(), ret.pixels(), 1.0f*scale);
+		add_resampled(plain.z_grad.pixels(), ret.pixels(), 1.0f);
+
+		store(plain.z_grad.pixels(), "z_grad.exr");
 	}
 
 	add_resampled(rolling_hills.pixels(), ret.pixels(), 1.0f);

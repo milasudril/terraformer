@@ -75,21 +75,21 @@ namespace
 				make_polynomial(
 					terraformer::cubic_spline_control_point{
 						.y = 0.0f,
-						.ddx = bcd.ddx_0
+						.ddx = bcd.ddx_0*bcd.x_m
 					},
 					terraformer::cubic_spline_control_point{
 						.y = 0.0f,
-						.ddx = bcd.ddx_m
+						.ddx = bcd.ddx_m*bcd.x_m
 					}
 				),
 				make_polynomial(
 					terraformer::cubic_spline_control_point{
 						.y = 0.0f,
-						.ddx = bcd.ddx_m
+						.ddx = bcd.ddx_m*(1.0f - bcd.x_m)
 					},
 					terraformer::cubic_spline_control_point{
 						.y = 0.0f,
-						.ddx = bcd.ddx_1
+						.ddx = bcd.ddx_1*(1.0f - bcd.x_m)
 					}
 				)
 			},
@@ -114,10 +114,8 @@ terraformer::plain terraformer::generate(
 )
 {
 	auto const size_factor = std::min(dom_size.width, dom_size.height);
-	// Assume a bandwidth of at most 4 periods
-	// Take 4 samples per period
-	// Round up to next value that also contains a factor of 3, which is useful to have
-	auto const min_pixel_count = 24.0f;
+
+	auto const min_pixel_count = 48.0f;
 	auto const w_scaled = min_pixel_count*dom_size.width/size_factor;
 	auto const h_scaled = min_pixel_count*dom_size.height/size_factor;
 
@@ -139,7 +137,7 @@ terraformer::plain terraformer::generate(
 	auto const h_float = static_cast<float>(h);
 
 	//auto const pixel_size_x = dom_size.width/(w_float - 1.0f);
-	auto const pixel_size_y = dom_size.height/(h_float - 1.0f);
+	auto const ddy_scale = dom_size.height;
 
 	auto const west_to_east_north_interp = boundary_curve_interp(
 		boundary_curve_interp_descriptor{
@@ -180,18 +178,29 @@ terraformer::plain terraformer::generate(
 	auto const ddy_0 = boundary_curve_interp(
 		boundary_curve_interp_descriptor{
 			.x_m = params.edge_midpoints.n,
-			.y_0 = params.boundary.nw.ddy*pixel_size_y,
-			.y_m = params.boundary.n.ddy*pixel_size_y,
-			.y_1 = params.boundary.ne.ddy*pixel_size_y
+			.y_0 = params.boundary.nw.ddy*ddy_scale,
+			.y_m = params.boundary.n.ddy*ddy_scale,
+			.y_1 = params.boundary.ne.ddy*ddy_scale
+		}
+	);
+
+	auto const ddx_m = make_polynomial(
+		cubic_spline_control_point{
+			.y = params.boundary.w.ddy*ddy_scale,
+			.ddx = 0.0f
+		},
+		cubic_spline_control_point{
+			.y = params.boundary.e.ddy*ddy_scale,
+			.ddx = 0.0f
 		}
 	);
 
 	auto const ddy_1 = boundary_curve_interp(
 		boundary_curve_interp_descriptor{
 			.x_m = params.edge_midpoints.n,
-			.y_0 = params.boundary.sw.ddy*pixel_size_y,
-			.y_m = params.boundary.s.ddy*pixel_size_y,
-			.y_1 = params.boundary.se.ddy*pixel_size_y
+			.y_0 = params.boundary.sw.ddy*ddy_scale,
+			.y_m = params.boundary.s.ddy*ddy_scale,
+			.y_1 = params.boundary.se.ddy*ddy_scale
 		}
 	);
 
@@ -243,7 +252,7 @@ terraformer::plain terraformer::generate(
 				boundary_curve_grad_descriptor{
 					.x_m = lerp(params.edge_midpoints.w, params.edge_midpoints.e, xi),
 					.ddx_0 = ddy_0(xi),
-					.ddx_m = std::lerp(params.boundary.w.ddy, params.boundary.e.ddy, xi)*pixel_size_y,
+					.ddx_m = ddx_m(xi),
 					.ddx_1 = ddy_1(xi)
 				}
 			);
@@ -260,9 +269,9 @@ terraformer::plain terraformer::generate(
 			auto const west_to_east_grad = boundary_curve_grad(
 				boundary_curve_grad_descriptor{
 				.x_m = lerp(params.edge_midpoints.n, params.edge_midpoints.s, eta),
-					.ddx_0 = std::lerp(params.boundary.nw.ddy, params.boundary.sw.ddy, eta)*pixel_size_y,
-					.ddx_m = std::lerp(params.boundary.n.ddy, params.boundary.s.ddy, eta)*pixel_size_y,
-					.ddx_1 = std::lerp(params.boundary.ne.ddy, params.boundary.se.ddy, eta)*pixel_size_y
+					.ddx_0 = std::lerp(params.boundary.nw.ddy, params.boundary.sw.ddy, eta)*ddy_scale,
+					.ddx_m = std::lerp(params.boundary.n.ddy, params.boundary.s.ddy, eta)*ddy_scale,
+					.ddx_1 = std::lerp(params.boundary.ne.ddy, params.boundary.se.ddy, eta)*ddy_scale
 				}
 			);
 #endif
