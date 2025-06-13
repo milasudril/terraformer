@@ -30,21 +30,21 @@ namespace
 				make_polynomial(
 					terraformer::cubic_spline_control_point{
 						.y = bcd.y_0,
-						.ddx = 0.0f
+						.ddx = bcd.ddx_0*bcd.x_m
 					},
 					terraformer::cubic_spline_control_point{
 						.y = bcd.y_m,
-						.ddx = 0.0f
+						.ddx = bcd.ddx_m*bcd.x_m
 					}
 				),
 				make_polynomial(
 					terraformer::cubic_spline_control_point{
 						.y = bcd.y_m,
-						.ddx = 0.0f
+						.ddx = bcd.ddx_m*(1.0f - bcd.x_m)
 					},
 					terraformer::cubic_spline_control_point{
 						.y = bcd.y_1,
-						.ddx = 0.0f
+						.ddx = bcd.ddx_1*(1.0f - bcd.x_m)
 					}
 				)
 			},
@@ -93,9 +93,9 @@ terraformer::grayscale_image terraformer::generate(
 			.y_0 = params.boundary.nw.elevation,
 			.y_m = params.boundary.n.elevation,
 			.y_1 = params.boundary.ne.elevation,
-			.ddx_0 = 0.0f,
-			.ddx_m = 0.0f,
-			.ddx_1 = 0.0f
+			.ddx_0 = params.boundary.nw.ddx*dom_size.width,
+			.ddx_m = params.boundary.n.ddx*dom_size.width,
+			.ddx_1 = params.boundary.ne.ddx*dom_size.width
 		}
 	);
 
@@ -105,9 +105,9 @@ terraformer::grayscale_image terraformer::generate(
 			.y_0 = params.boundary.sw.elevation,
 			.y_m = params.boundary.s.elevation,
 			.y_1 = params.boundary.se.elevation,
-			.ddx_0 = 0.0f,
-			.ddx_m = 0.0f,
-			.ddx_1 = 0.0f
+			.ddx_0 = params.boundary.sw.ddx*dom_size.width,
+			.ddx_m = params.boundary.s.ddx*dom_size.width,
+			.ddx_1 = params.boundary.se.ddx*dom_size.width
 		}
 	);
 
@@ -117,23 +117,23 @@ terraformer::grayscale_image terraformer::generate(
 			.y_0 = params.boundary.nw.elevation,
 			.y_m = params.boundary.w.elevation,
 			.y_1 = params.boundary.sw.elevation,
-			.ddx_0 = 0.0f,
-			.ddx_m = 0.0f,
-			.ddx_1 = 0.0f
+			.ddx_0 = params.boundary.nw.ddy*dom_size.height,
+			.ddx_m = params.boundary.w.ddy*dom_size.height,
+			.ddx_1 = params.boundary.sw.ddy*dom_size.height
 		}
 	);
 
-	auto const north_to_south_east = boundary_curve(
+	auto const north_to_south_east = boundary_curve{
 		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.e,
 			.y_0 = params.boundary.ne.elevation,
 			.y_m = params.boundary.e.elevation,
 			.y_1 = params.boundary.se.elevation,
-			.ddx_0 = 0.0f,
-			.ddx_m = 0.0f,
-			.ddx_1 = 0.0f
+			.ddx_0 = params.boundary.ne.ddy*dom_size.height,
+			.ddx_m = params.boundary.e.ddy*dom_size.height,
+			.ddx_1 = params.boundary.se.ddy*dom_size.height
 		}
-	);
+	};
 
 	auto const z_m_interp_ns = make_polynomial(
 		cubic_spline_control_point{
@@ -179,6 +179,72 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
+	auto const ddy_0 = boundary_curve{		boundary_curve_descriptor{
+			.x_m = params.edge_midpoints.n,
+			.y_0 = params.boundary.nw.ddy*dom_size.height,
+			.y_m = 2.0f*params.boundary.n.ddy*dom_size.height,
+			.y_1 = params.boundary.ne.ddy*dom_size.height,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	};
+
+	auto const ddy_m = make_polynomial(
+		cubic_spline_control_point{
+			.y = params.boundary.w.ddy*dom_size.height,
+			.ddx = 0.0f
+		},
+		cubic_spline_control_point{
+			.y = params.boundary.e.ddy*dom_size.height,
+			.ddx = 0.0f
+		}
+	);
+
+	auto const ddy_1 = boundary_curve{		boundary_curve_descriptor{
+			.x_m = params.edge_midpoints.n,
+			.y_0 = params.boundary.sw.ddy*dom_size.height,
+			.y_m = 2.0f*params.boundary.s.ddy*dom_size.height,
+			.y_1 = params.boundary.se.ddy*dom_size.height,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	};
+
+	auto const ddx_0 = boundary_curve{		boundary_curve_descriptor{
+			.x_m = params.edge_midpoints.n,
+			.y_0 = params.boundary.nw.ddx*dom_size.width,
+			.y_m = 2.0f*params.boundary.w.ddx*dom_size.width,
+			.y_1 = params.boundary.sw.ddx*dom_size.width,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	};
+
+	auto const ddx_m = make_polynomial(
+		cubic_spline_control_point{
+			.y = params.boundary.n.ddx*dom_size.width,
+			.ddx = 0.0f
+		},
+		cubic_spline_control_point{
+			.y = params.boundary.s.ddx*dom_size.width,
+			.ddx = 0.0f
+		}
+	);
+
+	auto const ddx_1 = boundary_curve{		boundary_curve_descriptor{
+			.x_m = params.edge_midpoints.n,
+			.y_0 = params.boundary.ne.ddx*dom_size.width,
+			.y_m = 2.0f*params.boundary.e.ddx*dom_size.width,
+			.y_1 = params.boundary.se.ddx*dom_size.width,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
+		}
+	};
+
 	auto const cos_theta = std::cos(2.0f*std::numbers::pi_v<float>*params.orientation);
 	auto const sin_theta = std::sin(2.0f*std::numbers::pi_v<float>*params.orientation);
 
@@ -198,9 +264,9 @@ terraformer::grayscale_image terraformer::generate(
 				.y_0 = west_to_east_north(xi),
 				.y_m = z_m_interp_ns(xi),
 				.y_1 = west_to_east_south(xi),
-				.ddx_0 = 0.0f,
-				.ddx_m = 0.0f,
-				.ddx_1 = 0.0f
+				.ddx_0 = ddy_0(xi),
+				.ddx_m = ddy_m(xi),
+				.ddx_1 = ddy_1(xi)
 				}
 			);
 
@@ -210,9 +276,9 @@ terraformer::grayscale_image terraformer::generate(
 				.y_0 = north_to_south_west(eta),
 				.y_m = z_m_interp_we(eta),
 				.y_1 = north_to_south_east(eta),
-				.ddx_0 = 0.0f,
-				.ddx_m = 0.0f,
-				.ddx_1 = 0.0f
+				.ddx_0 = ddx_0(eta),
+				.ddx_m = ddx_m(eta),
+				.ddx_1 = ddx_1(eta)
 				}
 			);
 
