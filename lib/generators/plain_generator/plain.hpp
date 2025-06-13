@@ -46,13 +46,7 @@ namespace terraformer
 		float orientation = 0.0f;
 	};
 
-	struct plain
-	{
-		grayscale_image z_interp;
-		grayscale_image z_grad;
-	};
-
-	plain generate(domain_size_descriptor const& dom_size, plain_descriptor const& params);
+	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor const& params);
 }
 
 #endif
