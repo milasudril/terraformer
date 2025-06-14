@@ -31,6 +31,13 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
+	struct plain_elevation_table_form_field_new
+	{
+		std::u8string_view label;
+		// TODO: Should use table instead of form
+		using input_widget_type = ui::widgets::table;
+	};
+
 	struct plain_elevation_table_form_field
 	{
 		std::u8string_view label;
@@ -82,6 +89,7 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.n, n);
+		n.append_pending_widgets();
 
 		auto& ne = parent.create_widget(
 			plain_boundary_point_form_field{
@@ -89,6 +97,7 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.ne, ne);
+		ne.append_pending_widgets();
 
 		auto& e = parent.create_widget(
 			plain_boundary_point_form_field{
@@ -96,6 +105,7 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.e, e);
+		e.append_pending_widgets();
 
 		auto& se = parent.create_widget(
 			plain_boundary_point_form_field{
@@ -103,6 +113,7 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.se, se);
+		se.append_pending_widgets();
 
 		auto& s = parent.create_widget(
 			plain_boundary_point_form_field{
@@ -110,6 +121,7 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.s, s);
+		s.append_pending_widgets();
 
 		auto& sw = parent.create_widget(
 			plain_boundary_point_form_field{
@@ -117,6 +129,7 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.sw, sw);
+		sw.append_pending_widgets();
 
 		auto& w = parent.create_widget(
 			plain_boundary_point_form_field{
@@ -124,6 +137,7 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.w, w);
+		w.append_pending_widgets();
 
 		auto& nw = parent.create_widget(
 			plain_boundary_point_form_field{
@@ -131,6 +145,7 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.nw, nw);
+		nw.append_pending_widgets();
 	}
 
 
@@ -212,20 +227,19 @@ namespace terraformer::app
 
 	void bind(plain_descriptor& field_value, ui::widgets::form& parent)
 	{
-#if 0
-		parent.create_widget(
-			plain_elevation_table_form_field{
+		auto& boundary_new = parent.create_widget(
+			plain_elevation_table_form_field_new{
 				.label = u8"Control points"
 			},
 			ui::main::widget_orientation::vertical,
 			std::array{
-				u8"Point",
 				u8"Elevation/m",
 				u8"∂/∂x",
 				u8"∂/∂y"
 			}
 		);
-#endif
+		bind(field_value.boundary, boundary_new);
+
 
 		auto& boundary = parent.create_widget(
 			plain_elevation_table_form_field{

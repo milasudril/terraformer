@@ -32,7 +32,7 @@ namespace terraformer::ui::widgets
 				template<class StoredType>
 				constexpr widget_vtable(std::type_identity<StoredType>):
 					append_to{[](void* object, main::widget_collection& collection){
-						collection.append(*static_cast<StoredType>(object), main::widget_geometry{});
+						collection.append(std::ref(*static_cast<StoredType*>(object)), main::widget_geometry{});
 					}
 				}
 				{}
@@ -40,15 +40,102 @@ namespace terraformer::ui::widgets
 			};
 			using widget = unique_resource<widget_vtable>;
 
-			explicit record(table& parent): m_parent{parent}
+			explicit record(std::u8string_view, table& parent): m_parent{parent}
 			{}
 
 			span<widget const> widgets() const
 			{ return m_widgets; }
 
+			template<class Function>
+			record& on_content_updated(Function&& func)
+			{
+				m_on_content_updated = std::forward<Function>(func);
+				return *this;
+			};
+
+			template<class FieldDescriptor, class ... InputWidgetParams>
+			auto& create_widget(FieldDescriptor const& field, InputWidgetParams&&... input_widget_params)
+			{
+				using input_widget_type = typename FieldDescriptor::input_widget_type;
+
+				auto field_input_widget = []<class ... T>(
+					iterator_invalidation_handler_ref iihr,
+					main::widget_orientation orientation,
+					T&&... input_widget_params
+				){
+					if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, main::widget_orientation, std::remove_cvref_t<T>...>)
+					{
+						if constexpr(sizeof...(InputWidgetParams))
+						{
+							if constexpr(std::is_same_v<std::remove_cvref_t<pick_first_t<InputWidgetParams...>>, main::widget_orientation>)
+							{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
+						}
+						return std::make_unique<input_widget_type>(iihr, orientation, std::forward<T>(input_widget_params)...);
+					}
+					else
+					if constexpr(std::is_constructible_v<input_widget_type, iterator_invalidation_handler_ref, std::remove_cvref_t<T>...>)
+					{ return std::make_unique<input_widget_type>(iihr, std::forward<T>(input_widget_params)...); }
+					else
+					{ return std::make_unique<input_widget_type>(std::forward<T>(input_widget_params)...); }
+				}(
+					m_parent.get().iterator_invalidation_handler(),
+					m_parent.get().m_orientation == main::widget_orientation::vertical?
+						main::widget_orientation::horizontal:
+						main::widget_orientation::vertical,
+					std::forward<InputWidgetParams>(input_widget_params)...
+				);
+
+				auto& ret = *field_input_widget;
+
+				if constexpr(requires(input_widget_type const& widget){{widget.value()};})
+				{
+					ret.value(field.value_reference.get());
+					ret.on_value_changed([value = field.value_reference, this]<class ... Args>(auto& widget, Args&&... args){
+						using widget_value_type = std::remove_cvref_t<decltype(widget.value())>;
+						auto&& new_val = widget.value();
+						if constexpr(requires(widget_value_type const& val){{FieldDescriptor::is_value_valid(val)};})
+						{
+							if(!FieldDescriptor::is_value_valid(widget.value()))
+							{
+								widget.value(static_cast<widget_value_type>(value.get()));
+								return;
+							}
+						}
+						value.get() = std::forward<widget_value_type>(new_val);
+						m_on_content_updated(*this, std::forward<Args>(args)...);
+					});
+				}
+				else
+				if constexpr(requires(input_widget_type& obj, main::widget_user_interaction_handler<input_widget_type>&& callback){
+					{obj.on_content_updated(std::move(callback))};
+				})
+				{
+					ret.on_content_updated([this]<class ... Args>(auto&, Args&&... args) {
+						m_on_content_updated(*this, std::forward<Args>(args)...);
+					});
+				}
+				m_widgets.push_back(widget{std::move(field_input_widget)});
+
+				return ret;
+			}
+
+			void append_pending_widgets()
+			{
+				for(auto& widget :m_widgets)
+				{
+					auto const ref = widget.get();
+					auto const ptr = ref.get_pointer();
+					auto const vt = ref.get_vtable();
+					vt.append_to(ptr, m_parent);
+				}
+			}
+
 		private:
 			single_array<widget> m_widgets;
 			std::reference_wrapper<table> m_parent;
+
+			using user_interaction_handler = main::widget_user_interaction_handler<record>;
+		user_interaction_handler m_on_content_updated{no_operation_tag{}};
 		};
 
 		template<size_t N>
@@ -76,36 +163,26 @@ namespace terraformer::ui::widgets
 			for(auto item : field_names)
 			{ m_field_names.push_back(std::move(label{}.text(item))); }
 
-			for(auto& item : m_field_names)
-			{ append(std::ref(item), main::widget_geometry{}); }
+			append_field_names();
 		}
 
 		template<class RecordDescriptor>
 		record& create_widget(RecordDescriptor&& descriptor)
 		{
 			auto i = m_records.emplace(descriptor.label, record{descriptor.label, *this});
-			return *i.first;
-		}
-
-		void collect_records()
-		{
-			clear();
-			for(auto& item : m_records)
-			{
-				for(auto& widget : item.second.widgets())
-				{
-					auto const ref = widget.get();
-					auto const ptr = ref.get_pointer();
-					auto const vt = ref.get_vtable();
-					vt.append_to(ptr, *this);
-				}
-			}
+			return i.first->second;
 		}
 
 	private:
 		single_array<label> m_field_names;
 		main::widget_orientation m_orientation;
 		std::unordered_map<std::u8string, record> m_records;
+
+		void append_field_names()
+		{
+			for(auto& item : m_field_names)
+			{ append(std::ref(item), main::widget_geometry{}); }
+		}
 	};
 
 	static_assert(

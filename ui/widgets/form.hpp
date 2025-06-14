@@ -208,6 +208,9 @@ namespace terraformer::ui::widgets
 			widget_states[i->second].collapsed = false;
 		}
 
+		void append_pending_widgets()
+		{}
+
 	private:
 		struct vtable
 		{
