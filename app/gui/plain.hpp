@@ -31,7 +31,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	struct plain_elevation_table_form_field_new
+	struct plain_elevation_table_form_field
 	{
 		std::u8string_view label;
 		// TODO: Should use table instead of form
@@ -227,8 +227,8 @@ namespace terraformer::app
 
 	void bind(plain_descriptor& field_value, ui::widgets::form& parent)
 	{
-		auto& boundary_new = parent.create_widget(
-			plain_elevation_table_form_field_new{
+		auto& boundary = parent.create_widget(
+			plain_elevation_table_form_field{
 				.label = u8"Control points"
 			},
 			ui::main::widget_orientation::vertical,
@@ -238,17 +238,7 @@ namespace terraformer::app
 				u8"∂/∂y"
 			}
 		);
-		bind(field_value.boundary, boundary_new);
-
-#if 0
-		auto& boundary = parent.create_widget(
-			plain_elevation_table_form_field{
-				.label = u8"Control points",
-			},
-			ui::main::widget_orientation::vertical
-		);
 		bind(field_value.boundary, boundary);
-#endif
 
 		auto& midpoints = parent.create_widget(
 			plain_midpoints_form_field{
