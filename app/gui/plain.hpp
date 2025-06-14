@@ -34,15 +34,7 @@ namespace terraformer::app
 	struct plain_elevation_table_form_field
 	{
 		std::u8string_view label;
-		// TODO: Should use table instead of form
 		using input_widget_type = ui::widgets::table;
-	};
-
-	struct plain_elevation_table_form_field
-	{
-		std::u8string_view label;
-		// TODO: Should use table instead of form
-		using input_widget_type = ui::widgets::form;
 	};
 
 	void bind(plain_control_point_descriptor& field_value, auto& parent)
