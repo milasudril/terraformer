@@ -40,8 +40,12 @@ namespace terraformer::ui::widgets
 			};
 			using widget = unique_resource<widget_vtable>;
 
-			explicit record(std::u8string_view, table& parent): m_parent{parent}
-			{}
+			explicit record(std::u8string_view id, table& parent): m_parent{parent}
+			{
+				auto id_label = std::make_unique<label>();
+				id_label->text(id);
+				m_widgets.push_back(widget{std::move(id_label)});
+			}
 
 			span<widget const> widgets() const
 			{ return m_widgets; }
@@ -154,12 +158,14 @@ namespace terraformer::ui::widgets
 			widget_group{
 				iihr,
 				orientation == main::widget_orientation::vertical?
-					 layouts::table{layouts::table::column_count{std::size(field_names).get()}}
-					:layouts::table{layouts::table::row_count{std::size(field_names).get()}}
+					 layouts::table{layouts::table::column_count{std::size(field_names).get() + 1}}
+					:layouts::table{layouts::table::row_count{std::size(field_names).get() + 1}}
 			},
 			m_orientation{orientation}
 		{
 			is_transparent = false;
+			// Placeholder for dummy id column
+			m_field_names.push_back(label{});
 			for(auto item : field_names)
 			{ m_field_names.push_back(std::move(label{}.text(item))); }
 

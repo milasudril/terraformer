@@ -240,7 +240,7 @@ namespace terraformer::app
 		);
 		bind(field_value.boundary, boundary_new);
 
-
+#if 0
 		auto& boundary = parent.create_widget(
 			plain_elevation_table_form_field{
 				.label = u8"Control points",
@@ -248,6 +248,7 @@ namespace terraformer::app
 			ui::main::widget_orientation::vertical
 		);
 		bind(field_value.boundary, boundary);
+#endif
 
 		auto& midpoints = parent.create_widget(
 			plain_midpoints_form_field{
