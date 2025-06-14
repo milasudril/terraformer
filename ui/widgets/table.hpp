@@ -4,7 +4,10 @@
 #include "./label.hpp"
 
 #include "ui/layouts/table.hpp"
+#include "ui/main/widget_collection.hpp"
+#include "ui/main/widget_geometry.hpp"
 #include "ui/widgets/widget_group.hpp"
+#include <unistd.h>
 
 namespace terraformer::ui::widgets
 {
@@ -20,6 +23,33 @@ namespace terraformer::ui::widgets
 		using widget_group::confirm_size;
 		using widget_group::set_refresh_function;
 		using widget_group::refresh;
+
+		class record
+		{
+		public:
+			struct widget_vtable
+			{
+				template<class StoredType>
+				constexpr widget_vtable(std::type_identity<StoredType>):
+					append_to{[](void* object, main::widget_collection& collection){
+						collection.append(*static_cast<StoredType>(object), main::widget_geometry{});
+					}
+				}
+				{}
+				void (*append_to)(void* object, main::widget_collection& collection);
+			};
+			using widget = unique_resource<widget_vtable>;
+
+			explicit record(table& parent): m_parent{parent}
+			{}
+
+			span<widget const> widgets() const
+			{ return m_widgets; }
+
+		private:
+			single_array<widget> m_widgets;
+			std::reference_wrapper<table> m_parent;
+		};
 
 		template<size_t N>
 		explicit table(
@@ -50,9 +80,32 @@ namespace terraformer::ui::widgets
 			{ append(std::ref(item), main::widget_geometry{}); }
 		}
 
+		template<class RecordDescriptor>
+		record& create_widget(RecordDescriptor&& descriptor)
+		{
+			auto i = m_records.emplace(descriptor.label, record{descriptor.label, *this});
+			return *i.first;
+		}
+
+		void collect_records()
+		{
+			clear();
+			for(auto& item : m_records)
+			{
+				for(auto& widget : item.second.widgets())
+				{
+					auto const ref = widget.get();
+					auto const ptr = ref.get_pointer();
+					auto const vt = ref.get_vtable();
+					vt.append_to(ptr, *this);
+				}
+			}
+		}
+
 	private:
 		single_array<label> m_field_names;
 		main::widget_orientation m_orientation;
+		std::unordered_map<std::u8string, record> m_records;
 	};
 
 	static_assert(

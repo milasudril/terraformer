@@ -38,7 +38,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	void bind(plain_control_point_descriptor& field_value, ui::widgets::form& parent)
+	void bind(plain_control_point_descriptor& field_value, auto& parent)
 	{
 		parent.create_widget(
 			plain_control_point_elevation_form_field{
@@ -74,7 +74,7 @@ namespace terraformer::app
 		.set_textbox_placeholder_string(u8"-0.073242545");
 	}
 
-	void bind(plain_boundary_descriptor& field_value, ui::widgets::form& parent)
+	void bind(plain_boundary_descriptor& field_value, auto& parent)
 	{
 		auto& n = parent.create_widget(
 			plain_boundary_point_form_field{
