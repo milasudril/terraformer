@@ -3,6 +3,7 @@
 
 #include "./label.hpp"
 
+#include "lib/common/move_only_function.hpp"
 #include "ui/layouts/table.hpp"
 #include "ui/main/widget_collection.hpp"
 #include "ui/main/widget_geometry.hpp"
@@ -106,7 +107,7 @@ namespace terraformer::ui::widgets
 							}
 						}
 						value.get() = std::forward<widget_value_type>(new_val);
-						m_on_content_updated(*this, std::forward<Args>(args)...);
+						call_on_content_updated(std::forward<Args>(args)...);
 					});
 				}
 				else
@@ -115,7 +116,7 @@ namespace terraformer::ui::widgets
 				})
 				{
 					ret.on_content_updated([this]<class ... Args>(auto&, Args&&... args) {
-						m_on_content_updated(*this, std::forward<Args>(args)...);
+						call_on_content_updated(std::forward<Args>(args)...);
 					});
 				}
 				m_widgets.push_back(widget{std::move(field_input_widget)});
@@ -139,7 +140,16 @@ namespace terraformer::ui::widgets
 			std::reference_wrapper<table> m_parent;
 
 			using user_interaction_handler = main::widget_user_interaction_handler<record>;
-		user_interaction_handler m_on_content_updated{no_operation_tag{}};
+		user_interaction_handler m_on_content_updated{};
+
+			template<class ... Args>
+			void call_on_content_updated(Args&&... args)
+			{
+				if(m_on_content_updated == user_interaction_handler{})
+				{ m_parent.get().m_on_content_updated(m_parent.get(), std::forward<Args>(args)...); }
+				else
+				{ m_on_content_updated(*this, std::forward<Args>(args)...); }
+			}
 		};
 
 		template<size_t N>
@@ -179,6 +189,13 @@ namespace terraformer::ui::widgets
 			return i.first->second;
 		}
 
+		template<class Function>
+		table& on_content_updated(Function&& func)
+		{
+			m_on_content_updated = std::forward<Function>(func);
+			return *this;
+		};
+
 	private:
 		single_array<label> m_field_names;
 		main::widget_orientation m_orientation;
@@ -189,6 +206,9 @@ namespace terraformer::ui::widgets
 			for(auto& item : m_field_names)
 			{ append(std::ref(item), main::widget_geometry{}); }
 		}
+
+		using user_interaction_handler = main::widget_user_interaction_handler<table>;
+		user_interaction_handler m_on_content_updated{no_operation_tag{}};
 	};
 
 	static_assert(
