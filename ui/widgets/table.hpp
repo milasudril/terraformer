@@ -4,10 +4,12 @@
 #include "./label.hpp"
 
 #include "lib/common/move_only_function.hpp"
+#include "lib/common/string_to_value_map.hpp"
 #include "ui/layouts/table.hpp"
 #include "ui/main/widget_collection.hpp"
 #include "ui/main/widget_geometry.hpp"
 #include "ui/widgets/widget_group.hpp"
+#include <stdexcept>
 #include <unistd.h>
 
 namespace terraformer::ui::widgets
@@ -41,15 +43,14 @@ namespace terraformer::ui::widgets
 			};
 			using widget = unique_resource<widget_vtable>;
 
-			explicit record(std::u8string_view id, table& parent): m_parent{parent}
-			{
-				auto id_label = std::make_unique<label>();
-				id_label->text(id);
-				m_widgets.push_back(widget{std::move(id_label)});
-			}
+			record(record const&) = delete;
+			record(record&&) = delete;
+			record& operator=(record const&) = delete;
+			record& operator=(record&&) = delete;
+			~record() = default;
 
-			span<widget const> widgets() const
-			{ return m_widgets; }
+			explicit record(std::u8string_view id, table& parent): m_parent{parent}
+			{ m_id_label.text(id); }
 
 			template<class Function>
 			record& on_content_updated(Function&& func)
@@ -119,16 +120,29 @@ namespace terraformer::ui::widgets
 						call_on_content_updated(std::forward<Args>(args)...);
 					});
 				}
-				m_widgets.push_back(widget{std::move(field_input_widget)});
+				m_widgets.emplace(field.label, widget{std::move(field_input_widget)});
 
 				return ret;
 			}
 
 			void append_pending_widgets()
 			{
-				for(auto& widget :m_widgets)
+				auto const& field_names =  m_parent.get().field_names();
+				if(std::size(m_widgets) != std::size(field_names).get())
+				{ throw std::runtime_error{"Table is missing fields"}; }
+
+				m_parent.get().append(std::ref(m_id_label), main::widget_geometry{});
+				for(auto& item :field_names)
 				{
-					auto const ref = widget.get();
+					auto const i = m_widgets.find(item.value());
+					if(i == std::end(m_widgets)) [[unlikely]]
+					{
+						auto const string_begin = reinterpret_cast<char const*>(item.value().data());
+						auto const string_end = string_begin + item.value().size();
+						throw std::out_of_range{std::string{string_begin, string_end}};
+					}
+
+					auto const ref = i->second.get();
 					auto const ptr = ref.get_pointer();
 					auto const vt = ref.get_vtable();
 					vt.append_to(ptr, m_parent);
@@ -136,7 +150,8 @@ namespace terraformer::ui::widgets
 			}
 
 		private:
-			single_array<widget> m_widgets;
+			interactive_label m_id_label;
+			u8string_to_value_map<widget> m_widgets;
 			std::reference_wrapper<table> m_parent;
 
 			using user_interaction_handler = main::widget_user_interaction_handler<record>;
@@ -174,8 +189,7 @@ namespace terraformer::ui::widgets
 			m_orientation{orientation}
 		{
 			is_transparent = false;
-			// Placeholder for dummy id column
-			m_field_names.push_back(label{});
+
 			for(auto item : field_names)
 			{ m_field_names.push_back(std::move(label{}.text(item))); }
 
@@ -185,7 +199,7 @@ namespace terraformer::ui::widgets
 		template<class RecordDescriptor>
 		record& create_widget(RecordDescriptor&& descriptor)
 		{
-			auto i = m_records.emplace(descriptor.label, record{descriptor.label, *this});
+			auto i = m_records.try_emplace(std::u8string{descriptor.label}, descriptor.label, *this);
 			return i.first->second;
 		}
 
@@ -196,13 +210,18 @@ namespace terraformer::ui::widgets
 			return *this;
 		};
 
+		single_array<label> const& field_names() const
+		{ return m_field_names; }
+
 	private:
+		label m_dummy;
 		single_array<label> m_field_names;
 		main::widget_orientation m_orientation;
 		std::unordered_map<std::u8string, record> m_records;
 
 		void append_field_names()
 		{
+			append(std::ref(m_dummy), main::widget_geometry{});
 			for(auto& item : m_field_names)
 			{ append(std::ref(item), main::widget_geometry{}); }
 		}

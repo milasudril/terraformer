@@ -1,28 +1,15 @@
 #ifndef TERRAFORMER_OBJECT_TREE_HPP
 #define TERRAFORMER_OBJECT_TREE_HPP
 
+#include "./string_to_value_map.hpp"
 #include "lib/any/shared_any.hpp"
 #include "lib/array_classes/single_array.hpp"
 
 #include <string>
-#include <unordered_map>
 #include <variant>
 
 namespace terraformer
 {
-	struct string_hash
-	{
-		using is_transparent = void;
-		[[nodiscard]] size_t operator()(char const* txt) const
-		{ return std::hash<std::string_view>{}(txt); }
-
-		[[nodiscard]] size_t operator()(std::string_view txt) const
-		{ return std::hash<std::string_view>{}(txt); }
-
-		[[nodiscard]] size_t operator()(std::string const& txt) const
-		{ return std::hash<std::string>{}(txt); }
-	};
-
 	template<bool>
 	class object_pointer;
 
