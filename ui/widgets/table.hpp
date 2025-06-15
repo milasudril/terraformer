@@ -197,7 +197,15 @@ namespace terraformer::ui::widgets
 			is_transparent = false;
 
 			for(auto item : field_names)
-			{ m_field_names.push_back(std::move(label{}.text(item))); }
+			{
+				interactive_label header;
+				header
+					.on_activated([field_name = std::u8string{item}, this](auto&&...){
+						toggle_field_visibility(field_name);
+					})
+					.text(item);
+				m_field_names.push_back(std::move(header));
+			}
 
 			append_field_names();
 		}
@@ -220,7 +228,7 @@ namespace terraformer::ui::widgets
 			return *this;
 		};
 
-		single_array<label> const& field_names() const
+		single_array<interactive_label> const& field_names() const
 		{ return m_field_names; }
 
 		void toggle_record_visibility(std::u8string_view item)
@@ -242,9 +250,27 @@ namespace terraformer::ui::widgets
 			{ states[k].collapsed = !states[k].collapsed; }
 		}
 
+		void toggle_field_visibility(std::u8string_view item)
+		{
+			auto i = std::ranges::find_if(m_field_names, [look_for = item](auto const& item){
+				return item.value() == look_for;
+			});
+			if(i == std::end(m_field_names))
+			{ return; }
+
+			auto const index = i - std::begin(m_field_names);
+			auto const colcount = std::size(m_field_names).get() + 1;
+			auto const start_offset = index + colcount + 1;
+			auto const attributes = get_attributes();
+			auto const widget_count = std::size(attributes);
+			auto const states = attributes.widget_states();
+			for(auto k = attributes.element_indices().front() + start_offset; k < widget_count; k += colcount)
+			{ states[k].collapsed = !states[k].collapsed; }
+		}
+
 	private:
 		label m_dummy;
-		single_array<label> m_field_names;
+		single_array<interactive_label> m_field_names;
 		main::widget_orientation m_orientation;
 		u8string_to_value_map<record> m_records;
 		u8string_to_value_map<main::widget_collection::index_type> m_record_indices;

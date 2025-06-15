@@ -94,6 +94,7 @@ namespace terraformer::ui::widgets
 		using label::get_children;
 		using label::compute_size;
 		using label::confirm_size;
+		using label::value;
 
 		void handle_event(main::cursor_leave_event const&, main::window_ref, main::ui_controller)
 		{ m_state_saved = std::exchange(m_state_to_display, state::released); }
