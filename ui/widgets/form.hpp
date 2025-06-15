@@ -73,14 +73,7 @@ namespace terraformer::ui::widgets
 			{
 				auto field_label = std::make_unique<interactive_label>();
 				field_label->on_activated([this, label = std::u8string{field.label}](auto&& ...){
-					auto const i = m_fields.find(label);
-					if(i == std::end(m_fields))
-					{ return; }
-
-					auto const widget_attributes = get_children();
-					auto const widget_states = widget_attributes.widget_states();
-					auto const is_collapsed = widget_states[i->second].collapsed;
-					widget_states[i->second].collapsed = !is_collapsed;
+					toggle_field_value_visibility(label);
 				});
 
 				field_label->text(field.label);
@@ -179,7 +172,7 @@ namespace terraformer::ui::widgets
 			return ret;
 		}
 
-		void hide_field_value(std::u8string_view field_name)
+		void toggle_field_value_visibility(std::u8string_view field_name)
 		{
 			auto const i = m_fields.find(field_name);
 			if(i == std::end(m_fields))
@@ -187,18 +180,7 @@ namespace terraformer::ui::widgets
 
 			auto const widget_attributes = get_children();
 			auto const widget_states = widget_attributes.widget_states();
-			widget_states[i->second].collapsed = true;
-		}
-
-		void show_field_value(std::u8string_view field_name)
-		{
-			auto const i = m_fields.find(field_name);
-			if(i == std::end(m_fields))
-			{ return; }
-
-			auto const widget_attributes = get_children();
-			auto const widget_states = widget_attributes.widget_states();
-			widget_states[i->second].collapsed = false;
+			widget_states[i->second].collapsed = !widget_states[i->second].collapsed;
 		}
 
 		void append_pending_widgets()
@@ -219,16 +201,6 @@ namespace terraformer::ui::widgets
 		main::widget_orientation m_orientation;
 
 		size_t m_record_count = 0;
-
-		struct string_hash
-		{
-			using hash_type = std::hash<std::u8string_view>;
-			using is_transparent = void;
-
-			std::size_t operator()(char8_t const* str) const        { return hash_type{}(str); }
-			std::size_t operator()(std::u8string_view str) const   { return hash_type{}(str); }
-			std::size_t operator()(std::u8string const& str) const { return hash_type{}(str); }
-		};
 
 		u8string_to_value_map<main::widget_collection_ref::index_type> m_fields;
 	};
