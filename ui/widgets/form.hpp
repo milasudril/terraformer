@@ -10,15 +10,6 @@
 
 namespace terraformer::ui::widgets
 {
-	template<class First, class ... Types>
-	struct pick_first
-	{
-		using type = First;
-	};
-
-	template<class ... Types>
-	using pick_first_t = typename pick_first<Types...>::type;
-
 	class form:private widget_group<layouts::table>
 	{
 	public:

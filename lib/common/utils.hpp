@@ -35,6 +35,16 @@ namespace terraformer
 	template<class T>
 	using empty = std::type_identity<T>;
 
+	template<class First, class ... Types>
+	struct pick_first
+	{
+		using type = First;
+	};
+
+	template<class ... Types>
+	using pick_first_t = typename pick_first<Types...>::type;
+
+
 	template<class T>
 	requires std::is_arithmetic_v<T>
 	inline std::string to_string_helper(T value)
