@@ -50,7 +50,13 @@ namespace terraformer::ui::widgets
 			~record() = default;
 
 			explicit record(std::u8string_view id, table& parent): m_parent{parent}
-			{ m_id_label.text(id); }
+			{
+				m_id_label
+					.on_activated([label = std::u8string{id}, parent = m_parent](auto&&...){
+						parent.get().toggle_record_visibility(label);
+					})
+					.text(id);
+			}
 
 			template<class Function>
 			record& on_content_updated(Function&& func)
@@ -200,6 +206,10 @@ namespace terraformer::ui::widgets
 		record& create_widget(RecordDescriptor&& descriptor)
 		{
 			auto i = m_records.try_emplace(std::u8string{descriptor.label}, descriptor.label, *this);
+			m_record_indices.try_emplace(
+				std::u8string{descriptor.label},
+				get_attributes().element_indices().back() + 1
+			);
 			return i.first->second;
 		}
 
@@ -213,11 +223,31 @@ namespace terraformer::ui::widgets
 		single_array<label> const& field_names() const
 		{ return m_field_names; }
 
+		void toggle_record_visibility(std::u8string_view item)
+		{
+			if(m_field_names.empty())
+			{ return; }
+
+			auto const i = m_record_indices.find(item);
+			if(i == std::end(m_record_indices))
+			{
+				auto const string_begin = reinterpret_cast<char const*>(item.data());
+				auto const string_end = string_begin + item.size();
+				throw std::out_of_range{std::string{string_begin, string_end}};
+			}
+
+			auto const attributes = get_attributes();
+			auto const states = attributes.widget_states();
+			for(auto k = i->second + 1; k != i->second + 1 + std::size(m_field_names).get(); ++k)
+			{ states[k].collapsed = !states[k].collapsed; }
+		}
+
 	private:
 		label m_dummy;
 		single_array<label> m_field_names;
 		main::widget_orientation m_orientation;
-		std::unordered_map<std::u8string, record> m_records;
+		u8string_to_value_map<record> m_records;
+		u8string_to_value_map<main::widget_collection::index_type> m_record_indices;
 
 		void append_field_names()
 		{
