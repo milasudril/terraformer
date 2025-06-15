@@ -101,15 +101,17 @@ namespace terraformer::app
 		bind(field_value.level_curves, level_curves_form);
 	}
 
-	enum class heightmap_active_view:size_t{
-		heatmap
-	};
-
 	struct heightmap_view_descriptor
 	{
 		std::reference_wrapper<grayscale_image const> data;
-		heightmap_active_view active_view = heightmap_active_view::heatmap;
 		heatmap_view_attributes heatmap_presentation_attributes;
+	};
+
+	struct heightmap_heatmap_form_field
+	{
+		std::u8string_view label;
+		bool expand_layout_cell;
+		using input_widget_type = ui::widgets::form;
 	};
 
 	struct heightmap_chart_form_field
@@ -167,7 +169,7 @@ namespace terraformer::app
 	void bind(heightmap_view_descriptor& field_value, ui::widgets::form& parent)
 	{
 		auto& heatmap = parent.create_widget(
-			heightmap_chart_form_field{
+			heightmap_heatmap_form_field{
 				.label = u8"Heatmap view",
 				.expand_layout_cell = true
 			}
