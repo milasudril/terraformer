@@ -6,6 +6,8 @@
 #include "ui/layouts/table.hpp"
 #include "ui/widgets/widget_group.hpp"
 
+#include "lib/common/string_to_value_map.hpp"
+
 namespace terraformer::ui::widgets
 {
 	template<class First, class ... Types>
@@ -237,12 +239,7 @@ namespace terraformer::ui::widgets
 			std::size_t operator()(std::u8string const& str) const { return hash_type{}(str); }
 		};
 
-		std::unordered_map<
-			std::u8string,
-			main::widget_collection_ref::index_type,
-			string_hash,
-			std::equal_to<>
-		> m_fields;
+		u8string_to_value_map<main::widget_collection_ref::index_type> m_fields;
 	};
 }
 
