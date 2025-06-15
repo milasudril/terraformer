@@ -2,6 +2,7 @@
 #define TERRAFORMER_GUI_HEIGHTMAP_HPP
 
 #include "./elevation_color_map.hpp"
+#include "./depth_color_map.hpp"
 #include "./domain_size.hpp"
 #include "./plain.hpp"
 #include "./rolling_hills.hpp"
@@ -173,6 +174,35 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
+	struct xsections_view_descriptor
+	{
+		explicit xsections_view_descriptor(heightmap_view_descriptor& main_view):
+			data{main_view.data}
+		{}
+
+		std::reference_wrapper<grayscale_image const> data;
+	};
+
+	void bind(xsections_view_descriptor const& field_value, ui::widgets::form& parent)
+	{
+		auto& imgview = parent.create_widget(
+			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
+				.label = u8"Output",
+				.value_reference = field_value.data,
+				.expand_layout_cell = true,
+				.maximize_widget = true
+			},
+			u8"Depth/m",
+			// FIXME: Value map depends on domain size
+			ui::value_maps::affine_value_map{0.0f, 1.0f},
+			terraformer::get_depth_color_lut()
+		);
+
+		parent.set_refresh_function([image = field_value.data, &imgview](){
+			imgview.show_image(image.get().pixels());
+		});
+	}
+
 	void bind(heightmap_view_descriptor& field_value, ui::widgets::form& parent)
 	{
 		auto& heatmap = parent.create_widget(
@@ -182,18 +212,20 @@ namespace terraformer::app
 			}
 		);
 		bind(heatmap_view_descriptor{field_value}, heatmap);
-
+#if 0
+		// FIXME: Need to solve collapsed expanding widget first
 		auto& xsections = parent.create_widget(
 			heightmap_xsections_form_field{
 				.label = u8"Cross-sections",
 				.expand_layout_cell = true
 			}
 		);
-		bind(heatmap_view_descriptor{field_value}, xsections);
+		bind(xsections_view_descriptor{field_value}, xsections);
+#endif
 
-		parent.set_refresh_function([&heatmap, &xsections](){
+		parent.set_refresh_function([&heatmap](){
 			heatmap.refresh();
-			xsections.refresh();
+//			xsections.refresh();
 		});
 	}
 
