@@ -13,7 +13,7 @@ namespace terraformer
 		rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
 		+ normalize(rgba_pixel{0.5f, 1.0f, 0.0f, 0.0f}, perceptual_color_intensity(0.25f)),
 		rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
-		+ normalize(rgba_pixel{0.0f, 1.0f, 1.0f, 0.0f}, perceptual_color_intensity(0.5f))
+		+ normalize(rgba_pixel{0.0f, 0.5f, 1.0f, 0.0f}, perceptual_color_intensity(0.5f))
 	};
 
 	constexpr auto get_depth_color_lut()
