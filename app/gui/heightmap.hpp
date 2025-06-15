@@ -166,6 +166,13 @@ namespace terraformer::app
 		});
 	}
 
+	struct heightmap_xsections_form_field
+	{
+		std::u8string_view label;
+		bool expand_layout_cell;
+		using input_widget_type = ui::widgets::form;
+	};
+
 	void bind(heightmap_view_descriptor& field_value, ui::widgets::form& parent)
 	{
 		auto& heatmap = parent.create_widget(
@@ -174,11 +181,19 @@ namespace terraformer::app
 				.expand_layout_cell = true
 			}
 		);
-
 		bind(heatmap_view_descriptor{field_value}, heatmap);
 
-		parent.set_refresh_function([&heatmap](){
+		auto& xsections = parent.create_widget(
+			heightmap_xsections_form_field{
+				.label = u8"Cross-sections",
+				.expand_layout_cell = true
+			}
+		);
+		bind(heatmap_view_descriptor{field_value}, xsections);
+
+		parent.set_refresh_function([&heatmap, &xsections](){
 			heatmap.refresh();
+			xsections.refresh();
 		});
 	}
 
