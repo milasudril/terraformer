@@ -3,6 +3,7 @@
 #include "./widget_collection_ref.hpp"
 
 #include "lib/array_classes/single_array.hpp"
+#include "ui/main/widget_state.hpp"
 
 
 terraformer::box_size terraformer::ui::main::run(minimize_cell_size_context const& ctxt)
@@ -50,6 +51,13 @@ terraformer::box_size terraformer::ui::main::run(adjust_cell_sizes_context const
 			widget_sizes[k] = run(adjust_cell_sizes_context{children, k}, available_size);
 		}
 		return ctxt.default_size();
+	}
+
+	single_array size_overrides{static_cast<single_array<float>::size_type>(std::size(children).get())};
+	for(auto k : children.element_indices())
+	{
+		single_array<float>::index_type override_index{k.get()};
+		size_overrides[override_index] = widget_states[k].collapsed? 0.0f :  -1.0f;
 	}
 
 	layout.adjust_cell_widths(available_size[0]);
