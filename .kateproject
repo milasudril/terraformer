@@ -1,0 +1,20 @@
+{
+  "name": "Terraformer",
+  "build": {
+    "directory": ".",
+    "build": "make",
+    "clean": "make clean",
+    "targets": [
+      {
+        "name": "Release",
+        "build_cmd": "make",
+        "run_cmd": "__targets_rel/bin/terraformer-gui"
+      },
+      {
+        "name": "Debug",
+        "build_cmd": "make debug",
+        "run_cmd": "gdb __targets_dbg/bin/terraformer-gui"
+      }
+    ]
+  }
+}
