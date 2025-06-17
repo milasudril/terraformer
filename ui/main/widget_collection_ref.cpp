@@ -60,8 +60,8 @@ terraformer::box_size terraformer::ui::main::run(adjust_cell_sizes_context const
 		size_overrides[override_index] = widget_states[k].collapsed? 0.0f :  -1.0f;
 	}
 
-	layout.adjust_cell_widths(available_size[0]);
-	layout.adjust_cell_heights(available_size[1]);
+	layout.adjust_cell_widths(available_size[0], size_overrides);
+	layout.adjust_cell_heights(available_size[1], size_overrides);
 	single_array cell_sizes{static_cast<array_size<box_size>>(std::size(children).get())};
 	layout.get_cell_sizes_into(cell_sizes);
 

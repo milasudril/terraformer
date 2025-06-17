@@ -181,13 +181,13 @@ namespace terraformer::ui::layouts
 		/**
 		 * Adjusts cell widths given available_width
 		 */
-		void adjust_cell_widths(float available_width)
+		void adjust_cell_widths(float available_width, span<float const>)
 		{ adjust_cell_sizes(m_cols_user, m_cols, available_width, m_params.margin_x, m_params.no_outer_margin); }
 
 		/**
 		 * Adjusts cell heights given available_height
 		 */
-		void adjust_cell_heights(float available_height)
+		void adjust_cell_heights(float available_height, span<float const>)
 		{ adjust_cell_sizes(m_rows_user, m_rows, available_height, m_params.margin_y, m_params.no_outer_margin); }
 
 		static void adjust_cell_sizes(

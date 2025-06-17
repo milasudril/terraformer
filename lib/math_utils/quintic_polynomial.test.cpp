@@ -1,4 +1,4 @@
-//@	{"target":{"name": "quintic_polynomial.test"}}
+//	{"target":{"name": "quintic_polynomial.test"}}
 
 #include "./quintic_polynomial.hpp"
 

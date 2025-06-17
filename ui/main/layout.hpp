@@ -38,7 +38,8 @@ namespace terraformer::ui::main
 		float available_width,
 		float available_height,
 		span<box_size> sizes_out,
-		span<location> locs_out
+		span<location> locs_out,
+		span<float const> size_overrides
 	)
 	{
 		/**
@@ -49,12 +50,12 @@ namespace terraformer::ui::main
 		/**
 		 * Adjusts cell widths given available_width
 		 */
-		{obj.adjust_cell_widths(available_width)} -> std::same_as<void>;
+		{obj.adjust_cell_widths(available_width, size_overrides)} -> std::same_as<void>;
 
 		/**
 		 * Adjusts cell heights given available_height
 		 */
-		{obj.adjust_cell_heights(available_height)} -> std::same_as<void>;
+		{obj.adjust_cell_heights(available_height, size_overrides)} -> std::same_as<void>;
 
 		/**
 		 * Fetches all cell locations into locs_out
@@ -75,8 +76,8 @@ namespace terraformer::ui::main
 	struct layout_vtable
 	{
 		void (*set_default_cell_sizes_to)(void*, span<box_size const>);
-		void (*adjust_cell_widths)(void*, float);
-		void (*adjust_cell_heights)(void*, float);
+		void (*adjust_cell_widths)(void*, float, span<float const>);
+		void (*adjust_cell_heights)(void*, float, span<float const>);
 		void (*get_cell_sizes_into)(void const*, span<box_size>);
 		void (*get_cell_locations_into)(void const*, span<location>);
 		box_size (*get_dimensions)(void const*);
@@ -87,11 +88,11 @@ namespace terraformer::ui::main
 		.set_default_cell_sizes_to = [](void* obj, span<box_size const> vals) {
 			static_cast<T*>(obj)->set_default_cell_sizes_to(vals);
 		},
-		.adjust_cell_widths = [](void* obj, float available_width){
-			static_cast<T*>(obj)->adjust_cell_widths(available_width);
+		.adjust_cell_widths = [](void* obj, float available_width, span<float const> size_overrides){
+			static_cast<T*>(obj)->adjust_cell_widths(available_width, size_overrides);
 		},
-		.adjust_cell_heights = [](void* obj, float available_height){
-			static_cast<T*>(obj)->adjust_cell_heights(available_height);
+		.adjust_cell_heights = [](void* obj, float available_height, span<float const> size_overrides){
+			static_cast<T*>(obj)->adjust_cell_heights(available_height, size_overrides);
 		},
 		.get_cell_sizes_into = [](void const* obj, span<box_size> sizes_out){
 			static_cast<T const*>(obj)->get_cell_sizes_into(sizes_out);
@@ -118,11 +119,11 @@ namespace terraformer::ui::main
 		void set_default_cell_sizes_to(span<box_size const> vals) const
 		{ m_vtable->set_default_cell_sizes_to(m_object, vals); }
 
-		void adjust_cell_widths(float available_width) const
-		{ m_vtable->adjust_cell_widths(m_object, available_width); }
+		void adjust_cell_widths(float available_width, span<float const> size_overrides) const
+		{ m_vtable->adjust_cell_widths(m_object, available_width, size_overrides); }
 
-		void adjust_cell_heights(float available_height) const
-		{ m_vtable->adjust_cell_heights(m_object, available_height); }
+		void adjust_cell_heights(float available_height, span<float const> size_overrides) const
+		{ m_vtable->adjust_cell_heights(m_object, available_height, size_overrides); }
 
 		void get_cell_sizes_into(span<box_size> sizes_out) const
 		{ m_vtable->get_cell_sizes_into(m_object, sizes_out); }
