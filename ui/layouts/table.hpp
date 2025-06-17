@@ -267,12 +267,23 @@ namespace terraformer::ui::layouts
 			__builtin_unreachable();
 		}
 
+		template<class T>
+		auto& set_cell_size(size_t index, T&& value)
+		{
+			m_cell_sizes.insert_or_assign(
+				static_cast<single_array<cell_size>::index_type>(index),
+				cell_size{.value = std::forward<T>(value)}
+			);
+			return *this;
+		}
+
 	private:
 		cell_order m_cell_order;
 		row_array<float> m_rows;
 		column_array<float> m_cols;
 		row_array<cell_size> m_rows_user;
 		column_array<cell_size> m_cols_user;
+		single_array<cell_size> m_cell_sizes;
 		common_params m_params{};
 	};
 }
