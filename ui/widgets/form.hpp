@@ -156,6 +156,7 @@ namespace terraformer::ui::widgets
 				{
 					auto const widget_states = widget_attributes.widget_states();
 					layout.set_record_size(m_record_count, layouts::table::cell_size::expand{});
+					layout.set_cell_size(last_element.get(), layouts::table::cell_size::expand{});
 					widget_states[last_element].maximized = true;
 				}
 			}
