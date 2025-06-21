@@ -138,6 +138,63 @@ void terraformer::ui::layouts::table::adjust_cell_sizes(
 
 	return;
 }
+#if 0
+void terraformer::ui::layouts::table::adjust_cell_widths_by_row(
+	float available_height,
+	span<float const> size_overrides,
+	span<cell_size const> specified_sizes,
+	span<float> actual_sizes,
+	float margin,
+	bool no_outer_margin
+)
+{
+	span<float>::index_type current_col{};
+	auto row_height = 0.0f;
+	auto const colcount = std::size(actual_sizes);
+	auto col_width = 0.0f;
+	auto width_of_fixed_cells = 0.0f;
+
+	for(auto const k : size_overrides.element_indices())
+	{
+		span<cell_size const>::index_type cell_size_index{k};
+		auto const overridden_size = size_overrides[k];
+		
+		size_of_fixed_cells += std::visit(
+			overload{
+				[k, actual_sizes](cell_size::use_default){
+					return actual_sizes[k];
+				},
+				[&cells_to_expand, k](cell_size::expand){
+					cells_to_expand.push_back(k);
+					return 0.0f;
+				}
+			},
+			specified_sizes.value_or(index, cell_size::use_default{}).value
+		);
+		
+		
+		if(overridden_size >= 0.0f)
+		{ col_width = overridden_size; }
+		else
+		{
+		}
+		
+		col_width = std::max(col_width, std::max(actual_sizes[current_col], item));
+		++current_col;
+
+		if(current_col == colcount)
+		{ 
+			actual_sizes[current_col] = col_width;
+			col_width = 0.0f;
+			current_col = span<float>::index_type{};; 
+			
+		}
+	}
+
+	if(current_col != colcount)
+	{ actual_sizes[current_col] = col_width; }
+}
+#endif
 
 void terraformer::ui::layouts::table::get_cell_sizes_into(
 	span<box_size> sizes_out,
@@ -178,6 +235,7 @@ void terraformer::ui::layouts::table::get_cell_sizes_into(
 		if(current_row == rowcount)
 		{
 			current_row = 0;
+
 			++current_col;
 		}
 	}
