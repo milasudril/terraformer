@@ -6,6 +6,7 @@
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/table.hpp"
 #include "ui/value_maps/sqrt_value_map.hpp"
+#include "ui/value_maps/atan_value_map.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
 
@@ -49,17 +50,23 @@ namespace terraformer::app
 			}
 		)
 		.set_textbox_placeholder_string(u8"-9999.9999");
-
 		parent.create_widget(
 			plain_control_point_slope_form_field{
 				.label = u8"∂/∂x",
 				.value_reference = std::ref(field_value.ddx)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{1.0f}
+				terraformer::ui::value_maps::atan_value_map{1.0f, true}
 			}
 		)
-		.set_textbox_placeholder_string(u8"-0.073242545");
+		.set_textbox_placeholder_string(u8"-0.073242545")
+		.input_widget()
+			.visual_angle_range(
+				closed_closed_interval<geosimd::turn_angle>{
+					geosimd::turns{0.5 - 0.125},
+					geosimd::turns{0.5 + 0.125}
+				}
+			);
 
 		parent.create_widget(
 			plain_control_point_slope_form_field{
@@ -67,10 +74,17 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.ddy)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::sqrt_value_map{1.0f}
+				terraformer::ui::value_maps::atan_value_map{1.0f, true}
 			}
 		)
-		.set_textbox_placeholder_string(u8"-0.073242545");
+		.set_textbox_placeholder_string(u8"-0.073242545")
+		.input_widget()
+			.visual_angle_range(
+				closed_closed_interval<geosimd::turn_angle>{
+					geosimd::turns{0.5 - 0.125},
+					geosimd::turns{0.5 + 0.125}
+				}
+			);
 	}
 
 	void bind(plain_boundary_descriptor& field_value, auto& parent)
