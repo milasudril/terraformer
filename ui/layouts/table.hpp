@@ -285,6 +285,8 @@ namespace terraformer::ui::layouts
 			);
 			return *this;
 		}
+		
+		single_array<array_index<float>> get_cells_to_expand(span<float const> size_overrides) const;
 
 	private:
 		cell_order m_cell_order;

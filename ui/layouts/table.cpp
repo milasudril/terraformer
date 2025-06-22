@@ -138,63 +138,6 @@ void terraformer::ui::layouts::table::adjust_cell_sizes(
 
 	return;
 }
-#if 0
-void terraformer::ui::layouts::table::adjust_cell_widths_by_row(
-	float available_height,
-	span<float const> size_overrides,
-	span<cell_size const> specified_sizes,
-	span<float> actual_sizes,
-	float margin,
-	bool no_outer_margin
-)
-{
-	span<float>::index_type current_col{};
-	auto row_height = 0.0f;
-	auto const colcount = std::size(actual_sizes);
-	auto col_width = 0.0f;
-	auto width_of_fixed_cells = 0.0f;
-
-	for(auto const k : size_overrides.element_indices())
-	{
-		span<cell_size const>::index_type cell_size_index{k};
-		auto const overridden_size = size_overrides[k];
-		
-		size_of_fixed_cells += std::visit(
-			overload{
-				[k, actual_sizes](cell_size::use_default){
-					return actual_sizes[k];
-				},
-				[&cells_to_expand, k](cell_size::expand){
-					cells_to_expand.push_back(k);
-					return 0.0f;
-				}
-			},
-			specified_sizes.value_or(index, cell_size::use_default{}).value
-		);
-		
-		
-		if(overridden_size >= 0.0f)
-		{ col_width = overridden_size; }
-		else
-		{
-		}
-		
-		col_width = std::max(col_width, std::max(actual_sizes[current_col], item));
-		++current_col;
-
-		if(current_col == colcount)
-		{ 
-			actual_sizes[current_col] = col_width;
-			col_width = 0.0f;
-			current_col = span<float>::index_type{};; 
-			
-		}
-	}
-
-	if(current_col != colcount)
-	{ actual_sizes[current_col] = col_width; }
-}
-#endif
 
 void terraformer::ui::layouts::table::get_cell_sizes_into(
 	span<box_size> sizes_out,
@@ -253,6 +196,25 @@ void terraformer::ui::layouts::table::get_cell_sizes_into(span<box_size> sizes_o
 			break;
 	}
 }
+
+terraformer::single_array<terraformer::array_index<float>>
+terraformer::ui::layouts::table::get_cells_to_expand(span<float const> size_overrides) const
+{
+	single_array<array_index<float>> ret;
+	for(auto k : m_cell_sizes.element_indices())
+	{
+		array_index<float> const size_override_index{k.get()};
+		if(
+			std::holds_alternative<cell_size::expand>(m_cell_sizes.value_or(k, cell_size{}).value) &&
+			size_overrides.value_or(size_override_index, -1.0f) < 0.0f
+		)
+		{
+			ret.push_back(size_override_index);
+		}
+	}
+	return ret;
+}
+
 
 void terraformer::ui::layouts::table::get_cell_locations_into(
 	span<location> locs_out,
