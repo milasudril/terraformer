@@ -6,6 +6,7 @@
 #include "lib/array_classes/single_array.hpp"
 
 #include <numeric>
+#include <variant>
 
 terraformer::ui::layouts::table::row_array<float>
 terraformer::ui::layouts::table::set_default_cell_sizes_to(
@@ -92,6 +93,47 @@ void terraformer::ui::layouts::table::set_default_cell_sizes_to(span<box_size co
 			m_cols = set_default_cell_sizes_to(sizes_in, m_rows);
 			break;
 	}
+}
+
+void terraformer::ui::layouts::table::adjust_cell_widths_by_row(
+	float available_width,
+	span<float const> size_overrides
+)
+{
+	span<float> const actual_sizes{m_cols};
+	auto size_of_fixed_cols = 0.0f;
+	auto const col_count = std::size(m_rows);
+	array_index<float> current_col{};
+	auto greatest_col_width = 0.0f;
+	for(auto item: m_cell_sizes)
+	{
+		auto const current_cell_width = std::holds_alternative<cell_size::use_default>(item.value)?
+			actual_sizes[current_col] : 0.0f;
+
+		greatest_col_width = std::max(current_cell_width, greatest_col_width);
+		
+		++current_col;
+		if(current_col.get() == col_count)
+		{
+			size_of_fixed_cols += greatest_col_width;
+			current_col = array_index<float>{}; 
+			greatest_col_width = 0.0f;
+		}
+	}
+	
+	auto const cells_to_expand = get_cells_to_expand(size_overrides);
+	auto const no_outer_margin = m_params.no_outer_margin;
+	auto const margin = m_params.margin_x;
+	auto const size_of_margins = margin*static_cast<float>(
+		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
+	);
+
+	auto const space_for_expanding_cells = available_width - size_of_margins - size_of_fixed_cols;
+
+	auto const num_to_expand = static_cast<float>(std::size(cells_to_expand).get());
+	for(auto k : cells_to_expand.element_indices())
+	{ actual_sizes[cells_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
+
 }
 
 void terraformer::ui::layouts::table::adjust_cell_sizes(
@@ -208,9 +250,7 @@ terraformer::ui::layouts::table::get_cells_to_expand(span<float const> size_over
 			std::holds_alternative<cell_size::expand>(m_cell_sizes.value_or(k, cell_size{}).value) &&
 			size_overrides.value_or(size_override_index, -1.0f) < 0.0f
 		)
-		{
-			ret.push_back(size_override_index);
-		}
+		{ ret.push_back(size_override_index); }
 	}
 	return ret;
 }
