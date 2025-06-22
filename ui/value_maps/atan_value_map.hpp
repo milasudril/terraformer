@@ -2,8 +2,6 @@
 #define TERRAFORMER_UI_VALUE_MAPS_ATAN_VALUE_MAP_HPP
 
 #include <cmath>
-#include <limits>
-#include <cstdio>
 
 namespace terraformer::ui::value_maps
 {
@@ -27,7 +25,6 @@ namespace terraformer::ui::value_maps
 
 		constexpr float to_value(float x) const noexcept
 		{
-			printf("to_value (x = %.8g)\n", x);
 			auto const theta = m_theta_max*std::lerp(-1.0f, 1.0f, x);
 			return std::tan(theta); 
 			
