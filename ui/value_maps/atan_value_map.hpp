@@ -2,8 +2,6 @@
 #define TERRAFORMER_UI_VALUE_MAPS_ATAN_VALUE_MAP_HPP
 
 #include <cmath>
-#include <limits>
-#include <cstdio>
 
 namespace terraformer::ui::value_maps
 {
