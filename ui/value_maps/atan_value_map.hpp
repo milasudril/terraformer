@@ -27,7 +27,6 @@ namespace terraformer::ui::value_maps
 
 		constexpr float to_value(float x) const noexcept
 		{
-			printf("to_value (x = %.8g)\n", x);
 			auto const theta = m_theta_max*std::lerp(-1.0f, 1.0f, x);
 			return std::tan(theta); 
 			
