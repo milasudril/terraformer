@@ -6,7 +6,6 @@
 #include "./common_params.hpp"
 
 #include "lib/common/spaces.hpp"
-#include "lib/math_utils/ratio.hpp"
 #include "lib/array_classes/span.hpp"
 #include "lib/array_classes/single_array.hpp"
 
@@ -91,9 +90,6 @@ namespace terraformer::ui::layouts
 
 			std::variant<use_default, expand> value = use_default{};
 		};
-
-		static row_array<cell_size> rows(span<cell_size const> sizes)
-		{ return row_array<cell_size>{sizes}; }
 
 		static row_array<cell_size> rows(std::initializer_list<cell_size> const& sizes)
 		{ return row_array<cell_size>{span{std::begin(sizes), std::end(sizes)}}; }
