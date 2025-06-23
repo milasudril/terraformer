@@ -105,10 +105,15 @@ void terraformer::ui::layouts::table::adjust_cell_widths_by_row(
 	auto const col_count = std::size(m_rows);
 	array_index<float> current_col{};
 	auto greatest_col_width = 0.0f;
-	for(auto item: m_cell_sizes)
+	for(auto k: size_overrides.element_indices())
 	{
-		auto const current_cell_width = std::holds_alternative<cell_size::use_default>(item.value)?
-			actual_sizes[current_col] : 0.0f;
+		array_index<cell_size> const cell_size_index{k.get()};
+		auto const current_cell_width = std::holds_alternative<cell_size::use_default>(
+			m_cell_sizes.value_or(
+				cell_size_index, cell_size{}
+			).value
+		)?
+		actual_sizes[current_col] : 0.0f;
 
 		greatest_col_width = std::max(current_cell_width, greatest_col_width);
 		
@@ -243,14 +248,16 @@ terraformer::single_array<terraformer::array_index<float>>
 terraformer::ui::layouts::table::get_cells_to_expand(span<float const> size_overrides) const
 {
 	single_array<array_index<float>> ret;
-	for(auto k : m_cell_sizes.element_indices())
+	for(auto k : size_overrides.element_indices())
 	{
-		array_index<float> const size_override_index{k.get()};
+		array_index<cell_size> const cell_size_index{k.get()};
 		if(
-			std::holds_alternative<cell_size::expand>(m_cell_sizes.value_or(k, cell_size{}).value) &&
-			size_overrides.value_or(size_override_index, -1.0f) < 0.0f
+			std::holds_alternative<cell_size::expand>(
+				m_cell_sizes.value_or(cell_size_index, cell_size{}).value
+			) &&
+			size_overrides.value_or(k, -1.0f) < 0.0f
 		)
-		{ ret.push_back(size_override_index); }
+		{ ret.push_back(k); }
 	}
 	return ret;
 }
