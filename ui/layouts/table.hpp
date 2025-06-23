@@ -188,7 +188,7 @@ namespace terraformer::ui::layouts
 		
 		void adjust_cell_widths_by_row(float available_width, span<float const> size_overrides);
 		
-		static void adjust_cell_sizes_by_row(
+		static void adjust_cell_sizes_regular(
 			span<cell_size const> specified_sizes,
 			array_size<float> stride,
 			span<float> actual_sizes,
@@ -197,6 +197,17 @@ namespace terraformer::ui::layouts
 			float available_size,
 			span<float const> size_overrides
 		);
+		
+		static void adjust_cell_sizes_transposed(
+			span<cell_size const> specified_sizes,
+			array_size<float> stride,
+			span<float> actual_sizes,
+			float margin,
+			bool no_outer_margin,
+			float available_size,
+			span<float const> size_overrides
+		);
+
 
 		static void adjust_cell_sizes(
 			span<cell_size const> specified_sizes,
