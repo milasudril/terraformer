@@ -116,16 +116,16 @@ void terraformer::ui::layouts::table::adjust_cell_widths_by_row(
 		actual_sizes[current_col] : 0.0f;
 
 		greatest_col_width = std::max(current_cell_width, greatest_col_width);
-		
+
 		++current_col;
 		if(current_col.get() == col_count)
 		{
 			size_of_fixed_cols += greatest_col_width;
-			current_col = array_index<float>{}; 
+			current_col = array_index<float>{};
 			greatest_col_width = 0.0f;
 		}
 	}
-	
+
 	auto const cells_to_expand = get_cells_to_expand(m_cell_sizes, size_overrides);
 	auto const no_outer_margin = m_params.no_outer_margin;
 	auto const margin = m_params.margin_x;
@@ -142,7 +142,6 @@ void terraformer::ui::layouts::table::adjust_cell_widths_by_row(
 
 void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 	span<cell_size const> specified_sizes,
-	array_size<float> stride,
 	span<float> actual_sizes,
 	float margin,
 	bool no_outer_margin,
@@ -153,6 +152,7 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 	auto size_of_fixedsized_elements = 0.0f;
 	array_index<float> current_output_item{};
 	auto greatest_size = 0.0f;
+	auto const stride = std::size(actual_sizes);
 	for(auto k: size_overrides.element_indices())
 	{
 		array_index<cell_size> const cell_size_index{k.get()};
@@ -164,16 +164,16 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 		actual_sizes[current_output_item] : 0.0f;
 
 		greatest_size = std::max(current_cell_size, greatest_size);
-		
+
 		++current_output_item;
 		if(current_output_item == stride)
 		{
 			size_of_fixedsized_elements += greatest_size;
-			current_output_item = array_index<float>{}; 
+			current_output_item = array_index<float>{};
 			greatest_size = 0.0f;
 		}
 	}
-	
+
 	auto const cells_to_expand = get_cells_to_expand(specified_sizes, size_overrides);
 	auto const size_of_margins = margin*static_cast<float>(
 		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
@@ -188,7 +188,6 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 
 void terraformer::ui::layouts::table::adjust_cell_sizes_transposed(
 	span<cell_size const> specified_sizes,
-	array_size<float> stride,
 	span<float> actual_sizes,
 	float margin,
 	bool no_outer_margin,
@@ -196,6 +195,7 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_transposed(
 	span<float const> size_overrides
 )
 {
+	auto const stride = std::size(actual_sizes);
 	array_index<float> current_item{};
 	single_array<float> collected_sizes{stride};
 	for(auto k: size_overrides.element_indices())
@@ -209,19 +209,18 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_transposed(
 		actual_sizes[current_item] : 0.0f;
 
 		collected_sizes[current_item] = std::max(current_cell_size, collected_sizes[current_item]);
-		
-		
+
 		++current_item;;
 		if(current_item == stride)
 		{ current_item = array_index<float>{}; }
 	}
-	
+
 	auto const size_of_fixedsized_elements = std::accumulate(
 		std::begin(collected_sizes),
 		std::end(collected_sizes),
 		0.0f
 	);
-	
+
 	auto const cells_to_expand = get_cells_to_expand(specified_sizes, size_overrides);
 	auto const size_of_margins = margin*static_cast<float>(
 		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
@@ -275,8 +274,6 @@ void terraformer::ui::layouts::table::adjust_cell_sizes(
 	auto const num_to_expand = static_cast<float>(std::size(cells_to_expand).get());
 	for(auto k : cells_to_expand.element_indices())
 	{ actual_sizes[cells_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
-
-	return;
 }
 
 void terraformer::ui::layouts::table::get_cell_sizes_into(

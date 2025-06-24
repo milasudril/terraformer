@@ -185,22 +185,20 @@ namespace terraformer::ui::layouts
 		 */
 		void adjust_cell_heights(float available_height, span<float const>)
 		{ adjust_cell_sizes(m_rows_user, m_rows, available_height, m_params.margin_y, m_params.no_outer_margin); }
-		
+
 		void adjust_cell_widths_by_row(float available_width, span<float const> size_overrides);
-		
+
 		static void adjust_cell_sizes_regular(
 			span<cell_size const> specified_sizes,
-			array_size<float> stride,
 			span<float> actual_sizes,
 			float margin,
 			bool no_outer_margin,
 			float available_size,
 			span<float const> size_overrides
 		);
-		
+
 		static void adjust_cell_sizes_transposed(
 			span<cell_size const> specified_sizes,
-			array_size<float> stride,
 			span<float> actual_sizes,
 			float margin,
 			bool no_outer_margin,
@@ -295,12 +293,12 @@ namespace terraformer::ui::layouts
 			);
 			return *this;
 		}
-		
+
 		static single_array<array_index<float>> get_cells_to_expand(
 			span<cell_size const> cell_sizes,
 			span<float const> size_overrides
 		);
-			
+
 	private:
 		cell_order m_cell_order;
 		row_array<float> m_rows;
