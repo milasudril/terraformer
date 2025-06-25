@@ -128,37 +128,31 @@ namespace terraformer::ui::layouts
 			{
 				case cell_order::row_major:
 					m_cols = column_array<float>{column_count{fixdim_size}};
-					m_cols_user = column_array<cell_size>{column_count{fixdim_size}};
 					break;
 				case cell_order::column_major:
 					m_rows = row_array<float>{row_count{fixdim_size}};
-					m_rows_user = row_array<cell_size>{row_count{fixdim_size}};
 					break;
 			}
 		}
 
 		explicit table(row_count num_rows):
 			m_cell_order{cell_order::column_major},
-			m_rows{num_rows},
-			m_rows_user{num_rows}
+			m_rows{num_rows}
 		{}
 
 		explicit table(row_array<cell_size>&& rows):
 			m_cell_order{cell_order::column_major},
-			m_rows{row_count{std::size(rows)}},
-			m_rows_user{std::move(rows)}
+			m_rows{row_count{std::size(rows)}}
 		{}
 
 		explicit table(column_count num_cols):
 			m_cell_order{cell_order::row_major},
-			m_cols{num_cols},
-			m_cols_user{num_cols}
+			m_cols{num_cols}
 		{}
 
 		explicit table(column_array<cell_size>&& cols):
 			m_cell_order{cell_order::row_major},
-			m_cols{column_count{std::size(cols)}},
-			m_cols_user{std::move(cols)}
+			m_cols{column_count{std::size(cols)}}
 		{}
 
 		/**
@@ -177,20 +171,71 @@ namespace terraformer::ui::layouts
 		/**
 		 * Adjusts cell widths given available_width
 		 */
-		void adjust_cell_widths(float available_width, span<float const>)
-		{ adjust_cell_sizes(m_cols_user, m_cols, available_width, m_params.margin_x, m_params.no_outer_margin); }
+		void adjust_cell_widths(float available_width, span<float const> size_overrides)
+		{
+			switch(m_cell_order)
+			{
+				case cell_order::row_major:
+					adjust_cell_sizes_transposed(
+						m_cell_sizes,
+						m_cols,
+						m_params.margin_x,
+						m_params.no_outer_margin,
+						available_width,
+						size_overrides
+					);
+					break;
+
+				case cell_order::column_major:
+					adjust_cell_sizes_regular(
+						m_cell_sizes,
+						m_cols,
+						array_size<float>{std::size(m_rows)},
+						m_params.margin_x,
+						m_params.no_outer_margin,
+						available_width,
+						size_overrides
+					);
+					break;
+			}
+		}
 
 		/**
 		 * Adjusts cell heights given available_height
 		 */
-		void adjust_cell_heights(float available_height, span<float const>)
-		{ adjust_cell_sizes(m_rows_user, m_rows, available_height, m_params.margin_y, m_params.no_outer_margin); }
+		void adjust_cell_heights(float available_height, span<float const> size_overrides)
+		{
+			switch(m_cell_order)
+			{
+				case cell_order::row_major:
+					adjust_cell_sizes_regular(
+						m_cell_sizes,
+						m_rows,
+						array_size<float>{std::size(m_cols)},
+						m_params.margin_y,
+						m_params.no_outer_margin,
+						available_height,
+						size_overrides
+					);
+					break;
 
-		void adjust_cell_widths_by_row(float available_width, span<float const> size_overrides);
+				case cell_order::column_major:
+					adjust_cell_sizes_transposed(
+						m_cell_sizes,
+						m_rows,
+						m_params.margin_y,
+						m_params.no_outer_margin,
+						available_height,
+						size_overrides
+					);
+					break;
+			}
+		}
 
 		static void adjust_cell_sizes_regular(
 			span<cell_size const> specified_sizes,
 			span<float> actual_sizes,
+			array_size<float> stride,
 			float margin,
 			bool no_outer_margin,
 			float available_size,
@@ -204,15 +249,6 @@ namespace terraformer::ui::layouts
 			bool no_outer_margin,
 			float available_size,
 			span<float const> size_overrides
-		);
-
-
-		static void adjust_cell_sizes(
-			span<cell_size const> specified_sizes,
-			span<float> actual_sizes,
-			float available_size,
-			float margin,
-			bool no_outer_margin
 		);
 
 		/**
@@ -253,38 +289,6 @@ namespace terraformer::ui::layouts
 		{ return m_params; }
 
 		template<class T>
-		auto& set_record_size(size_t index, T&& value)
-		{
-			switch(m_cell_order)
-			{
-				case cell_order::row_major:
-					m_rows_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
-					return *this;
-
-				case cell_order::column_major:
-					m_cols_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
-					return *this;
-			}
-			__builtin_unreachable();
-		}
-
-		template<class T>
-		auto& set_field_size(size_t index, T&& value)
-		{
-			switch(m_cell_order)
-			{
-				case cell_order::row_major:
-					m_cols_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
-					return *this;
-
-				case cell_order::column_major:
-					m_rows_user.insert_or_assign(index, cell_size{.value = std::forward<T>(value)});
-					return *this;
-			}
-			__builtin_unreachable();
-		}
-
-		template<class T>
 		auto& set_cell_size(size_t index, T&& value)
 		{
 			m_cell_sizes.insert_or_assign(
@@ -303,8 +307,6 @@ namespace terraformer::ui::layouts
 		cell_order m_cell_order;
 		row_array<float> m_rows;
 		column_array<float> m_cols;
-		row_array<cell_size> m_rows_user;
-		column_array<cell_size> m_cols_user;
 		single_array<cell_size> m_cell_sizes;
 		common_params m_params{};
 	};

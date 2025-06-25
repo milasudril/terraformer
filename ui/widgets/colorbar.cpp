@@ -154,7 +154,7 @@ void terraformer::ui::widgets::colorbar::init()
 	{
 		m_labels[k].set_margin(0.0f);
 		append(std::ref(m_labels[k]), terraformer::ui::main::widget_geometry{});
-		layout.set_record_size(k, layouts::table::cell_size::expand{});
+		layout.set_cell_size(k, layouts::table::cell_size::expand{});
 	}
 	layout.params().no_outer_margin = false;
 	layout.params().margin_y = 0.0f;

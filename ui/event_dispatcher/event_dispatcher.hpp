@@ -91,7 +91,7 @@ namespace terraformer::ui::main
 				auto new_keyboard_widget = flat_widget_collection::npos;
 				try_dispatch(event, res, window, ui_controller{*this});
 
-				if(res.state().accepts_keyboard_input())
+				if(!res.empty() && res.state().accepts_keyboard_input())
 				{
 					update_flat_widget_collection();
 					new_keyboard_widget = find(res, m_flat_collection);

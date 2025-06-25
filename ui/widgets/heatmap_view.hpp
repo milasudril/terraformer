@@ -33,8 +33,7 @@ namespace terraformer::ui::widgets
 			append(std::ref(m_img_view), terraformer::ui::main::widget_geometry{});
 			append(std::ref(m_colorbar), terraformer::ui::main::widget_geometry{});
 			layout.params().no_outer_margin = true;
-			layout.set_field_size(0, layouts::table::cell_size::expand{});
-			layout.set_record_size(0, layouts::table::cell_size::expand{});
+			layout.set_cell_size(0, layouts::table::cell_size::expand{});
 			auto const attributes = get_attributes();
 			attributes.widget_states()[attributes.element_indices().front()].maximized = true;
 			is_transparent = true;

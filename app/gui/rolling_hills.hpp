@@ -64,6 +64,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		using input_widget_type = ui::widgets::form;
+		bool expand_layout_cell;
 	};
 
 	struct rolling_hills_shape_exponent_form_field
@@ -78,7 +79,7 @@ namespace terraformer::app
 		std::u8string_view label;
 		std::reference_wrapper<closed_closed_interval<float>> value_reference;
 		using input_widget_type = ui::widgets::interval_input;
-		bool maximize_widget;
+		bool expand_layout_cell;
 	};
 
 	struct rolling_hills_shape_clamp_to_hardness_field
@@ -95,7 +96,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		std::reference_wrapper<closed_closed_interval<float>> value_reference;
-		bool maximize_widget;
+		bool expand_layout_cell;
 		using input_widget_type = ui::widgets::interval_input;
 	};
 
@@ -103,6 +104,7 @@ namespace terraformer::app
 	{
 		std::u8string_view label;
 		using input_widget_type = ui::widgets::form;
+		bool expand_layout_cell;
 	};
 
 	void bind(rolling_hills_filter_descriptor& field_value, ui::widgets::form& parent)
@@ -175,7 +177,7 @@ namespace terraformer::app
 			rolling_hills_shape_clamp_to_input_range_form_field{
 				.label = u8"Range",
 				.value_reference = std::reference_wrapper(field_value.range),
-				.maximize_widget = true
+				.expand_layout_cell = true
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 		)
@@ -198,7 +200,7 @@ namespace terraformer::app
 			rolling_hills_shape_input_mapping_form_field{
 				.label = u8"Input mapping",
 				.value_reference = std::reference_wrapper(field_value.input_mapping),
-				.maximize_widget = true
+				.expand_layout_cell = true
 			},
 			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
 		)
@@ -229,7 +231,8 @@ namespace terraformer::app
 
 		auto& clamp_to = parent.create_widget(
 			rolling_hills_shape_clamp_to_form_field{
-				.label = u8"Clamp to"
+				.label = u8"Clamp to",
+				.expand_layout_cell = true
 			},
 			ui::main::widget_orientation::vertical
 		);
@@ -237,7 +240,8 @@ namespace terraformer::app
 
 		auto& shape = parent.create_widget(
 			rolling_hills_shape_form_field{
-				.label = u8"Shape"
+				.label = u8"Shape",
+				.expand_layout_cell = true
 			},
 			ui::main::widget_orientation::vertical
 		);

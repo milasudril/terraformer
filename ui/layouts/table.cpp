@@ -95,54 +95,10 @@ void terraformer::ui::layouts::table::set_default_cell_sizes_to(span<box_size co
 	}
 }
 
-void terraformer::ui::layouts::table::adjust_cell_widths_by_row(
-	float available_width,
-	span<float const> size_overrides
-)
-{
-	span<float> const actual_sizes{m_cols};
-	auto size_of_fixed_cols = 0.0f;
-	auto const col_count = std::size(m_rows);
-	array_index<float> current_col{};
-	auto greatest_col_width = 0.0f;
-	for(auto k: size_overrides.element_indices())
-	{
-		array_index<cell_size> const cell_size_index{k.get()};
-		auto const current_cell_width = std::holds_alternative<cell_size::use_default>(
-			m_cell_sizes.value_or(
-				cell_size_index, cell_size{}
-			).value
-		)?
-		actual_sizes[current_col] : 0.0f;
-
-		greatest_col_width = std::max(current_cell_width, greatest_col_width);
-
-		++current_col;
-		if(current_col.get() == col_count)
-		{
-			size_of_fixed_cols += greatest_col_width;
-			current_col = array_index<float>{};
-			greatest_col_width = 0.0f;
-		}
-	}
-
-	auto const cells_to_expand = get_cells_to_expand(m_cell_sizes, size_overrides);
-	auto const no_outer_margin = m_params.no_outer_margin;
-	auto const margin = m_params.margin_x;
-	auto const size_of_margins = margin*static_cast<float>(
-		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
-	);
-
-	auto const space_for_expanding_cells = available_width - size_of_margins - size_of_fixed_cols;
-
-	auto const num_to_expand = static_cast<float>(std::size(cells_to_expand).get());
-	for(auto k : cells_to_expand.element_indices())
-	{ actual_sizes[cells_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
-}
-
 void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 	span<cell_size const> specified_sizes,
 	span<float> actual_sizes,
+	array_size<float> stride,
 	float margin,
 	bool no_outer_margin,
 	float available_size,
@@ -151,8 +107,8 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 {
 	auto size_of_fixedsized_elements = 0.0f;
 	array_index<float> current_item{};
+	array_index<float> current_group{};
 	auto greatest_size = 0.0f;
-	auto const stride = std::size(actual_sizes);
 	auto has_expanding_cells = false;
 	single_array<array_index<float>> items_to_expand;
 
@@ -162,7 +118,7 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 
 		auto const current_cell_size = std::visit(
 			overload{
-				[default_size = actual_sizes[current_item]](cell_size::use_default){
+				[default_size = actual_sizes[current_group]](cell_size::use_default){
 					return default_size;
 				},
 				[&has_expanding_cells, overridden_size = size_overrides[k]](cell_size::expand){
@@ -180,13 +136,15 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 		++current_item;
 		if(current_item == stride)
 		{
-			size_of_fixedsized_elements += greatest_size;
 			if(has_expanding_cells)
 			{
-				items_to_expand.push_back(current_item);
+				items_to_expand.push_back(current_group);
 				has_expanding_cells = false;
 			}
+			else
+			{ size_of_fixedsized_elements += greatest_size; }
 			current_item = array_index<float>{};
+			++current_group;
 			greatest_size = 0.0f;
 		}
 	}
@@ -199,7 +157,10 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 
 	auto const num_to_expand = static_cast<float>(std::size(items_to_expand).get());
 	for(auto k : items_to_expand.element_indices())
-	{ actual_sizes[items_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
+	{
+		auto const index_to_expand = items_to_expand[k];
+		actual_sizes[index_to_expand] = space_for_expanding_cells/num_to_expand;
+	}
 }
 
 void terraformer::ui::layouts::table::adjust_cell_sizes_transposed(
@@ -211,101 +172,72 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_transposed(
 	span<float const> size_overrides
 )
 {
-	auto const stride = std::size(actual_sizes);
+	struct cell_size_info
+	{
+		float size = 0.0f;
+		bool is_expanding = false;
+	};
+
 	array_index<float> current_item{};
-	single_array<float> collected_sizes{stride};
-	auto has_expanding_cells = false;
-	single_array<array_index<float>> items_to_expand;
+	single_array collected_sizes{array_size<cell_size_info>{std::size(actual_sizes).get()}};
+	array_index<cell_size_info> current_group{};
 	for(auto k: size_overrides.element_indices())
 	{
 		array_index<cell_size> const cell_size_index{k.get()};
 		auto const current_cell_size = std::visit(
 			overload{
-				[default_size = actual_sizes[current_item]](cell_size::use_default){
-					return default_size;
+				[default_size = actual_sizes[array_index<float>{current_group.get()}]](cell_size::use_default){
+					return cell_size_info{
+						.size = default_size,
+						.is_expanding = false
+					};
 				},
-				[&has_expanding_cells, overridden_size = size_overrides[k]](cell_size::expand){
+				[overridden_size = size_overrides[k]](cell_size::expand){
 					if(overridden_size >= 0.0f)
-					{ return overridden_size; }
-					has_expanding_cells = true;
-					return 0.0f;
+					{
+						return cell_size_info{
+							.size = overridden_size,
+							.is_expanding = false
+						};
+					}
+					return cell_size_info{
+						.size = 0.0f,
+						.is_expanding = true
+					};
 				}
 			},
 			specified_sizes.value_or(cell_size_index, cell_size{}).value
 		);
 
-		collected_sizes[current_item] = std::max(current_cell_size, collected_sizes[current_item]);
-
-		++current_item;;
-		if(current_item == stride)
-		{
-			if(has_expanding_cells)
-			{
-				items_to_expand.push_back(current_item);
-				has_expanding_cells = false;
-			}
-			current_item = array_index<float>{};
-		}
-	}
-
-	auto const size_of_fixedsized_elements = std::accumulate(
-		std::begin(collected_sizes),
-		std::end(collected_sizes),
-		0.0f
-	);
-
-	auto const size_of_margins = margin*static_cast<float>(
-		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
-	);
-
-	auto const space_for_expanding_cells = available_size - size_of_margins - size_of_fixedsized_elements;
-
-	auto const num_to_expand = static_cast<float>(std::size(items_to_expand).get());
-	for(auto k : items_to_expand.element_indices())
-	{ actual_sizes[items_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
-}
-
-void terraformer::ui::layouts::table::adjust_cell_sizes(
-	span<cell_size const> specified_sizes,
-	span<float> actual_sizes,
-	float available_size,
-	float margin,
-	bool no_outer_margin
-)
-{
-	auto size_of_fixed_cells = 0.0f;
-	single_array<decltype(actual_sizes)::index_type> cells_to_expand;
-	for(auto k : actual_sizes.element_indices())
-	{
-		using index_type = single_array<cell_size>::index_type;
-		index_type const index{k.get()};
-
-		size_of_fixed_cells += std::visit(
-			overload{
-				[k, actual_sizes](cell_size::use_default){
-					return actual_sizes[k];
-				},
-				[&cells_to_expand, k](cell_size::expand){
-					cells_to_expand.push_back(k);
-					return 0.0f;
-				}
-			},
-			specified_sizes.value_or(index, cell_size::use_default{}).value
+		collected_sizes[current_group].size = std::max(current_cell_size.size, collected_sizes[current_group].size);
+		collected_sizes[current_group].is_expanding = (
+			current_cell_size.is_expanding || collected_sizes[current_group].is_expanding
 		);
+
+		++current_group;
+		if(current_group == std::size(collected_sizes))
+		{ current_group = array_index<cell_size_info>{}; }
 	}
 
-	if(cells_to_expand.empty())
-	{ return; }
+	single_array<array_index<float>> groups_to_expand;
+	auto size_of_fixedsized_groups = 0.0f;
+	for(auto k : collected_sizes.element_indices())
+	{
+		auto item = collected_sizes[k];
+		if(item.is_expanding)
+		{ groups_to_expand.push_back(array_index<float>{k.get()}); }
+		else
+		{ size_of_fixedsized_groups += item.size; }
+	}
 
 	auto const size_of_margins = margin*static_cast<float>(
 		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
 	);
 
-	auto const space_for_expanding_cells = available_size - size_of_margins - size_of_fixed_cells;
-
-	auto const num_to_expand = static_cast<float>(std::size(cells_to_expand).get());
-	for(auto k : cells_to_expand.element_indices())
-	{ actual_sizes[cells_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
+	auto const space_for_expanding_cells = available_size - size_of_margins - size_of_fixedsized_groups;
+	auto const num_to_expand = static_cast<float>(std::size(groups_to_expand).get());
+	for(auto k : groups_to_expand.element_indices())
+	{ actual_sizes[groups_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
 }
 
 void terraformer::ui::layouts::table::get_cell_sizes_into(

@@ -100,7 +100,7 @@ namespace terraformer::ui::widgets
 		{
 			m_label.text(label);
 			m_label.set_margin(0.0f);
-			layout.set_record_size(1, layouts::table::cell_size::expand{});
+			layout.set_cell_size(1, layouts::table::cell_size::expand{});
 			append(std::ref(m_label), main::widget_geometry{});
 			append(std::ref(m_colorbar), main::widget_geometry{});
 			is_transparent = true;
