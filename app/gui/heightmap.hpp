@@ -212,7 +212,7 @@ namespace terraformer::app
 			}
 		);
 		bind(heatmap_view_descriptor{field_value}, heatmap);
-#if 0
+#if 1
 		// FIXME: Need to solve collapsed expanding widget first
 		auto& xsections = parent.create_widget(
 			heightmap_xsections_form_field{
@@ -223,9 +223,9 @@ namespace terraformer::app
 		bind(xsections_view_descriptor{field_value}, xsections);
 #endif
 
-		parent.set_refresh_function([&heatmap](){
+		parent.set_refresh_function([&heatmap, &xsections](){
 			heatmap.refresh();
-//			xsections.refresh();
+			xsections.refresh();
 		});
 	}
 
