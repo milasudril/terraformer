@@ -23,11 +23,23 @@ namespace terraformer::ui::widgets
 			m_color_map{std::forward<ColorMap>(cm)}
 		{ }
 
-		void show_image(span_2d<float const> pixels);
+		void show_image(span_2d<float const> image);
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
+
+		void set_pixel_size(float new_val)
+		{
+			m_pixel_size = new_val;
+			m_redraw_required = true;
+		}
+
+		void set_orientation(float new_val)
+		{
+			m_orientation = new_val;
+			m_redraw_required = true;
+		}
 
 	private:
 		type_erased_value_map m_value_map{
@@ -42,6 +54,14 @@ namespace terraformer::ui::widgets
 		rgba_pixel m_bg_tint;
 		main::immutable_shared_texture m_background;
 		main::immutable_shared_texture m_null_texture;
+		box_size m_current_box;
+		grayscale_image m_source_image;
+		float m_min_val;
+		float m_max_val;
+		float m_pixel_size;
+		float m_orientation;
+		image m_diagram;
+		bool m_redraw_required{false};
 	};
 }
 

@@ -2,8 +2,19 @@
 
 #include "./xsection_image_view.hpp"
 
-void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float const>)
-{}
+void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float const> image)
+{
+	m_source_image = grayscale_image{image};
+	m_redraw_required = true;
+
+	auto const size = static_cast<size_t>(image.width())*static_cast<size_t>(image.height());
+	auto const minmax = std::ranges::minmax_element(image.data(), image.data() + size);
+	auto const min = *minmax.min;
+	auto const max = *minmax.max;
+
+	m_min_val = min > 0.0f? 0.0f : min;
+	m_max_val = max < 0.0f? 0.0f : max;
+}
 
 void terraformer::ui::widgets::xsection_image_view::theme_updated(main::config const& cfg, main::widget_instance_info)
 {
