@@ -102,10 +102,16 @@ namespace terraformer::app
 		bind(field_value.level_curves, level_curves_form);
 	}
 
+	struct xsection_view_attributes
+	{
+		float orientation = 0.0f;
+	};
+
 	struct heightmap_view_descriptor
 	{
 		std::reference_wrapper<grayscale_image const> data;
 		heatmap_view_attributes heatmap_presentation_attributes;
+		xsection_view_attributes xsection_presentation_attributes;;
 	};
 
 	struct heightmap_heatmap_form_field
@@ -167,23 +173,59 @@ namespace terraformer::app
 		});
 	}
 
-	struct heightmap_xsections_form_field
+	struct heightmap_xsection_form_field
 	{
 		std::u8string_view label;
 		bool expand_layout_cell;
 		using input_widget_type = ui::widgets::form;
 	};
 
-	struct xsections_view_descriptor
+	struct xsection_view_attributes_form_field
 	{
-		explicit xsections_view_descriptor(heightmap_view_descriptor& main_view):
-			data{main_view.data}
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
+
+	struct xsection_view_descriptor
+	{
+		explicit xsection_view_descriptor(heightmap_view_descriptor& main_view):
+			data{main_view.data},
+			presentation_attributes{main_view.xsection_presentation_attributes}
 		{}
 
 		std::reference_wrapper<grayscale_image const> data;
+		std::reference_wrapper<xsection_view_attributes> presentation_attributes;
 	};
 
-	void bind(xsections_view_descriptor const& field_value, ui::widgets::form& parent)
+	struct xsection_orientation_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
+	void bind(xsection_view_attributes& field_value, ui::widgets::form& parent)
+	{
+		parent.create_widget(
+			global_orientation_form_field{
+				.label = u8"Orientation",
+				.value_reference = std::ref(field_value.orientation)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{-0.5f, 0.5f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"-0.123456789")
+		.input_widget().visual_angle_range(
+			closed_closed_interval<geosimd::turn_angle>{
+				geosimd::turns{0.0},
+				geosimd::turns{1.0}
+			}
+		);
+	}
+
+	void bind(xsection_view_descriptor const& field_value, ui::widgets::form& parent)
 	{
 		auto& imgview = parent.create_widget(
 			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
@@ -197,6 +239,13 @@ namespace terraformer::app
 			ui::value_maps::affine_value_map{0.0f, 1.0f},
 			terraformer::get_depth_color_lut()
 		);
+
+		auto& settings_form = parent.create_widget(
+			xsection_view_attributes_form_field{
+				.label = u8"Settings"
+			}
+		);
+		bind(field_value.presentation_attributes.get(), settings_form);
 
 		parent.set_refresh_function([image = field_value.data, &imgview](){
 			imgview.show_image(image.get().pixels());
@@ -212,20 +261,18 @@ namespace terraformer::app
 			}
 		);
 		bind(heatmap_view_descriptor{field_value}, heatmap);
-#if 1
-		// FIXME: Need to solve collapsed expanding widget first
-		auto& xsections = parent.create_widget(
-			heightmap_xsections_form_field{
-				.label = u8"Cross-sections",
+
+		auto& xsection = parent.create_widget(
+			heightmap_xsection_form_field{
+				.label = u8"Cross-section",
 				.expand_layout_cell = true
 			}
 		);
-		bind(xsections_view_descriptor{field_value}, xsections);
-#endif
+		bind(xsection_view_descriptor{field_value}, xsection);
 
-		parent.set_refresh_function([&heatmap, &xsections](){
+		parent.set_refresh_function([&heatmap, &xsection](){
 			heatmap.refresh();
-			xsections.refresh();
+			xsection.refresh();
 		});
 	}
 

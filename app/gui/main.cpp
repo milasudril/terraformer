@@ -124,7 +124,8 @@ int main(int, char**)
 				.interval = 100.0f,
 				.visible = true
 			}
-		}
+		},
+		.xsection_presentation_attributes{}
 	};
 
 	auto& heightmap_view = main_form.create_widget(
