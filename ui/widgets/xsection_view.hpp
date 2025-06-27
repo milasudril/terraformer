@@ -2,7 +2,7 @@
 #define TERRAFORMER_UI_WIDGETS_XSECTION_VIEW_HPP
 
 #include "./colorbar.hpp"
-#include "./false_color_image_view.hpp"
+#include "./xsection_image_view.hpp"
 #include "./widget_group.hpp"
 #include "ui/layouts/table.hpp"
 
@@ -39,21 +39,12 @@ namespace terraformer::ui::widgets
 			is_transparent = true;
 		}
 
-		void show_level_curves()
-		{ m_img_view.show_level_curves(); }
-
-		void hide_level_curves()
-		{ m_img_view.hide_level_curves(); }
-
-		void set_level_curve_interval(float value)
-		{ m_img_view.set_level_curve_interval(value); }
-
 		void show_image(span_2d<float const> pixels)
 		{ m_img_view.show_image(pixels); }
 
 
 	private:
-		false_color_image_view m_img_view;
+		xsection_image_view m_img_view;
 		labeled_colorbar m_colorbar;
 	};
 }
