@@ -9,6 +9,7 @@
 
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/heatmap_view.hpp"
+#include "ui/widgets/xsection_view.hpp"
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
@@ -228,7 +229,7 @@ namespace terraformer::app
 	void bind(xsection_view_descriptor const& field_value, ui::widgets::form& parent)
 	{
 		auto& imgview = parent.create_widget(
-			heightmap_part_form_field<terraformer::ui::widgets::heatmap_view>{
+			heightmap_part_form_field<terraformer::ui::widgets::xsection_view>{
 				.label = u8"Output",
 				.value_reference = field_value.data,
 				.expand_layout_cell = true,
