@@ -4,6 +4,7 @@
 #define TERRAFORMER_UI_WIDGETS_XSECTION_IMAGE_VIEW_HPP
 
 #include "./value_map.hpp"
+#include "lib/common/spaces.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "ui/main/texture_types.hpp"
 #include "ui/main/widget.hpp"
@@ -41,6 +42,39 @@ namespace terraformer::ui::widgets
 			m_orientation = new_val;
 			m_redraw_required = true;
 		}
+
+		box_size compute_size(main::widget_width_request wr)
+		{
+			auto const img_width = static_cast<float>(m_source_image.width());
+			auto const img_height = static_cast<float>(m_source_image.width())*(m_max_val - m_min_val)/m_phys_width;
+			auto const h = std::max(wr.height, 16.0f);
+			auto const w = h*img_width/img_height;
+			m_current_box = box_size{w, h, 0.0f};
+			return box_size{w, h, 0.0f};
+		}
+
+		box_size compute_size(main::widget_height_request hr)
+		{
+			auto const img_width = static_cast<float>(m_source_image.width());
+			auto const img_height = static_cast<float>(m_source_image.width())*(m_max_val - m_min_val)/m_phys_width;
+			auto const w_temp = hr.width;
+			auto const h = std::max(w_temp*img_height/img_width, 16.0f);
+			auto const w = h*img_width/img_height;
+			m_current_box = box_size{w, h, 0.0f};
+			return box_size{w, h, 0.0f};
+		}
+
+		box_size confirm_size(box_size size)
+		{
+			auto const new_box = max(
+				m_current_box.fit_xy_keep_z(
+					size
+				),
+				box_size{1.0f, 1.0f, 0.0f}
+			);
+			return new_box;
+		}
+
 
 	private:
 		type_erased_value_map m_value_map{
