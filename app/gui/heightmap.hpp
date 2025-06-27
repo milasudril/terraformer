@@ -7,6 +7,7 @@
 #include "./plain.hpp"
 #include "./rolling_hills.hpp"
 
+#include "lib/generators/domain/domain_size.hpp"
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/heatmap_view.hpp"
 #include "ui/widgets/xsection_view.hpp"
@@ -111,6 +112,7 @@ namespace terraformer::app
 	struct heightmap_view_descriptor
 	{
 		std::reference_wrapper<grayscale_image const> data;
+		std::reference_wrapper<domain_size_descriptor const> domain_size;
 		heatmap_view_attributes heatmap_presentation_attributes;
 		xsection_view_attributes xsection_presentation_attributes;;
 	};
@@ -192,10 +194,12 @@ namespace terraformer::app
 	{
 		explicit xsection_view_descriptor(heightmap_view_descriptor& main_view):
 			data{main_view.data},
+			domain_size{main_view.domain_size},
 			presentation_attributes{main_view.xsection_presentation_attributes}
 		{}
 
 		std::reference_wrapper<grayscale_image const> data;
+		std::reference_wrapper<domain_size_descriptor const> domain_size;
 		std::reference_wrapper<xsection_view_attributes> presentation_attributes;
 	};
 
@@ -248,7 +252,8 @@ namespace terraformer::app
 		);
 		bind(field_value.presentation_attributes.get(), settings_form);
 
-		parent.set_refresh_function([image = field_value.data, &imgview](){
+		parent.set_refresh_function([image = field_value.data, domain_size = field_value.domain_size, &imgview](){
+			imgview.set_physical_dimensions(domain_size.get().width, domain_size.get().width);
 			imgview.show_image(image.get().pixels());
 		});
 	}

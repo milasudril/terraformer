@@ -29,9 +29,10 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
-		void set_pixel_size(float new_val)
+		void set_physical_dimensions(float width, float height)
 		{
-			m_pixel_size = new_val;
+			m_phys_width = width;
+			m_phys_height = height;
 			m_redraw_required = true;
 		}
 
@@ -58,7 +59,8 @@ namespace terraformer::ui::widgets
 		grayscale_image m_source_image;
 		float m_min_val;
 		float m_max_val;
-		float m_pixel_size;
+		float m_phys_width;
+		float m_phys_height;
 		float m_orientation;
 		image m_diagram;
 		bool m_redraw_required{false};

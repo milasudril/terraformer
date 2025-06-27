@@ -42,6 +42,8 @@ namespace terraformer::ui::widgets
 		void show_image(span_2d<float const> pixels)
 		{ m_img_view.show_image(pixels); }
 
+		void set_physical_dimensions(float width, float height)
+		{ m_img_view.set_physical_dimensions(width, height); }
 
 	private:
 		xsection_image_view m_img_view;
