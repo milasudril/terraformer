@@ -213,7 +213,7 @@ namespace terraformer
 		auto const output_width = output.width();
 		auto const output_height = output.height();
 
-		auto const sample_factor = box_size{input_width - 1.0f, input_height - 1.0f, 1.0f}
+		auto const sample_factor = box_size{input_width, input_height, 1.0f}
 			/box_size{static_cast<float>(output_width), static_cast<float>(output_height), 1.0f};
 
 		// TODO: This algorithm is only suitable for upscaling. Downscaling needs an
@@ -222,8 +222,13 @@ namespace terraformer
 		{
 			for(uint32_t x = 0; x != output_width; ++x)
 			{
-				auto const src_pixel = displacement{static_cast<float>(x), static_cast<float>(y), 0.0f}
-					.apply(sample_factor);
+				displacement const half{0.5f, 0.5f, 0.0f};
+				auto const src_pixel = (
+					  displacement{static_cast<float>(x), static_cast<float>(y), 0.0f}
+					+ half
+				)
+				.apply(sample_factor)
+				- half;
 				output(x, y) += input_gain*interp(input, src_pixel[0], src_pixel[1], clamp_at_boundary{});
 			}
 		}
@@ -238,7 +243,7 @@ namespace terraformer
 		auto const output_width = static_cast<uint32_t>(factor[0]*input_width + 0.5f);
 		auto const output_height = static_cast<uint32_t>(factor[1]*input_height + 0.5f);
 
-		auto const sample_factor = box_size{input_width - 1.0f, input_height - 1.0f, 1.0f}
+		auto const sample_factor = box_size{input_width, input_height, 1.0f}
 			/box_size{static_cast<float>(output_width), static_cast<float>(output_height), 1.0f};
 
 		basic_image<T> ret{output_width, output_height};
@@ -249,8 +254,13 @@ namespace terraformer
 		{
 			for(uint32_t x = 0; x != output_width; ++x)
 			{
-				auto const src_pixel = displacement{static_cast<float>(x), static_cast<float>(y), 0.0f}
-					.apply(sample_factor);
+				displacement const half{0.5f, 0.5f, 0.0f};
+				auto const src_pixel = (
+					  displacement{static_cast<float>(x), static_cast<float>(y), 0.0f}
+					+ half
+				)
+				.apply(sample_factor)
+				- half;
 				ret(x, y) = interp(input, src_pixel[0], src_pixel[1], clamp_at_boundary{});
 			}
 		}
