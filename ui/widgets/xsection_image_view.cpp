@@ -51,14 +51,12 @@ namespace
 		for(size_t k = 0; k != 16; ++k)
 		{
 			auto const slice_offset = static_cast<uint32_t>(dy*(static_cast<float>(k) + 0.5f));
-			for(uint32_t x_in = 0; x_in != input.width(); ++x_in)
+			for(uint32_t x_out = 0; x_out != w; ++x_out)
 			{
+				auto const x_in = static_cast<uint32_t>(static_cast<float>(x_out)*params.xy_scale);
 				auto const z = static_cast<float>(h)*(params.z_max - input(x_in, slice_offset))/
 					(params.z_max - params.z_min);
-				auto const x_out = (static_cast<float>(x_in) + 0.5f)*params.xy_scale;
-				ret(
-					std::min(static_cast<uint32_t>(x_out), w - 1),
-					std::min(static_cast<uint32_t>(z), h - 1)) =
+				ret(x_out, std::min(static_cast<uint32_t>(z), h - 1)) =
 					terraformer::rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f};
 			}
 		}
@@ -83,7 +81,7 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 			m_source_image.pixels(),
 			draw_xsections_params{
 				.output_size = m_adjusted_box,
-				.xy_scale = m_adjusted_box[0]/m_src_image_box_xy[0],
+				.xy_scale = m_src_image_box_xy[0]/m_adjusted_box[0],
 				.z_min = m_min_val,
 				.z_max = m_max_val
 			}
