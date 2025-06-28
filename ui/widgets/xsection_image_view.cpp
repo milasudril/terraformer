@@ -1,7 +1,9 @@
 //@	{"target":{"name":"xsection_image_view.o"}}
 
 #include "./xsection_image_view.hpp"
+
 #include "lib/common/spaces.hpp"
+#include "lib/math_utils/interp.hpp"
 
 void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float const> image)
 {
@@ -50,13 +52,15 @@ namespace
 
 		for(size_t k = 0; k != 16; ++k)
 		{
-			auto const slice_offset = static_cast<uint32_t>(dy*(static_cast<float>(k) + 0.5f));
+			auto const slice_offset = dy*(static_cast<float>(k) + 0.5f);
 			for(uint32_t x_out = 0; x_out != w; ++x_out)
 			{
-				auto const x_in = static_cast<uint32_t>(static_cast<float>(x_out)*params.xy_scale);
-				auto const z = static_cast<float>(h)*(params.z_max - input(x_in, slice_offset))/
+				auto const x_in = static_cast<float>(x_out)*params.xy_scale;
+				auto const y_in = slice_offset;
+				auto const z_in = interp(input, x_in, y_in, terraformer::clamp_at_boundary{});
+				auto const z_out = static_cast<float>(h)*(params.z_max - z_in)/
 					(params.z_max - params.z_min);
-				ret(x_out, std::min(static_cast<uint32_t>(z), h - 1)) =
+				ret(x_out, std::min(static_cast<uint32_t>(z_out), h - 1)) =
 					terraformer::rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f};
 			}
 		}
