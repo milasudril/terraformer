@@ -251,10 +251,17 @@ namespace terraformer::app
 			}
 		);
 		bind(field_value.presentation_attributes.get(), settings_form);
+		settings_form.on_content_updated([
+			&orientation = field_value.presentation_attributes.get().orientation,
+			&imgview
+		](auto&&...){
+			imgview.set_orientation(orientation);
+		});
 
-		parent.set_refresh_function([image = field_value.data, domain_size = field_value.domain_size, &imgview](){
-			imgview.set_physical_dimensions(domain_size.get().width, domain_size.get().width);
-			imgview.show_image(image.get().pixels());
+		parent.set_refresh_function([fv = field_value, &imgview](){
+			imgview.set_physical_dimensions(fv.domain_size.get().width, fv.domain_size.get().width);
+			imgview.set_orientation(fv.presentation_attributes.get().orientation);
+			imgview.show_image(fv.data.get().pixels());
 		});
 	}
 

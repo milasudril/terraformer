@@ -5,6 +5,7 @@
 
 #include "./value_map.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/math_utils/trigfunc.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "ui/main/texture_types.hpp"
 #include "ui/main/widget.hpp"
@@ -53,14 +54,12 @@ namespace terraformer::ui::widgets
 			m_phys_width = width;
 			m_phys_height = height;
 			update_current_box();
-			m_redraw_required = true;
 		}
 
 		void set_orientation(float new_val)
 		{
 			m_orientation = new_val;
 			update_current_box();
-			m_redraw_required = true;
 		}
 
 		box_size compute_size(main::widget_width_request wr)
@@ -108,10 +107,13 @@ namespace terraformer::ui::widgets
 
 		void update_current_box()
 		{
-			auto const width = static_cast<float>(m_source_image.width());
-			auto const height = width*(m_max_val - m_min_val)/m_phys_width;
-
+			auto const r = distance_from_origin_to_edge_xy(
+				m_src_image_box, 2.0f*std::numbers::pi_v<float>*m_orientation
+			);
+			auto const width = r;
+			auto const height = m_src_image_box[0]*(m_max_val - m_min_val)/m_phys_width;
 			m_current_box = box_size{width, height, 0.0f};
+			m_redraw_required = true;
 		}
 
 		xsection_image_view_config m_cfg;

@@ -45,6 +45,9 @@ namespace terraformer::ui::widgets
 		void set_physical_dimensions(float width, float height)
 		{ m_img_view.set_physical_dimensions(width, height); }
 
+		void set_orientation(float theta)
+		{ m_img_view.set_orientation(theta); }
+
 	private:
 		xsection_image_view m_img_view;
 		labeled_colorbar m_colorbar;
