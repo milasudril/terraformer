@@ -58,7 +58,7 @@ namespace terraformer::ui::widgets
 
 		void set_orientation(float new_val)
 		{
-			m_orientation = new_val;
+			m_orientation = 2.0f*std::numbers::pi_v<float>*new_val;
 			update_current_box();
 		}
 
@@ -107,9 +107,7 @@ namespace terraformer::ui::widgets
 
 		void update_current_box()
 		{
-			auto const r = distance_from_origin_to_edge_xy(
-				m_src_image_box, 2.0f*std::numbers::pi_v<float>*m_orientation
-			);
+			auto const r = distance_from_origin_to_edge_xy(m_src_image_box, m_orientation);
 			auto const width = r;
 			auto const height = m_src_image_box[0]*(m_max_val - m_min_val)/m_phys_width;
 			m_current_box = box_size{width, height, 0.0f};
