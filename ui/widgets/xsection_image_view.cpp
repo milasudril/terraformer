@@ -16,23 +16,16 @@ void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float con
 	m_max_val = max < 0.0f? 0.0f : max;
 }
 
-void terraformer::ui::widgets::xsection_image_view::theme_updated(main::config const& cfg, main::widget_instance_info)
-{
-	m_bg_tint = cfg.input_area.colors.background;
-	m_background = cfg.misc_textures.white;
-	m_null_texture = cfg.misc_textures.null;
-}
-
 terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_image_view::prepare_for_presentation(main::graphics_backend_ref backend)
 {
 	std::array const bg_tints{
-		m_bg_tint,
-		m_bg_tint,
-		m_bg_tint,
-		m_bg_tint
+		m_cfg.bg_tint,
+		m_cfg.bg_tint,
+		m_cfg.bg_tint,
+		m_cfg.bg_tint
 	};
-	auto const null_texture = m_null_texture->get_backend_resource(backend).get();
-	auto const background = m_background->get_backend_resource(backend).get();
+	auto const null_texture = m_cfg.null_texture->get_backend_resource(backend).get();
+	auto const background = m_cfg.background->get_backend_resource(backend).get();
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
