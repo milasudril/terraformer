@@ -109,7 +109,6 @@ namespace terraformer::ui::widgets
 		{
 			auto const d = 2.0f*distance_from_origin_to_edge_xy(m_src_image_box_xy, m_orientation);
 			auto const width = d;
-			printf("min = %.8g, max = %.8g\n", m_min_val, m_max_val);
 			auto const height = m_src_image_box_xy[0]*(m_max_val - m_min_val)/m_phys_width;
 			m_src_image_box_xz = box_size{width, height, 0.0f};
 			m_redraw_required = true;

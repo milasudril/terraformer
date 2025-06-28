@@ -27,34 +27,35 @@ void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float con
 
 namespace
 {
+	struct draw_xsections_params
+	{
+		terraformer::box_size output_size;
+		float xy_scale;
+		float z_min;
+		float z_max;
+	};
+
 	terraformer::image draw_cross_sections(
 		terraformer::span_2d<float const> input,
-		terraformer::box_size input_size,
-		terraformer::box_size output_size,
-		float z_scale
+		draw_xsections_params const& params
 	)
 	{
-		auto const w = static_cast<uint32_t>(output_size[0] + 0.5f);
-		auto const h = static_cast<uint32_t>(output_size[1] + 0.5f);
-
-
+		auto const w = static_cast<uint32_t>(params.output_size[0] + 0.5f);
+		auto const h = static_cast<uint32_t>(params.output_size[1] + 0.5f);
 		assert(h >= 1);
 		assert(w >= 1);
 
 		terraformer::image ret{w, h};
-
-		auto const scale = output_size/input_size;
 		auto const dy = static_cast<float>(input.height())/16.0f;
-		printf("--- Rendering with w = %u, h = %u, z_scale = %.8g\n", w, h, scale[1]);
 
 		for(size_t k = 0; k != 16; ++k)
 		{
 			auto const slice_offset = static_cast<uint32_t>(dy*(static_cast<float>(k) + 0.5f));
 			for(uint32_t x_in = 0; x_in != input.width(); ++x_in)
 			{
-				auto const z = static_cast<float>(h)*(1.0f - input(x_in, slice_offset)/z_scale);
-				auto const x_out = (static_cast<float>(x_in) + 0.5f)*scale[0];
-				//printf("z_in = %.8g, z_out = %.8g, %u\n", input(x_in, slice_offset), z, h);
+				auto const z = static_cast<float>(h)*(params.z_max - input(x_in, slice_offset))/
+					(params.z_max - params.z_min);
+				auto const x_out = (static_cast<float>(x_in) + 0.5f)*params.xy_scale;
 				ret(
 					std::min(static_cast<uint32_t>(x_out), w - 1),
 					std::min(static_cast<uint32_t>(z), h - 1)) =
@@ -80,9 +81,12 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 	{
 		m_diagram = draw_cross_sections(
 			m_source_image.pixels(),
-			m_src_image_box_xz,
-			m_adjusted_box,
-			m_max_val - m_min_val
+			draw_xsections_params{
+				.output_size = m_adjusted_box,
+				.xy_scale = m_adjusted_box[0]/m_src_image_box_xy[0],
+				.z_min = m_min_val,
+				.z_max = m_max_val
+			}
 		);
 		m_redraw_required = false;
 	}
