@@ -50,19 +50,15 @@ namespace
 		assert(w >= 1);
 
 		terraformer::image ret{w, h};
-		auto const dy = static_cast<float>(input.height())/16.0f;
-		auto const cos_theta = std::cos(params.orientation);
-		auto const sin_theta = std::sin(params.orientation);
+		size_t const slice_count = 8;
+		auto const dy = static_cast<float>(input.height())/static_cast<float>(slice_count);
 
-		for(size_t k = 0; k != 16; ++k)
+		for(size_t k = 0; k != slice_count; ++k)
 		{
-			auto const eta = dy*(static_cast<float>(k) + 0.5f - 8.0f);
-
 			for(uint32_t x_out = 0; x_out != w; ++x_out)
 			{
-				auto const xi = (static_cast<float>(x_out) + 0.5f - 0.5f*w_float)*params.xy_scale;
-				auto const x_in = cos_theta*xi + sin_theta*eta + 0.5f*w_float*params.xy_scale;
-				auto const slice_offset = -sin_theta*xi + cos_theta*eta + 8.0f*dy;
+				auto const x_in = (static_cast<float>(x_out) + 0.5f)*params.xy_scale - 0.5f;
+				auto const slice_offset = (static_cast<float>(k) + 0.5f)*dy;
 
 				auto const y_in = slice_offset;
 				auto const z_in = interp(input, x_in, y_in, terraformer::clamp_at_boundary{});
