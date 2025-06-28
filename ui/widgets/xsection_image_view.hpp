@@ -53,19 +53,19 @@ namespace terraformer::ui::widgets
 		{
 			m_phys_width = width;
 			m_phys_height = height;
-			update_current_box();
+			update_src_image_box_xz();
 		}
 
 		void set_orientation(float new_val)
 		{
 			m_orientation = 2.0f*std::numbers::pi_v<float>*new_val;
-			update_current_box();
+			update_src_image_box_xz();
 		}
 
 		box_size compute_size(main::widget_width_request wr)
 		{
-			auto const img_width = m_current_box[0];
-			auto const img_height = m_current_box[1];
+			auto const img_width = m_src_image_box_xz[0];
+			auto const img_height = m_src_image_box_xz[1];
 			auto const h = std::max(wr.height, m_cfg.min_img_height);
 			auto const w = h*img_width/img_height;
 			return box_size{w, h, 0.0f} + 2.0f*m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
@@ -73,8 +73,8 @@ namespace terraformer::ui::widgets
 
 		box_size compute_size(main::widget_height_request hr)
 		{
-			auto const img_width = m_current_box[0];
-			auto const img_height = m_current_box[1];
+			auto const img_width = m_src_image_box_xz[0];
+			auto const img_height = m_src_image_box_xz[1];
 			auto const w_temp = hr.width;
 			auto const h = std::max(w_temp*img_height/img_width, m_cfg.min_img_height);
 			auto const w = h*img_width/img_height;
@@ -84,7 +84,7 @@ namespace terraformer::ui::widgets
 		box_size confirm_size(box_size size)
 		{
 			auto const new_box = max(
-				m_current_box.fit_xy_keep_z(
+				m_src_image_box_xz.fit_xy_keep_z(
 					size + 2.0f*m_cfg.border_thickness*displacement{-1.0f, -1.0f, 0.0f}
 				),
 				box_size{1.0f, 1.0f, 0.0f}
@@ -105,29 +105,30 @@ namespace terraformer::ui::widgets
 			}
 		};
 
-		void update_current_box()
+		void update_src_image_box_xz()
 		{
-			auto const r = distance_from_origin_to_edge_xy(m_src_image_box, m_orientation);
-			auto const width = r;
-			auto const height = m_src_image_box[0]*(m_max_val - m_min_val)/m_phys_width;
-			m_current_box = box_size{width, height, 0.0f};
+			auto const d = 2.0f*distance_from_origin_to_edge_xy(m_src_image_box_xy, m_orientation);
+			auto const width = d;
+			printf("min = %.8g, max = %.8g\n", m_min_val, m_max_val);
+			auto const height = m_src_image_box_xy[0]*(m_max_val - m_min_val)/m_phys_width;
+			m_src_image_box_xz = box_size{width, height, 0.0f};
 			m_redraw_required = true;
 		}
 
 		xsection_image_view_config m_cfg;
-		box_size m_current_box;
+		box_size m_src_image_box_xz;
 		box_size m_adjusted_box;
 		main::immutable_shared_texture m_background;
 
 		grayscale_image m_source_image;
 		float m_min_val;
 		float m_max_val;
-		box_size m_src_image_box;
+		box_size m_src_image_box_xy;
 
 		float m_phys_width;
 		float m_phys_height;
 		float m_orientation;
-		image m_diagram;
+		main::unique_texture m_diagram;
 		bool m_redraw_required{false};
 	};
 }

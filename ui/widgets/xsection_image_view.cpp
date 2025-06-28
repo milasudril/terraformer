@@ -16,13 +16,53 @@ void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float con
 	m_min_val = min > 0.0f? 0.0f : min;
 	m_max_val = max < 0.0f? 0.0f : max;
 
-	m_src_image_box = box_size{
+	m_src_image_box_xy = box_size{
 		static_cast<float>(m_source_image.width()),
 		static_cast<float>(m_source_image.height()),
 		0.0f
 	};
 
-	update_current_box();
+	update_src_image_box_xz();
+}
+
+namespace
+{
+	terraformer::image draw_cross_sections(
+		terraformer::span_2d<float const> input,
+		terraformer::box_size input_size,
+		terraformer::box_size output_size,
+		float z_scale
+	)
+	{
+		auto const w = static_cast<uint32_t>(output_size[0] + 0.5f);
+		auto const h = static_cast<uint32_t>(output_size[1] + 0.5f);
+
+
+		assert(h >= 1);
+		assert(w >= 1);
+
+		terraformer::image ret{w, h};
+
+		auto const scale = output_size/input_size;
+		auto const dy = static_cast<float>(input.height())/16.0f;
+		printf("--- Rendering with w = %u, h = %u, z_scale = %.8g\n", w, h, scale[1]);
+
+		for(size_t k = 0; k != 16; ++k)
+		{
+			auto const slice_offset = static_cast<uint32_t>(dy*(static_cast<float>(k) + 0.5f));
+			for(uint32_t x_in = 0; x_in != input.width(); ++x_in)
+			{
+				auto const z = static_cast<float>(h)*(1.0f - input(x_in, slice_offset)/z_scale);
+				auto const x_out = (static_cast<float>(x_in) + 0.5f)*scale[0];
+				//printf("z_in = %.8g, z_out = %.8g, %u\n", input(x_in, slice_offset), z, h);
+				ret(
+					std::min(static_cast<uint32_t>(x_out), w - 1),
+					std::min(static_cast<uint32_t>(z), h - 1)) =
+					terraformer::rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f};
+			}
+		}
+		return ret;
+	}
 }
 
 terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_image_view::prepare_for_presentation(main::graphics_backend_ref backend)
@@ -35,6 +75,25 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 	};
 	auto const null_texture = m_cfg.null_texture->get_backend_resource(backend).get();
 	auto const background = m_cfg.background->get_backend_resource(backend).get();
+
+	if(m_redraw_required)
+	{
+		m_diagram = draw_cross_sections(
+			m_source_image.pixels(),
+			m_src_image_box_xz,
+			m_adjusted_box,
+			m_max_val - m_min_val
+		);
+		m_redraw_required = false;
+	}
+
+	std::array const fg_tints{
+		rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+		rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+		rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+		rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+	};
+
 	return main::widget_layer_stack{
 		.background = main::widget_layer{
 			.offset = displacement{},
@@ -55,9 +114,8 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 		.foreground = main::widget_layer{
 			.offset = displacement{},
 			.rotation = geosimd::turn_angle{},
-			// TODO: This should be the image to display
-			.texture = null_texture,
-			.tints = std::array<rgba_pixel, 4>{}
+			.texture = m_diagram.get_backend_resource(backend).get(),
+			.tints = fg_tints
 		},
 		.frame = main::widget_layer{
 			.offset = displacement{},
