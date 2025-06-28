@@ -122,6 +122,8 @@ namespace terraformer::ui::widgets
 		grayscale_image m_source_image;
 		float m_min_val;
 		float m_max_val;
+		box_size m_src_image_box;
+
 		float m_phys_width;
 		float m_phys_height;
 		float m_orientation;

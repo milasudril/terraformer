@@ -1,6 +1,7 @@
 //@	{"target":{"name":"xsection_image_view.o"}}
 
 #include "./xsection_image_view.hpp"
+#include "lib/common/spaces.hpp"
 
 void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float const> image)
 {
@@ -14,6 +15,14 @@ void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float con
 
 	m_min_val = min > 0.0f? 0.0f : min;
 	m_max_val = max < 0.0f? 0.0f : max;
+
+	m_src_image_box = box_size{
+		static_cast<float>(m_source_image.width()),
+		static_cast<float>(m_source_image.height()),
+		0.0f
+	};
+
+	update_current_box();
 }
 
 terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_image_view::prepare_for_presentation(main::graphics_backend_ref backend)
