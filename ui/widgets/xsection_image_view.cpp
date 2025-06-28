@@ -35,6 +35,7 @@ namespace
 		float xy_scale;
 		float z_min;
 		float z_max;
+		float orientation;
 	};
 
 	terraformer::image draw_cross_sections(
@@ -42,20 +43,27 @@ namespace
 		draw_xsections_params const& params
 	)
 	{
-		auto const w = static_cast<uint32_t>(params.output_size[0] + 0.5f);
+		auto const w_float = params.output_size[0];
+		auto const w = static_cast<uint32_t>(w_float + 0.5f);
 		auto const h = static_cast<uint32_t>(params.output_size[1] + 0.5f);
 		assert(h >= 1);
 		assert(w >= 1);
 
 		terraformer::image ret{w, h};
 		auto const dy = static_cast<float>(input.height())/16.0f;
+		auto const cos_theta = std::cos(params.orientation);
+		auto const sin_theta = std::sin(params.orientation);
 
 		for(size_t k = 0; k != 16; ++k)
 		{
-			auto const slice_offset = dy*(static_cast<float>(k) + 0.5f);
+			auto const eta = dy*(static_cast<float>(k) + 0.5f - 8.0f);
+
 			for(uint32_t x_out = 0; x_out != w; ++x_out)
 			{
-				auto const x_in = static_cast<float>(x_out)*params.xy_scale;
+				auto const xi = (static_cast<float>(x_out) + 0.5f - 0.5f*w_float)*params.xy_scale;
+				auto const x_in = cos_theta*xi + sin_theta*eta + 0.5f*w_float*params.xy_scale;
+				auto const slice_offset = -sin_theta*xi + cos_theta*eta + 8.0f*dy;
+
 				auto const y_in = slice_offset;
 				auto const z_in = interp(input, x_in, y_in, terraformer::clamp_at_boundary{});
 				auto const z_out = static_cast<float>(h)*(params.z_max - z_in)/
@@ -87,7 +95,8 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 				.output_size = m_adjusted_box,
 				.xy_scale = m_src_image_box_xy[0]/m_adjusted_box[0],
 				.z_min = m_min_val,
-				.z_max = m_max_val
+				.z_max = m_max_val,
+				.orientation = m_orientation
 			}
 		);
 		m_redraw_required = false;
