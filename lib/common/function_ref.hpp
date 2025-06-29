@@ -46,16 +46,11 @@ namespace terraformer
 			m_handle{nullptr},
 			m_function{[](void*, Args... args){
 				return bound_callable<Callable>::call(std::forward<Args>(args)...);
-			}},
-			m_dtor{empty_dtor}
+			}}
 		{
 		}
 
 		template<class Func>
-		requires(
-			!std::is_same_v<std::remove_cvref_t<Func>, function_ref>
-			&& !std::is_same_v<std::decay_t<Func>, stateless_callback>
-		)
 		function_ref(std::reference_wrapper<Func> f):
 			m_handle{&f.get()},
 			m_function{[](void* handle, Args... args){
@@ -64,11 +59,23 @@ namespace terraformer
 			}}
 		{}
 
-		R operator()(Args... args)
+		template<class Func>
+		function_ref(Func* f):
+			m_handle{f},
+			m_function{[](void* handle, Args... args){
+				auto& obj = *static_cast<Func*>(handle);
+				return obj(std::forward<Args>(args)...);
+			}}
+		{}
+
+		R operator()(Args... args) const
 		{ return m_function(m_handle, std::forward<Args>(args)...); }
 
 		operator bool() const
 		{ return m_function != nullptr; }
+
+		void* handle() const
+		{ return m_handle; }
 
 	private:
 		static void empty_dtor(void*){}
