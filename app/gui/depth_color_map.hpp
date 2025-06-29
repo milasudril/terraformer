@@ -11,9 +11,9 @@ namespace terraformer
 	constexpr std::array<float, 2> depth_levels{0.0f, 1.0f};
 	constexpr std::array<terraformer::rgba_pixel, 2> depth_colors{
 		rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
-		+ normalize(rgba_pixel{0.5f, 1.0f, 0.0f, 0.0f}, perceptual_color_intensity(0.25f)),
+		+ normalize(rgba_pixel{0.5f, 1.0f, 0.0f, 0.0f}, perceptual_color_intensity(0.5f)),
 		rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f}
-		+ normalize(rgba_pixel{0.0f, 0.5f, 1.0f, 0.0f}, perceptual_color_intensity(0.5f))
+		+ normalize(rgba_pixel{0.0f, 0.5f, 1.0f, 0.0f}, perceptual_color_intensity(0.75f))
 	};
 
 	constexpr auto get_depth_color_lut()
