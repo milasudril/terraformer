@@ -7,6 +7,7 @@
 #include "lib/common/spaces.hpp"
 #include "ui/layouts/table.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
+#include <numbers>
 
 namespace terraformer::ui::widgets
 {
@@ -47,15 +48,30 @@ namespace terraformer::ui::widgets
 		void set_physical_dimensions(box_size dim)
 		{
 			m_img_view.set_physical_dimensions(dim);
-
-			// FIXME: Range depends on orientation
-			m_colorbar.set_value_map(value_maps::affine_value_map{0.0f, dim[1]});
+			m_phys_dimensions = dim;
+			update_colorbar_range();
 		}
 
 		void set_orientation(float theta)
-		{ m_img_view.set_orientation(theta); }
+		{
+			m_img_view.set_orientation(theta);
+			m_orientation = 2.0f*std::numbers::pi_v<float>*theta;
+			update_colorbar_range();
+		}
 
 	private:
+		void update_colorbar_range()
+		{
+			auto const d_orhto = 2.0f*distance_from_origin_to_edge_xy(
+				m_phys_dimensions,
+				m_orientation + 0.5f*std::numbers::pi_v<float>
+			);
+			m_colorbar.set_value_map(value_maps::affine_value_map{0.0f, d_orhto});
+		}
+
+
+		box_size m_phys_dimensions;
+		float m_orientation{};
 		xsection_image_view m_img_view;
 		labeled_colorbar m_colorbar;
 	};
