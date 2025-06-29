@@ -240,7 +240,6 @@ namespace terraformer::app
 				.maximize_widget = true
 			},
 			u8"View depth/m",
-			// FIXME: Value map depends on domain size
 			ui::value_maps::affine_value_map{0.0f, 1.0f},
 			terraformer::get_depth_color_lut()
 		);
