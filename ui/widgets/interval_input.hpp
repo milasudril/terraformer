@@ -70,7 +70,7 @@ namespace terraformer::ui::widgets
 					main::ui_controller ui_ctrl
 				){
 					m_slider.value(closed_closed_interval{m_textbox_lower.value(), m_textbox_upper.value()});
-					src.value(m_slider.value().min());
+					src.value(m_slider.value().max());
 					m_on_value_changed(*this, window, ui_ctrl);
 				}
 			);
