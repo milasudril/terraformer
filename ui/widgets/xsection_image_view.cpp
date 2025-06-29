@@ -2,9 +2,12 @@
 
 #include "./xsection_image_view.hpp"
 
+#include "lib/common/function_ref.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/math_utils/interp.hpp"
+#include "lib/pixel_store/rgba_pixel.hpp"
+#include "ui/value_maps/affine_value_map.hpp"
 
 void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float const> image)
 {
@@ -37,6 +40,8 @@ namespace
 		float z_min;
 		float z_max;
 		float orientation;
+		terraformer::ui::value_maps::affine_value_map depth_value_map;
+		terraformer::function_ref<terraformer::rgba_pixel(float)> color_map;
 	};
 
 	terraformer::image draw_cross_sections(
@@ -66,7 +71,11 @@ namespace
 				auto const z_out = static_cast<float>(h)*(params.z_max - z_in)/
 					(params.z_max - params.z_min);
 				ret(x_out, std::min(static_cast<uint32_t>(z_out), h - 1)) =
-					terraformer::rgba_pixel{0.0f, 0.0f, 0.0f, 1.0f};
+					params.color_map(
+						std::clamp(
+							1.0f - params.depth_value_map.from_value(slice_offset), 0.0f, 1.0f
+						)
+					);
 			}
 		}
 		return ret;
@@ -93,7 +102,9 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 				.xy_scale = m_src_image_box_xy[0]/m_adjusted_box[0],
 				.z_min = m_min_val,
 				.z_max = m_max_val,
-				.orientation = m_orientation
+				.orientation = m_orientation,
+				.depth_value_map = m_value_map,
+				.color_map = m_color_map.ref()
 			}
 		);
 		m_redraw_required = false;

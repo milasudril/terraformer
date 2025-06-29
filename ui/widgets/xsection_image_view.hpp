@@ -3,7 +3,6 @@
 #ifndef TERRAFORMER_UI_WIDGETS_XSECTION_IMAGE_VIEW_HPP
 #define TERRAFORMER_UI_WIDGETS_XSECTION_IMAGE_VIEW_HPP
 
-#include "./value_map.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/math_utils/trigfunc.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
@@ -96,9 +95,8 @@ namespace terraformer::ui::widgets
 
 
 	private:
-		type_erased_value_map m_value_map{
-			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
-		};
+		value_maps::affine_value_map m_value_map{0.0f, 1.0f};
+
 		move_only_function<rgba_pixel(float)> m_color_map{
 			[](float val){
 				return rgba_pixel{val, val, val, 1.0f};
@@ -108,6 +106,12 @@ namespace terraformer::ui::widgets
 		void update_src_image_box_xz()
 		{
 			auto const d = 2.0f*distance_from_origin_to_edge_xy(m_src_image_box_xy, m_orientation);
+			auto const d_orhto = 2.0f*distance_from_origin_to_edge_xy(
+				m_src_image_box_xy,
+				m_orientation + 0.5f*std::numbers::pi_v<float>
+			);
+			m_value_map = value_maps::affine_value_map{0.0f, d_orhto};
+
 			auto const width = d;
 			auto const height = m_src_image_box_xy[0]*(m_max_val - m_min_val)/m_phys_width;
 			m_src_image_box_xz = box_size{width, height, 0.0f};

@@ -84,6 +84,9 @@ namespace terraformer
 			}}
 		{}
 
+		auto ref() const
+		{ return static_cast<base>(*this); }
+
 	private:
 		static void empty_dtor(void*){}
 		void (*m_dtor)(void*) = empty_dtor;
