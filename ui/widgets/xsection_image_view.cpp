@@ -61,6 +61,7 @@ namespace
 
 		for(size_t k = 0; k != slice_count; ++k)
 		{
+			// TODO: Improve line-drawing algorithm
 			for(uint32_t y_out = 0; y_out != h; ++y_out)
 			{
 				for(uint32_t x_out = 0; x_out != w; ++x_out)

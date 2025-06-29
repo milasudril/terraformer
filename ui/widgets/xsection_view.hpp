@@ -5,6 +5,7 @@
 #include "./xsection_image_view.hpp"
 #include "./widget_group.hpp"
 #include "ui/layouts/table.hpp"
+#include "ui/value_maps/affine_value_map.hpp"
 
 namespace terraformer::ui::widgets
 {
@@ -43,7 +44,12 @@ namespace terraformer::ui::widgets
 		{ m_img_view.show_image(pixels); }
 
 		void set_physical_dimensions(float width, float height)
-		{ m_img_view.set_physical_dimensions(width, height); }
+		{
+			m_img_view.set_physical_dimensions(width, height);
+
+			// FIXME: Range depends on orientation
+			m_colorbar.set_value_map(value_maps::affine_value_map{0.0f, height});
+		}
 
 		void set_orientation(float theta)
 		{ m_img_view.set_orientation(theta); }

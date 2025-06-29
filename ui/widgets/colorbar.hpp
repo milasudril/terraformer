@@ -53,6 +53,14 @@ namespace terraformer::ui::widgets
 
 		box_size confirm_size(box_size size_in);
 
+		template<class ValueMap>
+		void set_value_map(ValueMap&& vm)
+		{
+			m_value_map = type_erased_value_map{std::forward<ValueMap>(vm)};
+			update_colorbar();
+			update_labels();
+		}
+
 	private:
 		type_erased_value_map m_value_map{
 			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
@@ -117,6 +125,10 @@ namespace terraformer::ui::widgets
 			layout.params().margin_y = 0.0f;
 			layout.params().no_outer_margin = false;
 		}
+
+		template<class ValueMap>
+		void set_value_map(ValueMap&& vm)
+		{ m_colorbar.set_value_map(std::forward<ValueMap>(vm)); }
 
 	private:
 		label m_label;

@@ -121,7 +121,7 @@ void terraformer::ui::widgets::colorbar::update_labels()
 			/static_cast<float>(std::size(m_labels) - 1);
 		auto const value = to_value(value_map_ptr, intensity);
 		// TODO: siformat should return u8
-		m_labels[k].value(reinterpret_cast<char8_t const*>(siformat(value, 2).c_str()));
+		m_labels[k].value(reinterpret_cast<char8_t const*>(siformat(value, 3).c_str()));
 	}
 }
 
