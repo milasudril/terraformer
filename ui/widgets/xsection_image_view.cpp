@@ -3,6 +3,7 @@
 #include "./xsection_image_view.hpp"
 
 #include "lib/common/spaces.hpp"
+#include "lib/common/utils.hpp"
 #include "lib/math_utils/interp.hpp"
 
 void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float const> image)
@@ -15,8 +16,8 @@ void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float con
 	auto const min = *minmax.min;
 	auto const max = *minmax.max;
 
-	m_min_val = min > 0.0f? 0.0f : min;
-	m_max_val = max < 0.0f? 0.0f : max;
+	m_min_val = min > 0.0f? 0.0f : -ceil_to_n_digits(-min, 2);
+	m_max_val = max <= 0.0f? 0.0f : ceil_to_n_digits(max, 2);
 
 	m_src_image_box_xy = box_size{
 		static_cast<float>(m_source_image.width()),
