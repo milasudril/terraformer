@@ -258,7 +258,8 @@ namespace terraformer::app
 		});
 
 		parent.set_refresh_function([fv = field_value, &imgview](){
-			imgview.set_physical_dimensions(fv.domain_size.get().width, fv.domain_size.get().height);
+			box_size const dom_size{fv.domain_size.get().width, fv.domain_size.get().height, 0.0f};
+			imgview.set_physical_dimensions(dom_size);
 			imgview.set_orientation(fv.presentation_attributes.get().orientation);
 			imgview.show_image(fv.data.get().pixels());
 		});

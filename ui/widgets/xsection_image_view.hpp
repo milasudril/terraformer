@@ -48,10 +48,10 @@ namespace terraformer::ui::widgets
 
 		main::widget_layer_stack prepare_for_presentation(main::graphics_backend_ref backend);
 
-		void set_physical_dimensions(float width, float height)
+		void set_physical_dimensions(box_size dim)
 		{
-			m_phys_width = width;
-			m_phys_height = height;
+			m_phys_width = dim[0];
+			m_phys_height = dim[1];
 			update_src_image_box_xz();
 		}
 
