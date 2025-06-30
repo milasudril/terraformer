@@ -70,7 +70,7 @@ namespace
 					auto const slice_offset = (static_cast<float>(k) + 0.5f)*dy;
 
 					auto const y_in = slice_offset;
-					auto const z_in = interp(input, x_in, y_in, terraformer::clamp_at_boundary{});
+					auto const z_in = interp(input, x_in, y_in - 0.5f, terraformer::clamp_at_boundary{});
 					auto const z_out = static_cast<float>(h)*(params.z_max - z_in)/
 						(params.z_max - params.z_min);
 					ret(x_out, y_out) = std::abs(static_cast<float>(y_out) - z_out) <= 1.0f?
