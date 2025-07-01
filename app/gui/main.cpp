@@ -133,8 +133,7 @@ int main(int, char**)
 		terraformer::app::heightmap_chart_form_field{
 			.label = u8"Current heightmap",
 			.expand_layout_cell = true
-		},
-		terraformer::ui::main::widget_orientation::horizontal
+		}
 	);
 
 	terraformer::app::bind(heightmap_view_info, heightmap_view);
