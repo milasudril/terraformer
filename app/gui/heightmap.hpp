@@ -159,7 +159,8 @@ namespace terraformer::app
 		auto& settings_form = parent.create_widget(
 			heatmap_view_attributes_form_field{
 				.label = u8"Settings"
-			}
+			},
+			terraformer::ui::main::widget_orientation::horizontal
 		);
 		bind(field_value.presentation_attributes.get(), settings_form);
 		settings_form.on_content_updated([&level_curves = field_value.presentation_attributes.get().level_curves, &imgview](auto&&...){
@@ -272,7 +273,7 @@ namespace terraformer::app
 				.label = u8"Heatmap view",
 				.expand_layout_cell = true
 			},
-			terraformer::ui::main::widget_orientation::vertical
+			terraformer::ui::main::widget_orientation::horizontal
 		);
 		bind(heatmap_view_descriptor{field_value}, heatmap);
 
