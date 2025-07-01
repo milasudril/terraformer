@@ -47,7 +47,6 @@ namespace
 
 	struct xsection_point
 	{
-		uint32_t x;
 		float z;
 	};
 
@@ -68,29 +67,25 @@ namespace
 	{
 		auto const z_in = interp(input, x_in - 0.5f, y_in - 0.5f, terraformer::clamp_at_boundary{});
 		return xsection_point{
-			.x = params_out.x,
 			.z = params_out.image_height*(params_out.z_max - z_in)/(params_out.z_max - params_out.z_min),
 		};
 	}
 
 	void draw_line(
 		terraformer::span_2d<terraformer::rgba_pixel> output,
+		uint32_t x_0,
 		xsection_point p_0,
 		xsection_point p_1,
 		terraformer::rgba_pixel color
 	)
 	{
-		assert(p_0.x < p_1.x);
 		auto const dz = p_1.z - p_0.z;
-		auto const dx = static_cast<float>(p_1.x - p_0.x);
+		constexpr auto dx = 1.0f;
 
 		if(dx > dz)
 		{
-			for(auto x = p_0.x; x < p_1.x; ++x)
-			{
-				auto const z_out = p_0.z + dz*static_cast<float>(x - p_0.x)/dx;
-				output(x, std::min(static_cast<uint32_t>(z_out), output.height() - 1)) = color;
-			}
+			auto const z_out = p_0.z;
+			output(x_0, std::min(static_cast<uint32_t>(z_out), output.height() - 1)) = color;
 		}
 		else
 		{
@@ -98,7 +93,7 @@ namespace
 			auto const z_0 = static_cast<int32_t>(p_0.z);
 			for(auto z = z_0; z != static_cast<int32_t>(p_1.z); z += step)
 			{
-				auto const x_out = static_cast<float>(p_0.x) + dx*static_cast<float>(z - z_0)/dz;
+				auto const x_out = static_cast<float>(x_0) + dx*static_cast<float>(z - z_0)/dz;
 				output(static_cast<uint32_t>(x_out), z) = color;
 			}
 		}
@@ -154,7 +149,7 @@ namespace
 					y_in
 				);
 
-				draw_line(ret, p_0, p_1, color);
+				draw_line(ret, x_out - 1, p_0, p_1, color);
 				p_0 = p_1;
 			}
 		}
