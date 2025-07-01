@@ -73,6 +73,37 @@ namespace
 		};
 	}
 
+	void draw_line(
+		terraformer::span_2d<terraformer::rgba_pixel> output,
+		xsection_point p_0,
+		xsection_point p_1,
+		terraformer::rgba_pixel color
+	)
+	{
+		assert(p_0.x < p_1.x);
+		auto const dz = p_1.z - p_0.z;
+		auto const dx = static_cast<float>(p_1.x - p_0.x);
+
+		if(dx > dz)
+		{
+			for(auto x = p_0.x; x < p_1.x; ++x)
+			{
+				auto const z_out = p_0.z + dz*static_cast<float>(x - p_0.x)/dx;
+				output(x, std::min(static_cast<uint32_t>(z_out), output.height() - 1)) = color;
+			}
+		}
+		else
+		{
+			auto step = p_0.z >= p_1.z? -1 : 1;
+			auto const z_0 = static_cast<int32_t>(p_0.z);
+			for(auto z = z_0; z != static_cast<int32_t>(p_1.z); z += step)
+			{
+				auto const x_out = static_cast<float>(p_0.x) + dx*static_cast<float>(z - z_0)/dz;
+				output(static_cast<uint32_t>(x_out), z) = color;
+			}
+		}
+	}
+
 	terraformer::image draw_cross_sections(
 		terraformer::span_2d<float const> input,
 		draw_xsections_params const& params
@@ -90,34 +121,44 @@ namespace
 
 		for(size_t k = 0; k != slice_count; ++k)
 		{
-			// TODO: Improve line-drawing algorithm
-			for(uint32_t y_out = 0; y_out != h; ++y_out)
-			{
-				for(uint32_t x_out = 0; x_out != w; ++x_out)
-				{
-					auto const x_in = (static_cast<float>(x_out) + 0.5f)*params.xy_scale;
-					auto const y_in = (static_cast<float>(k) + 0.5f)*dy;
-					auto const point = get_xsection_point(
-						xsection_point_output_params{
-							.x = x_out,
-							.z_min = params.z_min,
-							.z_max = params.z_max,
-							.image_height = static_cast<float>(h)
-						},
-						input,
-						x_in,
-						y_in
-					);
+			auto const x_in = 0.5f*params.xy_scale;
+			auto const y_in = (static_cast<float>(k) + 0.5f)*dy;
+			auto p_0 = get_xsection_point(
+				xsection_point_output_params{
+					.x = 0,
+					.z_min = params.z_min,
+					.z_max = params.z_max,
+					.image_height = static_cast<float>(h)
+				},
+				input,
+				x_in,
+				y_in
+			);
 
-					ret(point.x, y_out) = std::abs(static_cast<float>(y_out) - point.z) <= 1.0f?
-						params.color_map(
-							std::clamp(
-								1.0f - params.depth_value_map.from_value(y_in), 0.0f, 1.0f
-							)
-						): ret(point.x, y_out);
-				}
+			auto const color = params.color_map(
+				std::clamp(1.0f - params.depth_value_map.from_value(y_in), 0.0f, 1.0f)
+			);
+
+			for(uint32_t x_out = 1; x_out != w; ++x_out)
+			{
+				auto const x_in = (static_cast<float>(x_out) + 0.5f)*params.xy_scale;
+				auto const p_1 = get_xsection_point(
+					xsection_point_output_params{
+						.x = x_out,
+						.z_min = params.z_min,
+						.z_max = params.z_max,
+						.image_height = static_cast<float>(h)
+					},
+					input,
+					x_in,
+					y_in
+				);
+
+				draw_line(ret, p_0, p_1, color);
+				p_0 = p_1;
 			}
 		}
+
 		return ret;
 	}
 }
