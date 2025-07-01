@@ -130,7 +130,7 @@ namespace terraformer::ui::widgets
 
 		float m_phys_width;
 		float m_phys_height;
-		float m_orientation;
+		float m_orientation{};
 		main::unique_texture m_diagram;
 		bool m_redraw_required{false};
 	};
