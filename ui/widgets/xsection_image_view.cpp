@@ -5,6 +5,7 @@
 #include "lib/common/function_ref.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
+#include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
@@ -44,6 +45,34 @@ namespace
 		terraformer::function_ref<terraformer::rgba_pixel(float)> color_map;
 	};
 
+	struct xsection_point
+	{
+		uint32_t x;
+		float z;
+	};
+
+	struct xsection_point_output_params
+	{
+		uint32_t x;
+		float z_min;
+		float z_max;
+		float image_height;
+	};
+
+	xsection_point get_xsection_point(
+		xsection_point_output_params const& params_out,
+		terraformer::span_2d<float const> input,
+		float x_in,
+		float y_in
+	)
+	{
+		auto const z_in = interp(input, x_in - 0.5f, y_in - 0.5f, terraformer::clamp_at_boundary{});
+		return xsection_point{
+			.x = params_out.x,
+			.z = params_out.image_height*(params_out.z_max - z_in)/(params_out.z_max - params_out.z_min),
+		};
+	}
+
 	terraformer::image draw_cross_sections(
 		terraformer::span_2d<float const> input,
 		draw_xsections_params const& params
@@ -66,19 +95,26 @@ namespace
 			{
 				for(uint32_t x_out = 0; x_out != w; ++x_out)
 				{
-					auto const x_in = (static_cast<float>(x_out) + 0.5f)*params.xy_scale - 0.5f;
-					auto const slice_offset = (static_cast<float>(k) + 0.5f)*dy;
+					auto const x_in = (static_cast<float>(x_out) + 0.5f)*params.xy_scale;
+					auto const y_in = (static_cast<float>(k) + 0.5f)*dy;
+					auto const point = get_xsection_point(
+						xsection_point_output_params{
+							.x = x_out,
+							.z_min = params.z_min,
+							.z_max = params.z_max,
+							.image_height = static_cast<float>(h)
+						},
+						input,
+						x_in,
+						y_in
+					);
 
-					auto const y_in = slice_offset;
-					auto const z_in = interp(input, x_in, y_in - 0.5f, terraformer::clamp_at_boundary{});
-					auto const z_out = static_cast<float>(h)*(params.z_max - z_in)/
-						(params.z_max - params.z_min);
-					ret(x_out, y_out) = std::abs(static_cast<float>(y_out) - z_out) <= 1.0f?
+					ret(point.x, y_out) = std::abs(static_cast<float>(y_out) - point.z) <= 1.0f?
 						params.color_map(
 							std::clamp(
-								1.0f - params.depth_value_map.from_value(slice_offset), 0.0f, 1.0f
+								1.0f - params.depth_value_map.from_value(y_in), 0.0f, 1.0f
 							)
-						): ret(x_out, y_out);
+						): ret(point.x, y_out);
 				}
 			}
 		}
