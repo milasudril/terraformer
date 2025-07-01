@@ -271,7 +271,8 @@ namespace terraformer::app
 			heightmap_heatmap_form_field{
 				.label = u8"Heatmap view",
 				.expand_layout_cell = true
-			}
+			},
+			terraformer::ui::main::widget_orientation::vertical
 		);
 		bind(heatmap_view_descriptor{field_value}, heatmap);
 
@@ -279,7 +280,8 @@ namespace terraformer::app
 			heightmap_xsection_form_field{
 				.label = u8"Cross-section",
 				.expand_layout_cell = true
-			}
+			},
+			terraformer::ui::main::widget_orientation::vertical
 		);
 		bind(xsection_view_descriptor{field_value}, xsection);
 
