@@ -228,7 +228,7 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.foreground = main::widget_layer{
-			.offset = displacement{},
+			.offset = displacement{1.0f, 1.0f, 0.0f},
 			.rotation = geosimd::turn_angle{},
 			.texture = m_diagram.get_backend_resource(backend).get(),
 			.tints = fg_tints
