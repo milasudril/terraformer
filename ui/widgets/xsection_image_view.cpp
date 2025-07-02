@@ -4,6 +4,7 @@
 
 #include "lib/common/function_ref.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/span_2d.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/math_utils/interp.hpp"
@@ -52,7 +53,7 @@ namespace
 
 	struct xsection_point_output_params
 	{
-		uint32_t x;
+		int32_t x;
 		float z_min;
 		float z_max;
 		float image_height;
@@ -71,9 +72,25 @@ namespace
 		};
 	}
 
+	void draw_blob(
+		terraformer::span_2d<terraformer::rgba_pixel> output,
+		int32_t x_0,
+		int32_t y_0,
+		terraformer::rgba_pixel color
+	)
+	{
+		output(x_0, y_0) = color;
+		output(std::min(x_0 + 1, static_cast<int32_t>(output.width()) - 1), y_0) = color;
+		output(x_0, std::min(y_0 + 1, static_cast<int32_t>(output.height()) - 1)) = color;
+		output(
+			std::min(x_0 + 1, static_cast<int32_t>(output.width()) - 1),
+			std::min(y_0 + 1, static_cast<int32_t>(output.height()) - 1)
+		) = color;
+	}
+
 	void draw_line(
 		terraformer::span_2d<terraformer::rgba_pixel> output,
-		uint32_t x_0,
+		int32_t x_0,
 		xsection_point p_0,
 		xsection_point p_1,
 		terraformer::rgba_pixel color
@@ -85,7 +102,7 @@ namespace
 		if(dx > dz)
 		{
 			auto const z_out = p_0.z;
-			output(x_0, std::min(static_cast<uint32_t>(z_out), output.height() - 1)) = color;
+			draw_blob(output, x_0, static_cast<int32_t>(z_out), color);
 		}
 		else
 		{
@@ -94,7 +111,7 @@ namespace
 			for(auto z = z_0; z != static_cast<int32_t>(p_1.z); z += step)
 			{
 				auto const x_out = static_cast<float>(x_0) + dx*static_cast<float>(z - z_0)/dz;
-				output(static_cast<uint32_t>(x_out), z) = color;
+				draw_blob(output, static_cast<int32_t>(x_out), z, color);
 			}
 		}
 	}
@@ -139,7 +156,7 @@ namespace
 				auto const x_in = (static_cast<float>(x_out) + 0.5f)*params.xy_scale;
 				auto const p_1 = get_xsection_point(
 					xsection_point_output_params{
-						.x = x_out,
+						.x = static_cast<int32_t>(x_out),
 						.z_min = params.z_min,
 						.z_max = params.z_max,
 						.image_height = static_cast<float>(h)
