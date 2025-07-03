@@ -53,17 +53,16 @@ namespace
 
 	struct xsection_point_output_params
 	{
-		int32_t x;
 		float z_min;
 		float z_max;
 		float image_height;
 	};
 
 	xsection_point get_xsection_point(
-		xsection_point_output_params const& params_out,
 		terraformer::span_2d<float const> input,
 		float x_in,
-		float y_in
+		float y_in,
+		xsection_point_output_params const& params_out
 	)
 	{
 		auto const z_in = interp(input, x_in - 0.5f, y_in - 0.5f, terraformer::clamp_at_boundary{});
@@ -131,20 +130,21 @@ namespace
 		size_t const slice_count = 8;
 		auto const dy = static_cast<float>(input.height())/static_cast<float>(slice_count);
 
+		xsection_point_output_params const output_params{
+			.z_min = params.z_min,
+			.z_max = params.z_max,
+			.image_height = static_cast<float>(h)
+		};
+
 		for(size_t k = 0; k != slice_count; ++k)
 		{
 			auto const x_in = 0.5f*params.xy_scale;
 			auto const y_in = (static_cast<float>(k) + 0.5f)*dy;
 			auto p_0 = get_xsection_point(
-				xsection_point_output_params{
-					.x = 0,
-					.z_min = params.z_min,
-					.z_max = params.z_max,
-					.image_height = static_cast<float>(h)
-				},
 				input,
 				x_in,
-				y_in
+				y_in,
+				output_params
 			);
 
 			auto const color = params.color_map(
@@ -155,15 +155,10 @@ namespace
 			{
 				auto const x_in = (static_cast<float>(x_out) + 0.5f)*params.xy_scale;
 				auto const p_1 = get_xsection_point(
-					xsection_point_output_params{
-						.x = static_cast<int32_t>(x_out),
-						.z_min = params.z_min,
-						.z_max = params.z_max,
-						.image_height = static_cast<float>(h)
-					},
 					input,
 					x_in,
-					y_in
+					y_in,
+					output_params
 				);
 
 				draw_line(ret, x_out - 1, p_0, p_1, color);
