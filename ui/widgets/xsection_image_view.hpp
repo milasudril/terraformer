@@ -7,6 +7,7 @@
 #include "lib/math_utils/trigfunc.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "ui/main/texture_types.hpp"
+#include "ui/main/ui_controller.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
@@ -18,6 +19,7 @@ namespace terraformer::ui::widgets
 		main::immutable_shared_texture null_texture;
 		main::immutable_shared_texture background;
 		rgba_pixel bg_tint;
+		rgba_pixel frame_tint;
 		float border_thickness;
 		float min_img_height;
 	};
@@ -42,6 +44,8 @@ namespace terraformer::ui::widgets
 			m_cfg.bg_tint = cfg.output_area.colors.background;
 			m_cfg.border_thickness = cfg.output_area.border_thickness;
 			m_cfg.min_img_height = cfg.output_area.min_img_height;
+			m_cfg.frame_tint = cfg.output_area.colors.foreground;
+
 
 			m_redraw_required = true;
 		}
@@ -134,6 +138,7 @@ namespace terraformer::ui::widgets
 		float m_phys_height;
 		float m_orientation{};
 		main::unique_texture m_diagram;
+		main::unique_texture m_frame;
 		bool m_redraw_required{false};
 	};
 }

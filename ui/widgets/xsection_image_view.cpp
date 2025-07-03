@@ -10,6 +10,7 @@
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
+#include "ui/drawing_api/image_generators.hpp"
 
 void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float const> image)
 {
@@ -203,6 +204,7 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 	};
 	auto const null_texture = m_cfg.null_texture->get_backend_resource(backend).get();
 	auto const background = m_cfg.background->get_backend_resource(backend).get();
+	auto const border_displacement = m_cfg.border_thickness*displacement{1.0f, 1.0f, 0.0f};
 
 	if(m_redraw_required)
 	{
@@ -219,6 +221,27 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 				.color_map = m_color_map.ref()
 			}
 		);
+
+		auto const full_box = m_adjusted_box + 2.0f*border_displacement;
+		auto const w = static_cast<uint32_t>(full_box[0]);
+		auto const h = static_cast<uint32_t>(full_box[1]);
+
+		m_frame = generate(
+			drawing_api::flat_rectangle{
+				.domain_size = span_2d_extents {
+					.width = w,
+					.height = h
+				},
+				.origin_x = 0u,
+				.origin_y = 0u,
+				.width = w,
+				.height = h,
+				.border_thickness = static_cast<uint32_t>(m_cfg.border_thickness),
+				.border_color = rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
+				.fill_color = rgba_pixel{0.0f, 0.0f, 0.0f, 0.0f}
+			}
+		);
+
 		m_redraw_required = false;
 	}
 
@@ -227,6 +250,13 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 		rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 		rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f},
 		rgba_pixel{1.0f, 1.0f, 1.0f, 1.0f}
+	};
+
+	std::array const frame_tints{
+		m_cfg.frame_tint,
+		m_cfg.frame_tint,
+		m_cfg.frame_tint,
+		m_cfg.frame_tint
 	};
 
 	return main::widget_layer_stack{
@@ -247,7 +277,7 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 			.tints = std::array<rgba_pixel, 4>{}
 		},
 		.foreground = main::widget_layer{
-			.offset = displacement{1.0f, 1.0f, 0.0f},
+			.offset = border_displacement,
 			.rotation = geosimd::turn_angle{},
 			.texture = m_diagram.get_backend_resource(backend).get(),
 			.tints = fg_tints
@@ -255,9 +285,8 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 		.frame = main::widget_layer{
 			.offset = displacement{},
 			.rotation = geosimd::turn_angle{},
-			// TODO: Will be used to add a frame around the image
-			.texture = null_texture,
-			.tints = std::array<rgba_pixel, 4>{}
+			.texture = m_frame.get_backend_resource(backend).get(),
+			.tints = frame_tints
 		},
 		.input_marker = main::widget_layer{
 			.offset = displacement{},
