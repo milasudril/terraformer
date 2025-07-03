@@ -106,6 +106,7 @@ namespace terraformer::ui::widgets
 		void update_src_image_box_xz()
 		{
 			auto const d = 2.0f*distance_from_origin_to_edge_xy(m_src_image_box_xy, m_orientation);
+			m_rot_scale = d/m_src_image_box_xy[0];
 			auto const d_orhto = 2.0f*distance_from_origin_to_edge_xy(
 				m_src_image_box_xy,
 				m_orientation + 0.5f*std::numbers::pi_v<float>
@@ -127,6 +128,7 @@ namespace terraformer::ui::widgets
 		float m_min_val;
 		float m_max_val;
 		box_size m_src_image_box_xy;
+		float m_rot_scale;
 
 		float m_phys_width;
 		float m_phys_height;

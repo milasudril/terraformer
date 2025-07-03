@@ -42,6 +42,7 @@ namespace
 		float z_min;
 		float z_max;
 		float orientation;
+		float rot_scale;
 		terraformer::ui::value_maps::affine_value_map depth_value_map;
 		terraformer::function_ref<terraformer::rgba_pixel(float)> color_map;
 	};
@@ -56,6 +57,9 @@ namespace
 		float z_min;
 		float z_max;
 		float image_height;
+		float cos_theta;
+		float sin_theta;
+		float rot_scale;
 	};
 
 	xsection_point get_xsection_point(
@@ -65,7 +69,24 @@ namespace
 		xsection_point_output_params const& params_out
 	)
 	{
-		auto const z_in = interp(input, x_in - 0.5f, y_in - 0.5f, terraformer::clamp_at_boundary{});
+		auto const w = static_cast<float>(input.width());
+		auto const h = static_cast<float>(input.height());
+
+		auto const x_in_centered = x_in - 0.5f*w;
+		auto const y_in_centered = y_in - 0.5f*h;
+		auto const x_rot = params_out.rot_scale*(
+			 params_out.cos_theta*x_in_centered + params_out.sin_theta*y_in_centered
+		) + 0.5f*w;
+		auto const y_rot = params_out.rot_scale*(
+			- params_out.sin_theta*x_in_centered + params_out.cos_theta*y_in_centered
+		) + 0.5f*h;
+
+		auto const z_in = interp(
+			input,
+			x_rot - 0.5f,
+			y_rot - 0.5f,
+			terraformer::clamp_at_boundary{}
+		);
 		return xsection_point{
 			.z = params_out.image_height*(params_out.z_max - z_in)/(params_out.z_max - params_out.z_min),
 		};
@@ -120,23 +141,25 @@ namespace
 		draw_xsections_params const& params
 	)
 	{
-		auto const w_float = params.output_size[0];
-		auto const w = static_cast<uint32_t>(w_float + 0.5f);
+		auto const w = static_cast<uint32_t>(params.output_size[0] + 0.5f);
 		auto const h = static_cast<uint32_t>(params.output_size[1] + 0.5f);
 		assert(h >= 1);
 		assert(w >= 1);
 
 		terraformer::image ret{w, h};
-		size_t const slice_count = 8;
-		auto const dy = static_cast<float>(input.height())/static_cast<float>(slice_count);
+		auto const slice_count = 8.0f*params.rot_scale;
+		auto const dy = static_cast<float>(input.height())/slice_count;
 
 		xsection_point_output_params const output_params{
 			.z_min = params.z_min,
 			.z_max = params.z_max,
-			.image_height = static_cast<float>(h)
+			.image_height = static_cast<float>(h),
+			.cos_theta = std::cos(params.orientation),
+			.sin_theta = std::sin(params.orientation),
+			.rot_scale = params.rot_scale
 		};
 
-		for(size_t k = 0; k != slice_count; ++k)
+		for(size_t k = 0; k != static_cast<size_t>(slice_count + 0.5f); ++k)
 		{
 			auto const x_in = 0.5f*params.xy_scale;
 			auto const y_in = (static_cast<float>(k) + 0.5f)*dy;
@@ -191,6 +214,7 @@ terraformer::ui::main::widget_layer_stack terraformer::ui::widgets::xsection_ima
 				.z_min = m_min_val,
 				.z_max = m_max_val,
 				.orientation = m_orientation,
+				.rot_scale = m_rot_scale,
 				.depth_value_map = m_value_map,
 				.color_map = m_color_map.ref()
 			}
