@@ -120,7 +120,7 @@ namespace
 		auto const dz = p_1.z - p_0.z;
 		constexpr auto dx = 1.0f;
 
-		if(dx > dz)
+		if(dx > std::abs(dz))
 		{
 			auto const z_out = p_0.z;
 			draw_blob(output, x_0, static_cast<int32_t>(z_out), color);
