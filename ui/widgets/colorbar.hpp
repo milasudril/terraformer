@@ -61,6 +61,8 @@ namespace terraformer::ui::widgets
 			update_labels();
 		}
 
+		void set_label_count(size_t new_count);
+
 	private:
 		type_erased_value_map m_value_map{
 			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
@@ -80,7 +82,7 @@ namespace terraformer::ui::widgets
 		float m_marker_length;
 		uint32_t m_border_thickness;
 		main::immutable_shared_texture m_null_texture;
-		std::array<label, 13> m_labels;
+		single_array<label> m_labels;
 	};
 
 	class labeled_colorbar:private widget_group<layouts::table>
@@ -129,6 +131,9 @@ namespace terraformer::ui::widgets
 		template<class ValueMap>
 		void set_value_map(ValueMap&& vm)
 		{ m_colorbar.set_value_map(std::forward<ValueMap>(vm)); }
+
+		void set_label_count(size_t new_count)
+		{ m_colorbar.set_label_count(new_count); }
 
 	private:
 		label m_label;

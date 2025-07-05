@@ -40,6 +40,7 @@ namespace terraformer::ui::widgets
 			auto const attributes = get_attributes();
 			attributes.widget_states()[attributes.element_indices().front()].maximized = true;
 			is_transparent = true;
+			m_colorbar.set_label_count(11);
 		}
 
 		void show_image(span_2d<float const> pixels)
