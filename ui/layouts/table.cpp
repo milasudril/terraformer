@@ -153,7 +153,7 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_regular(
 		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
 	);
 
-	auto const space_for_expanding_cells = available_size - size_of_margins - size_of_fixedsized_elements;
+	auto const space_for_expanding_cells = std::max(available_size - size_of_margins - size_of_fixedsized_elements, 0.0f);
 
 	auto const num_to_expand = static_cast<float>(std::size(items_to_expand).get());
 	for(auto k : items_to_expand.element_indices())
@@ -234,7 +234,7 @@ void terraformer::ui::layouts::table::adjust_cell_sizes_transposed(
 		std::size(actual_sizes).get() + (no_outer_margin? -1 : 1)
 	);
 
-	auto const space_for_expanding_cells = available_size - size_of_margins - size_of_fixedsized_groups;
+	auto const space_for_expanding_cells = std::max(available_size - size_of_margins - size_of_fixedsized_groups, 0.0f);
 	auto const num_to_expand = static_cast<float>(std::size(groups_to_expand).get());
 	for(auto k : groups_to_expand.element_indices())
 	{ actual_sizes[groups_to_expand[k]] = space_for_expanding_cells/num_to_expand; }
