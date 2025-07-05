@@ -232,7 +232,7 @@ namespace terraformer::app
 		auto& clamp_to = parent.create_widget(
 			rolling_hills_shape_clamp_to_form_field{
 				.label = u8"Clamp to",
-				.expand_layout_cell = true
+				.expand_layout_cell = false
 			},
 			ui::main::widget_orientation::vertical
 		);
@@ -241,7 +241,7 @@ namespace terraformer::app
 		auto& shape = parent.create_widget(
 			rolling_hills_shape_form_field{
 				.label = u8"Shape",
-				.expand_layout_cell = true
+				.expand_layout_cell = false
 			},
 			ui::main::widget_orientation::vertical
 		);
