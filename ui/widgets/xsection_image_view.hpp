@@ -55,13 +55,18 @@ namespace terraformer::ui::widgets
 		void set_physical_dimensions(box_size dim)
 		{
 			m_phys_width = dim[0];
-			m_phys_height = dim[1];
 			update_src_image_box_xz();
 		}
 
 		void set_orientation(float new_val)
 		{
 			m_orientation = 2.0f*std::numbers::pi_v<float>*new_val;
+			update_src_image_box_xz();
+		}
+
+		void set_view_range_crop_factor(float factor)
+		{
+			m_view_range_crop_factor = factor;
 			update_src_image_box_xz();
 		}
 
@@ -98,6 +103,8 @@ namespace terraformer::ui::widgets
 		}
 
 
+
+
 	private:
 		value_maps::affine_value_map m_value_map{0.0f, 1.0f};
 
@@ -115,7 +122,7 @@ namespace terraformer::ui::widgets
 				m_src_image_box_xy,
 				m_orientation + 0.5f*std::numbers::pi_v<float>
 			);
-			m_value_map = value_maps::affine_value_map{0.0f, d_orhto};
+			m_value_map = value_maps::affine_value_map{0.0f, d_orhto*m_view_range_crop_factor};
 
 			auto const width = d;
 			auto const height = m_src_image_box_xy[0]*(m_max_val - m_min_val)/m_phys_width;
@@ -135,7 +142,7 @@ namespace terraformer::ui::widgets
 		float m_rot_scale;
 
 		float m_phys_width;
-		float m_phys_height;
+		float m_view_range_crop_factor{1.0f};
 		float m_orientation{};
 		main::unique_texture m_diagram;
 		main::unique_texture m_frame;

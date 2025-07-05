@@ -97,6 +97,12 @@ namespace terraformer
 		return std::ceil(x * scale) / scale;
 	}
 
+	inline float ceil_to_n_digits_10(float x, int n)
+	{
+		auto const scale = std::pow(10.0f, static_cast<float>(n) - std::ceil(std::log2(std::abs(x))/std::log2(10.0f)));
+		return std::ceil(x * scale) / scale;
+	}
+
 	inline uint32_t round_to_odd(float x)
 	{
 		return static_cast<uint32_t>(2.0f*std::floor(0.5f*x) + 1);

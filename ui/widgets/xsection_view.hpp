@@ -5,6 +5,7 @@
 #include "./xsection_image_view.hpp"
 #include "./widget_group.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/utils.hpp"
 #include "ui/layouts/table.hpp"
 #include "ui/value_maps/affine_value_map.hpp"
 #include <numbers>
@@ -48,26 +49,31 @@ namespace terraformer::ui::widgets
 
 		void set_physical_dimensions(box_size dim)
 		{
-			m_img_view.set_physical_dimensions(dim);
 			m_phys_dimensions = dim;
-			update_colorbar_range();
+			update_views();
 		}
 
 		void set_orientation(float theta)
 		{
-			m_img_view.set_orientation(theta);
-			m_orientation = 2.0f*std::numbers::pi_v<float>*theta;
-			update_colorbar_range();
+			m_orientation = theta;
+			update_views();
 		}
 
 	private:
-		void update_colorbar_range()
+		void update_views()
 		{
-			auto const d_orhto = 2.0f*distance_from_origin_to_edge_xy(
+			auto const theta = 2.0f*std::numbers::pi_v<float>*m_orientation;
+
+			auto const d_ortho = 2.0f*distance_from_origin_to_edge_xy(
 				m_phys_dimensions,
-				m_orientation + 0.5f*std::numbers::pi_v<float>
+				theta + 0.5f*std::numbers::pi_v<float>
 			);
-			m_colorbar.set_value_map(value_maps::affine_value_map{0.0f, d_orhto});
+
+			auto const d_ortho_rounded = ceil_to_n_digits_10(d_ortho, 1);
+			m_colorbar.set_value_map(value_maps::affine_value_map{0.0f, d_ortho_rounded});
+			m_img_view.set_physical_dimensions(m_phys_dimensions);
+			m_img_view.set_orientation(m_orientation);
+			m_img_view.set_view_range_crop_factor(d_ortho/d_ortho_rounded);
 		}
 
 
