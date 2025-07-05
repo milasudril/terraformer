@@ -87,7 +87,7 @@ namespace terraformer::app
 			);
 	}
 
-	void bind(plain_boundary_descriptor& field_value, auto& parent)
+	void bind(plain_control_points_info& field_value, auto& parent)
 	{
 		auto& n = parent.create_widget(
 			plain_boundary_point_form_field{
@@ -152,6 +152,14 @@ namespace terraformer::app
 		);
 		bind(field_value.nw, nw);
 		nw.append_pending_widgets();
+
+		auto& c = parent.create_widget(
+			plain_boundary_point_form_field{
+				.label = u8"C"
+			}
+		);
+		bind(field_value.c, c);
+		c.append_pending_widgets();
 	}
 
 
@@ -171,7 +179,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
-	void bind(plain_edge_midpoint_descriptor& field_value, ui::widgets::form& parent)
+	void bind(plain_midpoints_info& field_value, ui::widgets::form& parent)
 	{
 		parent.create_widget(
 			plain_midpoint_form_field{
@@ -216,6 +224,28 @@ namespace terraformer::app
 			}
 		)
 		.set_textbox_placeholder_string(u8"0.00019329926");
+
+		parent.create_widget(
+			plain_midpoint_form_field{
+				.label = u8"C x",
+				.value_reference = std::ref(field_value.c_x)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"0.00019329926");
+
+		parent.create_widget(
+			plain_midpoint_form_field{
+				.label = u8"C y",
+				.value_reference = std::ref(field_value.c_y)
+			},
+			terraformer::ui::widgets::knob{
+				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+			}
+		)
+		.set_textbox_placeholder_string(u8"0.00019329926");
 	}
 
 	struct plain_form_field
@@ -248,7 +278,7 @@ namespace terraformer::app
 
 		auto& midpoints = parent.create_widget(
 			plain_midpoints_form_field{
-				.label = u8"Edge midpoints"
+				.label = u8"Midpoints"
 			},
 			ui::main::widget_orientation::vertical
 		);

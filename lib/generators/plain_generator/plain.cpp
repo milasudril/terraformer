@@ -2,6 +2,7 @@
 
 #include "./plain.hpp"
 
+#include "lib/common/interval.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/pixel_store/image.hpp"
@@ -10,7 +11,7 @@
 
 namespace
 {
-	struct boundary_curve_descriptor
+	struct control_curve_descriptor
 	{
 		terraformer::bounded_value<terraformer::open_open_interval{0.0f, 1.0f}, 0.5f> x_m{0.5f};
 
@@ -22,10 +23,10 @@ namespace
 		float ddx_1 = 0.0f;
 	};
 
-	class boundary_curve
+	class control_curve
 	{
 	public:
-		constexpr explicit boundary_curve(boundary_curve_descriptor const& bcd):
+		constexpr explicit control_curve(control_curve_descriptor const& bcd):
 			m_poly{
 				make_polynomial(
 					terraformer::cubic_spline_control_point{
@@ -87,8 +88,8 @@ terraformer::grayscale_image terraformer::generate(
 	auto const w_float = static_cast<float>(w);
 	auto const h_float = static_cast<float>(h);
 
-	auto const west_to_east_north = boundary_curve(
-		boundary_curve_descriptor{
+	auto const west_to_east_north = control_curve(
+		control_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.nw.elevation,
 			.y_m = params.boundary.n.elevation,
@@ -99,8 +100,8 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
-	auto const west_to_east_south = boundary_curve(
-		boundary_curve_descriptor{
+	auto const west_to_east_south = control_curve(
+		control_curve_descriptor{
 			.x_m = params.edge_midpoints.s,
 			.y_0 = params.boundary.sw.elevation,
 			.y_m = params.boundary.s.elevation,
@@ -111,8 +112,8 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
-	auto const north_to_south_west = boundary_curve(
-		boundary_curve_descriptor{
+	auto const north_to_south_west = control_curve(
+		control_curve_descriptor{
 			.x_m = params.edge_midpoints.w,
 			.y_0 = params.boundary.nw.elevation,
 			.y_m = params.boundary.w.elevation,
@@ -123,8 +124,8 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	);
 
-	auto const north_to_south_east = boundary_curve{
-		boundary_curve_descriptor{
+	auto const north_to_south_east = control_curve{
+		control_curve_descriptor{
 			.x_m = params.edge_midpoints.e,
 			.y_0 = params.boundary.ne.elevation,
 			.y_m = params.boundary.e.elevation,
@@ -135,51 +136,56 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	};
 
-	auto const z_m_interp_ns = make_polynomial(
-		cubic_spline_control_point{
-			.y = params.boundary.w.elevation,
-			.ddx = params.boundary.w.ddx*dom_size.width
-		},
-		cubic_spline_control_point{
-			.y = params.boundary.e.elevation,
-			.ddx = params.boundary.e.ddx*dom_size.width
+	auto const z_m_interp_ns = control_curve{
+		control_curve_descriptor{
+			.x_m = params.edge_midpoints.c_x,
+			.y_0 = params.boundary.w.elevation,
+			.y_m = params.boundary.c.elevation,
+			.y_1 = params.boundary.e.elevation,
+			.ddx_0 = params.boundary.w.ddx*dom_size.width,
+			.ddx_m = params.boundary.c.ddx*dom_size.width,
+			.ddx_1 = params.boundary.e.ddx*dom_size.width
 		}
-	);
+	};
 
-	auto const z_m_interp_we = make_polynomial(
-		cubic_spline_control_point{
-			.y = params.boundary.n.elevation,
-			.ddx = params.boundary.n.ddy*dom_size.height
-		},
-		cubic_spline_control_point{
-			.y = params.boundary.s.elevation,
-			.ddx = params.boundary.s.ddy*dom_size.height
+	auto const z_m_interp_we = control_curve{
+		control_curve_descriptor{
+			.x_m = params.edge_midpoints.c_y,
+			.y_0 = params.boundary.n.elevation,
+			.y_m = params.boundary.c.elevation,
+			.y_1 = params.boundary.s.elevation,
+			.ddx_0 = params.boundary.n.ddy*dom_size.height,
+			.ddx_m = params.boundary.c.ddy*dom_size.height,
+			.ddx_1 = params.boundary.s.ddy*dom_size.height
 		}
-	);
+	};
 
-	auto const y_m = make_polynomial(
-		cubic_spline_control_point{
-			.y = params.edge_midpoints.w,
-			.ddx = 0.0f
-		},
-		cubic_spline_control_point{
-			.y = params.edge_midpoints.e,
-			.ddx = 0.0f
+	auto const y_m = control_curve{
+		control_curve_descriptor{
+			.x_m = params.edge_midpoints.c_x,
+			.y_0 = params.edge_midpoints.w,
+			.y_m = params.edge_midpoints.c_y,
+			.y_1 = params.edge_midpoints.e,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
 		}
-	);
+	};
 
-	auto const x_m = make_polynomial(
-		cubic_spline_control_point{
-			.y = params.edge_midpoints.n,
-			.ddx = 0.0f
-		},
-		cubic_spline_control_point{
-			.y = params.edge_midpoints.s,
-			.ddx = 0.0f
+	auto const x_m = control_curve{
+		control_curve_descriptor{
+			.x_m = params.edge_midpoints.c_y,
+			.y_0 = params.edge_midpoints.n,
+			.y_m = params.edge_midpoints.c_x,
+			.y_1 = params.edge_midpoints.s,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
 		}
-	);
+	};
 
-	auto const ddy_0 = boundary_curve{		boundary_curve_descriptor{
+	auto const ddy_0 = control_curve{
+		control_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.nw.ddy*dom_size.height,
 			.y_m = params.boundary.n.ddy*dom_size.height,
@@ -190,18 +196,20 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	};
 
-	auto const ddy_m = make_polynomial(
-		cubic_spline_control_point{
-			.y = params.boundary.w.ddy*dom_size.height,
-			.ddx = 0.0f
-		},
-		cubic_spline_control_point{
-			.y = params.boundary.e.ddy*dom_size.height,
-			.ddx = 0.0f
+	auto const ddy_m = control_curve{
+		control_curve_descriptor{
+			.x_m = params.edge_midpoints.c_x,
+			.y_0 = params.boundary.w.ddy*dom_size.height,
+			.y_m = params.boundary.c.ddy*dom_size.height,
+			.y_1 = params.boundary.e.ddy*dom_size.height,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f,
 		}
-	);
+	};
 
-	auto const ddy_1 = boundary_curve{		boundary_curve_descriptor{
+	auto const ddy_1 = control_curve{
+		control_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.sw.ddy*dom_size.height,
 			.y_m = params.boundary.s.ddy*dom_size.height,
@@ -212,7 +220,8 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	};
 
-	auto const ddx_0 = boundary_curve{		boundary_curve_descriptor{
+	auto const ddx_0 = control_curve{
+		control_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.nw.ddx*dom_size.width,
 			.y_m = params.boundary.w.ddx*dom_size.width,
@@ -223,18 +232,19 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	};
 
-	auto const ddx_m = make_polynomial(
-		cubic_spline_control_point{
-			.y = params.boundary.n.ddx*dom_size.width,
-			.ddx = 0.0f
-		},
-		cubic_spline_control_point{
-			.y = params.boundary.s.ddx*dom_size.width,
-			.ddx = 0.0f
+	auto const ddx_m = control_curve{
+		control_curve_descriptor{
+			.x_m = params.edge_midpoints.c_y,
+			.y_0 = params.boundary.n.ddx*dom_size.width,
+			.y_m = params.boundary.c.ddx*dom_size.width,
+			.y_1 = params.boundary.s.ddx*dom_size.width,
+			.ddx_0 = 0.0f,
+			.ddx_m = 0.0f,
+			.ddx_1 = 0.0f
 		}
-	);
+	};
 
-	auto const ddx_1 = boundary_curve{		boundary_curve_descriptor{
+	auto const ddx_1 = control_curve{		control_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.ne.ddx*dom_size.width,
 			.y_m = params.boundary.e.ddx*dom_size.width,
@@ -258,8 +268,8 @@ terraformer::grayscale_image terraformer::generate(
 			auto const xi  =  xi_in*cos_theta + eta_in*sin_theta + 0.5f;
 			auto const eta = -xi_in*sin_theta + eta_in*cos_theta + 0.5f;
 
-			auto const north_to_south = boundary_curve(
-				boundary_curve_descriptor{
+			auto const north_to_south = control_curve(
+				control_curve_descriptor{
 				.x_m = bounded_value<open_open_interval{0.0f, 1.0f}, 0.5f>{y_m(xi)},
 				.y_0 = west_to_east_north(xi),
 				.y_m = z_m_interp_ns(xi),
@@ -270,8 +280,8 @@ terraformer::grayscale_image terraformer::generate(
 				}
 			);
 
-			auto const west_to_east = boundary_curve(
-				boundary_curve_descriptor{
+			auto const west_to_east = control_curve(
+				control_curve_descriptor{
 				.x_m = bounded_value<open_open_interval{0.0f, 1.0f}, 0.5f>{x_m(eta)},
 				.y_0 = north_to_south_west(eta),
 				.y_m = z_m_interp_we(eta),

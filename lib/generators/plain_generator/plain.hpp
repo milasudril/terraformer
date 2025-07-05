@@ -18,7 +18,7 @@ namespace terraformer
 		float ddy = 0.0f;
 	};
 
-	struct plain_boundary_descriptor
+	struct plain_control_points_info
 	{
 		plain_control_point_descriptor n;
 		plain_control_point_descriptor ne;
@@ -28,21 +28,24 @@ namespace terraformer
 		plain_control_point_descriptor sw;
 		plain_control_point_descriptor w;
 		plain_control_point_descriptor nw;
+		plain_control_point_descriptor c;
 	};
 
-	struct plain_edge_midpoint_descriptor
+	struct plain_midpoints_info
 	{
 		using xm_type = bounded_value<open_open_interval{0.0f, 1.0f}, 0.5f>;
 		xm_type n;
 		xm_type e;
 		xm_type s;
 		xm_type w;
+		xm_type c_x;
+		xm_type c_y;
 	};
 
 	struct plain_descriptor
 	{
-		plain_boundary_descriptor boundary;
-		plain_edge_midpoint_descriptor edge_midpoints;
+		plain_control_points_info boundary;
+		plain_midpoints_info edge_midpoints;
 		float orientation = 0.0f;
 	};
 
