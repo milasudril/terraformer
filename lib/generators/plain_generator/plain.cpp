@@ -138,22 +138,22 @@ terraformer::grayscale_image terraformer::generate(
 	auto const z_m_interp_ns = make_polynomial(
 		cubic_spline_control_point{
 			.y = params.boundary.w.elevation,
-			.ddx = 0.0f
+			.ddx = params.boundary.w.ddx*dom_size.width
 		},
 		cubic_spline_control_point{
 			.y = params.boundary.e.elevation,
-			.ddx = 0.0f
+			.ddx = params.boundary.e.ddx*dom_size.width
 		}
 	);
 
 	auto const z_m_interp_we = make_polynomial(
 		cubic_spline_control_point{
 			.y = params.boundary.n.elevation,
-			.ddx = 0.0f
+			.ddx = params.boundary.n.ddy*dom_size.height
 		},
 		cubic_spline_control_point{
 			.y = params.boundary.s.elevation,
-			.ddx = 0.0f
+			.ddx = params.boundary.s.ddy*dom_size.height
 		}
 	);
 
@@ -182,7 +182,7 @@ terraformer::grayscale_image terraformer::generate(
 	auto const ddy_0 = boundary_curve{		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.nw.ddy*dom_size.height,
-			.y_m = 2.0f*params.boundary.n.ddy*dom_size.height,
+			.y_m = params.boundary.n.ddy*dom_size.height,
 			.y_1 = params.boundary.ne.ddy*dom_size.height,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
@@ -204,7 +204,7 @@ terraformer::grayscale_image terraformer::generate(
 	auto const ddy_1 = boundary_curve{		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.sw.ddy*dom_size.height,
-			.y_m = 2.0f*params.boundary.s.ddy*dom_size.height,
+			.y_m = params.boundary.s.ddy*dom_size.height,
 			.y_1 = params.boundary.se.ddy*dom_size.height,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
@@ -215,7 +215,7 @@ terraformer::grayscale_image terraformer::generate(
 	auto const ddx_0 = boundary_curve{		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.nw.ddx*dom_size.width,
-			.y_m = 2.0f*params.boundary.w.ddx*dom_size.width,
+			.y_m = params.boundary.w.ddx*dom_size.width,
 			.y_1 = params.boundary.sw.ddx*dom_size.width,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
@@ -237,7 +237,7 @@ terraformer::grayscale_image terraformer::generate(
 	auto const ddx_1 = boundary_curve{		boundary_curve_descriptor{
 			.x_m = params.edge_midpoints.n,
 			.y_0 = params.boundary.ne.ddx*dom_size.width,
-			.y_m = 2.0f*params.boundary.e.ddx*dom_size.width,
+			.y_m = params.boundary.e.ddx*dom_size.width,
 			.y_1 = params.boundary.se.ddx*dom_size.width,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
