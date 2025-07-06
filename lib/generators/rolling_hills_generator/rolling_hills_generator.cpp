@@ -79,16 +79,28 @@ namespace
 		auto k_high = 1.0f;
 		auto const y_0 = scale * hardness;
 
-		while (1.0f + std::pow(scale, -k_high) - std::pow(y_0, -k_high) >= 0.0f)
-		{ k_high = k_high * 2.0f; }
+		size_t iter_count = 100;
+		while (1.0f + std::pow(scale, -k_high) - std::pow(y_0, -k_high) >= 0.0f && iter_count != 0)
+		{
+			k_high = k_high * 2.0f;
+			--iter_count;
+		}
 
+		if(iter_count == 0)
+		{ return 1.0f; }
+
+		iter_count = 100;
 		while (true)
 		{
 			auto const k_mid = 0.5f*(k_low + k_high);
 			auto const value = 1.0f + std::pow(scale, -k_mid) - std::pow(y_0, -k_mid);
 
+			--iter_count;
 			if (std::abs(value) < 1.0f / 1024.0f)
 			{ return k_mid; }
+
+			if(iter_count == 0)
+			{ return 1.0f; }
 
 			if (value < 0.0f)
 			{ k_high = k_mid; }
