@@ -15,6 +15,7 @@
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
 #include "ui/value_maps/log_value_map.hpp"
+#include "ui/widgets/grayscale_image_statistics_view.hpp"
 
 #include "lib/pixel_store/image.hpp"
 #include "lib/generators/heightmap/heightmap.hpp"
@@ -120,8 +121,7 @@ namespace terraformer::app
 	struct heightmap_stats_form_field
 	{
 		std::u8string_view label;
-		using input_widget_type = ui::widgets::label;
-		std::reference_wrapper<grayscale_image const> value_reference;
+		using input_widget_type = ui::widgets::grayscale_image_statistics_view;
 	};
 
 	struct heightmap_heatmap_form_field
@@ -278,8 +278,7 @@ namespace terraformer::app
 	{
 		auto& stats = parent.create_widget(
 			heightmap_stats_form_field{
-				.label = u8"Statistics",
-				.value_reference = field_value.data
+				.label = u8"Statistics"
 			}
 		);
 
@@ -301,7 +300,13 @@ namespace terraformer::app
 		);
 		bind(xsection_view_descriptor{field_value}, xsection);
 
-		parent.set_refresh_function([&heatmap, &xsection](){
+		parent.set_refresh_function([&stats, &heatmap, &xsection, field_value](){
+			box_size dom_size{
+				field_value.domain_size.get().width,
+				field_value.domain_size.get().height,
+				0.0f
+			};
+			stats.show_image(field_value.data.get().pixels(), dom_size);
 			heatmap.refresh();
 			xsection.refresh();
 		});

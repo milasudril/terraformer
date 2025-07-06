@@ -22,6 +22,9 @@ namespace terraformer::ui::widgets
 		using widget_group::confirm_size;
 		using widget_group::set_refresh_function;
 		using widget_group::refresh;
+		using widget_group::iterator_invalidation_handler_ref;
+		using widget_group::layout;
+		using widget_group::is_transparent;
 
 		explicit form(
 			iterator_invalidation_handler_ref iihr,

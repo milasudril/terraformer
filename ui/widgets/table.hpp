@@ -101,7 +101,11 @@ namespace terraformer::ui::widgets
 
 				auto& ret = *field_input_widget;
 
-				if constexpr(requires(input_widget_type const& widget){{widget.value()};})
+				if constexpr(
+					requires(input_widget_type& widget){
+						{widget.on_value_changed(main::widget_user_interaction_handler<input_widget_type>{})};
+					}
+				)
 				{
 					ret.value(field.value_reference.get());
 					ret.on_value_changed([value = field.value_reference, this]<class ... Args>(auto& widget, Args&&... args){
