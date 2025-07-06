@@ -114,7 +114,14 @@ namespace terraformer::app
 		std::reference_wrapper<grayscale_image const> data;
 		std::reference_wrapper<domain_size_descriptor const> domain_size;
 		heatmap_view_attributes heatmap_presentation_attributes;
-		xsection_view_attributes xsection_presentation_attributes;;
+		xsection_view_attributes xsection_presentation_attributes;
+	};
+
+	struct heightmap_stats_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::label;
+		std::reference_wrapper<grayscale_image const> value_reference;
 	};
 
 	struct heightmap_heatmap_form_field
@@ -130,6 +137,7 @@ namespace terraformer::app
 		bool expand_layout_cell;
 		using input_widget_type = ui::widgets::form;
 	};
+
 
 	struct heatmap_view_descriptor
 	{
@@ -268,6 +276,13 @@ namespace terraformer::app
 
 	void bind(heightmap_view_descriptor& field_value, ui::widgets::form& parent)
 	{
+		auto& stats = parent.create_widget(
+			heightmap_stats_form_field{
+				.label = u8"Statistics",
+				.value_reference = field_value.data
+			}
+		);
+
 		auto& heatmap = parent.create_widget(
 			heightmap_heatmap_form_field{
 				.label = u8"Heatmap view",
