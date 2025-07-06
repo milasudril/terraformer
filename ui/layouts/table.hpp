@@ -39,7 +39,7 @@ namespace terraformer::ui::layouts
 
 			explicit cell_size_array(span<Value const> vals):
 				m_values{vals}
-			{ std::copy(std::begin(vals), std::end(vals), std::begin(*this)); }
+			{ }
 
 			size_t size() const
 			{ return std::size(m_values).get(); }
