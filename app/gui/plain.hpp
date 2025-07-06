@@ -280,7 +280,8 @@ namespace terraformer::app
 			plain_midpoints_form_field{
 				.label = u8"Midpoints"
 			},
-			ui::main::widget_orientation::vertical
+			ui::main::widget_orientation::vertical,
+			1
 		);
 		bind(field_value.edge_midpoints, midpoints);
 

@@ -37,9 +37,15 @@ namespace terraformer::ui::layouts
 				m_values{array_size<Value>{size.value}}
 			{}
 
-			explicit cell_size_array(span<Value const> vals):
+			explicit cell_size_array(span<Value const> vals, size_t repcount = 0):
 				m_values{vals}
-			{ }
+			{
+				for(size_t k = 0; k != repcount; ++k)
+				{
+					for(auto item : vals)
+					{ m_values.push_back(item); }
+				}
+			}
 
 			size_t size() const
 			{ return std::size(m_values).get(); }
@@ -91,33 +97,41 @@ namespace terraformer::ui::layouts
 			std::variant<use_default, expand> value = use_default{};
 		};
 
-		static row_array<cell_size> rows(std::initializer_list<cell_size> const& sizes)
-		{ return row_array<cell_size>{span{std::begin(sizes), std::end(sizes)}}; }
+		static row_array<cell_size> rows(span<cell_size const> sizes, size_t repcount = 0)
+		{ return row_array<cell_size>{sizes, repcount}; }
+
+		static row_array<cell_size> rows(std::initializer_list<cell_size> const& sizes, size_t repcount = 0)
+		{ return row_array<cell_size>{span{std::begin(sizes), std::end(sizes)}, repcount}; }
 
 		template<class Head, class ... Tail>
-		static row_array<cell_size> rows(Head&& h, Tail&&... t)
+		static row_array<cell_size> rows(size_t repcount, Head&& h, Tail&&... t)
 		{
-			return rows({
-				cell_size{.value = std::forward<Head>(h)},
-				cell_size{.value = std::forward<Tail>(t)}...
-			});
+			return rows(
+				{
+					cell_size{.value = std::forward<Head>(h)},
+					cell_size{.value = std::forward<Tail>(t)}...
+				},
+				repcount
+			);
 		}
 
-		static column_array<cell_size> columns(span<cell_size const> sizes)
-		{ return column_array<cell_size>{sizes}; }
+		static column_array<cell_size> columns(span<cell_size const> sizes, size_t repcount = 0)
+		{ return column_array<cell_size>{sizes, repcount}; }
 
-		static column_array<cell_size> columns(std::initializer_list<cell_size> const& sizes)
-		{ return column_array<cell_size>{span{std::begin(sizes), std::end(sizes)}}; }
+		static column_array<cell_size> columns(std::initializer_list<cell_size> const& sizes, size_t repcount = 0)
+		{ return column_array<cell_size>{span{std::begin(sizes), std::end(sizes)}, repcount}; }
 
 		template<class Head, class ... Tail>
-		static column_array<cell_size> columns(Head&& h, Tail&&... t)
+		static column_array<cell_size> columns(size_t repcount, Head&& h, Tail&&... t)
 		{
-			return columns({
-				cell_size{.value = std::forward<Head>(h)},
-				cell_size{.value = std::forward<Tail>(t)}...
-			});
+			return columns(
+				{
+					cell_size{.value = std::forward<Head>(h)},
+					cell_size{.value = std::forward<Tail>(t)}...
+				},
+				repcount
+			);
 		}
-
 
 		enum class cell_order:size_t{row_major, column_major};
 

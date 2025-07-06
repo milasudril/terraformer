@@ -25,19 +25,22 @@ namespace terraformer::ui::widgets
 
 		explicit form(
 			iterator_invalidation_handler_ref iihr,
-			main::widget_orientation orientation = main::widget_orientation::vertical
+			main::widget_orientation orientation = main::widget_orientation::vertical,
+			size_t extra_fields_per_row = 0
 		):
 			widget_group{
 				iihr,
 				orientation == main::widget_orientation::vertical?
 					layouts::table{
 						layouts::table::columns(
+							extra_fields_per_row,
 							layouts::table::cell_size::use_default{},
 							layouts::table::cell_size::expand{}
 						)
 					}
 					:layouts::table{
 						layouts::table::rows(
+							extra_fields_per_row,
 							layouts::table::cell_size::use_default{},
 							layouts::table::cell_size::expand{}
 						)
