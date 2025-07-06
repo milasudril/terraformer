@@ -119,7 +119,11 @@ namespace terraformer::ui::widgets
 				{ ret.text(field.label); }
 			}
 
-			if constexpr(requires(input_widget_type const& widget){{widget.value()};})
+			if constexpr(
+				requires(input_widget_type& widget){
+					{widget.on_value_changed(main::widget_user_interaction_handler<input_widget_type>{})};
+				}
+			)
 			{
 				ret.value(field.value_reference.get());
 				ret.on_value_changed([value = field.value_reference, this]<class ... Args>(auto& widget, Args&&... args){
@@ -138,9 +142,11 @@ namespace terraformer::ui::widgets
 				});
 			}
 			else
-			if constexpr(requires(input_widget_type& obj, main::widget_user_interaction_handler<input_widget_type>&& callback){
-				{obj.on_content_updated(std::move(callback))};
-			})
+			if constexpr(
+				requires(input_widget_type& obj, main::widget_user_interaction_handler<input_widget_type>&& callback){
+					{obj.on_content_updated(std::move(callback))};
+				}
+			)
 			{
 				ret.on_content_updated([this]<class ... Args>(auto&, Args&&... args) {
 					m_on_content_updated(*this, std::forward<Args>(args)...);
