@@ -43,7 +43,7 @@ namespace terraformer::ui::widgets
 				.label = u8"Min elevation/m"
 			});
 			m_max_elev = &create_widget(statistic_field_form_field{
-				.label = u8"Min elevation/m"
+				.label = u8"Max elevation/m"
 			});
 			m_max_slope = &create_widget(statistic_field_form_field{
 				.label = u8"Max |grad z|"
