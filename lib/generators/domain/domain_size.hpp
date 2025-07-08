@@ -7,6 +7,9 @@ namespace terraformer
 	{
 		float width = 4096.0f;
 		float height = 4096.0f;
+
+		constexpr bool operator==(domain_size_descriptor const&) const = default;
+		constexpr bool operator!=(domain_size_descriptor const&) const = default;
 	};
 }
 
