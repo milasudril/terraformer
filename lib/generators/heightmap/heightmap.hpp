@@ -27,6 +27,17 @@ namespace terraformer
 			m_resource{std::forward<Descriptor>(params)}
 		{ }
 
+		heightmap_generator(heightmap_generator const& other):
+			m_resource{
+				other.m_resource.get().get_vtable().do_clone(other.m_resource.get().get_pointer())
+			}
+		{}
+		~heightmap_generator() = default;
+
+		heightmap_generator(heightmap_generator&&) = default;
+		heightmap_generator& operator=(heightmap_generator&&) = default;
+		heightmap_generator& operator=(heightmap_generator const&) = default;
+
 		grayscale_image generate(domain_size_descriptor dom_size) const
 		{
 			auto const do_generate = m_resource.get().get_vtable().do_generate;
@@ -38,31 +49,37 @@ namespace terraformer
 		{
 			auto const do_bind = m_resource.get().get_vtable().do_bind;
 			auto const descriptor = m_resource.get().get_pointer();
-			return do_bind(descriptor, editor);
+			do_bind(descriptor, editor);
 		}
 
 	private:
 		struct vtable
 		{
 			template<heightmap_generator_source_descriptor Descriptor>
-			explicit vtable(std::type_identity<Descriptor>):
+			constexpr explicit vtable(std::type_identity<Descriptor>):
 				do_generate{[](domain_size_descriptor dom_size,  void const* descriptor){
-					return generate(dom_size, *static_cast<Descriptor const*>(descriptor));
+					return terraformer::generate(dom_size, *static_cast<Descriptor const*>(descriptor));
 				}},
 				do_bind{[](void* descriptor, descriptor_editor& editor){
-					return bind(*static_cast<Descriptor*>(descriptor), editor);
+					terraformer::bind(*static_cast<Descriptor*>(descriptor), editor);
+				}},
+				do_clone{[](void const* descriptor){
+					return unique_resource<vtable>{*static_cast<Descriptor const*>(descriptor)};
 				}}
 			{}
 
 			grayscale_image (*do_generate)(domain_size_descriptor, void const* descriptor);
 			void (*do_bind)(void*, descriptor_editor&);
+			unique_resource<vtable> (*do_clone)(void const*);
 		};
+
 		unique_resource<vtable> m_resource;
 	};
 
 	struct heightmap_generator_descriptor
 	{
 		plain_descriptor plain;
+		heightmap_generator plain_2{plain_descriptor{}};
 		rolling_hills_descriptor rolling_hills;
 	};
 

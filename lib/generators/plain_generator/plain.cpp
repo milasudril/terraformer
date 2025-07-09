@@ -4,6 +4,7 @@
 
 #include "lib/common/interval.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/descriptor_io/descriptor_editor.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/pixel_store/image.hpp"
 
@@ -298,4 +299,50 @@ terraformer::grayscale_image terraformer::generate(
 
 	return ret;
 }
+
+void terraformer::bind(plain_control_points_info&, descriptor_editor&)
+{}
+
+void terraformer::bind(plain_descriptor& field_value, descriptor_editor& editor)
+{
+	auto& control_points = editor.create_table(
+		u8"Control points",
+		descriptor_editor::widget_orientation::vertical,
+		{
+			u8"Elevation/m",
+			u8"∂/∂x",
+			u8"∂/∂y"
+		}
+	);
+	bind(field_value.boundary, control_points);
+
+#if 0
+auto& midpoints = parent.create_widget(
+	plain_midpoints_form_field{
+		.label = u8"Midpoints"
+	},
+	ui::main::widget_orientation::vertical,
+	1
+);
+bind(field_value.edge_midpoints, midpoints);
+
+parent.create_widget(
+	global_orientation_form_field{
+		.label = u8"Orientation",
+		.value_reference = std::ref(field_value.orientation)
+	},
+	terraformer::ui::widgets::knob{
+		terraformer::ui::value_maps::affine_value_map{-0.5f, 0.5f}
+	}
+)
+.set_textbox_placeholder_string(u8"-0.123456789")
+.input_widget().visual_angle_range(
+	closed_closed_interval<geosimd::turn_angle>{
+		geosimd::turns{0.0},
+		geosimd::turns{1.0}
+	}
+		);
+#endif
+}
+
 

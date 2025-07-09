@@ -8,6 +8,7 @@
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/interval.hpp"
 #include "lib/common/bounded_value.hpp"
+#include "lib/descriptor_io/descriptor_editor.hpp"
 
 namespace terraformer
 {
@@ -50,6 +51,10 @@ namespace terraformer
 	};
 
 	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor const& params);
+
+	void bind(plain_control_points_info& field_value, descriptor_editor& editor);
+
+	void bind(plain_descriptor& field_value, descriptor_editor& editor);
 }
 
 #endif
