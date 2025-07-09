@@ -3,6 +3,7 @@
 #ifndef TERRAFORMER_HEIGHTMAP_HPP
 #define TERRAFORMER_HEIGHTMAP_HPP
 
+#include "lib/descriptor_io/descriptor_editor.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/common/unique_resource.hpp"
 #include "lib/generators/plain_generator/plain.hpp"
@@ -17,9 +18,6 @@ namespace terraformer
 	{
 		{generate(dom_size, x)} -> std::same_as<grayscale_image>;
 	};
-
-	class descriptor_editor
-	{};
 
 	class heightmap_generator
 	{
