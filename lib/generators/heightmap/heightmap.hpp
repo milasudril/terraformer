@@ -18,19 +18,29 @@ namespace terraformer
 		{generate(dom_size, x)} -> std::same_as<grayscale_image>;
 	};
 
+	class descriptor_editor
+	{};
+
 	class heightmap_generator
 	{
 	public:
-		template<heightmap_generator_source_descriptor Descriptor, class Form>
-		explicit heightmap_generator(Descriptor&& params, Form& bind_to):
+		template<heightmap_generator_source_descriptor Descriptor>
+		explicit heightmap_generator(Descriptor&& params):
 			m_resource{std::forward<Descriptor>(params)}
-		{ bind(*static_cast<Descriptor*>(m_resource.get().get_pointer()), bind_to); }
+		{ }
 
 		grayscale_image generate(domain_size_descriptor dom_size) const
 		{
 			auto const do_generate = m_resource.get().get_vtable().do_generate;
 			auto const descriptor = m_resource.get().get_pointer();
 			return do_generate(dom_size, descriptor);
+		}
+
+		void bind(descriptor_editor& editor)
+		{
+			auto const do_bind = m_resource.get().get_vtable().do_bind;
+			auto const descriptor = m_resource.get().get_pointer();
+			return do_bind(descriptor, editor);
 		}
 
 	private:
@@ -40,10 +50,14 @@ namespace terraformer
 			explicit vtable(std::type_identity<Descriptor>):
 				do_generate{[](domain_size_descriptor dom_size,  void const* descriptor){
 					return generate(dom_size, *static_cast<Descriptor const*>(descriptor));
+				}},
+				do_bind{[](void* descriptor, descriptor_editor& editor){
+					return bind(*static_cast<Descriptor*>(descriptor), editor);
 				}}
 			{}
 
-			grayscale_image (*do_generate)(domain_size_descriptor dom_size, void const* descriptor);
+			grayscale_image (*do_generate)(domain_size_descriptor, void const* descriptor);
+			void (*do_bind)(void*, descriptor_editor&);
 		};
 		unique_resource<vtable> m_resource;
 	};
