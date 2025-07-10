@@ -67,7 +67,7 @@ TESTCASE(terraformer_unique_resource_constructed_resource_points_to_correct_vtab
 		std::in_place_type_t<testfwk::lifetime_checker<int>>{}
 	};
 	auto vt = res.get().get_vtable();
-	EXPECT_EQ((std::is_same_v<decltype(vt), dummy_vtable>), true);
+	EXPECT_EQ((std::is_same_v<decltype(vt), terraformer::resource_reference_vtable<dummy_vtable, false>>), true);
 }
 
 TESTCASE(terraformer_unique_resource_same_vt_type_points_to_same_vt)

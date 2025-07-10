@@ -7,24 +7,40 @@
 
 namespace terraformer
 {
+	template<class Vtable, bool AddDtor>
+	struct resource_reference_vtable;
+
 	template<class Vtable>
+	struct resource_reference_vtable<Vtable, false>:Vtable
+	{
+		template<class ReferencedType>
+		constexpr resource_reference_vtable(std::type_identity<ReferencedType>):
+			Vtable{std::type_identity<ReferencedType>{}}
+		{}
+	};
+
+	template<class Vtable>
+	struct resource_reference_vtable<Vtable, true>:resource_reference_vtable<Vtable, false>
+	{
+		template<class ReferencedType>
+		constexpr resource_reference_vtable(std::type_identity<ReferencedType>):
+			resource_reference_vtable<Vtable,false>{std::type_identity<ReferencedType>{}},
+			destroy{
+				[](void* object){
+					delete static_cast<ReferencedType*>(object);
+				}
+			}
+		{}
+
+		void (*destroy)(void*);
+	};
+
+
+	template<class Vtable, bool AddDtor = false>
 	class resource_reference
 	{
 	public:
-		struct vtable:Vtable
-		{
-			template<class ReferencedType>
-			constexpr vtable(std::type_identity<ReferencedType>):
-				Vtable{std::type_identity<ReferencedType>{}},
-				destroy{
-					[](void* object){
-						delete static_cast<ReferencedType*>(object);
-					}
-				}
-			{}
-
-			void (*destroy)(void*);
-		};
+		using vtable = resource_reference_vtable<Vtable, AddDtor>;
 
 		resource_reference() = default;
 
@@ -51,14 +67,15 @@ namespace terraformer
 		void* get_pointer() const
 		{ return m_handle; }
 
-		Vtable const& get_vtable() const
+		vtable const& get_vtable() const
 		{ return *m_vtable_pointer; }
 
-		vtable const& get_full_vtable() const
-		{ return *m_vtable_pointer; }
 
 		operator bool() const
 		{ return m_handle != nullptr; }
+
+		explicit operator resource_reference<Vtable>() const
+		{ return resource_reference<Vtable>{m_handle, m_vtable_pointer}; }
 
 	private:
 		void* m_handle{nullptr};
@@ -91,7 +108,7 @@ namespace terraformer
 		{ reset(); }
 
 		unique_resource(unique_resource&& other):
-			m_handle{std::exchange(other.m_handle, resource_reference<Vtable>{})}
+			m_handle{std::exchange(other.m_handle, resource_reference<Vtable, true>{})}
 		{ }
 
 		unique_resource& operator=(unique_resource&& other)
@@ -106,7 +123,7 @@ namespace terraformer
 		unique_resource& operator=(unique_resource const&) = delete;
 
 		resource_reference<Vtable> get() const
-		{ return m_handle; }
+		{ return resource_reference<Vtable>{m_handle}; }
 
 		operator bool() const
 		{ return static_cast<bool>(m_handle); }
@@ -116,12 +133,12 @@ namespace terraformer
 			if(!m_handle)
 			{ return; }
 
-			m_handle.get_full_vtable().destroy(m_handle.get_pointer());
-			m_handle = resource_reference<Vtable>{};
+			m_handle.get_vtable().destroy(m_handle.get_pointer());
+			m_handle = resource_reference<Vtable, true>{};
 		}
 
 	private:
-		resource_reference<Vtable> m_handle;
+		resource_reference<Vtable, true> m_handle;
 	};
 }
 
