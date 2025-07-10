@@ -15,7 +15,7 @@ namespace terraformer
 
 		template<class DescriptorEditor>
 		explicit descriptor_editor_ref(DescriptorEditor& editor):
-			m_handle{editor}
+			m_handle{std::ref(editor)}
 		{}
 
 		descriptor_editor_ref create_table(
@@ -33,7 +33,7 @@ namespace terraformer
 		struct vtable
 		{
 			template<class DescriptorEditor>
-			explicit vtable(std::type_identity<DescriptorEditor>)
+			constexpr explicit vtable(std::type_identity<DescriptorEditor>)
 				:create_table{[](
 					void* handle,
 					std::u8string_view label,

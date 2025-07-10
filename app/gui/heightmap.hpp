@@ -325,8 +325,7 @@ namespace terraformer::app
 				.label = u8"Plain"
 			}
 		);
-		bind(field_value.plain, plain);
-
+		field_value.plain_2.bind(descriptor_editor_ref{plain});
 
 		auto& rolling_hills = parent.create_widget(
 			rolling_hills_descriptor_form_field{

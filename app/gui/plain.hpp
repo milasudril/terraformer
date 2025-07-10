@@ -1,6 +1,8 @@
 #ifndef TERRAFORMER_GUI_PLAIN_HPP
 #define TERRAFORMER_GUI_PLAIN_HPP
 
+#include "./descriptor_editor.hpp"
+
 #include "lib/generators/plain_generator/plain.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/widgets/form.hpp"
@@ -251,7 +253,7 @@ namespace terraformer::app
 	struct plain_form_field
 	{
 		std::u8string_view label;
-		using input_widget_type = ui::widgets::form;
+		using input_widget_type = descriptor_editor;
 	};
 
 	struct global_orientation_form_field
