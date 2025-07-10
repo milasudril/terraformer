@@ -89,7 +89,7 @@ namespace terraformer::app
 
 	void bind(plain_control_points_info& field_value, auto& parent)
 	{
-		auto& n = parent.create_widget(
+		auto& n = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"N"
 			}
@@ -97,7 +97,7 @@ namespace terraformer::app
 		bind(field_value.n, n);
 		n.append_pending_widgets();
 
-		auto& ne = parent.create_widget(
+		auto& ne = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"NE"
 			}
@@ -105,7 +105,7 @@ namespace terraformer::app
 		bind(field_value.ne, ne);
 		ne.append_pending_widgets();
 
-		auto& e = parent.create_widget(
+		auto& e = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"E"
 			}
@@ -113,7 +113,7 @@ namespace terraformer::app
 		bind(field_value.e, e);
 		e.append_pending_widgets();
 
-		auto& se = parent.create_widget(
+		auto& se = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"SE"
 			}
@@ -121,7 +121,7 @@ namespace terraformer::app
 		bind(field_value.se, se);
 		se.append_pending_widgets();
 
-		auto& s = parent.create_widget(
+		auto& s = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"S"
 			}
@@ -129,7 +129,7 @@ namespace terraformer::app
 		bind(field_value.s, s);
 		s.append_pending_widgets();
 
-		auto& sw = parent.create_widget(
+		auto& sw = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"SW"
 			}
@@ -137,7 +137,7 @@ namespace terraformer::app
 		bind(field_value.sw, sw);
 		sw.append_pending_widgets();
 
-		auto& w = parent.create_widget(
+		auto& w = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"W"
 			}
@@ -145,7 +145,7 @@ namespace terraformer::app
 		bind(field_value.w, w);
 		w.append_pending_widgets();
 
-		auto& nw = parent.create_widget(
+		auto& nw = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"NW"
 			}
@@ -153,7 +153,7 @@ namespace terraformer::app
 		bind(field_value.nw, nw);
 		nw.append_pending_widgets();
 
-		auto& c = parent.create_widget(
+		auto& c = parent.add_record(
 			plain_boundary_point_form_field{
 				.label = u8"C"
 			}

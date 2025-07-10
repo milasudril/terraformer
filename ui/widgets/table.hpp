@@ -172,7 +172,7 @@ namespace terraformer::ui::widgets
 		);
 
 		template<class RecordDescriptor>
-		record& create_widget(RecordDescriptor&& descriptor)
+		record& add_record(RecordDescriptor&& descriptor)
 		{
 			auto i = m_records.try_emplace(std::u8string{descriptor.label}, descriptor.label, *this);
 			m_record_indices.try_emplace(
