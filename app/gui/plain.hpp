@@ -26,7 +26,7 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
-	struct plain_boundary_point_form_field
+	struct plain_control_points_point_form_field
 	{
 		std::u8string_view label;
 		using input_widget_type = ui::widgets::form;
@@ -90,7 +90,7 @@ namespace terraformer::app
 	void bind(plain_control_points_info& field_value, auto& parent)
 	{
 		auto& n = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"N"
 			}
 		);
@@ -98,7 +98,7 @@ namespace terraformer::app
 		n.append_pending_widgets();
 
 		auto& ne = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"NE"
 			}
 		);
@@ -106,7 +106,7 @@ namespace terraformer::app
 		ne.append_pending_widgets();
 
 		auto& e = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"E"
 			}
 		);
@@ -114,7 +114,7 @@ namespace terraformer::app
 		e.append_pending_widgets();
 
 		auto& se = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"SE"
 			}
 		);
@@ -122,7 +122,7 @@ namespace terraformer::app
 		se.append_pending_widgets();
 
 		auto& s = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"S"
 			}
 		);
@@ -130,7 +130,7 @@ namespace terraformer::app
 		s.append_pending_widgets();
 
 		auto& sw = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"SW"
 			}
 		);
@@ -138,7 +138,7 @@ namespace terraformer::app
 		sw.append_pending_widgets();
 
 		auto& w = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"W"
 			}
 		);
@@ -146,7 +146,7 @@ namespace terraformer::app
 		w.append_pending_widgets();
 
 		auto& nw = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"NW"
 			}
 		);
@@ -154,7 +154,7 @@ namespace terraformer::app
 		nw.append_pending_widgets();
 
 		auto& c = parent.create_widget(
-			plain_boundary_point_form_field{
+			plain_control_points_point_form_field{
 				.label = u8"C"
 			}
 		);
@@ -263,7 +263,7 @@ namespace terraformer::app
 
 	void bind(plain_descriptor& field_value, ui::widgets::form& parent)
 	{
-		auto& boundary = parent.create_widget(
+		auto& control_points = parent.create_widget(
 			plain_elevation_table_form_field{
 				.label = u8"Control points"
 			},
@@ -274,7 +274,7 @@ namespace terraformer::app
 				u8"∂/∂y"
 			}
 		);
-		bind(field_value.boundary, boundary);
+		bind(field_value.control_points, control_points);
 
 		auto& midpoints = parent.create_widget(
 			plain_midpoints_form_field{
@@ -283,7 +283,7 @@ namespace terraformer::app
 			ui::main::widget_orientation::vertical,
 			1
 		);
-		bind(field_value.edge_midpoints, midpoints);
+		bind(field_value.midpoints, midpoints);
 
 		parent.create_widget(
 			global_orientation_form_field{

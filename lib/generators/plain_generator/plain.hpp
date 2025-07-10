@@ -30,6 +30,8 @@ namespace terraformer
 		plain_control_point_descriptor w;
 		plain_control_point_descriptor nw;
 		plain_control_point_descriptor c;
+
+		void bind(descriptor_editor&){}
 	};
 
 	struct plain_midpoints_info
@@ -45,16 +47,15 @@ namespace terraformer
 
 	struct plain_descriptor
 	{
-		plain_control_points_info boundary;
-		plain_midpoints_info edge_midpoints;
+		plain_control_points_info control_points;
+		plain_midpoints_info midpoints;
 		float orientation = 0.0f;
+
+		grayscale_image generate_heightmap(domain_size_descriptor) const;
+		void bind(descriptor_editor& editor);
 	};
 
-	grayscale_image generate(domain_size_descriptor const& dom_size, plain_descriptor const& params);
-
-	void bind(plain_control_points_info& field_value, descriptor_editor& editor);
-
-	void bind(plain_descriptor& field_value, descriptor_editor& editor);
+	grayscale_image generate(domain_size_descriptor dom_size, plain_descriptor const& params);
 }
 
 #endif

@@ -14,16 +14,22 @@
 namespace terraformer
 {
 	template<class T>
-	concept heightmap_generator_source_descriptor = requires(domain_size_descriptor dom_size, T const& x)
+	concept heightmap_generator_source_descriptor = requires(
+		 T& x,
+		 domain_size_descriptor dom_size,
+		 descriptor_editor& editor
+	)
 	{
-		{generate(dom_size, x)} -> std::same_as<grayscale_image>;
+		{std::as_const(x).generate_heightmap(dom_size)} -> std::same_as<grayscale_image>;
+		{x.bind(editor)} -> std::same_as<void>;
 	};
 
 	class heightmap_generator
 	{
 	public:
 		template<heightmap_generator_source_descriptor Descriptor>
-		explicit heightmap_generator(Descriptor&& params):
+		explicit heightmap_generator(Descriptor&& params) requires
+		(!std::is_same_v<heightmap_generator, std::remove_cvref_t<Descriptor>>):
 			m_resource{std::forward<Descriptor>(params)}
 		{ }
 
@@ -38,7 +44,7 @@ namespace terraformer
 		heightmap_generator& operator=(heightmap_generator&&) = default;
 		heightmap_generator& operator=(heightmap_generator const&) = default;
 
-		grayscale_image generate(domain_size_descriptor dom_size) const
+		grayscale_image generate_heightmap(domain_size_descriptor dom_size) const
 		{
 			auto const do_generate = m_resource.get().get_vtable().do_generate;
 			auto const descriptor = m_resource.get().get_pointer();
@@ -58,10 +64,10 @@ namespace terraformer
 			template<heightmap_generator_source_descriptor Descriptor>
 			constexpr explicit vtable(std::type_identity<Descriptor>):
 				do_generate{[](domain_size_descriptor dom_size,  void const* descriptor){
-					return terraformer::generate(dom_size, *static_cast<Descriptor const*>(descriptor));
+					return static_cast<Descriptor const*>(descriptor)->generate_heightmap(dom_size);
 				}},
 				do_bind{[](void* descriptor, descriptor_editor& editor){
-					terraformer::bind(*static_cast<Descriptor*>(descriptor), editor);
+					return static_cast<Descriptor*>(descriptor)->bind(editor);
 				}},
 				do_clone{[](void const* descriptor){
 					return unique_resource<vtable>{*static_cast<Descriptor const*>(descriptor)};

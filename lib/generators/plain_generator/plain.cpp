@@ -66,7 +66,7 @@ namespace
 }
 
 terraformer::grayscale_image terraformer::generate(
-	domain_size_descriptor const& dom_size,
+	domain_size_descriptor dom_size,
 	plain_descriptor const& params
 )
 {
@@ -91,82 +91,82 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const west_to_east_north = control_curve(
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.n,
-			.y_0 = params.boundary.nw.elevation,
-			.y_m = params.boundary.n.elevation,
-			.y_1 = params.boundary.ne.elevation,
-			.ddx_0 = params.boundary.nw.ddx*dom_size.width,
-			.ddx_m = params.boundary.n.ddx*dom_size.width,
-			.ddx_1 = params.boundary.ne.ddx*dom_size.width
+			.x_m = params.midpoints.n,
+			.y_0 = params.control_points.nw.elevation,
+			.y_m = params.control_points.n.elevation,
+			.y_1 = params.control_points.ne.elevation,
+			.ddx_0 = params.control_points.nw.ddx*dom_size.width,
+			.ddx_m = params.control_points.n.ddx*dom_size.width,
+			.ddx_1 = params.control_points.ne.ddx*dom_size.width
 		}
 	);
 
 	auto const west_to_east_south = control_curve(
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.s,
-			.y_0 = params.boundary.sw.elevation,
-			.y_m = params.boundary.s.elevation,
-			.y_1 = params.boundary.se.elevation,
-			.ddx_0 = params.boundary.sw.ddx*dom_size.width,
-			.ddx_m = params.boundary.s.ddx*dom_size.width,
-			.ddx_1 = params.boundary.se.ddx*dom_size.width
+			.x_m = params.midpoints.s,
+			.y_0 = params.control_points.sw.elevation,
+			.y_m = params.control_points.s.elevation,
+			.y_1 = params.control_points.se.elevation,
+			.ddx_0 = params.control_points.sw.ddx*dom_size.width,
+			.ddx_m = params.control_points.s.ddx*dom_size.width,
+			.ddx_1 = params.control_points.se.ddx*dom_size.width
 		}
 	);
 
 	auto const north_to_south_west = control_curve(
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.w,
-			.y_0 = params.boundary.nw.elevation,
-			.y_m = params.boundary.w.elevation,
-			.y_1 = params.boundary.sw.elevation,
-			.ddx_0 = params.boundary.nw.ddy*dom_size.height,
-			.ddx_m = params.boundary.w.ddy*dom_size.height,
-			.ddx_1 = params.boundary.sw.ddy*dom_size.height
+			.x_m = params.midpoints.w,
+			.y_0 = params.control_points.nw.elevation,
+			.y_m = params.control_points.w.elevation,
+			.y_1 = params.control_points.sw.elevation,
+			.ddx_0 = params.control_points.nw.ddy*dom_size.height,
+			.ddx_m = params.control_points.w.ddy*dom_size.height,
+			.ddx_1 = params.control_points.sw.ddy*dom_size.height
 		}
 	);
 
 	auto const north_to_south_east = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.e,
-			.y_0 = params.boundary.ne.elevation,
-			.y_m = params.boundary.e.elevation,
-			.y_1 = params.boundary.se.elevation,
-			.ddx_0 = params.boundary.ne.ddy*dom_size.height,
-			.ddx_m = params.boundary.e.ddy*dom_size.height,
-			.ddx_1 = params.boundary.se.ddy*dom_size.height
+			.x_m = params.midpoints.e,
+			.y_0 = params.control_points.ne.elevation,
+			.y_m = params.control_points.e.elevation,
+			.y_1 = params.control_points.se.elevation,
+			.ddx_0 = params.control_points.ne.ddy*dom_size.height,
+			.ddx_m = params.control_points.e.ddy*dom_size.height,
+			.ddx_1 = params.control_points.se.ddy*dom_size.height
 		}
 	};
 
 	auto const z_m_interp_ns = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.c_x,
-			.y_0 = params.boundary.w.elevation,
-			.y_m = params.boundary.c.elevation,
-			.y_1 = params.boundary.e.elevation,
-			.ddx_0 = params.boundary.w.ddx*dom_size.width,
-			.ddx_m = params.boundary.c.ddx*dom_size.width,
-			.ddx_1 = params.boundary.e.ddx*dom_size.width
+			.x_m = params.midpoints.c_x,
+			.y_0 = params.control_points.w.elevation,
+			.y_m = params.control_points.c.elevation,
+			.y_1 = params.control_points.e.elevation,
+			.ddx_0 = params.control_points.w.ddx*dom_size.width,
+			.ddx_m = params.control_points.c.ddx*dom_size.width,
+			.ddx_1 = params.control_points.e.ddx*dom_size.width
 		}
 	};
 
 	auto const z_m_interp_we = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.c_y,
-			.y_0 = params.boundary.n.elevation,
-			.y_m = params.boundary.c.elevation,
-			.y_1 = params.boundary.s.elevation,
-			.ddx_0 = params.boundary.n.ddy*dom_size.height,
-			.ddx_m = params.boundary.c.ddy*dom_size.height,
-			.ddx_1 = params.boundary.s.ddy*dom_size.height
+			.x_m = params.midpoints.c_y,
+			.y_0 = params.control_points.n.elevation,
+			.y_m = params.control_points.c.elevation,
+			.y_1 = params.control_points.s.elevation,
+			.ddx_0 = params.control_points.n.ddy*dom_size.height,
+			.ddx_m = params.control_points.c.ddy*dom_size.height,
+			.ddx_1 = params.control_points.s.ddy*dom_size.height
 		}
 	};
 
 	auto const y_m = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.c_x,
-			.y_0 = params.edge_midpoints.w,
-			.y_m = params.edge_midpoints.c_y,
-			.y_1 = params.edge_midpoints.e,
+			.x_m = params.midpoints.c_x,
+			.y_0 = params.midpoints.w,
+			.y_m = params.midpoints.c_y,
+			.y_1 = params.midpoints.e,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -175,10 +175,10 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const x_m = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.c_y,
-			.y_0 = params.edge_midpoints.n,
-			.y_m = params.edge_midpoints.c_x,
-			.y_1 = params.edge_midpoints.s,
+			.x_m = params.midpoints.c_y,
+			.y_0 = params.midpoints.n,
+			.y_m = params.midpoints.c_x,
+			.y_1 = params.midpoints.s,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -187,10 +187,10 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const ddy_0 = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.n,
-			.y_0 = params.boundary.nw.ddy*dom_size.height,
-			.y_m = params.boundary.n.ddy*dom_size.height,
-			.y_1 = params.boundary.ne.ddy*dom_size.height,
+			.x_m = params.midpoints.n,
+			.y_0 = params.control_points.nw.ddy*dom_size.height,
+			.y_m = params.control_points.n.ddy*dom_size.height,
+			.y_1 = params.control_points.ne.ddy*dom_size.height,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -199,10 +199,10 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const ddy_m = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.c_x,
-			.y_0 = params.boundary.w.ddy*dom_size.height,
-			.y_m = params.boundary.c.ddy*dom_size.height,
-			.y_1 = params.boundary.e.ddy*dom_size.height,
+			.x_m = params.midpoints.c_x,
+			.y_0 = params.control_points.w.ddy*dom_size.height,
+			.y_m = params.control_points.c.ddy*dom_size.height,
+			.y_1 = params.control_points.e.ddy*dom_size.height,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f,
@@ -211,10 +211,10 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const ddy_1 = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.n,
-			.y_0 = params.boundary.sw.ddy*dom_size.height,
-			.y_m = params.boundary.s.ddy*dom_size.height,
-			.y_1 = params.boundary.se.ddy*dom_size.height,
+			.x_m = params.midpoints.n,
+			.y_0 = params.control_points.sw.ddy*dom_size.height,
+			.y_m = params.control_points.s.ddy*dom_size.height,
+			.y_1 = params.control_points.se.ddy*dom_size.height,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -223,10 +223,10 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const ddx_0 = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.n,
-			.y_0 = params.boundary.nw.ddx*dom_size.width,
-			.y_m = params.boundary.w.ddx*dom_size.width,
-			.y_1 = params.boundary.sw.ddx*dom_size.width,
+			.x_m = params.midpoints.n,
+			.y_0 = params.control_points.nw.ddx*dom_size.width,
+			.y_m = params.control_points.w.ddx*dom_size.width,
+			.y_1 = params.control_points.sw.ddx*dom_size.width,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -235,10 +235,10 @@ terraformer::grayscale_image terraformer::generate(
 
 	auto const ddx_m = control_curve{
 		control_curve_descriptor{
-			.x_m = params.edge_midpoints.c_y,
-			.y_0 = params.boundary.n.ddx*dom_size.width,
-			.y_m = params.boundary.c.ddx*dom_size.width,
-			.y_1 = params.boundary.s.ddx*dom_size.width,
+			.x_m = params.midpoints.c_y,
+			.y_0 = params.control_points.n.ddx*dom_size.width,
+			.y_m = params.control_points.c.ddx*dom_size.width,
+			.y_1 = params.control_points.s.ddx*dom_size.width,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -246,10 +246,10 @@ terraformer::grayscale_image terraformer::generate(
 	};
 
 	auto const ddx_1 = control_curve{		control_curve_descriptor{
-			.x_m = params.edge_midpoints.n,
-			.y_0 = params.boundary.ne.ddx*dom_size.width,
-			.y_m = params.boundary.e.ddx*dom_size.width,
-			.y_1 = params.boundary.se.ddx*dom_size.width,
+			.x_m = params.midpoints.n,
+			.y_0 = params.control_points.ne.ddx*dom_size.width,
+			.y_m = params.control_points.e.ddx*dom_size.width,
+			.y_1 = params.control_points.se.ddx*dom_size.width,
 			.ddx_0 = 0.0f,
 			.ddx_m = 0.0f,
 			.ddx_1 = 0.0f
@@ -300,12 +300,12 @@ terraformer::grayscale_image terraformer::generate(
 	return ret;
 }
 
-void terraformer::bind(plain_control_points_info&, descriptor_editor&)
-{}
+terraformer::grayscale_image terraformer::plain_descriptor::generate_heightmap(domain_size_descriptor size) const
+{ return generate(size, *this); }
 
-void terraformer::bind(plain_descriptor& field_value, descriptor_editor& editor)
+void terraformer::plain_descriptor::bind( descriptor_editor& editor)
 {
-	auto& control_points = editor.create_table(
+	auto& control_points_editor = editor.create_table(
 		u8"Control points",
 		descriptor_editor::widget_orientation::vertical,
 		{
@@ -314,7 +314,7 @@ void terraformer::bind(plain_descriptor& field_value, descriptor_editor& editor)
 			u8"∂/∂y"
 		}
 	);
-	bind(field_value.boundary, control_points);
+	control_points.bind(control_points_editor);
 
 #if 0
 auto& midpoints = parent.create_widget(
@@ -324,7 +324,7 @@ auto& midpoints = parent.create_widget(
 	ui::main::widget_orientation::vertical,
 	1
 );
-bind(field_value.edge_midpoints, midpoints);
+bind(field_value.midpoints, midpoints);
 
 parent.create_widget(
 	global_orientation_form_field{
