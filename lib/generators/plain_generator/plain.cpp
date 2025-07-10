@@ -4,7 +4,6 @@
 
 #include "lib/common/interval.hpp"
 #include "lib/common/span_2d.hpp"
-#include "lib/descriptor_io/descriptor_editor.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/pixel_store/image.hpp"
 
@@ -303,11 +302,11 @@ terraformer::grayscale_image terraformer::generate(
 terraformer::grayscale_image terraformer::plain_descriptor::generate_heightmap(domain_size_descriptor size) const
 { return generate(size, *this); }
 
-void terraformer::plain_descriptor::bind( descriptor_editor& editor)
+void terraformer::plain_descriptor::bind(descriptor_editor_ref editor)
 {
-	auto& control_points_editor = editor.create_table(
+	auto control_points_editor = editor.create_table(
 		u8"Control points",
-		descriptor_editor::widget_orientation::vertical,
+		descriptor_editor_ref::widget_orientation::vertical,
 		{
 			u8"Elevation/m",
 			u8"∂/∂x",

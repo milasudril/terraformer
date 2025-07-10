@@ -8,7 +8,7 @@
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/interval.hpp"
 #include "lib/common/bounded_value.hpp"
-#include "lib/descriptor_io/descriptor_editor.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 
 namespace terraformer
 {
@@ -31,7 +31,7 @@ namespace terraformer
 		plain_control_point_descriptor nw;
 		plain_control_point_descriptor c;
 
-		void bind(descriptor_editor&){}
+		void bind(descriptor_editor_ref){}
 	};
 
 	struct plain_midpoints_info
@@ -52,7 +52,7 @@ namespace terraformer
 		float orientation = 0.0f;
 
 		grayscale_image generate_heightmap(domain_size_descriptor) const;
-		void bind(descriptor_editor& editor);
+		void bind(descriptor_editor_ref editor);
 	};
 
 	grayscale_image generate(domain_size_descriptor dom_size, plain_descriptor const& params);

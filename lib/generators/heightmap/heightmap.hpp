@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_HEIGHTMAP_HPP
 #define TERRAFORMER_HEIGHTMAP_HPP
 
-#include "lib/descriptor_io/descriptor_editor.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/common/unique_resource.hpp"
 #include "lib/generators/plain_generator/plain.hpp"
@@ -17,7 +17,7 @@ namespace terraformer
 	concept heightmap_generator_source_descriptor = requires(
 		 T& x,
 		 domain_size_descriptor dom_size,
-		 descriptor_editor& editor
+		 descriptor_editor_ref editor
 	)
 	{
 		{std::as_const(x).generate_heightmap(dom_size)} -> std::same_as<grayscale_image>;
@@ -51,7 +51,7 @@ namespace terraformer
 			return do_generate(dom_size, descriptor);
 		}
 
-		void bind(descriptor_editor& editor)
+		void bind(descriptor_editor_ref editor)
 		{
 			auto const do_bind = m_resource.get().get_vtable().do_bind;
 			auto const descriptor = m_resource.get().get_pointer();
@@ -66,7 +66,7 @@ namespace terraformer
 				do_generate{[](domain_size_descriptor dom_size,  void const* descriptor){
 					return static_cast<Descriptor const*>(descriptor)->generate_heightmap(dom_size);
 				}},
-				do_bind{[](void* descriptor, descriptor_editor& editor){
+				do_bind{[](void* descriptor, descriptor_editor_ref editor){
 					return static_cast<Descriptor*>(descriptor)->bind(editor);
 				}},
 				do_clone{[](void const* descriptor){
@@ -75,7 +75,7 @@ namespace terraformer
 			{}
 
 			grayscale_image (*do_generate)(domain_size_descriptor, void const* descriptor);
-			void (*do_bind)(void*, descriptor_editor&);
+			void (*do_bind)(void*, descriptor_editor_ref);
 			unique_resource<vtable> (*do_clone)(void const*);
 		};
 
