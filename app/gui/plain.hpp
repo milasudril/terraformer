@@ -253,7 +253,7 @@ namespace terraformer::app
 	struct plain_form_field
 	{
 		std::u8string_view label;
-		using input_widget_type = descriptor_editor;
+		using input_widget_type = descriptor_editor<ui::widgets::form>;
 	};
 
 	struct global_orientation_form_field

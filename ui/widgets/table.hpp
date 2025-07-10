@@ -11,8 +11,9 @@
 #include "ui/main/widget_collection.hpp"
 #include "ui/main/widget_geometry.hpp"
 #include "ui/widgets/widget_group.hpp"
+
 #include <stdexcept>
-#include <unistd.h>
+#include <initializer_list>
 
 namespace terraformer::ui::widgets
 {
@@ -162,6 +163,13 @@ namespace terraformer::ui::widgets
 			iterator_invalidation_handler_ref iihr,
 			main::widget_orientation orientation,
 			std::array<char8_t const*, N> const& field_names
+		):table{iihr, orientation, span{std::begin(field_names), std::end(field_names)}}
+		{}
+
+		explicit table(
+			iterator_invalidation_handler_ref iihr,
+			main::widget_orientation orientation,
+			std::initializer_list<char8_t const*> field_names
 		):table{iihr, orientation, span{std::begin(field_names), std::end(field_names)}}
 		{}
 
