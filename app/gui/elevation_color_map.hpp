@@ -4,7 +4,7 @@
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "lib/pixel_store/intensity.hpp"
-#include "ui/value_maps/asinh_value_map.hpp"
+#include "lib/value_maps/asinh_value_map.hpp"
 
 namespace terraformer
 {
@@ -31,7 +31,7 @@ namespace terraformer
 		};
 	}
 
-	constexpr ui::value_maps::asinh_value_map global_elevation_map{
+	constexpr value_maps::asinh_value_map global_elevation_map{
 		266.3185546307779f,
 		0.7086205026374324f*6.0f
 	};

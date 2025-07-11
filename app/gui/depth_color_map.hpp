@@ -4,7 +4,7 @@
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "lib/pixel_store/intensity.hpp"
-#include "ui/value_maps/asinh_value_map.hpp"
+#include "lib/value_maps/asinh_value_map.hpp"
 
 namespace terraformer
 {

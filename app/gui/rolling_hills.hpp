@@ -2,9 +2,10 @@
 #define TERRAFORMER_GUI_ROLLING_HILLS_HPP
 
 #include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
-#include "ui/value_maps/affine_value_map.hpp"
+#include "lib/value_maps/log_value_map.hpp"
+#include "lib/value_maps/affine_value_map.hpp"
+
 #include "ui/widgets/form.hpp"
-#include "ui/value_maps/log_value_map.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
 #include "ui/widgets/rng_seed_input.hpp"
@@ -115,7 +116,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.wavelength_x)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
+				terraformer::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
@@ -126,7 +127,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.wavelength_y)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
+				terraformer::value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
@@ -137,7 +138,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.lf_rolloff)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
+				terraformer::value_maps::log_value_map{1.0f, 8.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
@@ -148,7 +149,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.hf_rolloff)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{2.0f, 8.0f, 2.0f}
+				terraformer::value_maps::log_value_map{2.0f, 8.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
@@ -159,7 +160,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.y_direction)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{-0.25f, 0.25f}
+				terraformer::value_maps::affine_value_map{-0.25f, 0.25f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"-0.123456789")
@@ -179,7 +180,7 @@ namespace terraformer::app
 				.value_reference = std::reference_wrapper(field_value.range),
 				.expand_layout_cell = true
 			},
-			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
+			terraformer::value_maps::affine_value_map{-1.0f, 1.0f}
 		)
 		.set_textbox_placeholder_string(u8"-0.123456789");
 
@@ -189,7 +190,7 @@ namespace terraformer::app
 				.value_reference = std::reference_wrapper(field_value.hardness)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{0.0f, 1.0f}
+				terraformer::value_maps::affine_value_map{0.0f, 1.0f}
 			}
 		);
 	}
@@ -202,7 +203,7 @@ namespace terraformer::app
 				.value_reference = std::reference_wrapper(field_value.input_mapping),
 				.expand_layout_cell = true
 			},
-			terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
+			terraformer::value_maps::affine_value_map{-1.0f, 1.0f}
 		)
 		.set_textbox_placeholder_string(u8"-0.123456789");;
 
@@ -212,7 +213,7 @@ namespace terraformer::app
 				.value_reference = std::reference_wrapper(field_value.exponent)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{0.25f, 4.0f, 2.0f}
+				terraformer::value_maps::log_value_map{0.25f, 4.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"0.123456789");
@@ -253,7 +254,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.amplitude)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1.0f, 8192.0f, 2.0f}
+				terraformer::value_maps::log_value_map{1.0f, 8192.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
@@ -264,7 +265,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.relative_z_offset)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{-1.0f, 1.0f}
+				terraformer::value_maps::affine_value_map{-1.0f, 1.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"-0.123456789");

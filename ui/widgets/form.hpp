@@ -140,7 +140,13 @@ namespace terraformer::ui::widgets
 							return;
 						}
 					}
-					value.get() = std::forward<widget_value_type>(new_val);
+					try
+					{ value.get() = std::forward<widget_value_type>(new_val); }
+					catch(...)
+					{
+						widget.value(static_cast<widget_value_type>(value.get()));
+						throw;
+					}
 					m_on_content_updated(*this, std::forward<Args>(args)...);
 				});
 			}

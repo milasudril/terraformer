@@ -3,11 +3,12 @@
 #ifndef TERRAFORMER_UI_WIDGETS_FALSE_COLOR_IMAGE_VIEW_HPP
 #define TERRAFORMER_UI_WIDGETS_FALSE_COLOR_IMAGE_VIEW_HPP
 
-#include "./value_map.hpp"
 #include "./basic_image_view.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
-#include "ui/value_maps/affine_value_map.hpp"
+
+#include "lib/value_maps/affine_value_map.hpp"
+#include "lib/common/value_map.hpp"
 
 namespace terraformer::ui::widgets
 {
@@ -52,7 +53,7 @@ namespace terraformer::ui::widgets
 
 	private:
 		type_erased_value_map m_value_map{
-			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
+			std::in_place_type_t<terraformer::value_maps::affine_value_map>{}, 0.0f, 1.0f
 		};
 		move_only_function<rgba_pixel(float)> m_color_map{
 			[](float val){

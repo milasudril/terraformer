@@ -4,8 +4,8 @@
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
-#include "ui/value_maps/log_value_map.hpp"
 
+#include "lib/value_maps/log_value_map.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 
 namespace terraformer::app
@@ -31,7 +31,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.width)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1.0f, 65536.0f, 2.0f}
+				terraformer::value_maps::log_value_map{1.0f, 65536.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
@@ -42,7 +42,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.height)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1.0f, 65536.0f, 2.0f}
+				terraformer::value_maps::log_value_map{1.0f, 65536.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");

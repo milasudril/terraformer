@@ -3,9 +3,9 @@
 
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
-#include "ui/value_maps/affine_value_map.hpp"
 #include "ui/drawing_api/image_generators.hpp"
 
+#include "lib/value_maps/affine_value_map.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
 

@@ -4,8 +4,12 @@
 
 #include "lib/common/interval.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/common/value_map.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/pixel_store/image.hpp"
+#include "lib/value_maps/atan_value_map.hpp"
+#include "lib/value_maps/sqrt_value_map.hpp"
 
 #include <stdexcept>
 
@@ -299,6 +303,158 @@ terraformer::grayscale_image terraformer::generate(
 	return ret;
 }
 
+void terraformer::plain_control_point_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_float_input(
+		u8"Elevation/m",
+		elevation,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::sqrt_value_map{6400.0f}},
+			.textbox_placeholder_string = u8"-9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"∂/∂x",
+		std::ref(ddx),
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::atan_value_map{1.0f, true}},
+			.textbox_placeholder_string = u8"-0.073242545",
+			.visual_angle_range = closed_closed_interval<geosimd::turn_angle>{
+					geosimd::turns{0.5 - 0.125},
+					geosimd::turns{0.5 + 0.125}
+			}
+		}
+	);
+
+	editor.create_float_input(
+		u8"∂/∂y",
+		std::ref(ddy),
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::atan_value_map{1.0f, true}},
+			.textbox_placeholder_string = u8"-0.073242545",
+			.visual_angle_range = closed_closed_interval<geosimd::turn_angle>{
+					geosimd::turns{0.5 - 0.125},
+					geosimd::turns{0.5 + 0.125}
+			}
+		});
+}
+
+void terraformer::plain_control_points_info::bind(descriptor_table_editor_ref editor)
+{
+	{
+		auto n_edit = editor.add_record(u8"N");
+		n.bind(n_edit);
+		n_edit.append_pending_widgets();
+	}
+
+	{
+		auto ne_edit = editor.add_record(u8"NE");
+		ne.bind(ne_edit);
+		ne_edit.append_pending_widgets();
+	}
+
+	{
+		auto e_edit =editor.add_record(u8"E");
+		ne.bind(e_edit);
+		e_edit.append_pending_widgets();
+	}
+
+	{
+		auto se_edit = editor.add_record(u8"SE");
+		se.bind(se_edit);
+		se_edit.append_pending_widgets();
+	}
+
+	{
+		auto s_edit = editor.add_record(u8"S");
+		s.bind(s_edit);
+		s_edit.append_pending_widgets();
+	}
+
+	{
+		auto sw_edit = editor.add_record(u8"SW");
+		sw.bind(sw_edit);
+		sw_edit.append_pending_widgets();
+	}
+
+	{
+		auto w_edit = editor.add_record(u8"W");
+		w.bind(w_edit);
+		w_edit.append_pending_widgets();
+	}
+
+	{
+		auto nw_edit = editor.add_record(u8"NW");
+		nw.bind(nw_edit);
+		nw_edit.append_pending_widgets();
+	}
+
+	{
+		auto c_edit = editor.add_record(u8"C");
+		c.bind(c_edit);
+		c_edit.append_pending_widgets();
+	}
+}
+
+void terraformer::plain_midpoints_info::bind(descriptor_editor_ref editor)
+{
+	editor.create_float_input(
+		u8"N",
+		descriptor_editor_ref::assigner<float>{n},
+		descriptor_editor_ref::knob_descriptor{
+			.textbox_placeholder_string = u8"0.00019329926",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"E",
+		descriptor_editor_ref::assigner<float>{e},
+		descriptor_editor_ref::knob_descriptor{
+			.textbox_placeholder_string = u8"0.00019329926",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"S",
+		descriptor_editor_ref::assigner<float>{s},
+		descriptor_editor_ref::knob_descriptor{
+			.textbox_placeholder_string = u8"0.00019329926",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"W",
+		descriptor_editor_ref::assigner<float>{w},
+		descriptor_editor_ref::knob_descriptor{
+			.textbox_placeholder_string = u8"0.00019329926",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"C x",
+		descriptor_editor_ref::assigner<float>{c_x},
+		descriptor_editor_ref::knob_descriptor{
+			.textbox_placeholder_string = u8"0.00019329926",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"C y",
+		descriptor_editor_ref::assigner<float>{c_y},
+		descriptor_editor_ref::knob_descriptor{
+			.textbox_placeholder_string = u8"0.00019329926",
+			.visual_angle_range = std::nullopt
+		}
+	);
+}
+
 terraformer::grayscale_image terraformer::plain_descriptor::generate_heightmap(domain_size_descriptor size) const
 { return generate(size, *this); }
 
@@ -306,42 +462,38 @@ void terraformer::plain_descriptor::bind(descriptor_editor_ref editor)
 {
 	auto control_points_editor = editor.create_table(
 		u8"Control points",
-		descriptor_editor_ref::widget_orientation::vertical,
-		{
-			u8"Elevation/m",
-			u8"∂/∂x",
-			u8"∂/∂y"
+		descriptor_editor_ref::table_descriptor{
+			.orientation = descriptor_editor_ref::widget_orientation::vertical,
+			.field_names = {
+				u8"Elevation/m",
+				u8"∂/∂x",
+				u8"∂/∂y"
+			}
 		}
 	);
 	control_points.bind(control_points_editor);
 
-#if 0
-auto& midpoints = parent.create_widget(
-	plain_midpoints_form_field{
-		.label = u8"Midpoints"
-	},
-	ui::main::widget_orientation::vertical,
-	1
-);
-bind(field_value.midpoints, midpoints);
+	auto midpoints_editor = editor.create_form(
+		u8"Midpoints",
+		descriptor_editor_ref::form_descriptor{
+			.orientation = descriptor_editor_ref::widget_orientation::vertical,
+			.extra_fields_per_row = 1
+		}
+	);
+	midpoints.bind(midpoints_editor);
 
-parent.create_widget(
-	global_orientation_form_field{
-		.label = u8"Orientation",
-		.value_reference = std::ref(field_value.orientation)
-	},
-	terraformer::ui::widgets::knob{
-		terraformer::ui::value_maps::affine_value_map{-0.5f, 0.5f}
-	}
-)
-.set_textbox_placeholder_string(u8"-0.123456789")
-.input_widget().visual_angle_range(
-	closed_closed_interval<geosimd::turn_angle>{
-		geosimd::turns{0.0},
-		geosimd::turns{1.0}
-	}
-		);
-#endif
+	editor.create_float_input(
+		u8"Orientation",
+		std::ref(orientation),
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-0.5f, 0.5f}},
+			.textbox_placeholder_string = u8"-0.123456789",
+			.visual_angle_range = closed_closed_interval<geosimd::turn_angle>{
+				geosimd::turns{0.0},
+				geosimd::turns{1.0}
+			}
+		}
+	);
 }
 
 

@@ -8,7 +8,7 @@ TESTCASE(terraformer_ui_value_maps_asinh_value_map_do_stuff)
 {
 	constexpr auto num_stops = 6.0f;
 
-	terraformer::ui::value_maps::asinh_value_map map{
+	terraformer::value_maps::asinh_value_map map{
 		266.3185546307779f,
 		0.7086205026374324f*num_stops
 	};

@@ -6,7 +6,7 @@
 
 TESTCASE(terraformer_ui_value_maps_affine_value_map_verify)
 {
-	terraformer::ui::value_maps::affine_value_map map{-2.0f, 6.0f};
+	terraformer::value_maps::affine_value_map map{-2.0f, 6.0f};
 	EXPECT_EQ(map.min(), -2.0f);
 	EXPECT_EQ(map.max(), 6.0f);
 	EXPECT_EQ(map.from_value(2.0f), 0.5f);

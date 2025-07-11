@@ -1,13 +1,14 @@
 #ifndef TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 #define TERRAFORMER_UI_WIDGETS_FLOAT_INPUT_CONTROLLER_HPP
 
-#include "./value_map.hpp"
 #include "ui/main/builtin_command_id.hpp"
 #include "ui/main/widget.hpp"
-#include "ui/value_maps/affine_value_map.hpp"
+
 #include "lib/common/move_only_function.hpp"
 #include "lib/common/bounded_value.hpp"
 #include "lib/common/interval.hpp"
+#include "lib/common/value_map.hpp"
+#include "lib/value_maps/affine_value_map.hpp"
 
 namespace terraformer::ui::widgets
 {
@@ -29,6 +30,7 @@ namespace terraformer::ui::widgets
 		{ value(0.0f); }
 
 		template<class ValueMap, class... Args>
+		requires (std::is_same_v<std::remove_cvref_t<ValueMap>, terraformer::type_erased_value_map>)
 		explicit float_input_controller(std::in_place_type_t<ValueMap>, Args&&... args):
 			m_value_map{std::in_place_type_t<ValueMap>{}, std::forward<Args>(args)...}
 		{ value(0.0f); }
@@ -142,7 +144,7 @@ namespace terraformer::ui::widgets
 		state m_state_current = state::released;
 
 		type_erased_value_map m_value_map{
-			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
+			std::in_place_type_t<terraformer::value_maps::affine_value_map>{}, 0.0f, 1.0f
 		};
 	};
 }

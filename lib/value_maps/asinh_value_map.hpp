@@ -1,11 +1,11 @@
-#ifndef TERRAFORMER_UI_VALUE_MAPS_ASINH_VALUE_MAP_HPP
-#define TERRAFORMER_UI_VALUE_MAPS_ASINH_VALUE_MAP_HPP
+#ifndef TERRAFORMER_VALUE_MAPS_ASINH_VALUE_MAP_HPP
+#define TERRAFORMER_VALUE_MAPS_ASINH_VALUE_MAP_HPP
 
 #include <cmath>
 
 #include <cstdio>
 
-namespace terraformer::ui::value_maps
+namespace terraformer::value_maps
 {
 	class asinh_value_map
 	{

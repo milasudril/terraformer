@@ -3,14 +3,14 @@
 #ifndef TERRAFORMER_UI_WIDGETS_RANGE_SLIDER_HPP
 #define TERRAFORMER_UI_WIDGETS_RANGE_SLIDER_HPP
 
-#include "./value_map.hpp"
 #include "ui/main/events.hpp"
 #include "ui/main/keyboard_button_event.hpp"
 #include "ui/main/texture_types.hpp"
 #include "ui/main/widget.hpp"
 #include "ui/main/graphics_backend_ref.hpp"
-#include "ui/value_maps/affine_value_map.hpp"
 
+#include "lib/value_maps/affine_value_map.hpp"
+#include "lib/common/value_map.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "lib/common/interval.hpp"
 
@@ -126,7 +126,7 @@ namespace terraformer::ui::widgets
 		closed_closed_interval<float> m_current_range{0.0f, 1.0f};
 
 		type_erased_value_map m_value_map{
-			std::in_place_type_t<value_maps::affine_value_map>{}, 0.0f, 1.0f
+			std::in_place_type_t<terraformer::value_maps::affine_value_map>{}, 0.0f, 1.0f
 		};
 
 		main::widget_user_interaction_handler<range_slider> m_on_value_changed{no_operation_tag{}};

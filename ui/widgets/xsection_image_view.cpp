@@ -2,6 +2,8 @@
 
 #include "./xsection_image_view.hpp"
 
+#include "ui/drawing_api/image_generators.hpp"
+
 #include "lib/common/function_ref.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
@@ -9,8 +11,7 @@
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/rgba_pixel.hpp"
-#include "ui/value_maps/affine_value_map.hpp"
-#include "ui/drawing_api/image_generators.hpp"
+#include "lib/value_maps/affine_value_map.hpp"
 
 void terraformer::ui::widgets::xsection_image_view::show_image(span_2d<float const> image)
 {
@@ -44,7 +45,7 @@ namespace
 		float z_max;
 		float orientation;
 		float rot_scale;
-		terraformer::ui::value_maps::affine_value_map depth_value_map;
+		terraformer::value_maps::affine_value_map depth_value_map;
 		terraformer::function_ref<terraformer::rgba_pixel(float)> color_map;
 	};
 

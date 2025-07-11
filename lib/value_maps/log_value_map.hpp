@@ -1,11 +1,11 @@
-#ifndef TERRAFORMER_UI_VALUE_MAPS_LOG_VALUE_MAP_HPP
-#define TERRAFORMER_UI_VALUE_MAPS_LOG_VALUE_MAP_HPP
+#ifndef TERRAFORMER_VALUE_MAPS_LOG_VALUE_MAP_HPP
+#define TERRAFORMER_VALUE_MAPS_LOG_VALUE_MAP_HPP
 
 #include "./affine_value_map.hpp"
 
 #include <cmath>
 
-namespace terraformer::ui::value_maps
+namespace terraformer::value_maps
 {
 	class log_value_map
 	{

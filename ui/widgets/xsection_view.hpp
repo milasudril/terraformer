@@ -4,10 +4,12 @@
 #include "./colorbar.hpp"
 #include "./xsection_image_view.hpp"
 #include "./widget_group.hpp"
+#include "ui/layouts/table.hpp"
+
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
-#include "ui/layouts/table.hpp"
-#include "ui/value_maps/affine_value_map.hpp"
+#include "lib/value_maps/affine_value_map.hpp"
+
 #include <numbers>
 
 namespace terraformer::ui::widgets
@@ -70,7 +72,7 @@ namespace terraformer::ui::widgets
 			);
 
 			auto const d_ortho_rounded = ceil_to_n_digits_10(d_ortho, 1);
-			m_colorbar.set_value_map(value_maps::affine_value_map{0.0f, d_ortho_rounded});
+			m_colorbar.set_value_map(terraformer::value_maps::affine_value_map{0.0f, d_ortho_rounded});
 			m_img_view.set_physical_dimensions(m_phys_dimensions);
 			m_img_view.set_orientation(m_orientation);
 			m_img_view.set_view_range_crop_factor(d_ortho/d_ortho_rounded);

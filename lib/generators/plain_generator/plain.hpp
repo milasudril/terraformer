@@ -17,6 +17,8 @@ namespace terraformer
 		float elevation = 840.0f;
 		float ddx = 0.0f;
 		float ddy = 0.0f;
+
+		void bind(descriptor_editor_ref editor);
 	};
 
 	struct plain_control_points_info
@@ -31,7 +33,7 @@ namespace terraformer
 		plain_control_point_descriptor nw;
 		plain_control_point_descriptor c;
 
-		void bind(descriptor_editor_ref){}
+		void bind(descriptor_table_editor_ref editor);
 	};
 
 	struct plain_midpoints_info
@@ -43,6 +45,8 @@ namespace terraformer
 		xm_type w;
 		xm_type c_x;
 		xm_type c_y;
+
+		void bind(descriptor_editor_ref editor);
 	};
 
 	struct plain_descriptor

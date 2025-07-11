@@ -3,7 +3,6 @@
 //@	}
 
 #include "./heightmap.hpp"
-#include "./plain.hpp"
 #include "./heightmap.hpp"
 #include "./elevation_color_map.hpp"
 

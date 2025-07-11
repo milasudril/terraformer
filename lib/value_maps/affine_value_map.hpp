@@ -1,9 +1,9 @@
-#ifndef TERRAFORMER_UI_VALUE_MAPS_AFFINE_VALUE_MAP_HPP
-#define TERRAFORMER_UI_VALUE_MAPS_AFFINE_VALUE_MAP_HPP
+#ifndef TERRAFORMER_VALUE_MAPS_AFFINE_VALUE_MAP_HPP
+#define TERRAFORMER_VALUE_MAPS_AFFINE_VALUE_MAP_HPP
 
 #include <cmath>
 
-namespace terraformer::ui::value_maps
+namespace terraformer::value_maps
 {
 	class affine_value_map
 	{

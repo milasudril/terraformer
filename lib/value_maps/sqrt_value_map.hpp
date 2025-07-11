@@ -1,16 +1,16 @@
-#ifndef TERRAFORMER_UI_VALUE_MAPS_QURT_VALUE_MAP_HPP
-#define TERRAFORMER_UI_VALUE_MAPS_QURT_VALUE_MAP_HPP
+#ifndef TERRAFORMER_VALUE_MAPS_SQRT_VALUE_MAP_HPP
+#define TERRAFORMER_VALUE_MAPS_SQRT_VALUE_MAP_HPP
 
 #include <cmath>
 
 #include <cstdio>
 
-namespace terraformer::ui::value_maps
+namespace terraformer::value_maps
 {
-	class qurt_value_map
+	class sqrt_value_map
 	{
 	public:
-		constexpr explicit qurt_value_map(float max_value) noexcept:
+		constexpr explicit sqrt_value_map(float max_value) noexcept:
 			m_max_value{max_value}
 		{}
 
@@ -23,8 +23,8 @@ namespace terraformer::ui::value_maps
 		constexpr float from_value(float x) const noexcept
 		{
 			auto const tmp = x < 0.0f?
-				-std::pow(-x/m_max_value, 1.0f/3.0f):
-				std::pow(x/m_max_value, 1.0f/3.0f);
+				-std::sqrt(-x/m_max_value):
+				std::sqrt(x/m_max_value);
 
 			return 0.5f*(tmp + 1.0f);
 		}
@@ -32,7 +32,7 @@ namespace terraformer::ui::value_maps
 		constexpr float to_value(float x) const noexcept
 		{
 			auto const xi = 2.0f*x - 1.0f;
-			return m_max_value*(xi*xi*xi);
+			return xi < 0.0f ? -m_max_value*(xi*xi) : m_max_value*(xi*xi);
 		}
 
 	private:

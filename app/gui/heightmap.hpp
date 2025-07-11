@@ -4,8 +4,8 @@
 #include "./elevation_color_map.hpp"
 #include "./depth_color_map.hpp"
 #include "./domain_size.hpp"
-#include "./plain.hpp"
 #include "./rolling_hills.hpp"
+#include "./descriptor_editor.hpp"
 
 #include "lib/generators/domain/domain_size.hpp"
 #include "ui/widgets/form.hpp"
@@ -14,9 +14,9 @@
 #include "ui/widgets/button.hpp"
 #include "ui/widgets/knob.hpp"
 #include "ui/widgets/float_input.hpp"
-#include "ui/value_maps/log_value_map.hpp"
 #include "ui/widgets/grayscale_image_statistics_view.hpp"
 
+#include "lib/value_maps/log_value_map.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/generators/heightmap/heightmap.hpp"
 
@@ -76,7 +76,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.interval)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::log_value_map{1.0f, 1024.0f, 2.0f}
+				terraformer::value_maps::log_value_map{1.0f, 1024.0f, 2.0f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"9999.9999");
@@ -219,6 +219,13 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
 	};
 
+	struct global_orientation_form_field
+	{
+		std::u8string_view label;
+		std::reference_wrapper<float> value_reference;
+		using input_widget_type = ui::widgets::float_input<ui::widgets::knob>;
+	};
+
 	void bind(xsection_view_attributes& field_value, ui::widgets::form& parent)
 	{
 		parent.create_widget(
@@ -227,7 +234,7 @@ namespace terraformer::app
 				.value_reference = std::ref(field_value.orientation)
 			},
 			terraformer::ui::widgets::knob{
-				terraformer::ui::value_maps::affine_value_map{-0.5f, 0.5f}
+				terraformer::value_maps::affine_value_map{-0.5f, 0.5f}
 			}
 		)
 		.set_textbox_placeholder_string(u8"-0.123456789")
@@ -249,7 +256,7 @@ namespace terraformer::app
 				.maximize_widget = true
 			},
 			u8"View depth/m",
-			ui::value_maps::affine_value_map{0.0f, 1.0f},
+			value_maps::affine_value_map{0.0f, 1.0f},
 			terraformer::get_depth_color_lut()
 		);
 
@@ -318,6 +325,12 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
+	struct plain_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
 	void bind(heightmap_generator_descriptor& field_value, ui::widgets::form& parent)
 	{
 		auto& plain = parent.create_widget(
@@ -325,7 +338,7 @@ namespace terraformer::app
 				.label = u8"Plain"
 			}
 		);
-		field_value.plain_2.bind(descriptor_editor_ref{plain});
+		field_value.plain.bind(descriptor_editor_ref{plain, std::type_identity<descriptor_editor_traits>{}});
 
 		auto& rolling_hills = parent.create_widget(
 			rolling_hills_descriptor_form_field{

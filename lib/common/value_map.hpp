@@ -1,9 +1,9 @@
-#ifndef TERRAFORMER_UI_WIDGETS_VALUE_MAP_HPP
-#define TERRAFORMER_UI_WIDGETS_VALUE_MAP_HPP
+#ifndef TERRAFORMER_VALUE_MAP_HPP
+#define TERRAFORMER_VALUE_MAP_HPP
 
 #include "lib/common/unique_resource.hpp"
 
-namespace terraformer::ui::widgets
+namespace terraformer
 {
 	struct value_map_vtable
 	{
