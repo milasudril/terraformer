@@ -13,18 +13,20 @@ namespace terraformer
 	template<class Vtable>
 	struct resource_reference_vtable<Vtable, false>:Vtable
 	{
-		template<class ReferencedType>
-		constexpr resource_reference_vtable(std::type_identity<ReferencedType>):
-			Vtable{std::type_identity<ReferencedType>{}}
+		template<class ... Tags>
+		constexpr resource_reference_vtable(std::type_identity<Tags>...):
+			Vtable{std::type_identity<Tags>{}...}
 		{}
 	};
 
 	template<class Vtable>
 	struct resource_reference_vtable<Vtable, true>:resource_reference_vtable<Vtable, false>
 	{
-		template<class ReferencedType>
-		constexpr resource_reference_vtable(std::type_identity<ReferencedType>):
-			resource_reference_vtable<Vtable,false>{std::type_identity<ReferencedType>{}},
+		template<class ReferencedType, class ... Tags>
+		constexpr resource_reference_vtable(std::type_identity<ReferencedType>, std::type_identity<Tags>...):
+			resource_reference_vtable<Vtable,false>{
+				std::type_identity<ReferencedType>{}, std::type_identity<Tags>{}...
+			},
 			destroy{
 				[](void* object){
 					delete static_cast<ReferencedType*>(object);
@@ -44,16 +46,16 @@ namespace terraformer
 
 		resource_reference() = default;
 
-		template<class ReferencedType>
-		explicit resource_reference(std::reference_wrapper<ReferencedType> ref):
-			m_handle{&ref},
-			m_vtable_pointer{&s_vtable<ReferencedType>}
+		template<class ReferencedType, class... Tags>
+		explicit resource_reference(std::reference_wrapper<ReferencedType> ref, std::type_identity<Tags>...):
+			m_handle{&ref.get()},
+			m_vtable_pointer{&s_vtable<ReferencedType, Tags...>}
 		{}
 
-		template<class ReferencedType>
-		explicit resource_reference(ReferencedType* ref):
+		template<class ReferencedType, class... Tags>
+		explicit resource_reference(ReferencedType* ref, std::type_identity<Tags>...):
 			m_handle{ref},
-			m_vtable_pointer{&s_vtable<ReferencedType>}
+			m_vtable_pointer{&s_vtable<ReferencedType, Tags...>}
 		{}
 
 		explicit resource_reference(void* handle, vtable const* vt):
@@ -61,8 +63,8 @@ namespace terraformer
 			m_vtable_pointer{vt}
 		{}
 
-		template<class ReferencedType>
-		static constexpr vtable s_vtable{std::type_identity<ReferencedType>{}};
+		template<class... Tags>
+		static constexpr vtable s_vtable{std::type_identity<Tags>{}...};
 
 		void* get_pointer() const
 		{ return m_handle; }
