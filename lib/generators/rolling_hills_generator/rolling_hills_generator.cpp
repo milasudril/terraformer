@@ -2,10 +2,13 @@
 
 #include "./rolling_hills_generator.hpp"
 
+#include "lib/common/value_map.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/math_utils/dft_engine.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/math_utils/interp.hpp"
+#include "lib/value_maps/affine_value_map.hpp"
+#include "lib/value_maps/log_value_map.hpp"
 
 #include <cassert>
 #include <random>
@@ -223,7 +226,7 @@ float terraformer::clamp(float value, terraformer::rolling_hills_smooth_clamp_de
 }
 
 terraformer::grayscale_image
-terraformer::generate(domain_size_descriptor const& size, rolling_hills_descriptor const& params)
+terraformer::generate(domain_size_descriptor size, rolling_hills_descriptor const& params)
 {
 	auto const filter = make_filter(make_rolling_hills_normalized_filter_descriptor(size, params.filter));
 
@@ -315,3 +318,145 @@ terraformer::generate(domain_size_descriptor const& size, rolling_hills_descript
 
 	return ret;
 }
+
+void terraformer::rolling_hills_filter_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_float_input(
+		u8"Wavelength x/m",
+		wavelength_x,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"Wavelength y/m",
+		wavelength_y,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1024.0f, 32768.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"LF roll-off",
+		lf_rolloff,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"HF roll-off",
+		hf_rolloff,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{2.0f, 8.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"Y direction",
+		y_direction,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-0.25f, 0.25f}},
+			.textbox_placeholder_string = u8"-0.123456789",
+			.visual_angle_range = closed_closed_interval<geosimd::turn_angle>{
+				geosimd::turns{1.0/4.0},
+				geosimd::turns{3.0/4.0}
+			}
+		}
+	);
+}
+
+void terraformer::rolling_hills_clamp_to_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_range_input(
+		u8"Range",
+		range,
+		descriptor_editor_ref::range_input_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
+			.textbox_placeholder_string = u8"-0.123456789"
+		}
+	);
+
+	editor.create_float_input(
+		u8"Hardness",
+		descriptor_editor_ref::assigner<float>{hardness},
+		descriptor_editor_ref::knob_descriptor{}
+	);
+}
+
+void terraformer::rolling_hills_shape_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_range_input(
+		u8"Input mapping",
+		input_mapping,
+		descriptor_editor_ref::range_input_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
+			.textbox_placeholder_string = u8"-0.123456789"
+		}
+	);
+
+	editor.create_float_input(
+		u8"Exponent",
+		exponent,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
+}
+
+void terraformer::rolling_hills_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_rng_seed_input(u8"Seed", rng_seed);
+	filter.bind(editor);
+
+	auto clamp_to_edit = editor.create_form(
+		u8"Clamp to",
+		descriptor_editor_ref::form_descriptor{
+			.orientation = descriptor_editor_ref::widget_orientation::vertical
+		}
+	);
+	clamp_to.bind(clamp_to_edit);
+
+	auto shape_edit = editor.create_form(
+		u8"Shape",
+		descriptor_editor_ref::form_descriptor{
+			.orientation = descriptor_editor_ref::widget_orientation::vertical
+		}
+	);
+	shape.bind(shape_edit);
+
+	editor.create_float_input(
+		u8"Amplitude/m",
+		amplitude,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8192.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"Relative z offset",
+		relative_z_offset,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
+			.textbox_placeholder_string = std::u8string_view{},
+			.visual_angle_range = std::nullopt
+		}
+	);
+}
+
+terraformer::grayscale_image
+terraformer::rolling_hills_descriptor::generate_heightmap(domain_size_descriptor size) const
+{ return generate(size, *this); }

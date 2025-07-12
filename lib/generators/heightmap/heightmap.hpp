@@ -85,6 +85,7 @@ namespace terraformer
 	struct heightmap_generator_descriptor
 	{
 		heightmap_generator plain{plain_descriptor{}};
+		heightmap_generator rolling_hills_2{rolling_hills_descriptor{}};
 		rolling_hills_descriptor rolling_hills;
 	};
 

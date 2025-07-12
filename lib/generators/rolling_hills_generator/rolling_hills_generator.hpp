@@ -7,6 +7,7 @@
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/interval.hpp"
 #include "lib/common/bounded_value.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 
 namespace terraformer
 {
@@ -17,6 +18,8 @@ namespace terraformer
 		float lf_rolloff = 2.0f;
 		float hf_rolloff = 2.0f;
 		float y_direction = 0.0f;
+
+		void bind(descriptor_editor_ref);
 	};
 
 	struct rolling_hills_normalized_filter_descriptor
@@ -51,6 +54,8 @@ namespace terraformer
 	{
 		closed_closed_interval<float> range{-1.0f, 1.0f};
 		bounded_value<open_open_interval{0.0f, 1.0f}, 1.0f - 1.0f/128.0f> hardness;
+
+		void bind(descriptor_editor_ref);
 	};
 
 	rolling_hills_smooth_clamp_descriptor make_rolling_hills_smooth_clamp_descriptor(
@@ -61,6 +66,8 @@ namespace terraformer
 	{
 		closed_closed_interval<float> input_mapping{0.0f, 1.0f};
 		float exponent = 2.0f;
+
+		void bind(descriptor_editor_ref editor);
 	};
 
 	struct rolling_hills_descriptor
@@ -71,9 +78,12 @@ namespace terraformer
 		rolling_hills_shape_descriptor shape;
 		float amplitude = 4096.0f/(4.0f*std::numbers::pi_v<float>);
 		float relative_z_offset = 0.0f;
+
+		grayscale_image generate_heightmap(domain_size_descriptor) const;
+		void bind(descriptor_editor_ref editor);
 	};
 
-	grayscale_image generate(domain_size_descriptor const& dom_size, rolling_hills_descriptor const& params);
+	grayscale_image generate(domain_size_descriptor dom_size, rolling_hills_descriptor const& params);
 }
 
 #endif

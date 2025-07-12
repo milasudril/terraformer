@@ -10,7 +10,7 @@
 terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& descriptor)
 {
 	auto const plain = descriptor.generators.plain.generate_heightmap(descriptor.domain_size);
-	auto const rolling_hills = generate(descriptor.domain_size, descriptor.generators.rolling_hills);
+	auto const rolling_hills = descriptor.generators.rolling_hills_2.generate_heightmap(descriptor.domain_size);
 
 	auto const output_width = std::max(plain.width(), rolling_hills.width());
 	auto const output_height = std::max(plain.height(), 	rolling_hills.height());;

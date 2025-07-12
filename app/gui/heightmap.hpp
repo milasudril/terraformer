@@ -4,7 +4,6 @@
 #include "./elevation_color_map.hpp"
 #include "./depth_color_map.hpp"
 #include "./domain_size.hpp"
-#include "./rolling_hills.hpp"
 #include "./descriptor_editor.hpp"
 
 #include "lib/generators/domain/domain_size.hpp"
@@ -331,6 +330,12 @@ namespace terraformer::app
 		using input_widget_type = ui::widgets::form;
 	};
 
+	struct rolling_hills_descriptor_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = ui::widgets::form;
+	};
+
 	void bind(heightmap_generator_descriptor& field_value, ui::widgets::form& parent)
 	{
 		auto& plain = parent.create_widget(
@@ -345,7 +350,7 @@ namespace terraformer::app
 				.label = u8"Rolling hills"
 			}
 		);
-		bind(field_value.rolling_hills, rolling_hills);
+		field_value.rolling_hills_2.bind(descriptor_editor_ref{rolling_hills, std::type_identity<descriptor_editor_traits>{}});
 	}
 
 	struct heightmap_form_field
