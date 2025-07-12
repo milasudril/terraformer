@@ -317,24 +317,6 @@ namespace terraformer::app
 			xsection.refresh();
 		});
 	}
-
-	struct heightmap_generator_form_field
-	{
-		std::u8string_view label;
-		using input_widget_type = ui::widgets::form;
-	};
-
-	struct plain_form_field
-	{
-		std::u8string_view label;
-		using input_widget_type = ui::widgets::form;
-	};
-
-	struct rolling_hills_descriptor_form_field
-	{
-		std::u8string_view label;
-		using input_widget_type = ui::widgets::form;
-	};
 }
 
 #endif
