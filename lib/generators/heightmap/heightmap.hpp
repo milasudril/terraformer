@@ -3,9 +3,9 @@
 #ifndef TERRAFORMER_HEIGHTMAP_HPP
 #define TERRAFORMER_HEIGHTMAP_HPP
 
-#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/common/unique_resource.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/generators/plain_generator/plain.hpp"
 #include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
 #include "lib/generators/domain/domain_size.hpp"
@@ -86,12 +86,16 @@ namespace terraformer
 	{
 		heightmap_generator plain{plain_descriptor{}};
 		heightmap_generator rolling_hills{rolling_hills_descriptor{}};
+
+		void bind(descriptor_editor_ref editor);
 	};
 
 	struct heightmap_descriptor
 	{
 		domain_size_descriptor domain_size;
 		heightmap_generator_descriptor generators;
+
+		void bind(descriptor_editor_ref editor);
 	};
 
 	grayscale_image generate(heightmap_descriptor const& descriptor);

@@ -6,11 +6,13 @@
 #include "./heightmap.hpp"
 #include "./elevation_color_map.hpp"
 
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "ui/drawing_api/gl_surface_configuration.hpp"
 #include "ui/drawing_api/gl_resource_factory.hpp"
 #include "ui/drawing_api/gl_frame_renderer.hpp"
 #include "ui/drawing_api/gl_widget_stack_renderer.hpp"
 #include "ui/event_dispatcher/event_dispatcher.hpp"
+#include "ui/main/widget_collection.hpp"
 #include "ui/theming/cursor_set.hpp"
 #include "ui/theming/theme_loader.hpp"
 #include "ui/wsapi/native_window.hpp"
@@ -61,6 +63,12 @@ namespace
 						( type == GL_DEBUG_TYPE_ERROR ? "** GL ERROR **" : "" ),
 							type, severity, message );
 	}
+
+	struct heightmap_form_field
+	{
+		std::u8string_view label;
+		using input_widget_type = terraformer::ui::widgets::form;
+	};
 }
 
 int main(int, char**)
@@ -90,7 +98,6 @@ int main(int, char**)
 	glEnable(GL_DEBUG_OUTPUT);
 	glDebugMessageCallback( MessageCallback, 0 );
 
-
 	terraformer::ui::drawing_api::gl_resource_factory res_factory{};
 
 	terraformer::ui::main::event_dispatcher event_dispatcher{
@@ -108,11 +115,16 @@ int main(int, char**)
 
 	terraformer::heightmap_descriptor heightmap;
 	auto& heightmap_form = main_form.create_widget(
-		terraformer::app::heightmap_form_field{
-			.label = u8"Heightmap parameters",
+		heightmap_form_field{
+			.label = u8"Heightmap parameters"
 		}
 	);
-	terraformer::app::bind(heightmap, heightmap_form);
+	heightmap.bind(
+		terraformer::descriptor_editor_ref{
+			heightmap_form,
+			std::type_identity<terraformer::app::descriptor_editor_traits>{}
+		}
+	);
 
 	auto output = generate(heightmap);
 

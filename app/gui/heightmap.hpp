@@ -335,46 +335,6 @@ namespace terraformer::app
 		std::u8string_view label;
 		using input_widget_type = ui::widgets::form;
 	};
-
-	void bind(heightmap_generator_descriptor& field_value, ui::widgets::form& parent)
-	{
-		auto& plain = parent.create_widget(
-			plain_form_field{
-				.label = u8"Plain"
-			}
-		);
-		field_value.plain.bind(descriptor_editor_ref{plain, std::type_identity<descriptor_editor_traits>{}});
-
-		auto& rolling_hills = parent.create_widget(
-			rolling_hills_descriptor_form_field{
-				.label = u8"Rolling hills"
-			}
-		);
-		field_value.rolling_hills.bind(descriptor_editor_ref{rolling_hills, std::type_identity<descriptor_editor_traits>{}});
-	}
-
-	struct heightmap_form_field
-	{
-		std::u8string_view label;
-		using input_widget_type = ui::widgets::form;
-	};
-
-	void bind(heightmap_descriptor& field_value, ui::widgets::form& parent)
-	{
-		auto& domain_size_form = parent.create_widget(
-			domain_size_form_field{
-				.label = u8"Domain size",
-			}
-		);
-		bind(field_value.domain_size, domain_size_form);
-
-		auto& generators = parent.create_widget(
-			heightmap_generator_form_field{
-				.label = u8"Generators"
-			}
-		);
-		bind(field_value.generators, generators);
-	}
 }
 
 #endif
