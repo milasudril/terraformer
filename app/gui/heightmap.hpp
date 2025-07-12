@@ -350,7 +350,7 @@ namespace terraformer::app
 				.label = u8"Rolling hills"
 			}
 		);
-		field_value.rolling_hills_2.bind(descriptor_editor_ref{rolling_hills, std::type_identity<descriptor_editor_traits>{}});
+		field_value.rolling_hills.bind(descriptor_editor_ref{rolling_hills, std::type_identity<descriptor_editor_traits>{}});
 	}
 
 	struct heightmap_form_field
