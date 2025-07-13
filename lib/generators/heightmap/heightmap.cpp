@@ -50,11 +50,11 @@ terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& d
 	for(;i != std::end(std::as_const(inputs)); ++i, ++j)
 	{
 		auto& img = i->second;
-		if(j->second.modulator.has_value())
+		if(j->second.modulation.has_value())
 		{
 			images_to_mix.push_back(
 				std::pair{
-					j->second.modulator->compose_image_from(
+					j->second.modulation->compose_image_from(
 						span_2d_extents{output_width, output_height},
 						img.pixels(),
 						registry

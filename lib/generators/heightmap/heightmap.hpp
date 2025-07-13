@@ -90,7 +90,7 @@ namespace terraformer
 	struct heightmap_generator_channel_strip_descriptor
 	{
 		heightmap_generator input;
-		std::optional<filters::modulator_descriptor> modulator;
+		std::optional<filters::modulator_descriptor> modulation;
 		float gain = 1.0f;
 	};
 
@@ -101,14 +101,14 @@ namespace terraformer
 			{
 				u8"Plain", heightmap_generator_channel_strip_descriptor{
 					.input = heightmap_generator{plain_descriptor{}},
-					.modulator = std::nullopt,
+					.modulation = std::nullopt,
 					.gain = 1.0f
 				}
 			},
 			{
 				u8"Rolling hills", heightmap_generator_channel_strip_descriptor{
 					.input = heightmap_generator{rolling_hills_descriptor{}},
-					.modulator = filters::modulator_descriptor{
+					.modulation = filters::modulator_descriptor{
 						.modulator = u8"Plain",
 						.modulation_depth = 1.0f
 					},
