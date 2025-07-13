@@ -19,15 +19,15 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 	for(auto& item : generators)
 	{
 		auto editor = generators_editor.create_form(item.first, descriptor_editor_ref::form_descriptor{});
-		item.second.bind(editor);
+		item.second.input.bind(editor);
 	}
 }
 
 
 terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& descriptor)
 {
-	auto const plain = descriptor.generators.at(u8"Plain").generate_heightmap(descriptor.domain_size);
-	auto const rolling_hills = descriptor.generators.at(u8"Rolling hills").generate_heightmap(descriptor.domain_size);
+	auto const plain = descriptor.generators.at(u8"Plain").input.generate_heightmap(descriptor.domain_size);
+	auto const rolling_hills = descriptor.generators.at(u8"Rolling hills").input.generate_heightmap(descriptor.domain_size);
 
 	auto const output_width = std::max(plain.width(), rolling_hills.width());
 	auto const output_height = std::max(plain.height(), 	rolling_hills.height());;

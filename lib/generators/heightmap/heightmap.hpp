@@ -7,6 +7,7 @@
 #include "lib/common/unique_resource.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/filters/heightmap_to_mesh.hpp"
+#include "lib/filters/modulator/modulator.hpp"
 #include "lib/generators/plain_generator/plain.hpp"
 #include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
 #include "lib/generators/domain/domain_size.hpp"
@@ -86,12 +87,34 @@ namespace terraformer
 		unique_resource<vtable> m_resource;
 	};
 
+	struct heightmap_generator_channel_strip_descriptor
+	{
+		heightmap_generator input;
+		std::optional<filters::modulator_descriptor> modulator;
+		float gain = 1.0f;
+	};
+
 	struct heightmap_descriptor
 	{
 		domain_size_descriptor domain_size;
-		std::map<std::u8string, heightmap_generator, std::less<>> generators{
-			{u8"Plain", heightmap_generator{plain_descriptor{}}},
-			{u8"Rolling hills", heightmap_generator{rolling_hills_descriptor{}}}
+		std::map<std::u8string, heightmap_generator_channel_strip_descriptor, std::less<>> generators{
+			{
+				u8"Plain", heightmap_generator_channel_strip_descriptor{
+					.input = heightmap_generator{plain_descriptor{}},
+					.modulator = std::nullopt,
+					.gain = 1.0f
+				}
+			},
+			{
+				u8"Rolling hills", heightmap_generator_channel_strip_descriptor{
+					.input = heightmap_generator{rolling_hills_descriptor{}},
+					.modulator = filters::modulator_descriptor{
+						.modulator = u8"Plain",
+						.modulation_depth = 1.0f
+					},
+					.gain = 1.0f
+				}
+			}
 		};
 
 		void bind(descriptor_editor_ref editor);
