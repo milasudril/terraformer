@@ -7,30 +7,6 @@
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include <algorithm>
 
-namespace
-{
-	terraformer::grayscale_image normalize(terraformer::span_2d<float const> input, float min_out, float max_out)
-	{
-		terraformer::grayscale_image ret{input.width(), input.height()};
-		auto const pixel_count = static_cast<size_t>(input.width())*static_cast<size_t>(input.height());
-		auto const range = std::minmax_element(input.data(), input.data() + pixel_count);
-
-		auto const min = *range.first;
-		auto const max = *range.second;
-
-		for(uint32_t y = 0; y != ret.height(); ++y)
-		{
-			for(uint32_t x = 0; x != ret.width(); ++x)
-			{
-				auto const in = input(x, y);
-				ret(x, y) = std::lerp(min_out, max_out, (in - min)/(max - min));
-			}
-		}
-
-		return ret;
-	}
-}
-
 terraformer::grayscale_image
 terraformer::filters::modulator_descriptor::compose_image_from(
 	span_2d_extents output_size,
@@ -42,11 +18,15 @@ terraformer::filters::modulator_descriptor::compose_image_from(
 	auto const w_float = static_cast<float>(ret.width());
 	auto const h_float = static_cast<float>(ret.height());
 
-	auto const modulator_image = normalize(control_images.get_image(modulator), -1.0f, 0.0f);
-		auto const mod_depth = modulation_depth;
+	auto const mod_img = control_images.get_image(modulator);
+	auto const pixel_count = static_cast<size_t>(mod_img.width())*static_cast<size_t>(mod_img.height());
+	auto const range = std::minmax_element(mod_img.data(), mod_img.data() + pixel_count);
+	auto const mod_img_min = *range.first;
+	auto const mod_img_max = *range.second;
+	auto const mod_depth = modulation_depth;
 
-	auto const scale_mod_x = static_cast<float>(modulator_image.width())/w_float;
-	auto const scale_mod_y = static_cast<float>(modulator_image.height())/h_float;
+	auto const scale_mod_x = static_cast<float>(mod_img.width())/w_float;
+	auto const scale_mod_y = static_cast<float>(mod_img.height())/h_float;
 	auto const scale_input_x = static_cast<float>(input_image.width())/w_float;
 	auto const scale_input_y = static_cast<float>(input_image.height())/h_float;
 
@@ -62,7 +42,8 @@ terraformer::filters::modulator_descriptor::compose_image_from(
 			auto const y_mod = (0.5f + y_float)*scale_mod_y - 0.5f;
 
 			auto const in = interp(input_image, x_in, y_in, clamp_at_boundary{});
-			auto const mod = interp(modulator_image, x_mod, y_mod, clamp_at_boundary{});
+			auto const mod_in = interp(mod_img, x_mod, y_mod, clamp_at_boundary{});
+			auto const mod = std::lerp(-1.0f, 0.0f, (mod_in - mod_img_min)/(mod_img_max - mod_img_min));
 
 			ret(x, y) = in*(mod_depth*mod + 1.0f);
 		}
