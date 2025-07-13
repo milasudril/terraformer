@@ -75,20 +75,6 @@ namespace terraformer
 			return vt.create_form(pointer, label, std::move(form_params));
 		}
 
-		struct knob_descriptor
-		{
-			type_erased_value_map value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}};
-			std::u8string_view textbox_placeholder_string;
-			std::optional<closed_closed_interval<geosimd::turn_angle>> visual_angle_range;
-		};
-
-		void create_float_input(std::u8string_view label, float& value, knob_descriptor&& knob_params)
-		{
-			auto const vt = m_handle.get_vtable();
-			auto const pointer = m_handle.get_pointer();
-			vt.create_float_input_knob(pointer, label, value, std::move(knob_params));
-		}
-
 		template<class Rhs>
 		class assigner
 		{
@@ -124,11 +110,39 @@ namespace terraformer
 			Rhs (*m_get_value)(void const*);
 		};
 
+		struct knob_descriptor
+		{
+			type_erased_value_map value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}};
+			std::u8string_view textbox_placeholder_string;
+			std::optional<closed_closed_interval<geosimd::turn_angle>> visual_angle_range;
+		};
+
+		void create_float_input(std::u8string_view label, float& value, knob_descriptor&& knob_params)
+		{
+			auto const vt = m_handle.get_vtable();
+			auto const pointer = m_handle.get_pointer();
+			vt.create_float_input_knob(pointer, label, value, std::move(knob_params));
+		}
+
 		void create_float_input(std::u8string_view label, assigner<float> value, knob_descriptor&& knob_params)
 		{
 			auto const vt = m_handle.get_vtable();
 			auto const pointer = m_handle.get_pointer();
 			return vt.create_float_assigner_input_knob(pointer, label, value, std::move(knob_params));
+		}
+
+		struct slider_descriptor
+		{
+			type_erased_value_map value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}};
+			std::u8string_view textbox_placeholder_string;
+			widget_orientation orientation;
+		};
+
+		void create_float_input(std::u8string_view label, float& value, slider_descriptor&& knob_params)
+		{
+			auto const vt = m_handle.get_vtable();
+			auto const pointer = m_handle.get_pointer();
+			vt.create_float_input_slider(pointer, label, value, std::move(knob_params));
 		}
 
 		void create_rng_seed_input(std::u8string_view label, std::array<std::byte, 16>& value)
@@ -187,6 +201,9 @@ namespace terraformer
 				create_float_assigner_input_knob{[](void* handle, std::u8string_view label, assigner<float> value, knob_descriptor&& knob_params) {
 					DescriptorEditorTraits::create_float_input(*static_cast<DescriptorEditor*>(handle), label, value, std::move(knob_params));
 				}},
+				create_float_input_slider{[](void* handle, std::u8string_view label, float& value, slider_descriptor&& slider_params) {
+					DescriptorEditorTraits::create_float_input(*static_cast<DescriptorEditor*>(handle), label, std::ref(value), std::move(slider_params));
+				}},
 				create_rng_seed_input{[](void* handle, std::u8string_view label, std::array<std::byte, 16>& value){
 					DescriptorEditorTraits::create_rng_seed_input(*static_cast<DescriptorEditor*>(handle), label, value);
 				}},
@@ -202,6 +219,7 @@ namespace terraformer
 			descriptor_editor_ref (*create_form)(void*, std::u8string_view, form_descriptor&&);
 			void (*create_float_input_knob)(void*, std::u8string_view, float&, knob_descriptor&&);
 			void (*create_float_assigner_input_knob)(void*, std::u8string_view, assigner<float>, knob_descriptor&&);
+			void (*create_float_input_slider)(void*, std::u8string_view, float&, slider_descriptor&&);
 			void (*create_rng_seed_input)(void*, std::u8string_view, std::array<std::byte, 16>&);
 			void (*create_range_input)(void*, std::u8string_view, closed_closed_interval<float>&, range_input_descriptor&&);
 			void (*append_pending_widgets)(void*);

@@ -85,16 +85,16 @@ namespace terraformer::ui::widgets
 			return static_cast<float>(m_current_size.height) - 2.0f*track_margin();
 		}
 
-		rgba_pixel m_bg_tint;
+		rgba_pixel m_bg_tint{};
 
 		main::immutable_shared_texture m_null_texture;
-		main::unique_texture m_track;
+		main::unique_texture m_track{};
 
 		main::immutable_shared_texture m_handle;
 		main::immutable_shared_texture m_horizontal_handle;
 		main::immutable_shared_texture m_vertical_handle;
 
-		main::fb_size m_current_size;
+		main::fb_size m_current_size{};
 
 		main::widget_orientation m_orientation = main::widget_orientation::horizontal;
 	};

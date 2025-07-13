@@ -4,6 +4,7 @@
 #include "lib/common/interval.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "ui/main/widget.hpp"
+#include "ui/widgets/slider.hpp"
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/table.hpp"
 #include "ui/widgets/rng_seed_input.hpp"
@@ -114,6 +115,51 @@ namespace terraformer::app
 
 			if(params.visual_angle_range.has_value())
 			{ widget.input_widget().visual_angle_range(*params.visual_angle_range); }
+
+			if(params.textbox_placeholder_string.data() != nullptr)
+			{ widget.set_textbox_placeholder_string(params.textbox_placeholder_string); }
+		}
+
+		template<class FloatWrapper>
+		struct slider_descriptor
+		{
+			std::u8string_view label;
+			FloatWrapper value_reference;
+			using input_widget_type = ui::widgets::float_input<ui::widgets::slider>;
+		};
+
+		template<class Parent, class FloatWrapper>
+		static void create_float_input(Parent& parent, std::u8string_view label, FloatWrapper value, descriptor_editor_ref::slider_descriptor&& params)
+		{
+			// FIXME: Does deduce work properly for slider
+			// FIXME: Orientation should affect both slider and layout
+			auto& widget = params.orientation == descriptor_editor_ref::widget_orientation::deduce?
+				parent.create_widget(
+					slider_descriptor<FloatWrapper>{
+						.label = label,
+						.value_reference = value
+					},
+					terraformer::ui::widgets::slider{std::move(params.value_map)}
+				):
+				parent.create_widget(
+					slider_descriptor<FloatWrapper>{
+						.label = label,
+						.value_reference = value
+					},
+					terraformer::ui::widgets::slider{std::move(params.value_map)},
+					params.orientation == descriptor_editor_ref::widget_orientation::horizontal?
+						ui::main::widget_orientation::horizontal :
+						ui::main::widget_orientation::vertical
+				);
+
+			if(params.orientation != descriptor_editor_ref::widget_orientation::deduce)
+			{
+				widget.input_widget().orientation(
+					params.orientation == descriptor_editor_ref::widget_orientation::horizontal?
+						ui::main::widget_orientation::horizontal :
+						ui::main::widget_orientation::vertical
+				);
+			}
 
 			if(params.textbox_placeholder_string.data() != nullptr)
 			{ widget.set_textbox_placeholder_string(params.textbox_placeholder_string); }

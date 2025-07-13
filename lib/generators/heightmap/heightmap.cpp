@@ -15,10 +15,18 @@ void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_
 	editor.create_float_input(
 		u8"Gain",
 		gain,
-		descriptor_editor_ref::knob_descriptor{
+#if 0
+				struct slider_descriptor
+		{
+			type_erased_value_map value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}};
+			std::u8string_view textbox_placeholder_string;
+			widget_orientation orientation;
+		};
+#endif
+		descriptor_editor_ref::slider_descriptor{
 			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
 			.textbox_placeholder_string = u8"-0.123456789",
-			.visual_angle_range = std::nullopt,
+			.orientation = descriptor_editor_ref::widget_orientation::vertical
 		}
 	);
 }
