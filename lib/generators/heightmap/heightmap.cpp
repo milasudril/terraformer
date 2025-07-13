@@ -7,7 +7,6 @@
 #include "lib/common/span_2d.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
-#include "lib/common/string_to_value_map.hpp"
 
 void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 {
@@ -31,7 +30,8 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 
 terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& descriptor)
 {
-	u8string_to_value_map<grayscale_image> inputs;
+	// NOTE: Must use same ordering as descriptor.generators
+	std::map<std::u8string, grayscale_image, std::less<>> inputs;
 	uint32_t output_width = 0;
 	uint32_t output_height = 0;
 	for(auto const& item : descriptor.generators)
