@@ -6,10 +6,14 @@
 #include "lib/common/span_2d.hpp"
 #include "lib/common/unique_resource.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
+#include "lib/filters/heightmap_to_mesh.hpp"
 #include "lib/generators/plain_generator/plain.hpp"
 #include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/pixel_store/image.hpp"
+
+#include <map>
+#include <string>
 
 namespace terraformer
 {
@@ -82,18 +86,13 @@ namespace terraformer
 		unique_resource<vtable> m_resource;
 	};
 
-	struct heightmap_generator_descriptor
-	{
-		heightmap_generator plain{plain_descriptor{}};
-		heightmap_generator rolling_hills{rolling_hills_descriptor{}};
-
-		void bind(descriptor_editor_ref editor);
-	};
-
 	struct heightmap_descriptor
 	{
 		domain_size_descriptor domain_size;
-		heightmap_generator_descriptor generators;
+		std::map<std::u8string, heightmap_generator, std::less<>> generators{
+			{u8"Plain", heightmap_generator{plain_descriptor{}}},
+			{u8"Rolling hills", heightmap_generator{rolling_hills_descriptor{}}}
+		};
 
 		void bind(descriptor_editor_ref editor);
 	};
