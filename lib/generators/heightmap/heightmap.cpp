@@ -7,6 +7,7 @@
 #include "lib/common/span_2d.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
+#include "lib/common/string_to_value_map.hpp"
 
 void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 {
@@ -23,48 +24,44 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 	for(auto& item : generators)
 	{
 		auto editor = generators_editor.create_form(item.first, descriptor_editor_ref::form_descriptor{});
-		item.second.input.bind(editor);
+		item.second.bind(editor);
 	}
 }
 
 
 terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& descriptor)
 {
-	// NOTE: Must use same ordering as descriptor.generators
-	std::map<std::u8string, grayscale_image, std::less<>> inputs;
+	u8string_to_value_map<grayscale_image> inputs;
 	uint32_t output_width = 0;
 	uint32_t output_height = 0;
 	for(auto const& item : descriptor.generators)
 	{
-		auto img = item.second.input.generate_heightmap(descriptor.domain_size);
+		auto img = item.second.generate_heightmap(descriptor.domain_size);
 		output_height = std::max(img.height(), output_height);
 		output_width = std::max(img.width(), output_width);
 		inputs.insert(std::pair{item.first, std::move(img)});
 	}
 
 	single_array<std::pair<grayscale_image, float>> images_to_mix;
-	// TODO: C++23: Use zip view
-	auto i = std::begin(std::as_const(inputs));
-	auto j = std::begin(descriptor.generators);
 	image_registry_view registry{std::cref(inputs)};
-	for(;i != std::end(std::as_const(inputs)); ++i, ++j)
+	for(auto& item : descriptor.channel_strips)
 	{
-		auto& img = i->second;
-		if(j->second.modulation.has_value())
+		auto& img = std::as_const(inputs).at(item.input);
+		if(item.modulation.has_value())
 		{
 			images_to_mix.push_back(
 				std::pair{
-					j->second.modulation->compose_image_from(
+					item.modulation->compose_image_from(
 						span_2d_extents{output_width, output_height},
 						img.pixels(),
 						registry
 					),
-					j->second.gain
+					item.gain
 				}
 			);
 		}
 		else
-		{ images_to_mix.push_back(std::pair{img, j->second.gain}); }
+		{ images_to_mix.push_back(std::pair{img, item.gain}); }
 	}
 
 	terraformer::grayscale_image ret{output_width, output_height};

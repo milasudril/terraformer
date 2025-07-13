@@ -12,6 +12,7 @@
 #include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/pixel_store/image.hpp"
+#include "lib/array_classes/single_array.hpp"
 
 #include <map>
 #include <string>
@@ -89,7 +90,7 @@ namespace terraformer
 
 	struct heightmap_generator_channel_strip_descriptor
 	{
-		heightmap_generator input;
+		std::u8string input;
 		std::optional<filters::modulator_descriptor> modulation;
 		float gain = 1.0f;
 	};
@@ -97,24 +98,25 @@ namespace terraformer
 	struct heightmap_descriptor
 	{
 		domain_size_descriptor domain_size;
-		std::map<std::u8string, heightmap_generator_channel_strip_descriptor, std::less<>> generators{
-			{
-				u8"Plain", heightmap_generator_channel_strip_descriptor{
-					.input = heightmap_generator{plain_descriptor{}},
-					.modulation = std::nullopt,
-					.gain = 1.0f
-				}
+		std::map<std::u8string, heightmap_generator, std::less<>> generators{
+			{u8"Plain", heightmap_generator{plain_descriptor{}}},
+			{u8"Rolling hills", heightmap_generator{rolling_hills_descriptor{}}}
+		};
+
+		std::array<heightmap_generator_channel_strip_descriptor, 2> channel_strips{
+			heightmap_generator_channel_strip_descriptor{
+				.input = u8"Plain",
+				.modulation = std::nullopt,
+				.gain = 1.0f
 			},
-			{
-				u8"Rolling hills", heightmap_generator_channel_strip_descriptor{
-					.input = heightmap_generator{rolling_hills_descriptor{}},
-					.modulation = filters::modulator_descriptor{
-						.modulator = u8"Plain",
-						.modulator_exponent = 2.0f,
-						.modulation_depth = 1.0f
-					},
-					.gain = 1.0f
-				}
+			heightmap_generator_channel_strip_descriptor{
+				.input = u8"Rolling hills",
+				.modulation = filters::modulator_descriptor{
+					.modulator = u8"Plain",
+					.modulator_exponent = 2.0f,
+					.modulation_depth = 1.0f
+				},
+				.gain = 1.0f
 			}
 		};
 
