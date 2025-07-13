@@ -2,7 +2,12 @@
 
 #include "./heightmap.hpp"
 
+#include "lib/array_classes/single_array.hpp"
+#include "lib/common/image_registry_view.hpp"
+#include "lib/common/span_2d.hpp"
 #include "lib/math_utils/interp.hpp"
+#include "lib/pixel_store/image.hpp"
+#include "lib/common/string_to_value_map.hpp"
 
 void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 {
@@ -26,16 +31,45 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 
 terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& descriptor)
 {
-	auto const plain = descriptor.generators.at(u8"Plain").input.generate_heightmap(descriptor.domain_size);
-	auto const rolling_hills = descriptor.generators.at(u8"Rolling hills").input.generate_heightmap(descriptor.domain_size);
+	u8string_to_value_map<grayscale_image> inputs;
+	uint32_t output_width = 0;
+	uint32_t output_height = 0;
+	for(auto const& item : descriptor.generators)
+	{
+		auto img = item.second.input.generate_heightmap(descriptor.domain_size);
+		output_height = std::max(img.height(), output_height);
+		output_width = std::max(img.width(), output_width);
+		inputs.insert(std::pair{item.first, std::move(img)});
+	}
 
-	auto const output_width = std::max(plain.width(), rolling_hills.width());
-	auto const output_height = std::max(plain.height(), 	rolling_hills.height());;
+	single_array<std::pair<grayscale_image, float>> images_to_mix;
+	// TODO: C++23: Use zip view
+	auto i = std::begin(std::as_const(inputs));
+	auto j = std::begin(descriptor.generators);
+	image_registry_view registry{std::cref(inputs)};
+	for(;i != std::end(std::as_const(inputs)); ++i, ++j)
+	{
+		auto& img = i->second;
+		if(j->second.modulator.has_value())
+		{
+			images_to_mix.push_back(
+				std::pair{
+					j->second.modulator->compose_image_from(
+						span_2d_extents{output_width, output_height},
+						img.pixels(),
+						registry
+					),
+					j->second.gain
+				}
+			);
+		}
+		else
+		{ images_to_mix.push_back(std::pair{img, j->second.gain}); }
+	}
 
-	grayscale_image ret{output_width, output_height};
-
-	add_resampled(plain.pixels(), ret.pixels(), 1.0f);
-	add_resampled(rolling_hills.pixels(), ret.pixels(), 1.0f);
+	terraformer::grayscale_image ret{output_width, output_height};
+	for(auto const& item : images_to_mix)
+	{ add_resampled(item.first.pixels(), ret.pixels(), item.second); }
 
 	return ret;
 }

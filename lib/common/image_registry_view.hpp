@@ -5,6 +5,7 @@
 
 #include <string_view>
 #include <functional>
+#include <stdexcept>
 
 namespace terraformer
 {
@@ -15,7 +16,11 @@ namespace terraformer
 		explicit image_registry_view(std::reference_wrapper<ImageRegistry> registry):
 			m_handle{&registry.get()},
 			m_get_image{[](void const* handle, std::u8string_view name) {
-				return static_cast<ImageRegistry const*>(handle)->at(name).pixels();
+				auto& obj = *static_cast<ImageRegistry const*>(handle);
+				auto i = obj.find(name);
+				if(i == std::end(obj))
+				{ throw std::runtime_error{"Key not found"}; }
+				return i->second.pixels();
 			}}
 		{}
 
