@@ -74,10 +74,7 @@ terraformer::grayscale_image terraformer::generate(
 )
 {
 	auto const size_factor = std::min(dom_size.width, dom_size.height);
-	// Assume a bandwidth of at most 4 periods
-	// Take 4 samples per period
-	// Round up to next value that also contains a factor of 3, which is useful to have
-	auto const min_pixel_count = 24.0f;
+	auto const min_pixel_count = 64.0f;
 	auto const w_scaled = min_pixel_count*dom_size.width/size_factor;
 	auto const h_scaled = min_pixel_count*dom_size.height/size_factor;
 
