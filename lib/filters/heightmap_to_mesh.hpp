@@ -17,8 +17,6 @@ namespace terraformer
 
 	template<map_2d<float> Map>
 	mesh create(std::type_identity<mesh>, heightmap<Map> const& heightmap);
-
-
 }
 
 template<terraformer::map_2d<float> Map>
