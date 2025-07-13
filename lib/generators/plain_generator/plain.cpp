@@ -357,7 +357,7 @@ void terraformer::plain_control_points_info::bind(descriptor_table_editor_ref ed
 
 	{
 		auto e_edit =editor.add_record(u8"E");
-		ne.bind(e_edit);
+		e.bind(e_edit);
 		e_edit.append_pending_widgets();
 	}
 
