@@ -125,6 +125,7 @@ namespace terraformer::app
 		{
 			std::u8string_view label;
 			FloatWrapper value_reference;
+			bool expand_layout_cell;
 			using input_widget_type = ui::widgets::float_input<ui::widgets::slider>;
 		};
 
@@ -137,14 +138,16 @@ namespace terraformer::app
 				parent.create_widget(
 					slider_descriptor<FloatWrapper>{
 						.label = label,
-						.value_reference = value
+						.value_reference = value,
+						.expand_layout_cell = true
 					},
 					terraformer::ui::widgets::slider{std::move(params.value_map)}
 				):
 				parent.create_widget(
 					slider_descriptor<FloatWrapper>{
 						.label = label,
-						.value_reference = value
+						.value_reference = value,
+						.expand_layout_cell = true
 					},
 					terraformer::ui::widgets::slider{std::move(params.value_map)},
 					params.orientation == descriptor_editor_ref::widget_orientation::horizontal?

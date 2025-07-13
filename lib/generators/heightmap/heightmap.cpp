@@ -25,7 +25,7 @@ void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_
 #endif
 		descriptor_editor_ref::slider_descriptor{
 			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
-			.textbox_placeholder_string = u8"-0.123456789",
+			.textbox_placeholder_string = u8"-0.12345",
 			.orientation = descriptor_editor_ref::widget_orientation::vertical
 		}
 	);
