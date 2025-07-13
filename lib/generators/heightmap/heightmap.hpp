@@ -93,6 +93,8 @@ namespace terraformer
 		std::u8string input;
 		std::optional<filters::modulator_descriptor> modulation;
 		float gain = 1.0f;
+
+		void bind(descriptor_editor_ref editor);
 	};
 
 	struct heightmap_descriptor

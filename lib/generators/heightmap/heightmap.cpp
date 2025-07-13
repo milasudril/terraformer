@@ -5,9 +5,23 @@
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/image_registry_view.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/common/value_map.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/string_to_value_map.hpp"
+
+void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_float_input(
+		u8"Gain",
+		gain,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
+			.textbox_placeholder_string = u8"-0.123456789",
+			.visual_angle_range = std::nullopt,
+		}
+	);
+}
 
 void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 {
@@ -26,8 +40,27 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 		auto editor = generators_editor.create_form(item.first, descriptor_editor_ref::form_descriptor{});
 		item.second.bind(editor);
 	}
-}
 
+	auto channel_strips_editor = editor.create_table(
+		u8"Mixer",
+		descriptor_editor_ref::table_descriptor{
+			.orientation = descriptor_editor_ref::widget_orientation::deduce,
+			.field_names = {
+				//u8"Input",
+				//u8"Modulation",
+				u8"Gain"
+			}
+		}
+	);
+	size_t k = 1;
+	for(auto& item :channel_strips)
+	{
+		auto record = channel_strips_editor.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+		item.bind(record);
+		record.append_pending_widgets();
+		++k;
+	}
+}
 
 terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& descriptor)
 {
