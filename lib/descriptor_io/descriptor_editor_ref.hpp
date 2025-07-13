@@ -41,7 +41,7 @@ namespace terraformer
 	class descriptor_editor_ref
 	{
 	public:
-		enum class widget_orientation{horizontal, vertical};
+		enum class widget_orientation{deduce, horizontal, vertical};
 
 		template<class DescriptorEditor, class DescriptorEditorTraits>
 		explicit descriptor_editor_ref(DescriptorEditor& editor, std::type_identity<DescriptorEditorTraits>):
@@ -50,8 +50,8 @@ namespace terraformer
 
 		struct table_descriptor
 		{
-			widget_orientation orientation;
-			std::initializer_list<char8_t const*> field_names;
+			widget_orientation orientation = widget_orientation::deduce;
+			std::initializer_list<char8_t const*> field_names{};
 		};
 
 		descriptor_table_editor_ref
@@ -64,7 +64,7 @@ namespace terraformer
 
 		struct form_descriptor
 		{
-			widget_orientation orientation;
+			widget_orientation orientation = widget_orientation::deduce;
 			size_t extra_fields_per_row = 0;
 		};
 

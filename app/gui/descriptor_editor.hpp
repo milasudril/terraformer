@@ -26,11 +26,17 @@ namespace terraformer::app
 			descriptor_editor_ref::table_descriptor&& params
 		)
 		{
+			if(params.orientation == descriptor_editor_ref::widget_orientation::deduce)
+			{
+				return descriptor_table_editor_ref{
+					parent.create_widget(table_descriptor{.label = label}, params.field_names),
+					std::type_identity<descriptor_editor_traits>{}
+				};
+			}
+
 			return descriptor_table_editor_ref{
 				parent.create_widget(
-					table_descriptor{
-						.label = label
-					},
+					table_descriptor{.label = label},
 					params.orientation == descriptor_editor_ref::widget_orientation::horizontal?
 						ui::main::widget_orientation::horizontal :
 						ui::main::widget_orientation::vertical,
@@ -49,11 +55,7 @@ namespace terraformer::app
 		static descriptor_editor_ref add_record(Parent& parent, std::u8string_view label)
 		{
 			return descriptor_editor_ref{
-				parent.add_record(
-					record_decriptor{
-						.label = label
-					}
-				),
+				parent.add_record(record_decriptor{.label = label}),
 				std::type_identity<descriptor_editor_traits>{}
 			};
 		}
@@ -71,11 +73,17 @@ namespace terraformer::app
 			descriptor_editor_ref::form_descriptor&& params
 		)
 		{
+			if(params.orientation == descriptor_editor_ref::widget_orientation::deduce)
+			{
+				return descriptor_editor_ref{
+					parent.create_widget(form_descriptor{.label = label}, params.extra_fields_per_row),
+					std::type_identity<descriptor_editor_traits>{}
+				};
+			}
+
 			return descriptor_editor_ref{
 				parent.create_widget(
-					form_descriptor{
-						.label = label
-					},
+					form_descriptor{.label = label},
 					params.orientation == descriptor_editor_ref::widget_orientation::horizontal?
 						ui::main::widget_orientation::horizontal :
 						ui::main::widget_orientation::vertical,

@@ -8,21 +8,12 @@
 
 void terraformer::heightmap_generator_descriptor::bind(descriptor_editor_ref editor)
 {
-	auto plain_editor = editor.create_form(
-		u8"Plain",
-		descriptor_editor_ref::form_descriptor{
-			// FIXME: Should have "auto" as orientation
-			.orientation = descriptor_editor_ref::widget_orientation::vertical
-		}
-	);
+	auto plain_editor = editor.create_form(u8"Plain", descriptor_editor_ref::form_descriptor{});
 	plain.bind(plain_editor);
 
 	auto rolling_hills_editor = editor.create_form(
 		u8"Rolling hills",
-		descriptor_editor_ref::form_descriptor{
-			// FIXME: Should have "auto" as orientation
-			.orientation = descriptor_editor_ref::widget_orientation::vertical
-		}
+		descriptor_editor_ref::form_descriptor{}
 	);
 	rolling_hills.bind(rolling_hills_editor);
 }
@@ -31,19 +22,13 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 {
 	auto dom_size_editor = editor.create_form(
 		u8"Domain size",
-		descriptor_editor_ref::form_descriptor{
-			// FIXME: Should have "auto" as orientation
-			.orientation = descriptor_editor_ref::widget_orientation::horizontal
-		}
+		descriptor_editor_ref::form_descriptor{}
 	);
 	domain_size.bind(dom_size_editor);
 
 	auto generators_editor = editor.create_form(
 		u8"Generators",
-		descriptor_editor_ref::form_descriptor{
-			// FIXME: Should have "auto" as orientation
-			.orientation = descriptor_editor_ref::widget_orientation::horizontal
-		}
+		descriptor_editor_ref::form_descriptor{}
 	);
 	generators.bind(generators_editor);
 }
