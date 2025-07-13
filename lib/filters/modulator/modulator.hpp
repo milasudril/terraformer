@@ -13,7 +13,8 @@ namespace terraformer::filters
 	struct modulator_descriptor
 	{
 		std::u8string modulator;
-		float modulation_depth;
+		float modulator_exponent = 1.0f;
+		float modulation_depth = 0.5f;
 
 		grayscale_image compose_image_from(
 			span_2d_extents output_size,

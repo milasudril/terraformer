@@ -110,6 +110,7 @@ namespace terraformer
 					.input = heightmap_generator{rolling_hills_descriptor{}},
 					.modulation = filters::modulator_descriptor{
 						.modulator = u8"Plain",
+						.modulator_exponent = 2.0f,
 						.modulation_depth = 1.0f
 					},
 					.gain = 1.0f

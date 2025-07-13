@@ -24,6 +24,7 @@ terraformer::filters::modulator_descriptor::compose_image_from(
 	auto const mod_img_min = *range.first;
 	auto const mod_img_max = *range.second;
 	auto const mod_depth = modulation_depth;
+	auto const mod_exp = modulator_exponent;
 
 	auto const scale_mod_x = static_cast<float>(mod_img.width())/w_float;
 	auto const scale_mod_y = static_cast<float>(mod_img.height())/h_float;
@@ -43,7 +44,7 @@ terraformer::filters::modulator_descriptor::compose_image_from(
 
 			auto const in = interp(input_image, x_in, y_in, clamp_at_boundary{});
 			auto const mod_in = interp(mod_img, x_mod, y_mod, clamp_at_boundary{});
-			auto const mod = std::lerp(-1.0f, 0.0f, (mod_in - mod_img_min)/(mod_img_max - mod_img_min));
+			auto const mod = std::pow((mod_in - mod_img_min)/(mod_img_max - mod_img_min),mod_exp) - 1.0f;
 
 			ret(x, y) = in*(mod_depth*mod + 1.0f);
 		}
