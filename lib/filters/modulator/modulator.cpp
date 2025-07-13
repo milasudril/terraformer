@@ -34,16 +34,16 @@ namespace
 terraformer::grayscale_image
 terraformer::filters::modulator_descriptor::compose_image_from(
 	span_2d_extents output_size,
-	image_registry_view images
+	span_2d<float const> input_image,
+	image_registry_view control_images
 ) const
 {
 	grayscale_image ret{output_size};
 	auto const w_float = static_cast<float>(ret.width());
 	auto const h_float = static_cast<float>(ret.height());
 
-	auto const modulator_image = normalize(images.get_image(modulator), -1.0f, 0.0f);
-	auto const input_image = images.get_image(input);
-	auto const mod_depth = modulation_depth;
+	auto const modulator_image = normalize(control_images.get_image(modulator), -1.0f, 0.0f);
+		auto const mod_depth = modulation_depth;
 
 	auto const scale_mod_x = static_cast<float>(modulator_image.width())/w_float;
 	auto const scale_mod_y = static_cast<float>(modulator_image.height())/h_float;

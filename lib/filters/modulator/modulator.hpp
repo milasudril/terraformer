@@ -12,11 +12,14 @@ namespace terraformer::filters
 {
 	struct modulator_descriptor
 	{
-		std::u8string input;
 		std::u8string modulator;
 		float modulation_depth;
 
-		grayscale_image compose_image_from(span_2d_extents output_size, image_registry_view images) const;
+		grayscale_image compose_image_from(
+			span_2d_extents output_size,
+			span_2d<float const> input,
+			image_registry_view control_images
+		) const;
 	};
 }
 
