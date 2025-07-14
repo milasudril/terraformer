@@ -11,8 +11,6 @@
 #include "lib/value_maps/atan_value_map.hpp"
 #include "lib/value_maps/sqrt_value_map.hpp"
 
-#include <stdexcept>
-
 namespace
 {
 	struct control_curve_descriptor
@@ -458,7 +456,9 @@ terraformer::grayscale_image terraformer::plain_descriptor::generate_heightmap(d
 void terraformer::plain_descriptor::bind(descriptor_editor_ref editor)
 {
 	auto control_points_editor = editor.create_table(
-		u8"Control points",
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Control points"
+		},
 		descriptor_editor_ref::table_descriptor{
 			.orientation = descriptor_editor_ref::widget_orientation::vertical,
 			.field_names = {

@@ -19,26 +19,36 @@ namespace terraformer::app
 		{
 			using input_widget_type = ui::widgets::table;
 			std::u8string_view label;
+			bool expand_layout_cell = false;
 		};
 
 		template<class Parent>
 		static descriptor_table_editor_ref create_table(
 			Parent& parent,
-			std::u8string_view label,
+			descriptor_editor_ref::field_descriptor const& field_info,
 			descriptor_editor_ref::table_descriptor&& params
 		)
 		{
 			if(params.orientation == descriptor_editor_ref::widget_orientation::deduce)
 			{
 				return descriptor_table_editor_ref{
-					parent.create_widget(table_descriptor{.label = label}, params.field_names),
+					parent.create_widget(
+						table_descriptor{
+							.label = field_info.label,
+							.expand_layout_cell = field_info.expand_layout_cell
+						},
+						params.field_names
+					),
 					std::type_identity<descriptor_editor_traits>{}
 				};
 			}
 
 			return descriptor_table_editor_ref{
 				parent.create_widget(
-					table_descriptor{.label = label},
+					table_descriptor{
+						.label = field_info.label,
+						.expand_layout_cell = field_info.expand_layout_cell
+					},
 					params.orientation == descriptor_editor_ref::widget_orientation::horizontal?
 						ui::main::widget_orientation::horizontal :
 						ui::main::widget_orientation::vertical,

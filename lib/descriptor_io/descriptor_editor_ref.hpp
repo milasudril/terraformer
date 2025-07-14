@@ -48,6 +48,12 @@ namespace terraformer
 		explicit descriptor_editor_ref(DescriptorEditor& editor, std::type_identity<DescriptorEditorTraits>):
 			m_handle{std::ref(editor), std::type_identity<DescriptorEditorTraits>{}}
 		{}
+		
+		struct field_descriptor
+		{
+			std::u8string_view label;
+			bool expand_layout_cell = false;
+		};
 
 		struct table_descriptor
 		{
@@ -56,11 +62,11 @@ namespace terraformer
 		};
 
 		descriptor_table_editor_ref
-		create_table(std::u8string_view label, table_descriptor&& table_params) const
+		create_table(field_descriptor const& field_info, table_descriptor&& table_params) const
 		{
 			auto const vt = m_handle.get_vtable();
 			auto const pointer = m_handle.get_pointer();
-			return vt.create_table(pointer, label, std::move(table_params));
+			return vt.create_table(pointer, field_info, std::move(table_params));
 		}
 
 		struct form_descriptor
@@ -198,10 +204,10 @@ namespace terraformer
 		{
 			template<class DescriptorEditor, class DescriptorEditorTraits>
 			constexpr explicit vtable(std::type_identity<DescriptorEditor>, std::type_identity<DescriptorEditorTraits>):
-				create_table{[](void* handle, std::u8string_view label, table_descriptor&& table_params){
+				create_table{[](void* handle, field_descriptor const& field_info, table_descriptor&& table_params){
 					return DescriptorEditorTraits::create_table(
 						*static_cast<DescriptorEditor*>(handle),
-						label,
+						field_info,
 						std::move(table_params)
 					);
 				}},
@@ -235,7 +241,7 @@ namespace terraformer
 				}}
 			{}
 
-			descriptor_table_editor_ref (*create_table)(void*, std::u8string_view, table_descriptor&&);
+			descriptor_table_editor_ref (*create_table)(void*, field_descriptor const&, table_descriptor&&);
 			descriptor_editor_ref (*create_form)(void*, std::u8string_view, form_descriptor&&);
 			void (*create_float_input_knob)(void*, std::u8string_view, float&, knob_descriptor&&);
 			void (*create_float_assigner_input_knob)(void*, std::u8string_view, assigner<float>, knob_descriptor&&);

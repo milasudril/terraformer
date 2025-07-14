@@ -53,7 +53,10 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 	}
 
 	auto channel_strips_editor = editor.create_table(
-		u8"Mixer",
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Mixer",
+			.expand_layout_cell = true
+		},
 		descriptor_editor_ref::table_descriptor{
 			.orientation = descriptor_editor_ref::widget_orientation::deduce,
 			.field_names = {
