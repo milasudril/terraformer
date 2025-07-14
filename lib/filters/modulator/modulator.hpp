@@ -7,6 +7,7 @@
 
 #include "lib/common/span_2d.hpp"
 #include "lib/pixel_store/image.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 
 namespace terraformer::filters
 {
@@ -21,6 +22,8 @@ namespace terraformer::filters
 			span_2d<float const> input,
 			image_registry_view control_images
 		) const;
+
+		void bind(descriptor_editor_ref);
 	};
 }
 

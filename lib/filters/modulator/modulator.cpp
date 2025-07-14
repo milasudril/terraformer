@@ -5,6 +5,7 @@
 #include "lib/pixel_store/image.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
+#include "lib/value_maps/log_value_map.hpp"
 #include <algorithm>
 
 terraformer::grayscale_image
@@ -51,4 +52,36 @@ terraformer::filters::modulator_descriptor::compose_image_from(
 	}
 
 	return ret;
+}
+
+void terraformer::filters::modulator_descriptor::bind(descriptor_editor_ref editor)
+{
+	// TODO: Use a combobox instead
+	editor.create_string_input(u8"Modulator",
+		modulator,
+		descriptor_editor_ref::single_line_text_input_descriptor{
+			.textbox_placeholder_string = u8"Lorem ipsum"
+		}
+	);
+
+	editor.create_float_input(
+		u8"Modulator exponent",
+		modulator_exponent,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"Depth",
+		modulation_depth,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
 }
