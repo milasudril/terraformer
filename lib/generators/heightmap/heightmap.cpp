@@ -15,14 +15,6 @@ void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_
 	editor.create_float_input(
 		u8"Gain",
 		gain,
-#if 0
-				struct slider_descriptor
-		{
-			type_erased_value_map value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}};
-			std::u8string_view textbox_placeholder_string;
-			widget_orientation orientation;
-		};
-#endif
 		descriptor_editor_ref::slider_descriptor{
 			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
 			.textbox_placeholder_string = u8"-0.12345",
@@ -88,11 +80,11 @@ terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& d
 	for(auto& item : descriptor.channel_strips)
 	{
 		auto& img = std::as_const(inputs).at(item.input);
-		if(item.modulation.has_value())
+		if(!item.modulation.modulator.empty())
 		{
 			images_to_mix.push_back(
 				std::pair{
-					item.modulation->compose_image_from(
+					item.modulation.compose_image_from(
 						span_2d_extents{output_width, output_height},
 						img.pixels(),
 						registry
