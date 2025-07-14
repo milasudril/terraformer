@@ -19,7 +19,7 @@ void terraformer::ui::widgets::table::record::append_pending_widgets()
 			throw std::out_of_range{std::string{string_begin, string_end}};
 		}
 
-		auto const ref = i->second.get();
+		auto const ref = i->second.object.get();
 		auto const ptr = ref.get_pointer();
 		auto const vt = ref.get_vtable();
 		vt.append_to(ptr, m_parent);

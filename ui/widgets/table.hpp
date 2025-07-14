@@ -7,6 +7,7 @@
 
 #include "lib/common/move_only_function.hpp"
 #include "lib/common/string_to_value_map.hpp"
+#include "lib/common/unique_resource.hpp"
 #include "ui/layouts/table.hpp"
 #include "ui/main/widget_collection.hpp"
 #include "ui/main/widget_geometry.hpp"
@@ -44,7 +45,11 @@ namespace terraformer::ui::widgets
 				{}
 				void (*append_to)(void* object, main::widget_collection& collection);
 			};
-			using widget = unique_resource<widget_vtable>;
+			
+			struct widget
+			{
+				unique_resource<widget_vtable> object;
+			};
 
 			record(record const&) = delete;
 			record(record&&) = delete;
@@ -140,7 +145,12 @@ namespace terraformer::ui::widgets
 						call_on_content_updated(std::forward<Args>(args)...);
 					});
 				}
-				m_widgets.emplace(field.label, widget{std::move(field_input_widget)});
+				m_widgets.emplace(
+					field.label,
+					widget{
+						.object = unique_resource<widget_vtable>{std::move(field_input_widget)}
+					}
+				);
 
 				return ret;
 			}
