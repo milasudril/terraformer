@@ -4,6 +4,7 @@
 #include "lib/common/interval.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "ui/main/widget.hpp"
+#include "ui/widgets/single_line_text_input.hpp"
 #include "ui/widgets/slider.hpp"
 #include "ui/widgets/form.hpp"
 #include "ui/widgets/table.hpp"
@@ -132,8 +133,8 @@ namespace terraformer::app
 		template<class Parent, class FloatWrapper>
 		static void create_float_input(Parent& parent, std::u8string_view label, FloatWrapper value, descriptor_editor_ref::slider_descriptor&& params)
 		{
-			// FIXME: Does deduce work properly for slider
-			// FIXME: Orientation should affect both slider and layout
+			// TODO: Does deduce work properly for slider
+			// TODO: Orientation should affect both slider and layout
 			auto& widget = params.orientation == descriptor_editor_ref::widget_orientation::deduce?
 				parent.create_widget(
 					slider_descriptor<FloatWrapper>{
@@ -166,6 +167,25 @@ namespace terraformer::app
 
 			if(params.textbox_placeholder_string.data() != nullptr)
 			{ widget.set_textbox_placeholder_string(params.textbox_placeholder_string); }
+		}
+
+		struct single_line_text_input_descriptor
+		{
+			std::u8string_view label;
+			std::reference_wrapper<std::u8string> value_reference;
+			using input_widget_type = ui::widgets::single_line_text_input;
+		};
+
+		template<class Parent>
+		static void create_string_input(Parent& parent, std::u8string_view label, std::u8string& value, descriptor_editor_ref::single_line_text_input_descriptor&& params)
+		{
+			auto& widget = parent.create_widget(
+				single_line_text_input_descriptor{
+					.label = label,
+					.value_reference = value
+				}
+			);
+			widget.use_size_from_placeholder(params.textbox_placeholder_string);
 		}
 
 

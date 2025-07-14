@@ -9,6 +9,7 @@
 #include <geosimd/angle.hpp>
 #include <initializer_list>
 #include <string_view>
+#include <string>
 
 namespace terraformer
 {
@@ -145,6 +146,22 @@ namespace terraformer
 			vt.create_float_input_slider(pointer, label, value, std::move(knob_params));
 		}
 
+		struct single_line_text_input_descriptor
+		{
+			std::u8string_view textbox_placeholder_string;
+		};
+
+		void create_string_input(
+			std::u8string_view label,
+			std::u8string& value,
+			single_line_text_input_descriptor&& text_input_params
+		)
+		{
+			auto const vt = m_handle.get_vtable();
+			auto const pointer =m_handle.get_pointer();
+			vt.create_string_input_single_line_text_input(pointer, label, value, std::move(text_input_params));
+		}
+
 		void create_rng_seed_input(std::u8string_view label, std::array<std::byte, 16>& value)
 		{
 			auto const vt = m_handle.get_vtable();
@@ -204,6 +221,9 @@ namespace terraformer
 				create_float_input_slider{[](void* handle, std::u8string_view label, float& value, slider_descriptor&& slider_params) {
 					DescriptorEditorTraits::create_float_input(*static_cast<DescriptorEditor*>(handle), label, std::ref(value), std::move(slider_params));
 				}},
+				create_string_input_single_line_text_input{[](void* handle, std::u8string_view label, std::u8string& value, single_line_text_input_descriptor&& text_input_params){
+					DescriptorEditorTraits::create_string_input(*static_cast<DescriptorEditor*>(handle), label, std::ref(value), std::move(text_input_params));
+				}},
 				create_rng_seed_input{[](void* handle, std::u8string_view label, std::array<std::byte, 16>& value){
 					DescriptorEditorTraits::create_rng_seed_input(*static_cast<DescriptorEditor*>(handle), label, value);
 				}},
@@ -220,6 +240,7 @@ namespace terraformer
 			void (*create_float_input_knob)(void*, std::u8string_view, float&, knob_descriptor&&);
 			void (*create_float_assigner_input_knob)(void*, std::u8string_view, assigner<float>, knob_descriptor&&);
 			void (*create_float_input_slider)(void*, std::u8string_view, float&, slider_descriptor&&);
+			void (*create_string_input_single_line_text_input)(void*, std::u8string_view, std::u8string&, single_line_text_input_descriptor&&);
 			void (*create_rng_seed_input)(void*, std::u8string_view, std::array<std::byte, 16>&);
 			void (*create_range_input)(void*, std::u8string_view, closed_closed_interval<float>&, range_input_descriptor&&);
 			void (*append_pending_widgets)(void*);

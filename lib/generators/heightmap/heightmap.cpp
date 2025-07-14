@@ -12,6 +12,14 @@
 
 void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_editor_ref editor)
 {
+	// TODO: Use a combobox instead
+	editor.create_string_input(u8"Input",
+		input,
+		descriptor_editor_ref::single_line_text_input_descriptor{
+			.textbox_placeholder_string = u8"Foobar 99"
+		}
+	);
+
 	editor.create_float_input(
 		u8"Gain",
 		gain,
@@ -46,7 +54,7 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 		descriptor_editor_ref::table_descriptor{
 			.orientation = descriptor_editor_ref::widget_orientation::deduce,
 			.field_names = {
-				//u8"Input",
+				u8"Input",
 				//u8"Modulation",
 				u8"Gain"
 			}
