@@ -149,24 +149,24 @@ namespace terraformer::app
 		};
 
 		template<class Parent, class FloatWrapper>
-		static void create_float_input(Parent& parent, std::u8string_view label, FloatWrapper value, descriptor_editor_ref::slider_descriptor&& params)
+		static void create_float_input(Parent& parent, descriptor_editor_ref::field_descriptor const& field_info, FloatWrapper value, descriptor_editor_ref::slider_descriptor&& params)
 		{
 			// TODO: Does deduce work properly for slider
 			// TODO: Orientation should affect both slider and layout
 			auto& widget = params.orientation == descriptor_editor_ref::widget_orientation::deduce?
 				parent.create_widget(
 					slider_descriptor<FloatWrapper>{
-						.label = label,
+						.label = field_info.label,
 						.value_reference = value,
-						.expand_layout_cell = true
+						.expand_layout_cell = field_info.expand_layout_cell
 					},
 					terraformer::ui::widgets::slider{std::move(params.value_map)}
 				):
 				parent.create_widget(
 					slider_descriptor<FloatWrapper>{
-						.label = label,
+						.label = field_info.label,
 						.value_reference = value,
-						.expand_layout_cell = true
+						.expand_layout_cell = field_info.expand_layout_cell
 					},
 					terraformer::ui::widgets::slider{std::move(params.value_map)},
 					params.orientation == descriptor_editor_ref::widget_orientation::horizontal?

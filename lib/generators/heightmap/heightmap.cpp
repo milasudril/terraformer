@@ -29,7 +29,10 @@ void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_
 	modulation.bind(modulation_editor);
 
 	editor.create_float_input(
-		u8"Gain",
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Gain",
+			.expand_layout_cell = true
+		},
 		gain,
 		descriptor_editor_ref::slider_descriptor{
 			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
