@@ -1,6 +1,7 @@
 //@	{"target":{"name":"table.o"}}
 
 #include "./table.hpp"
+#include "ui/layouts/table.hpp"
 
 void terraformer::ui::widgets::table::record::append_pending_widgets()
 {
@@ -23,6 +24,16 @@ void terraformer::ui::widgets::table::record::append_pending_widgets()
 		auto const ptr = ref.get_pointer();
 		auto const vt = ref.get_vtable();
 		vt.append_to(ptr, m_parent);
+		
+		auto const attribs = m_parent.get().get_attributes();
+		auto const last = attribs.element_indices().back();
+		if(i->second.expand_layout_cell)
+		{
+			puts("Hej");
+			m_parent.get().layout.set_cell_size(last.get(), layouts::table::cell_size::expand{}); 
+			
+		}
+		attribs.widget_states()[last].maximized = i->second.maximize_widget;
 	}
 }
 
