@@ -49,6 +49,8 @@ namespace terraformer::ui::widgets
 			struct widget
 			{
 				unique_resource<widget_vtable> object;
+				bool expand_layout_cell = false;
+				bool maximize_widget = false;
 			};
 
 			record(record const&) = delete;
@@ -145,10 +147,27 @@ namespace terraformer::ui::widgets
 						call_on_content_updated(std::forward<Args>(args)...);
 					});
 				}
+				
+				bool expand_layout_cell = false;
+				bool maximize_widget = false;
+				if constexpr(requires(FieldDescriptor const& f){{f.expand_layout_cell} -> std::convertible_to<bool>;})
+				{
+					if(field.expand_layout_cell)
+					{
+						expand_layout_cell = true;
+						maximize_widget = true;
+					}
+				}
+
+				if constexpr(requires(FieldDescriptor const& f){{f.maximize_widget} -> std::convertible_to<bool>;})
+				{ maximize_widget = field.maximize_widget; }
+				
 				m_widgets.emplace(
 					field.label,
 					widget{
-						.object = unique_resource<widget_vtable>{std::move(field_input_widget)}
+						.object = unique_resource<widget_vtable>{std::move(field_input_widget)},
+						.expand_layout_cell = expand_layout_cell,
+						.maximize_widget = maximize_widget
 					}
 				);
 

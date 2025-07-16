@@ -471,7 +471,9 @@ void terraformer::plain_descriptor::bind(descriptor_editor_ref editor)
 	control_points.bind(control_points_editor);
 
 	auto midpoints_editor = editor.create_form(
-		u8"Midpoints",
+		descriptor_editor_ref::field_descriptor{
+			u8"Midpoints",
+		},
 		descriptor_editor_ref::form_descriptor{
 			.orientation = descriptor_editor_ref::widget_orientation::vertical,
 			.extra_fields_per_row = 1

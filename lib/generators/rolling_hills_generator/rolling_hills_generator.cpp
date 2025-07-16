@@ -421,7 +421,9 @@ void terraformer::rolling_hills_descriptor::bind(descriptor_editor_ref editor)
 	filter.bind(editor);
 
 	auto clamp_to_edit = editor.create_form(
-		u8"Clamp to",
+		descriptor_editor_ref::field_descriptor{
+			.label= u8"Clamp to",
+		},
 		descriptor_editor_ref::form_descriptor{
 			.orientation = descriptor_editor_ref::widget_orientation::vertical
 		}
@@ -429,7 +431,9 @@ void terraformer::rolling_hills_descriptor::bind(descriptor_editor_ref editor)
 	clamp_to.bind(clamp_to_edit);
 
 	auto shape_edit = editor.create_form(
-		u8"Shape",
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Shape",
+		},
 		descriptor_editor_ref::form_descriptor{
 			.orientation = descriptor_editor_ref::widget_orientation::vertical
 		}

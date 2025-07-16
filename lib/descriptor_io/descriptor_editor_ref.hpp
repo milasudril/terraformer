@@ -75,11 +75,11 @@ namespace terraformer
 			size_t extra_fields_per_row = 0;
 		};
 
-		descriptor_editor_ref create_form(std::u8string_view label, form_descriptor&& form_params)
+		descriptor_editor_ref create_form(field_descriptor const& field_info, form_descriptor&& form_params)
 		{
 			auto const vt = m_handle.get_vtable();
 			auto const pointer = m_handle.get_pointer();
-			return vt.create_form(pointer, label, std::move(form_params));
+			return vt.create_form(pointer, field_info, std::move(form_params));
 		}
 
 		template<class Rhs>
@@ -211,10 +211,10 @@ namespace terraformer
 						std::move(table_params)
 					);
 				}},
-				create_form{[](void* handle, std::u8string_view label, form_descriptor&& form_params){
+				create_form{[](void* handle, field_descriptor const& field_info, form_descriptor&& form_params){
 					return DescriptorEditorTraits::create_form(
 						*static_cast<DescriptorEditor*>(handle),
-						label,
+						field_info,
 						std::move(form_params)
 					);
 				}},
@@ -239,10 +239,10 @@ namespace terraformer
 				append_pending_widgets{[](void* handle){
 					return DescriptorEditorTraits::append_pending_widgets(*static_cast<DescriptorEditor*>(handle));
 				}}
-			{}
+		{}
 
 			descriptor_table_editor_ref (*create_table)(void*, field_descriptor const&, table_descriptor&&);
-			descriptor_editor_ref (*create_form)(void*, std::u8string_view, form_descriptor&&);
+			descriptor_editor_ref (*create_form)(void*, field_descriptor const&, form_descriptor&&);
 			void (*create_float_input_knob)(void*, std::u8string_view, float&, knob_descriptor&&);
 			void (*create_float_assigner_input_knob)(void*, std::u8string_view, assigner<float>, knob_descriptor&&);
 			void (*create_float_input_slider)(void*, std::u8string_view, float&, slider_descriptor&&);

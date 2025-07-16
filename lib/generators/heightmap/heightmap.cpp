@@ -20,7 +20,12 @@ void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_
 		}
 	);
 
-	auto modulation_editor = editor.create_form(u8"Modulation", descriptor_editor_ref::form_descriptor{});
+	auto modulation_editor = editor.create_form(
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Modulation"
+		},
+		descriptor_editor_ref::form_descriptor{}
+	);
 	modulation.bind(modulation_editor);
 
 	editor.create_float_input(
@@ -37,18 +42,27 @@ void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_
 void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 {
 	auto dom_size_editor = editor.create_form(
-		u8"Domain size",
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Domain size",
+		},
 		descriptor_editor_ref::form_descriptor{}
 	);
 	domain_size.bind(dom_size_editor);
 
 	auto generators_editor = editor.create_form(
-		u8"Generators",
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Generators",
+		},
 		descriptor_editor_ref::form_descriptor{}
 	);
 	for(auto& item : generators)
 	{
-		auto editor = generators_editor.create_form(item.first, descriptor_editor_ref::form_descriptor{});
+		auto editor = generators_editor.create_form(
+			descriptor_editor_ref::field_descriptor{
+				.label = item.first
+			},
+			descriptor_editor_ref::form_descriptor{}
+		);
 		item.second.bind(editor);
 	}
 
