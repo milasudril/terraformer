@@ -24,6 +24,9 @@ terraformer::filters::modulator_descriptor::compose_image_from(
 	auto const range = std::minmax_element(mod_img.data(), mod_img.data() + pixel_count);
 	auto const mod_img_min = *range.first;
 	auto const mod_img_max = *range.second;
+	if(std::abs(mod_img_max - mod_img_min) < 1.0e-6f)
+	{ return grayscale_image{input_image}; }
+	
 	auto const mod_depth = modulation_depth;
 	auto const mod_exp = modulator_exponent;
 
