@@ -38,9 +38,10 @@ namespace terraformer::ui::widgets
 
 		box_size confirm_size(box_size size)
 		{
+			// FIXME: Use handle size to derive min size
 			m_current_size = main::fb_size{
-				.width = static_cast<int>(size[0]),
-				.height = static_cast<int>(size[1])
+				.width = std::max(static_cast<int>(size[0]), 8),
+				.height = std::max(static_cast<int>(size[1]), 8)
 			};
 			m_dirty_bits |= track_dirty;
 			return size;
@@ -62,6 +63,8 @@ namespace terraformer::ui::widgets
 				clamp_tag{},
 			};
 		}
+		
+		static constexpr bool expanded_by_default = true;
 
 	private:
 		static constexpr unsigned int track_dirty = 0x1;

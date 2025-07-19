@@ -90,6 +90,16 @@ namespace terraformer::ui::widgets
 				.value(m_input_widget.value());
 			layout.params().no_outer_margin = true;
 			is_transparent = true;
+			if constexpr (requires(){{ControlWidget::expanded_by_default} -> std::convertible_to<bool>;})
+			{
+				if constexpr (ControlWidget::expanded_by_default)
+				{
+					layout.set_cell_size(0,  terraformer::ui::layouts::table::cell_size::expand{}); 
+					auto const attribs = get_attributes();
+					auto const index = attribs.element_indices().front();
+					attribs.widget_states()[index].maximized = true;
+				}
+			}
 		}
 	};
 }

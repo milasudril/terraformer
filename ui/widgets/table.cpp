@@ -29,10 +29,12 @@ void terraformer::ui::widgets::table::record::append_pending_widgets()
 		auto const last = attribs.element_indices().back();
 		if(i->second.expand_layout_cell)
 		{
-			puts("Hej");
+			puts("Cell should be expanded");
 			m_parent.get().layout.set_cell_size(last.get(), layouts::table::cell_size::expand{}); 
 			
 		}
+		if(i->second.maximize_widget)
+		{ puts("Widget should be maximized"); }
 		attribs.widget_states()[last].maximized = i->second.maximize_widget;
 	}
 }
