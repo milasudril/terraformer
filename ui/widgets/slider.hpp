@@ -38,13 +38,32 @@ namespace terraformer::ui::widgets
 
 		box_size confirm_size(box_size size)
 		{
+#if 0
+	auto const w = static_cast<float>(m_handle->frontend_resource().width());
+	auto const h = static_cast<float>(m_handle->frontend_resource().height());
+	if(m_orientation == main::widget_orientation::horizontal)
+	{ return box_size{2.0f*track_margin() + 8.0f*w, h, 0.0f}; }
+	return box_size{w, 2.0f*track_margin() + 8.0f*h, 0.0f};
+#endif
+			auto const handle_width = static_cast<float>(m_handle->frontend_resource().width());
+			auto const handle_height = static_cast<float>(m_handle->frontend_resource().height());
+
 			// FIXME: Use handle size to derive min size
-			m_current_size = main::fb_size{
-				.width = std::max(static_cast<int>(size[0]), 8),
-				.height = std::max(static_cast<int>(size[1]), 8)
+			box_size const ret{
+				m_orientation == main::widget_orientation::horizontal?
+					std::max(size[0], 8.0f) : handle_width,
+				m_orientation == main::widget_orientation::horizontal?
+					handle_height : std::max(size[1], 8.0f),
+				0.0f
 			};
+			
+			m_current_size = main::fb_size{
+				.width = static_cast<int>(ret[0]),
+				.height = static_cast<int>(ret[1])
+			};
+
 			m_dirty_bits |= track_dirty;
-			return size;
+			return ret;
 		}
 
 		void theme_updated(main::config const& cfg, main::widget_instance_info);
