@@ -38,13 +38,6 @@ namespace terraformer::ui::widgets
 
 		box_size confirm_size(box_size size)
 		{
-#if 0
-	auto const w = static_cast<float>(m_handle->frontend_resource().width());
-	auto const h = static_cast<float>(m_handle->frontend_resource().height());
-	if(m_orientation == main::widget_orientation::horizontal)
-	{ return box_size{2.0f*track_margin() + 8.0f*w, h, 0.0f}; }
-	return box_size{w, 2.0f*track_margin() + 8.0f*h, 0.0f};
-#endif
 			auto const handle_width = static_cast<float>(m_handle->frontend_resource().width());
 			auto const handle_height = static_cast<float>(m_handle->frontend_resource().height());
 
