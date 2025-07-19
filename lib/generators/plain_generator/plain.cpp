@@ -254,9 +254,6 @@ terraformer::grayscale_image terraformer::generate(
 		}
 	};
 
-	auto const cos_theta = std::cos(2.0f*std::numbers::pi_v<float>*params.orientation);
-	auto const sin_theta = std::sin(2.0f*std::numbers::pi_v<float>*params.orientation);
-
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		for(uint32_t x = 0; x != w; ++x)
@@ -264,8 +261,8 @@ terraformer::grayscale_image terraformer::generate(
 			auto const eta_in = (static_cast<float>(y) + 0.5f)/h_float - 0.5f;
 			auto const xi_in = (static_cast<float>(x) + 0.5f)/w_float - 0.5f;
 
-			auto const xi  =  xi_in*cos_theta + eta_in*sin_theta + 0.5f;
-			auto const eta = -xi_in*sin_theta + eta_in*cos_theta + 0.5f;
+			auto const xi  =  xi_in + 0.5f;
+			auto const eta = eta_in + 0.5f;
 
 			auto const north_to_south = control_curve(
 				control_curve_descriptor{
@@ -480,19 +477,6 @@ void terraformer::plain_descriptor::bind(descriptor_editor_ref editor)
 		}
 	);
 	midpoints.bind(midpoints_editor);
-
-	editor.create_float_input(
-		u8"Orientation",
-		std::ref(orientation),
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::affine_value_map{-0.5f, 0.5f}},
-			.textbox_placeholder_string = u8"-0.123456789",
-			.visual_angle_range = closed_closed_interval<geosimd::turn_angle>{
-				geosimd::turns{0.0},
-				geosimd::turns{1.0}
-			}
-		}
-	);
 }
 
 

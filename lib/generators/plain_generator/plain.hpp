@@ -53,7 +53,6 @@ namespace terraformer
 	{
 		plain_control_points_info control_points;
 		plain_midpoints_info midpoints;
-		float orientation = 0.0f;
 
 		grayscale_image generate_heightmap(domain_size_descriptor) const;
 		void bind(descriptor_editor_ref editor);
