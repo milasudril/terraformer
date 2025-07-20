@@ -48,7 +48,12 @@ namespace terraformer
 
 		heightmap_generator(heightmap_generator&&) = default;
 		heightmap_generator& operator=(heightmap_generator&&) = default;
-		heightmap_generator& operator=(heightmap_generator const&) = default;
+		heightmap_generator& operator=(heightmap_generator const& other)
+		{
+			auto tmp = other;
+			*this = std::move(tmp);
+			return *this;
+		}
 
 		grayscale_image generate_heightmap(domain_size_descriptor dom_size) const
 		{
