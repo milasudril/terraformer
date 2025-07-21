@@ -2,7 +2,7 @@
 #define TERRAFORMER_DESCRIPTOR_EDITOR_REF_HPP
 
 #include "lib/common/interval.hpp"
-#include "lib/common/unique_resource.hpp"
+#include "lib/common/resource_reference.hpp"
 #include "lib/common/value_map.hpp"
 #include "lib/value_maps/affine_value_map.hpp"
 
@@ -48,7 +48,7 @@ namespace terraformer
 		explicit descriptor_editor_ref(DescriptorEditor& editor, std::type_identity<DescriptorEditorTraits>):
 			m_handle{std::ref(editor), std::type_identity<DescriptorEditorTraits>{}}
 		{}
-		
+
 		struct field_descriptor
 		{
 			std::u8string_view label;
