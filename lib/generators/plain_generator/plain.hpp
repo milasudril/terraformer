@@ -18,6 +18,9 @@ namespace terraformer
 		float ddx = 0.0f;
 		float ddy = 0.0f;
 
+		bool operator==(plain_control_point_descriptor const&) const = default;
+		bool operator!=(plain_control_point_descriptor const&) const = default;
+
 		void bind(descriptor_editor_ref editor);
 	};
 
@@ -33,6 +36,9 @@ namespace terraformer
 		plain_control_point_descriptor nw;
 		plain_control_point_descriptor c;
 
+		bool operator==(plain_control_points_info const&) const = default;
+		bool operator!=(plain_control_points_info const&) const = default;
+
 		void bind(descriptor_table_editor_ref editor);
 	};
 
@@ -46,6 +52,9 @@ namespace terraformer
 		xm_type c_x;
 		xm_type c_y;
 
+		bool operator==(plain_midpoints_info const&) const = default;
+		bool operator!=(plain_midpoints_info const&) const = default;
+
 		void bind(descriptor_editor_ref editor);
 	};
 
@@ -56,6 +65,9 @@ namespace terraformer
 
 		grayscale_image generate_heightmap(domain_size_descriptor) const;
 		void bind(descriptor_editor_ref editor);
+
+		bool operator==(plain_descriptor const&) const = default;
+		bool operator!=(plain_descriptor const&) const = default;
 	};
 
 	grayscale_image generate(domain_size_descriptor dom_size, plain_descriptor const& params);

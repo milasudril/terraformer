@@ -19,6 +19,9 @@ namespace terraformer
 		float hf_rolloff = 2.0f;
 		float y_direction = 0.0f;
 
+		bool operator==(rolling_hills_filter_descriptor const&) const = default;
+		bool operator!=(rolling_hills_filter_descriptor const&) const = default;
+
 		void bind(descriptor_editor_ref);
 	};
 
@@ -55,6 +58,9 @@ namespace terraformer
 		closed_closed_interval<float> range{-1.0f, 1.0f};
 		bounded_value<open_open_interval{0.0f, 1.0f}, 1.0f - 1.0f/128.0f> hardness;
 
+		bool operator==(rolling_hills_clamp_to_descriptor const&) const = default;
+		bool operator!=(rolling_hills_clamp_to_descriptor const&) const = default;
+
 		void bind(descriptor_editor_ref);
 	};
 
@@ -67,6 +73,9 @@ namespace terraformer
 		closed_closed_interval<float> input_mapping{0.0f, 1.0f};
 		float exponent = 2.0f;
 
+		bool operator==(rolling_hills_shape_descriptor const&) const = default;
+		bool operator!=(rolling_hills_shape_descriptor const&) const = default;
+
 		void bind(descriptor_editor_ref editor);
 	};
 
@@ -78,6 +87,9 @@ namespace terraformer
 		rolling_hills_shape_descriptor shape;
 		float amplitude = 4096.0f/(4.0f*std::numbers::pi_v<float>);
 		float relative_z_offset = 0.0f;
+
+		bool operator==(rolling_hills_descriptor const&) const = default;
+		bool operator!=(rolling_hills_descriptor const&) const = default;
 
 		grayscale_image generate_heightmap(domain_size_descriptor) const;
 		void bind(descriptor_editor_ref editor);

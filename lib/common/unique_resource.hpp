@@ -15,7 +15,7 @@ namespace terraformer
 		unique_resource() = default;
 
 		template<class OwnedType>
-		explicit unique_resource(std::unique_ptr<OwnedType> obj):
+		explicit unique_resource(std::unique_ptr<OwnedType> obj) noexcept:
 			m_handle{obj.release()}
 		{ }
 
@@ -33,11 +33,11 @@ namespace terraformer
 		~unique_resource()
 		{ reset(); }
 
-		unique_resource(unique_resource&& other):
+		unique_resource(unique_resource&& other) noexcept:
 			m_handle{std::exchange(other.m_handle, resource_reference<Vtable, true>{})}
 		{ }
 
-		unique_resource& operator=(unique_resource&& other)
+		unique_resource& operator=(unique_resource&& other) noexcept
 		{
 			m_handle = std::exchange(other.m_handle, m_handle);
 			other.reset();
