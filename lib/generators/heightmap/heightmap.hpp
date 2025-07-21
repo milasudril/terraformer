@@ -30,6 +30,28 @@ namespace terraformer
 		{x.bind(editor)} -> std::same_as<void>;
 	};
 
+	template<heightmap_generator_source_descriptor Descriptor>
+	class generated_heightmap
+	{
+	public:
+		span_2d<float const> generate_heightmap(domain_size_descriptor dom_size, Descriptor const& new_descriptor)
+		{
+			if(dom_size != m_dom_size || new_descriptor != m_descriptor || m_output.width() == 0 || m_output.height() == 0)
+			{
+				m_output = new_descriptor.generate_heightmap(dom_size);
+				m_dom_size = dom_size;
+				m_descriptor = new_descriptor;
+			}
+			return m_output.pixels();
+		}
+
+	private:
+		domain_size_descriptor m_dom_size{};
+		Descriptor m_descriptor{};
+		grayscale_image m_output{};
+	};
+
+
 	class heightmap_generator
 	{
 	public:
