@@ -11,9 +11,16 @@
 #include <random>
 
 terraformer::grayscale_image
-terraformer::generate(domain_size_descriptor, ridge_tree_descriptor const&)
+terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor const& params)
 {
-	terraformer::grayscale_image ret{1, 1};
+	auto const T_0 = params.trunk.horz_displacement.wavelength;
+	auto const dx = T_0/128.0f;  // Allow 6 octaves within 2^-12
+
+	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/dx + 0.5f), 1u);
+	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/dx + 0.5f), 1u);
+
+	terraformer::grayscale_image ret{w_img, h_img};
+	printf("Computed image size = %u x %u\n", w_img, h_img);
 	return ret;
 }
 
