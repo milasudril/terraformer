@@ -9,9 +9,23 @@
 
 namespace terraformer
 {
+	struct ridge_tree_trunk_descriptor
+	{
+		float x_0 = 0.0f;
+		float y_0 = 0.0f;
+		float e2e_distance = 49152.0f;
+		float heading = 0.25f;
+
+		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
+		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;
+		void bind(descriptor_editor_ref editor);
+	};
+
 	struct ridge_tree_descriptor
 	{
 		std::array<std::byte, 16> rng_seed{};
+
+		ridge_tree_trunk_descriptor trunk_settings;
 
 		bool operator==(ridge_tree_descriptor const&) const = default;
 		bool operator!=(ridge_tree_descriptor const&) const = default;
