@@ -12,6 +12,7 @@
 #include "lib/filters/modulator/modulator.hpp"
 #include "lib/generators/plain_generator/plain.hpp"
 #include "lib/generators/rolling_hills_generator/rolling_hills_generator.hpp"
+#include "lib/generators/ridge_tree_generator_new/ridge_tree_generator.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/array_classes/single_array.hpp"
@@ -154,10 +155,11 @@ namespace terraformer
 		domain_size_descriptor domain_size;
 		std::map<std::u8string, heightmap_generator, std::less<>> generators{
 			{u8"Plain", heightmap_generator{plain_descriptor{}}},
-			{u8"Rolling hills", heightmap_generator{rolling_hills_descriptor{}}}
+			{u8"Rolling hills", heightmap_generator{rolling_hills_descriptor{}}},
+			{u8"Ridge tree", heightmap_generator{ridge_tree_descriptor{}}}
 		};
 
-		std::array<heightmap_generator_channel_strip_descriptor, 2> channel_strips{
+		std::array<heightmap_generator_channel_strip_descriptor, 3> channel_strips{
 			heightmap_generator_channel_strip_descriptor{
 				.input = u8"Plain",
 				.modulation = filters::modulator_descriptor{},
@@ -170,6 +172,11 @@ namespace terraformer
 					.modulator_exponent = 2.0f,
 					.modulation_depth = 1.0f
 				},
+				.gain = 1.0f
+			},
+			heightmap_generator_channel_strip_descriptor{
+				.input = u8"Ridge tree",
+				.modulation = filters::modulator_descriptor{},
 				.gain = 1.0f
 			}
 		};
