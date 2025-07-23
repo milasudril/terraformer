@@ -16,17 +16,7 @@
 terraformer::grayscale_image
 terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor const& params)
 {
-	auto const T_0 = params.trunk.horz_displacement.wavelength;
-	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
-
-	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
-	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
-
-	grayscale_image ret{w_img, h_img};
-	printf("Computed image size = %u x %u\n", w_img, h_img);
-
 	auto const theta = 2.0f*std::numbers::pi_v<float>*params.trunk.heading;
-
 	location const world_origin{0.5f*dom_size.width, 0.5f*dom_size.height, 0.0f};
 	location const ridge_origin{params.trunk.x_0, params.trunk.y_0, 0.0f};
 
@@ -72,11 +62,17 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 			}
 		}
 	};
-	auto res = generate(
-		desc,
-		rng,
-		pixel_size
-	);
+
+	auto const T_0 = params.trunk.horz_displacement.wavelength;
+	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
+
+	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
+	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
+
+	grayscale_image ret{w_img, h_img};
+
+	auto res = generate(desc, rng, pixel_size);
+
 
 	return ret;
 }
