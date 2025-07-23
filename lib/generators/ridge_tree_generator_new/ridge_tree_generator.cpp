@@ -1,26 +1,120 @@
 //@	{"target": {"name": "./ridge_tree_generator.o"}}
 
 #include "./ridge_tree_generator.hpp"
+#include "./ridge_tree.hpp"
 
 #include "lib/common/rng.hpp"
+#include "lib/common/spaces.hpp"
 #include "lib/common/value_map.hpp"
 #include "lib/value_maps/qurt_value_map.hpp"
 #include "lib/value_maps/log_value_map.hpp"
 
 #include <cassert>
+#include <numbers>
 #include <random>
 
 terraformer::grayscale_image
 terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor const& params)
 {
 	auto const T_0 = params.trunk.horz_displacement.wavelength;
-	auto const dx = T_0/128.0f;  // Allow 6 octaves within 2^-12
+	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
 
-	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/dx + 0.5f), 1u);
-	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/dx + 0.5f), 1u);
+	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
+	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
 
-	terraformer::grayscale_image ret{w_img, h_img};
+	grayscale_image ret{w_img, h_img};
 	printf("Computed image size = %u x %u\n", w_img, h_img);
+
+	auto const theta = 2.0f*std::numbers::pi_v<float>*params.trunk.heading;
+
+	location const world_origin{0.5f*dom_size.width, 0.5f*dom_size.height, 0.0f};
+	location const ridge_origin{params.trunk.x_0, params.trunk.y_0, 0.0f};
+
+	auto const sin_theta = std::sin(theta);
+	auto const cos_theta = std::cos(theta);
+	direction const ridge_direction{
+		displacement{
+			sin_theta,
+			-cos_theta,
+			0.0f
+		}
+	};
+	direction const dir_ortho{
+		displacement{
+			cos_theta,
+			sin_theta,
+			0.0f
+		}
+	};
+	auto const dr = ridge_origin - location{0.5f*params.trunk.e2e_distance, 0.0f, 0.0f};
+	auto const root_location = world_origin + displacement{
+		inner_product(dr, ridge_direction),
+		-inner_product(dr, dir_ortho),
+		0.0f
+	};
+
+	printf("root loc = %.8g %.8g\n", root_location[0], root_location[1]);
+
+#if 0
+
+	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
+	terraformer::random_generator rng{rng_seed};
+	terraformer::ridge_tree_xy_description const desc{
+		.root_location = world_origin + (ridge_origin - terraformer::displacement{})
+		.trunk_direction = ridge_direction,
+		.curve_levels = std::vector{
+			terraformer::ridge_tree_branch_description{
+				.displacement_profile {
+					.amplitude = terraformer::horizontal_amplitude{3096.0f},
+					.wavelength = terraformer::domain_length{12384.0f},
+					.damping = std::sqrt(0.5f)
+				},
+				.growth_params{
+					.max_length = terraformer::domain_length{49152.0f},
+					.min_neighbour_distance = terraformer::domain_length{49152.0f}
+				}
+			},
+			terraformer::ridge_tree_branch_description{
+				.displacement_profile {
+					.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
+					.wavelength = terraformer::domain_length{12384.0f/3.0f},
+					.damping = std::sqrt(0.5f)
+				},
+				.growth_params{
+					.max_length = terraformer::domain_length{12384.0f},
+					.min_neighbour_distance = terraformer::domain_length{6144.0f}
+				}
+			},
+			terraformer::ridge_tree_branch_description{
+				.displacement_profile {
+					.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
+					.wavelength = terraformer::domain_length{12384.0f/9.0f},
+					.damping = std::sqrt(0.5f)
+				},
+				.growth_params{
+					.max_length = terraformer::domain_length{12384.0f/3.0f},
+					.min_neighbour_distance = terraformer::domain_length{1536.0f}
+				}
+			},
+			terraformer::ridge_tree_branch_description{
+				.displacement_profile {
+					.amplitude = terraformer::horizontal_amplitude{3096.0f/27.0f},
+					.wavelength = terraformer::domain_length{12384.0f/27.0f},
+					.damping = std::sqrt(0.5f)
+				},
+				.growth_params {
+					.max_length = terraformer::domain_length{12384.0f/9.0f},
+					.min_neighbour_distance = terraformer::domain_length{384.0f}
+				}
+			}
+		}
+	};
+	auto res = generate(
+		desc,
+		rng,
+		pixel_size
+	);
+#endif
 	return ret;
 }
 
