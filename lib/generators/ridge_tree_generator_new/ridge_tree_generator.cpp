@@ -8,6 +8,7 @@
 #include "lib/common/value_map.hpp"
 #include "lib/value_maps/qurt_value_map.hpp"
 #include "lib/value_maps/log_value_map.hpp"
+#include "lib/curve_tools/rasterizer.hpp"
 
 
 #include "lib/curve_tools/dump.hpp"
