@@ -26,9 +26,9 @@ namespace
 		terraformer::ridge_tree_descriptor const& params
 	)
 	{
-		auto const theta = 2.0f*std::numbers::pi_v<float>*params.trunk.heading;
+		auto const theta = 2.0f*std::numbers::pi_v<float>*params.heading;
 		terraformer::location const world_origin{0.5f*dom_size.width, 0.5f*dom_size.height, 0.0f};
-		terraformer::location const ridge_origin{params.trunk.x_0, params.trunk.y_0, 0.0f};
+		terraformer::location const ridge_origin{params.x_0, params.y_0, 0.0f};
 
 		auto const sin_theta = std::sin(theta);
 		auto const cos_theta = std::cos(theta);
@@ -46,7 +46,7 @@ namespace
 				0.0f
 			}
 		};
-		auto const dr = ridge_origin - terraformer::location{0.5f*params.trunk.e2e_distance, 0.0f, 0.0f};
+		auto const dr = ridge_origin - terraformer::location{0.5f*params.branches[0].e2e_distance, 0.0f, 0.0f};
 		auto const root_location = world_origin + terraformer::displacement{
 			inner_product(dr, ridge_direction),
 			-inner_product(dr, dir_ortho),
@@ -59,13 +59,13 @@ namespace
 			.curve_levels = std::vector{
 				terraformer::ridge_tree_branch_description{
 					.displacement_profile {
-						.amplitude = params.trunk.horz_displacement.amplitude,
-						.wavelength = params.trunk.horz_displacement.wavelength,
-						.damping = params.trunk.horz_displacement.damping
+						.amplitude = params.branches[0].displacement.amplitude,
+						.wavelength = params.branches[0].displacement.wavelength,
+						.damping = params.branches[0].displacement.damping
 					},
 					.growth_params{
-						.max_length = params.trunk.e2e_distance,
-						.min_neighbour_distance = params.trunk.e2e_distance
+						.max_length = params.branches[0].e2e_distance,
+						.min_neighbour_distance = params.branches[0].e2e_distance
 					}
 				}
 			}
@@ -79,7 +79,7 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
 
-	auto const T_0 = params.trunk.horz_displacement.wavelength;
+	auto const T_0 = params.branches[0].displacement.wavelength;
 	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
 	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
 	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
@@ -146,8 +146,24 @@ void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descripto
 	);
 }
 
-void terraformer::ridge_tree_trunk_descriptor::bind(descriptor_editor_ref editor)
+void terraformer::ridge_tree_branch_horz_descriptor::bind(descriptor_editor_ref editor)
 {
+	editor.create_float_input(
+		u8"E2E distance/m",
+		e2e_distance,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 65536.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	displacement.bind(editor);
+}
+
+void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_rng_seed_input(u8"Seed", rng_seed);
+
 	editor.create_float_input(
 		u8"Center loc x/m",
 		x_0,
@@ -181,38 +197,26 @@ void terraformer::ridge_tree_trunk_descriptor::bind(descriptor_editor_ref editor
 		}
 	);
 
-	editor.create_float_input(
-		u8"E2E distance/m",
-		e2e_distance,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 65536.0f, 2.0f}},
-			.textbox_placeholder_string = u8"9999.9999",
-			.visual_angle_range = std::nullopt
-		}
-	);
-
-	auto displacement_form = editor.create_form(
+	auto branches_table = editor.create_table(
 		descriptor_editor_ref::field_descriptor{
-			.label = u8"Horz displacement"
+			.label = u8"Branches"
 		},
-		descriptor_editor_ref::form_descriptor{
-			.orientation = descriptor_editor_ref::widget_orientation::vertical
+		descriptor_editor_ref::table_descriptor{
+			.orientation = descriptor_editor_ref::widget_orientation::vertical,
+			.field_names{
+				u8"E2E distance/m",
+				u8"Amplitude/m",
+				u8"Wavelength/m",
+				u8"Damping"
+			}
 		}
 	);
-	horz_displacement.bind(displacement_form);
-}
-
-
-void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
-{
-	editor.create_rng_seed_input(u8"Seed", rng_seed);
-	auto trunk_form = editor.create_form(
-		descriptor_editor_ref::field_descriptor{
-			.label = u8"Trunk"
-		},
-		descriptor_editor_ref::form_descriptor{
-			.orientation = descriptor_editor_ref::widget_orientation::vertical
-		}
-	);
-	trunk.bind(trunk_form);
+	size_t k = 0;
+	for(auto& item : branches)
+	{
+		auto record = branches_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+		item.bind(record);
+		record.append_pending_widgets();
+		++k;
+	}
 }

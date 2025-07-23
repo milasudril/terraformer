@@ -32,24 +32,14 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
-	struct ridge_tree_trunk_descriptor
-	{
-		float x_0 = 0.0f;
-		float y_0 = 0.0f;
-		float heading = 0.25f;
-		float e2e_distance = 49152.0f;
-		ridge_tree_branch_horz_displacement_descriptor horz_displacement;
-
-		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
-		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;
-		void bind(descriptor_editor_ref editor);
-	};
 
 	struct ridge_tree_descriptor
 	{
 		std::array<std::byte, 16> rng_seed{};
-
-		ridge_tree_trunk_descriptor trunk;
+		float x_0 = 0.0f;
+		float y_0 = 0.0f;
+		float heading = 0.25f;
+		std::array<ridge_tree_branch_horz_descriptor, 4> branches;
 
 		bool operator==(ridge_tree_descriptor const&) const = default;
 		bool operator!=(ridge_tree_descriptor const&) const = default;
