@@ -17,65 +17,75 @@
 #include <numbers>
 #include <random>
 
+namespace
+{
+	terraformer::ridge_tree_xy_description
+	collect_ridge_tree_xy_params(
+		terraformer::domain_size_descriptor dom_size,
+		terraformer::ridge_tree_descriptor const& params
+	)
+	{
+		auto const theta = 2.0f*std::numbers::pi_v<float>*params.trunk.heading;
+		terraformer::location const world_origin{0.5f*dom_size.width, 0.5f*dom_size.height, 0.0f};
+		terraformer::location const ridge_origin{params.trunk.x_0, params.trunk.y_0, 0.0f};
+
+		auto const sin_theta = std::sin(theta);
+		auto const cos_theta = std::cos(theta);
+		terraformer::direction const ridge_direction{
+			terraformer::displacement{
+				sin_theta,
+				-cos_theta,
+				0.0f
+			}
+		};
+		terraformer::direction const dir_ortho{
+			terraformer::displacement{
+				cos_theta,
+				sin_theta,
+				0.0f
+			}
+		};
+		auto const dr = ridge_origin - terraformer::location{0.5f*params.trunk.e2e_distance, 0.0f, 0.0f};
+		auto const root_location = world_origin + terraformer::displacement{
+			inner_product(dr, ridge_direction),
+			-inner_product(dr, dir_ortho),
+			0.0f
+		};
+
+		return terraformer::ridge_tree_xy_description{
+			.root_location = root_location,
+			.trunk_direction = ridge_direction,
+			.curve_levels = std::vector{
+				terraformer::ridge_tree_branch_description{
+					.displacement_profile {
+						.amplitude = params.trunk.horz_displacement.amplitude,
+						.wavelength = params.trunk.horz_displacement.wavelength,
+						.damping = params.trunk.horz_displacement.damping
+					},
+					.growth_params{
+						.max_length = params.trunk.e2e_distance,
+						.min_neighbour_distance = params.trunk.e2e_distance
+					}
+				}
+			}
+		};
+	}
+}
+
 terraformer::grayscale_image
 terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor const& params)
 {
-	auto const theta = 2.0f*std::numbers::pi_v<float>*params.trunk.heading;
-	location const world_origin{0.5f*dom_size.width, 0.5f*dom_size.height, 0.0f};
-	location const ridge_origin{params.trunk.x_0, params.trunk.y_0, 0.0f};
-
-	auto const sin_theta = std::sin(theta);
-	auto const cos_theta = std::cos(theta);
-	direction const ridge_direction{
-		displacement{
-			sin_theta,
-			-cos_theta,
-			0.0f
-		}
-	};
-	direction const dir_ortho{
-		displacement{
-			cos_theta,
-			sin_theta,
-			0.0f
-		}
-	};
-	auto const dr = ridge_origin - location{0.5f*params.trunk.e2e_distance, 0.0f, 0.0f};
-	auto const root_location = world_origin + displacement{
-		inner_product(dr, ridge_direction),
-		-inner_product(dr, dir_ortho),
-		0.0f
-	};
-
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
-	terraformer::ridge_tree_xy_description const desc{
-		.root_location = root_location,
-		.trunk_direction = ridge_direction,
-		.curve_levels = std::vector{
-			terraformer::ridge_tree_branch_description{
-				.displacement_profile {
-					.amplitude = params.trunk.horz_displacement.amplitude,
-					.wavelength = params.trunk.horz_displacement.wavelength,
-					.damping = params.trunk.horz_displacement.damping
-				},
-				.growth_params{
-					.max_length = params.trunk.e2e_distance,
-					.min_neighbour_distance = params.trunk.e2e_distance
-				}
-			}
-		}
-	};
 
 	auto const T_0 = params.trunk.horz_displacement.wavelength;
 	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
-
 	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
 	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
 
 	grayscale_image ret{w_img, h_img};
 
-	auto res = generate(desc, rng, pixel_size);
+	auto res = generate(collect_ridge_tree_xy_params(dom_size, params), rng, pixel_size);
 
 	{
 		terraformer::curve_set curves;
