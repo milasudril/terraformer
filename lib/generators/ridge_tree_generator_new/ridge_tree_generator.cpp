@@ -46,7 +46,7 @@ namespace
 				0.0f
 			}
 		};
-		auto const dr = ridge_origin - terraformer::location{0.5f*params.branches[0].e2e_distance, 0.0f, 0.0f};
+		auto const dr = ridge_origin - terraformer::location{0.5f*params.branches_plane[0].e2e_distance, 0.0f, 0.0f};
 		auto const root_location = world_origin + terraformer::displacement{
 			inner_product(dr, ridge_direction),
 			-inner_product(dr, dir_ortho),
@@ -59,13 +59,13 @@ namespace
 			.curve_levels = std::vector{
 				terraformer::ridge_tree_branch_description{
 					.displacement_profile {
-						.amplitude = params.branches[0].displacement.amplitude,
-						.wavelength = params.branches[0].displacement.wavelength,
-						.damping = params.branches[0].displacement.damping
+						.amplitude = params.branches_plane[0].displacement.amplitude,
+						.wavelength = params.branches_plane[0].displacement.wavelength,
+						.damping = params.branches_plane[0].displacement.damping
 					},
 					.growth_params{
-						.max_length = params.branches[0].e2e_distance,
-						.min_neighbour_distance = params.branches[0].e2e_distance
+						.max_length = params.branches_plane[0].e2e_distance,
+						.min_neighbour_distance = 2.0f*params.branches_plane[0].displacement.amplitude
 					}
 				}
 			}
@@ -79,7 +79,7 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
 
-	auto const T_0 = params.branches[0].displacement.wavelength;
+	auto const T_0 = params.branches_plane[0].displacement.wavelength;
 	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
 	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
 	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
@@ -129,7 +129,7 @@ void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descripto
 		u8"Wavelength/m",
 		wavelength,
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{1024.0f, 65536.0f, 2.0f}},
+			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
 			.visual_angle_range = std::nullopt
 		}
@@ -197,9 +197,9 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		}
 	);
 
-	auto branches_table = editor.create_table(
+	auto branches_plane_table = editor.create_table(
 		descriptor_editor_ref::field_descriptor{
-			.label = u8"Branches"
+			.label = u8"Branches (Plane)"
 		},
 		descriptor_editor_ref::table_descriptor{
 			.orientation = descriptor_editor_ref::widget_orientation::vertical,
@@ -212,9 +212,9 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		}
 	);
 	size_t k = 0;
-	for(auto& item : branches)
+	for(auto& item : branches_plane)
 	{
-		auto record = branches_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+		auto record = branches_plane_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
 		item.bind(record);
 		record.append_pending_widgets();
 		++k;
