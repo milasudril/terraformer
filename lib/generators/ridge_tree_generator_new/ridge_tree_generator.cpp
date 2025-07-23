@@ -53,58 +53,21 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 		0.0f
 	};
 
-	printf("root loc = %.8g %.8g\n", root_location[0], root_location[1]);
-
-#if 0
-
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
 	terraformer::ridge_tree_xy_description const desc{
-		.root_location = world_origin + (ridge_origin - terraformer::displacement{})
+		.root_location = root_location,
 		.trunk_direction = ridge_direction,
 		.curve_levels = std::vector{
 			terraformer::ridge_tree_branch_description{
 				.displacement_profile {
-					.amplitude = terraformer::horizontal_amplitude{3096.0f},
-					.wavelength = terraformer::domain_length{12384.0f},
-					.damping = std::sqrt(0.5f)
+					.amplitude = params.trunk.horz_displacement.amplitude,
+					.wavelength = params.trunk.horz_displacement.wavelength,
+					.damping = params.trunk.horz_displacement.damping
 				},
 				.growth_params{
-					.max_length = terraformer::domain_length{49152.0f},
-					.min_neighbour_distance = terraformer::domain_length{49152.0f}
-				}
-			},
-			terraformer::ridge_tree_branch_description{
-				.displacement_profile {
-					.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
-					.wavelength = terraformer::domain_length{12384.0f/3.0f},
-					.damping = std::sqrt(0.5f)
-				},
-				.growth_params{
-					.max_length = terraformer::domain_length{12384.0f},
-					.min_neighbour_distance = terraformer::domain_length{6144.0f}
-				}
-			},
-			terraformer::ridge_tree_branch_description{
-				.displacement_profile {
-					.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
-					.wavelength = terraformer::domain_length{12384.0f/9.0f},
-					.damping = std::sqrt(0.5f)
-				},
-				.growth_params{
-					.max_length = terraformer::domain_length{12384.0f/3.0f},
-					.min_neighbour_distance = terraformer::domain_length{1536.0f}
-				}
-			},
-			terraformer::ridge_tree_branch_description{
-				.displacement_profile {
-					.amplitude = terraformer::horizontal_amplitude{3096.0f/27.0f},
-					.wavelength = terraformer::domain_length{12384.0f/27.0f},
-					.damping = std::sqrt(0.5f)
-				},
-				.growth_params {
-					.max_length = terraformer::domain_length{12384.0f/9.0f},
-					.min_neighbour_distance = terraformer::domain_length{384.0f}
+					.max_length = params.trunk.e2e_distance,
+					.min_neighbour_distance = params.trunk.e2e_distance
 				}
 			}
 		}
@@ -114,7 +77,7 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 		rng,
 		pixel_size
 	);
-#endif
+
 	return ret;
 }
 

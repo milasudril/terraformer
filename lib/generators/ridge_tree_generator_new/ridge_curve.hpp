@@ -3,7 +3,6 @@
 #ifndef TERRAFORMER_RIDGECURVE_HPP
 #define TERRAFORMER_RIDGECURVE_HPP
 
-#include "lib/modules/dimensions.hpp"
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
@@ -14,9 +13,9 @@ namespace terraformer
 {
 	struct ridge_tree_branch_displacement_description
 	{
-		horizontal_amplitude amplitude;
-		domain_length wavelength;
-		float damping;  // TODO: Should be within ]0, 1[
+		float amplitude;
+		float wavelength;
+		float damping;
 	};
 
 	single_array<float> generate(
@@ -24,7 +23,8 @@ namespace terraformer
 		random_generator& rng,
 		array_size<float> seg_count,
 		float dx,
-		float warmup_periods = 0.0f);
+		float warmup_periods = 0.0f
+	);
 }
 
 #endif

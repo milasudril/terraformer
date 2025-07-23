@@ -239,8 +239,8 @@ namespace terraformer
 
 	struct ridge_tree_branch_growth_description
 	{
-		domain_length max_length;
-		domain_length min_neighbour_distance;
+		float max_length;
+		float min_neighbour_distance;
 	};
 
 	single_array<ridge_tree_stem_collection>
