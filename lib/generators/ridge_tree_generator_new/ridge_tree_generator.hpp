@@ -22,6 +22,16 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
+	struct ridge_tree_branch_horz_descriptor
+	{
+		float e2e_distance = 49152.0f;
+		ridge_tree_branch_horz_displacement_descriptor displacement;
+
+		bool operator==(ridge_tree_branch_horz_descriptor const&) const = default;
+		bool operator!=(ridge_tree_branch_horz_descriptor const&) const = default;
+		void bind(descriptor_editor_ref editor);
+	};
+
 	struct ridge_tree_trunk_descriptor
 	{
 		float x_0 = 0.0f;
