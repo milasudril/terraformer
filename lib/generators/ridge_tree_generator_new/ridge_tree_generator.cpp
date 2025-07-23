@@ -169,16 +169,6 @@ void terraformer::ridge_tree_trunk_descriptor::bind(descriptor_editor_ref editor
 	);
 
 	editor.create_float_input(
-		u8"E2E distance/m",
-		e2e_distance,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 65536.0f, 2.0f}},
-			.textbox_placeholder_string = u8"9999.9999",
-			.visual_angle_range = std::nullopt
-		}
-	);
-
-	editor.create_float_input(
 		u8"Heading",
 		heading,
 		descriptor_editor_ref::knob_descriptor{
@@ -188,6 +178,16 @@ void terraformer::ridge_tree_trunk_descriptor::bind(descriptor_editor_ref editor
 				geosimd::turns{1.0/4.0},
 				geosimd::turns{3.0/4.0}
 			}
+		}
+	);
+
+	editor.create_float_input(
+		u8"E2E distance/m",
+		e2e_distance,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 65536.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
 		}
 	);
 

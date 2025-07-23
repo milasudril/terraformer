@@ -26,8 +26,8 @@ namespace terraformer
 	{
 		float x_0 = 0.0f;
 		float y_0 = 0.0f;
-		float e2e_distance = 49152.0f;
 		float heading = 0.25f;
+		float e2e_distance = 49152.0f;
 		ridge_tree_branch_horz_displacement_descriptor horz_displacement;
 
 		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
