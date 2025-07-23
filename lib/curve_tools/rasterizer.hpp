@@ -27,14 +27,12 @@ namespace terraformer
 		if(std::abs(dr[0]) > std::abs(dr[1]))
 		{
 			auto const a = dr[1]/dr[0];
-			auto const b = dr[2]/dr[0];
 			auto const dx = dr[0] >= 0.0f ? 1 : -1;
 			for(auto l = static_cast<int32_t>(p1[0]);
 				l != static_cast<int32_t>(p2[0]) + dx;
 				l += dx)
 			{
 				auto const y = a*static_cast<float>(l - static_cast<int32_t>(p1[0])) + p1[1];
-				auto const k = static_cast<uint32_t>(y);
 				auto const x = static_cast<float>(l);
 				pixel_visitor(x, y, starting_at);
 			}
@@ -42,14 +40,12 @@ namespace terraformer
 		else
 		{
 			auto const a = dr[0]/dr[1];
-			auto const b = dr[2]/dr[1];
 			auto const dy = dr[1] >= 0.0f ? 1 : -1;
 			for(auto k = static_cast<int32_t>(p1[1]);
 				k != static_cast<int32_t>(p2[1]) + dy;
 				k += dy)
 			{
 				auto const x = a*static_cast<float>(k - static_cast<int32_t>(p1[1])) + p1[0];
-				auto const l = static_cast<uint32_t>(x);
 				auto const y = static_cast<float>(k);
 				pixel_visitor(x, y, starting_at);
 			}

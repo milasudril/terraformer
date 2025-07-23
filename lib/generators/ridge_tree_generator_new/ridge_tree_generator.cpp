@@ -88,18 +88,23 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 
 	auto res = generate(collect_ridge_tree_xy_params(dom_size, params), rng, pixel_size);
 
+	for(auto const& item : res)
 	{
-		terraformer::curve_set curves;
-		for(auto const& item : res)
+		for(auto const& curve : item.branches.get<0>())
 		{
-			for(auto const& curve : item.branches.get<0>())
-			{
-				curves.append(curve.points());
-			}
+			visit_pixels(curve.points(), pixel_size, [result = ret.pixels()](float x, float y, auto&&...){
+				auto const target_x = static_cast<int32_t>(x + 0.5f);
+				auto const target_y = static_cast<int32_t>(y + 0.5f);
+				if(
+					(target_x >= 0 && static_cast<uint32_t>(target_x) < result.width()) &&
+					(target_y >= 0 && static_cast<uint32_t>(target_y) < result.height())
+				)
+				{ result(target_x, target_y) = 3600.0f; }
+			});
 		}
-		auto curve_file = terraformer::make_output_file("/dev/shm/curves.json");
-		curves.write_to(curve_file.get());
 	}
+
+
 
 	return ret;
 }
