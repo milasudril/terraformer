@@ -9,6 +9,10 @@
 #include "lib/value_maps/qurt_value_map.hpp"
 #include "lib/value_maps/log_value_map.hpp"
 
+
+#include "lib/curve_tools/dump.hpp"
+#include "lib/common/cfile_owner.hpp"
+
 #include <cassert>
 #include <numbers>
 #include <random>
@@ -73,6 +77,18 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 
 	auto res = generate(desc, rng, pixel_size);
 
+	{
+		terraformer::curve_set curves;
+		for(auto const& item : res)
+		{
+			for(auto const& curve : item.branches.get<0>())
+			{
+				curves.append(curve.points());
+			}
+		}
+		auto curve_file = terraformer::make_output_file("/dev/shm/curves.json");
+		curves.write_to(curve_file.get());
+	}
 
 	return ret;
 }
