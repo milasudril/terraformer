@@ -4,7 +4,6 @@
 #include "./ridge_tree_branch.hpp"
 
 #include "lib/curve_tools/length.hpp"
-#include "lib/curve_tools/rasterizer.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 
@@ -230,111 +229,6 @@ void terraformer::ridge_tree::update_elevations(
 			);
 
 			replace_z_inplace(my_curves[k].points(), elevation_profile);
-		}
-	}
-}
-
-namespace
-{
-	class ridge_tree_brush
-	{
-	public:
-		explicit ridge_tree_brush(float peak_radius, terraformer::span<terraformer::location const> locations, std::reference_wrapper<size_t> pixel_count):
-			m_intensity_profile{},
-			m_peak_radius{peak_radius},
-			m_locations{locations},
-			m_tangent{terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}}},
-			m_normal{terraformer::direction{terraformer::displacement{0.0f, 1.0f, 0.0f}}},
-			m_pixel_count{pixel_count}
-		{}
-
-		void begin_pixel(float, float, float z, terraformer::array_index<terraformer::location> starting_at)
-		{
-			++m_pixel_count.get();
-
-			if(starting_at < std::size(m_locations) - terraformer::array_size<terraformer::location>{1})
-			{
-				auto t = m_locations[starting_at + 1] - m_locations[starting_at - 1];
-				t -= terraformer::displacement{0.0f, 0.0f, t[2]};
-				m_tangent = terraformer::direction{t};
-				// TODO: This operation should be optimized in geosimd
-				m_normal = terraformer::direction{terraformer::displacement{m_tangent[1], -m_tangent[0], 0.0f}};
-			}
-
-			m_current_radius = z*m_peak_radius;
-			m_intensity_profile = make_polynomial(
-				terraformer::cubic_spline_control_point{
-					.y = 1.0f,
-					.ddx = -1.0f
-				},
-				terraformer::cubic_spline_control_point{
-					.y = 0.0f,
-					.ddx = 0.0f
-				}
-			);
-		}
-
-		auto get_radius() const
-		{ return m_current_radius; }
-
-		void get_pixel_value(float& old_val, float new_val, float xi, float eta) const
-		{
-			terraformer::displacement const v{xi, eta, 0.0f};
-			auto const v_tangent = inner_product(v, m_tangent);
-			auto const v_normal = inner_product(v, m_normal);
-			auto const r = std::min(std::sqrt(v_tangent*v_tangent + v_normal*v_normal), 1.0f);
-			auto const z = new_val*std::max(m_intensity_profile(r), 0.0f);
-			old_val = std::max(old_val, z);
-		}
-
-	private:
-		terraformer::polynomial<3> m_intensity_profile;
-		float m_peak_radius;
-		float m_current_radius;
-		terraformer::span<terraformer::location const> m_locations;
-		terraformer::direction m_tangent;
-		terraformer::direction m_normal;
-
-		std::reference_wrapper<size_t> m_pixel_count;
-	};
-}
-
-void terraformer::render(
-	ridge_tree const& tree,
-	span_2d<float> output,
-	ridge_tree_render_description const& params,
-	float pixel_size
-)
-{
-	auto paint_mask = create_with_same_size<uint8_t>(output);
-
-	for(auto const& branch_collection: tree)
-	{
-		auto const level = branch_collection.level;
-		if(level >= std::size(params.curve_levels))
-		{	continue; }
-
-		auto const peak_radius = params.curve_levels[level].peak_radius.min;
-
-		for(auto const& branch: branch_collection.branches.get<0>())
-		{
-			size_t pixel_count = 0;
-
-			draw(
-				output,
-				branch.points(),
-				line_segment_draw_params{
-					.value = 1.0f,
-					.scale = pixel_size
-				},
-				ridge_tree_brush{
-					peak_radius/pixel_size,
-					branch.points(),
-					std::ref(pixel_count)
-				},
-				paint_mask.pixels()
-			);
-			fflush(stdout);
 		}
 	}
 }
