@@ -129,7 +129,7 @@ void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descripto
 		u8"Wavelength/m",
 		wavelength,
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 65536.0f, 2.0f}},
+			.value_map = type_erased_value_map{value_maps::log_value_map{1024.0f, 65536.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
 			.visual_angle_range = std::nullopt
 		}
