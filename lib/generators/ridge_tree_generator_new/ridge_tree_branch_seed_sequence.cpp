@@ -59,7 +59,7 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		auto const side_of_curve = inner_product(ab, normal);
 		auto const visible = (side*y > 0.0f ? 1.0f : 0.0f)*(side*side_of_curve > 0.0f ? 1.0f : 0.0f);
 
-		if(visible && std::abs(y) > max_offset && side*y > side*offsets[k - 1] && side*y < side*offsets[k + 1])
+		if(visible && std::abs(y) > max_offset && side*y > side*offsets[k - 1] && side*y > side*offsets[k + 1])
 		{
 			max_offset = std::abs(y);
 			selected_branch_point = k;
