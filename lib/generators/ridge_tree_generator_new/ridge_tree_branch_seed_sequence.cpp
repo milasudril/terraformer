@@ -9,6 +9,9 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 	displaced_curve const& displaced_points
 )
 {
+	if(std::size(displaced_points).get() < 3)
+	{ return ridge_tree_branch_seed_sequence_pair{}; }
+
 	auto const points = displaced_points.get<0>();
 	auto const offsets = displaced_points.get<1>();
 
@@ -23,11 +26,9 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 
 	ridge_tree_branch_seed_sequence_pair ret;
 	float max_offset = 0.0f;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 	std::optional<displaced_curve::index_type> selected_branch_point;
-#pragma GCC diagnostic pop
-	for(auto k : displaced_points.element_indices())
+	auto const indices = displaced_points.element_indices();
+	for(auto k : index_range{indices.front() + 1, indices.back() - 1})
 	{
 		if(l != std::size(x_intercepts.zeros) && k == displaced_curve::index_type{x_intercepts.zeros[l]})
 		{
