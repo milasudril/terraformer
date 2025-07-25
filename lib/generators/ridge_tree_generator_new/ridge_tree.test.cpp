@@ -10,7 +10,7 @@
 
 TESTCASE(terraformer_ridge_tree_generate)
 {
-	terraformer::random_generator const rng;
+	terraformer::random_generator rng;
 	terraformer::ridge_tree_xy_description const desc{
 		.root_location = terraformer::location{0.0f, 24576.0f, 0.0f},
 		.trunk_direction = terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}},
@@ -62,12 +62,10 @@ TESTCASE(terraformer_ridge_tree_generate)
 		}
 	};
 
-	constexpr auto pixel_size = 48.0f;
 	auto const t_0 = std::chrono::steady_clock::now();
 	auto res = generate(
 		desc,
-		rng,
-		pixel_size
+		rng
 	);
 	auto const t = std::chrono::steady_clock::now();
 	printf("Elapsed time %.8g s\n", std::chrono::duration<double>(t - t_0).count());

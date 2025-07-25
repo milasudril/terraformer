@@ -25,8 +25,7 @@ namespace terraformer
 
 terraformer::ridge_tree::ridge_tree(
 	ridge_tree_xy_description const& description,
-	random_generator rng,
-	float pixel_size
+	random_generator& rng
 )
 {
 	auto& ret = m_value;
@@ -35,22 +34,29 @@ terraformer::ridge_tree::ridge_tree(
 	if(curve_levels.empty())
 	{ return; }
 
-	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].growth_params.max_length/pixel_size);
+	auto const trunk_amplitude = curve_levels.front().displacement_profile.amplitude;
+	auto const trunk_wavelength = curve_levels.front().displacement_profile.wavelength;
+	auto const trunk_pixel_size = std::min(
+		2048.0f*trunk_wavelength/(128.0f*trunk_amplitude), 0.25f*trunk_wavelength
+	);
+
+	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].growth_params.max_length/trunk_pixel_size);
 	auto const trunk_offsets = generate(
 		curve_levels[0].displacement_profile,
 		rng,
 		array_size<float>{trunk_pixel_count},
-		pixel_size,
-		1024.0f);
+		trunk_pixel_size,
+		1024.0f
+	);
 
 	auto const trunk_base_curve = terraformer::make_point_array
-		(description.root_location, description.trunk_direction, trunk_pixel_count, pixel_size);
+		(description.root_location, description.trunk_direction, trunk_pixel_count, trunk_pixel_size);
 	{
 		auto curve = displace_xy(
 			trunk_base_curve,
 			terraformer::displacement_profile{
 				.offsets = trunk_offsets,
-				.sample_period = pixel_size
+				.sample_period = trunk_pixel_size
 			}
 		);
 
@@ -102,6 +108,9 @@ terraformer::ridge_tree::ridge_tree(
 			++k;
 		}
 
+		auto const amplitude = curve_levels[next_level_index].displacement_profile.amplitude;
+		auto const wavelength = curve_levels[next_level_index].displacement_profile.wavelength;
+		auto const pixel_size = std::min(2048.0f*wavelength/(128.0f*amplitude), 0.25f*wavelength);
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret,
@@ -148,7 +157,7 @@ terraformer::ridge_tree::ridge_tree(
 void terraformer::ridge_tree::update_elevations(
 	elevation initial_elevation,
 	std::span<ridge_tree_branch_elevation_profile const> elevation_profiles,
-	random_generator rng
+	random_generator& rng
 )
 {
 	span<ridge_tree_trunk> branches{m_value};

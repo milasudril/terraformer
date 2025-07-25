@@ -37,7 +37,7 @@ namespace terraformer
 	class ridge_tree
 	{
 	public:
-	  explicit ridge_tree(ridge_tree_xy_description const& description, random_generator rng, float pixel_size);
+	  explicit ridge_tree(ridge_tree_xy_description const& description, random_generator& rng);
 
 		operator span<ridge_tree_trunk const>() const
 		{ return m_value; }
@@ -63,7 +63,7 @@ namespace terraformer
 		void update_elevations(
 			elevation initial_elevation,
 			std::span<ridge_tree_branch_elevation_profile const> elevation_profiles,
-			random_generator rng
+			random_generator& rng
 		);
 
 	private:
@@ -72,10 +72,9 @@ namespace terraformer
 
 	inline ridge_tree generate(
 		ridge_tree_xy_description const& description,
-		random_generator rng,
-		float pixel_size
+		random_generator& rng
 	)
-	{ return ridge_tree{description, rng, pixel_size}; }
+	{ return ridge_tree{description, rng}; }
 
 	struct ridge_tree_peak_radius_range
 	{

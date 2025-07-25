@@ -289,7 +289,6 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 
 	for(auto k : branch_points.element_indices())
 	{
-		printf("Starting at %zu\n", k.get());
 		auto const base_curve = generate_branch_base_curve(
 			points[k],
 			normals[k],
@@ -324,11 +323,10 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 				return false;
 			}
 		);
-		printf("Base curve generated\n");
 
 		if(std::size(base_curve).get() < 3)
 		{
-			fprintf(stderr, "Curve %zu is to short\n", k.get());
+			fprintf(stderr, "Warning: Curve %zu is to short\n", k.get());
 			continue;
 		}
 

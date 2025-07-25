@@ -53,22 +53,28 @@ namespace
 			0.0f
 		};
 
+		std::vector<terraformer::ridge_tree_branch_description> curve_levels;
+		for(auto const& item : params.branches_plane)
+		{
+			curve_levels.push_back(
+				terraformer::ridge_tree_branch_description{
+					.displacement_profile {
+						.amplitude = item.displacement.amplitude,
+						.wavelength = item.displacement.wavelength,
+						.damping = item.displacement.damping
+					},
+					.growth_params{
+						.max_length = item.e2e_distance,
+						.min_neighbour_distance = 2.0f*item.displacement.amplitude
+					}
+				}
+			);
+		}
+
 		return terraformer::ridge_tree_xy_description{
 			.root_location = root_location,
 			.trunk_direction = ridge_direction,
-			.curve_levels = std::vector{
-				terraformer::ridge_tree_branch_description{
-					.displacement_profile {
-						.amplitude = params.branches_plane[0].displacement.amplitude,
-						.wavelength = params.branches_plane[0].displacement.wavelength,
-						.damping = params.branches_plane[0].displacement.damping
-					},
-					.growth_params{
-						.max_length = params.branches_plane[0].e2e_distance,
-						.min_neighbour_distance = 2.0f*params.branches_plane[0].displacement.amplitude
-					}
-				}
-			}
+			.curve_levels = std::move(curve_levels)
 		};
 	}
 }
@@ -79,14 +85,14 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
 
-	auto const T_0 = params.branches_plane[0].displacement.wavelength;
+	auto const T_0 = params.branches_plane[2].displacement.wavelength;
 	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
 	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
 	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
 
 	grayscale_image ret{w_img, h_img};
 
-	auto res = generate(collect_ridge_tree_xy_params(dom_size, params), rng, pixel_size);
+	auto res = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
 
 	for(auto const& item : res)
 	{

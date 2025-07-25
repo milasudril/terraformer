@@ -211,6 +211,7 @@ namespace terraformer
 			auto const g = direction{compute_field(trunks, loc, pixel_size)};
 			loc -= pixel_size*g;
 		}
+
 		return base_curve;
 	}
 

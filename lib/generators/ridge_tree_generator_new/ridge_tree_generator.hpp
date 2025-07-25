@@ -49,7 +49,7 @@ namespace terraformer
 				}
 			},
 			ridge_tree_branch_horz_descriptor{
-				.e2e_distance = 49152.0f/2.0f,
+				.e2e_distance = 49152.0f/4.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 2048.0f/(2.0f*std::numbers::pi_v<float>),
 					.wavelength = 2048.0f,
@@ -57,7 +57,7 @@ namespace terraformer
 				}
 			},
 			ridge_tree_branch_horz_descriptor{
-				.e2e_distance = 49152.0f/4.0f,
+				.e2e_distance = 49152.0f/16.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 512.0f/(2.0f*std::numbers::pi_v<float>),
 					.wavelength = 512.0f,
@@ -65,13 +65,13 @@ namespace terraformer
 				}
 			},
 			ridge_tree_branch_horz_descriptor{
-				.e2e_distance = 49152.0f/8.0f,
+				.e2e_distance = 49152.0f/64.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 128.0f/(2.0f*std::numbers::pi_v<float>),
 					.wavelength = 128.0f,
 					.damping = {}
 				}
-			},
+			}
 		};
 
 		bool operator==(ridge_tree_descriptor const&) const = default;
