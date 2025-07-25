@@ -6,6 +6,8 @@
 #include "lib/math_utils/first_order_hp_filter.hpp"
 #include "lib/math_utils/second_order_lp_filter.hpp"
 
+#include <fenv.h>
+
 terraformer::polynomial<3> terraformer::create_polynomial(
 	float curve_length,
 	elevation z_0,
@@ -281,22 +283,48 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	auto const normals = branch_points.get<1>();
 	auto const vertex_index = branch_points.get<2>();
 
+	fenv_t env;
+	feholdexcept(&env);
+	feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
+
 	for(auto k : branch_points.element_indices())
 	{
+		printf("Starting at %zu\n", k.get());
 		auto const base_curve = generate_branch_base_curve(
 			points[k],
 			normals[k],
 			trunks,
 			pixel_size,
-			[d = 0.0f, loc_prev = points[k], d_max](auto loc) mutable {
+			[
+				d_max,
+				d = 0.0f,
+				loc_prev = points[k],
+				loc_prev_prev = points[k],
+				theta = 0.0f,
+				iter = size_t{0}
+			](auto loc) mutable {
 				auto new_distance = d + distance(loc, loc_prev);
 				if(new_distance > d_max)
 				{ return true; }
+
+				if(iter >= 2)
+				{
+					auto const v01 = direction{loc_prev - loc_prev_prev};
+					auto const v12 = direction{loc - loc_prev};
+					theta += std::acos(std::clamp(inner_product(v01, v12), -1.0f, 1.0f));
+					if(std::abs(theta) >= std::numbers::pi_v<float>/3.0f)
+					{ return true;}
+				}
+
 				d = new_distance;
+				loc_prev_prev = loc_prev;
 				loc_prev = loc;
+
+				++iter;
 				return false;
 			}
 		);
+		printf("Base curve generated\n");
 
 		if(std::size(base_curve).get() < 3)
 		{
@@ -324,6 +352,8 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			std::move(integrated_curve_length)
 		);
 	}
+
+	fesetenv(&env);
 
 	return gen_branches;
 }
