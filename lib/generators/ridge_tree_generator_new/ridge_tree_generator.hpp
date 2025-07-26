@@ -32,6 +32,19 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
+	struct ridge_tree_elevation_profile_descriptor
+	{
+		float ridge_elevation = 2048.0f;
+		float noise_amplitude = 512.0f;
+		float lf_rolloff = 2.0f;
+		float hf_rolloff = 2.0f;
+		float horizontal_scale = 1024.0f*2.0f*std::numbers::pi_v<float>;
+		float shape_exponent = 2.0f;
+
+		bool operator==(ridge_tree_elevation_profile_descriptor const&) const = default;
+		bool operator!=(ridge_tree_elevation_profile_descriptor const&) const = default;
+		void bind(descriptor_editor_ref editor);
+	};
 
 	struct ridge_tree_descriptor
 	{
@@ -39,7 +52,10 @@ namespace terraformer
 		float x_0 = 0.0f;
 		float y_0 = 0.0f;
 		float heading = 0.25f;
-		std::array<ridge_tree_horz_layout_descriptor, 4> horizontal_layout{
+
+		static constexpr size_t num_levels = 4;
+
+		std::array<ridge_tree_horz_layout_descriptor, num_levels> horizontal_layout{
 			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 49152.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
@@ -71,6 +87,41 @@ namespace terraformer
 					.wavelength = 128.0f,
 					.damping = {}
 				}
+			}
+		};
+
+		std::array<ridge_tree_elevation_profile_descriptor, num_levels> elevation_profile{
+			ridge_tree_elevation_profile_descriptor{
+				.ridge_elevation = 2048.0f,
+				.noise_amplitude = 512.0f,
+				.lf_rolloff = 2.0f,
+				.hf_rolloff = 2.0f,
+				.horizontal_scale = 1024.0f*2.0f*std::numbers::pi_v<float>,
+				.shape_exponent = 2.0f
+			},
+			ridge_tree_elevation_profile_descriptor{
+				.ridge_elevation = 1024.0f,
+				.noise_amplitude = 256.0f,
+				.lf_rolloff = 2.0f,
+				.hf_rolloff = 2.0f,
+				.horizontal_scale = 512.0f*2.0f*std::numbers::pi_v<float>,
+				.shape_exponent = 2.0f
+			},
+			ridge_tree_elevation_profile_descriptor{
+				.ridge_elevation = 512.0f,
+				.noise_amplitude = 128.0f,
+				.lf_rolloff = 2.0f,
+				.hf_rolloff = 2.0f,
+				.horizontal_scale = 256.0f*2.0f*std::numbers::pi_v<float>,
+				.shape_exponent = 2.0f
+			},
+			ridge_tree_elevation_profile_descriptor{
+				.ridge_elevation = 256.0f,
+				.noise_amplitude = 64.0f,
+				.lf_rolloff = 2.0f,
+				.hf_rolloff = 2.0f,
+				.horizontal_scale = 128.0f*2.0f*std::numbers::pi_v<float>,
+				.shape_exponent = 2.0f
 			}
 		};
 

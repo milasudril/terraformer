@@ -110,8 +110,6 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 		}
 	}
 
-
-
 	return ret;
 }
 
@@ -166,6 +164,64 @@ void terraformer::ridge_tree_horz_layout_descriptor::bind(descriptor_editor_ref 
 	displacement.bind(editor);
 }
 
+void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_float_input(
+		u8"Ridge elevation/m",
+		ridge_elevation,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8192.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	editor.create_float_input(
+		u8"Noise amplitude/m",
+		noise_amplitude,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8192.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	editor.create_float_input(
+		u8"LF roll-off",
+		lf_rolloff,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	editor.create_float_input(
+		u8"HF roll-off",
+		hf_rolloff,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{2.0f, 8.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	editor.create_float_input(
+		u8"Horizontal scale/m",
+		horizontal_scale,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	editor.create_float_input(
+		u8"Shape exponent",
+		shape_exponent,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
+}
+
 void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_rng_seed_input(u8"Seed", rng_seed);
@@ -203,26 +259,55 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		}
 	);
 
-	auto horz_layout_table = editor.create_table(
-		descriptor_editor_ref::field_descriptor{
-			.label = u8"Horizontal layout"
-		},
-		descriptor_editor_ref::table_descriptor{
-			.orientation = descriptor_editor_ref::widget_orientation::vertical,
-			.field_names{
-				u8"E2E distance/m",
-				u8"Amplitude/m",
-				u8"Wavelength/m",
-				u8"Damping"
-			}
-		}
-	);
-	size_t k = 0;
-	for(auto& item : horizontal_layout)
 	{
-		auto record = horz_layout_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
-		item.bind(record);
-		record.append_pending_widgets();
-		++k;
+		auto horz_layout_table = editor.create_table(
+			descriptor_editor_ref::field_descriptor{
+				.label = u8"Horizontal layout"
+			},
+			descriptor_editor_ref::table_descriptor{
+				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
+				.field_names{
+					u8"E2E distance/m",
+					u8"Amplitude/m",
+					u8"Wavelength/m",
+					u8"Damping"
+				}
+			}
+		);
+		size_t k = 0;
+		for(auto& item : horizontal_layout)
+		{
+			auto record = horz_layout_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+			item.bind(record);
+			record.append_pending_widgets();
+			++k;
+		}
+	}
+
+	{
+		auto elev_profile_table = editor.create_table(
+			descriptor_editor_ref::field_descriptor{
+				.label = u8"Elevation profile"
+			},
+			descriptor_editor_ref::table_descriptor{
+				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
+				.field_names{
+					u8"Ridge elevation/m",
+					u8"Noise amplitude/m",
+					u8"LF roll-off",
+					u8"HF roll-off",
+					u8"Horizontal scale/m",
+					u8"Shape exponent"
+				}
+			}
+		);
+		size_t k = 0;
+		for(auto& item : elevation_profile)
+		{
+			auto record = elev_profile_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+			item.bind(record);
+			record.append_pending_widgets();
+			++k;
+		}
 	}
 }
