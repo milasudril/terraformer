@@ -34,10 +34,11 @@ terraformer::ridge_tree::ridge_tree(
 	if(curve_levels.empty())
 	{ return; }
 
-	auto const trunk_amplitude = curve_levels.front().displacement_profile.amplitude;
-	auto const trunk_wavelength = curve_levels.front().displacement_profile.wavelength;
-	auto const trunk_pixel_size = std::min(
-		2048.0f*trunk_wavelength/(128.0f*trunk_amplitude), 0.25f*trunk_wavelength
+	auto const trunk_pixel_size = get_pixel_size(
+		wave_descriptor{
+			.amplitude = curve_levels.front().displacement_profile.amplitude,
+			.wavelength = curve_levels.front().displacement_profile.wavelength
+		}
 	);
 
 	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].growth_params.max_length/trunk_pixel_size);
@@ -108,9 +109,12 @@ terraformer::ridge_tree::ridge_tree(
 			++k;
 		}
 
-		auto const amplitude = curve_levels[next_level_index].displacement_profile.amplitude;
-		auto const wavelength = curve_levels[next_level_index].displacement_profile.wavelength;
-		auto const pixel_size = std::min(2048.0f*wavelength/(128.0f*amplitude), 0.25f*wavelength);
+		auto const pixel_size = get_pixel_size(
+			wave_descriptor{
+				.amplitude = curve_levels[next_level_index].displacement_profile.amplitude,
+				.wavelength = curve_levels[next_level_index].displacement_profile.wavelength
+			}
+		);
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret,

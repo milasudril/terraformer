@@ -34,6 +34,19 @@ namespace terraformer
 		ridge_tree_elevation_modulation_description modulation;
 	};
 
+	struct wave_descriptor
+	{
+		float amplitude;
+		float wavelength;
+	};
+
+	inline constexpr float get_pixel_size(wave_descriptor wave)
+	{
+		auto const amplitude = wave.amplitude;
+		auto const wavelength = wave.wavelength;
+		return std::min(2048.0f*wavelength/(128.0f*amplitude), 0.25f*wavelength);
+	}
+
 	class ridge_tree
 	{
 	public:
