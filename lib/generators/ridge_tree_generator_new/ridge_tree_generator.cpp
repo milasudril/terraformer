@@ -6,6 +6,7 @@
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/value_map.hpp"
+#include "lib/pixel_store/image.hpp"
 #include "lib/value_maps/qurt_value_map.hpp"
 #include "lib/value_maps/log_value_map.hpp"
 #include "lib/curve_tools/rasterizer.hpp"
@@ -77,6 +78,38 @@ namespace
 			.curve_levels = std::move(curve_levels)
 		};
 	}
+
+	float get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
+	{
+		auto const min_layout = std::ranges::min_element(
+			params.horizontal_layout,
+			[](auto const& a, auto const b)
+			{
+				auto const size_a =	get_pixel_size(
+					terraformer::wave_descriptor{
+						.amplitude = a.displacement.amplitude,
+						.wavelength = a.displacement.wavelength
+					}
+				);
+
+				auto const size_b = get_pixel_size(
+					terraformer::wave_descriptor{
+						.amplitude = b.displacement.amplitude,
+						.wavelength = b.displacement.wavelength
+					}
+				);
+
+				return size_a < size_b;
+			}
+		);
+
+		return 0.5f*get_pixel_size(
+			terraformer::wave_descriptor{
+				.amplitude = min_layout->displacement.amplitude,
+				.wavelength = min_layout->displacement.wavelength
+			}
+		);
+	}
 }
 
 terraformer::grayscale_image
@@ -85,20 +118,40 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
 
-	auto const T_0 = params.horizontal_layout[2].displacement.wavelength;
-	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
-	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
-	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
+	auto res = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
+	if(res.size().get() == 0)
+	{ return terraformer::grayscale_image{16, 16}; }
 
+	auto const global_pixel_size = get_min_pixel_size(params);
+	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/global_pixel_size + 0.5f), 1u);
+	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/global_pixel_size + 0.5f), 1u);
 	grayscale_image ret{w_img, h_img};
 
-	auto res = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
-
+	auto current_level = res.begin()->level;
+	auto current_pixel_size = get_pixel_size(
+		wave_descriptor{
+			.amplitude = params.horizontal_layout[current_level].displacement.amplitude,
+			.wavelength = params.horizontal_layout[current_level].displacement.wavelength
+		}
+	);
+	printf("Current pixel size %.8g\n", current_pixel_size);
 	for(auto const& item : res)
 	{
+		if(item.level != current_level)
+		{
+			current_pixel_size = get_pixel_size(
+				wave_descriptor{
+					.amplitude = params.horizontal_layout[current_level].displacement.amplitude,
+					.wavelength = params.horizontal_layout[current_level].displacement.wavelength
+				}
+			);
+			printf("Current pixel size %.8g\n", current_pixel_size);
+			current_level = item.level;
+		}
+
 		for(auto const& curve : item.branches.get<0>())
 		{
-			visit_pixels(curve.points(), pixel_size, [result = ret.pixels()](float x, float y, auto&&...){
+			visit_pixels(curve.points(), global_pixel_size, [result = ret.pixels()](float x, float y, auto&&...){
 				auto const target_x = static_cast<int32_t>(x + 0.5f);
 				auto const target_y = static_cast<int32_t>(y + 0.5f);
 				if(
