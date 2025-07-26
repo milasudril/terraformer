@@ -46,7 +46,7 @@ namespace
 				0.0f
 			}
 		};
-		auto const dr = ridge_origin - terraformer::location{0.5f*params.branches_plane[0].e2e_distance, 0.0f, 0.0f};
+		auto const dr = ridge_origin - terraformer::location{0.5f*params.horizontal_layout[0].e2e_distance, 0.0f, 0.0f};
 		auto const root_location = world_origin + terraformer::displacement{
 			inner_product(dr, ridge_direction),
 			-inner_product(dr, dir_ortho),
@@ -54,7 +54,7 @@ namespace
 		};
 
 		std::vector<terraformer::ridge_tree_branch_description> curve_levels;
-		for(auto const& item : params.branches_plane)
+		for(auto const& item : params.horizontal_layout)
 		{
 			curve_levels.push_back(
 				terraformer::ridge_tree_branch_description{
@@ -85,7 +85,7 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
 
-	auto const T_0 = params.branches_plane[2].displacement.wavelength;
+	auto const T_0 = params.horizontal_layout[2].displacement.wavelength;
 	auto const pixel_size = T_0/128.0f;  // Allow 6 octaves within 2^-12
 	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
 	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
@@ -152,7 +152,7 @@ void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descripto
 	);
 }
 
-void terraformer::ridge_tree_branch_horz_descriptor::bind(descriptor_editor_ref editor)
+void terraformer::ridge_tree_horz_layout_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
 		u8"E2E distance/m",
@@ -203,9 +203,9 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		}
 	);
 
-	auto branches_plane_table = editor.create_table(
+	auto horz_layout_table = editor.create_table(
 		descriptor_editor_ref::field_descriptor{
-			.label = u8"Branches (Plane)"
+			.label = u8"Horizontal layout"
 		},
 		descriptor_editor_ref::table_descriptor{
 			.orientation = descriptor_editor_ref::widget_orientation::vertical,
@@ -218,9 +218,9 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		}
 	);
 	size_t k = 0;
-	for(auto& item : branches_plane)
+	for(auto& item : horizontal_layout)
 	{
-		auto record = branches_plane_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+		auto record = horz_layout_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
 		item.bind(record);
 		record.append_pending_widgets();
 		++k;

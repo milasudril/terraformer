@@ -22,13 +22,13 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
-	struct ridge_tree_branch_horz_descriptor
+	struct ridge_tree_horz_layout_descriptor
 	{
 		float e2e_distance = 49152.0f;
 		ridge_tree_branch_horz_displacement_descriptor displacement;
 
-		bool operator==(ridge_tree_branch_horz_descriptor const&) const = default;
-		bool operator!=(ridge_tree_branch_horz_descriptor const&) const = default;
+		bool operator==(ridge_tree_horz_layout_descriptor const&) const = default;
+		bool operator!=(ridge_tree_horz_layout_descriptor const&) const = default;
 		void bind(descriptor_editor_ref editor);
 	};
 
@@ -39,8 +39,8 @@ namespace terraformer
 		float x_0 = 0.0f;
 		float y_0 = 0.0f;
 		float heading = 0.25f;
-		std::array<ridge_tree_branch_horz_descriptor, 4> branches_plane{
-			ridge_tree_branch_horz_descriptor{
+		std::array<ridge_tree_horz_layout_descriptor, 4> horizontal_layout{
+			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 49152.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 8192.0f/(2.0f*std::numbers::pi_v<float>),
@@ -48,7 +48,7 @@ namespace terraformer
 					.damping = {}
 				}
 			},
-			ridge_tree_branch_horz_descriptor{
+			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 49152.0f/4.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 2048.0f/(2.0f*std::numbers::pi_v<float>),
@@ -56,7 +56,7 @@ namespace terraformer
 					.damping = {}
 				}
 			},
-			ridge_tree_branch_horz_descriptor{
+			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 49152.0f/16.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 512.0f/(2.0f*std::numbers::pi_v<float>),
@@ -64,7 +64,7 @@ namespace terraformer
 					.damping = {}
 				}
 			},
-			ridge_tree_branch_horz_descriptor{
+			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 49152.0f/64.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 128.0f/(2.0f*std::numbers::pi_v<float>),
