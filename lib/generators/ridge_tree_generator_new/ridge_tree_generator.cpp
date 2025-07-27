@@ -98,8 +98,10 @@ namespace
 			params.elevation_profile[level],
 			params.horizontal_layout[level]
 		);
-		auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
-		auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
+		auto const w_img = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
+		auto const h_img = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
+		printf("Image size for level %zu: %u x %u\n", level, w_img, h_img);
+
 		terraformer::grayscale_image tmp{w_img, h_img};
 		while(i != i_end)
 		{
@@ -155,8 +157,8 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	{ return terraformer::grayscale_image{16, 16}; }
 
 	auto const global_pixel_size = get_min_pixel_size(params);
-	auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/global_pixel_size + 0.5f), 1u);
-	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/global_pixel_size + 0.5f), 1u);
+	auto const w_img = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*global_pixel_size) + 0.5f), 1u);
+	auto const h_img = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*global_pixel_size) + 0.5f), 1u);
 	grayscale_image ret{w_img, h_img};
 
 	auto i = std::begin(ridge_tree);
