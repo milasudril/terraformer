@@ -10,6 +10,7 @@
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree_branch.hpp"
 #include "lib/math_utils/butter_bp_2d.hpp"
+#include "lib/math_utils/butter_lp_2d.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/value_maps/qurt_value_map.hpp"
@@ -112,14 +113,14 @@ namespace
 			for(auto const& curve : i->branches.get<0>())
 			{
 				visit_pixels(curve.points(), pixel_size, [result = tmp.pixels(), &rng](float x, float y, auto&&...){
-					std::uniform_real_distribution pixel_value{0.0f, 1.0f};
+					//std::uniform_real_distribution pixel_value{0.0f, 1.0f};
 					auto const target_x = static_cast<int32_t>(x + 0.5f);
 					auto const target_y = static_cast<int32_t>(y + 0.5f);
 					if(
 						(target_x >= 0 && static_cast<uint32_t>(target_x) < result.width()) &&
 						(target_y >= 0 && static_cast<uint32_t>(target_y) < result.height())
 					)
-					{ result(target_x, target_y) = pixel_value(rng); }
+					{ result(target_x, target_y) = 1.0f; }
 				});
 			}
 			++i;
@@ -127,10 +128,9 @@ namespace
 
 		auto& ep = params.elevation_profile[level];
 		tmp = apply(
-			terraformer::butter_bp_2d_descriptor{
+			terraformer::butter_lp_2d_descriptor{
 				.f_x = dom_size.width/ep.horizontal_scale,
 				.f_y = dom_size.height/ep.horizontal_scale,
-				.lf_rolloff = ep.lf_rolloff,
 				.hf_rolloff = ep.hf_rolloff,
 				.y_direction = 0.0f
 			},
@@ -147,10 +147,9 @@ namespace
 			[
 				min = *minmax.first,
 				max = *minmax.second,
-				ridge_elevation = ep.ridge_elevation,
-				noise_amplitude = ep.noise_amplitude
+				ridge_elevation = ep.ridge_elevation
 			](auto val) {
-				return ridge_elevation + 2.0f*noise_amplitude*(val - min)/(max - min);
+				return ridge_elevation * (val - min)/(max - min);
 			}
 		);
 
