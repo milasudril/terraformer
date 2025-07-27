@@ -6,7 +6,7 @@
 #include <cassert>
 
 terraformer::grayscale_image terraformer::apply(
-	butter_bp_2d_descriptor const&,
+	butter_bp_2d_descriptor const& params,
 	span_2d<float const> input
 )
 {
@@ -41,12 +41,33 @@ terraformer::grayscale_image terraformer::apply(
 	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
 	plan_forward.execute(std::as_const(filter_input).pixels().data(), transformed_input.pixels().data());
 
-	for(uint32_t y = 0; y != h; ++y)
 	{
-		for(uint32_t x = 0; x != w; ++x)
+		auto const f_x = params.f_x;
+		auto const f_y = params.f_y;
+		auto const w_float = static_cast<float>(w);
+		auto const h_float = static_cast<float>(h);
+		auto const x_0 = 0.5f*w_float;
+		auto const x_y = 0.5f*h_float;
+		auto const cos_theta = std::cos(params.y_direction);
+		auto const sin_theta = std::sin(params.y_direction);
+		auto const hf_rolloff = params.hf_rolloff;
+		auto const lf_rolloff = params.lf_rolloff;
+		for(uint32_t y = 0; y != h; ++y)
 		{
-			auto const filter_value = 1.0f;
-			transformed_input(x, y) *= filter_value;
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				auto const xi_in = static_cast<float>(x) - x_0;
+				auto const eta_in = static_cast<float>(y) - x_y;
+
+				auto const xi = (xi_in*cos_theta + eta_in*sin_theta)/f_x;
+				auto const eta = (-xi_in*sin_theta + eta_in*cos_theta)/f_y;
+
+				auto const r2 = xi*xi + eta*eta;
+
+				auto const lpf = 1.0f/std::sqrt(1.0f + std::pow(r2, hf_rolloff));
+				auto const hpf = std::pow(r2, 0.5f*lf_rolloff)/std::sqrt(1.0f + std::pow(r2, lf_rolloff));
+				transformed_input(x, y) *= 2.0f*lpf*hpf;
+			}
 		}
 	}
 
