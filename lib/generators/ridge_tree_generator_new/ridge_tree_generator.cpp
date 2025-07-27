@@ -100,11 +100,13 @@ namespace
 			params.elevation_profile[level],
 			params.horizontal_layout[level]
 		);
-		auto const w_img = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
-		auto const h_img = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
-		printf("Image size for level %zu: %u x %u\n", level, w_img, h_img);
+		auto const w_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
+		auto const h_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
+		auto const w_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
+		auto const h_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
 
-		terraformer::grayscale_image tmp{w_img, h_img};
+		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
+		terraformer::grayscale_image noise{w_img_noise, h_img_noise};
 		while(i != i_end)
 		{
 			if(i->level != level)
@@ -112,48 +114,87 @@ namespace
 
 			for(auto const& curve : i->branches.get<0>())
 			{
-				visit_pixels(curve.points(), pixel_size, [result = tmp.pixels(), &rng](float x, float y, auto&&...){
-					//std::uniform_real_distribution pixel_value{0.0f, 1.0f};
+				visit_pixels(curve.points(), pixel_size, [ridge = ridge.pixels(), noise = noise.pixels(), &rng](float x, float y, auto&&...){
+					std::uniform_real_distribution noise_value{0.0f, 1.0f};
 					auto const target_x = static_cast<int32_t>(x + 0.5f);
 					auto const target_y = static_cast<int32_t>(y + 0.5f);
 					if(
-						(target_x >= 0 && static_cast<uint32_t>(target_x) < result.width()) &&
-						(target_y >= 0 && static_cast<uint32_t>(target_y) < result.height())
-					)
-					{ result(target_x, target_y) = 1.0f; }
+						(target_x >= 0 && static_cast<uint32_t>(target_x) < ridge.width()) &&
+						(target_y >= 0 && static_cast<uint32_t>(target_y) < ridge.height())
+					) [[likely]]
+					{ ridge(target_x, target_y) = 1.0f; }
+
+					if(
+						(target_x >= 0 && static_cast<uint32_t>(target_x) < noise.width()) &&
+						(target_y >= 0 && static_cast<uint32_t>(target_y) < noise.height())
+					) [[likely]]
+					{ noise(target_x, target_y) = noise_value(rng); }
 				});
 			}
 			++i;
 		}
 
 		auto& ep = params.elevation_profile[level];
-		tmp = apply(
+		ridge = apply(
 			terraformer::butter_lp_2d_descriptor{
 				.f_x = dom_size.width/ep.horizontal_scale_ridge,
 				.f_y = dom_size.height/ep.horizontal_scale_ridge,
 				.hf_rolloff = ep.hf_rolloff,
 				.y_direction = 0.0f
 			},
-			std::as_const(tmp).pixels()
+			std::as_const(ridge).pixels()
 		);
-		auto const minmax = std::minmax_element(
-			tmp.pixels().data(),
-			tmp.pixels().data() + w_img*h_img
-		);
-		std::transform(
-			tmp.pixels().data(),
-			tmp.pixels().data() + w_img*h_img,
-			tmp.pixels().data(),
-			[
-				min = *minmax.first,
-				max = *minmax.second,
-				ridge_elevation = ep.ridge_elevation
-			](auto val) {
-				return ridge_elevation * (val - min)/(max - min);
-			}
-		);
+		{
+			auto const minmax = std::minmax_element(
+				ridge.pixels().data(),
+				ridge.pixels().data() + w_img_ridge*h_img_ridge
+			);
+			std::transform(
+				ridge.pixels().data(),
+				ridge.pixels().data() + w_img_ridge*h_img_ridge,
+				ridge.pixels().data(),
+				[
+					min = *minmax.first,
+					max = *minmax.second,
+					ridge_elevation = ep.ridge_elevation
+				](auto val) {
+					return ridge_elevation * (val - min)/(max - min);
+				}
+			);
+		}
 
-		terraformer::add_resampled(std::as_const(tmp).pixels(), output_image, 1.0f);
+		noise = apply(
+			terraformer::butter_bp_2d_descriptor{
+				.f_x = dom_size.width/ep.horizontal_scale_noise,
+				.f_y = dom_size.height/ep.horizontal_scale_noise,
+				.lf_rolloff = ep.lf_rolloff,
+				.hf_rolloff = ep.hf_rolloff,
+				.y_direction = 0.0f
+			},
+			std::as_const(noise).pixels()
+		);
+		{
+			auto const minmax = std::minmax_element(
+				noise.pixels().data(),
+				noise.pixels().data() + w_img_ridge*h_img_ridge
+			);
+			std::transform(
+				noise.pixels().data(),
+				noise.pixels().data() + w_img_ridge*h_img_ridge,
+				noise.pixels().data(),
+				[
+					min = *minmax.first,
+					max = *minmax.second,
+					noise_amplitude = ep.noise_amplitude
+				](auto val) {
+					return 2.0f*noise_amplitude*(val - min)/(max - min);
+				}
+			);
+		}
+
+
+		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
+		terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
 		return i;
 	}
 }
