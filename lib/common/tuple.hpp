@@ -97,6 +97,8 @@ namespace terraformer
 	public:
 		tuple() = default;
 
+		struct enable_apply{};
+
 		template<class ... U>
 		requires(... && same_as_unqual<Types, U>)
 		constexpr explicit tuple(U&&... t):base{std::forward<U>(t)...}{}
@@ -145,7 +147,14 @@ namespace terraformer
 	[[nodiscard]] decltype(auto) get(tuple<Types...> const&& t)
 	{ return std::move(t).template get<I>();}
 
+	template<class T>
+	concept supports_apply = requires()
+	{
+		typename T::enable_apply;
+	};
+
 	template<class F, class Tuple>
+	requires supports_apply<std::remove_reference_t<Tuple>>
 	constexpr decltype(auto) apply(F&& f, Tuple&& t)
 	{
 		return tuple_detail::apply(
