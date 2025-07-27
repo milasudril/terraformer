@@ -5,7 +5,11 @@
 
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/span_2d.hpp"
 #include "lib/common/value_map.hpp"
+#include "lib/generators/domain/domain_size.hpp"
+#include "lib/generators/ridge_tree_generator_new/ridge_tree_branch.hpp"
+#include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/value_maps/qurt_value_map.hpp"
 #include "lib/value_maps/log_value_map.hpp"
@@ -79,6 +83,48 @@ namespace
 			.curve_levels = std::move(curve_levels)
 		};
 	}
+
+	auto render_branches_at_current_level(
+		terraformer::domain_size_descriptor dom_size,
+		terraformer::ridge_tree_descriptor const& params,
+		terraformer::ridge_tree_trunk const* i,
+		terraformer::ridge_tree_trunk const* i_end,
+		terraformer::random_generator& rng,
+		terraformer::span_2d<float> output_image
+	)
+	{
+		auto const level = i->level;
+		auto const pixel_size = get_min_pixel_size(
+			params.elevation_profile[level],
+			params.horizontal_layout[level]
+		);
+		auto const w_img = std::max(static_cast<uint32_t>(dom_size.width/pixel_size + 0.5f), 1u);
+		auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/pixel_size + 0.5f), 1u);
+		terraformer::grayscale_image tmp{w_img, h_img};
+		while(i != i_end)
+		{
+			if(i->level != level)
+			{ break; }
+
+			for(auto const& curve : i->branches.get<0>())
+			{
+				visit_pixels(curve.points(), pixel_size, [result = tmp.pixels(), &rng](float x, float y, auto&&...){
+					std::uniform_real_distribution pixel_value{0.0f, 1.0f};
+					auto const target_x = static_cast<int32_t>(x + 0.5f);
+					auto const target_y = static_cast<int32_t>(y + 0.5f);
+					if(
+						(target_x >= 0 && static_cast<uint32_t>(target_x) < result.width()) &&
+						(target_y >= 0 && static_cast<uint32_t>(target_y) < result.height())
+					)
+					{ result(target_x, target_y) = pixel_value(rng); }
+				});
+			}
+			++i;
+		}
+
+		terraformer::add_resampled(std::as_const(tmp).pixels(), output_image, 1.0f);
+		return i;
+	}
 }
 
 float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
@@ -104,8 +150,8 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
 
-	auto res = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
-	if(res.size().get() == 0)
+	auto const ridge_tree = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
+	if(ridge_tree.size().get() == 0)
 	{ return terraformer::grayscale_image{16, 16}; }
 
 	auto const global_pixel_size = get_min_pixel_size(params);
@@ -113,38 +159,10 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	auto const h_img = std::max(static_cast<uint32_t>(dom_size.height/global_pixel_size + 0.5f), 1u);
 	grayscale_image ret{w_img, h_img};
 
-	auto current_level = res.begin()->level;
-	auto current_pixel_size = get_min_pixel_size(
-		params.horizontal_layout[current_level],
-		params.elevation_profile[current_level]
-	);
-
-	printf("Current pixel size %.8g\n", current_pixel_size);
-	for(auto const& item : res)
+	auto i = std::begin(ridge_tree);
+	while(i != std::end(ridge_tree))
 	{
-		if(item.level != current_level)
-		{
-			auto current_pixel_size = get_min_pixel_size(
-				params.horizontal_layout[current_level],
-				params.elevation_profile[current_level]
-			);
-
-			printf("Current pixel size %.8g\n", current_pixel_size);
-			current_level = item.level;
-		}
-
-		for(auto const& curve : item.branches.get<0>())
-		{
-			visit_pixels(curve.points(), global_pixel_size, [result = ret.pixels()](float x, float y, auto&&...){
-				auto const target_x = static_cast<int32_t>(x + 0.5f);
-				auto const target_y = static_cast<int32_t>(y + 0.5f);
-				if(
-					(target_x >= 0 && static_cast<uint32_t>(target_x) < result.width()) &&
-					(target_y >= 0 && static_cast<uint32_t>(target_y) < result.height())
-				)
-				{ result(target_x, target_y) = 3600.0f; }
-			});
-		}
+		i = render_branches_at_current_level(dom_size, params, i, std::end(ridge_tree), rng, ret.pixels());
 	}
 
 	return ret;
