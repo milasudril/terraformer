@@ -6,6 +6,7 @@
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/utils.hpp"
 
 #include <vector>
 
@@ -17,6 +18,17 @@ namespace terraformer
 		float wavelength;
 		float damping;
 	};
+
+	inline constexpr float get_min_pixel_size(ridge_tree_branch_displacement_description const& item)
+	{
+		return get_min_pixel_size(
+			terraformer::wave_descriptor{
+				.amplitude = item.amplitude,
+				.wavelength = item.wavelength,
+				.hf_rolloff = 2.0f
+			}
+		);
+	}
 
 	single_array<float> generate(
 		ridge_tree_branch_displacement_description const& src,

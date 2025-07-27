@@ -15,6 +15,7 @@
 #include "lib/curve_tools/dump.hpp"
 #include "lib/common/cfile_owner.hpp"
 
+#include <algorithm>
 #include <cassert>
 #include <numbers>
 #include <random>
@@ -78,38 +79,23 @@ namespace
 			.curve_levels = std::move(curve_levels)
 		};
 	}
+}
 
-	float get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
-	{
-		auto const min_layout = std::ranges::min_element(
-			params.horizontal_layout,
-			[](auto const& a, auto const b)
-			{
-				auto const size_a =	get_pixel_size(
-					terraformer::wave_descriptor{
-						.amplitude = a.displacement.amplitude,
-						.wavelength = a.displacement.wavelength
-					}
-				);
+float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
+{
+	auto const min_layout = std::ranges::min_element(
+		params.horizontal_layout,
+		[](auto const& a, auto const& b)
+		{ return get_min_pixel_size(a) < get_min_pixel_size(b); }
+	);
 
-				auto const size_b = get_pixel_size(
-					terraformer::wave_descriptor{
-						.amplitude = b.displacement.amplitude,
-						.wavelength = b.displacement.wavelength
-					}
-				);
+	auto const min_elevation_profile = std::ranges::min_element(
+		params.elevation_profile,
+		[](auto const& a, auto const& b)
+		{ return get_min_pixel_size(a) < get_min_pixel_size(b); }
+	);
 
-				return size_a < size_b;
-			}
-		);
-
-		return 0.5f*get_pixel_size(
-			terraformer::wave_descriptor{
-				.amplitude = min_layout->displacement.amplitude,
-				.wavelength = min_layout->displacement.wavelength
-			}
-		);
-	}
+	return get_min_pixel_size(*min_layout, *min_elevation_profile);
 }
 
 terraformer::grayscale_image
@@ -128,23 +114,21 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	grayscale_image ret{w_img, h_img};
 
 	auto current_level = res.begin()->level;
-	auto current_pixel_size = get_pixel_size(
-		wave_descriptor{
-			.amplitude = params.horizontal_layout[current_level].displacement.amplitude,
-			.wavelength = params.horizontal_layout[current_level].displacement.wavelength
-		}
+	auto current_pixel_size = get_min_pixel_size(
+		params.horizontal_layout[current_level],
+		params.elevation_profile[current_level]
 	);
+
 	printf("Current pixel size %.8g\n", current_pixel_size);
 	for(auto const& item : res)
 	{
 		if(item.level != current_level)
 		{
-			current_pixel_size = get_pixel_size(
-				wave_descriptor{
-					.amplitude = params.horizontal_layout[current_level].displacement.amplitude,
-					.wavelength = params.horizontal_layout[current_level].displacement.wavelength
-				}
+			auto current_pixel_size = get_min_pixel_size(
+				params.horizontal_layout[current_level],
+				params.elevation_profile[current_level]
 			);
+
 			printf("Current pixel size %.8g\n", current_pixel_size);
 			current_level = item.level;
 		}

@@ -3,6 +3,7 @@
 #include "./ridge_tree.hpp"
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/common/utils.hpp"
 #include "lib/curve_tools/length.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
@@ -34,14 +35,9 @@ terraformer::ridge_tree::ridge_tree(
 	if(curve_levels.empty())
 	{ return; }
 
-	auto const trunk_pixel_size = get_pixel_size(
-		wave_descriptor{
-			.amplitude = curve_levels.front().displacement_profile.amplitude,
-			.wavelength = curve_levels.front().displacement_profile.wavelength
-		}
-	);
-
+	auto const trunk_pixel_size = get_min_pixel_size(curve_levels[0].displacement_profile);
 	auto const trunk_pixel_count = static_cast<size_t>(curve_levels[0].growth_params.max_length/trunk_pixel_size);
+
 	auto const trunk_offsets = generate(
 		curve_levels[0].displacement_profile,
 		rng,
@@ -109,12 +105,7 @@ terraformer::ridge_tree::ridge_tree(
 			++k;
 		}
 
-		auto const pixel_size = get_pixel_size(
-			wave_descriptor{
-				.amplitude = curve_levels[next_level_index].displacement_profile.amplitude,
-				.wavelength = curve_levels[next_level_index].displacement_profile.wavelength
-			}
-		);
+		auto const pixel_size = get_min_pixel_size(curve_levels[next_level_index].displacement_profile);
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret,

@@ -3,9 +3,11 @@
 #ifndef TERRAFORMER_RIDGE_TREE_GENERATOR_HPP
 #define TERRAFORMER_RIDGE_TREE_GENERATOR_HPP
 
+#include "lib/generators/ridge_tree_generator_new/ridge_tree.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/common/bounded_value.hpp"
+#include "lib/common/utils.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 #include <numbers>
 
@@ -22,6 +24,17 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
+	inline constexpr float get_min_pixel_size(ridge_tree_branch_horz_displacement_descriptor const& item)
+	{
+		return get_min_pixel_size(
+			terraformer::wave_descriptor{
+				.amplitude = item.amplitude,
+				.wavelength = item.wavelength,
+				.hf_rolloff = 2.0f
+			}
+		);
+	}
+
 	struct ridge_tree_horz_layout_descriptor
 	{
 		float e2e_distance = 49152.0f;
@@ -31,6 +44,9 @@ namespace terraformer
 		bool operator!=(ridge_tree_horz_layout_descriptor const&) const = default;
 		void bind(descriptor_editor_ref editor);
 	};
+
+	inline constexpr float get_min_pixel_size(ridge_tree_horz_layout_descriptor const& item)
+	{ return get_min_pixel_size(item.displacement); }
 
 	struct ridge_tree_elevation_profile_descriptor
 	{
@@ -45,6 +61,29 @@ namespace terraformer
 		bool operator!=(ridge_tree_elevation_profile_descriptor const&) const = default;
 		void bind(descriptor_editor_ref editor);
 	};
+
+	inline constexpr float get_min_pixel_size(ridge_tree_elevation_profile_descriptor const& item)
+	{
+		return get_min_pixel_size(
+			terraformer::wave_descriptor{
+				.amplitude = item.noise_amplitude,
+				.wavelength = item.horizontal_scale,
+				.hf_rolloff = item.hf_rolloff
+			}
+		);
+	}
+
+	inline constexpr float get_min_pixel_size(
+		ridge_tree_horz_layout_descriptor const& a,
+		ridge_tree_elevation_profile_descriptor const& b
+	)
+	{ return std::min(0.5f*get_min_pixel_size(a), get_min_pixel_size(b)); }
+
+	inline constexpr float get_min_pixel_size(
+		ridge_tree_elevation_profile_descriptor const& a,
+		ridge_tree_horz_layout_descriptor const& b
+	)
+	{ return get_min_pixel_size(b, a); }
 
 	struct ridge_tree_descriptor
 	{
@@ -131,6 +170,8 @@ namespace terraformer
 		grayscale_image generate_heightmap(domain_size_descriptor) const;
 		void bind(descriptor_editor_ref editor);
 	};
+
+	float get_min_pixel_size(ridge_tree_descriptor const& params);
 
 	grayscale_image generate(domain_size_descriptor dom_size, ridge_tree_descriptor const& params);
 }

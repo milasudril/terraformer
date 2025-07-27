@@ -204,6 +204,62 @@ namespace terraformer
 	inline size_t ceil_div(size_t x, size_t y)
 	{ return x / y + (x % y == 0? 0 : 1); }
 
+		struct wave_descriptor
+	{
+		float amplitude;
+		float wavelength;
+		float hf_rolloff = 2.0f;
+	};
+
+	/**
+	 * Computes a suitable step or pixel size given the scale properties of a wave
+	 *
+	 * Assume a filter for which the frequency response is
+	 * \f[
+	 * |H(\omega)| = \frac{1}{\sqrt{1 + \left(\frac{\omega^2}{\omega_0^2}\right)^n}}
+	 * \f]
+	 *
+	 * If the input signal is white noise with amplitude \(A\), the strength of the output
+	 * signal is
+	 * \f[
+	 * |Y(\omega)| = \frac{A}{\sqrt{1 + \left(\frac{f}{f_0}\right)^{2n}}}
+	 * \f]
+	 *
+	 * The goal is to determine a sample rate \f$f_s\f$ such that frequencies with amplitude greater
+	 * than one can be represented. Notice that the step size is \f$1/f_s\f$. For the to be satisfied,
+	 * all frequencies above the Nyquist frequency \f$1f_n = f_s/2\f$ should be less than some
+	 * threshold \f$A_0\f$, that is
+	 * \f[
+	 * \frac{A}{\sqrt{1 + \left(\frac{f_s}{2 f_0}\right)^{2n}}} < A_0
+	 * \f]
+	 *
+	 * Which gives
+	 *
+	 * \f[
+	 * \sqrt{1 + \left(\frac{f_s}{2 f_0}\right)^{2n}} > \frac{A}{A_0}
+	 * \f]
+	 *
+	 * This requires that $A > 1$. Since \f$f_s\f$ must be greater than
+	 * \f[
+	 * 2 f_0 \left(\frac{A}{A_0}^2 - 1\right)^{\frac{1}{2n}}
+	 * \f]
+	 * it is sufficient to pick
+	 * \f[
+	 * f_s = 2 f_0 \frac{A}{A_0}^{\frac{1}{n}}
+	 * \f]
+	 * which is the limit as \f$\frac{A}{A_0}\to\infty\f$.
+	 *
+	 * For the purpose of this function, \f$A_0\f$ is set to 1 m.
+	 */
+	inline constexpr float get_min_pixel_size(wave_descriptor const& wave)
+	{
+		auto const amplitude = wave.amplitude;
+		auto const wavelength = wave.wavelength;
+		auto const hf_rolloff = wave.hf_rolloff;
+		auto const a_0 = 1.0f;
+		auto const dx = wavelength*std::pow(amplitude/a_0, -1.0f/hf_rolloff)/2.0f;
+		return std::min(dx, 0.5f*wavelength);
+	}
 }
 
 #endif
