@@ -2,13 +2,13 @@
 #define TERRAFORMER_IMAGE_GRAD_TRACER_HPP
 
 #include "lib/common/span_2d.hpp"
-#include "lib/common/array_tuple.hpp"
+#include "lib/array_classes/multi_array.hpp"
 
 namespace terraformer
 {
 	auto trace_gradient(span_2d<float const> pixels, pixel_coordinates start_point)
 	{
-		array_tuple<location, float> ret;
+		multi_array<location, float> ret;
 
 		location loc
 		{
@@ -36,7 +36,7 @@ namespace terraformer
 
 			loc = loc_next;
 			z = z_next;
-			ret.push_back(tuple{location{loc[0], loc[1], z}, grad_size});
+			ret.push_back(location{loc[0], loc[1], z}, grad_size);
 		}
 
 		return ret;
@@ -44,7 +44,7 @@ namespace terraformer
 
 	auto trace_gradient_periodic_xy(span_2d<float const> pixels, pixel_coordinates start_point)
 	{
-		array_tuple<location, float> ret;
+		multi_array<location, float> ret;
 
 		location loc
 		{
@@ -72,7 +72,7 @@ namespace terraformer
 
 			loc = loc_next;
 			z = z_next;
-			ret.push_back(tuple{location{loc[0], loc[1], z}, grad_size});
+			ret.push_back(location{loc[0], loc[1], z}, grad_size);
 		}
 
 		return ret;
