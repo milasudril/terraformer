@@ -253,12 +253,11 @@ namespace terraformer
 	 */
 	inline constexpr float get_min_pixel_size(wave_descriptor const& wave)
 	{
-		auto const amplitude = wave.amplitude;
+		auto const a_0 = 1.0f;
+		auto const amplitude = std::max(wave.amplitude, a_0);
 		auto const wavelength = wave.wavelength;
 		auto const hf_rolloff = wave.hf_rolloff;
-		auto const a_0 = 1.0f;
-		auto const dx = wavelength*std::pow(amplitude/a_0, -1.0f/hf_rolloff)/2.0f;
-		return std::min(dx, 0.5f*wavelength);
+		return wavelength*std::pow(amplitude/a_0, -1.0f/hf_rolloff)/2.0f;
 	}
 }
 
