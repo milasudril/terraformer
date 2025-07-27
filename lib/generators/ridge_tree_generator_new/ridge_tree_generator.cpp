@@ -9,6 +9,7 @@
 #include "lib/common/value_map.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree_branch.hpp"
+#include "lib/math_utils/butter_bp_2d.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/value_maps/qurt_value_map.hpp"
@@ -123,6 +124,18 @@ namespace
 			}
 			++i;
 		}
+
+		auto& ep = params.elevation_profile[level];
+		tmp = apply(
+			terraformer::butter_bp_2d_descriptor{
+				.f_x = dom_size.width/ep.horizontal_scale,
+				.f_y = dom_size.height/ep.horizontal_scale,
+				.lf_rolloff = ep.lf_rolloff,
+				.hf_rolloff = ep.hf_rolloff,
+				.y_direction = 0.0f
+			},
+			std::as_const(tmp).pixels()
+		);
 
 		terraformer::add_resampled(std::as_const(tmp).pixels(), output_image, 1.0f);
 		return i;
