@@ -101,7 +101,7 @@ namespace terraformer
 	}
 
 	template<class ... Types>
-	class array_tuple
+	class [[deprecated("Use multi_array")]] array_tuple
 	{
 		using storage_type = tuple<Types*...>;
 	public:

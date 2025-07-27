@@ -102,6 +102,9 @@ namespace terraformer
 			constexpr T operator*() const noexcept
 			{ return m_current; }
 
+			constexpr auto operator+(size_t offset) const
+			{ return m_current + offset; }
+
 		private:
 			T m_current;
 		};

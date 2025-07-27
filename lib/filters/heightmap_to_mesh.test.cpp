@@ -38,7 +38,7 @@ TESTCASE(terraformer_create_mesh_from_heightmap)
 
 	auto const locs = mesh.locations();
 	constexpr auto num_verts = 12;
-	EXPECT_EQ(std::size(locs), num_verts);
+	EXPECT_EQ(std::size(locs).get(), num_verts);
 	std::array<float, num_verts> const x_expected{
 		-1.500000f, -0.500000f, 0.500000f, 1.500000f,
 		-1.500000f, -0.500000f, 0.500000f, 1.500000f,
@@ -51,10 +51,10 @@ TESTCASE(terraformer_create_mesh_from_heightmap)
 		-1.000000f, -1.000000f, -1.000000f, -1.000000f
 	};
 
-	for(size_t k = 0; k != num_verts; ++k)
+	for(auto k : locs.element_indices())
 	{
-		EXPECT_EQ(locs[k][0], x_expected[k]);
-		EXPECT_EQ(locs[k][1], y_expected[k]);
+		EXPECT_EQ(locs[k][0], x_expected[k.get()]);
+		EXPECT_EQ(locs[k][1], y_expected[k.get()]);
 		if(locs[k][0] != 1.5f && locs[k][0] != -1.5f && locs[k][1] != -1.0f && locs[k][1] != 1.0f)
 		{
 			EXPECT_LT(mesh.normals()[k][0], 0.0f);

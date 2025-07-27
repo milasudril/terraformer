@@ -1,7 +1,8 @@
 #ifndef TERRAFORMER_MESH_HPP
 #define TERRAFORMER_MESH_HPP
 
-#include "lib/common/array_tuple.hpp"
+#include "lib/array_classes/multi_array.hpp"
+#include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
 
 #include <geosimd/triangle.hpp>
@@ -16,13 +17,13 @@ namespace terraformer
 	{
 	public:
 		void push_back(vertex v)
-		{ m_vertex_data.push_back(v); }
+		{ m_vertex_data.push_back(get<0>(v), get<1>(v)); }
 
 		void push_back(face const& f)
-		{ m_faces.push_back(tuple{f}); }
+		{ m_faces.push_back(f); }
 
 		auto faces() const
-		{ return m_faces.get<0>(); }
+		{ return span{m_faces.begin(), m_faces.end()}; }
 
 		auto locations() const
 		{ return m_vertex_data.get<0>(); }
@@ -34,8 +35,8 @@ namespace terraformer
 		bool operator!=(mesh const&) const = default;
 
 	private:
-		array_tuple<location, direction> m_vertex_data;
-		array_tuple<face> m_faces;
+		multi_array<location, direction> m_vertex_data;
+		single_array<face> m_faces;
 	};
 }
 
