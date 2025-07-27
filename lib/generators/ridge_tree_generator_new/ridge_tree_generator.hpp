@@ -54,7 +54,8 @@ namespace terraformer
 		float noise_amplitude = 512.0f;
 		float lf_rolloff = 2.0f;
 		float hf_rolloff = 2.0f;
-		float horizontal_scale = 1024.0f*2.0f*std::numbers::pi_v<float>;
+		float horizontal_scale_ridge = 12884.0f;
+		float horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>;
 		float shape_exponent = 2.0f;
 
 		bool operator==(ridge_tree_elevation_profile_descriptor const&) const = default;
@@ -66,8 +67,8 @@ namespace terraformer
 	{
 		return get_min_pixel_size(
 			terraformer::wave_descriptor{
-				.amplitude = item.noise_amplitude,
-				.wavelength = item.horizontal_scale,
+				.amplitude = item.ridge_elevation,
+				.wavelength = item.horizontal_scale_ridge,
 				.hf_rolloff = item.hf_rolloff
 			}
 		);
@@ -135,7 +136,8 @@ namespace terraformer
 				.noise_amplitude = 512.0f,
 				.lf_rolloff = 2.0f,
 				.hf_rolloff = 2.0f,
-				.horizontal_scale = 1024.0f*2.0f*std::numbers::pi_v<float>,
+				.horizontal_scale_ridge = 12884.0f,
+				.horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
 			},
 			ridge_tree_elevation_profile_descriptor{
@@ -143,7 +145,8 @@ namespace terraformer
 				.noise_amplitude = 256.0f,
 				.lf_rolloff = 2.0f,
 				.hf_rolloff = 2.0f,
-				.horizontal_scale = 512.0f*2.0f*std::numbers::pi_v<float>,
+				.horizontal_scale_ridge = 6144.0f,
+				.horizontal_scale_noise = 512.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
 			},
 			ridge_tree_elevation_profile_descriptor{
@@ -151,7 +154,8 @@ namespace terraformer
 				.noise_amplitude = 128.0f,
 				.lf_rolloff = 2.0f,
 				.hf_rolloff = 2.0f,
-				.horizontal_scale = 256.0f*2.0f*std::numbers::pi_v<float>,
+				.horizontal_scale_ridge = 3072.0f,
+				.horizontal_scale_noise = 256.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
 			},
 			ridge_tree_elevation_profile_descriptor{
@@ -159,7 +163,8 @@ namespace terraformer
 				.noise_amplitude = 64.0f,
 				.lf_rolloff = 2.0f,
 				.hf_rolloff = 2.0f,
-				.horizontal_scale = 128.0f*2.0f*std::numbers::pi_v<float>,
+				.horizontal_scale_ridge = 1536.0f,
+				.horizontal_scale_noise = 128.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
 			}
 		};

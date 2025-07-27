@@ -129,8 +129,8 @@ namespace
 		auto& ep = params.elevation_profile[level];
 		tmp = apply(
 			terraformer::butter_lp_2d_descriptor{
-				.f_x = dom_size.width/ep.horizontal_scale,
-				.f_y = dom_size.height/ep.horizontal_scale,
+				.f_x = dom_size.width/ep.horizontal_scale_ridge,
+				.f_y = dom_size.height/ep.horizontal_scale_ridge,
 				.hf_rolloff = ep.hf_rolloff,
 				.y_direction = 0.0f
 			},
@@ -289,8 +289,17 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		}
 	);
 	editor.create_float_input(
-		u8"Horizontal scale/m",
-		horizontal_scale,
+		u8"Horizontal scale (ridge)/m",
+		horizontal_scale_ridge,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	editor.create_float_input(
+		u8"Horizontal scale (noise)/m",
+		horizontal_scale_noise,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
@@ -382,7 +391,8 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 					u8"Noise amplitude/m",
 					u8"LF roll-off",
 					u8"HF roll-off",
-					u8"Horizontal scale/m",
+					u8"Horizontal scale (ridge)/m",
+					u8"Horizontal scale (noise)/m",
 					u8"Shape exponent"
 				}
 			}
