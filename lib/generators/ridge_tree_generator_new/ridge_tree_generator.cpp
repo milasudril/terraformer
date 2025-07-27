@@ -136,6 +136,23 @@ namespace
 			},
 			std::as_const(tmp).pixels()
 		);
+		auto const minmax = std::minmax_element(
+			tmp.pixels().data(),
+			tmp.pixels().data() + w_img*h_img
+		);
+		std::transform(
+			tmp.pixels().data(),
+			tmp.pixels().data() + w_img*h_img,
+			tmp.pixels().data(),
+			[
+				min = *minmax.first,
+				max = *minmax.second,
+				ridge_elevation = ep.ridge_elevation,
+				noise_amplitude = ep.noise_amplitude
+			](auto val) {
+				return ridge_elevation + 2.0f*noise_amplitude*(val - min)/(max - min);
+			}
+		);
 
 		terraformer::add_resampled(std::as_const(tmp).pixels(), output_image, 1.0f);
 		return i;
