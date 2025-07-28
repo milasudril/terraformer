@@ -86,6 +86,45 @@ namespace
 		};
 	}
 
+	void  add_circle(terraformer::span_2d<float> output, float x_0, float y_0, float r)
+	{
+		auto const x_min = std::clamp(
+			static_cast<int32_t>(x_0 - r + 0.5f),
+			0,
+			static_cast<int32_t>(output.width())
+		);
+
+		auto const y_min = std::clamp(
+			static_cast<int32_t>(y_0 - r + 0.5f),
+			0,
+			static_cast<int32_t>(output.height())
+		);
+
+		auto const x_max = std::clamp(
+			static_cast<int32_t>(x_0 + r + 0.5f),
+			0,
+			static_cast<int32_t>(output.width())
+		);
+
+		auto const y_max = std::clamp(
+			static_cast<int32_t>(y_0 + r + 0.5f),
+			0,
+			static_cast<int32_t>(output.height())
+		);
+
+		for(int32_t y = y_min; y != y_max; ++y)
+		{
+			for(int32_t x = x_min; x != x_max; ++x)
+			{
+				auto const x_float = (static_cast<float>(x) + 0.5f - x_0)/r;
+				auto const y_float = (static_cast<float>(y) + 0.5f - y_0)/r;
+				auto const r = std::sqrt(x_float*x_float + y_float*y_float);
+				if( r <= 1.0f)
+				{ output(x, y) += (1.0f - r)*(1.0f - r); }
+			}
+		}
+	}
+
 	auto render_branches_at_current_level(
 		terraformer::domain_size_descriptor dom_size,
 		terraformer::ridge_tree_descriptor const& params,
@@ -107,6 +146,8 @@ namespace
 
 		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
 		terraformer::grayscale_image noise{w_img_noise, h_img_noise};
+		auto& ep = params.elevation_profile[level];
+		auto const ridge_radius = ep.horizontal_scale_ridge/pixel_size;
 		while(i != i_end)
 		{
 			if(i->level != level)
@@ -114,15 +155,17 @@ namespace
 
 			for(auto const& curve : i->branches.get<0>())
 			{
-				visit_pixels(curve.points(), pixel_size, [ridge = ridge.pixels(), noise = noise.pixels(), &rng](float x, float y, auto&&...){
+				visit_pixels(curve.points(), pixel_size, [
+					ridge = ridge.pixels(),
+					noise = noise.pixels(),
+					&rng,
+					ridge_radius
+				](float x, float y, auto&&...){
+					add_circle(ridge, x, y, ridge_radius);
+
 					std::uniform_real_distribution noise_value{0.0f, 1.0f};
 					auto const target_x = static_cast<int32_t>(x + 0.5f);
 					auto const target_y = static_cast<int32_t>(y + 0.5f);
-					if(
-						(target_x >= 0 && static_cast<uint32_t>(target_x) < ridge.width()) &&
-						(target_y >= 0 && static_cast<uint32_t>(target_y) < ridge.height())
-					) [[likely]]
-					{ ridge(target_x, target_y) = 1.0f; }
 
 					if(
 						(target_x >= 0 && static_cast<uint32_t>(target_x) < noise.width()) &&
@@ -134,16 +177,6 @@ namespace
 			++i;
 		}
 
-		auto& ep = params.elevation_profile[level];
-		ridge = apply(
-			terraformer::butter_lp_2d_descriptor{
-				.f_x = dom_size.width/ep.horizontal_scale_ridge,
-				.f_y = dom_size.height/ep.horizontal_scale_ridge,
-				.hf_rolloff = ep.hf_rolloff,
-				.y_direction = 0.0f
-			},
-			std::as_const(ridge).pixels()
-		);
 		{
 			auto const minmax = std::minmax_element(
 				ridge.pixels().data(),
@@ -187,11 +220,11 @@ namespace
 					max = *minmax.second,
 					noise_amplitude = ep.noise_amplitude
 				](auto val) {
-					return 2.0f*noise_amplitude*(val - min)/(max - min);
+					auto const xi = (val - min)/(max - min);
+					return 2.0f*noise_amplitude*xi*xi;
 				}
 			);
 		}
-
 
 		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
 		terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
