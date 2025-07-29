@@ -97,10 +97,10 @@ namespace terraformer
 
 		std::array<ridge_tree_horz_layout_descriptor, num_levels> horizontal_layout{
 			ridge_tree_horz_layout_descriptor{
-				.e2e_distance = 49152.0f,
+				.e2e_distance = 32768.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 8192.0f/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 8192.0f,
+					.wavelength = 6144.0f,
 					.damping = {}
 				}
 			},
@@ -108,7 +108,7 @@ namespace terraformer
 				.e2e_distance = 49152.0f/4.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 2048.0f/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 2048.0f,
+					.wavelength = 1536.0f,
 					.damping = {}
 				}
 			},
@@ -116,7 +116,7 @@ namespace terraformer
 				.e2e_distance = 49152.0f/16.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 512.0f/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 512.0f,
+					.wavelength = 384.0f,
 					.damping = {}
 				}
 			},
@@ -124,7 +124,7 @@ namespace terraformer
 				.e2e_distance = 49152.0f/64.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
 					.amplitude = 128.0f/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 128.0f,
+					.wavelength = 96.0f,
 					.damping = {}
 				}
 			}
