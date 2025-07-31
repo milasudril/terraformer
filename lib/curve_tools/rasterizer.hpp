@@ -32,7 +32,7 @@ namespace terraformer
 				l != static_cast<int32_t>(p2[0]);
 				l += dx)
 			{
-				auto const y = a*static_cast<float>(l - static_cast<int32_t>(p1[0])) + p1[1] + 0.5f;
+				auto const y = a*static_cast<float>(l - static_cast<int32_t>(p1[0])) + static_cast<int32_t>(p1[1]) + 0.5f;
 				auto const x = static_cast<float>(l) + 0.5f;
 				pixel_visitor(x, y, starting_at);
 			}
@@ -45,7 +45,7 @@ namespace terraformer
 				k != static_cast<int32_t>(p2[1]);
 				k += dy)
 			{
-				auto const x = a*static_cast<float>(k - static_cast<int32_t>(p1[1])) + p1[0] + 0.5f;
+				auto const x = a*static_cast<float>(k - static_cast<int32_t>(p1[1])) + static_cast<int32_t>(p1[0]) + 0.5f;
 				auto const y = static_cast<float>(k) + 0.5f;
 				pixel_visitor(x, y, starting_at);
 			}
