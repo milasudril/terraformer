@@ -84,39 +84,42 @@ TESTCASE(terraformer_visit_pixels_curve_through_non_integer_point_with_dir_chang
 
 TESTCASE(terraformer_visit_pixels_curge_random_points)
 {
-	terraformer::single_array<terraformer::location> locs;
-	terraformer::random_generator rng;
-	terraformer::location loc{};
-	for(size_t k = 0; k != 2048; ++k)
+	for(size_t k_max = 2; k_max <= 65536; k_max <<= 1)
 	{
-		locs.push_back(loc);
+		terraformer::single_array<terraformer::location> locs;
+		terraformer::random_generator rng;
+		terraformer::location loc{};
+		for(size_t k = 0; k != k_max; ++k)
+		{
+			locs.push_back(loc);
 
-		std::uniform_real_distribution u{5.0f, 10.0f};
-		terraformer::displacement const dr{u(rng), u(rng), 0.0f};
-		loc += dr;
-	}
-
-	auto const pixel_size = 0.25f;
-	auto x_0 = 0.0f;
-	auto y_0 = 0.0f;
-	visit_pixels(
-		locs,
-		pixel_size,
-		[&x_0, &y_0, callcount = 0](auto x, auto y, auto&&) mutable{
-			if(callcount != 0)
-			{
-				auto const dx_size = std::abs(x - x_0);
-				auto const dy_size = std::abs(y - y_0);
-				EXPECT_EQ(dx_size == 1.0f || dy_size == 1.0f, true);
-			}
-
-			++callcount;
-			x_0 = x;
-			y_0 = y;
+			std::uniform_real_distribution u{5.0f, 10.0f};
+			terraformer::displacement const dr{u(rng), u(rng), 0.0f};
+			loc += dr;
 		}
-	);
 
-	auto const end = (locs.back() - terraformer::location{})/pixel_size;
-	EXPECT_LT(std::abs(end[0] - x_0), 1.0f);
-	EXPECT_LT(std::abs(end[1] - y_0), 1.0f);
+		auto const pixel_size = 1.0f/16.0f;
+		auto x_0 = 0.0f;
+		auto y_0 = 0.0f;
+		visit_pixels(
+			locs,
+			pixel_size,
+			[&x_0, &y_0, callcount = 0](auto x, auto y, auto&&) mutable{
+				if(callcount != 0)
+				{
+					auto const dx_size = std::abs(x - x_0);
+					auto const dy_size = std::abs(y - y_0);
+					EXPECT_EQ(dx_size == 1.0f || dy_size == 1.0f, true);
+				}
+
+				++callcount;
+				x_0 = x;
+				y_0 = y;
+			}
+		);
+
+		auto const end = (locs.back() - terraformer::location{})/pixel_size;
+		EXPECT_LT(std::abs(end[0] - x_0), 2.0f);
+		EXPECT_LT(std::abs(end[1] - y_0), 2.0f);
+	}
 }
