@@ -1,9 +1,12 @@
 //@	{"target":{"name":"rasterizer.test"}}
 
 #include "./rasterizer.hpp"
+#include "lib/array_classes/single_array.hpp"
+#include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
 #include "testfwk/validation.hpp"
 
+#include <random>
 #include <testfwk/testfwk.hpp>
 
 TESTCASE(terraformer_visit_pixels_different_directions)
@@ -74,8 +77,46 @@ TESTCASE(terraformer_visit_pixels_curve_through_non_integer_point_with_dir_chang
 			{
 				EXPECT_EQ(y, 0.5f + static_cast<float>(callcount - 8 + 1));
 			}
-			fprintf(stderr, "%.8g %.8g\n", x, y);
 			++callcount;
 		}
 	);
+}
+
+TESTCASE(terraformer_visit_pixels_curge_random_points)
+{
+	terraformer::single_array<terraformer::location> locs;
+	terraformer::random_generator rng;
+	terraformer::location loc{};
+	for(size_t k = 0; k != 2048; ++k)
+	{
+		locs.push_back(loc);
+
+		std::uniform_real_distribution u{5.0f, 10.0f};
+		terraformer::displacement const dr{u(rng), u(rng), 0.0f};
+		loc += dr;
+	}
+
+	auto const pixel_size = 0.25f;
+	auto x_0 = 0.0f;
+	auto y_0 = 0.0f;
+	visit_pixels(
+		locs,
+		pixel_size,
+		[&x_0, &y_0, callcount = 0](auto x, auto y, auto&&) mutable{
+			if(callcount != 0)
+			{
+				auto const dx_size = std::abs(x - x_0);
+				auto const dy_size = std::abs(y - y_0);
+				EXPECT_EQ(dx_size == 1.0f || dy_size == 1.0f, true);
+			}
+
+			++callcount;
+			x_0 = x;
+			y_0 = y;
+		}
+	);
+
+	auto const end = (locs.back() - terraformer::location{})/pixel_size;
+	EXPECT_LT(std::abs(end[0] - x_0), 1.0f);
+	EXPECT_LT(std::abs(end[1] - y_0), 1.0f);
 }
