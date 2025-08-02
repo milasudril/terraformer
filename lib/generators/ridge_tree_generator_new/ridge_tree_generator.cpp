@@ -149,6 +149,7 @@ namespace
 		auto& ep = params.elevation_profile[level];
 		auto const ridge_radius = ep.horizontal_scale_ridge/pixel_size;
 		auto const shape_exponent = ep.shape_exponent;
+		printf("Rendering level %zu\n", level);
 		while(i != i_end)
 		{
 			if(i->level != level)
@@ -201,54 +202,63 @@ namespace
 				ridge.pixels().data(),
 				ridge.pixels().data() + w_img_ridge*h_img_ridge
 			);
-			std::transform(
-				ridge.pixels().data(),
-				ridge.pixels().data() + w_img_ridge*h_img_ridge,
-				ridge.pixels().data(),
-				[
-					min = *minmax.first,
-					max = *minmax.second,
-					ridge_elevation = ep.ridge_elevation
-				](auto val) {
-					return ridge_elevation * (val - min)/(max - min);
-				}
-			);
+
+			if(*minmax.first < *minmax.second)
+			{
+				std::transform(
+					ridge.pixels().data(),
+					ridge.pixels().data() + w_img_ridge*h_img_ridge,
+					ridge.pixels().data(),
+					[
+						min = *minmax.first,
+						max = *minmax.second,
+						ridge_elevation = ep.ridge_elevation
+					](auto val) {
+						return ridge_elevation * (val - min)/(max - min);
+					}
+				);
+			}
 		}
 
-#if 0
-		noise = apply(
-			terraformer::butter_bp_2d_descriptor{
-				.f_x = dom_size.width/ep.horizontal_scale_noise,
-				.f_y = dom_size.height/ep.horizontal_scale_noise,
-				.lf_rolloff = ep.lf_rolloff,
-				.hf_rolloff = ep.hf_rolloff,
-				.y_direction = 0.0f
-			},
-			std::as_const(noise).pixels()
-		);
 		{
-			auto const minmax = std::minmax_element(
-				noise.pixels().data(),
-				noise.pixels().data() + w_img_ridge*h_img_ridge
+			noise = apply(
+				terraformer::butter_bp_2d_descriptor{
+					.f_x = dom_size.width/ep.horizontal_scale_noise,
+					.f_y = dom_size.height/ep.horizontal_scale_noise,
+					.lf_rolloff = ep.lf_rolloff,
+					.hf_rolloff = ep.hf_rolloff,
+					.y_direction = 0.0f
+				},
+				std::as_const(noise).pixels()
 			);
-			std::transform(
-				noise.pixels().data(),
-				noise.pixels().data() + w_img_ridge*h_img_ridge,
-				noise.pixels().data(),
-				[
-					min = *minmax.first,
-					max = *minmax.second,
-					noise_amplitude = ep.noise_amplitude
-				](auto val) {
-					auto const xi = (val - min)/(max - min);
-					return 2.0f*noise_amplitude*xi*xi;
+
+			{
+				auto const minmax = std::minmax_element(
+					noise.pixels().data(),
+					noise.pixels().data() + w_img_ridge*h_img_ridge
+				);
+
+				if(*minmax.first < *minmax.second)
+				{
+					std::transform(
+						noise.pixels().data(),
+						noise.pixels().data() + w_img_ridge*h_img_ridge,
+						noise.pixels().data(),
+						[
+							min = *minmax.first,
+							max = *minmax.second,
+							noise_amplitude = ep.noise_amplitude
+						](auto val) {
+							auto const xi = (val - min)/(max - min);
+							return 2.0f*noise_amplitude*xi*xi;
+						}
+					);
 				}
-			);
+			}
 		}
-#endif
 
 		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
-	//	terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
+		terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
 		return i;
 	}
 }
