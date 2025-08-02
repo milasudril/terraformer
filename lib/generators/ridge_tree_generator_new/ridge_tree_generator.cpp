@@ -125,11 +125,33 @@ namespace
 		}
 	}
 
+	auto get_parent_ridge_elevation(
+		terraformer::displaced_curve::index_type branch_starts_at,
+		terraformer::ridge_tree_trunk const& current_trunk,
+		terraformer::span<terraformer::ridge_tree_trunk const> all_trunks
+	)
+	{
+		if(current_trunk.parent ==terraformer::ridge_tree_trunk::no_parent)
+		{ return 1.0f; }
+
+		auto const& parent = all_trunks[current_trunk.parent];
+		auto const& parent_branches = parent.branches;
+		auto const curve_lengths = parent_branches.get<3>();
+		// This is the correct index
+		terraformer::ridge_tree_branch_sequence::index_type const i{current_trunk.parent_curve_index.get()};
+		auto const parent_curve_length_tot = curve_lengths[i].back();
+		auto const curve_length_at_branch = curve_lengths[i][terraformer::array_index<float>{branch_starts_at.get()}];
+
+		return std::max(1.0f - curve_length_at_branch/parent_curve_length_tot, 0.0f)/
+			std::max(1.0f - curve_lengths[i].front()/parent_curve_length_tot, 0.0f);
+	}
+
 	auto render_branches_at_current_level(
 		terraformer::domain_size_descriptor dom_size,
 		terraformer::ridge_tree_descriptor const& params,
 		terraformer::ridge_tree_trunk const* i,
 		terraformer::ridge_tree_trunk const* i_end,
+		terraformer::span<terraformer::ridge_tree_trunk const> all_trunks,
 		terraformer::random_generator& rng,
 		terraformer::span_2d<float> output_image
 	)
@@ -155,21 +177,15 @@ namespace
 			if(i->level != level)
 			{ break; }
 
-			printf("Parent trunk: %zu\n", i->parent.get());
-			printf("Parent branch: %zu\n", i->parent_curve_index.get());
-
 			auto const& branches = i->branches;
 			auto const curves = branches.get<0>();
+			auto const start_index = branches.get<1>();
 			auto const curve_lengths = branches.get<3>();
-			auto const parent_verts = branches.get<1>();
 			for(auto k : branches.element_indices())
 			{
 				auto const& curve = curves[k];
 				if(curve.points().empty())
 				{ continue; }
-
-				printf("- Curve starts at %zu\n", parent_verts[k].get());
-
 
 				visit_pixels(curve.points(), pixel_size, [
 					ridge = ridge.pixels(),
@@ -180,15 +196,17 @@ namespace
 					curve_length = curve_lengths[k].back()/pixel_size,
 					travel_distance = 0.0f,
 					level,
-					shape_exponent
+					shape_exponent,
+					ridge_elevation = level <2? 1.0f : get_parent_ridge_elevation(start_index[k], *i, all_trunks)
 				](auto loc) mutable{
 					auto const x = loc[0];
 					auto const y = loc[1];
 					add_circle(ridge, x, y, ridge_radius, [
 						d = level == 0? 0.0f :travel_distance/curve_length,
-						shape_exponent
+						shape_exponent,
+						ridge_elevation
 					](float r){
-						return std::max(1.0f - d, 0.0f)*std::pow(r, shape_exponent);
+						return ridge_elevation*std::max(1.0f - d, 0.0f)*std::pow(r, shape_exponent);
 					});
 #if 0
 					std::uniform_real_distribution noise_value{0.0f, 1.0f};
@@ -310,7 +328,7 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 
 	auto i = std::begin(ridge_tree);
 	while(i != std::end(ridge_tree))
-	{ i = render_branches_at_current_level(dom_size, params, i, std::end(ridge_tree), rng, ret.pixels()); }
+	{ i = render_branches_at_current_level(dom_size, params, i, std::end(ridge_tree), ridge_tree, rng, ret.pixels()); }
 
 	return ret;
 }
