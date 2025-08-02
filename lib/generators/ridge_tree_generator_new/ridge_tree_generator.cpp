@@ -155,10 +155,21 @@ namespace
 			if(i->level != level)
 			{ break; }
 
-			for(auto const& curve : i->branches.get<0>())
+			printf("Parent trunk: %zu\n", i->parent.get());
+			printf("Parent branch: %zu\n", i->parent_curve_index.get());
+
+			auto const& branches = i->branches;
+			auto const curves = branches.get<0>();
+			auto const curve_lengths = branches.get<3>();
+			auto const parent_verts = branches.get<1>();
+			for(auto k : branches.element_indices())
 			{
+				auto const& curve = curves[k];
 				if(curve.points().empty())
 				{ continue; }
+
+				printf("- Curve starts at %zu\n", parent_verts[k].get());
+
 
 				visit_pixels(curve.points(), pixel_size, [
 					ridge = ridge.pixels(),
@@ -166,7 +177,7 @@ namespace
 					&rng,
 					ridge_radius,
 					loc_prev = terraformer::location{} + (curve.points().front() - terraformer::location{})/pixel_size,
-					curve_length = curve_length(curve.points())/pixel_size,
+					curve_length = curve_lengths[k].back()/pixel_size,
 					travel_distance = 0.0f,
 					level,
 					shape_exponent
