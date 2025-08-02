@@ -85,8 +85,8 @@ namespace
 			.curve_levels = std::move(curve_levels)
 		};
 	}
-
-	void  add_circle(terraformer::span_2d<float> output, float x_0, float y_0, float r)
+	template<class Shape>
+	void  add_circle(terraformer::span_2d<float> output, float x_0, float y_0, float r, Shape&& shape)
 	{
 		auto const x_min = std::clamp(
 			static_cast<int32_t>(x_0 - r + 0.5f),
@@ -120,7 +120,7 @@ namespace
 				auto const y_float = (static_cast<float>(y) + 0.5f - y_0)/r;
 				auto const r = std::sqrt(x_float*x_float + y_float*y_float);
 				if( r <= 1.0f)
-				{ output(x, y) += (1.0f - r)*(1.0f - r); }
+				{ output(x, y) += shape(1.0f - r); }
 			}
 		}
 	}
@@ -148,6 +148,7 @@ namespace
 		terraformer::grayscale_image noise{w_img_noise, h_img_noise};
 		auto& ep = params.elevation_profile[level];
 		auto const ridge_radius = ep.horizontal_scale_ridge/pixel_size;
+		auto const shape_exponent = ep.shape_exponent;
 		while(i != i_end)
 		{
 			if(i->level != level)
@@ -155,15 +156,28 @@ namespace
 
 			for(auto const& curve : i->branches.get<0>())
 			{
+				if(curve.points().empty())
+				{ continue; }
+
 				visit_pixels(curve.points(), pixel_size, [
 					ridge = ridge.pixels(),
 					noise = noise.pixels(),
 					&rng,
-					ridge_radius
-				](auto loc){
+					ridge_radius,
+					loc_prev = terraformer::location{} + (curve.points().front() - terraformer::location{})/pixel_size,
+					curve_length = curve_length(curve.points())/pixel_size,
+					travel_distance = 0.0f,
+					level,
+					shape_exponent
+				](auto loc) mutable{
 					auto const x = loc[0];
 					auto const y = loc[1];
-					add_circle(ridge, x, y, ridge_radius);
+					add_circle(ridge, x, y, ridge_radius, [
+						d = level == 0? 0.0f :travel_distance/curve_length,
+						shape_exponent
+					](float r){
+						return std::max(1.0f - d, 0.0f)*std::pow(r, shape_exponent);
+					});
 
 					std::uniform_real_distribution noise_value{0.0f, 1.0f};
 					auto const target_x = static_cast<int32_t>(x + 0.5f);
@@ -174,6 +188,9 @@ namespace
 						(target_y >= 0 && static_cast<uint32_t>(target_y) < noise.height())
 					) [[likely]]
 					{ noise(target_x, target_y) = noise_value(rng); }
+
+					travel_distance += distance(loc, loc_prev);
+					loc_prev = loc;
 				});
 			}
 			++i;
@@ -269,12 +286,8 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	grayscale_image ret{w_img, h_img};
 
 	auto i = std::begin(ridge_tree);
-	size_t k = 0;
-	while(i != std::end(ridge_tree) && k != 2)
-	{
-		i = render_branches_at_current_level(dom_size, params, i, std::end(ridge_tree), rng, ret.pixels());
-		++k;
-	}
+	while(i != std::end(ridge_tree))
+	{ i = render_branches_at_current_level(dom_size, params, i, std::end(ridge_tree), rng, ret.pixels()); }
 
 	return ret;
 }

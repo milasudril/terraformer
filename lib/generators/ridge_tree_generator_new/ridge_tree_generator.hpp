@@ -93,7 +93,7 @@ namespace terraformer
 		float y_0 = 0.0f;
 		float heading = 0.25f;
 
-		static constexpr size_t num_levels = 4;
+		static constexpr size_t num_levels = 2;
 
 		std::array<ridge_tree_horz_layout_descriptor, num_levels> horizontal_layout{
 			ridge_tree_horz_layout_descriptor{
@@ -111,7 +111,8 @@ namespace terraformer
 					.wavelength = 1536.0f,
 					.damping = {}
 				}
-			},
+			}
+/*
 			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 49152.0f/16.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
@@ -127,7 +128,7 @@ namespace terraformer
 					.wavelength = 96.0f,
 					.damping = {}
 				}
-			}
+			}*/
 		};
 
 		std::array<ridge_tree_elevation_profile_descriptor, num_levels> elevation_profile{
@@ -148,7 +149,8 @@ namespace terraformer
 				.horizontal_scale_ridge = 6144.0f,
 				.horizontal_scale_noise = 512.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
-			},
+			}
+			/*,
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 512.0f,
 				.noise_amplitude = 128.0f,
@@ -166,7 +168,7 @@ namespace terraformer
 				.horizontal_scale_ridge = 1536.0f,
 				.horizontal_scale_noise = 128.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
-			}
+			}*/
 		};
 
 		bool operator==(ridge_tree_descriptor const&) const = default;
