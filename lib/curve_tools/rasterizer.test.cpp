@@ -39,10 +39,10 @@ TESTCASE(terraformer_visit_pixels_different_directions)
 		visit_pixels(
 			terraformer::span{std::begin(locs), std::end(locs)},
 			pixel_size,
-			[&callcount, item, pixel_size](auto x, auto y, auto&&...) {
+			[&callcount, item, pixel_size](auto loc) {
 				auto const expected_loc = static_cast<float>(callcount)*item/2.0f;
-				EXPECT_EQ(x, expected_loc[0]);
-				EXPECT_EQ(y, expected_loc[1]);
+				EXPECT_EQ(loc[0], expected_loc[0]);
+				EXPECT_EQ(loc[1], expected_loc[1]);
 				++callcount;
 			}
 		);
@@ -66,7 +66,9 @@ TESTCASE(terraformer_visit_pixels_curve_through_non_integer_point_with_dir_chang
 	visit_pixels(
 		terraformer::span{std::begin(locs), std::end(locs)},
 		pixel_size,
-		[&callcount, pixel_size](auto x, auto y, auto&&...) {
+		[&callcount, pixel_size](auto loc) {
+			auto const x = loc[0];
+			auto const y = loc[1];
 			if(callcount < 7)
 			{
 				EXPECT_EQ(x,  static_cast<float>(callcount));
@@ -106,9 +108,9 @@ TESTCASE(terraformer_visit_pixels_curge_random_points)
 		visit_pixels(
 			locs,
 			pixel_size,
-			[&x_0, &y_0, callcount = 0](auto x, auto y, auto&&...) mutable{
-				auto const x_int = static_cast<int>(std::round(x));
-				auto const y_int = static_cast<int>(std::round(y));
+			[&x_0, &y_0, callcount = 0](auto loc) mutable{
+				auto const x_int = static_cast<int>(std::round(loc[0]));
+				auto const y_int = static_cast<int>(std::round(loc[1]));
 				if(callcount != 0)
 				{
 					auto const dx_size = std::abs(x_int - x_0);

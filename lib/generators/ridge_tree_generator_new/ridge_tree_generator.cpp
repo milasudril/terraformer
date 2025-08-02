@@ -160,7 +160,9 @@ namespace
 					noise = noise.pixels(),
 					&rng,
 					ridge_radius
-				](float x, float y, auto&&...){
+				](auto loc){
+					auto const x = loc[0];
+					auto const y = loc[1];
 					add_circle(ridge, x, y, ridge_radius);
 
 					std::uniform_real_distribution noise_value{0.0f, 1.0f};
@@ -196,6 +198,7 @@ namespace
 			);
 		}
 
+#if 0
 		noise = apply(
 			terraformer::butter_bp_2d_descriptor{
 				.f_x = dom_size.width/ep.horizontal_scale_noise,
@@ -225,9 +228,10 @@ namespace
 				}
 			);
 		}
+#endif
 
 		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
-		terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
+	//	terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
 		return i;
 	}
 }
@@ -265,9 +269,11 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	grayscale_image ret{w_img, h_img};
 
 	auto i = std::begin(ridge_tree);
-	while(i != std::end(ridge_tree))
+	size_t k = 0;
+	while(i != std::end(ridge_tree) && k != 2)
 	{
 		i = render_branches_at_current_level(dom_size, params, i, std::end(ridge_tree), rng, ret.pixels());
+		++k;
 	}
 
 	return ret;
