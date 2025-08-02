@@ -17,38 +17,22 @@ namespace terraformer
 	void visit_pixels(
 		geosimd::line_segment<geom_space> seg,
 		float pixel_size,
-		PixelVisitor&& pixel_visitor,
-		array_index<location> starting_at
+		PixelVisitor&& pixel_visitor
 	)
 	{
 		auto const p1 = (seg.p1 - location{0.0f, 0.0f, 0.0f})/pixel_size;
 		auto const p2 = (seg.p2 - location{0.0f, 0.0f, 0.0f})/pixel_size;
-		auto const dr = p2 - p1;
-		if(std::abs(dr[0]) > std::abs(dr[1]))
+		auto const total_displacement = p2 - p1;
+		auto const rep = total_displacement.get().get();
+		auto const absvec = rep < geosimd::vec_t<float, 4>{}.get()? -rep : rep;
+		auto const projected_distance = std::max(absvec[0], absvec[1]);
+		auto const dr = total_displacement/projected_distance;
+		auto const n = static_cast<size_t>(projected_distance);
+
+		for(size_t k = 0; k != n; ++k)
 		{
-			auto const a = dr[1]/dr[0];
-			auto const dx = dr[0] >= 0.0f ? 1 : -1;
-			for(auto l = static_cast<int32_t>(p1[0]);
-				l != static_cast<int32_t>(p2[0]);
-				l += dx)
-			{
-				auto const y = a*static_cast<float>(l - static_cast<int32_t>(p1[0])) + static_cast<int32_t>(p1[1]) + 0.5f;
-				auto const x = static_cast<float>(l) + 0.5f;
-				pixel_visitor(x, y, starting_at);
-			}
-		}
-		else
-		{
-			auto const a = dr[0]/dr[1];
-			auto const dy = dr[1] >= 0.0f ? 1 : -1;
-			for(auto k = static_cast<int32_t>(p1[1]);
-				k != static_cast<int32_t>(p2[1]);
-				k += dy)
-			{
-				auto const x = a*static_cast<float>(k - static_cast<int32_t>(p1[1])) + static_cast<int32_t>(p1[0]) + 0.5f;
-				auto const y = static_cast<float>(k) + 0.5f;
-				pixel_visitor(x, y, starting_at);
-			}
+			auto const r = p1 + (static_cast<float>(k))*dr;
+			pixel_visitor(r[0], r[1]);
 		}
 	}
 
@@ -67,7 +51,12 @@ namespace terraformer
 		for(auto k : curve.element_indices(1))
 		{
 			auto const current = curve[k];
-			visit_pixels(geosimd::line_segment{.p1 = prev, .p2 = current}, pixel_size, pixel_visitor, k);
+			visit_pixels(
+				geosimd::line_segment{.p1 = prev, .p2 = current},
+				pixel_size,
+				pixel_visitor
+			);
+
 			prev = current;
 		}
 	}

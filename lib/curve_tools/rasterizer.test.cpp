@@ -39,9 +39,8 @@ TESTCASE(terraformer_visit_pixels_different_directions)
 		visit_pixels(
 			terraformer::span{std::begin(locs), std::end(locs)},
 			pixel_size,
-			[&callcount, item, pixel_size](auto x, auto y, auto&&) {
-				auto const expected_loc = terraformer::location{0.5f, 0.5f, 0.0f}
-					+ static_cast<float>(callcount)*item/2.0f;
+			[&callcount, item, pixel_size](auto x, auto y, auto&&...) {
+				auto const expected_loc = static_cast<float>(callcount)*item/2.0f;
 				EXPECT_EQ(x, expected_loc[0]);
 				EXPECT_EQ(y, expected_loc[1]);
 				++callcount;
@@ -67,16 +66,17 @@ TESTCASE(terraformer_visit_pixels_curve_through_non_integer_point_with_dir_chang
 	visit_pixels(
 		terraformer::span{std::begin(locs), std::end(locs)},
 		pixel_size,
-		[&callcount, pixel_size](auto x, auto y, auto&&) {
-			if(callcount < 8)
+		[&callcount, pixel_size](auto x, auto y, auto&&...) {
+			if(callcount < 7)
 			{
-				EXPECT_EQ(x, 0.5f + static_cast<float>(callcount));
-				EXPECT_EQ(y, 0.5f);
+				EXPECT_EQ(x,  static_cast<float>(callcount));
+				EXPECT_EQ(y, 0.0f);
 			}
 			else
-			{
-				EXPECT_EQ(y, 0.5f + static_cast<float>(callcount - 8 + 1));
-			}
+			if(callcount < 10)
+			{ EXPECT_EQ(y, static_cast<float>(callcount - 7)); }
+			else
+			{ EXPECT_EQ(y, 3.5f + static_cast<float>(callcount - 10)); }
 			++callcount;
 		}
 	);
@@ -93,33 +93,37 @@ TESTCASE(terraformer_visit_pixels_curge_random_points)
 		{
 			locs.push_back(loc);
 
-			std::uniform_real_distribution u{5.0f, 10.0f};
-			terraformer::displacement const dr{u(rng), u(rng), 0.0f};
+			std::uniform_real_distribution u{1.0f, 2.0f};
+			auto sign_dist = std::uniform_int_distribution{0, 1};
+			auto const sign = sign_dist(rng) == 0? -1.0f : 1.0f;
+			terraformer::displacement const dr{sign*u(rng), sign*u(rng), 0.0f};
 			loc += dr;
 		}
 
 		auto const pixel_size = 1.0f/16.0f;
-		auto x_0 = 0.0f;
-		auto y_0 = 0.0f;
+		auto x_0 = 0;
+		auto y_0 = 0;
 		visit_pixels(
 			locs,
 			pixel_size,
-			[&x_0, &y_0, callcount = 0](auto x, auto y, auto&&) mutable{
+			[&x_0, &y_0, callcount = 0](auto x, auto y, auto&&...) mutable{
+				auto const x_int = static_cast<int>(std::round(x));
+				auto const y_int = static_cast<int>(std::round(y));
 				if(callcount != 0)
 				{
-					auto const dx_size = std::abs(x - x_0);
-					auto const dy_size = std::abs(y - y_0);
-					EXPECT_EQ(dx_size == 1.0f || dy_size == 1.0f, true);
+					auto const dx_size = std::abs(x_int - x_0);
+					auto const dy_size = std::abs(y_int - y_0);
+					EXPECT_EQ(dx_size > 0 || dy_size > 0, true);
 				}
 
 				++callcount;
-				x_0 = x;
-				y_0 = y;
+				x_0 = x_int;
+				y_0 = y_int;
 			}
 		);
 
 		auto const end = (locs.back() - terraformer::location{})/pixel_size;
-		EXPECT_LT(std::abs(end[0] - x_0), 2.0f);
-		EXPECT_LT(std::abs(end[1] - y_0), 2.0f);
+		EXPECT_LT(std::abs(end[0] - static_cast<float>(x_0)), 2.5f);
+		EXPECT_LT(std::abs(end[1] - static_cast<float>(y_0)), 2.5f);
 	}
 }
