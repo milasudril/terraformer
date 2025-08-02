@@ -141,11 +141,11 @@ namespace
 		);
 		auto const w_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
 		auto const h_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
-		auto const w_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
-		auto const h_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
+//		auto const w_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
+//		auto const h_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
 
 		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
-		terraformer::grayscale_image noise{w_img_noise, h_img_noise};
+//		terraformer::grayscale_image noise{w_img_noise, h_img_noise};
 		auto& ep = params.elevation_profile[level];
 		auto const ridge_radius = ep.horizontal_scale_ridge/pixel_size;
 		auto const shape_exponent = ep.shape_exponent;
@@ -162,7 +162,7 @@ namespace
 
 				visit_pixels(curve.points(), pixel_size, [
 					ridge = ridge.pixels(),
-					noise = noise.pixels(),
+	//				noise = noise.pixels(),
 					&rng,
 					ridge_radius,
 					loc_prev = terraformer::location{} + (curve.points().front() - terraformer::location{})/pixel_size,
@@ -179,7 +179,7 @@ namespace
 					](float r){
 						return std::max(1.0f - d, 0.0f)*std::pow(r, shape_exponent);
 					});
-
+#if 0
 					std::uniform_real_distribution noise_value{0.0f, 1.0f};
 					auto const target_x = static_cast<int32_t>(x + 0.5f);
 					auto const target_y = static_cast<int32_t>(y + 0.5f);
@@ -189,6 +189,7 @@ namespace
 						(target_y >= 0 && static_cast<uint32_t>(target_y) < noise.height())
 					) [[likely]]
 					{ noise(target_x, target_y) = noise_value(rng); }
+#endif
 
 					travel_distance += distance(loc, loc_prev);
 					loc_prev = loc;
@@ -219,7 +220,7 @@ namespace
 				);
 			}
 		}
-
+#if 0
 		{
 			noise = apply(
 				terraformer::butter_bp_2d_descriptor{
@@ -256,9 +257,10 @@ namespace
 				}
 			}
 		}
+#endif
 
 		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
-		terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
+	//	terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
 		return i;
 	}
 }
