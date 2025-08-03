@@ -119,7 +119,7 @@ namespace terraformer
 					.wavelength = 1536.0f,
 					.damping = {}
 				}
-			}
+			},
 /*
 			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 49152.0f/64.0f,
