@@ -125,6 +125,46 @@ namespace
 		}
 	}
 
+	template<class Shape>
+	void  replace_circle(terraformer::span_2d<float> output, float x_0, float y_0, float r, Shape&& shape)
+	{
+		auto const x_min = std::clamp(
+			static_cast<int32_t>(x_0 - r + 0.5f),
+			0,
+			static_cast<int32_t>(output.width())
+		);
+
+		auto const y_min = std::clamp(
+			static_cast<int32_t>(y_0 - r + 0.5f),
+			0,
+			static_cast<int32_t>(output.height())
+		);
+
+		auto const x_max = std::clamp(
+			static_cast<int32_t>(x_0 + r + 0.5f),
+			0,
+			static_cast<int32_t>(output.width())
+		);
+
+		auto const y_max = std::clamp(
+			static_cast<int32_t>(y_0 + r + 0.5f),
+			0,
+			static_cast<int32_t>(output.height())
+		);
+
+		for(int32_t y = y_min; y != y_max; ++y)
+		{
+			for(int32_t x = x_min; x != x_max; ++x)
+			{
+				auto const x_float = (static_cast<float>(x) + 0.5f - x_0)/r;
+				auto const y_float = (static_cast<float>(y) + 0.5f - y_0)/r;
+				auto const r = std::sqrt(x_float*x_float + y_float*y_float);
+				if( r <= 1.0f)
+				{ output(x, y) = shape(1.0f - r); }
+			}
+		}
+	}
+
 	auto get_parent_ridge_elevation(
 		terraformer::displaced_curve::index_type branch_starts_at,
 		terraformer::ridge_tree_trunk const& current_trunk,
@@ -163,11 +203,11 @@ namespace
 		);
 		auto const w_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
 		auto const h_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
-//		auto const w_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
-//		auto const h_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
+		auto const w_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
+		auto const h_img_noise = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
 
 		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
-//		terraformer::grayscale_image noise{w_img_noise, h_img_noise};
+		terraformer::grayscale_image noise{w_img_noise, h_img_noise};
 		auto& ep = params.elevation_profile[level];
 		auto const ridge_radius = ep.horizontal_scale_ridge/pixel_size;
 		auto const shape_exponent = ep.shape_exponent;
@@ -189,7 +229,7 @@ namespace
 
 				visit_pixels(curve.points(), pixel_size, [
 					ridge = ridge.pixels(),
-	//				noise = noise.pixels(),
+					noise = noise.pixels(),
 					&rng,
 					ridge_radius,
 					loc_prev = terraformer::location{} + (curve.points().front() - terraformer::location{})/pixel_size,
@@ -201,25 +241,23 @@ namespace
 				](auto loc) mutable{
 					auto const x = loc[0];
 					auto const y = loc[1];
+					auto const d = level == 0? 0.0f :travel_distance/curve_length;
 					add_circle(ridge, x, y, ridge_radius, [
-						d = level == 0? 0.0f :travel_distance/curve_length,
+						d,
 						shape_exponent,
 						ridge_elevation
 					](float r){
 						return ridge_elevation*std::max(1.0f - d, 0.0f)*std::pow(r, shape_exponent);
 					});
-#if 0
-					std::uniform_real_distribution noise_value{0.0f, 1.0f};
-					auto const target_x = static_cast<int32_t>(x + 0.5f);
-					auto const target_y = static_cast<int32_t>(y + 0.5f);
-
-					if(
-						(target_x >= 0 && static_cast<uint32_t>(target_x) < noise.width()) &&
-						(target_y >= 0 && static_cast<uint32_t>(target_y) < noise.height())
-					) [[likely]]
-					{ noise(target_x, target_y) = noise_value(rng); }
-#endif
-
+					add_circle(noise, x, y, ridge_radius, [
+						d,
+						shape_exponent,
+						ridge_elevation,
+						&rng
+					](float r){
+						return ridge_elevation*std::max(1.0f - d, 0.0f)*std::pow(r, 2.0f*shape_exponent)
+							*std::uniform_real_distribution{0.0f, 1.0f}(rng);
+					});
 					travel_distance += distance(loc, loc_prev);
 					loc_prev = loc;
 				});
@@ -249,47 +287,43 @@ namespace
 				);
 			}
 		}
-#if 0
+
 		{
 			noise = apply(
-				terraformer::butter_bp_2d_descriptor{
+				terraformer::butter_lp_2d_descriptor{
 					.f_x = dom_size.width/ep.horizontal_scale_noise,
 					.f_y = dom_size.height/ep.horizontal_scale_noise,
-					.lf_rolloff = ep.lf_rolloff,
 					.hf_rolloff = ep.hf_rolloff,
 					.y_direction = 0.0f
 				},
 				std::as_const(noise).pixels()
 			);
 
-			{
-				auto const minmax = std::minmax_element(
-					noise.pixels().data(),
-					noise.pixels().data() + w_img_ridge*h_img_ridge
-				);
+			auto const minmax = std::minmax_element(
+				noise.pixels().data(),
+				noise.pixels().data() + w_img_ridge*h_img_ridge
+			);
 
-				if(*minmax.first < *minmax.second)
-				{
-					std::transform(
-						noise.pixels().data(),
-						noise.pixels().data() + w_img_ridge*h_img_ridge,
-						noise.pixels().data(),
-						[
-							min = *minmax.first,
-							max = *minmax.second,
-							noise_amplitude = ep.noise_amplitude
-						](auto val) {
-							auto const xi = (val - min)/(max - min);
-							return 2.0f*noise_amplitude*xi*xi;
-						}
-					);
-				}
+			if(*minmax.first < *minmax.second)
+			{
+				std::transform(
+					noise.pixels().data(),
+					noise.pixels().data() + w_img_ridge*h_img_ridge,
+					noise.pixels().data(),
+					[
+						min = *minmax.first,
+						max = *minmax.second,
+						noise_amplitude = ep.noise_amplitude
+					](auto val) {
+						auto const xi = (val - min)/(max - min);
+						return 2.0f*noise_amplitude*xi*xi;
+					}
+				);
 			}
 		}
-#endif
 
 		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
-	//	terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
+		terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
 		return i;
 	}
 }
@@ -417,7 +451,7 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		u8"HF roll-off",
 		hf_rolloff,
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{2.0f, 8.0f, 2.0f}},
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
 			.visual_angle_range = std::nullopt
 		}
