@@ -158,7 +158,7 @@ namespace terraformer
 				.horizontal_scale_ridge = 768.0f,
 				.horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
-			}
+			},
 			/*
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 256.0f,

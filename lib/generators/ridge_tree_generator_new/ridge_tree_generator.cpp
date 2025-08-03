@@ -290,7 +290,51 @@ namespace
 			}
 		}
 
+		terraformer::grayscale_image noise{w_img_ridge, h_img_ridge};
+		{
+			for(uint32_t y = 0; y != h_img_ridge; ++y)
+			{
+				for(uint32_t x = 0; x != w_img_ridge; ++x)
+				{
+					noise(x,y) = ridge(x, y)*std::uniform_real_distribution{0.0f, 1.0f}(rng);
+				}
+			}
+
+			noise = terraformer::apply(
+				terraformer::butter_bp_2d_descriptor{
+					.f_x = 2.0f*dom_size.width/params.horizontal_layout[level].displacement.wavelength,
+					.f_y = 2.0f*dom_size.width/params.horizontal_layout[level].displacement.wavelength,
+					.lf_rolloff = ep.lf_rolloff,
+					.hf_rolloff = ep.hf_rolloff,
+					.y_direction = 0.0f
+				},
+				noise.pixels()
+			);
+
+			auto const minmax = std::minmax_element(
+				noise.pixels().data(),
+				noise.pixels().data() + w_img_ridge*h_img_ridge
+			);
+
+			if(*minmax.first < *minmax.second)
+			{
+				std::transform(
+					noise.pixels().data(),
+					noise.pixels().data() + w_img_ridge*h_img_ridge,
+					noise.pixels().data(),
+					[
+						min = *minmax.first,
+						max = *minmax.second,
+						noise_amplitude = ep.noise_amplitude
+					](auto val) {
+						return 2.0f*noise_amplitude*((val - min)/(max - min) - 0.5f);
+					}
+				);
+			}
+		}
+
 		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
+		terraformer::add_resampled(std::as_const(noise).pixels(), output_image , 1.0f);
 		return i;
 	}
 }
