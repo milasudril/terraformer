@@ -198,7 +198,7 @@ namespace
 			{
 				auto const x_float = (static_cast<float>(x) + 0.5f - x_0)/r;
 				auto const y_float = (static_cast<float>(y) + 0.5f - y_0)/r;
-				auto const r = std::sqrt(x_float*x_float + y_float*y_float);
+				auto const r = std::abs(x_float) + std::abs(y_float);
 				if( r <= 1.0f)
 				{ output(x, y) = std::max(output(x,y), shape(1.0f - r)); }
 			}
@@ -334,7 +334,7 @@ namespace
 		}
 
 		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
-		terraformer::add_resampled(std::as_const(noise).pixels(), output_image , 1.0f);
+		terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
 		return i;
 	}
 }
