@@ -303,7 +303,7 @@ namespace
 			noise = terraformer::apply(
 				terraformer::butter_bp_2d_descriptor{
 					.f_x = 2.0f*dom_size.width/params.horizontal_layout[level].displacement.wavelength,
-					.f_y = 2.0f*dom_size.width/params.horizontal_layout[level].displacement.wavelength,
+					.f_y = 2.0f*dom_size.height/params.horizontal_layout[level].displacement.wavelength,
 					.lf_rolloff = ep.lf_rolloff,
 					.hf_rolloff = ep.hf_rolloff,
 					.y_direction = 0.0f
