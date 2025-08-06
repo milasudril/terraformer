@@ -333,8 +333,14 @@ namespace
 			}
 		}
 
-		terraformer::add_resampled(std::as_const(ridge).pixels(), output_image, 1.0f);
-		terraformer::add_resampled(std::as_const(noise).pixels(), output_image, 1.0f);
+		terraformer::grayscale_image tmp{w_img_ridge, h_img_ridge};
+		for(uint32_t y = 0; y != h_img_ridge; ++y)
+		{
+			for(uint32_t x = 0; x != w_img_ridge; ++x)
+			{ tmp(x, y) = std::max(ridge(x, y) + noise(x, y), 0.0f); }
+		}
+
+		terraformer::add_resampled(std::as_const(tmp).pixels(), output_image, 1.0f);
 		return i;
 	}
 }
@@ -374,6 +380,15 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	auto i = std::begin(ridge_tree);
 	while(i != std::end(ridge_tree))
 	{ i = render_branches_at_current_level(dom_size, params, i, std::end(ridge_tree), rng, ret.pixels()); }
+
+	std::transform(
+		ret.pixels().data(),
+		ret.pixels().data() + w_img*h_img,
+		ret.pixels().data(),
+		[](auto val) {
+			return std::max(0.0f, val);
+		}
+	);
 
 	return ret;
 }
