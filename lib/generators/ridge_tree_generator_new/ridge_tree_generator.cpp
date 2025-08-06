@@ -36,7 +36,7 @@ namespace
 	{
 		auto const theta = 2.0f*std::numbers::pi_v<float>*params.heading;
 		terraformer::location const world_origin{0.5f*dom_size.width, 0.5f*dom_size.height, 0.0f};
-		terraformer::location const ridge_origin{params.x_0, params.y_0, 0.0f};
+		terraformer::location const ridge_origin{params.x_0, -params.y_0, 0.0f};
 
 		auto const sin_theta = std::sin(theta);
 		auto const cos_theta = std::cos(theta);
