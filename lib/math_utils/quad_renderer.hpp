@@ -17,8 +17,10 @@ namespace terraformer
 
 	inline location map_unit_square_to_quad(location loc, quad const& q)
 	{
-		loc[2] = loc[0]*loc[1];
 		auto const input_vec = loc - location{};
+		auto v_impl = input_vec.get();
+		v_impl[3] = v_impl[0]*v_impl[1];
+
 
 		auto const u = q.p2 - q.p1;
 		auto const v = q.p3 - q.p1;
@@ -27,11 +29,11 @@ namespace terraformer
 		geosimd::mat_4x4 const transform{
 			u.get(),
 			v.get(),
+			geosimd::vec_t{0.0f, 0.0f, 1.0f, 0.0f},
 			w.get(),
-			geosimd::vec_t{0.0f, 0.0f, 0.0f, 1.0f}
 		};
 
-		return q.p1 + input_vec.apply(transform);
+		return q.p1 + displacement{transform*v_impl};
 	}
 
 	template<class PixelType, class Shader>
