@@ -46,25 +46,21 @@ namespace terraformer
 		auto const v = q.p3 - q.p1;
 		auto const w = location{} + (q.p4 - q.p1) - (u + v);
 
-		// x[0]' = u[0] x[0] + v[0] x[1] + w[0] x[0] x[1]  <=>  u[0] x[0] + v[0] x[1] + w[0] x[0] x[1] - x[0]' = 0
-		// x[1]' = u[1] x[0] + v[1] x[1] + w[1] x[0] x[1]  <=>  u[1] x[0] + v[1] x[1] + w[1] x[0] x[1] - x[1]' = 0
+		// y[0] = u[0] x[0] + v[0] x[1] + w[0] x[0] x[1]  <=>  u[0] x[0] + v[0] x[1] + w[0] x[0] x[1] - y[0] = 0
+		// y[1] = u[1] x[0] + v[1] x[1] + w[1] x[0] x[1]  <=>  u[1] x[0] + v[1] x[1] + w[1] x[0] x[1] - y[1] = 0
 
 		//
 		// J = u[0] + w[0] x[1], v[0] + w[0] x[0]
 		//     u[1] + w[1] x[1], v[1] + w[1] x[0]
 		//
 		auto const x = current_offset_square;
-		auto const y = current_offest_quad;
-
-		auto const denom =  (w[0]*v[1] - v[0]*w[1])*x[1]
-		                   +(u[0]*w[1] - w[0]*u[1])*x[0]
-		                   + u[0]*v[1] - v[0]*u[1];
+		auto const y = -current_offest_quad;
 
 		return displacement{
-			 w[0]*x[0]*y[1] + v[0]*y[1] - y[0]*(x[0]*w[1] + v[1]),
-			 x[1]*(y[0]*w[1]     - w[0]*y[1]) - u[0]*y[1] + y[0]*u[1],
+			-((-(w[0]*x[0]*y[1])-v[0]*y[1]+y[0]*(x[0]*w[1]+v[1]))/((w[0]*v[1]-v[0]*w[1])*x[1]+x[0]*(u[0]*w[1]-w[0]*u[1])+u[0]*v[1]-v[0]*u[1])),
+			(x[1]*(y[0]*w[1]-w[0]*y[1])-u[0]*y[1]+y[0]*u[1])/((w[0]*v[1]-v[0]*w[1])*x[1]+x[0]*(u[0]*w[1]-w[0]*u[1])+u[0]*v[1]-v[0]*u[1]),
 			-y[2]
-		}/denom;
+		};
 	}
 
 	inline auto quad_to_unit_square_compute_initial_guess(quad const& q, displacement offset_quad)
@@ -104,12 +100,19 @@ namespace terraformer
 	inline location map_quad_to_unit_square(quad const& q, location loc)
 	{
 		auto const input_vec = loc - q.p1;
+
 		auto current_offest_square = quad_to_unit_square_compute_initial_guess(q, input_vec);
 
+		for(size_t k = 0; k != 64; ++k)
+		{
+			auto current_offset_quad = map_unit_square_to_quad_rel(current_offest_square, q) - input_vec;
+			auto const delta = quad_to_unit_square_compute_delta(q, current_offest_square, current_offset_quad);
 
-		printf("xy = %.8g\n", current_offest_square[3]);
+			if(norm(delta) < 1.0e-8f)
+			{ return location{} + current_offest_square; }
 
-		//current_offest_square += quad_to_unit_square_compute_delta(q, current_offest_square, map_unit_square_to_quad_rel(current_offest_square, q));
+			current_offest_square -= delta;
+		}
 
 		return location{} + current_offest_square;
 	}

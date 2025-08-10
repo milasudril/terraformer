@@ -40,12 +40,11 @@ TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square)
 	EXPECT_EQ(loc1, terraformer::location{});
 
 	auto const loc2 = terraformer::map_quad_to_unit_square(q, q.p2);
-	printf("%s\n", to_string(loc2).c_str());
+	EXPECT_EQ(loc2, (terraformer::location{1.0f, 0.0f, 0.0f}));
 
 	auto const loc3 = terraformer::map_quad_to_unit_square(q, q.p3);
-	printf("%s\n", to_string(loc3).c_str());
+	EXPECT_EQ(loc3, (terraformer::location{0.0f, 1.0f, 0.0f}));
 
 	auto const loc4 = terraformer::map_quad_to_unit_square(q, q.p4);
-	printf("%s\n", to_string(loc4).c_str());
-
+	EXPECT_EQ(loc4, (terraformer::location{1.0f, 1.0f, 0.0f}));
 }
