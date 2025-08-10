@@ -35,29 +35,38 @@ namespace terraformer
 		};
 	}
 
+	struct quad_fwd_matrix
+	{
+		location origin;
+		geosimd::mat_4x4<float> mat;
+	};
+
 	inline auto make_fwd_matrix(quad_params const& q)
 	{
-		return geosimd::mat_4x4{
-			q.u.get(),
-			q.v.get(),
-			geosimd::vec_t{0.0f, 0.0f, 1.0f, 0.0f},
-			q.w.get(),
+		return quad_fwd_matrix{
+			.origin = q.origin,
+			.mat = geosimd::mat_4x4{
+				q.u.get(),
+				q.v.get(),
+				geosimd::vec_t{0.0f, 0.0f, 1.0f, 0.0f},
+				q.w.get(),
+			}
 		};
 	}
 
-	inline displacement map_unit_square_to_quad_rel(displacement input_vec, quad_params const& q)
+	inline displacement map_unit_square_to_quad_rel(displacement input_vec, quad_fwd_matrix const& m)
 	{
 		auto v_impl = input_vec.get();
 		v_impl[3] = v_impl[0]*v_impl[1];
 
-		return displacement{make_fwd_matrix(q)*v_impl};
+		return displacement{m.mat*v_impl};
 	}
 
-	inline location map_unit_square_to_quad(location loc, quad_params const& q)
-	{ return q.origin + map_unit_square_to_quad_rel(loc - location{}, q); }
+	inline location map_unit_square_to_quad(location loc, quad_fwd_matrix const& m)
+	{ return m.origin + map_unit_square_to_quad_rel(loc - location{}, m); }
 
 	inline location map_unit_square_to_quad(location loc, quad const& q)
-	{ return q.p1 + map_unit_square_to_quad_rel(loc - location{}, make_quad_params(q)); }
+	{ return q.p1 + map_unit_square_to_quad_rel(loc - location{}, make_fwd_matrix(make_quad_params(q))); }
 
 	inline auto quad_to_unit_square_compute_delta(quad_params const& q, displacement current_offset_square, displacement current_offest_quad)
 	{
@@ -120,13 +129,14 @@ namespace terraformer
 	inline location map_quad_to_unit_square(quad const& q, location loc)
 	{
 		auto const quad_params = make_quad_params(q);
+		auto const mat = make_fwd_matrix(quad_params);
 		auto const input_vec = loc - q.p1;
 
 		auto current_offest_square = quad_to_unit_square_compute_initial_guess(quad_params, input_vec);
 
 		for(size_t k = 0; k != 64; ++k)
 		{
-			auto current_offset_quad = map_unit_square_to_quad_rel(current_offest_square, quad_params) - input_vec;
+			auto current_offset_quad = map_unit_square_to_quad_rel(current_offest_square, mat) - input_vec;
 			auto const delta = quad_to_unit_square_compute_delta(quad_params, current_offest_square, current_offset_quad);
 
 			if(norm(delta) < 1.0e-8f)
