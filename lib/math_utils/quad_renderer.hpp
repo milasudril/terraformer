@@ -15,23 +15,27 @@ namespace terraformer
 		location p4;
 	};
 
+	inline auto make_fwd_matrix(quad const& q)
+	{
+		auto const u = q.p2 - q.p1;
+		auto const v = q.p3 - q.p1;
+		auto const w = (q.p4 - q.p1) - (u + v);
+
+		return geosimd::mat_4x4{
+			u.get(),
+			v.get(),
+			geosimd::vec_t{0.0f, 0.0f, 1.0f, 0.0f},
+			w.get(),
+		};
+	}
+
 	inline location map_unit_square_to_quad(location loc, quad const& q)
 	{
 		auto const input_vec = loc - location{};
 		auto v_impl = input_vec.get();
 		v_impl[3] = v_impl[0]*v_impl[1];
 
-
-		auto const u = q.p2 - q.p1;
-		auto const v = q.p3 - q.p1;
-		auto const w = (q.p4 - q.p1) - (u + v);
-
-		geosimd::mat_4x4 const transform{
-			u.get(),
-			v.get(),
-			geosimd::vec_t{0.0f, 0.0f, 1.0f, 0.0f},
-			w.get(),
-		};
+		auto const transform = make_fwd_matrix(q);
 
 		return q.p1 + displacement{transform*v_impl};
 	}
