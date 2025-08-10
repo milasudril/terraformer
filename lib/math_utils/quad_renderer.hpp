@@ -59,6 +59,7 @@ namespace terraformer
 		auto const denom =  (w[0]*v[1] - v[0]*w[1])*x[1]
 		                   +(u[0]*w[1] - w[0]*u[1])*x[0]
 		                   + u[0]*v[1] - v[0]*u[1];
+
 		return displacement{
 			 w[0]*x[0]*y[1] + v[0]*y[1] - y[0]*(x[0]*w[1] + v[1]),
 			 x[1]*(y[0]*w[1]     - w[0]*y[1]) - u[0]*y[1] + y[0]*u[1],
@@ -66,36 +67,20 @@ namespace terraformer
 		}/denom;
 	}
 
-	inline location map_quad_to_unit_square(quad const& q, location loc)
+	inline auto quad_to_unit_square_compute_initial_guess(quad const& q, displacement offset_quad)
 	{
 		auto const u = q.p2 - q.p1;
 		auto const v = q.p3 - q.p1;
 		auto const w = location{} + (q.p4 - q.p1) - (u + v);
 
-#if 1
 		auto const w_factors = shuffle(w.get(), 1, 0, 0, 1);
 		auto const uv_factors = shuffle(u.get(), v.get(), 4, 1, 5, 0);
 		auto const prod = w_factors*uv_factors;
 		auto const sum = shuffle(prod, 0, 1, 2, 3) - shuffle(prod, 2, 3, 2, 3);
 
-
 		auto const row_0 = shuffle(v.get(), sum, 1, 0, 2, 4)*geosimd::vec_t{1.0f, -1.0f, 1.0f, 1.0f};
 		auto const row_1 = shuffle(u.get(), sum, 1, 0, 2, 5)*geosimd::vec_t{-1.0f, 1.0f, 1.0f, 1.0f};
-#else
-		geosimd::vec_t const row_0{
-			v[1],
-			-v[0],
-			0.0f,
-			v[0]*w[1] - v[1]*w[0]
-		};
 
-		geosimd::vec_t const row_1{
-			-u[1],
-			u[0],
-			0.0f,
-			u[1]*w[0] - u[0]*w[1]
-		};
-#endif
 		geosimd::vec_t const row_2{0.0f, 0.0f, 1.0f, 0.0f};
 		geosimd::vec_t const row_3{0.0f, 0.0f, 0.0f, 1.0f};
 
@@ -107,17 +92,24 @@ namespace terraformer
 		};
 		auto const det = u[0]*v[1] - u[1]*v[0];
 
-		auto const input_vec = (loc - q.p1).get();
 		geosimd::vec_t<float, 4> result{};
 		for(size_t k = 0; k != 4; ++k)
 		{
-			result[k] = inner_product(transform[k], input_vec);
+			result[k] = inner_product(transform[k], offset_quad.get());
 		}
 
-		result /= det;
-		printf("xy = %.8g\n", result[3]);
+		return displacement{result}/det;
+	}
 
-		return location{} + displacement{result};
+	inline location map_quad_to_unit_square(quad const& q, location loc)
+	{
+		auto const input_vec = loc - q.p1;
+		auto current_offest_quad = quad_to_unit_square_compute_initial_guess(q, input_vec);
+
+
+		printf("xy = %.8g\n", current_offest_quad[3]);
+
+		return location{} + current_offest_quad;
 	}
 
 	template<class PixelType, class Shader>
