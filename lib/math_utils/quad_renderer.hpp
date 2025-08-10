@@ -29,9 +29,8 @@ namespace terraformer
 		};
 	}
 
-	inline displacement map_unit_square_to_quad_rel(location loc, quad const& q)
+	inline displacement map_unit_square_to_quad_rel(displacement input_vec, quad const& q)
 	{
-		auto const input_vec = loc - location{};
 		auto v_impl = input_vec.get();
 		v_impl[3] = v_impl[0]*v_impl[1];
 
@@ -39,7 +38,7 @@ namespace terraformer
 	}
 
 	inline location map_unit_square_to_quad(location loc, quad const& q)
-	{ return q.p1 + map_unit_square_to_quad_rel(loc, q); }
+	{ return q.p1 + map_unit_square_to_quad_rel(loc - location{}, q); }
 
 	inline auto quad_to_unit_square_compute_delta(quad const& q, displacement current_offset_square, displacement current_offest_quad)
 	{
@@ -110,7 +109,7 @@ namespace terraformer
 
 		printf("xy = %.8g\n", current_offest_square[3]);
 
-//		current_offest_square += quad_to_unit_square_compute_delta(q, current_offest_square, current_)
+		//current_offest_square += quad_to_unit_square_compute_delta(q, current_offest_square, map_unit_square_to_quad_rel(current_offest_square, q));
 
 		return location{} + current_offest_square;
 	}
