@@ -29,16 +29,17 @@ namespace terraformer
 		};
 	}
 
-	inline location map_unit_square_to_quad(location loc, quad const& q)
+	inline displacement map_unit_square_to_quad_rel(location loc, quad const& q)
 	{
 		auto const input_vec = loc - location{};
 		auto v_impl = input_vec.get();
 		v_impl[3] = v_impl[0]*v_impl[1];
 
-		auto const transform = make_fwd_matrix(q);
-
-		return q.p1 + displacement{transform*v_impl};
+		return displacement{make_fwd_matrix(q)*v_impl};
 	}
+
+	inline location map_unit_square_to_quad(location loc, quad const& q)
+	{ return q.p1 + map_unit_square_to_quad_rel(loc, q); }
 
 	inline auto quad_to_unit_square_compute_delta(quad const& q, displacement current_offset_square, displacement current_offest_quad)
 	{
@@ -104,12 +105,14 @@ namespace terraformer
 	inline location map_quad_to_unit_square(quad const& q, location loc)
 	{
 		auto const input_vec = loc - q.p1;
-		auto current_offest_quad = quad_to_unit_square_compute_initial_guess(q, input_vec);
+		auto current_offest_square = quad_to_unit_square_compute_initial_guess(q, input_vec);
 
 
-		printf("xy = %.8g\n", current_offest_quad[3]);
+		printf("xy = %.8g\n", current_offest_square[3]);
 
-		return location{} + current_offest_quad;
+//		current_offest_square += quad_to_unit_square_compute_delta(q, current_offest_square, current_)
+
+		return location{} + current_offest_square;
 	}
 
 	template<class PixelType, class Shader>
