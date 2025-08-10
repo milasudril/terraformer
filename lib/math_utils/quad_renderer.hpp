@@ -126,18 +126,31 @@ namespace terraformer
 		return displacement{result}/det;
 	}
 
-	inline location map_quad_to_unit_square(quad const& q, location loc)
+	struct quad_to_unit_square_params
 	{
-		auto const quad_params = make_quad_params(q);
-		auto const mat = make_fwd_matrix(quad_params);
-		auto const input_vec = loc - q.p1;
+		quad_params params;
+		quad_fwd_matrix mat;
+	};
 
-		auto current_offest_square = quad_to_unit_square_compute_initial_guess(quad_params, input_vec);
+	inline auto make_quad_to_unit_square_params(quad const& q)
+	{
+		auto params = make_quad_params(q);
+		return quad_to_unit_square_params{
+			.params = params,
+			.mat = make_fwd_matrix(params)
+		};
+	}
+
+	inline location map_quad_to_unit_square(quad_to_unit_square_params const& params, location loc)
+	{
+		auto const input_vec = loc - params.params.origin;
+
+		auto current_offest_square = quad_to_unit_square_compute_initial_guess(params.params, input_vec);
 
 		for(size_t k = 0; k != 64; ++k)
 		{
-			auto current_offset_quad = map_unit_square_to_quad_rel(current_offest_square, mat) - input_vec;
-			auto const delta = quad_to_unit_square_compute_delta(quad_params, current_offest_square, current_offset_quad);
+			auto current_offset_quad = map_unit_square_to_quad_rel(current_offest_square, params.mat) - input_vec;
+			auto const delta = quad_to_unit_square_compute_delta(params.params, current_offest_square, current_offset_quad);
 
 			if(norm(delta) < 1.0e-8f)
 			{ return location{} + current_offest_square; }
@@ -147,6 +160,9 @@ namespace terraformer
 
 		return location{} + current_offest_square;
 	}
+
+	inline location map_quad_to_unit_square(quad const& q, location loc)
+	{ return map_quad_to_unit_square(make_quad_to_unit_square_params(q), loc); }
 
 	template<class PixelType, class Shader>
 	void render_quad(quad const& q, span_2d<PixelType> output, Shader&& shader)
