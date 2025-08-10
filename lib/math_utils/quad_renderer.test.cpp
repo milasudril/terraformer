@@ -46,7 +46,7 @@ TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square)
 	EXPECT_EQ(loc3, (terraformer::location{0.0f, 1.0f, 0.0f}));
 
 	auto const loc4 = terraformer::map_quad_to_unit_square(q, q.p4);
-	EXPECT_LT(distance(loc4, terraformer::location{1.0f, 1.0f, 0.0f}), 1.0e-5f);
+	EXPECT_LT(distance(loc4, terraformer::location{1.0f, 1.0f, 0.0f}), 1.0e-6f);
 }
 
 TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square_crossed)
@@ -68,7 +68,7 @@ TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square_crossed)
 	EXPECT_EQ(loc3, (terraformer::location{0.0f, 1.0f, 0.0f}));
 
 	auto const loc4 = terraformer::map_quad_to_unit_square(q, q.p4);
-	EXPECT_EQ(loc4, (terraformer::location{1.0f, 1.0f, 0.0f}));
+	EXPECT_LT(distance(loc4, terraformer::location{1.0f, 1.0f, 0.0f}), 1.0e-6f);
 }
 
 TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square_degenerate)

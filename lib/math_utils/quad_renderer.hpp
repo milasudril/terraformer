@@ -74,12 +74,13 @@ namespace terraformer
 		//
 		auto const x = current_offset_square;
 		auto const y = -current_offest_quad;
+		auto const denom = ((w[0]*v[1]-v[0]*w[1])*x[1]+x[0]*(u[0]*w[1]-w[0]*u[1])+u[0]*v[1]-v[0]*u[1]);
 
 		return displacement{
-			-((-(w[0]*x[0]*y[1])-v[0]*y[1]+y[0]*(x[0]*w[1]+v[1]))/((w[0]*v[1]-v[0]*w[1])*x[1]+x[0]*(u[0]*w[1]-w[0]*u[1])+u[0]*v[1]-v[0]*u[1])),
-			(x[1]*(y[0]*w[1]-w[0]*y[1])-u[0]*y[1]+y[0]*u[1])/((w[0]*v[1]-v[0]*w[1])*x[1]+x[0]*(u[0]*w[1]-w[0]*u[1])+u[0]*v[1]-v[0]*u[1]),
+			 (w[0]*x[0]*y[1]) + v[0]*y[1] - y[0]*(x[0]*w[1] + v[1]),
+			 x[1]*(y[0]*w[1] - w[0]*y[1]) - u[0]*y[1] + y[0]*u[1],
 			-y[2]
-		};
+		}/denom;
 	}
 
 	inline auto quad_to_unit_square_compute_initial_guess(quad_params const& q, displacement offset_quad)
