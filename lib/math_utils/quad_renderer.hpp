@@ -15,6 +15,25 @@ namespace terraformer
 		location p4;
 	};
 
+	struct quad_aabb
+	{
+		location min;
+		location max;
+	};
+
+	inline quad_aabb make_aabb(quad const& q)
+	{
+		auto const v1 = (q.p1 - location{}).get();
+		auto const v2 = (q.p2 - location{}).get();
+		auto const v3 = (q.p3 - location{}).get();
+		auto const v4 = (q.p4 - location{}).get();
+
+		return quad_aabb{
+			.min = location{} + displacement{min(v1, min(v2, min(v3, v4)))},
+			.max = location{} + displacement{max(v1, max(v2, max(v3, v4)))}
+		};
+	}
+
 	struct quad_params
 	{
 		location origin;
@@ -167,7 +186,35 @@ namespace terraformer
 	template<class PixelType, class Shader>
 	void render_quad(quad const& q, span_2d<PixelType> output, Shader&& shader)
 	{
+		auto const aabb = make_aabb(q);
+		auto const w = static_cast<int32_t>(output.width());
+		auto const h = static_cast<int32_t>(output.height());
+		auto const x_min = std::max(static_cast<int32_t>(aabb.min[0] - 1.0f), 0);
+		auto const x_max = std::min(static_cast<int32_t>(aabb.max[1] + 1.0f), w);
+		auto const y_min = std::max(static_cast<int32_t>(aabb.min[0] - 1.0f), 0);
+		auto const y_max = std::min(static_cast<int32_t>(aabb.max[1] + 1.0f), h);
+		auto const quad_params = make_quad_to_unit_square_params(q);
 
+		for(auto y = y_min; y != y_max; ++y)
+		{
+			for(auto x = x_min; x != x_max; ++x)
+			{
+				location const loc_quad{
+					static_cast<float>(x) + 0.5f,
+					static_cast<float>(y) + 0.5f,
+					0.0f,
+				};
+
+				auto const loc_square = map_quad_to_unit_square(quad_params, loc_quad);
+				if(
+					(loc_square[0] >= 0.0f && loc_square[0] <= 1.0f) &&
+					(loc_square[1] >= 0.0f && loc_square[1] <= 1.0f)
+				)
+				{
+					output(x, y) = shader(loc_square);
+				}
+			}
+		}
 	}
 }
 

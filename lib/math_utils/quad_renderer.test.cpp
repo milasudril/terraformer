@@ -2,7 +2,12 @@
 
 #include "./quad_renderer.hpp"
 
+#include "lib/pixel_store/image.hpp"
+#include "lib/pixel_store/image_io.hpp"
+
 #include <testfwk/testfwk.hpp>
+#include <cfenv>
+#include <format>
 
 TESTCASE(terraformer_quad_renderer_map_unit_square_to_quad)
 {
@@ -139,4 +144,29 @@ TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square_degenerate)
 	// 3 and 4 are indistinguishable
 }
 
+TESTCASE(terraformer_quad_renderer_render_quad)
+{
+	feenableexcept(FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW);
+	terraformer::quad const q{
+		.p1 = terraformer::location{} + 128.0f*(terraformer::location{1.0f, 1.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
+		.p2 = terraformer::location{} + 128.0f*(terraformer::location{4.0f, 2.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
+		.p3 = terraformer::location{} + 128.0f*(terraformer::location{1.0f, 3.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
+		.p4 = terraformer::location{} + 128.0f*(terraformer::location{2.0f, 4.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f})
+	};
 
+	terraformer::image result{512, 512};
+	render_quad(
+		q,
+		result.pixels(),
+		[](terraformer::location loc){
+			return terraformer::rgba_pixel{
+				loc[0],
+				loc[1],
+				0.0f,
+				1.0f
+			};
+		}
+	);
+
+	store(result, std::format("{}/{}_quad.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str());
+}
