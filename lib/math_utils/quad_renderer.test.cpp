@@ -12,45 +12,44 @@
 TESTCASE(terraformer_quad_renderer_map_unit_square_to_quad)
 {
 	terraformer::quad const q{
-		.p1 = terraformer::location{-1.0f, -4.0f, 0.0f},
-		.p2 = terraformer::location{ 3.0f,  2.0f, 0.0f},
-		.p3 = terraformer::location{-2.0f,  2.0f, 0.0f},
-		.p4 = terraformer::location{-4.0f,  1.0f, 0.0f}
+		.origin = terraformer::location{-1.0f, -4.0f, 0.0f},
+		.lower_right = terraformer::location{ 3.0f,  2.0f, 0.0f},
+		.upper_left = terraformer::location{-2.0f,  2.0f, 0.0f},
+		.remote = terraformer::location{-4.0f,  1.0f, 0.0f}
 	};
 
 	auto const loc1 = terraformer::map_unit_square_to_quad(terraformer::location{}, q);
-	EXPECT_EQ(loc1, q.p1);
-
+	EXPECT_EQ(loc1, q.origin);
 
 	auto const loc2 = terraformer::map_unit_square_to_quad(terraformer::location{1.0f, 0.0f, 0.0f}, q);
-	EXPECT_EQ(loc2, q.p2);
+	EXPECT_EQ(loc2, q.lower_right);
 
 	auto const loc3 = terraformer::map_unit_square_to_quad(terraformer::location{0.0f, 1.0f, 0.0f}, q);
-	EXPECT_EQ(loc3, q.p3);
+	EXPECT_EQ(loc3, q.upper_left);
 
 	auto const loc4 = terraformer::map_unit_square_to_quad(terraformer::location{1.0f, 1.0f, 0.0f}, q);
-	EXPECT_EQ(loc4, q.p4);
+	EXPECT_EQ(loc4, q.remote);
 }
 
 TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square)
 {
 	terraformer::quad const q{
-		.p1 = terraformer::location{-1.0f, -4.0f, 0.0f},
-		.p2 = terraformer::location{ 3.0f,  2.0f, 0.0f},
-		.p3 = terraformer::location{-2.0f,  2.0f, 0.0f},
-		.p4 = terraformer::location{-4.0f,  1.0f, 0.0f}
+		.origin = terraformer::location{-1.0f, -4.0f, 0.0f},
+		.lower_right = terraformer::location{ 3.0f,  2.0f, 0.0f},
+		.upper_left = terraformer::location{-2.0f,  2.0f, 0.0f},
+		.remote = terraformer::location{-4.0f,  1.0f, 0.0f}
 	};
 
-	auto const loc1 = terraformer::map_quad_to_unit_square(q, q.p1);
+	auto const loc1 = terraformer::map_quad_to_unit_square(q, q.origin);
 	EXPECT_EQ(loc1, terraformer::location{});
 
-	auto const loc2 = terraformer::map_quad_to_unit_square(q, q.p2);
+	auto const loc2 = terraformer::map_quad_to_unit_square(q, q.lower_right);
 	EXPECT_EQ(loc2, (terraformer::location{1.0f, 0.0f, 0.0f}));
 
-	auto const loc3 = terraformer::map_quad_to_unit_square(q, q.p3);
+	auto const loc3 = terraformer::map_quad_to_unit_square(q, q.upper_left);
 	EXPECT_EQ(loc3, (terraformer::location{0.0f, 1.0f, 0.0f}));
 
-	auto const loc4 = terraformer::map_quad_to_unit_square(q, q.p4);
+	auto const loc4 = terraformer::map_quad_to_unit_square(q, q.remote);
 	EXPECT_LT(distance(loc4, terraformer::location{1.0f, 1.0f, 0.0f}), 1.0e-6f);
 
 	auto const loc_outside1 = terraformer::map_quad_to_unit_square(
@@ -107,38 +106,38 @@ TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square)
 TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square_crossed)
 {
 	terraformer::quad const q{
-		.p1 = terraformer::location{-1.0f, -4.0f, 0.0f},
-		.p2 = terraformer::location{ 3.0f,  2.0f, 0.0f},
-		.p3 = terraformer::location{-4.0f,  1.0f, 0.0f},
-		.p4 = terraformer::location{-2.0f,  2.0f, 0.0f}
+		.origin = terraformer::location{-1.0f, -4.0f, 0.0f},
+		.lower_right = terraformer::location{ 3.0f,  2.0f, 0.0f},
+		.upper_left = terraformer::location{-4.0f,  1.0f, 0.0f},
+		.remote = terraformer::location{-2.0f,  2.0f, 0.0f}
 	};
 
-	auto const loc1 = terraformer::map_quad_to_unit_square(q, q.p1);
+	auto const loc1 = terraformer::map_quad_to_unit_square(q, q.origin);
 	EXPECT_EQ(loc1, terraformer::location{});
 
-	auto const loc2 = terraformer::map_quad_to_unit_square(q, q.p2);
+	auto const loc2 = terraformer::map_quad_to_unit_square(q, q.lower_right);
 	EXPECT_EQ(loc2, (terraformer::location{1.0f, 0.0f, 0.0f}));
 
-	auto const loc3 = terraformer::map_quad_to_unit_square(q, q.p3);
+	auto const loc3 = terraformer::map_quad_to_unit_square(q, q.upper_left);
 	EXPECT_EQ(loc3, (terraformer::location{0.0f, 1.0f, 0.0f}));
 
-	auto const loc4 = terraformer::map_quad_to_unit_square(q, q.p4);
+	auto const loc4 = terraformer::map_quad_to_unit_square(q, q.remote);
 	EXPECT_LT(distance(loc4, terraformer::location{1.0f, 1.0f, 0.0f}), 1.0e-6f);
 }
 
 TESTCASE(terraformer_quad_renderer_map_quad_to_unit_square_degenerate)
 {
 	terraformer::quad const q{
-		.p1 = terraformer::location{-1.0f, -4.0f, 0.0f},
-		.p2 = terraformer::location{ 3.0f,  2.0f, 0.0f},
-		.p3 = terraformer::location{-2.0f,  2.0f, 0.0f},
-		.p4 = terraformer::location{-2.0f,  2.0f, 0.0f}
+		.origin = terraformer::location{-1.0f, -4.0f, 0.0f},
+		.lower_right = terraformer::location{ 3.0f,  2.0f, 0.0f},
+		.upper_left = terraformer::location{-2.0f,  2.0f, 0.0f},
+		.remote = terraformer::location{-2.0f,  2.0f, 0.0f}
 	};
 
-	auto const loc1 = terraformer::map_quad_to_unit_square(q, q.p1);
+	auto const loc1 = terraformer::map_quad_to_unit_square(q, q.origin);
 	EXPECT_EQ(loc1, terraformer::location{});
 
-	auto const loc2 = terraformer::map_quad_to_unit_square(q, q.p2);
+	auto const loc2 = terraformer::map_quad_to_unit_square(q, q.lower_right);
 	EXPECT_EQ(loc2, (terraformer::location{1.0f, 0.0f, 0.0f}));
 
 	// 3 and 4 are indistinguishable
@@ -148,10 +147,10 @@ TESTCASE(terraformer_quad_renderer_render_quad)
 {
 	feenableexcept(FE_INVALID|FE_DIVBYZERO|FE_OVERFLOW|FE_UNDERFLOW);
 	terraformer::quad const q{
-		.p1 = terraformer::location{} + 128.0f*(terraformer::location{1.0f, 1.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
-		.p2 = terraformer::location{} + 128.0f*(terraformer::location{4.0f, 2.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
-		.p3 = terraformer::location{} + 128.0f*(terraformer::location{1.0f, 3.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
-		.p4 = terraformer::location{} + 128.0f*(terraformer::location{2.0f, 4.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f})
+		.origin = terraformer::location{} + 128.0f*(terraformer::location{1.0f, 1.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
+		.lower_right = terraformer::location{} + 128.0f*(terraformer::location{4.0f, 2.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
+		.upper_left = terraformer::location{} + 128.0f*(terraformer::location{1.0f, 3.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f}),
+		.remote = terraformer::location{} + 128.0f*(terraformer::location{2.0f, 4.0f, 0.0f} - terraformer::location{0.5f, 0.5f, 0.0f})
 	};
 
 	terraformer::image result{512, 512};

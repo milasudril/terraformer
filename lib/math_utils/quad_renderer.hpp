@@ -9,10 +9,10 @@ namespace terraformer
 {
 	struct quad
 	{
-		location p1;
-		location p2;
-		location p3;
-		location p4;
+		location origin;
+		location lower_right;
+		location upper_left;
+		location remote;
 	};
 
 	struct quad_aabb
@@ -23,10 +23,10 @@ namespace terraformer
 
 	inline quad_aabb make_aabb(quad const& q)
 	{
-		auto const v1 = (q.p1 - location{}).get();
-		auto const v2 = (q.p2 - location{}).get();
-		auto const v3 = (q.p3 - location{}).get();
-		auto const v4 = (q.p4 - location{}).get();
+		auto const v1 = (q.origin - location{}).get();
+		auto const v2 = (q.lower_right - location{}).get();
+		auto const v3 = (q.upper_left - location{}).get();
+		auto const v4 = (q.remote - location{}).get();
 
 		return quad_aabb{
 			.min = location{} + displacement{min(v1, min(v2, min(v3, v4)))},
@@ -44,13 +44,13 @@ namespace terraformer
 
 	inline auto make_quad_params(quad const& q)
 	{
-		auto const u = q.p2 - q.p1;
-		auto const v = q.p3 - q.p1;
+		auto const u = q.lower_right - q.origin;
+		auto const v = q.upper_left - q.origin;
 		return quad_params{
-			.origin = q.p1,
+			.origin = q.origin,
 			.u = u,
 			.v = v,
-			.w = (q.p4 - q.p1) - (u + v)
+			.w = (q.remote - q.origin) - (u + v)
 		};
 	}
 
@@ -85,7 +85,7 @@ namespace terraformer
 	{ return m.origin + map_unit_square_to_quad_rel(loc - location{}, m); }
 
 	inline location map_unit_square_to_quad(location loc, quad const& q)
-	{ return q.p1 + map_unit_square_to_quad_rel(loc - location{}, make_fwd_matrix(make_quad_params(q))); }
+	{ return q.origin + map_unit_square_to_quad_rel(loc - location{}, make_fwd_matrix(make_quad_params(q))); }
 
 	inline auto quad_to_unit_square_compute_delta(quad_params const& q, displacement current_offset_square, displacement current_offest_quad)
 	{
