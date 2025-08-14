@@ -5,6 +5,7 @@
 #include "lib/common/span_2d.hpp"
 #include "lib/array_classes/span.hpp"
 #include "lib/pixel_store/image.hpp"
+#include "lib/math_utils/quad_renderer.hpp"
 
 #include <geosimd/line.hpp>
 
@@ -56,6 +57,29 @@ namespace terraformer
 
 			prev = current;
 		}
+	}
+
+	template<class PixelType, class PerQuadShader>
+	void fill_using_quads(
+		span<location const> curve,
+		float pixel_size,
+		span<float const> curve_thickness,
+		span_2d<PixelType> output_image,
+		PerQuadShader&& shader
+	)
+	{
+		if(std::size(curve).get() < 2)
+		{ return; }
+
+		assert(std::size(curve).get() == std::size(curve_thickness).get());
+
+		auto prev_vertex = curve.front();
+		auto prev_thickness = curve_thickness.front();
+		for(auto k : curve.element_indices(1))
+		{
+
+		}
+
 	}
 }
 #endif
