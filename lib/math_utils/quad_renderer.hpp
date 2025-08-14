@@ -26,7 +26,7 @@ namespace terraformer
 			if(param.has_value())
 			{
 				if((param->a.get() >= 0.0f && param->a.get() <= 1.0f)
-					&& (param->b.get() >= 0.0f && param->a.get() <= 1.0f))
+					&& (param->b.get() >= 0.0f && param->b.get() <= 1.0f))
 				{ return true; }
 			}
 		}
@@ -38,7 +38,7 @@ namespace terraformer
 			if(param.has_value())
 			{
 				if((param->a.get() >= 0.0f && param->a.get() <= 1.0f)
-					&& (param->b.get() >= 0.0f && param->a.get() <= 1.0f))
+					&& (param->b.get() >= 0.0f && param->b.get() <= 1.0f))
 				{ return true; }
 			}
 		}
