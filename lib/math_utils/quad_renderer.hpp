@@ -3,7 +3,9 @@
 
 #include "lib/common/span_2d.hpp"
 #include "lib/common/spaces.hpp"
+
 #include <array>
+#include <geosimd/line.hpp>
 
 namespace terraformer
 {
@@ -14,6 +16,35 @@ namespace terraformer
 		location upper_left;
 		location remote;
 	};
+
+	inline bool has_crossed_edges(quad const& q)
+	{
+		{
+			geosimd::line l1{q.origin, q.lower_right};
+			geosimd::line l2{q.upper_left, q.remote};
+			auto const param = intersect_2d(l1, l2);
+			if(param.has_value())
+			{
+				if((param->a.get() >= 0.0f && param->a.get() <= 1.0f)
+					&& (param->b.get() >= 0.0f && param->a.get() <= 1.0f))
+				{ return true; }
+			}
+		}
+
+		{
+			geosimd::line l1{q.origin, q.upper_left};
+			geosimd::line l2{q.lower_right, q.remote};
+			auto const param = intersect_2d(l1, l2);
+			if(param.has_value())
+			{
+				if((param->a.get() >= 0.0f && param->a.get() <= 1.0f)
+					&& (param->b.get() >= 0.0f && param->a.get() <= 1.0f))
+				{ return true; }
+			}
+		}
+
+		return false;
+	}
 
 	struct quad_aabb
 	{
