@@ -1,3 +1,5 @@
+//@	{"dependencies_extra":[{"ref":"./rasterizer.o", "rel":"implementation"}]}
+
 #ifndef TERRAFORMER_CURVE_RASTERIZER_HPP
 #define TERRAFORMER_CURVE_RASTERIZER_HPP
 
