@@ -4,6 +4,7 @@
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/array_classes/span.hpp"
+#include "lib/array_classes/multi_array.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/math_utils/quad_renderer.hpp"
 
@@ -58,6 +59,19 @@ namespace terraformer
 			prev = current;
 		}
 	}
+
+	struct thick_curve
+	{
+		auto locations() const
+		{ return data.get<0>(); }
+
+		auto thicknesses() const
+		{ return data.get<1>(); }
+
+		multi_array<location, float> data;
+	};
+
+	thick_curve make_thick_curve(span<location const> curve, span<float const> curve_thickness);
 
 	template<class PixelType, class PerQuadShader>
 	void fill_using_quads(
