@@ -47,6 +47,12 @@ TESTCASE(terraformer_span_test_all_members)
 			++other;
 		}
 	}
+
+	auto clamp_left =  span(-1, terraformer::clamp_index{});
+	EXPECT_EQ(clamp_left, 1);
+
+	auto clamp_right = span(6, terraformer::clamp_index{});
+	EXPECT_EQ(clamp_right, 5);
 }
 
 TESTCASE(terraformer_span_find_next_wrap_around_empty_span)

@@ -7,11 +7,14 @@
 
 namespace terraformer
 {
+	struct clamp_index{};
+
 	template<class T, class IndexType = array_index<std::remove_const_t<T>>, class SizeType = array_size<std::remove_const_t<T>>>
 	class span
 	{
 	public:
 		using index_type = IndexType;
+		using offset_type = IndexType::offset_type;
 		using size_type = SizeType;
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
@@ -38,6 +41,13 @@ namespace terraformer
 
 		constexpr auto& operator[](index_type index) const
 		{ return m_begin[index.get()]; }
+
+		constexpr auto& operator()(typename index_type::offset_type index, clamp_index) const
+		{
+			return (*this)[
+				index_type{} + std::clamp(index, offset_type{}, static_cast<offset_type>(size().decay()) - 1)
+			];
+		}
 
 		template<class U>
 		T value_or(index_type index, U&& default_value) const noexcept

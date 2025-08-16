@@ -52,6 +52,9 @@ namespace terraformer
 		constexpr explicit operator Rep() const
 		{ return m_value; }
 
+		constexpr auto decay() const
+		{ return m_value; }
+
 	private:
 		Rep m_value{};
 	};
