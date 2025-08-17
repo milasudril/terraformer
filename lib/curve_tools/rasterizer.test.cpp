@@ -210,20 +210,35 @@ TESTCASE(terraformer_make_thick_curve_all_segments_broken)
 		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
 	);
 
-	// First element was removed
+	// Nothing interesting left
 	EXPECT_EQ(std::size(res.data).get(), 0);
+}
 
-#if 0
-	auto const locs_out = res.locations();
-	auto const elems = locs_out.element_indices();
-	std::array locs_out_expected{
-		terraformer::location{0.0f, 0.5f, 0.0f},
-		terraformer::location{1.0f, 1.0f, 0.0f},
-		terraformer::location{2.0f, 1.333333f, 0.0f},
+TESTCASE(terraformer_make_thick_curve_only_two_vertices)
+{
+	std::array locs{
+		terraformer::location{},
+		terraformer::location{0.0f, 1.0f, 0.0f}
 	};
+
+	std::array thicknesses{
+		2.0f,
+		2.0f
+	};
+
+	auto res = make_thick_curve(
+		terraformer::span{std::begin(locs), std::end(locs)},
+		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
+	);
+
+	EXPECT_EQ(std::size(res.data).get(), 2);
+	auto const elems = res.data.element_indices();
+	auto const normals_out = res.normals();
+	auto const locs_out = res.locations();
 	for(auto index : elems)
 	{
-		EXPECT_EQ(locs_out[index], locs_out_expected[index - elems.front()]);
+		EXPECT_EQ(locs_out[index], locs[index - elems.front()]);
+		EXPECT_EQ(normals_out[index], (terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}}));
 	}
-#endif
+
 }
