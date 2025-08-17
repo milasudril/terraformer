@@ -197,17 +197,22 @@ namespace terraformer
 
 		auto current_offest_square = quad_to_unit_square_compute_initial_guess(params.params, input_vec);
 
-		for(size_t k = 0; k != 64; ++k)
+		for(size_t k = 0; k != 8; ++k)
 		{
 			auto current_offset_quad = map_unit_square_to_quad_rel(current_offest_square, params.mat) - input_vec;
 			auto const delta = quad_to_unit_square_compute_delta(params.params, current_offest_square, current_offset_quad);
 
 			if(norm(delta) < 1.0e-8f)
-			{ return location{} + current_offest_square; }
+			{
+			//	printf("%zu\n", k);
+				return location{} + current_offest_square;
+
+			}
 
 			current_offest_square -= delta;
 		}
 
+	//	printf("Did not converge %s\n", to_string(loc).c_str());
 		return location{} + current_offest_square;
 	}
 
@@ -221,8 +226,8 @@ namespace terraformer
 		auto const w = static_cast<int32_t>(output.width());
 		auto const h = static_cast<int32_t>(output.height());
 		auto const x_min = std::max(static_cast<int32_t>(aabb.min[0] - 1.0f), 0);
-		auto const x_max = std::min(static_cast<int32_t>(aabb.max[1] + 1.0f), w);
-		auto const y_min = std::max(static_cast<int32_t>(aabb.min[0] - 1.0f), 0);
+		auto const x_max = std::min(static_cast<int32_t>(aabb.max[0] + 1.0f), w);
+		auto const y_min = std::max(static_cast<int32_t>(aabb.min[1] - 1.0f), 0);
 		auto const y_max = std::min(static_cast<int32_t>(aabb.max[1] + 1.0f), h);
 		auto const quad_params = make_quad_to_unit_square_params(q);
 
