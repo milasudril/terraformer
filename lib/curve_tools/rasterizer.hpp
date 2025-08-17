@@ -64,13 +64,23 @@ namespace terraformer
 
 	struct thick_curve
 	{
+		struct vertex
+		{
+			location loc;
+			direction normal;
+			float thickness;
+		};
+
 		auto locations() const
 		{ return data.get<0>(); }
 
-		auto thicknesses() const
+		auto normals() const
 		{ return data.get<1>(); }
 
-		multi_array<location, float> data;
+		auto thicknesses() const
+		{ return data.get<2>(); }
+
+		multi_array<location, direction, float> data;
 	};
 
 	thick_curve make_thick_curve(span<location const> curve, span<float const> curve_thickness);

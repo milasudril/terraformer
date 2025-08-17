@@ -1,6 +1,7 @@
 //@	{"target": {"name":"rasterizer.o"}}
 
 #include "./rasterizer.hpp"
+#include "lib/array_classes/span.hpp"
 
 #include <cassert>
 
@@ -12,29 +13,43 @@ terraformer::thick_curve terraformer::make_thick_curve(
 	assert(std::size(curve).get() == std::size(curve_thickness).get());
 
 	terraformer::thick_curve ret{};
-	auto const elems = curve_thickness.element_indices(1);
-	for(auto item : elems)
+
+	auto current_index = curve.element_indices().front() - curve.element_indices().front();
+	thick_curve::vertex saved_vertex{
+		.loc = curve.front(),
+		.normal = direction{
+			(curve(current_index + 1, clamp_index{}) - curve(current_index - 1, clamp_index{})).rot_right_angle_z_right()
+		},
+		.thickness = curve_thickness.front()
+	};
+	ret.data.push_back(saved_vertex.loc, saved_vertex.normal, saved_vertex.thickness);
+	++current_index;
+
+	using offset_type = decltype(curve)::offset_type;
+	static_assert(std::is_same_v<decltype(current_index), offset_type>);
+
+	for(;
+		current_index != static_cast<offset_type>(std::size(curve).get());
+		++current_index
+	)
 	{
-		auto const current_index = (item - elems.front()) - 1;
+		auto const prev_loc = saved_vertex.loc;
+		auto const current_loc = curve(current_index, clamp_index{});
+		auto const next_loc = curve(current_index + 1, clamp_index{});
 
-		auto compute_normal = [curve](decltype(curve)::offset_type current_index) {
-			auto const loc_first = curve(current_index - 1, clamp_index{});
-			auto const loc_next = curve(current_index + 1, clamp_index{});
-			auto const dr = loc_next - loc_first;
-			return direction{dr.rot_right_angle_z_right()};
-		};
+		auto const prev_normal = saved_vertex.normal;
+		auto const current_normal = direction{(next_loc - prev_loc).rot_right_angle_z_right()};
 
-		auto const thickness_1 = curve_thickness[item];
-		auto const thickness_2 = curve_thickness(current_index + 1, clamp_index{});
-		auto const v1 = thickness_1*compute_normal(current_index);
-		auto const v2 = thickness_2*compute_normal(current_index + 1);
-		auto const loc_1 = curve[decltype(curve)::index_type{} + current_index];
-		auto const loc_2 = curve[decltype(curve)::index_type{} + current_index + 1];
+		auto const prev_thickness = saved_vertex.thickness;
+		auto const current_thickness = curve_thickness(current_index, clamp_index{});
 
-		auto const origin = loc_1 - v1;
-		auto const lower_right = loc_1 + v1;
-		auto const upper_left = loc_2 - v2;
-		auto const remote = loc_2 + v2;
+		auto const prev_v = prev_thickness*prev_normal;
+		auto const current_v = current_thickness*current_normal;
+
+		auto const origin = prev_loc - prev_v;
+		auto const lower_right = prev_loc + prev_v;
+		auto const upper_left = current_loc - current_v;
+		auto const remote = current_loc + current_v;
 
 		auto const intersect = intersect_2d(
 			geosimd::line{
@@ -47,21 +62,31 @@ terraformer::thick_curve terraformer::make_thick_curve(
 			}
 		);
 
-		if(!intersect.has_value())
+		if(intersect.has_value() && (intersect->a.get() >= 0.0f && intersect->a.get() <= 1.0f))
 		{
-			ret.data.push_back(loc_1, thickness_1);
-			continue;
-		}
+			auto const new_loc = midpoint(prev_loc, current_loc);
+			auto const new_thickness = 0.5f*(prev_thickness + current_thickness);
+			if(!ret.data.empty())
+			{ ret.data.pop_back(); }
 
-		// It should be sufficent to check one line parameter
-		if(intersect->a.get() < 0.0f || intersect->a.get() > 1.0f)
-		{
-			ret.data.push_back(loc_1, thickness_1);
-			continue;
-		}
+			auto const saved_locations = ret.locations();
+			auto const prev_saved_loc = saved_locations.empty()? curve.front() : saved_locations.back();
 
+			saved_vertex = thick_curve::vertex{
+				.loc = new_loc,
+				.normal = direction{(new_loc - prev_saved_loc).rot_right_angle_z_right()},
+				.thickness = new_thickness
+			};
+		}
+		else {
+			saved_vertex = thick_curve::vertex{
+				.loc = current_loc,
+				.normal = current_normal,
+				.thickness = current_thickness
+			};
+		}
+		ret.data.push_back(saved_vertex.loc, saved_vertex.normal, saved_vertex.thickness);
 	}
-
 
 	return ret;
 }

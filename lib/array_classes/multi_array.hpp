@@ -341,6 +341,9 @@ namespace terraformer
 			};
 		}
 
+		void pop_back() noexcept
+		{ truncate_from(index_type{m_size.get() - 1}); }
+
 		void truncate_from(index_type index) noexcept
 		{
 			destroy(m_storage, index, size_type{m_size.get() - index.get()});
