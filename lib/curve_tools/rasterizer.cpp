@@ -74,6 +74,7 @@ terraformer::thick_curve terraformer::make_thick_curve(
 		{
 			auto const new_loc = midpoint(prev_loc, current_loc);
 			auto const new_thickness = 0.5f*(prev_thickness + current_thickness);
+			auto const saved_length =ret.running_lengths().empty()? 0.0f : ret.running_lengths().back();
 			ret.data.pop_back();
 
 			auto const saved_locations = ret.locations();
@@ -83,7 +84,7 @@ terraformer::thick_curve terraformer::make_thick_curve(
 				.loc = new_loc,
 				.normal = direction{(next_loc - prev_saved_loc).rot_right_angle_z_right()},
 				.thickness = new_thickness,
-				.running_length = ret.curve_length
+				.running_length = (ret.curve_length - saved_length)
 					+ (saved_locations.empty()? 0.0f : distance(new_loc, prev_saved_loc))
 			};
 		}

@@ -253,3 +253,46 @@ TESTCASE(terraformer_make_thick_curve_only_two_vertices)
 	}
 	EXPECT_EQ(res.curve_length, 1.0f);
 }
+
+TESTCASE(terraformer_make_thick_curve_in_the_middle_and_last)
+{
+	std::array locs{
+		terraformer::location{},
+		terraformer::location{0.0f, 1.0f, 0.0f},
+		terraformer::location{0.5f, 2.0f, 0.0f},
+		terraformer::location{1.5f, 1.5f, 0.0f},
+	};
+
+	std::array thicknesses{
+		2.0f,
+		2.0f,
+		2.0f,
+		2.0f
+	};
+
+	auto res = make_thick_curve(
+		terraformer::span{std::begin(locs), std::end(locs)},
+		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
+	);
+	EXPECT_EQ(std::size(res.data).get(), 2);
+
+	auto const locs_out = res.locations();
+	auto const elems = res.data.element_indices();
+	auto const running_lenghts = res.running_lengths();
+	std::array locs_out_expected{
+		terraformer::location{},
+		terraformer::location{0.875f, 1.5f, 0.0f}
+
+	};
+	std::array running_lenghts_expected{
+		0.0f,
+		distance(locs_out_expected[1], locs_out_expected[0])
+	};
+	for(auto index : elems)
+	{
+		auto const i = index - elems.front();
+		EXPECT_EQ(locs_out[index], locs_out_expected[i]);
+		EXPECT_EQ(running_lenghts[index], running_lenghts_expected[i]);
+	}
+	EXPECT_EQ(res.curve_length, running_lenghts_expected.back());
+}
