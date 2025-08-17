@@ -62,7 +62,7 @@ namespace terraformer
 		}
 	}
 
-	struct thick_curve
+	struct thick_curve_view
 	{
 		struct vertex
 		{
@@ -80,6 +80,25 @@ namespace terraformer
 		auto thicknesses() const
 		{ return data.get<2>(); }
 
+		multi_span<location const, direction const, float const> data;
+	};
+
+	struct thick_curve
+	{
+		using vertex = thick_curve_view::vertex;
+
+		auto locations() const
+		{ return data.get<0>(); }
+
+		auto normals() const
+		{ return data.get<1>(); }
+
+		auto thicknesses() const
+		{ return data.get<2>(); }
+
+		auto attributes() const
+		{ return thick_curve_view{data.attributes()}; }
+
 		multi_array<location, direction, float> data;
 	};
 
@@ -87,25 +106,23 @@ namespace terraformer
 
 	template<class PixelType, class Shader>
 	void fill_using_quads(
-		span<location const> curve,
+		thick_curve_view curve,
 		float pixel_size,
-		span<float const> curve_thickness,
 		span_2d<PixelType> output_image,
 		Shader&& shader
 	)
 	{
-		auto const thick_curve = make_thick_curve(curve, curve_thickness);
-		if(std::size(thick_curve.data).get() < 2)
+		if(std::size(curve.data).get() < 2)
 		{ return; }
 
 		// FIXME: Shader may want to know total curve length
 
-		auto const elems = thick_curve.data.element_indices(1);
-		auto const locs  = thick_curve.locations();
-		auto const normals = thick_curve.normals();
-		auto const thicknesses = thick_curve.thicknesses();
+		auto const elems = curve.data.element_indices(1);
+		auto const locs  = curve.locations();
+		auto const normals = curve.normals();
+		auto const thicknesses = curve.thicknesses();
 
-		thick_curve::vertex last_vertex{
+		thick_curve_view::vertex last_vertex{
 			.loc = locs.front(),
 			.normals = normals.front(),
 			.thickness = thicknesses.front()

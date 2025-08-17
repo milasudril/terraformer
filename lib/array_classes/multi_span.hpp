@@ -82,8 +82,8 @@ namespace terraformer
 			m_size{span.size()}
 		{}
 
-		constexpr auto element_indices() const noexcept
-		{ return index_range{index_type{}, index_type{} + m_size.get()}; }
+		constexpr auto element_indices(size_t skip = 0) const
+		{ return index_range{index_type{} + skip, index_type{} + m_size.get()}; }
 
 		constexpr auto size() const noexcept
 		{ return m_size; }
