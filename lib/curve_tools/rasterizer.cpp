@@ -22,9 +22,15 @@ terraformer::thick_curve terraformer::make_thick_curve(
 		.normal = direction{
 			(curve(current_index + 1, clamp_index{}) - curve(current_index - 1, clamp_index{})).rot_right_angle_z_right()
 		},
-		.thickness = curve_thickness.front()
+		.thickness = curve_thickness.front(),
+		.running_length = 0.0f
 	};
-	ret.data.push_back(saved_vertex.loc, saved_vertex.normal, saved_vertex.thickness);
+	ret.data.push_back(
+		saved_vertex.loc,
+		saved_vertex.normal,
+		saved_vertex.thickness,
+		saved_vertex.running_length
+	);
 	++current_index;
 
 	using offset_type = decltype(curve)::offset_type;
@@ -76,17 +82,24 @@ terraformer::thick_curve terraformer::make_thick_curve(
 			saved_vertex = thick_curve::vertex{
 				.loc = new_loc,
 				.normal = direction{(next_loc - prev_saved_loc).rot_right_angle_z_right()},
-				.thickness = new_thickness
+				.thickness = new_thickness,
+				.running_length = 0.0f // FIXME
 			};
 		}
 		else {
 			saved_vertex = thick_curve::vertex{
 				.loc = current_loc,
 				.normal = current_normal,
-				.thickness = current_thickness
+				.thickness = current_thickness,
+				.running_length = 0.0f // FIXME
 			};
 		}
-		ret.data.push_back(saved_vertex.loc, saved_vertex.normal, saved_vertex.thickness);
+		ret.data.push_back(
+			saved_vertex.loc,
+			saved_vertex.normal,
+			saved_vertex.thickness,
+			saved_vertex.running_length
+		);
 	}
 
 	if(std::size(ret.data).get() == 1)

@@ -69,7 +69,9 @@ namespace terraformer
 			location loc;
 			direction normal;
 			float thickness;
+			float running_length;
 		};
+
 
 		auto locations() const
 		{ return data.get<0>(); }
@@ -80,7 +82,11 @@ namespace terraformer
 		auto thicknesses() const
 		{ return data.get<2>(); }
 
-		multi_span<location const, direction const, float const> data;
+		auto running_lengths() const
+		{ return data.get<3>(); }
+
+		multi_span<location const, direction const, float const, float const> data;
+		float curve_length;
 	};
 
 	struct thick_curve
@@ -96,10 +102,20 @@ namespace terraformer
 		auto thicknesses() const
 		{ return data.get<2>(); }
 
-		auto attributes() const
-		{ return thick_curve_view{data.attributes()}; }
+		auto running_lengths() const
+		{ return data.get<3>(); }
 
-		multi_array<location, direction, float> data;
+		auto attributes() const
+		{
+			return thick_curve_view{
+				.data = data.attributes(),
+				.curve_length = curve_length
+			};
+
+		}
+
+		multi_array<location, direction, float, float> data;
+		float curve_length;
 	};
 
 	thick_curve make_thick_curve(span<location const> curve, span<float const> curve_thickness);
@@ -115,26 +131,25 @@ namespace terraformer
 		if(std::size(curve.data).get() < 2)
 		{ return; }
 
-		// FIXME: Shader may want to know total curve length
-
 		auto const elems = curve.data.element_indices(1);
 		auto const locs  = curve.locations();
 		auto const normals = curve.normals();
 		auto const thicknesses = curve.thicknesses();
+		auto const running_lenghts = curve.running_lengths();
 
 		thick_curve_view::vertex last_vertex{
 			.loc = locs.front(),
 			.normals = normals.front(),
-			.thickness = thicknesses.front()
+			.thickness = thicknesses.front(),
+			.running_length = running_lenghts.front()
 		};
-
-		float running_length = 0.0f;
 
 		for(auto item: elems)
 		{
 			auto const current_loc = locs[item];
 			auto const current_normal = normals[item];
 			auto const current_thickness = thicknesses[item];
+			auto const running_length = running_lenghts[item];
 
 			auto const prev_loc = last_vertex.loc;
 			auto const prev_normal = last_vertex.normal;
@@ -186,10 +201,9 @@ namespace terraformer
 			last_vertex = thick_curve::vertex{
 				.loc = current_loc,
 				.normal = current_normal,
-				.thickness = current_thickness
+				.thickness = current_thickness,
+				.running_length = running_length
 			};
-
-			running_length += segment_length;
 		}
 	}
 }
