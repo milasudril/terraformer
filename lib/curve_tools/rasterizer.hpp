@@ -94,17 +94,9 @@ namespace terraformer
 		PerQuadShader&& shader
 	)
 	{
-		if(std::size(curve).get() < 2)
+		auto const thick_curve = make_thick_curve(curve, curve_thickness);
+		if(std::size(thick_curve.data).get() < 2)
 		{ return; }
-
-		assert(std::size(curve).get() == std::size(curve_thickness).get());
-
-		auto prev_vertex = curve.front();
-		auto prev_thickness = curve_thickness.front();
-		for(auto k : curve.element_indices(1))
-		{
-
-		}
 
 	}
 }
