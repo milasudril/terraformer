@@ -129,3 +129,62 @@ TESTCASE(terraformer_visit_pixels_curge_random_points)
 		EXPECT_LT(std::abs(end[1] - static_cast<float>(y_0)), 2.5f);
 	}
 }
+
+TESTCASE(terraformer_make_thick_curve_empty_input)
+{
+	auto res = make_thick_curve(
+		terraformer::span<terraformer::location const>{},
+		terraformer::span<float const>{}
+	);
+
+	EXPECT_EQ(res.data.empty(), true);
+}
+
+TESTCASE(terraformer_make_thick_curve_single_element_only)
+{
+	terraformer::location const loc{};
+	auto const thickness = 4.0f;
+
+	auto res = make_thick_curve(
+		terraformer::span{&loc, &loc + 1},
+		terraformer::span{&thickness, &thickness + 1}
+	);
+
+	EXPECT_EQ(res.data.empty(), true);
+}
+
+TESTCASE(terraformer_make_thick_curve_first_segment_broken)
+{
+	std::array locs{
+		terraformer::location{},
+		terraformer::location{0.0f, 1.0f, 0.0f},
+		terraformer::location{1.0f, 1.0f, 0.0f},
+		terraformer::location{2.0f, 1.333333f, 0.0f},
+	};
+
+	std::array thicknesses{
+		2.0f,
+		2.0f,
+		2.0f,
+		2.0f
+	};
+
+	auto res = make_thick_curve(
+		terraformer::span{std::begin(locs), std::end(locs)},
+		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
+	);
+
+	// First element was removed
+	EXPECT_EQ(std::size(res.data).get(), 3);
+	auto const locs_out = res.locations();
+	auto const elems = locs_out.element_indices();
+	std::array locs_out_expected{
+		terraformer::location{0.0f, 0.5f, 0.0f},
+		terraformer::location{1.0f, 1.0f, 0.0f},
+		terraformer::location{2.0f, 1.333333f, 0.0f},
+	};
+	for(auto index : elems)
+	{
+		EXPECT_EQ(locs_out[index], locs_out_expected[index - elems.front()]);
+	}
+}

@@ -13,6 +13,8 @@ terraformer::thick_curve terraformer::make_thick_curve(
 	assert(std::size(curve).get() == std::size(curve_thickness).get());
 
 	terraformer::thick_curve ret{};
+	if(std::size(curve).get() < 2)
+	{ return ret; }
 
 	auto current_index = curve.element_indices().front() - curve.element_indices().front();
 	thick_curve::vertex saved_vertex{
@@ -66,15 +68,14 @@ terraformer::thick_curve terraformer::make_thick_curve(
 		{
 			auto const new_loc = midpoint(prev_loc, current_loc);
 			auto const new_thickness = 0.5f*(prev_thickness + current_thickness);
-			if(!ret.data.empty())
-			{ ret.data.pop_back(); }
+			ret.data.pop_back();
 
 			auto const saved_locations = ret.locations();
 			auto const prev_saved_loc = saved_locations.empty()? curve.front() : saved_locations.back();
 
 			saved_vertex = thick_curve::vertex{
 				.loc = new_loc,
-				.normal = direction{(new_loc - prev_saved_loc).rot_right_angle_z_right()},
+				.normal = direction{(next_loc - prev_saved_loc).rot_right_angle_z_right()},
 				.thickness = new_thickness
 			};
 		}
