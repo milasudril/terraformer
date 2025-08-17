@@ -197,7 +197,7 @@ namespace terraformer
 
 		auto current_offest_square = quad_to_unit_square_compute_initial_guess(params.params, input_vec);
 
-		for(size_t k = 0; k != 8; ++k)
+		for(size_t k = 0; k != 16; ++k)
 		{
 			auto current_offset_quad = map_unit_square_to_quad_rel(current_offest_square, params.mat) - input_vec;
 			auto const delta = quad_to_unit_square_compute_delta(params.params, current_offest_square, current_offset_quad);

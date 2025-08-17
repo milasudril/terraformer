@@ -1,13 +1,19 @@
 //@	{"target":{"name":"rasterizer.test"}}
 
 #include "./rasterizer.hpp"
+
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/pixel_store/image.hpp"
+#include "lib/pixel_store/image_io.hpp"
+
+#include "lib/pixel_store/rgba_pixel.hpp"
 #include "testfwk/validation.hpp"
 
 #include <random>
 #include <testfwk/testfwk.hpp>
+#include <format>
 
 TESTCASE(terraformer_visit_pixels_different_directions)
 {
@@ -295,4 +301,34 @@ TESTCASE(terraformer_make_thick_curve_in_the_middle_and_last)
 		EXPECT_EQ(running_lenghts[index], running_lenghts_expected[i]);
 	}
 	EXPECT_EQ(res.curve_length, running_lenghts_expected.back());
+}
+
+TESTCASE(terraformer_fill_curve_using_quads)
+{
+	terraformer::image output{512, 512};
+
+	std::array<terraformer::location, 48> locs{};
+	std::array<float, 48> thicknesses{};
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+
+		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
+			/static_cast<float>(std::size(locs));
+		thicknesses[k] = (0.5f*std::sin(6.0f*theta) + 1.0f)/32.0f;
+		locs[k] = terraformer::location{0.5f, 0.5f, 0.0f}
+			+ 0.25f*terraformer::displacement{std::cos(theta), std::sin(theta), 0.0f};
+	}
+
+	auto curve = make_thick_curve(
+		terraformer::span{std::begin(locs), std::end(locs)},
+		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
+	);
+	EXPECT_EQ(std::size(curve.data).get(), 48);
+
+	fill_using_quads(curve.attributes(), 1.0f/512.0f, output.pixels(),[length = curve.curve_length](terraformer::location loc){
+		return terraformer::rgba_pixel{0.5f*(loc[0] + 1.0f), loc[1]/length, 0.0f, 1.0f};
+	});
+
+	store(output, std::format("{}/{}_fill_curve_using_quads.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str());
+
 }

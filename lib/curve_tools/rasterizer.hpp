@@ -139,7 +139,7 @@ namespace terraformer
 
 		thick_curve_view::vertex last_vertex{
 			.loc = locs.front(),
-			.normals = normals.front(),
+			.normal = normals.front(),
 			.thickness = thicknesses.front(),
 			.running_length = running_lenghts.front()
 		};
@@ -149,11 +149,12 @@ namespace terraformer
 			auto const current_loc = locs[item];
 			auto const current_normal = normals[item];
 			auto const current_thickness = thicknesses[item];
-			auto const running_length = running_lenghts[item];
+			auto const current_running_length = running_lenghts[item];
 
 			auto const prev_loc = last_vertex.loc;
 			auto const prev_normal = last_vertex.normal;
 			auto const prev_thickness = last_vertex.thickness;
+			auto const prev_running_length = last_vertex.running_length;
 
 			auto const prev_v = prev_thickness*prev_normal;
 			auto const current_v = current_thickness*current_normal;
@@ -181,7 +182,6 @@ namespace terraformer
 			}
 
 			auto const segment_length = distance(current_loc, prev_loc);
-
 			render_quad(
 				quad{
 					.origin = location{} + (origin - location{})/pixel_size,
@@ -190,9 +190,9 @@ namespace terraformer
 					.remote = location{} + (remote - location{})/pixel_size
 				},
 				output_image,
-				[running_length, segment_length, &shader](location loc) {
+				[prev_running_length, segment_length, &shader](location loc) {
 					auto const loc_transformed =
-						  location{0.0f, running_length, 0.0f}
+						  location{0.0f, prev_running_length, 0.0f}
 						+ (loc - location{0.5f, 0.0f, 0.0f}).apply(scaling{2.0f, segment_length, 1.0f});
 					return shader(loc_transformed);
 				}
@@ -202,7 +202,7 @@ namespace terraformer
 				.loc = current_loc,
 				.normal = current_normal,
 				.thickness = current_thickness,
-				.running_length = running_length
+				.running_length = current_running_length
 			};
 		}
 	}
