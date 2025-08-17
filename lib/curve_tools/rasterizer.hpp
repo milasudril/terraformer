@@ -85,19 +85,95 @@ namespace terraformer
 
 	thick_curve make_thick_curve(span<location const> curve, span<float const> curve_thickness);
 
-	template<class PixelType, class PerQuadShader>
+	template<class PixelType, class Shader>
 	void fill_using_quads(
 		span<location const> curve,
 		float pixel_size,
 		span<float const> curve_thickness,
 		span_2d<PixelType> output_image,
-		PerQuadShader&& shader
+		Shader&& shader
 	)
 	{
 		auto const thick_curve = make_thick_curve(curve, curve_thickness);
 		if(std::size(thick_curve.data).get() < 2)
 		{ return; }
 
+		// FIXME: Shader may want to know total curve length
+
+		auto const elems = thick_curve.data.element_indices(1);
+		auto const locs  = thick_curve.locations();
+		auto const normals = thick_curve.normals();
+		auto const thicknesses = thick_curve.thicknesses();
+
+		thick_curve::vertex last_vertex{
+			.loc = locs.front(),
+			.normals = normals.front(),
+			.thickness = thicknesses.front()
+		};
+
+		float running_length = 0.0f;
+
+		for(auto item: elems)
+		{
+			auto const current_loc = locs[item];
+			auto const current_normal = normals[item];
+			auto const current_thickness = thicknesses[item];
+
+			auto const prev_loc = last_vertex.loc;
+			auto const prev_normal = last_vertex.normal;
+			auto const prev_thickness = last_vertex.thickness;
+
+			auto const prev_v = prev_thickness*prev_normal;
+			auto const current_v = current_thickness*current_normal;
+
+			auto const origin = prev_loc - prev_v;
+			auto const lower_right = prev_loc + prev_v;
+			auto const upper_left = current_loc - current_v;
+			auto const remote = current_loc + current_v;
+
+			auto const intersect = intersect_2d(
+				geosimd::line{
+					.p1 = origin,
+					.p2 = lower_right
+				},
+				geosimd::line{
+					.p1 = upper_left,
+					.p2 = remote
+				}
+			);
+			if(intersect.has_value() && (intersect->a.get() >= 0.0f && intersect->a.get() <= 1.0f))
+			{
+				fprintf(stderr, "FIXME: Curve needs to be cleaned up again\n");
+				fflush(stderr);
+				abort();
+			}
+
+			auto const segment_length = distance(current_loc, prev_loc);
+
+			render_quad(
+				quad{
+					.origin = location{} + (origin - location{})/pixel_size,
+					.lower_right = location{} + (lower_right - location{})/pixel_size,
+					.upper_left = location{} + (upper_left - location{})/pixel_size,
+					.remote = location{} + (remote - location{})/pixel_size
+				},
+				output_image,
+				[running_length, segment_length, &shader](location loc) {
+					auto const loc_transformed =
+						  location{0.0f, running_length, 0.0f}
+						+ (loc - location{0.5f, 0.0f, 0.0f}).apply(scaling{2.0f, segment_length, 1.0f});
+					return shader(loc_transformed);
+				}
+			);
+
+			last_vertex = thick_curve::vertex{
+				.loc = current_loc,
+				.normal = current_normal,
+				.thickness = current_thickness
+			};
+
+			running_length += segment_length;
+		}
 	}
 }
 #endif
