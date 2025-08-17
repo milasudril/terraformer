@@ -89,5 +89,8 @@ terraformer::thick_curve terraformer::make_thick_curve(
 		ret.data.push_back(saved_vertex.loc, saved_vertex.normal, saved_vertex.thickness);
 	}
 
+	if(std::size(ret.data).get() == 1)
+	{ ret.data.clear(); }
+
 	return ret;
 }
