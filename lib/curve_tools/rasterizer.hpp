@@ -86,7 +86,7 @@ namespace terraformer
 		{ return data.get<3>(); }
 
 		multi_span<location const, direction const, float const, float const> data;
-		float curve_length;
+		float curve_length = 0.0f;
 	};
 
 	struct thick_curve
@@ -115,7 +115,7 @@ namespace terraformer
 		}
 
 		multi_array<location, direction, float, float> data;
-		float curve_length;
+		float curve_length = 0.0f;
 	};
 
 	thick_curve make_thick_curve(span<location const> curve, span<float const> curve_thickness);

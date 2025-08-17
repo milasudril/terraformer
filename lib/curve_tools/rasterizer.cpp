@@ -83,7 +83,8 @@ terraformer::thick_curve terraformer::make_thick_curve(
 				.loc = new_loc,
 				.normal = direction{(next_loc - prev_saved_loc).rot_right_angle_z_right()},
 				.thickness = new_thickness,
-				.running_length = 0.0f // FIXME
+				.running_length = ret.curve_length
+					+ (saved_locations.empty()? 0.0f : distance(new_loc, prev_saved_loc))
 			};
 		}
 		else {
@@ -91,7 +92,7 @@ terraformer::thick_curve terraformer::make_thick_curve(
 				.loc = current_loc,
 				.normal = current_normal,
 				.thickness = current_thickness,
-				.running_length = 0.0f // FIXME
+				.running_length = ret.curve_length + distance(current_loc, prev_loc)
 			};
 		}
 		ret.data.push_back(
@@ -100,10 +101,14 @@ terraformer::thick_curve terraformer::make_thick_curve(
 			saved_vertex.thickness,
 			saved_vertex.running_length
 		);
+		ret.curve_length = saved_vertex.running_length;
 	}
 
 	if(std::size(ret.data).get() == 1)
-	{ ret.data.clear(); }
+	{
+		ret.data.clear();
+		ret.curve_length = 0.0f;
+	}
 
 	return ret;
 }

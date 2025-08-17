@@ -177,16 +177,26 @@ TESTCASE(terraformer_make_thick_curve_first_segment_broken)
 	// First element was removed
 	EXPECT_EQ(std::size(res.data).get(), 3);
 	auto const locs_out = res.locations();
-	auto const elems = locs_out.element_indices();
+	auto const elems = res.data.element_indices();
+	auto const running_lenghts = res.running_lengths();
 	std::array locs_out_expected{
 		terraformer::location{0.0f, 0.5f, 0.0f},
 		terraformer::location{1.0f, 1.0f, 0.0f},
 		terraformer::location{2.0f, 1.333333f, 0.0f},
 	};
+	std::array running_lenghts_expected{
+		0.0f,
+		distance(locs_out_expected[1], locs_out_expected[0]),
+		  distance(locs_out_expected[1], locs_out_expected[0])
+		+ distance(locs_out_expected[2], locs_out_expected[1]),
+	};
 	for(auto index : elems)
 	{
-		EXPECT_EQ(locs_out[index], locs_out_expected[index - elems.front()]);
+		auto const i = index - elems.front();
+		EXPECT_EQ(locs_out[index], locs_out_expected[i]);
+		EXPECT_EQ(running_lenghts[index], running_lenghts_expected[i]);
 	}
+	EXPECT_EQ(res.curve_length, running_lenghts_expected.back());
 }
 
 TESTCASE(terraformer_make_thick_curve_all_segments_broken)
@@ -212,6 +222,7 @@ TESTCASE(terraformer_make_thick_curve_all_segments_broken)
 
 	// Nothing interesting left
 	EXPECT_EQ(std::size(res.data).get(), 0);
+	EXPECT_EQ(res.curve_length, 0.0f);
 }
 
 TESTCASE(terraformer_make_thick_curve_only_two_vertices)
@@ -240,5 +251,5 @@ TESTCASE(terraformer_make_thick_curve_only_two_vertices)
 		EXPECT_EQ(locs_out[index], locs[index - elems.front()]);
 		EXPECT_EQ(normals_out[index], (terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}}));
 	}
-
+	EXPECT_EQ(res.curve_length, 1.0f);
 }
