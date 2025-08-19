@@ -26,7 +26,7 @@ terraformer::filters::modulator_descriptor::compose_image_from(
 	auto const mod_img_max = *range.second;
 	if(std::abs(mod_img_max - mod_img_min) < 1.0e-6f)
 	{ return grayscale_image{input_image}; }
-	
+
 	auto const mod_depth = modulation_depth;
 	auto const mod_exp = modulator_exponent;
 
@@ -48,9 +48,11 @@ terraformer::filters::modulator_descriptor::compose_image_from(
 
 			auto const in = interp(input_image, x_in, y_in, clamp_at_boundary{});
 			auto const mod_in = interp(mod_img, x_mod, y_mod, clamp_at_boundary{});
-			auto const mod = std::pow((mod_in - mod_img_min)/(mod_img_max - mod_img_min),mod_exp) - 1.0f;
+			auto const mod = std::pow((mod_in - mod_img_min)/(mod_img_max - mod_img_min), mod_exp);
 
-			ret(x, y) = in*(mod_depth*mod + 1.0f);
+			ret(x, y) = in*(mod_depth >= 0.0f?
+				std::lerp(1.0f, mod, mod_depth) : std::lerp(1.0f, 1.0f - mod, -mod_depth)
+			);
 		}
 	}
 
@@ -81,7 +83,7 @@ void terraformer::filters::modulator_descriptor::bind(descriptor_editor_ref edit
 		u8"Depth",
 		modulation_depth,
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}},
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-1.0f, 1.0f}},
 			.textbox_placeholder_string = u8"0.123456789",
 			.visual_angle_range = std::nullopt
 		}
