@@ -166,8 +166,10 @@ namespace
 	}
 
 	template<class Shape>
-	void  max_circle(terraformer::span_2d<float> output, float x_0, float y_0, float r, Shape&& shape)
+	void  max_circle(terraformer::span_2d<float> output, terraformer::location loc, float r, Shape&& shape)
 	{
+		auto const x_0 = loc[0];
+		auto const y_0 = loc[1];
 		auto const x_min = std::clamp(
 			static_cast<int32_t>(x_0 - r + 0.5f),
 			0,
@@ -252,16 +254,12 @@ namespace
 					shape_exponent,
 					ridge_elevation = 1.0f
 				](auto loc) mutable{
-					auto const x = loc[0];
-					auto const y = loc[1];
-					max_circle(ridge, x, y, ridge_radius, [
+					max_circle(ridge, loc, ridge_radius, [
 						shape_exponent,
 						ridge_elevation
 					](float r){
 						return ridge_elevation*std::pow(r, shape_exponent);
 					});
-					travel_distance += distance(loc, loc_prev);
-					loc_prev = loc;
 				});
 			}
 			++i;
