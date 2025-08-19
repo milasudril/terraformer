@@ -20,13 +20,25 @@ void terraformer::heightmap_generator_channel_strip_descriptor::bind(descriptor_
 		}
 	);
 
-	auto modulation_editor = editor.create_form(
-		descriptor_editor_ref::field_descriptor{
-			.label = u8"Modulation"
-		},
-		descriptor_editor_ref::form_descriptor{}
-	);
-	modulation.bind(modulation_editor);
+	{
+		auto modulation_editor = editor.create_form(
+			descriptor_editor_ref::field_descriptor{
+				.label = u8"Modulation A"
+			},
+			descriptor_editor_ref::form_descriptor{}
+		);
+		modulation_a.bind(modulation_editor);
+	}
+
+	{
+		auto modulation_editor = editor.create_form(
+			descriptor_editor_ref::field_descriptor{
+				.label = u8"Modulation B"
+			},
+			descriptor_editor_ref::form_descriptor{}
+		);
+		modulation_b.bind(modulation_editor);
+	}
 
 	editor.create_float_input(
 		descriptor_editor_ref::field_descriptor{
@@ -78,7 +90,8 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 			.orientation = descriptor_editor_ref::widget_orientation::deduce,
 			.field_names = {
 				u8"Input",
-				u8"Modulation",
+				u8"Modulation A",
+				u8"Modulation B",
 				u8"Gain"
 			}
 		}
@@ -111,21 +124,27 @@ terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& d
 	for(auto& item : descriptor.channel_strips)
 	{
 		auto& img = std::as_const(inputs).at(item.input);
-		if(!item.modulation.modulator.empty())
+
+		auto output_image = img;
+		if(!item.modulation_a.modulator.empty())
 		{
-			images_to_mix.push_back(
-				std::pair{
-					item.modulation.compose_image_from(
-						span_2d_extents{output_width, output_height},
-						img.pixels(),
-						registry
-					),
-					item.gain
-				}
+			output_image = item.modulation_a.compose_image_from(
+				span_2d_extents{output_width, output_height},
+				output_image.pixels(),
+				registry
 			);
 		}
-		else
-		{ images_to_mix.push_back(std::pair{img, item.gain}); }
+
+		if(!item.modulation_b.modulator.empty())
+		{
+			output_image = item.modulation_b.compose_image_from(
+				span_2d_extents{output_width, output_height},
+				output_image.pixels(),
+				registry
+			);
+		}
+
+		images_to_mix.push_back(std::pair{std::move(output_image), item.gain});
 	}
 
 	terraformer::grayscale_image ret{output_width, output_height};
