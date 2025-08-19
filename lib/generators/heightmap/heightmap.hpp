@@ -169,8 +169,8 @@ namespace terraformer
 				.input = u8"Rolling hills",
 				.modulation = filters::modulator_descriptor{
 					.modulator = u8"Plain",
-					.modulator_exponent = 2.0f,
-					.modulation_depth = 1.0f
+					.modulator_exponent = 1.0f,
+					.modulation_depth = 0.5f
 				},
 				.gain = 1.0f
 			},
