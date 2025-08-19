@@ -26,6 +26,8 @@ namespace terraformer
 	{
 		auto const p1 = location{} + (seg.p1 - location{})/pixel_size;
 		auto const p2 = location{} + (seg.p2 - location{})/pixel_size;
+		direction const tangent{p2 - p1};
+		auto const normal = direction{(p2 - p1).rot_right_angle_z_right()};
 		auto const total_displacement = p2 - p1;
 		auto const rep = total_displacement.get().get();
 		auto const absvec = rep < geosimd::vec_t<float, 4>{}.get()? -rep : rep;
@@ -34,7 +36,7 @@ namespace terraformer
 		auto const n = static_cast<size_t>(projected_distance);
 
 		for(size_t k = 0; k != n; ++k)
-		{ pixel_visitor(p1 + (static_cast<float>(k))*dr); }
+		{ pixel_visitor(p1 + (static_cast<float>(k))*dr, tangent, normal); }
 	}
 
 	template<class PixelVisitor>

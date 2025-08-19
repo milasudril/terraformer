@@ -23,6 +23,7 @@
 
 #include <algorithm>
 #include <cassert>
+#include <geosimd/unit_vector.hpp>
 #include <numbers>
 #include <random>
 
@@ -166,7 +167,13 @@ namespace
 	}
 
 	template<class Shape>
-	void  max_circle(terraformer::span_2d<float> output, terraformer::location loc, float r, Shape&& shape)
+	void  max_circle(
+		terraformer::span_2d<float> output,
+		terraformer::location loc,
+		terraformer::direction tangent,
+		terraformer::direction normal,
+		float r, Shape&& shape
+	)
 	{
 		auto const x_0 = loc[0];
 		auto const y_0 = loc[1];
@@ -198,9 +205,15 @@ namespace
 		{
 			for(int32_t x = x_min; x != x_max; ++x)
 			{
-				auto const x_float = (static_cast<float>(x) + 0.5f - x_0)/r;
-				auto const y_float = (static_cast<float>(y) + 0.5f - y_0)/r;
-				auto const r = std::abs(x_float) + std::abs(y_float);
+				auto const v = (
+					  (terraformer::location{static_cast<float>(x), static_cast<float>(y), 0.0f} - loc)
+					+ terraformer::displacement{0.5f, 0.5f, 0.0f}
+					)/r;
+
+				auto const xi = inner_product(v, tangent);
+				auto const eta = inner_product(v, normal);
+
+				auto const r = std::abs(xi) + std::abs(eta);
 				if( r <= 1.0f)
 				{ output(x, y) = std::max(output(x,y), shape(1.0f - r)); }
 			}
@@ -236,7 +249,7 @@ namespace
 
 			auto const& branches = i->branches;
 			auto const curves = branches.get<0>();
-			auto const curve_lengths = branches.get<3>();
+		//	auto const curve_lengths = branches.get<3>();
 			for(auto k : branches.element_indices())
 			{
 				auto const& curve = curves[k];
@@ -247,14 +260,10 @@ namespace
 					ridge = ridge.pixels(),
 					&rng,
 					ridge_radius,
-					loc_prev = terraformer::location{} + (curve.points().front() - terraformer::location{})/pixel_size,
-					curve_length = curve_lengths[k].back()/pixel_size,
-					travel_distance = 0.0f,
-					level,
 					shape_exponent,
 					ridge_elevation = 1.0f
-				](auto loc) mutable{
-					max_circle(ridge, loc, ridge_radius, [
+				](terraformer::location loc, terraformer::direction tangent, terraformer::direction normal) {
+					max_circle(ridge, loc, tangent, normal, ridge_radius, [
 						shape_exponent,
 						ridge_elevation
 					](float r){
