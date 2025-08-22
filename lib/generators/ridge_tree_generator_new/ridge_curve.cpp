@@ -39,7 +39,7 @@ terraformer::single_array<float> terraformer::generate(
 			filter = second_order_lp_filter{
 				second_order_lp_filter_description{
 					.damping = src.damping,
-					.cutoff_freq = twopi/src.wavelength,
+					.cutoff_freq = twopi/(2.0f*src.wavelength),
 					.initial_value = 0.0f,
 					.initial_derivative = 0.0f,
 					.initial_input = 0.0f
@@ -73,20 +73,25 @@ terraformer::single_array<float> terraformer::generate(
 			1.0f;
 	};
 
+	for(auto k : ret.element_indices())
+	{ ret[k] = f(U(rng)); }
+
+	auto const minmax = std::ranges::minmax_element(ret);
+	auto const min = *minmax.min;
+	auto const max = *minmax.max;
+
 	// TODO: C++23 adjacent_view
 	for(auto k : ret.element_indices())
 	{
-		ret[k] = f(U(rng))
-			*envelope(dx*static_cast<float>(k.get()))
+		auto const input_val = (ret[k] - min)/(max - min);
+		auto const x = static_cast<float>(k.get());
+		ret[k] =
+			 src.amplitude
+			*input_val
+			*std::sin(twopi*x*dx/src.wavelength)
+			*envelope(dx*x)
 			*envelope(dx*static_cast<float>(seg_count.get() - k.get()));
 	}
-
-	auto minmax = std::ranges::minmax_element(ret);
-
-	auto const gain = 2.0f*src.amplitude/(*minmax.max - *minmax.min);
-
-	for(auto& item : ret)
-	{ item *= gain; }
 
 	return ret;
 }
