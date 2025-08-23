@@ -20,13 +20,14 @@ terraformer::single_array<float> terraformer::generate(
 	single_array<float> ret;
 	ret.resize(seg_count);
 	constexpr auto twopi = 2.0f*std::numbers::pi_v<float>;
+	auto const noise_cutoff = std::sqrt(2.0f)*twopi/src.wavelength;
 	std::uniform_real_distribution U{-1.0f, 1.0f};
 
 	composite_function f{
 		[
 			filter = first_order_hp_filter{
 				first_order_hp_filter_description{
-					.cutoff_freq = 2.0f*twopi/src.wavelength,
+					.cutoff_freq = noise_cutoff,
 					.initial_value = 0.0f,
 					.initial_input = 0.f
 				}
@@ -39,7 +40,7 @@ terraformer::single_array<float> terraformer::generate(
 			filter = second_order_lp_filter{
 				second_order_lp_filter_description{
 					.damping = src.damping,
-					.cutoff_freq = 2.0f*twopi/src.wavelength,
+					.cutoff_freq = noise_cutoff,
 					.initial_value = 0.0f,
 					.initial_derivative = 0.0f,
 					.initial_input = 0.0f
