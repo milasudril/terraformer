@@ -26,7 +26,7 @@ terraformer::single_array<float> terraformer::generate(
 		[
 			filter = first_order_hp_filter{
 				first_order_hp_filter_description{
-					.cutoff_freq = twopi/src.wavelength,
+					.cutoff_freq = 2.0f*twopi/src.wavelength,
 					.initial_value = 0.0f,
 					.initial_input = 0.f
 				}
@@ -39,7 +39,7 @@ terraformer::single_array<float> terraformer::generate(
 			filter = second_order_lp_filter{
 				second_order_lp_filter_description{
 					.damping = src.damping,
-					.cutoff_freq = twopi/(2.0f*src.wavelength),
+					.cutoff_freq = 2.0f*twopi/src.wavelength,
 					.initial_value = 0.0f,
 					.initial_derivative = 0.0f,
 					.initial_input = 0.0f

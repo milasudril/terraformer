@@ -19,7 +19,7 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 	auto const points = displaced_points.get<0>();
 	auto const offsets = displaced_points.get<1>();
 
-	auto const x_intercepts = terraformer::find_zeros(offsets);
+	auto const x_intercepts = terraformer::find_zeros(offsets, 1.0f/128.0f);
 	auto side = x_intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 	size_t l = 0;
 	if(l != std::size(x_intercepts.zeros) && x_intercepts.zeros[l] == 0)
@@ -54,16 +54,7 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		}
 
 		auto const y = offsets[k];
-		auto const loc_a = points[k - 1];
-		auto const loc_b = points[k];
-		auto const loc_c = points[k + 1];
-		auto const normal
-			= curve_vertex_normal_from_projection(loc_a, loc_b, loc_c, displacement{0.0f, 0.0f, -1.0f});
-		auto const ab = loc_b - loc_a;
-		auto const side_of_curve = inner_product(ab, normal);
-		auto const visible = (side*y > 0.0f ? 1.0f : 0.0f)*(side*side_of_curve > 0.0f ? 1.0f : 0.0f);
-
-		if(visible && std::abs(y) > max_offset && side*y > side*offsets[k - 1] && side*y > side*offsets[k + 1])
+		if(std::abs(y) > max_offset && side*y > side*offsets[k - 1] && side*y > side*offsets[k + 1])
 		{
 			max_offset = std::abs(y);
 			selected_branch_point = k;
