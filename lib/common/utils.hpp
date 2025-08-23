@@ -93,6 +93,8 @@ namespace terraformer
 
 	inline float ceil_to_n_digits(float x, int n)
 	{
+		if(x == 0.0f)
+		{ return x; }
 		auto const scale = std::exp2(static_cast<float>(n) - std::ceil(std::log2(std::abs(x))));
 		return std::ceil(x * scale) / scale;
 	}
