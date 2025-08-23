@@ -20,6 +20,8 @@ namespace terraformer
 
 		constexpr bool operator==(span_2d_extents const&) const = default;
 		constexpr bool operator!=(span_2d_extents const&) const = default;
+
+		struct clamp_tag{};
 	};
 
 	inline auto diagonal(span_2d_extents extents)
@@ -34,6 +36,7 @@ namespace terraformer
 	{
 	public:
 		using IndexType = uint32_t;
+		using clamp_tag = span_2d_extents::clamp_tag;
 
 		using mapped_type = T;
 
@@ -69,6 +72,20 @@ namespace terraformer
 
 		constexpr T& operator()(IndexType x, IndexType y) const
 		{	return *(m_ptr + y * width() + x); }
+
+		constexpr T& operator()(
+			std::make_signed_t<IndexType> x,
+			std::make_signed_t<IndexType> y,
+			clamp_tag
+		) const
+		{
+			using signed_size = std::make_signed_t<IndexType>;
+			return (*this)(
+				static_cast<IndexType>(std::clamp(x, 0, static_cast<signed_size>(m_width) - 1)),
+				static_cast<IndexType>(std::clamp(y, 0, static_cast<signed_size>(m_height) - 1))
+			);
+		}
+
 
 	private:
 		IndexType m_width;

@@ -101,13 +101,11 @@ namespace
 		terraformer::rgba_pixel color
 	)
 	{
-		output(x_0, y_0) = color;
-		output(std::min(x_0 + 1, static_cast<int32_t>(output.width()) - 1), y_0) = color;
-		output(x_0, std::min(y_0 + 1, static_cast<int32_t>(output.height()) - 1)) = color;
-		output(
-			std::min(x_0 + 1, static_cast<int32_t>(output.width()) - 1),
-			std::min(y_0 + 1, static_cast<int32_t>(output.height()) - 1)
-		) = color;
+		using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+		output(x_0, y_0, clamp_tag{}) = color;
+		output(x_0 + 1, y_0, clamp_tag{}) = color;
+		output(x_0, y_0 + 1, clamp_tag{}) = color;
+		output(x_0 + 1, y_0 + 1,  clamp_tag{}) = color;
 	}
 
 	void draw_line(
