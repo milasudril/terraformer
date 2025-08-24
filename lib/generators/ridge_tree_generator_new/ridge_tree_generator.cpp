@@ -222,7 +222,8 @@ namespace
 
 	auto render_branches_at_current_level(
 		terraformer::domain_size_descriptor dom_size,
-		terraformer::ridge_tree_descriptor const& params,
+		float min_pixel_size,
+		terraformer::ridge_tree_elevation_profile_descriptor const& elevation_profile,
 		terraformer::ridge_tree_trunk const* i,
 		terraformer::ridge_tree_trunk const* i_end,
 		terraformer::random_generator& rng,
@@ -230,17 +231,13 @@ namespace
 	)
 	{
 		auto const level = i->level;
-		auto const pixel_size = get_min_pixel_size(
-			params.horizontal_layout[level],
-			params.elevation_profile[level]
-		);
+		auto const pixel_size = std::min(min_pixel_size, get_min_pixel_size(elevation_profile));
 		auto const w_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
 		auto const h_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
 
 		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
-		auto& ep = params.elevation_profile[level];
-		auto const ridge_radius = ep.ridge_half_thickness/pixel_size;
-		auto const shape_exponent = ep.ridge_rolloff_exponent;
+		auto const ridge_radius = elevation_profile.ridge_half_thickness/pixel_size;
+		auto const shape_exponent = elevation_profile.ridge_rolloff_exponent;
 		printf("Rendering level %zu\n", level);
 		while(i != i_end)
 		{
@@ -289,7 +286,7 @@ namespace
 					[
 						min = *minmax.first,
 						max = *minmax.second,
-						ridge_elevation = ep.ridge_elevation
+						ridge_elevation = elevation_profile.ridge_elevation
 					](auto val) {
 						return ridge_elevation * (val - min)/(max - min);
 					}
@@ -309,10 +306,10 @@ namespace
 
 			noise = terraformer::apply(
 				terraformer::butter_bp_2d_descriptor{
-					.f_x = 2.0f*dom_size.width/params.elevation_profile[level].noise_wavelength,
-					.f_y = 2.0f*dom_size.height/params.elevation_profile[level].noise_wavelength,
-					.lf_rolloff = ep.noise_lf_rolloff,
-					.hf_rolloff = ep.noise_hf_rolloff,
+					.f_x = 2.0f*dom_size.width/elevation_profile.noise_wavelength,
+					.f_y = 2.0f*dom_size.height/elevation_profile.noise_wavelength,
+					.lf_rolloff = elevation_profile.noise_lf_rolloff,
+					.hf_rolloff = elevation_profile.noise_hf_rolloff,
 					.y_direction = 0.0f
 				},
 				noise.pixels()
@@ -332,7 +329,7 @@ namespace
 					[
 						min = *minmax.first,
 						max = *minmax.second,
-						noise_amplitude = ep.noise_amplitude
+						noise_amplitude = elevation_profile.noise_amplitude
 					](auto val) {
 						return 2.0f*noise_amplitude*((val - min)/(max - min) - 0.5f);
 					}
@@ -386,7 +383,17 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 
 	auto i = std::begin(ridge_tree);
 	while(i != std::end(ridge_tree))
-	{ i = render_branches_at_current_level(dom_size, params, i, std::end(ridge_tree), rng, ret.pixels()); }
+	{
+		i = render_branches_at_current_level(
+			dom_size,
+			0.5f*get_min_pixel_size(params.horizontal_layout[i->level].displacement),
+			params.elevation_profile[i->level],
+			i,
+			std::end(ridge_tree),
+			rng,
+			ret.pixels()
+		);
+	}
 
 	std::transform(
 		ret.pixels().data(),
