@@ -240,7 +240,7 @@ namespace
 		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
 		auto& ep = params.elevation_profile[level];
 		auto const ridge_radius = ep.ridge_half_thickness/pixel_size;
-		auto const shape_exponent = ep.shape_exponent;
+		auto const shape_exponent = ep.ridge_rolloff_exponent;
 		printf("Rendering level %zu\n", level);
 		while(i != i_end)
 		{
@@ -309,8 +309,8 @@ namespace
 
 			noise = terraformer::apply(
 				terraformer::butter_bp_2d_descriptor{
-					.f_x = 2.0f*dom_size.width/params.elevation_profile[level].horizontal_scale_noise,
-					.f_y = 2.0f*dom_size.height/params.elevation_profile[level].horizontal_scale_noise,
+					.f_x = 2.0f*dom_size.width/params.elevation_profile[level].noise_wavelength,
+					.f_y = 2.0f*dom_size.height/params.elevation_profile[level].noise_wavelength,
 					.lf_rolloff = ep.noise_lf_rolloff,
 					.hf_rolloff = ep.noise_hf_rolloff,
 					.y_direction = 0.0f
@@ -463,7 +463,7 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		}
 	);
 	editor.create_float_input(
-		u8"Ridge half thickness/m",
+		u8"Ridge half-thickness/m",
 		ridge_half_thickness,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
@@ -472,10 +472,19 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		}
 	);
 	editor.create_float_input(
-		u8"Noise amplitude/m",
-		noise_amplitude,
+		u8"Ridge roll-off exponent",
+		ridge_rolloff_exponent,
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8192.0f, 2.0f}},
+			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	editor.create_float_input(
+		u8"Noise wavelength/m",
+		noise_wavelength,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
 			.visual_angle_range = std::nullopt
 		}
@@ -499,20 +508,11 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		}
 	);
 	editor.create_float_input(
-		u8"Horizontal scale (noise)/m",
-		horizontal_scale_noise,
+		u8"Noise amplitude/m",
+		noise_amplitude,
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8192.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
-			.visual_angle_range = std::nullopt
-		}
-	);
-	editor.create_float_input(
-		u8"Shape exponent",
-		shape_exponent,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
-			.textbox_placeholder_string = u8"0.123456789",
 			.visual_angle_range = std::nullopt
 		}
 	);
@@ -589,12 +589,12 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"Ridge elevation/m",
-					u8"Ridge half thickness/m",
-					u8"Noise amplitude/m",
+					u8"Ridge half-thickness/m",
+					u8"Ridge roll-off exponent",
+					u8"Noise wavelength/m",
 					u8"Noise LF roll-off",
 					u8"Noise HF roll-off",
-					u8"Horizontal scale (noise)/m",
-					u8"Shape exponent"
+					u8"Noise amplitude/m"
 				}
 			}
 		);
