@@ -231,8 +231,8 @@ namespace
 	{
 		auto const level = i->level;
 		auto const pixel_size = get_min_pixel_size(
-			params.elevation_profile[level],
-			params.horizontal_layout[level]
+			params.horizontal_layout[level],
+			params.elevation_profile[level]
 		);
 		auto const w_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
 		auto const h_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);

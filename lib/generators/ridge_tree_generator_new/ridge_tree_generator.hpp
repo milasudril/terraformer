@@ -80,12 +80,6 @@ namespace terraformer
 	)
 	{ return std::min(0.5f*get_min_pixel_size(a), get_min_pixel_size(b)); }
 
-	inline constexpr float get_min_pixel_size(
-		ridge_tree_elevation_profile_descriptor const& a,
-		ridge_tree_horz_layout_descriptor const& b
-	)
-	{ return get_min_pixel_size(b, a); }
-
 	struct ridge_tree_descriptor
 	{
 		std::array<std::byte, 16> rng_seed{};
