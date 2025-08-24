@@ -311,8 +311,8 @@ namespace
 				terraformer::butter_bp_2d_descriptor{
 					.f_x = 2.0f*dom_size.width/params.elevation_profile[level].horizontal_scale_noise,
 					.f_y = 2.0f*dom_size.height/params.elevation_profile[level].horizontal_scale_noise,
-					.lf_rolloff = ep.lf_rolloff,
-					.hf_rolloff = ep.hf_rolloff,
+					.lf_rolloff = ep.noise_lf_rolloff,
+					.hf_rolloff = ep.noise_hf_rolloff,
 					.y_direction = 0.0f
 				},
 				noise.pixels()
@@ -472,8 +472,8 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		}
 	);
 	editor.create_float_input(
-		u8"LF roll-off",
-		lf_rolloff,
+		u8"Noise LF roll-off",
+		noise_lf_rolloff,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
@@ -481,8 +481,8 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		}
 	);
 	editor.create_float_input(
-		u8"HF roll-off",
-		hf_rolloff,
+		u8"Noise HF roll-off",
+		noise_hf_rolloff,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
@@ -590,8 +590,8 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.field_names{
 					u8"Ridge elevation/m",
 					u8"Noise amplitude/m",
-					u8"LF roll-off",
-					u8"HF roll-off",
+					u8"Noise LF roll-off",
+					u8"Noise HF roll-off",
 					u8"Horizontal scale (ridge)/m",
 					u8"Horizontal scale (noise)/m",
 					u8"Shape exponent"

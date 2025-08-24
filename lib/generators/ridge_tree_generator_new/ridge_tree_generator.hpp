@@ -52,11 +52,11 @@ namespace terraformer
 	{
 		float ridge_elevation = 2048.0f;
 		float noise_amplitude = 512.0f;
-		float lf_rolloff = 2.0f;
-		float hf_rolloff = 2.0f;
+		float noise_lf_rolloff = 2.0f;
+		float noise_hf_rolloff = 2.0f;
 		float horizontal_scale_ridge = 12884.0f;
 		float horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>;
-		float shape_exponent = 2.0f;
+		float shape_exponent = 1.0f;
 
 		bool operator==(ridge_tree_elevation_profile_descriptor const&) const = default;
 		bool operator!=(ridge_tree_elevation_profile_descriptor const&) const = default;
@@ -69,7 +69,7 @@ namespace terraformer
 			terraformer::wave_descriptor{
 				.amplitude = item.ridge_elevation,
 				.wavelength = item.horizontal_scale_ridge,
-				.hf_rolloff = item.hf_rolloff
+				.hf_rolloff = item.noise_hf_rolloff
 			}
 		);
 	}
@@ -135,8 +135,8 @@ namespace terraformer
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 2048.0f,
 				.noise_amplitude = 512.0f,
-				.lf_rolloff = 2.0f,
-				.hf_rolloff = 2.0f,
+				.noise_lf_rolloff = 2.0f,
+				.noise_hf_rolloff = 2.0f,
 				.horizontal_scale_ridge = 6144.0f,
 				.horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 1.0f
@@ -144,8 +144,8 @@ namespace terraformer
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 1024.0f,
 				.noise_amplitude = 256.0f,
-				.lf_rolloff = 2.0f,
-				.hf_rolloff = 2.0f,
+				.noise_lf_rolloff = 2.0f,
+				.noise_hf_rolloff = 2.0f,
 				.horizontal_scale_ridge = 3072.0f,
 				.horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 1.25f
@@ -153,8 +153,8 @@ namespace terraformer
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 512.0f,
 				.noise_amplitude = 128.0f,
-				.lf_rolloff = 2.0f,
-				.hf_rolloff = 2.0f,
+				.noise_lf_rolloff = 2.0f,
+				.noise_hf_rolloff = 2.0f,
 				.horizontal_scale_ridge = 768.0f,
 				.horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
@@ -163,8 +163,8 @@ namespace terraformer
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 256.0f,
 				.noise_amplitude = 64.0f,
-				.lf_rolloff = 2.0f,
-				.hf_rolloff = 2.0f,
+				.noise_lf_rolloff = 2.0f,
+				.noise_hf_rolloff = 2.0f,
 				.horizontal_scale_ridge = 1536.0f,
 				.horizontal_scale_noise = 128.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
