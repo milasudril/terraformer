@@ -239,7 +239,7 @@ namespace
 
 		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
 		auto& ep = params.elevation_profile[level];
-		auto const ridge_radius = ep.horizontal_scale_ridge/pixel_size;
+		auto const ridge_radius = ep.ridge_half_thickness/pixel_size;
 		auto const shape_exponent = ep.shape_exponent;
 		printf("Rendering level %zu\n", level);
 		while(i != i_end)
@@ -463,6 +463,15 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		}
 	);
 	editor.create_float_input(
+		u8"Ridge half thickness/m",
+		ridge_half_thickness,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+	editor.create_float_input(
 		u8"Noise amplitude/m",
 		noise_amplitude,
 		descriptor_editor_ref::knob_descriptor{
@@ -485,15 +494,6 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 		noise_hf_rolloff,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8.0f, 2.0f}},
-			.textbox_placeholder_string = u8"9999.9999",
-			.visual_angle_range = std::nullopt
-		}
-	);
-	editor.create_float_input(
-		u8"Horizontal scale (ridge)/m",
-		horizontal_scale_ridge,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
 			.visual_angle_range = std::nullopt
 		}
@@ -589,10 +589,10 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"Ridge elevation/m",
+					u8"Ridge half thickness/m",
 					u8"Noise amplitude/m",
 					u8"Noise LF roll-off",
 					u8"Noise HF roll-off",
-					u8"Horizontal scale (ridge)/m",
 					u8"Horizontal scale (noise)/m",
 					u8"Shape exponent"
 				}

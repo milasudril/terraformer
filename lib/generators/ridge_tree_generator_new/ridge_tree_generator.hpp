@@ -51,10 +51,10 @@ namespace terraformer
 	struct ridge_tree_elevation_profile_descriptor
 	{
 		float ridge_elevation = 2048.0f;
+		float ridge_half_thickness = 2048.0f + 512.0f;
 		float noise_amplitude = 512.0f;
 		float noise_lf_rolloff = 2.0f;
 		float noise_hf_rolloff = 2.0f;
-		float horizontal_scale_ridge = 12884.0f;
 		float horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>;
 		float shape_exponent = 1.0f;
 
@@ -68,7 +68,7 @@ namespace terraformer
 		return get_min_pixel_size(
 			terraformer::wave_descriptor{
 				.amplitude = item.ridge_elevation,
-				.wavelength = item.horizontal_scale_ridge,
+				.wavelength = item.horizontal_scale_noise,
 				.hf_rolloff = item.noise_hf_rolloff
 			}
 		);
@@ -99,24 +99,24 @@ namespace terraformer
 			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 32768.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
-					.amplitude = 8192.0f/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 6144.0f,
+					.amplitude = 3.0f*2.0f*(1024.0f + 256.0f)/(2.0f*std::numbers::pi_v<float>),
+					.wavelength = 3.0f*2.0f*(1024.0f + 256.0f),
 					.damping = {}
 				}
 			},
 			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 16384,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
-					.amplitude = 4096.0f/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 3072.0f,
+					.amplitude = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f)/(2.0f*std::numbers::pi_v<float>),
+					.wavelength = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f),
 					.damping = {}
 				}
 			},
 			ridge_tree_horz_layout_descriptor{
 				.e2e_distance = 8192.0f,
 				.displacement = ridge_tree_branch_horz_displacement_descriptor{
-					.amplitude = 2048.0f/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 1536.0f,
+					.amplitude = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f)/(2.0f*std::numbers::pi_v<float>),
+					.wavelength = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f),
 					.damping = {}
 				}
 			},
@@ -134,30 +134,30 @@ namespace terraformer
 		std::array<ridge_tree_elevation_profile_descriptor, num_levels> elevation_profile{
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 2048.0f,
+				.ridge_half_thickness = 2.0f*1.5f*(2048.0f + 512.0f),
 				.noise_amplitude = 512.0f,
 				.noise_lf_rolloff = 2.0f,
 				.noise_hf_rolloff = 2.0f,
-				.horizontal_scale_ridge = 6144.0f,
-				.horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>,
-				.shape_exponent = 1.0f
+				.horizontal_scale_noise = 3.0f*2.0f*(1024.0f + 256.0f)*(2.0f/3.0f),
+				.shape_exponent = std::sqrt(2.0f)
 			},
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 1024.0f,
+				.ridge_half_thickness = 2.0f*2.0f*(1024.0f + 256.0f),
 				.noise_amplitude = 256.0f,
 				.noise_lf_rolloff = 2.0f,
 				.noise_hf_rolloff = 2.0f,
-				.horizontal_scale_ridge = 3072.0f,
-				.horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>,
-				.shape_exponent = 1.25f
+				.horizontal_scale_noise = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f)*(2.0f/3.0f),
+				.shape_exponent = 2.0f
 			},
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = 512.0f,
+				.ridge_half_thickness = std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f),
 				.noise_amplitude = 128.0f,
 				.noise_lf_rolloff = 2.0f,
 				.noise_hf_rolloff = 2.0f,
-				.horizontal_scale_ridge = 768.0f,
-				.horizontal_scale_noise = 1024.0f*2.0f*std::numbers::pi_v<float>,
-				.shape_exponent = 2.0f
+				.horizontal_scale_noise = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f)*(2.0f/3.0f),
+				.shape_exponent = std::pow(2.0f, 3.0f/2.0f)
 			},
 			/*
 			ridge_tree_elevation_profile_descriptor{
@@ -165,7 +165,7 @@ namespace terraformer
 				.noise_amplitude = 64.0f,
 				.noise_lf_rolloff = 2.0f,
 				.noise_hf_rolloff = 2.0f,
-				.horizontal_scale_ridge = 1536.0f,
+				.ridge_radius = 1536.0f,
 				.horizontal_scale_noise = 128.0f*2.0f*std::numbers::pi_v<float>,
 				.shape_exponent = 2.0f
 			}*/
