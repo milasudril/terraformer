@@ -14,6 +14,17 @@ TESTCASE(terraformer_ridge_tree_generate)
 	terraformer::ridge_tree_xy_description const desc{
 		.root_location = terraformer::location{0.0f, 24576.0f, 0.0f},
 		.trunk_direction = terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}},
+		.trunk_curve = terraformer::ridge_tree_branch_description{
+			.displacement_profile {
+				.amplitude = terraformer::horizontal_amplitude{3096.0f},
+				.wavelength = terraformer::domain_length{12384.0f},
+				.damping = std::sqrt(0.5f)
+			},
+			.growth_params{
+				.max_length = terraformer::domain_length{49152.0f},
+				.min_neighbour_distance = terraformer::domain_length{49152.0f}
+			}
+		},
 		.curve_levels = std::vector{
 			terraformer::ridge_tree_branch_description{
 				.displacement_profile {

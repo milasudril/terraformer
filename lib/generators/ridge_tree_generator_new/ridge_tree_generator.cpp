@@ -62,9 +62,22 @@ namespace
 			0.0f
 		};
 
+		terraformer::ridge_tree_branch_description const trunk{
+			.displacement_profile {
+				.amplitude = params.horizontal_layout[0].displacement.amplitude,
+				.wavelength = params.horizontal_layout[0].displacement.wavelength,
+				.damping = params.horizontal_layout[0].displacement.damping
+			},
+			.growth_params{
+				.max_length = params.horizontal_layout[0].e2e_distance,
+				.min_neighbour_distance = 2.0f*params.horizontal_layout[0].displacement.amplitude
+			}
+		};
+
 		std::vector<terraformer::ridge_tree_branch_description> curve_levels;
-		for(auto const& item : params.horizontal_layout)
+		for(size_t k = 1; k != std::size(params.horizontal_layout); ++k)
 		{
+			auto const& item = params.horizontal_layout[k];
 			curve_levels.push_back(
 				terraformer::ridge_tree_branch_description{
 					.displacement_profile {
@@ -83,9 +96,11 @@ namespace
 		return terraformer::ridge_tree_xy_description{
 			.root_location = root_location,
 			.trunk_direction = ridge_direction,
+			.trunk_curve = trunk,
 			.curve_levels = std::move(curve_levels)
 		};
 	}
+
 	template<class Shape>
 	void  add_circle(terraformer::span_2d<float> output, float x_0, float y_0, float r, Shape&& shape)
 	{
