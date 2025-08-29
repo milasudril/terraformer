@@ -14,6 +14,11 @@ TESTCASE(terraformer_ridge_tree_generate)
 	terraformer::ridge_tree_xy_description const desc{
 		.root_location = terraformer::location{0.0f, 24576.0f, 0.0f},
 		.trunk_direction = terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}},
+
+		.trunk_growth_params{},
+		.branch_growth_params{},
+		.displacement_profiles{},
+
 		.trunk_curve = terraformer::ridge_tree_branch_description{
 			.displacement_profile {
 				.amplitude = terraformer::horizontal_amplitude{3096.0f},

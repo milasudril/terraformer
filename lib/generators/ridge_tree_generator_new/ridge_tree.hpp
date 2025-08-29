@@ -25,6 +25,11 @@ namespace terraformer
 	{
 		location root_location;
 		direction trunk_direction;
+
+		ridge_tree_branch_growth_description trunk_growth_params;
+		std::vector<ridge_tree_branch_growth_description> branch_growth_params;
+		std::vector<ridge_tree_branch_displacement_description> displacement_profiles;
+
 		ridge_tree_branch_description trunk_curve;
 		std::vector<ridge_tree_branch_description> curve_levels;
 	};

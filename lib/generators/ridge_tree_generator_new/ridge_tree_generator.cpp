@@ -96,6 +96,9 @@ namespace
 		return terraformer::ridge_tree_xy_description{
 			.root_location = root_location,
 			.trunk_direction = ridge_direction,
+			.trunk_growth_params{},
+			.branch_growth_params{},
+			.displacement_profiles{},
 			.trunk_curve = trunk,
 			.curve_levels = std::move(curve_levels)
 		};
