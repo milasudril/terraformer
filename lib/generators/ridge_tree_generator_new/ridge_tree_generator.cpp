@@ -8,7 +8,9 @@
 #include "lib/common/span_2d.hpp"
 #include "lib/common/value_map.hpp"
 #include "lib/generators/domain/domain_size.hpp"
+#include "lib/generators/ridge_tree_generator_new/ridge_curve.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree_branch.hpp"
+#include "lib/generators/ridge_tree_generator_new/ridge_tree_branch_seed_sequence.hpp"
 #include "lib/math_utils/butter_bp_2d.hpp"
 #include "lib/math_utils/butter_lp_2d.hpp"
 #include "lib/math_utils/interp.hpp"
@@ -75,6 +77,7 @@ namespace
 		};
 
 		std::vector<terraformer::ridge_tree_branch_description> curve_levels;
+		std::vector<terraformer::ridge_tree_branch_growth_description> branch_growth_params;
 		for(size_t k = 1; k != std::size(params.horizontal_layout); ++k)
 		{
 			auto const& item = params.horizontal_layout[k];
@@ -91,14 +94,36 @@ namespace
 					}
 				}
 			);
+			branch_growth_params.push_back(
+				terraformer::ridge_tree_branch_growth_description{
+					.max_length = item.e2e_distance,
+					.min_neighbour_distance = 2.0f*item.displacement.amplitude
+				}
+			);
+		}
+
+		std::vector<terraformer::ridge_tree_branch_displacement_description> displacement_profiles;
+		for(size_t k = 0; k != std::size(params.horizontal_layout); ++k)
+		{
+			auto const& item = params.horizontal_layout[k];
+			displacement_profiles.push_back(
+				terraformer::ridge_tree_branch_displacement_description{
+					.amplitude = item.displacement.amplitude,
+					.wavelength = item.displacement.wavelength,
+					.damping = item.displacement.damping
+				}
+			);
 		}
 
 		return terraformer::ridge_tree_xy_description{
 			.root_location = root_location,
 			.trunk_direction = ridge_direction,
-			.trunk_growth_params{},
-			.branch_growth_params{},
-			.displacement_profiles{},
+			.trunk_growth_params = terraformer::ridge_tree_branch_growth_description{
+				.max_length = params.horizontal_layout[0].e2e_distance,
+				.min_neighbour_distance = 2.0f*params.horizontal_layout[0].displacement.amplitude
+			},
+			.branch_growth_params = std::move(branch_growth_params),
+			.displacement_profiles = std::move(displacement_profiles),
 			.trunk_curve = trunk,
 			.curve_levels = std::move(curve_levels)
 		};
