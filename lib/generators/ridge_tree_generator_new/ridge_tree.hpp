@@ -10,17 +10,25 @@
 #include "lib/curve_tools/displace.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/math_utils/cubic_spline.hpp"
 
 #include <vector>
 
 namespace terraformer
 {
+	struct ridge_tree_trunk_description
+	{
+		cubic_spline_control_point<location, displacement> begin;
+		cubic_spline_control_point<location, displacement> end;
+	};
+
 	struct ridge_tree_xy_description
 	{
 		location root_location;
 		direction trunk_direction;
 
-		ridge_tree_branch_growth_description trunk_growth_params;
+		ridge_tree_trunk_description trunk;
+		[[deprecated]] ridge_tree_branch_growth_description trunk_growth_params;
 		std::vector<ridge_tree_branch_growth_description> branch_growth_params;
 		std::vector<ridge_tree_branch_displacement_description> displacement_profiles;;
 	};

@@ -12,12 +12,12 @@ namespace terraformer
 		template<class Param>
 		constexpr auto operator()(Param x) const
 		{
-			auto ret = 0.0f;
-			auto val = 1.0f;
+			Value ret{};
+			Param param{1};
 			for(size_t k = 0; k != std::size(coefficients); ++k)
 			{
-				ret += coefficients[k]*val;
-				val *= x;
+				ret += coefficients[k]*param;
+				param *= x;
 			}
 			return ret;
 		}

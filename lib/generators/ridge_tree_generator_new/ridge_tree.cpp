@@ -3,24 +3,33 @@
 #include "./ridge_tree.hpp"
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/curve_tools/length.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 
-namespace terraformer
+
+namespace
 {
-	namespace
+	std::vector<terraformer::location> make_point_array(
+		terraformer::cubic_spline_control_point<terraformer::location, terraformer::displacement> begin,
+		terraformer::cubic_spline_control_point<terraformer::location, terraformer::displacement> end,
+		size_t count
+	)
 	{
-		std::vector<location> make_point_array(location start_loc, direction dir, size_t count, float dx)
+		auto const p = make_polynomial(begin, end);
+		auto const v = p.derivative();
+
+		std::vector<terraformer::location> ret(count);
+		for(size_t k = 0; k != count; ++k)
 		{
-			std::vector<location> ret(count);
-			for(size_t k = 0; k != count; ++k)
-			{
-				ret[k] = start_loc + static_cast<float>(k)*dx*dir;
-			}
-			return ret;
+			auto const t = (static_cast<float>(k) + 0.5f)/static_cast<float>(count);
+			ret[k] = terraformer::location{} + p(t);
+
+			printf("v = %.8g\n", norm(v(t)));
 		}
+		return ret;
 	}
 }
 
@@ -36,8 +45,12 @@ terraformer::ridge_tree::ridge_tree(
 	if(branch_growth_params.empty() || displacement_profiles.empty())
 	{ return; }
 
-	auto const trunk_pixel_size = get_min_pixel_size(displacement_profiles[0]);
-	auto const trunk_pixel_count = static_cast<size_t>(description.trunk_growth_params.max_length/trunk_pixel_size);
+	auto const trunk_e2e_distance = distance(description.trunk.begin.y, description.trunk.end.y);
+	auto const trunk_pixel_size = std::min(
+		get_min_pixel_size(displacement_profiles[0]),
+		trunk_e2e_distance/1024.0f
+	);
+	auto const trunk_pixel_count = static_cast<size_t>(trunk_e2e_distance/trunk_pixel_size);
 
 	auto const trunk_offsets = generate(
 		displacement_profiles[0],
@@ -47,8 +60,8 @@ terraformer::ridge_tree::ridge_tree(
 		1024.0f
 	);
 
-	auto const trunk_base_curve = terraformer::make_point_array
-		(description.root_location, description.trunk_direction, trunk_pixel_count, trunk_pixel_size);
+	auto const trunk_base_curve = make_point_array
+		(description.trunk.begin, description.trunk.end, trunk_pixel_count);
 	{
 		auto curve = displace_xy(
 			trunk_base_curve,

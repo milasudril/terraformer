@@ -14,7 +14,10 @@ TESTCASE(terraformer_ridge_tree_generate)
 	terraformer::ridge_tree_xy_description const desc{
 		.root_location = terraformer::location{0.0f, 24576.0f, 0.0f},
 		.trunk_direction = terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}},
-
+		.trunk{
+			.begin{terraformer::location{0.0f, 24576.0f, 0.0f}, terraformer::displacement{1024.0f, 0.0f, 0.0f}},
+			.end{terraformer::location{49152.0f, 24576.0f, 0.0f}, terraformer::displacement{1024.0f, 0.0f, 0.0f}}
+		},
 		.trunk_growth_params{
 			.max_length = terraformer::domain_length{49152.0f},
 			.min_neighbour_distance = terraformer::domain_length{49152.0f}

@@ -13,6 +13,7 @@
 #include "lib/generators/ridge_tree_generator_new/ridge_tree_branch_seed_sequence.hpp"
 #include "lib/math_utils/butter_bp_2d.hpp"
 #include "lib/math_utils/butter_lp_2d.hpp"
+#include "lib/math_utils/cubic_spline.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/value_maps/qurt_value_map.hpp"
@@ -31,6 +32,33 @@
 
 namespace
 {
+	auto make_cubic_spline_control_point(
+		terraformer::domain_size_descriptor dom_size,
+		terraformer::ridge_tree_trunk_control_point_descriptor const& params
+	)
+	{
+		auto const theta = 2.0f*std::numbers::pi_v<float>*params.heading;
+		auto const r = terraformer::displacement{params.x, params.y, 0.0f}
+			.apply(terraformer::scaling{dom_size.width, dom_size.height, 1.0f});
+		auto const dom_norm = std::sqrt(dom_size.width*dom_size.height);
+		return terraformer::cubic_spline_control_point<terraformer::location, terraformer::displacement>{
+			.y = terraformer::location{} + r,
+			.ddx = dom_norm*params.speed*terraformer::displacement{std::sin(theta), -std::cos(theta), 0.0f}
+		};
+	}
+
+	terraformer::ridge_tree_trunk_description
+	make_ridge_tree_trunk_description(
+		terraformer::domain_size_descriptor dom_size,
+		terraformer::ridge_tree_trunk_descriptor const& params
+	)
+	{
+		return terraformer::ridge_tree_trunk_description{
+			.begin = make_cubic_spline_control_point(dom_size, params.begin),
+			.end = make_cubic_spline_control_point(dom_size, params.end)
+		};
+	}
+
 	terraformer::ridge_tree_xy_description
 	collect_ridge_tree_xy_params(
 		terraformer::domain_size_descriptor dom_size,
@@ -92,6 +120,7 @@ namespace
 		return terraformer::ridge_tree_xy_description{
 			.root_location = root_location,
 			.trunk_direction = ridge_direction,
+			.trunk = make_ridge_tree_trunk_description(dom_size, params.trunk),
 			.trunk_growth_params = terraformer::ridge_tree_branch_growth_description{
 				.max_length = params.branch_growth_params[0].e2e_distance,
 				.min_neighbour_distance = 2.0f*params.horz_displacements[0].amplitude
