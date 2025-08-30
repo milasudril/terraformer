@@ -8,7 +8,7 @@
 
 #include <fenv.h>
 
-terraformer::polynomial<3> terraformer::create_polynomial(
+terraformer::polynomial<float, 3> terraformer::create_polynomial(
 	float curve_length,
 	elevation z_0,
 	ridge_tree_ridge_elevation_profile_description const& elevation_profile,
@@ -30,7 +30,7 @@ terraformer::polynomial<3> terraformer::create_polynomial(
 
 terraformer::single_array<float> terraformer::generate_elevation_profile(
 	span<float const, array_index<float>, array_size<float>> integrated_curve_length,
-	polynomial<3> const& ridge_polynomial
+	polynomial<float, 3> const& ridge_polynomial
 )
 {
 	if(integrated_curve_length.empty())
@@ -50,7 +50,7 @@ namespace
 	auto wrap_derivative(
 		float target_derivative,
 		float modulation_func_val,
-		terraformer::polynomial<3> const& f,
+		terraformer::polynomial<float, 3> const& f,
 		float x,
 		float x_scale_factor,
 		float mod_depth
@@ -70,7 +70,7 @@ namespace
 terraformer::single_array<float> terraformer::generate_elevation_profile(
 	span<float const> integrated_curve_length,
 	span<displaced_curve::index_type const> branch_points,
-	polynomial<3> const& initial_elevation,
+	polynomial<float, 3> const& initial_elevation,
 	ridge_tree_elevation_modulation_description const& elevation_profile,
 	random_generator& rng
 )

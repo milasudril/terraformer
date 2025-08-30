@@ -61,7 +61,7 @@ namespace
 		}
 
 	private:
-		std::array<terraformer::polynomial<3>, 2> m_poly;
+		std::array<terraformer::polynomial<float, 3>, 2> m_poly;
 		terraformer::bounded_value<terraformer::open_open_interval{0.0f, 1.0f}, 0.5f> m_xm;
 	};
 }

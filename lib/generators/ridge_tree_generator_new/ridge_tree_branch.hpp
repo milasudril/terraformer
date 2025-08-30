@@ -41,7 +41,7 @@ namespace terraformer
 		ridge_tree_slope_angle_range final_slope;
 	};
 
-	polynomial<3> create_polynomial(
+	polynomial<float, 3> create_polynomial(
 		float curve_length,
 		elevation z_0,
 		ridge_tree_ridge_elevation_profile_description const& elevation_profile,
@@ -50,7 +50,7 @@ namespace terraformer
 
 	single_array<float> generate_elevation_profile(
 		span<float const, array_index<float>, array_size<float>> integrated_curve_length,
-		polynomial<3> const& ridge_polynomial
+		polynomial<float, 3> const& ridge_polynomial
 	);
 
 	struct ridge_tree_elevation_noise
@@ -75,7 +75,7 @@ namespace terraformer
 	single_array<float> generate_elevation_profile(
 		span<float const> integrated_curve_length,
 		span<displaced_curve::index_type const> branch_points,
-		polynomial<3> const& initial_elevation,
+		polynomial<float, 3> const& initial_elevation,
 		ridge_tree_elevation_modulation_description const& elevation_profile,
 		random_generator& rng
 	);
@@ -129,7 +129,7 @@ namespace terraformer
 	inline auto closest_point_xy(ridge_tree_branch_sequence const& seed_seq, location loc)
 	{	return closest_point_xy(seed_seq.get<0>(), loc); }
 
-	using ridge_tree_branch_elevation_data = single_array<polynomial<3>>;
+	using ridge_tree_branch_elevation_data = single_array<polynomial<float, 3>>;
 
 	struct ridge_tree_trunk
 	{

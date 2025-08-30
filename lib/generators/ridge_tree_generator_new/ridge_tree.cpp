@@ -228,7 +228,7 @@ void terraformer::ridge_tree::update_elevations(
 			auto const elevation_profile = generate_elevation_profile(
 				curve_lengths[k],
 				branches_at[k],
-				current_trunk.elevation_data[array_index<polynomial<3>>{k.get()}],
+				current_trunk.elevation_data[array_index<polynomial<float, 3>>{k.get()}],
 				elevation_profiles[level].modulation,
 				rng
 			);
