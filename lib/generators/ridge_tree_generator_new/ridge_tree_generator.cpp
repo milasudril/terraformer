@@ -463,8 +463,8 @@ void terraformer::ridge_tree_trunk_control_point_descriptor::bind(descriptor_edi
 		u8"Speed",
 		speed,
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::qurt_value_map{32767.0f}},
-			.textbox_placeholder_string = u8"-9999.9999",
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f/128.0f, 2.0f, 2.0f}},
+			.textbox_placeholder_string = u8"0.011031073",
 			.visual_angle_range = std::nullopt
 		}
 	);
