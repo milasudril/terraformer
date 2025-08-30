@@ -3,7 +3,9 @@
 #ifndef TERRAFORMER_RIDGE_TREE_GENERATOR_HPP
 #define TERRAFORMER_RIDGE_TREE_GENERATOR_HPP
 
+#include "lib/common/spaces.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree.hpp"
+#include "lib/math_utils/cubic_spline.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/common/bounded_value.hpp"
@@ -13,9 +15,42 @@
 
 namespace terraformer
 {
+	struct ridge_tree_trunk_control_point_descriptor
+	{
+		float x = 0.5f;
+		float y = 0.5f;
+		float heading = 0.25f;
+		float speed = 0.25f;
+
+		bool operator==(ridge_tree_trunk_control_point_descriptor const&) const = default;
+		bool operator!=(ridge_tree_trunk_control_point_descriptor const&) const = default;
+		void bind(descriptor_editor_ref editor);
+	};
+
+	struct ridge_tree_trunk_descriptor
+	{
+		ridge_tree_trunk_control_point_descriptor begin{
+			.x = 0.25f,
+			.y = 1.0f/3.0f,
+			.heading = 0.25f,
+			.speed = 0.25f
+		};
+
+		ridge_tree_trunk_control_point_descriptor end{
+			.x = 0.75f,
+			.y = 2.0f/3.0f,
+			.heading = 0.25f,
+			.speed = 0.25f
+		};
+
+		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
+		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;
+	};
+
 	struct ridge_tree_branch_growth_descriptor
 	{
 		float e2e_distance = 16384.0f;
+
 		bool operator==(ridge_tree_branch_growth_descriptor const&) const = default;
 		bool operator!=(ridge_tree_branch_growth_descriptor const&) const = default;
 		void bind(descriptor_editor_ref editor);
@@ -82,8 +117,10 @@ namespace terraformer
 		float y_0 = 0.0f;
 		float heading = 0.25f;
 
-		static constexpr size_t num_levels = 3;
 
+		ridge_tree_trunk_descriptor trunk;
+
+		static constexpr size_t num_levels = 3;
 		std::array<ridge_tree_branch_growth_descriptor, num_levels> branch_growth_params{
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 32768.0f},
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 16384.0f},

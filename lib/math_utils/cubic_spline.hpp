@@ -12,6 +12,9 @@ namespace terraformer
 	{
 		Point y;
 		Vector ddx;
+
+		constexpr bool operator==(cubic_spline_control_point const&) const = default;
+		constexpr bool operator!=(cubic_spline_control_point const&) const = default;
 	};
 
 	template<class Point, class Vector>
@@ -40,7 +43,7 @@ namespace terraformer
 		cubic_spline_control_point<Point, Vector> b,
 		float x
 	)
-	{	return make_polynomial(a, b)(x); }
+	{	return Point{} + make_polynomial(a, b)(x); }
 
 	constexpr auto smoothstep(float x)
 	{

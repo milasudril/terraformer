@@ -426,6 +426,50 @@ terraformer::grayscale_image
 terraformer::ridge_tree_descriptor::generate_heightmap(domain_size_descriptor size) const
 { return generate(size, *this); }
 
+void terraformer::ridge_tree_trunk_control_point_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_float_input(
+		u8"x",
+		x,
+		descriptor_editor_ref::knob_descriptor{
+			.textbox_placeholder_string = u8"0.00019329926",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"y",
+		y,
+		descriptor_editor_ref::knob_descriptor{
+			.textbox_placeholder_string = u8"0.00019329926",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"Heading",
+		heading,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-0.5f, 0.5f}},
+			.textbox_placeholder_string = u8"-0.123456789",
+			.visual_angle_range = closed_closed_interval<geosimd::turn_angle>{
+				geosimd::turns{0.0},
+				geosimd::turns{1.0}
+			}
+		}
+	);
+
+	editor.create_float_input(
+		u8"Speed",
+		speed,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::qurt_value_map{32767.0f}},
+			.textbox_placeholder_string = u8"-9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
+}
+
 void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
@@ -575,6 +619,35 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 			}
 		}
 	);
+
+	{
+		auto trunk_table = editor.create_table(
+			descriptor_editor_ref::field_descriptor{
+				.label = u8"Trunk (Level 0)"
+			},
+			descriptor_editor_ref::table_descriptor{
+				.orientation = descriptor_editor_ref::widget_orientation::vertical,
+				.field_names{
+					u8"x",
+					u8"y",
+					u8"Heading",
+					u8"Speed",
+				}
+			}
+		);
+
+		{
+			auto record = trunk_table.add_record(u8"Begin");
+			trunk.begin.bind(record);
+			record.append_pending_widgets();
+		}
+
+		{
+			auto record = trunk_table.add_record(u8"End");
+			trunk.end.bind(record);
+			record.append_pending_widgets();
+		}
+	}
 
 	{
 		auto branch_growth_table = editor.create_table(
