@@ -116,8 +116,7 @@ namespace terraformer
 		ridge_tree_trunk_descriptor trunk;
 
 		static constexpr size_t num_levels = 3;
-		std::array<ridge_tree_branch_growth_descriptor, num_levels> branch_growth_params{
-			ridge_tree_branch_growth_descriptor{.e2e_distance = 32768.0f},
+		std::array<ridge_tree_branch_growth_descriptor, num_levels - 1> branch_growth_params{
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 16384.0f},
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 8192.0f}
 		};

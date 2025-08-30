@@ -66,13 +66,13 @@ namespace
 	)
 	{
 		std::vector<terraformer::ridge_tree_branch_growth_description> branch_growth_params;
-		for(size_t k = 1; k != std::size(params.branch_growth_params); ++k)
+		for(size_t k = 0; k != std::size(params.branch_growth_params); ++k)
 		{
 			auto const& item =  params.branch_growth_params[k];
 			branch_growth_params.push_back(
 				terraformer::ridge_tree_branch_growth_description{
 					.max_length = item.e2e_distance,
-					.min_neighbour_distance = 2.0f*params.horz_displacements[k].amplitude
+					.min_neighbour_distance = 2.0f*params.horz_displacements[k + 1].amplitude
 				}
 			);
 		}
@@ -653,7 +653,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		for(auto& item : horz_displacements)
 		{
 			auto record = horz_displacement_table.add_record(
-				reinterpret_cast<char8_t const*>(std::to_string(k).c_str())
+				reinterpret_cast<char8_t const*>(std::to_string(k + 1).c_str())
 			);
 			item.bind(record);
 			record.append_pending_widgets();
