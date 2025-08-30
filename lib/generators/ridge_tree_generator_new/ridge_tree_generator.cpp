@@ -64,36 +64,10 @@ namespace
 			0.0f
 		};
 
-		terraformer::ridge_tree_branch_description const trunk{
-			.displacement_profile {
-				.amplitude = params.horizontal_layout[0].displacement.amplitude,
-				.wavelength = params.horizontal_layout[0].displacement.wavelength,
-				.damping = params.horizontal_layout[0].displacement.damping
-			},
-			.growth_params{
-				.max_length = params.horizontal_layout[0].e2e_distance,
-				.min_neighbour_distance = 2.0f*params.horizontal_layout[0].displacement.amplitude
-			}
-		};
-
-		std::vector<terraformer::ridge_tree_branch_description> curve_levels;
 		std::vector<terraformer::ridge_tree_branch_growth_description> branch_growth_params;
 		for(size_t k = 1; k != std::size(params.horizontal_layout); ++k)
 		{
-			auto const& item = params.horizontal_layout[k];
-			curve_levels.push_back(
-				terraformer::ridge_tree_branch_description{
-					.displacement_profile {
-						.amplitude = item.displacement.amplitude,
-						.wavelength = item.displacement.wavelength,
-						.damping = item.displacement.damping
-					},
-					.growth_params{
-						.max_length = item.e2e_distance,
-						.min_neighbour_distance = 2.0f*item.displacement.amplitude
-					}
-				}
-			);
+			auto const& item =  params.horizontal_layout[k];
 			branch_growth_params.push_back(
 				terraformer::ridge_tree_branch_growth_description{
 					.max_length = item.e2e_distance,
@@ -124,8 +98,6 @@ namespace
 			},
 			.branch_growth_params = std::move(branch_growth_params),
 			.displacement_profiles = std::move(displacement_profiles),
-			.trunk_curve = trunk,
-			.curve_levels = std::move(curve_levels)
 		};
 	}
 

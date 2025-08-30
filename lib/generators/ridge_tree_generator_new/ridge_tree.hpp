@@ -15,12 +15,6 @@
 
 namespace terraformer
 {
-	struct ridge_tree_branch_description
-	{
-		ridge_tree_branch_displacement_description displacement_profile;
-		ridge_tree_branch_growth_description growth_params;
-	};
-
 	struct ridge_tree_xy_description
 	{
 		location root_location;
@@ -28,10 +22,7 @@ namespace terraformer
 
 		ridge_tree_branch_growth_description trunk_growth_params;
 		std::vector<ridge_tree_branch_growth_description> branch_growth_params;
-		std::vector<ridge_tree_branch_displacement_description> displacement_profiles;
-
-		[[deprecated]] ridge_tree_branch_description trunk_curve;
-		[[deprecated]] std::vector<ridge_tree_branch_description> curve_levels;
+		std::vector<ridge_tree_branch_displacement_description> displacement_profiles;;
 	};
 
 	struct ridge_tree_branch_elevation_profile

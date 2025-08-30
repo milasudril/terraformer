@@ -55,64 +55,6 @@ TESTCASE(terraformer_ridge_tree_generate)
 				.damping = std::sqrt(0.5f)
 			}
 		},
-
-		.trunk_curve = terraformer::ridge_tree_branch_description{
-			.displacement_profile {
-				.amplitude = terraformer::horizontal_amplitude{3096.0f},
-				.wavelength = terraformer::domain_length{12384.0f},
-				.damping = std::sqrt(0.5f)
-			},
-			.growth_params{
-				.max_length = terraformer::domain_length{49152.0f},
-				.min_neighbour_distance = terraformer::domain_length{49152.0f}
-			}
-		},
-		.curve_levels = std::vector{
-			terraformer::ridge_tree_branch_description{
-				.displacement_profile {
-					.amplitude = terraformer::horizontal_amplitude{3096.0f},
-					.wavelength = terraformer::domain_length{12384.0f},
-					.damping = std::sqrt(0.5f)
-				},
-				.growth_params{
-					.max_length = terraformer::domain_length{49152.0f},
-					.min_neighbour_distance = terraformer::domain_length{49152.0f}
-				}
-			},
-			terraformer::ridge_tree_branch_description{
-				.displacement_profile {
-					.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
-					.wavelength = terraformer::domain_length{12384.0f/3.0f},
-					.damping = std::sqrt(0.5f)
-				},
-				.growth_params{
-					.max_length = terraformer::domain_length{12384.0f},
-					.min_neighbour_distance = terraformer::domain_length{6144.0f}
-				}
-			},
-			terraformer::ridge_tree_branch_description{
-				.displacement_profile {
-					.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
-					.wavelength = terraformer::domain_length{12384.0f/9.0f},
-					.damping = std::sqrt(0.5f)
-				},
-				.growth_params{
-					.max_length = terraformer::domain_length{12384.0f/3.0f},
-					.min_neighbour_distance = terraformer::domain_length{1536.0f}
-				}
-			},
-			terraformer::ridge_tree_branch_description{
-				.displacement_profile {
-					.amplitude = terraformer::horizontal_amplitude{3096.0f/27.0f},
-					.wavelength = terraformer::domain_length{12384.0f/27.0f},
-					.damping = std::sqrt(0.5f)
-				},
-				.growth_params {
-					.max_length = terraformer::domain_length{12384.0f/9.0f},
-					.min_neighbour_distance = terraformer::domain_length{384.0f}
-				}
-			}
-		}
 	};
 
 	auto const t_0 = std::chrono::steady_clock::now();
