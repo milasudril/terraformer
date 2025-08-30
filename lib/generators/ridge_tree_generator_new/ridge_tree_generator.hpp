@@ -30,17 +30,17 @@ namespace terraformer
 	struct ridge_tree_trunk_descriptor
 	{
 		ridge_tree_trunk_control_point_descriptor begin{
-			.x = 0.25f,
-			.y = 1.0f/3.0f,
+			.x = 0.125f,
+			.y = 3.0f/8.0f,
 			.heading = 0.25f,
-			.speed = 0.25f
+			.speed = 1.0f,
 		};
 
 		ridge_tree_trunk_control_point_descriptor end{
-			.x = 0.75f,
-			.y = 2.0f/3.0f,
+			.x = 0.875f,
+			.y = 5.0f/8.0f,
 			.heading = 0.25f,
-			.speed = 0.25f
+			.speed = 1.0f
 		};
 
 		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
@@ -113,11 +113,6 @@ namespace terraformer
 	struct ridge_tree_descriptor
 	{
 		std::array<std::byte, 16> rng_seed{};
-		float x_0 = 0.0f;
-		float y_0 = 0.0f;
-		float heading = 0.25f;
-
-
 		ridge_tree_trunk_descriptor trunk;
 
 		static constexpr size_t num_levels = 3;

@@ -65,33 +65,6 @@ namespace
 		terraformer::ridge_tree_descriptor const& params
 	)
 	{
-		auto const theta = 2.0f*std::numbers::pi_v<float>*params.heading;
-		terraformer::location const world_origin{0.5f*dom_size.width, 0.5f*dom_size.height, 0.0f};
-		terraformer::location const ridge_origin{params.x_0, -params.y_0, 0.0f};
-
-		auto const sin_theta = std::sin(theta);
-		auto const cos_theta = std::cos(theta);
-		terraformer::direction const ridge_direction{
-			terraformer::displacement{
-				sin_theta,
-				-cos_theta,
-				0.0f
-			}
-		};
-		terraformer::direction const dir_ortho{
-			terraformer::displacement{
-				cos_theta,
-				sin_theta,
-				0.0f
-			}
-		};
-		auto const dr = ridge_origin - terraformer::location{0.5f*params.branch_growth_params[0].e2e_distance, 0.0f, 0.0f};
-		auto const root_location = world_origin + terraformer::displacement{
-			inner_product(dr, ridge_direction),
-			-inner_product(dr, dir_ortho),
-			0.0f
-		};
-
 		std::vector<terraformer::ridge_tree_branch_growth_description> branch_growth_params;
 		for(size_t k = 1; k != std::size(params.branch_growth_params); ++k)
 		{
@@ -118,13 +91,7 @@ namespace
 		}
 
 		return terraformer::ridge_tree_xy_description{
-			.root_location = root_location,
-			.trunk_direction = ridge_direction,
 			.trunk = make_ridge_tree_trunk_description(dom_size, params.trunk),
-			.trunk_growth_params = terraformer::ridge_tree_branch_growth_description{
-				.max_length = params.branch_growth_params[0].e2e_distance,
-				.min_neighbour_distance = 2.0f*params.horz_displacements[0].amplitude
-			},
 			.branch_growth_params = std::move(branch_growth_params),
 			.displacement_profiles = std::move(displacement_profiles),
 		};
@@ -615,39 +582,6 @@ void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_edito
 void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_rng_seed_input(u8"Seed", rng_seed);
-
-	editor.create_float_input(
-		u8"Center loc x/m",
-		x_0,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::qurt_value_map{32767.0f}},
-			.textbox_placeholder_string = u8"-9999.9999",
-			.visual_angle_range = std::nullopt
-		}
-	);
-
-	editor.create_float_input(
-		u8"Center loc y/m",
-		y_0,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::qurt_value_map{32767.0f}},
-			.textbox_placeholder_string = u8"-9999.9999",
-			.visual_angle_range = std::nullopt
-		}
-	);
-
-	editor.create_float_input(
-		u8"Heading",
-		heading,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::affine_value_map{-0.25f, 0.25f}},
-			.textbox_placeholder_string = u8"-0.123456789",
-			.visual_angle_range = closed_closed_interval<geosimd::turn_angle>{
-				geosimd::turns{1.0/4.0},
-				geosimd::turns{3.0/4.0}
-			}
-		}
-	);
 
 	{
 		auto trunk_table = editor.create_table(

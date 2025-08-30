@@ -99,6 +99,7 @@ namespace terraformer
 		{ return (1.0f - t)*left + t*right; }
 	}
 
+	// TODO: Return current position to avoid unnecessary O(n^2) algorithms
 	template<
 		std::ranges::random_access_range RangeX,
 		std::ranges::random_access_range RangeY

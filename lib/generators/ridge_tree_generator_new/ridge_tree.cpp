@@ -9,7 +9,6 @@
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 
-
 namespace
 {
 	std::vector<terraformer::location> make_point_array(
@@ -19,15 +18,34 @@ namespace
 	)
 	{
 		auto const p = make_polynomial(begin, end);
-		auto const v = p.derivative();
+		terraformer::multi_array<terraformer::location, float> points;
+		auto traveled_distance = 0.0f;
+		auto loc_prev = terraformer::location{} + p(0.0f);
+		points.push_back(loc_prev, traveled_distance);
+		auto const seg_count = static_cast<float>(count - 1);
+		for(size_t k = 1; k != count; ++k)
+		{
+			auto const t = static_cast<float>(k)/seg_count;
+			auto const loc =terraformer::location{} + p(t);
+			traveled_distance += distance(loc, loc_prev);
+			points.push_back(loc, traveled_distance);
+			loc_prev = loc;
+		}
 
 		std::vector<terraformer::location> ret(count);
+		auto const ds = traveled_distance/seg_count;
+		auto const attribs = points.attributes();
+		auto const x_vals = attribs.get<1>();
+		auto const y_vals = attribs.get<0>();
+
 		for(size_t k = 0; k != count; ++k)
 		{
-			auto const t = (static_cast<float>(k) + 0.5f)/static_cast<float>(count);
-			ret[k] = terraformer::location{} + p(t);
-
-			printf("v = %.8g\n", norm(v(t)));
+			auto const sample_at = ds*static_cast<float>(k);
+			ret[k] = terraformer::interp(
+				std::span{std::begin(x_vals), std::end(x_vals)},
+				std::span{std::begin(y_vals), std::end(y_vals)},
+				sample_at
+			);
 		}
 		return ret;
 	}
@@ -46,10 +64,8 @@ terraformer::ridge_tree::ridge_tree(
 	{ return; }
 
 	auto const trunk_e2e_distance = distance(description.trunk.begin.y, description.trunk.end.y);
-	auto const trunk_pixel_size = std::min(
-		get_min_pixel_size(displacement_profiles[0]),
-		trunk_e2e_distance/1024.0f
-	);
+	auto const trunk_pixel_size = get_min_pixel_size(displacement_profiles[0]);
+
 	auto const trunk_pixel_count = static_cast<size_t>(trunk_e2e_distance/trunk_pixel_size);
 
 	auto const trunk_offsets = generate(
