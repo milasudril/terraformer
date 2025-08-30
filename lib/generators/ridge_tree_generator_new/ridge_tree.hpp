@@ -30,8 +30,8 @@ namespace terraformer
 		std::vector<ridge_tree_branch_growth_description> branch_growth_params;
 		std::vector<ridge_tree_branch_displacement_description> displacement_profiles;
 
-		ridge_tree_branch_description trunk_curve;
-		std::vector<ridge_tree_branch_description> curve_levels;
+		[[deprecated]] ridge_tree_branch_description trunk_curve;
+		[[deprecated]] std::vector<ridge_tree_branch_description> curve_levels;
 	};
 
 	struct ridge_tree_branch_elevation_profile

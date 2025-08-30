@@ -30,16 +30,17 @@ terraformer::ridge_tree::ridge_tree(
 )
 {
 	auto& ret = m_value;
-	std::span curve_levels{description.curve_levels};
+	std::span branch_growth_params{description.branch_growth_params};
+	std::span displacement_profiles{description.displacement_profiles};
 
-	if(curve_levels.empty())
+	if(branch_growth_params.empty() || displacement_profiles.empty())
 	{ return; }
 
-	auto const trunk_pixel_size = get_min_pixel_size(description.trunk_curve.displacement_profile);
-	auto const trunk_pixel_count = static_cast<size_t>(description.trunk_curve.growth_params.max_length/trunk_pixel_size);
+	auto const trunk_pixel_size = get_min_pixel_size(displacement_profiles[0]);
+	auto const trunk_pixel_count = static_cast<size_t>(description.trunk_growth_params.max_length/trunk_pixel_size);
 
 	auto const trunk_offsets = generate(
-		description.trunk_curve.displacement_profile,
+		displacement_profiles[0],
 		rng,
 		array_size<float>{trunk_pixel_count},
 		trunk_pixel_size,
@@ -88,7 +89,7 @@ terraformer::ridge_tree::ridge_tree(
 
 		auto& current_trunk = ret[current_trunk_index];
 		auto const next_level_index = current_trunk.level + 1;
-		if(next_level_index == std::size(curve_levels) + 1)
+		if(next_level_index == std::size(branch_growth_params) + 1)
 		{
 			++current_trunk_index;
 			continue;
@@ -105,14 +106,14 @@ terraformer::ridge_tree::ridge_tree(
 			++k;
 		}
 
-		auto const pixel_size = get_min_pixel_size(curve_levels[next_level_index - 1].displacement_profile);
+		auto const pixel_size = get_min_pixel_size(displacement_profiles[next_level_index]);
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret,
 			pixel_size,
-			curve_levels[next_level_index - 1].displacement_profile,
+			displacement_profiles[next_level_index],
 			rng,
-			curve_levels[next_level_index - 1].growth_params
+			branch_growth_params[next_level_index - 1]
 		);
 
 		for(auto& stem: next_level)

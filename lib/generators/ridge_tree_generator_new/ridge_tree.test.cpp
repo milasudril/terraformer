@@ -15,9 +15,46 @@ TESTCASE(terraformer_ridge_tree_generate)
 		.root_location = terraformer::location{0.0f, 24576.0f, 0.0f},
 		.trunk_direction = terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}},
 
-		.trunk_growth_params{},
-		.branch_growth_params{},
-		.displacement_profiles{},
+		.trunk_growth_params{
+			.max_length = terraformer::domain_length{49152.0f},
+			.min_neighbour_distance = terraformer::domain_length{49152.0f}
+		},
+		.branch_growth_params = std::vector{
+			terraformer::ridge_tree_branch_growth_description{
+				.max_length = terraformer::domain_length{12384.0f},
+				.min_neighbour_distance = terraformer::domain_length{6144.0f}
+			},
+			terraformer::ridge_tree_branch_growth_description{
+				.max_length = terraformer::domain_length{12384.0f/3.0f},
+				.min_neighbour_distance = terraformer::domain_length{1536.0f}
+			},
+			terraformer::ridge_tree_branch_growth_description{
+				.max_length = terraformer::domain_length{12384.0f/9.0f},
+				.min_neighbour_distance = terraformer::domain_length{384.0f}
+			}
+		},
+		.displacement_profiles = std::vector{
+			terraformer::ridge_tree_branch_displacement_description{
+				.amplitude = terraformer::horizontal_amplitude{3096.0f},
+				.wavelength = terraformer::domain_length{12384.0f},
+				.damping = std::sqrt(0.5f)
+			},
+			terraformer::ridge_tree_branch_displacement_description{
+				.amplitude = terraformer::horizontal_amplitude{3096.0f/3.0f},
+				.wavelength = terraformer::domain_length{12384.0f/3.0f},
+				.damping = std::sqrt(0.5f)
+			},
+			terraformer::ridge_tree_branch_displacement_description{
+				.amplitude = terraformer::horizontal_amplitude{3096.0f/9.0f},
+				.wavelength = terraformer::domain_length{12384.0f/9.0f},
+				.damping = std::sqrt(0.5f)
+			},
+			terraformer::ridge_tree_branch_displacement_description{
+				.amplitude = terraformer::horizontal_amplitude{3096.0f/27.0f},
+				.wavelength = terraformer::domain_length{12384.0f/27.0f},
+				.damping = std::sqrt(0.5f)
+			}
+		},
 
 		.trunk_curve = terraformer::ridge_tree_branch_description{
 			.displacement_profile {
