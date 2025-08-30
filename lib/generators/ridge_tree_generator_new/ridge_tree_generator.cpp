@@ -57,7 +57,7 @@ namespace
 				0.0f
 			}
 		};
-		auto const dr = ridge_origin - terraformer::location{0.5f*params.horizontal_layout[0].e2e_distance, 0.0f, 0.0f};
+		auto const dr = ridge_origin - terraformer::location{0.5f*params.branch_growth_params[0].e2e_distance, 0.0f, 0.0f};
 		auto const root_location = world_origin + terraformer::displacement{
 			inner_product(dr, ridge_direction),
 			-inner_product(dr, dir_ortho),
@@ -65,26 +65,26 @@ namespace
 		};
 
 		std::vector<terraformer::ridge_tree_branch_growth_description> branch_growth_params;
-		for(size_t k = 1; k != std::size(params.horizontal_layout); ++k)
+		for(size_t k = 1; k != std::size(params.branch_growth_params); ++k)
 		{
-			auto const& item =  params.horizontal_layout[k];
+			auto const& item =  params.branch_growth_params[k];
 			branch_growth_params.push_back(
 				terraformer::ridge_tree_branch_growth_description{
 					.max_length = item.e2e_distance,
-					.min_neighbour_distance = 2.0f*item.displacement.amplitude
+					.min_neighbour_distance = 2.0f*params.horz_displacements[k].amplitude
 				}
 			);
 		}
 
 		std::vector<terraformer::ridge_tree_branch_displacement_description> displacement_profiles;
-		for(size_t k = 0; k != std::size(params.horizontal_layout); ++k)
+		for(size_t k = 0; k != std::size(params.horz_displacements); ++k)
 		{
-			auto const& item = params.horizontal_layout[k];
+			auto const& item = params.horz_displacements[k];
 			displacement_profiles.push_back(
 				terraformer::ridge_tree_branch_displacement_description{
-					.amplitude = item.displacement.amplitude,
-					.wavelength = item.displacement.wavelength,
-					.damping = item.displacement.damping
+					.amplitude = item.amplitude,
+					.wavelength = item.wavelength,
+					.damping = item.damping
 				}
 			);
 		}
@@ -93,8 +93,8 @@ namespace
 			.root_location = root_location,
 			.trunk_direction = ridge_direction,
 			.trunk_growth_params = terraformer::ridge_tree_branch_growth_description{
-				.max_length = params.horizontal_layout[0].e2e_distance,
-				.min_neighbour_distance = 2.0f*params.horizontal_layout[0].displacement.amplitude
+				.max_length = params.branch_growth_params[0].e2e_distance,
+				.min_neighbour_distance = 2.0f*params.horz_displacements[0].amplitude
 			},
 			.branch_growth_params = std::move(branch_growth_params),
 			.displacement_profiles = std::move(displacement_profiles),
@@ -367,7 +367,7 @@ namespace
 float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
 {
 	auto const min_layout = std::ranges::min_element(
-		params.horizontal_layout,
+		params.horz_displacements,
 		[](auto const& a, auto const& b)
 		{ return get_min_pixel_size(a) < get_min_pixel_size(b); }
 	);
@@ -401,7 +401,7 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	{
 		i = render_branches_at_current_level(
 			dom_size,
-			0.5f*get_min_pixel_size(params.horizontal_layout[i->level].displacement),
+			0.5f*get_min_pixel_size(params.horz_displacements[i->level]),
 			params.elevation_profile[i->level],
 			i,
 			std::end(ridge_tree),
@@ -459,7 +459,7 @@ void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descripto
 	);
 }
 
-void terraformer::ridge_tree_horz_layout_descriptor::bind(descriptor_editor_ref editor)
+void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
 		u8"E2E distance/m",
@@ -470,7 +470,6 @@ void terraformer::ridge_tree_horz_layout_descriptor::bind(descriptor_editor_ref 
 			.visual_angle_range = std::nullopt
 		}
 	);
-	displacement.bind(editor);
 }
 
 void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_editor_ref editor)
@@ -578,14 +577,36 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 	);
 
 	{
-		auto horz_layout_table = editor.create_table(
+		auto branch_growth_table = editor.create_table(
 			descriptor_editor_ref::field_descriptor{
-				.label = u8"Horizontal layout"
+				.label = u8"Branch growth"
 			},
 			descriptor_editor_ref::table_descriptor{
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
-					u8"E2E distance/m",
+					u8"E2E distance/m"
+				}
+			}
+		);
+
+		size_t k = 0;
+		for(auto& item : branch_growth_params)
+		{
+			auto record = branch_growth_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+			item.bind(record);
+			record.append_pending_widgets();
+			++k;
+		}
+	}
+
+	{
+		auto horz_displacement_table = editor.create_table(
+			descriptor_editor_ref::field_descriptor{
+				.label = u8"Horz displacements"
+			},
+			descriptor_editor_ref::table_descriptor{
+				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
+				.field_names{
 					u8"Amplitude/m",
 					u8"Wavelength/m",
 					u8"Damping"
@@ -593,9 +614,11 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 			}
 		);
 		size_t k = 0;
-		for(auto& item : horizontal_layout)
+		for(auto& item : horz_displacements)
 		{
-			auto record = horz_layout_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+			auto record = horz_displacement_table.add_record(
+				reinterpret_cast<char8_t const*>(std::to_string(k).c_str())
+			);
 			item.bind(record);
 			record.append_pending_widgets();
 			++k;

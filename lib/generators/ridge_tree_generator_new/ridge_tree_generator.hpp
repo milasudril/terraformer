@@ -13,6 +13,14 @@
 
 namespace terraformer
 {
+	struct ridge_tree_branch_growth_descriptor
+	{
+		float e2e_distance = 16384.0f;
+		bool operator==(ridge_tree_branch_growth_descriptor const&) const = default;
+		bool operator!=(ridge_tree_branch_growth_descriptor const&) const = default;
+		void bind(descriptor_editor_ref editor);
+	};
+
 	struct ridge_tree_branch_horz_displacement_descriptor
 	{
 		float amplitude = 8192.0f/(2.0f*std::numbers::pi_v<float>);
@@ -34,19 +42,6 @@ namespace terraformer
 			}
 		);
 	}
-
-	struct ridge_tree_horz_layout_descriptor
-	{
-		float e2e_distance = 49152.0f;
-		ridge_tree_branch_horz_displacement_descriptor displacement;
-
-		bool operator==(ridge_tree_horz_layout_descriptor const&) const = default;
-		bool operator!=(ridge_tree_horz_layout_descriptor const&) const = default;
-		void bind(descriptor_editor_ref editor);
-	};
-
-	inline constexpr float get_min_pixel_size(ridge_tree_horz_layout_descriptor const& item)
-	{ return get_min_pixel_size(item.displacement); }
 
 	struct ridge_tree_elevation_profile_descriptor
 	{
@@ -75,7 +70,7 @@ namespace terraformer
 	}
 
 	inline constexpr float get_min_pixel_size(
-		ridge_tree_horz_layout_descriptor const& a,
+		ridge_tree_branch_horz_displacement_descriptor const& a,
 		ridge_tree_elevation_profile_descriptor const& b
 	)
 	{ return std::min(0.5f*get_min_pixel_size(a), get_min_pixel_size(b)); }
@@ -89,40 +84,28 @@ namespace terraformer
 
 		static constexpr size_t num_levels = 3;
 
-		std::array<ridge_tree_horz_layout_descriptor, num_levels> horizontal_layout{
-			ridge_tree_horz_layout_descriptor{
-				.e2e_distance = 32768.0f,
-				.displacement = ridge_tree_branch_horz_displacement_descriptor{
-					.amplitude = 3.0f*2.0f*(1024.0f + 256.0f)/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 3.0f*2.0f*(1024.0f + 256.0f),
-					.damping = {}
-				}
+		std::array<ridge_tree_branch_growth_descriptor, num_levels> branch_growth_params{
+			ridge_tree_branch_growth_descriptor{.e2e_distance = 32768.0f},
+			ridge_tree_branch_growth_descriptor{.e2e_distance = 16384.0f},
+			ridge_tree_branch_growth_descriptor{.e2e_distance = 8192.0f}
+		};
+
+		std::array<ridge_tree_branch_horz_displacement_descriptor, num_levels> horz_displacements{
+			ridge_tree_branch_horz_displacement_descriptor{
+				.amplitude = 3.0f*2.0f*(1024.0f + 256.0f)/(2.0f*std::numbers::pi_v<float>),
+				.wavelength = 3.0f*2.0f*(1024.0f + 256.0f),
+				.damping = {}
 			},
-			ridge_tree_horz_layout_descriptor{
-				.e2e_distance = 16384,
-				.displacement = ridge_tree_branch_horz_displacement_descriptor{
-					.amplitude = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f)/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f),
-					.damping = {}
-				}
+			ridge_tree_branch_horz_displacement_descriptor{
+				.amplitude = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f)/(2.0f*std::numbers::pi_v<float>),
+				.wavelength = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f),
+				.damping = {}
 			},
-			ridge_tree_horz_layout_descriptor{
-				.e2e_distance = 8192.0f,
-				.displacement = ridge_tree_branch_horz_displacement_descriptor{
-					.amplitude = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f)/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f),
-					.damping = {}
-				}
-			},
-/*
-			ridge_tree_horz_layout_descriptor{
-				.e2e_distance = 49152.0f/64.0f,
-				.displacement = ridge_tree_branch_horz_displacement_descriptor{
-					.amplitude = 128.0f/(2.0f*std::numbers::pi_v<float>),
-					.wavelength = 96.0f,
-					.damping = {}
-				}
-			}*/
+			ridge_tree_branch_horz_displacement_descriptor{
+				.amplitude = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f)/(2.0f*std::numbers::pi_v<float>),
+				.wavelength = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f),
+				.damping = {}
+			}
 		};
 
 		std::array<ridge_tree_elevation_profile_descriptor, num_levels> elevation_profile{
@@ -152,17 +135,7 @@ namespace terraformer
 				.noise_lf_rolloff = 2.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = 128.0f
-			},
-			/*
-			ridge_tree_elevation_profile_descriptor{
-				.ridge_elevation = 256.0f,
-				.noise_amplitude = 64.0f,
-				.noise_lf_rolloff = 2.0f,
-				.noise_hf_rolloff = 2.0f,
-				.ridge_radius = 1536.0f,
-				.noise_wavelength = 128.0f*2.0f*std::numbers::pi_v<float>,
-				.ridge_rolloff_exponent = 2.0f
-			}*/
+			}
 		};
 
 		bool operator==(ridge_tree_descriptor const&) const = default;
