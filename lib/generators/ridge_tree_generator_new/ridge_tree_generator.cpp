@@ -310,9 +310,7 @@ namespace
 			for(uint32_t y = 0; y != h_img_ridge; ++y)
 			{
 				for(uint32_t x = 0; x != w_img_ridge; ++x)
-				{
-					noise(x,y) = ridge(x, y)*std::uniform_real_distribution{0.0f, 1.0f}(rng);
-				}
+				{ noise(x,y) = std::uniform_real_distribution{0.0f, 1.0f}(rng); }
 			}
 
 			noise = terraformer::apply(
@@ -352,7 +350,12 @@ namespace
 		for(uint32_t y = 0; y != h_img_ridge; ++y)
 		{
 			for(uint32_t x = 0; x != w_img_ridge; ++x)
-			{ tmp(x, y) = std::max(ridge(x, y) + noise(x, y), 0.0f); }
+			{
+				tmp(x, y) = std::max(
+					ridge(x, y)*(1.0f + noise(x, y)/elevation_profile.ridge_elevation),
+					0.0f
+				);
+			}
 		}
 
 		terraformer::add_resampled(std::as_const(tmp).pixels(), output_image, 1.0f);

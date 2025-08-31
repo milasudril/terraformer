@@ -6,6 +6,7 @@
 #include "lib/common/spaces.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
+#include "lib/math_utils/trigfunc.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/common/bounded_value.hpp"
@@ -121,51 +122,94 @@ namespace terraformer
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 8192.0f}
 		};
 
+		static constexpr auto default_trunk_horz_wavelength = 3.0f*2.0f*(1024.0f + 256.0f);
+		static constexpr auto default_trunk_horz_amplitude = wavelength_to_amplitude(
+			default_trunk_horz_wavelength,
+			1.0f
+		);
+		static constexpr auto default_trunk_ridge_elevation = 2048.0f;
+		static constexpr auto default_trunk_ridge_rolloff_exponent = 2.0f;
+		static constexpr auto default_trunk_noise_wavelength = default_trunk_horz_wavelength*std::numbers::phi_v<float>;
+		static constexpr auto default_trunk_noise_amplitude = 512.0f;
+
+		static constexpr auto default_branch_1_horz_amplitude = default_trunk_horz_wavelength/6.0f;
+		static constexpr auto default_branch_1_horz_wavelength = amplitude_to_wavelength(
+			default_branch_1_horz_amplitude,
+			2.0f
+		);
+		static constexpr auto default_branch_1_ridge_elevation = 1024.0f;
+		static constexpr auto default_branch_1_ridge_rolloff_exponent = 2.0f;
+		static constexpr auto default_branch_1_noise_wavelength = default_branch_1_horz_wavelength*std::numbers::phi_v<float>;
+		static constexpr auto default_branch_1_noise_amplitude = 256.0f;
+
+		static constexpr auto default_branch_2_horz_amplitude = default_branch_1_horz_wavelength/3.0f;
+		static constexpr auto default_branch_2_horz_wavelength = amplitude_to_wavelength(
+			default_branch_2_horz_amplitude,
+			3.0f
+		);
+		static constexpr auto default_branch_2_ridge_elevation = 512.0f;
+		static constexpr auto default_branch_2_ridge_rolloff_exponent = 2.0f;
+		static constexpr auto default_branch_2_noise_wavelength = default_branch_2_horz_wavelength*std::numbers::phi_v<float>;
+		static constexpr auto default_branch_2_noise_amplitude = 128.0f;
+
 		std::array<ridge_tree_branch_horz_displacement_descriptor, num_levels> horz_displacements{
 			ridge_tree_branch_horz_displacement_descriptor{
-				.amplitude = 3.0f*2.0f*(1024.0f + 256.0f)/(2.0f*std::numbers::pi_v<float>),
-				.wavelength = 3.0f*2.0f*(1024.0f + 256.0f),
+				.amplitude = default_trunk_horz_amplitude,
+				.wavelength = default_trunk_horz_wavelength,
 				.damping = {}
 			},
 			ridge_tree_branch_horz_displacement_descriptor{
-				.amplitude = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f)/(2.0f*std::numbers::pi_v<float>),
-				.wavelength = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f),
+				.amplitude = default_branch_1_horz_amplitude,
+				.wavelength = default_branch_1_horz_wavelength,
 				.damping = {}
 			},
 			ridge_tree_branch_horz_displacement_descriptor{
-				.amplitude = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f)/(2.0f*std::numbers::pi_v<float>),
-				.wavelength = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f),
+				.amplitude = default_branch_2_horz_amplitude,
+				.wavelength = default_branch_2_horz_wavelength,
 				.damping = {}
 			}
 		};
 
 		std::array<ridge_tree_elevation_profile_descriptor, num_levels> elevation_profile{
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_elevation = 2048.0f,
-				.ridge_half_thickness = 2.0f*1.5f*(2048.0f + 512.0f),
-				.ridge_rolloff_exponent = std::sqrt(2.0f),
-				.noise_wavelength = 3.0f*2.0f*(1024.0f + 256.0f)*(2.0f/3.0f),
+				.ridge_elevation = default_trunk_ridge_elevation,
+				.ridge_half_thickness = default_trunk_ridge_elevation*(
+					  default_trunk_ridge_rolloff_exponent
+					+ slope_from_amplitude_and_wavelength(default_trunk_noise_amplitude, default_trunk_noise_wavelength)
+					+ default_branch_1_ridge_rolloff_exponent
+					+ slope_from_amplitude_and_wavelength(default_branch_1_noise_amplitude, default_branch_1_noise_wavelength)
+				),
+				.ridge_rolloff_exponent = default_trunk_ridge_rolloff_exponent,
+				.noise_wavelength = default_trunk_noise_wavelength,
 				.noise_lf_rolloff = 2.0f,
 				.noise_hf_rolloff = 2.0f,
-				.noise_amplitude = 512.0f
+				.noise_amplitude = default_trunk_noise_amplitude
 			},
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_elevation = 1024.0f,
-				.ridge_half_thickness = 2.0f*2.0f*(1024.0f + 256.0f),
-				.ridge_rolloff_exponent = 2.0f,
-				.noise_wavelength = 3.0f*std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f)*(2.0f/3.0f),
+				.ridge_elevation = default_branch_1_ridge_elevation,
+				.ridge_half_thickness = default_branch_1_ridge_elevation*(
+					  default_branch_1_ridge_rolloff_exponent
+					+ slope_from_amplitude_and_wavelength(default_branch_1_noise_amplitude, default_branch_1_noise_wavelength)
+					+ default_branch_2_ridge_rolloff_exponent
+					+ slope_from_amplitude_and_wavelength(default_branch_2_noise_amplitude, default_branch_2_noise_wavelength)
+				),
+				.ridge_rolloff_exponent = default_branch_1_ridge_rolloff_exponent,
+				.noise_wavelength = default_branch_1_noise_wavelength,
 				.noise_lf_rolloff = 2.0f,
 				.noise_hf_rolloff = 2.0f,
-				.noise_amplitude = 256.0f
+				.noise_amplitude = default_branch_1_noise_amplitude
 			},
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_elevation = 512.0f,
-				.ridge_half_thickness = std::pow(2.0f, 3.0f/2.0f)*(512.0f + 128.0f),
-				.ridge_rolloff_exponent = std::pow(2.0f, 3.0f/2.0f),
-				.noise_wavelength = 3.0f*std::pow(2.0f, 2.0f)*(256.0f + 64.0f)*(2.0f/3.0f),
+				.ridge_elevation = default_branch_2_ridge_elevation,
+				.ridge_half_thickness =default_branch_2_ridge_elevation*(
+					  default_branch_2_ridge_rolloff_exponent
+					+ slope_from_amplitude_and_wavelength(default_branch_2_noise_amplitude, default_branch_2_noise_wavelength)
+				),
+				.ridge_rolloff_exponent = default_branch_2_ridge_rolloff_exponent,
+				.noise_wavelength = default_branch_2_noise_wavelength,
 				.noise_lf_rolloff = 2.0f,
 				.noise_hf_rolloff = 2.0f,
-				.noise_amplitude = 128.0f
+				.noise_amplitude = default_branch_2_noise_amplitude
 			}
 		};
 

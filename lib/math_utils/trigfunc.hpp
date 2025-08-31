@@ -31,6 +31,12 @@ namespace terraformer
 	{
 		return slope*wavelength/(2.0f*std::numbers::pi_v<float>);
 	}
+
+	constexpr auto slope_from_amplitude_and_wavelength(float amp, float wavelength)
+	{
+		return 2.0f*std::numbers::pi_v<float>*amp/wavelength;
+	}
 }
+
 
 #endif
