@@ -119,7 +119,7 @@ namespace terraformer
 		static constexpr size_t num_levels = 3;
 		std::array<ridge_tree_branch_growth_descriptor, num_levels - 1> branch_growth_params{
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 16384.0f},
-			ridge_tree_branch_growth_descriptor{.e2e_distance = 8192.0f}
+			ridge_tree_branch_growth_descriptor{.e2e_distance = 3072.0f}
 		};
 
 		static constexpr auto default_trunk_horz_wavelength = 3.0f*2.0f*(1024.0f + 256.0f);
@@ -132,21 +132,15 @@ namespace terraformer
 		static constexpr auto default_trunk_noise_wavelength = default_trunk_horz_wavelength*std::numbers::phi_v<float>;
 		static constexpr auto default_trunk_noise_amplitude = 512.0f;
 
-		static constexpr auto default_branch_1_horz_amplitude = default_trunk_horz_wavelength/6.0f;
-		static constexpr auto default_branch_1_horz_wavelength = amplitude_to_wavelength(
-			default_branch_1_horz_amplitude,
-			2.0f
-		);
+		static constexpr auto default_branch_1_horz_wavelength = 3072.0f;
+		static constexpr auto default_branch_1_horz_amplitude = wavelength_to_amplitude(default_branch_1_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_1_ridge_elevation = 1024.0f;
 		static constexpr auto default_branch_1_ridge_rolloff_exponent = 2.0f;
 		static constexpr auto default_branch_1_noise_wavelength = default_branch_1_horz_wavelength*std::numbers::phi_v<float>;
 		static constexpr auto default_branch_1_noise_amplitude = 256.0f;
 
-		static constexpr auto default_branch_2_horz_amplitude = default_branch_1_horz_wavelength/3.0f;
-		static constexpr auto default_branch_2_horz_wavelength = amplitude_to_wavelength(
-			default_branch_2_horz_amplitude,
-			3.0f
-		);
+		static constexpr auto default_branch_2_horz_wavelength = 600.0f;
+		static constexpr auto default_branch_2_horz_amplitude = wavelength_to_amplitude(default_branch_2_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_2_ridge_elevation = 512.0f;
 		static constexpr auto default_branch_2_ridge_rolloff_exponent = 2.0f;
 		static constexpr auto default_branch_2_noise_wavelength = default_branch_2_horz_wavelength*std::numbers::phi_v<float>;
