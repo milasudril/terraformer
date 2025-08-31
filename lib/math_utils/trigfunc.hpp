@@ -21,6 +21,16 @@ namespace terraformer
 		box /= factor;
 		return 0.5f*std::min(box[0], box[1]);;
 	}
+
+	constexpr auto amplitude_to_wavelength(float amp, float slope)
+	{
+		return 2.0f*std::numbers::pi_v<float>*amp/slope;
+	}
+
+	constexpr auto wavelength_to_amplitude(float wavelength, float slope)
+	{
+		return slope*wavelength/(2.0f*std::numbers::pi_v<float>);
+	}
 }
 
 #endif
