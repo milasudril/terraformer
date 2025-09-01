@@ -589,7 +589,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 	{
 		auto trunk_table = editor.create_table(
 			descriptor_editor_ref::field_descriptor{
-				.label = u8"Trunk (Level 0)"
+				.label = u8"Trunk"
 			},
 			descriptor_editor_ref::table_descriptor{
 				.orientation = descriptor_editor_ref::widget_orientation::vertical,
@@ -631,7 +631,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		size_t k = 0;
 		for(auto& item : branch_growth_params)
 		{
-			auto record = branch_growth_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
+			auto record = branch_growth_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k + 1).c_str()));
 			item.bind(record);
 			record.append_pending_widgets();
 			++k;
@@ -656,7 +656,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		for(auto& item : horz_displacements)
 		{
 			auto record = horz_displacement_table.add_record(
-				reinterpret_cast<char8_t const*>(std::to_string(k + 1).c_str())
+				k == 0? u8"Trunk" : reinterpret_cast<char8_t const*>(std::to_string(k).c_str())
 			);
 			item.bind(record);
 			record.append_pending_widgets();
@@ -685,8 +685,9 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		size_t k = 0;
 		for(auto& item : elevation_profile)
 		{
-			auto record = elev_profile_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k).c_str()));
-			item.bind(record);
+			auto record = elev_profile_table.add_record(
+				k == 0? u8"Trunk" : reinterpret_cast<char8_t const*>(std::to_string(k).c_str())
+			);			item.bind(record);
 			record.append_pending_widgets();
 			++k;
 		}
