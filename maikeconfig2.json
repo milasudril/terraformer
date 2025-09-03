@@ -128,7 +128,6 @@
             "fullpath_input_filter": [
                 "^\\.",
                 "^__",
-                "experiments",
                 "pcg-cpp"
             ],
             "recursive": 1
