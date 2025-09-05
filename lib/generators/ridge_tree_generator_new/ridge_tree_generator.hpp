@@ -145,7 +145,7 @@ namespace terraformer
 		static constexpr auto default_branch_2_horz_amplitude = wavelength_to_amplitude(default_branch_2_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_2_ridge_elevation = 512.0f;
 		static constexpr auto default_branch_2_ridge_rolloff_exponent = 1.25f;
-		static constexpr auto default_branch_2_noise_wavelength = 2.0f*default_branch_2_horz_wavelength*std::numbers::phi_v<float>;
+		static constexpr auto default_branch_2_noise_wavelength = default_branch_2_horz_wavelength*std::numbers::phi_v<float>;
 		static constexpr auto default_branch_2_noise_amplitude = 128.0f;
 
 		std::array<ridge_tree_branch_horz_displacement_descriptor, num_levels> horz_displacements{
@@ -177,7 +177,7 @@ namespace terraformer
 				)/trunk_slope,
 				.ridge_rolloff_exponent = default_trunk_ridge_rolloff_exponent,
 				.noise_wavelength = default_trunk_noise_wavelength,
-				.noise_lf_rolloff = 2.0f,
+				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_trunk_noise_amplitude
 			},
@@ -191,7 +191,7 @@ namespace terraformer
 				)/branch_1_slope,
 				.ridge_rolloff_exponent = default_branch_1_ridge_rolloff_exponent,
 				.noise_wavelength = default_branch_1_noise_wavelength,
-				.noise_lf_rolloff = 2.0f,
+				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_branch_1_noise_amplitude
 			},
@@ -203,7 +203,7 @@ namespace terraformer
 				),
 				.ridge_rolloff_exponent = default_branch_2_ridge_rolloff_exponent,
 				.noise_wavelength = default_branch_2_noise_wavelength,
-				.noise_lf_rolloff = 2.0f,
+				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_branch_2_noise_amplitude
 			}
