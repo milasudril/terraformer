@@ -1,0 +1,4 @@
+{
+	"target":{"name":"erode"}
+	,"dependencies":[{"ref":"./erode.o", "rel":"implementation"}]
+}
