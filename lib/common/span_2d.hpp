@@ -90,7 +90,7 @@ namespace terraformer
 	private:
 		IndexType m_width;
 		IndexType m_height;
-		T* m_ptr;
+		T* __restrict__ m_ptr;
 	};
 
 	template<class T>
