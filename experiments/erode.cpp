@@ -27,7 +27,7 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
 	terraformer::span_2d<float const> noise,
-	float peak_elevation
+	float maxval_in
 )
 {
 	terraformer::grayscale_image ret{input.width(), input.height()};
@@ -64,7 +64,7 @@ void amplify(terraformer::span_2d<float> input, float gain)
 			auto const val = std::lerp(
 				input_val,
 				minval,
-				input_val*noise_val*noise_val/peak_elevation
+				input_val*noise_val*noise_val/maxval_in
 			);
 			maxval = std::max(val, maxval);
 
