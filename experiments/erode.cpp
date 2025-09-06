@@ -21,7 +21,8 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	}
 }
 
-terraformer::grayscale_image erode(
+void erode(
+	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
 	terraformer::span_2d<float const> noise
 )
@@ -70,12 +71,11 @@ terraformer::grayscale_image erode(
 			);
 			maxval = std::max(val, maxval);
 
-			ret(x, y) = val;
+			output(x, y) = val;
 		}
 	}
 
-	amplify(ret, 3500.0f/maxval);
-	return ret;
+	amplify(output, 3500.0f/maxval);
 }
 
 terraformer::grayscale_image make_noise(uint32_t width, uint32_t height, terraformer::random_generator& rng)
@@ -148,18 +148,23 @@ int main(int argc, char** argv)
 	}
 
 	terraformer::random_generator rng;
-	auto input = load(terraformer::empty<terraformer::grayscale_image>{}, argv[1]);
+	auto buffer_a = load(terraformer::empty<terraformer::grayscale_image>{}, argv[1]);
+	auto buffer_b = buffer_a;
+
+	auto input = buffer_a.pixels();
+	auto output = buffer_b.pixels();
+
 	auto noise = make_noise(input.width(), input.height(), rng);
 
 	for(size_t k = 0; k != 1024; ++k)
 	{
-		input = erode(input, noise);
+		erode(output, input, noise);
+		std::swap(output, input);
 		auto const new_noise = make_noise(input.width(), input.height(), rng);
 		accumulate(noise.pixels(), new_noise.pixels(), 0.25f);
-
 		printf("%zu\n", k);
 	}
 
-	store(input.pixels(), static_cast<char const*>(argv[2]));
+	store(output, static_cast<char const*>(argv[2]));
 	return 0;
 }
