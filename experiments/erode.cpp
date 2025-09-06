@@ -17,14 +17,17 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	for(uint32_t y = 0; y != height; ++y)
 	{
 		for(uint32_t x = 0; x != width; ++x)
-		{ input(x, y) *= gain; }
+		{
+			input(x, y) *= gain;
+		}
 	}
 }
 
-void erode(
+[[nodiscard]] float erode(
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
-	terraformer::span_2d<float const> noise
+	terraformer::span_2d<float const> noise,
+	float peak_elevation
 )
 {
 	terraformer::grayscale_image ret{input.width(), input.height()};
@@ -60,22 +63,20 @@ void erode(
 			};
 
 			auto const noise_val = noise(x ,y);
-
 			auto const minval = (downhill_value >= input_val || (ddx_input == 0.0f && ddy_input == 0.0f))?
 				*std::ranges::min_element(vals) : downhill_value;
 
 			auto const val = std::lerp(
 				input_val,
 				minval,
-				input_val*noise_val*noise_val/3500.0f
+				input_val*noise_val*noise_val/peak_elevation
 			);
 			maxval = std::max(val, maxval);
 
 			output(x, y) = val;
 		}
 	}
-
-	amplify(output, 3500.0f/maxval);
+	return maxval;
 }
 
 void make_white_noise(terraformer::span_2d<float> output, terraformer::random_generator& rng)
@@ -91,7 +92,7 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 	}
 }
 
-void apply_lowpass_filter(terraformer::span_2d<float> output, terraformer::span_2d<float const> input)
+[[nodiscard]] float apply_lowpass_filter(terraformer::span_2d<float> output, terraformer::span_2d<float const> input)
 {
 	constexpr auto kernel_width = 5;
 	constexpr auto kernel_height = 5;
@@ -128,8 +129,7 @@ void apply_lowpass_filter(terraformer::span_2d<float> output, terraformer::span_
 			output(x, y) = sum;
 		}
 	}
-
-	amplify(output, 1.0f/maxval);
+	return maxval;
 }
 
 void accumulate(terraformer::span_2d<float> output, terraformer::span_2d<float const> input, float factor)
@@ -162,14 +162,17 @@ int main(int argc, char** argv)
 	auto accumulated_noise = buffer_a;
 
 	make_white_noise(white_noise_buffer.pixels(), rng);
-	apply_lowpass_filter(accumulated_noise.pixels(), white_noise_buffer.pixels());
+	auto maxval = apply_lowpass_filter(accumulated_noise.pixels(), white_noise_buffer.pixels());
+	amplify(accumulated_noise.pixels(), 1.0f/maxval);
 
 	for(size_t k = 0; k != 1024; ++k)
 	{
-		erode(output, input, accumulated_noise.pixels());
+		maxval = erode(output, input, accumulated_noise.pixels(), 3500.0f);
+		amplify(output, 3500.0f/maxval);
 		std::swap(output, input);
 		make_white_noise(white_noise_buffer.pixels(), rng);
-		apply_lowpass_filter(filtered_noise_buffer.pixels(), white_noise_buffer.pixels());
+		maxval = apply_lowpass_filter(filtered_noise_buffer.pixels(), white_noise_buffer.pixels());
+		amplify(filtered_noise_buffer.pixels(), 1.0f/maxval);
 		accumulate(accumulated_noise.pixels(), filtered_noise_buffer.pixels(), 0.25f);
 		printf("%zu\n", k);
 	}
