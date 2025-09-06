@@ -2,12 +2,24 @@
 
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/span_2d.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/math_utils/interp.hpp"
 #include <algorithm>
 #include <random>
+
+void amplify(terraformer::span_2d<float> input, float gain)
+{
+	auto const width = input.width();
+	auto const height = input.height();
+	for(uint32_t y = 0; y != height; ++y)
+	{
+		for(uint32_t x = 0; x != width; ++x)
+		{ input(x, y) *= gain; }
+	}
+}
 
 terraformer::grayscale_image erode(
 	terraformer::span_2d<float const> input,
@@ -17,7 +29,6 @@ terraformer::grayscale_image erode(
 	terraformer::grayscale_image ret{input.width(), input.height()};
 	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
 	auto maxval = 0.0f;
-	std::uniform_real_distribution noise_displacement{-256.0f, 256.0f};
 
 	for(int32_t y = 0; y != static_cast<int32_t>(input.height()); ++y)
 	{
@@ -63,13 +74,7 @@ terraformer::grayscale_image erode(
 		}
 	}
 
-	for(int32_t y = 0; y != static_cast<int32_t>(input.height()); ++y)
-	{
-		for(int32_t x = 0; x != static_cast<int32_t>(input.width()); ++x)
-		{
-			ret(x, y) = 3500.0f*ret(x, y)/maxval;
-		}
-	}
+	amplify(ret, 3500.0f/maxval);
 	return ret;
 }
 
@@ -119,11 +124,7 @@ terraformer::grayscale_image make_noise(uint32_t width, uint32_t height, terrafo
 		}
 	}
 
-	for(uint32_t y = 0; y != height; ++y)
-	{
-		for(uint32_t x = 0; x != width; ++x)
-		{ filtered_noise(x, y) /= maxval; }
-	}
+	amplify(filtered_noise, 1.0f/maxval);
 
 	return filtered_noise;
 }
