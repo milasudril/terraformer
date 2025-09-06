@@ -72,28 +72,29 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
 	terraformer::span_2d<float const> noise,
-	float maxval_in
+	float maxval_in,
+	uint32_t input_y_offset = 0
 )
 {
-	terraformer::grayscale_image ret{input.width(), input.height()};
 	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
 	auto maxval = 0.0f;
 
-	for(int32_t y = 0; y != static_cast<int32_t>(input.height()); ++y)
+	for(int32_t y = 0; y != static_cast<int32_t>(output.height()); ++y)
 	{
-		for(int32_t x = 0; x != static_cast<int32_t>(input.width()); ++x)
+		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
 		{
-			auto const ddx_input = input(x + 1, y, clamp_tag{}) - input(x - 1, y, clamp_tag{});
-			auto const ddy_input = input(x, y + 1, clamp_tag{}) - input(x, y - 1, clamp_tag{});
+			auto const y_in = y + input_y_offset;
+			auto const ddx_input = input(x + 1, y_in, clamp_tag{}) - input(x - 1, y_in, clamp_tag{});
+			auto const ddy_input = input(x, y_in + 1, clamp_tag{}) - input(x, y_in - 1, clamp_tag{});
 			terraformer::displacement grad_z{ddx_input, ddy_input, 0.0f};
 			auto const grad_size = norm(grad_z);
 			if(grad_size  == 0.0f)
 			{ continue; }
 
 
-			terraformer::location current_loc{static_cast<float>(x), static_cast<float>(y), 0.0f};
+			terraformer::location current_loc{static_cast<float>(x), static_cast<float>(y_in), 0.0f};
 
-			auto const input_val = input(x, y);
+			auto const input_val = input(x, y_in);
 
 			auto const sample_from = current_loc - grad_z/grad_size;
 			auto const downhill_value = terraformer::interp(
@@ -103,7 +104,7 @@ void amplify(terraformer::span_2d<float> input, float gain)
 				terraformer::clamp_at_boundary{}
 			);
 
-			auto const noise_val = noise(x ,y);
+			auto const noise_val = noise(x ,y_in);
 			auto const minval = std::min(input_val, downhill_value);
 
 			auto const val = std::lerp(
@@ -117,6 +118,48 @@ void amplify(terraformer::span_2d<float> input, float gain)
 		}
 	}
 	return maxval;
+}
+
+[[nodiscard]] float erode(
+	terraformer::span_2d<float> output,
+	terraformer::span_2d<float const> input,
+	terraformer::span_2d<float const> noise,
+	float maxval_in,
+	thread_pool_type& workers
+)
+{
+	terraformer::signaling_counter counter{workers.size()};
+	auto const height = output.height();
+	auto const n_workers = workers.size();
+	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
+	terraformer::single_array maxvals{terraformer::array_size<float>{n_workers}};
+
+	for(auto k : maxvals.element_indices())
+	{
+		terraformer::scanline_range range{
+			.begin = static_cast<uint32_t>(k.get()*batch_size),
+			.end = static_cast<uint32_t>((k + 1).get()*batch_size)
+		};
+
+		workers.run(
+			task_type{
+				std::ref(counter.get()),
+				[
+					maxval_in,
+					&retval = maxvals[k],
+					scanlines_out = output.scanlines(range),
+					scanlines_in = input,
+					scanlines_noise = noise,
+					input_y_offset = range.begin
+				](){
+					retval = erode(scanlines_out, scanlines_in, scanlines_noise, maxval_in, input_y_offset);
+				}
+			}
+		);
+	}
+	counter.wait();
+
+	return *std::ranges::max_element(maxvals);
 }
 
 void make_white_noise(terraformer::span_2d<float> output, terraformer::random_generator& rng)
@@ -243,7 +286,6 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 	return *std::ranges::max_element(maxvals);
 }
 
-
 void accumulate(
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
@@ -329,13 +371,14 @@ int main(int argc, char** argv)
 
 	for(size_t k = 0; k != 1024; ++k)
 	{
-		auto const maxval_erode = erode(output, input, accumulated_noise.pixels(), 3500.0f);
+		auto const maxval_erode = erode(output, input, accumulated_noise.pixels(), 3500.0f, workers);
 		make_white_noise(white_noise_buffer.pixels(), workers, rngs).wait();
 		maxval_filter = apply_lowpass_filter(filtered_noise_buffer.pixels(), white_noise_buffer.pixels(), workers);
 		auto noise_accumulate_sem = accumulate(accumulated_noise.pixels(), filtered_noise_buffer.pixels(), 0.25f, 1.0f/maxval_filter, workers);
 		auto output_amplify_sem = amplify(output, 3500.0f/maxval_erode, workers);
 		std::swap(output, input);
-		printf("%zu\n", k);
+		if(k %16 == 0)
+		{ printf("%zu\n", k); }
 	}
 
 	store(output, static_cast<char const*>(argv[2]));
