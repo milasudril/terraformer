@@ -13,6 +13,12 @@
 
 namespace terraformer
 {
+	struct scanline_range
+	{
+		uint32_t begin;
+		uint32_t end;
+	};
+
 	struct span_2d_extents
 	{
 		uint32_t width;
@@ -86,6 +92,15 @@ namespace terraformer
 			);
 		}
 
+		auto scanlines(scanline_range range) const
+		{
+			return span_2d{
+				m_width,
+				std::min(range.end, m_height) - range.begin,
+				&(*this)(0, range.begin)
+			};
+		}
+
 
 	private:
 		IndexType m_width;
@@ -107,12 +122,6 @@ namespace terraformer
 
 		bool operator==(pixel_coordinates const&) const = default;
 		bool operator!=(pixel_coordinates const&) const = default;
-	};
-
-	struct scanline_range
-	{
-		uint32_t begin;
-		uint32_t end;
 	};
 
 	template<class T, class Func>
