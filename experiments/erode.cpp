@@ -127,14 +127,19 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 	return maxval;
 }
 
-void accumulate(terraformer::span_2d<float> output, terraformer::span_2d<float const> input, float factor)
+void accumulate(
+	terraformer::span_2d<float> output,
+	terraformer::span_2d<float const> input,
+	float factor,
+	float input_gain
+)
 {
 	auto const width = output.width();
 	auto const height = output.height();
 	for(uint32_t y = 0; y != height; ++y)
 	{
 		for(uint32_t x = 0; x != width; ++x)
-		{ output(x, y) = (1.0f - factor)*output(x, y) + factor*input(x, y); }
+		{ output(x, y) = (1.0f - factor)*output(x, y) + factor*input(x, y)*input_gain; }
 	}
 }
 
@@ -167,8 +172,7 @@ int main(int argc, char** argv)
 		std::swap(output, input);
 		make_white_noise(white_noise_buffer.pixels(), rng);
 		maxval = apply_lowpass_filter(filtered_noise_buffer.pixels(), white_noise_buffer.pixels());
-		amplify(filtered_noise_buffer.pixels(), 1.0f/maxval);
-		accumulate(accumulated_noise.pixels(), filtered_noise_buffer.pixels(), 0.25f);
+		accumulate(accumulated_noise.pixels(), filtered_noise_buffer.pixels(), 0.25f, 1.0f/maxval);
 		printf("%zu\n", k);
 	}
 
