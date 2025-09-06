@@ -42,6 +42,10 @@ void amplify(terraformer::span_2d<float> input, float gain)
 			auto const ddy_input = input(x, y + 1, clamp_tag{}) - input(x, y - 1, clamp_tag{});
 			terraformer::displacement grad_z{ddx_input, ddy_input, 0.0f};
 			auto const grad_size = norm(grad_z);
+			if(grad_size  == 0.0f)
+			{ continue; }
+
+
 			terraformer::location current_loc{static_cast<float>(x), static_cast<float>(y), 0.0f};
 
 			auto const input_val = input(x, y);
@@ -54,17 +58,8 @@ void amplify(terraformer::span_2d<float> input, float gain)
 				terraformer::clamp_at_boundary{}
 			);
 
-			std::array vals{
-				input_val,
-				input(x + 1, y, clamp_tag{}),
-				input(x - 1, y, clamp_tag{}),
-				input(x, y + 1, clamp_tag{}),
-				input(x, y - 1, clamp_tag{}),
-			};
-
 			auto const noise_val = noise(x ,y);
-			auto const minval = (downhill_value >= input_val || (ddx_input == 0.0f && ddy_input == 0.0f))?
-				*std::ranges::min_element(vals) : downhill_value;
+			auto const minval = std::min(input_val, downhill_value);
 
 			auto const val = std::lerp(
 				input_val,
