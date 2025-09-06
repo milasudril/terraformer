@@ -10,58 +10,45 @@ namespace terraformer
 {
 	class signaling_counter
 	{
-		class control_block
+		class impl
 		{
 		public:
-			template<class Pred>
-			decltype(auto) wait(Pred&& pred)
+			explicit impl(size_t start_value):m_value{start_value}{}
+
+			void wait()
 			{
 				std::unique_lock lock{m_mutex};
-				return m_cv.wait(lock, std::forward<Pred>(pred));
+				return m_cv.wait(lock, [this](){ return m_value == 0; });
 			}
 
-			template<class Action>
-			void notify_if_successful(Action&& action)
+			void decrement()
 			{
 				std::lock_guard lock{m_mutex};
-				if(std::forward<Action>(action)())
+				--m_value;
+				if(m_value == 0)
 				{ m_cv.notify_one(); }
 			}
 
 		private:
+			size_t m_value;
 			std::mutex m_mutex;
 			std::condition_variable m_cv;
 		};
+
 	public:
+		using semaphore = impl;
+
 		explicit signaling_counter(size_t start_value):
-			m_value{start_value},
-			m_ctrl{std::make_unique<control_block>()}
+			m_ctrl{std::make_unique<impl>(start_value)}
 		{}
 
-		signaling_counter(signaling_counter&& other) noexcept:
-			m_value{other.m_value},
-			m_ctrl{std::move(other.m_ctrl)}
-		{}
-
-		signaling_counter& operator=(signaling_counter&& other) noexcept
-		{
-			m_value = other.m_value;
-			m_ctrl = std::exchange(other.m_ctrl, std::move(m_ctrl));
-			return *this;
-		}
-
-		void decrement()
-		{
-			m_ctrl->notify_if_successful([this]() {
-				--m_value;
-				return m_value == 0;
-			});
-		}
+		signaling_counter(signaling_counter&& other) = default;
+		signaling_counter& operator=(signaling_counter&& other) = default;
+		signaling_counter(signaling_counter const& other) = delete;
+		signaling_counter& operator=(signaling_counter const& other) = delete;
 
 		void wait()
-		{
-			m_ctrl->wait([this](){ return m_value == 0; });
-		}
+		{ m_ctrl->wait(); }
 
 		~signaling_counter()
 		{
@@ -69,12 +56,14 @@ namespace terraformer
 			{ wait(); }
 		}
 
+		auto& get()
+		{ return *m_ctrl; }
+
 	private:
-		size_t m_value;
-		std::unique_ptr<control_block> m_ctrl;
+		std::unique_ptr<impl> m_ctrl;
 	};
 
-	inline void trigger(signaling_counter& counter)
+	inline void trigger(signaling_counter::semaphore& counter)
 	{ counter.decrement(); }
 }
 
