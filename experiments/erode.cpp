@@ -10,18 +10,14 @@
 #include "lib/math_utils/interp.hpp"
 #include "lib/execution/thread_pool.hpp"
 #include "lib/execution/signaling_counter.hpp"
-#include "lib/execution/notifying_task.hpp"
+#include "lib/execution/batch_result.hpp"
 #include "lib/array_classes/single_array.hpp"
 
 #include <algorithm>
 #include <random>
 #include <bit>
 
-using task_type = terraformer::notifying_task<
-	std::reference_wrapper<terraformer::signaling_counter::semaphore>,
-	terraformer::move_only_function<void()>
->;
-using thread_pool_type = terraformer::thread_pool<task_type>;
+using thread_pool_type = terraformer::thread_pool<terraformer::move_only_function<void()>>;
 
 void amplify(terraformer::span_2d<float> input, float gain)
 {
@@ -50,19 +46,18 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	for(size_t k = 0; k != workers.size(); ++k)
 	{
 		workers.run(
-			task_type{
-				std::ref(counter.get()),
-				[
-					gain,
-					scanlines = input.scanlines(
-						terraformer::scanline_range{
-							.begin = static_cast<uint32_t>(k*batch_size),
-							.end = static_cast<uint32_t>((k + 1)*batch_size)
-						}
-					)
-				](){
-					amplify(scanlines, gain);
-				}
+			[
+				&counter = counter.get_state(),
+				gain,
+				scanlines = input.scanlines(
+					terraformer::scanline_range{
+						.begin = static_cast<uint32_t>(k*batch_size),
+						.end = static_cast<uint32_t>((k + 1)*batch_size)
+					}
+				)
+			](){
+				amplify(scanlines, gain);
+				counter.decrement();
 			}
 		);
 	}
@@ -121,33 +116,7 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	return maxval;
 }
 
-class pending_maximum
-{
-public:
-	explicit pending_maximum(size_t num_elems):
-		m_counter{num_elems},
-		m_values{terraformer::array_size<float>{num_elems}}
-	{}
-
-	float get() const
-	{
-		m_counter.wait();
-		return *std::ranges::max_element(m_values);
-	}
-
-	float& get(terraformer::array_index<float> index)
-	{ return m_values[index]; }
-
-	auto& counter()
-	{ return m_counter.get(); }
-
-private:
-	terraformer::signaling_counter m_counter;
-	terraformer::single_array<float> m_values;
-};
-
-
-[[nodiscard]] pending_maximum erode(
+[[nodiscard]] terraformer::batch_result<float> erode(
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
 	terraformer::span_2d<float const> noise,
@@ -155,7 +124,7 @@ private:
 	thread_pool_type& workers
 )
 {
-	pending_maximum retvals{workers.size()};
+	terraformer::batch_result<float> retvals{workers.size()};
 	auto const height = output.height();
 	auto const n_workers = workers.size();
 	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
@@ -169,18 +138,15 @@ private:
 		};
 
 		workers.run(
-			task_type{
-				std::ref(retvals.counter()),
-				[
-					maxval_in,
-					&retval = retvals.get(k),
-					scanlines_out = output.scanlines(range),
-					scanlines_in = input,
-					scanlines_noise = noise,
-					input_y_offset = range.begin
-				](){
-					retval = erode(scanlines_out, scanlines_in, scanlines_noise, maxval_in, input_y_offset);
-				}
+			[
+				&retvals = retvals.get_state(),
+				maxval_in,
+				scanlines_out = output.scanlines(range),
+				scanlines_in = input,
+				scanlines_noise = noise,
+				input_y_offset = range.begin
+			](){
+				retvals.save_partial_result(erode(scanlines_out, scanlines_in, scanlines_noise, maxval_in, input_y_offset));
 			}
 		);
 	}
@@ -217,20 +183,19 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 	for(auto k : rngs.element_indices())
 	{
 		workers.run(
-			task_type{
-				std::ref(counter.get()),
-				[
-					&rng = rngs[k],
-					width,
-					scanlines = output.scanlines(
-						terraformer::scanline_range{
-							.begin = static_cast<uint32_t>(k.get()*batch_size),
-							.end = static_cast<uint32_t>((k + 1).get()*batch_size)
-						}
-					)
-				](){
-					make_white_noise(scanlines, rng);
-				}
+			[
+				&counter = counter.get_state(),
+				&rng = rngs[k],
+				width,
+				scanlines = output.scanlines(
+					terraformer::scanline_range{
+						.begin = static_cast<uint32_t>(k.get()*batch_size),
+						.end = static_cast<uint32_t>((k + 1).get()*batch_size)
+					}
+				)
+			](){
+				make_white_noise(scanlines, rng);
+				counter.decrement();
 			}
 		);
 	}
@@ -278,9 +243,10 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 	return maxval;
 }
 
-[[nodiscard]] float apply_lowpass_filter(terraformer::span_2d<float> output, terraformer::span_2d<float const> input, thread_pool_type& workers)
+[[nodiscard]]
+terraformer::batch_result<float> apply_lowpass_filter(terraformer::span_2d<float> output, terraformer::span_2d<float const> input, thread_pool_type& workers)
 {
-	terraformer::signaling_counter counter{workers.size()};
+	terraformer::batch_result<float> results{workers.size()};
 	auto const height = output.height();
 	auto const n_workers = workers.size();
 	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
@@ -294,21 +260,16 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 		};
 
 		workers.run(
-			task_type{
-				std::ref(counter.get()),
-				[
-					&retval = maxvals[k],
-					scanlines_out = output.scanlines(range),
-					scanlines_in = input.scanlines(range)
-				](){
-					retval = apply_lowpass_filter(scanlines_out, scanlines_in);
-				}
+			[
+				&results = results.get_state(),
+				scanlines_out = output.scanlines(range),
+				scanlines_in = input.scanlines(range)
+			](){
+				results.save_partial_result(apply_lowpass_filter(scanlines_out, scanlines_in));
 			}
 		);
 	}
-	counter.wait();
-
-	return *std::ranges::max_element(maxvals);
+	return results;
 }
 
 void accumulate(
@@ -348,16 +309,15 @@ void accumulate(
 		};
 
 		workers.run(
-			task_type{
-				std::ref(counter.get()),
-				[
-					factor,
-					input_gain,
-					scanlines_out = output.scanlines(range),
-					scanlines_in = input.scanlines(range)
-				](){
-					accumulate(scanlines_out, scanlines_in, factor, input_gain);
-				}
+			[
+				&counter = counter.get_state(),
+				factor,
+				input_gain,
+				scanlines_out = output.scanlines(range),
+				scanlines_in = input.scanlines(range)
+			](){
+				accumulate(scanlines_out, scanlines_in, factor, input_gain);
+				counter.decrement();
 			}
 		);
 	}
@@ -382,6 +342,10 @@ struct linux_sched_params
 			perror("Failed to set scheduling policy");
 		}
 	}
+};
+
+constexpr auto max_value = []<class T>(T&& range){
+	return *std::ranges::max_element(std::forward<T>(range));
 };
 
 int main(int argc, char** argv)
@@ -420,9 +384,9 @@ int main(int argc, char** argv)
 
 	make_white_noise(white_noise_buffer.pixels(), workers, rngs).wait();
 	auto maxval_filter = apply_lowpass_filter(accumulated_noise.pixels(), white_noise_buffer.pixels(), workers);
-	amplify(accumulated_noise.pixels(), 1.0f/maxval_filter, workers).wait();
+	amplify(accumulated_noise.pixels(), 1.0f/maxval_filter.get_result(max_value), workers).wait();
 
-	for(size_t k = 0; k != 65536; ++k)
+	for(size_t k = 0; k != 1024; ++k)
 	{
 		if(std::has_single_bit(k + 1))
 		{
@@ -434,8 +398,14 @@ int main(int argc, char** argv)
 		auto const maxval_erode = erode(output, input, accumulated_noise.pixels(), 3500.0f, workers);
 		make_white_noise(white_noise_buffer.pixels(), workers, rngs).wait();
 		maxval_filter = apply_lowpass_filter(filtered_noise_buffer.pixels(), white_noise_buffer.pixels(), workers);
-		auto noise_accumulate_sem = accumulate(accumulated_noise.pixels(), filtered_noise_buffer.pixels(), 0.25f, 1.0f/maxval_filter, workers);
-		auto output_amplify_sem = amplify(output, 3500.0f/maxval_erode.get(), workers);
+		auto noise_accumulate_sem = accumulate(
+			accumulated_noise.pixels(),
+			filtered_noise_buffer.pixels(),
+			0.25f,
+			1.0f/maxval_filter.get_result(max_value),
+			workers
+		);
+		auto output_amplify_sem = amplify(output, 3500.0f/maxval_erode.get_result(max_value), workers);
 		std::swap(output, input);
 
 		if(k %16 == 0)

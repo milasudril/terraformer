@@ -56,7 +56,7 @@ namespace terraformer
 			{ wait(); }
 		}
 
-		auto& get()
+		auto& get_state()
 		{ return *m_ctrl; }
 
 	private:
