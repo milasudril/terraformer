@@ -14,8 +14,8 @@
 #include "lib/array_classes/single_array.hpp"
 
 #include <algorithm>
-#include <pthread.h>
 #include <random>
+#include <bit>
 
 using task_type = terraformer::notifying_task<
 	std::reference_wrapper<terraformer::signaling_counter::semaphore>,
@@ -422,19 +422,33 @@ int main(int argc, char** argv)
 	auto maxval_filter = apply_lowpass_filter(accumulated_noise.pixels(), white_noise_buffer.pixels(), workers);
 	amplify(accumulated_noise.pixels(), 1.0f/maxval_filter, workers).wait();
 
-	for(size_t k = 0; k != 1024; ++k)
+	for(size_t k = 0; k != 65536; ++k)
 	{
+		if(std::has_single_bit(k + 1))
+		{
+			std::filesystem::path filename{argv[2]};
+			filename /= std::to_string(k) + ".exr";
+			store(input, filename.c_str());
+		}
+
 		auto const maxval_erode = erode(output, input, accumulated_noise.pixels(), 3500.0f, workers);
 		make_white_noise(white_noise_buffer.pixels(), workers, rngs).wait();
 		maxval_filter = apply_lowpass_filter(filtered_noise_buffer.pixels(), white_noise_buffer.pixels(), workers);
 		auto noise_accumulate_sem = accumulate(accumulated_noise.pixels(), filtered_noise_buffer.pixels(), 0.25f, 1.0f/maxval_filter, workers);
 		auto output_amplify_sem = amplify(output, 3500.0f/maxval_erode.get(), workers);
 		std::swap(output, input);
-		if(k %16 == 0)
-		{ printf("%zu\n", k); }
-	}
 
-	store(output, static_cast<char const*>(argv[2]));
+		if(k %16 == 0)
+		{
+			printf("\r");
+			auto count = static_cast<size_t>(64.0f*static_cast<float>(k)/65536.0f);
+			for(size_t k = 0; k != count; ++k)
+			{
+				printf("=");
+			}
+		}
+	}
+	printf("\n");
 
 	return 0;
 }
