@@ -15,7 +15,7 @@ namespace terraformer
 		public:
 			explicit impl(size_t start_value):m_value{start_value}{}
 
-			void wait()
+			void wait() const
 			{
 				std::unique_lock lock{m_mutex};
 				return m_cv.wait(lock, [this](){ return m_value == 0; });
@@ -31,8 +31,8 @@ namespace terraformer
 
 		private:
 			size_t m_value;
-			std::mutex m_mutex;
-			std::condition_variable m_cv;
+			mutable std::mutex m_mutex;
+			mutable std::condition_variable m_cv;
 		};
 
 	public:
@@ -47,7 +47,7 @@ namespace terraformer
 		signaling_counter(signaling_counter const& other) = delete;
 		signaling_counter& operator=(signaling_counter const& other) = delete;
 
-		void wait()
+		void wait() const
 		{ m_ctrl->wait(); }
 
 		~signaling_counter()

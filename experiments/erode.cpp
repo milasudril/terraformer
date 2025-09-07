@@ -120,7 +120,33 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	return maxval;
 }
 
-[[nodiscard]] float erode(
+class pending_maximum
+{
+public:
+	explicit pending_maximum(size_t num_elems):
+		m_counter{num_elems},
+		m_values{terraformer::array_size<float>{num_elems}}
+	{}
+
+	float get() const
+	{
+		m_counter.wait();
+		return *std::ranges::max_element(m_values);
+	}
+
+	float& get(terraformer::array_index<float> index)
+	{ return m_values[index]; }
+
+	auto& counter()
+	{ return m_counter.get(); }
+
+private:
+	terraformer::signaling_counter m_counter;
+	terraformer::single_array<float> m_values;
+};
+
+
+[[nodiscard]] pending_maximum erode(
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
 	terraformer::span_2d<float const> noise,
@@ -128,7 +154,7 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	thread_pool_type& workers
 )
 {
-	terraformer::signaling_counter counter{workers.size()};
+	pending_maximum retvals{workers.size()};
 	auto const height = output.height();
 	auto const n_workers = workers.size();
 	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
@@ -143,10 +169,10 @@ void amplify(terraformer::span_2d<float> input, float gain)
 
 		workers.run(
 			task_type{
-				std::ref(counter.get()),
+				std::ref(retvals.counter()),
 				[
 					maxval_in,
-					&retval = maxvals[k],
+					&retval = retvals.get(k),
 					scanlines_out = output.scanlines(range),
 					scanlines_in = input,
 					scanlines_noise = noise,
@@ -157,9 +183,7 @@ void amplify(terraformer::span_2d<float> input, float gain)
 			}
 		);
 	}
-	counter.wait();
-
-	return *std::ranges::max_element(maxvals);
+	return retvals;
 }
 
 void make_white_noise(terraformer::span_2d<float> output, terraformer::random_generator& rng)
@@ -375,7 +399,7 @@ int main(int argc, char** argv)
 		make_white_noise(white_noise_buffer.pixels(), workers, rngs).wait();
 		maxval_filter = apply_lowpass_filter(filtered_noise_buffer.pixels(), white_noise_buffer.pixels(), workers);
 		auto noise_accumulate_sem = accumulate(accumulated_noise.pixels(), filtered_noise_buffer.pixels(), 0.25f, 1.0f/maxval_filter, workers);
-		auto output_amplify_sem = amplify(output, 3500.0f/maxval_erode, workers);
+		auto output_amplify_sem = amplify(output, 3500.0f/maxval_erode.get(), workers);
 		std::swap(output, input);
 		if(k %16 == 0)
 		{ printf("%zu\n", k); }
