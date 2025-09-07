@@ -5,13 +5,18 @@
 #include <thread>
 #include <condition_variable>
 #include <mutex>
+#include <shared_ptr>
 
 namespace terraformer
 {
 	template<class ResultType>
-	class batch_result
+	class batch_result_state
 	{
 	public:
+		explicit batch_result_state(size_t num_tasks_to_complete):
+			m_num_tasks_to_complete{num_tasks_to_complete}
+		{}
+
 		template<class Fold>
 		[[nodiscard]] auto get_result(Fold&& fold) const
 		{
@@ -37,6 +42,26 @@ namespace terraformer
 		size_t m_num_tasks_to_complete{0};
 		mutable std::mutex m_mutex;
 		mutable std::condition_variable m_cv;
+	};
+
+	template<class ResultType>
+	class batch_result
+	{
+	public:
+		explicit batch_result(size_t num_tasks_to_complete):
+			m_state{std::make_shared<batch_result_state>(num_tasks_to_complete)}
+		{}
+
+		template<class Fold>
+		[[nodiscard]] auto get_result(Fold&& fold) const
+		{ return m_state->get_result(std::forward<Fold>(fold); }
+
+		template<class... Args>
+		void save_partial_result(Args&&... args)
+		{ m_state->save_partial_result(std::forward<Args>(args)...);}
+
+	private:
+		std::shared_ptr<batch_result_state<ResultType>> m_state;
 	};
 }
 #endif
