@@ -14,6 +14,7 @@
 #include "lib/array_classes/single_array.hpp"
 
 #include <algorithm>
+#include <pthread.h>
 #include <random>
 
 using task_type = terraformer::notifying_task<
@@ -364,6 +365,25 @@ void accumulate(
 	return counter;
 }
 
+struct linux_sched_params
+{
+	int policy;
+	int priority;
+
+	void apply(pthread_t thread) const
+	{
+		sched_param param{
+			.sched_priority = priority
+		};
+
+		if(auto res = pthread_setschedparam(thread, policy, &param); res != 0)
+		{
+			errno = res;
+			perror("Failed to set scheduling policy");
+		}
+	}
+};
+
 int main(int argc, char** argv)
 {
 	if(argc < 3)
@@ -382,8 +402,17 @@ int main(int argc, char** argv)
 	auto filtered_noise_buffer = buffer_a;
 	auto accumulated_noise = buffer_a;
 
+	pthread_attr_t attr{};
+	pthread_attr_init(&attr);
+	pthread_attr_setstacksize(&attr, 16384);
+
 	auto const n_threads = std::thread::hardware_concurrency();
 	thread_pool_type workers{n_threads};
+	workers.set_schedparams(linux_sched_params{
+		.policy = SCHED_BATCH,
+		.priority = 0
+	});
+
 	terraformer::random_generator master_rng;
 	terraformer::single_array<terraformer::random_generator> rngs;
 	for(size_t k = 0; k != n_threads; ++k)

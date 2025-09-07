@@ -41,6 +41,13 @@ namespace terraformer
 			});
 		}
 
+		template<class SchedParams>
+		void set_schedparams(SchedParams const& params)
+		{
+			for(auto& thread:m_workers)
+			{ params.apply(thread.native_handle()); }
+		}
+
 		~thread_pool()
 		{ terminate(); }
 
