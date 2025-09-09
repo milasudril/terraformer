@@ -4,10 +4,12 @@
 #define TERRAFORMER_DFT_ENGINE_HPP
 
 #include "lib/common/span_2d.hpp"
+#include "lib/execution/signaling_counter.hpp"
 
 #include <fftw3.h>
 #include <complex>
 #include <memory>
+#include <mutex>
 #include <type_traits>
 #include <array>
 #include <variant>
@@ -65,6 +67,24 @@ namespace terraformer
 	};
 
 	dft_execution_plan get_plan(dft_execution_plan_cache::sizes buffer_size, dft_direction dir);
+
+	class dft_engine
+	{
+	public:
+		void transform(span_2d<std::complex<float>> const input_buffer, span_2d<std::complex<float>> output_buffer, dft_direction direction) const
+		{
+			auto plan = [this](span_2d_extents extents, dft_direction direction){
+				std::lock_guard lock{m_plan_cache_mtx};
+				return m_plan_cache.get_plan(extents, direction);
+			}(input_buffer.extents(), direction);
+
+			plan.execute(input_buffer.data(), output_buffer.data());
+		}
+
+	private:
+		mutable std::mutex m_plan_cache_mtx;
+		mutable dft_execution_plan_cache m_plan_cache;
+	};
 }
 
 #endif
