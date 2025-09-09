@@ -71,17 +71,49 @@ namespace terraformer
 	class dft_engine
 	{
 	public:
-		void transform(span_2d<std::complex<float>> const input_buffer, span_2d<std::complex<float>> output_buffer, dft_direction direction) const
+		template<class TaskRunner>
+		static void enable_multithreading(TaskRunner& task_runner)
+		{
+			fftwf_init_threads();
+			fftw_plan_with_nthreads(static_cast<int>(task_runner.max_concurrency()));
+			fftw_threads_set_callback(
+				[](void *(*work)(char *), char *jobdata, size_t elsize, int njobs, void* task_runner) {
+					*m_status = signaling_counter{static_cast<size_t>(njobs)};
+					auto& obj = *static_cast<TaskRunner*>(task_runner);
+					for (int i = 0; i < njobs; ++i)
+					{
+						obj.submit(
+							[work, jobdata, elsize, i](){
+								work(jobdata + elsize * i);
+								m_status->decrement();
+							}
+						);
+					}
+				},
+				&task_runner
+			);
+		}
+
+		signaling_counter transform(
+			span_2d<std::complex<float>> const input_buffer,
+			span_2d<std::complex<float>> output_buffer,
+			dft_direction direction
+		) const
 		{
 			auto plan = [this](span_2d_extents extents, dft_direction direction){
 				std::lock_guard lock{m_plan_cache_mtx};
 				return m_plan_cache.get_plan(extents, direction);
 			}(input_buffer.extents(), direction);
 
+			signaling_counter ret{0};
+			m_status = &ret.get_state();
 			plan.execute(input_buffer.data(), output_buffer.data());
+			return ret;
 		}
 
 	private:
+		static thread_local signaling_counter::semaphore* m_status;
+
 		mutable std::mutex m_plan_cache_mtx;
 		mutable dft_execution_plan_cache m_plan_cache;
 	};
