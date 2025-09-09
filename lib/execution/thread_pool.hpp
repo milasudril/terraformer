@@ -21,19 +21,12 @@ namespace terraformer
 
 		size_t max_concurrency() const { return std::size(m_workers); }
 
-		[[deprecated("Use max_concurrency instead")]]
-		size_t size() const { return max_concurrency(); }
-
 		void submit(Task&& task)
 		{
 			m_tasks.push(std::move(task));
 			std::lock_guard lock{m_mutex};
 			m_cv.notify_all();
 		}
-
-		[[deprecated("Use submit instead")]]
-		void run(Task&& task)
-		{ submit(std::move(task)); }
 
 		void terminate()
 		{

@@ -38,14 +38,14 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	thread_pool_type& workers
 )
 {
-	terraformer::signaling_counter counter{workers.size()};
+	terraformer::signaling_counter counter{workers.max_concurrency()};
 	auto const height = input.height();
-	auto const n_workers = workers.size();
+	auto const n_workers = workers.max_concurrency();
 	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
 
-	for(size_t k = 0; k != workers.size(); ++k)
+	for(size_t k = 0; k != workers.max_concurrency(); ++k)
 	{
-		workers.run(
+		workers.submit(
 			[
 				&counter = counter.get_state(),
 				gain,
@@ -124,9 +124,9 @@ void amplify(terraformer::span_2d<float> input, float gain)
 	thread_pool_type& workers
 )
 {
-	terraformer::batch_result<float> retvals{workers.size()};
+	terraformer::batch_result<float> retvals{workers.max_concurrency()};
 	auto const height = output.height();
-	auto const n_workers = workers.size();
+	auto const n_workers = workers.max_concurrency();
 	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
 	terraformer::single_array maxvals{terraformer::array_size<float>{n_workers}};
 
@@ -137,7 +137,7 @@ void amplify(terraformer::span_2d<float> input, float gain)
 			.end = static_cast<uint32_t>((k + 1).get()*batch_size)
 		};
 
-		workers.run(
+		workers.submit(
 			[
 				&retvals = retvals.get_state(),
 				maxval_in,
@@ -172,17 +172,17 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 	terraformer::span<terraformer::random_generator> rngs
 )
 {
-	assert(std::size(workers) == std::size(rngs).get());
+	assert(workers.max_concurrency() == std::size(rngs).get());
 
-	terraformer::signaling_counter counter{workers.size()};
+	terraformer::signaling_counter counter{workers.max_concurrency()};
 	auto const width = output.width();
 	auto const height = output.height();
-	auto const n_workers = workers.size();
+	auto const n_workers = workers.max_concurrency();
 	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
 
 	for(auto k : rngs.element_indices())
 	{
-		workers.run(
+		workers.submit(
 			[
 				&counter = counter.get_state(),
 				&rng = rngs[k],
@@ -246,9 +246,9 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 [[nodiscard]]
 terraformer::batch_result<float> apply_lowpass_filter(terraformer::span_2d<float> output, terraformer::span_2d<float const> input, thread_pool_type& workers)
 {
-	terraformer::batch_result<float> results{workers.size()};
+	terraformer::batch_result<float> results{workers.max_concurrency()};
 	auto const height = output.height();
-	auto const n_workers = workers.size();
+	auto const n_workers = workers.max_concurrency();
 	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
 	terraformer::single_array maxvals{terraformer::array_size<float>{n_workers}};
 
@@ -259,7 +259,7 @@ terraformer::batch_result<float> apply_lowpass_filter(terraformer::span_2d<float
 			.end = static_cast<uint32_t>((k + 1).get()*batch_size)
 		};
 
-		workers.run(
+		workers.submit(
 			[
 				&results = results.get_state(),
 				scanlines_out = output.scanlines(range),
@@ -296,19 +296,19 @@ void accumulate(
 	thread_pool_type& workers
 )
 {
-	terraformer::signaling_counter counter{workers.size()};
+	terraformer::signaling_counter counter{workers.max_concurrency()};
 	auto const height = output.height();
-	auto const n_workers = workers.size();
+	auto const n_workers = workers.max_concurrency();
 	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
 
-	for(size_t k = 0; k != workers.size(); ++k)
+	for(size_t k = 0; k != workers.max_concurrency(); ++k)
 	{
 		terraformer::scanline_range range{
 			.begin = static_cast<uint32_t>(k*batch_size),
 			.end = static_cast<uint32_t>((k + 1)*batch_size)
 		};
 
-		workers.run(
+		workers.submit(
 			[
 				&counter = counter.get_state(),
 				factor,
