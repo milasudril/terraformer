@@ -7,6 +7,15 @@
 
 #include <algorithm>
 
+namespace
+{
+	struct plan_deleter
+	{
+		void operator()(fftwf_plan plan)
+		{ if(plan != nullptr) { fftwf_destroy_plan(plan); } }
+	};
+}
+
 terraformer::dft_execution_plan::dft_execution_plan(size_t size, dft_direction dir)
 {
 	auto input_buff  = std::make_unique<std::complex<float>[]>(size);
@@ -41,8 +50,8 @@ terraformer::dft_execution_plan::dft_execution_plan(span_2d_extents size, dft_di
 	};
 }
 
-terraformer::dft_execution_plan const&
-terraformer::dft_execution_plan_cache::get_plan(sizes buffer_size, dft_direction dir) const
+terraformer::dft_execution_plan
+terraformer::dft_execution_plan_cache::get_plan(sizes buffer_size, dft_direction dir)
 {
 	auto const i = std::ranges::find(m_transform_sizes, std::pair{buffer_size, dir});
 	if(i != std::end(m_transform_sizes)) [[likely]]
@@ -80,7 +89,7 @@ namespace
 	constinit thread_local terraformer::dft_execution_plan_cache dft_execution_plans;
 }
 
-terraformer::dft_execution_plan const& terraformer::get_plan(dft_execution_plan_cache::sizes buffer_size, dft_direction dir)
+terraformer::dft_execution_plan terraformer::get_plan(dft_execution_plan_cache::sizes buffer_size, dft_direction dir)
 {
 	return dft_execution_plans.get_plan(buffer_size, dir);
 }

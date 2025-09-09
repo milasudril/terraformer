@@ -21,7 +21,7 @@ namespace terraformer
 	public:
 		explicit dft_execution_plan(size_t size, dft_direction dir);
 
-		explicit dft_execution_plan(span_2d_extents size, dft_direction);
+		explicit dft_execution_plan(span_2d_extents size, dft_direction dir);
 
 		dft_execution_plan() = default;
 
@@ -40,13 +40,7 @@ namespace terraformer
 	private:
 		using plan_type = std::remove_pointer_t<fftwf_plan>;
 
-		struct plan_deleter
-		{
-			void operator()(fftwf_plan plan)
-			{ if(plan != nullptr) { fftwf_destroy_plan(plan); } }
-		};
-
-		std::unique_ptr<plan_type, plan_deleter> m_plan;
+		std::shared_ptr<plan_type> m_plan;
 	};
 
 	class dft_execution_plan_cache
@@ -54,7 +48,7 @@ namespace terraformer
 	public:
 		using sizes = std::variant<size_t, span_2d_extents>;
 
-		dft_execution_plan const& get_plan(sizes size, dft_direction dir) const;
+		dft_execution_plan get_plan(sizes size, dft_direction dir);
 
 	private:
 		static constexpr size_t cache_size = 16;
@@ -65,13 +59,12 @@ namespace terraformer
 			size_t last_used{0};
 		};
 
-
-		mutable size_t m_counter{0};
-		mutable std::array<std::pair<sizes, dft_direction>, cache_size> m_transform_sizes{};
-		mutable std::array<plan_info, cache_size> m_plans;
+		size_t m_counter{0};
+		std::array<std::pair<sizes, dft_direction>, cache_size> m_transform_sizes{};
+		std::array<plan_info, cache_size> m_plans;
 	};
 
-	dft_execution_plan const& get_plan(dft_execution_plan_cache::sizes buffer_size, dft_direction dir);
+	dft_execution_plan get_plan(dft_execution_plan_cache::sizes buffer_size, dft_direction dir);
 }
 
 #endif
