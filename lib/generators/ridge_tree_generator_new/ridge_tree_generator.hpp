@@ -4,6 +4,7 @@
 #define TERRAFORMER_RIDGE_TREE_GENERATOR_HPP
 
 #include "lib/common/spaces.hpp"
+#include "lib/generators/heightmap/heightmap_generator_context.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/math_utils/trigfunc.hpp"
@@ -212,7 +213,7 @@ namespace terraformer
 		bool operator==(ridge_tree_descriptor const&) const = default;
 		bool operator!=(ridge_tree_descriptor const&) const = default;
 
-		grayscale_image generate_heightmap(domain_size_descriptor) const;
+		grayscale_image generate_heightmap(heightmap_generator_context const&) const;
 		void bind(descriptor_editor_ref editor);
 	};
 

@@ -113,7 +113,11 @@ terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& d
 	uint32_t output_height = 0;
 	for(auto const& item : descriptor.generators)
 	{
-		auto img = item.second.generate_heightmap(descriptor.domain_size);
+		auto img = item.second.generate_heightmap(
+			heightmap_generator_context{
+				.domain_size = descriptor.domain_size
+			}
+		);
 		output_height = std::max(img.height(), output_height);
 		output_width = std::max(img.width(), output_width);
 		inputs.insert(std::pair{item.first, std::move(img)});

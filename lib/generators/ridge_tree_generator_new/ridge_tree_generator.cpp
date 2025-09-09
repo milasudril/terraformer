@@ -422,8 +422,8 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 }
 
 terraformer::grayscale_image
-terraformer::ridge_tree_descriptor::generate_heightmap(domain_size_descriptor size) const
-{ return generate(size, *this); }
+terraformer::ridge_tree_descriptor::generate_heightmap(heightmap_generator_context const& ctxt) const
+{ return generate(ctxt.domain_size, *this); }
 
 void terraformer::ridge_tree_trunk_control_point_descriptor::bind(descriptor_editor_ref editor)
 {

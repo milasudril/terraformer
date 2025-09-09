@@ -3,6 +3,7 @@
 #include "./rolling_hills_generator.hpp"
 
 #include "lib/common/value_map.hpp"
+#include "lib/generators/heightmap/heightmap_generator_context.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/math_utils/dft_engine.hpp"
 #include "lib/common/rng.hpp"
@@ -462,5 +463,5 @@ void terraformer::rolling_hills_descriptor::bind(descriptor_editor_ref editor)
 }
 
 terraformer::grayscale_image
-terraformer::rolling_hills_descriptor::generate_heightmap(domain_size_descriptor size) const
-{ return generate(size, *this); }
+terraformer::rolling_hills_descriptor::generate_heightmap(heightmap_generator_context const& ctxt) const
+{ return generate(ctxt.domain_size, *this); }

@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_ROLLING_HILLS_GENERATOR_HPP
 #define TERRAFORMER_ROLLING_HILLS_GENERATOR_HPP
 
-#include "lib/generators/domain/domain_size.hpp"
+#include "lib/generators/heightmap/heightmap_generator_context.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/interval.hpp"
 #include "lib/common/bounded_value.hpp"
@@ -91,7 +91,7 @@ namespace terraformer
 		bool operator==(rolling_hills_descriptor const&) const = default;
 		bool operator!=(rolling_hills_descriptor const&) const = default;
 
-		grayscale_image generate_heightmap(domain_size_descriptor) const;
+		grayscale_image generate_heightmap(heightmap_generator_context const&) const;
 		void bind(descriptor_editor_ref editor);
 	};
 

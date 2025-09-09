@@ -447,8 +447,10 @@ void terraformer::plain_midpoints_info::bind(descriptor_editor_ref editor)
 	);
 }
 
-terraformer::grayscale_image terraformer::plain_descriptor::generate_heightmap(domain_size_descriptor size) const
-{ return generate(size, *this); }
+terraformer::grayscale_image terraformer::plain_descriptor::generate_heightmap(
+	heightmap_generator_context const& ctxt
+) const
+{ return generate(ctxt.domain_size, *this); }
 
 void terraformer::plain_descriptor::bind(descriptor_editor_ref editor)
 {

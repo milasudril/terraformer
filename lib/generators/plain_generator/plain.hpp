@@ -3,7 +3,7 @@
 #ifndef TERRAFORMER_PLAIN_GENERATOR_HPP
 #define TERRAFORMER_PLAIN_GENERATOR_HPP
 
-#include "lib/generators/domain/domain_size.hpp"
+#include "lib/generators/heightmap/heightmap_generator_context.hpp"
 
 #include "lib/pixel_store/image.hpp"
 #include "lib/common/interval.hpp"
@@ -63,7 +63,7 @@ namespace terraformer
 		plain_control_points_info control_points;
 		plain_midpoints_info midpoints;
 
-		grayscale_image generate_heightmap(domain_size_descriptor) const;
+		grayscale_image generate_heightmap(heightmap_generator_context const& ctxt) const;
 		void bind(descriptor_editor_ref editor);
 
 		bool operator==(plain_descriptor const&) const = default;
