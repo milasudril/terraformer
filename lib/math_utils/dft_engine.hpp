@@ -94,8 +94,8 @@ namespace terraformer
 			);
 		}
 
-		signaling_counter transform(
-			span_2d<std::complex<float>> const input_buffer,
+		[[nodiscard]] signaling_counter transform(
+			span_2d<std::complex<float> const> input_buffer,
 			span_2d<std::complex<float>> output_buffer,
 			dft_direction direction
 		) const
