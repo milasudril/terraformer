@@ -227,8 +227,10 @@ float terraformer::clamp(float value, terraformer::rolling_hills_smooth_clamp_de
 }
 
 terraformer::grayscale_image
-terraformer::generate(domain_size_descriptor size, rolling_hills_descriptor const& params)
+terraformer::generate(heightmap_generator_context const& ctxt, rolling_hills_descriptor const& params)
 {
+	auto const size = ctxt.domain_size;
+	auto& [_, dft_engine] = ctxt.comp_ctxt.get();
 	auto const filter = make_filter(make_rolling_hills_normalized_filter_descriptor(size, params.filter));
 
 	auto const w_img = filter.width();
@@ -236,32 +238,17 @@ terraformer::generate(domain_size_descriptor size, rolling_hills_descriptor cons
 
 	auto noise = make_noise(w_img, h_img, std::bit_cast<rng_seed_type>(params.rng_seed));
 
-	dft_execution_plan plan_forward{
-		span_2d_extents{
-			.width = w_img,
-			.height = h_img
-		},
-		dft_direction::forward
-	};
-
-	terraformer::basic_image<std::complex<float>> transformed_input{w_img, h_img};
-	plan_forward.execute(std::as_const(noise).pixels().data(), transformed_input.pixels().data());
-
+	basic_image<std::complex<float>> transformed_input{w_img, h_img};
+	puts("Computing dft of input");
+	dft_engine.transform(noise.pixels(), transformed_input.pixels(), dft_direction::forward).wait();
+	puts("Applying filter");
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 		for(uint32_t x = 0; x != w_img; ++x)
 		{ transformed_input(x, y) *= filter(x, y); }
 	}
 
-	dft_execution_plan plan_backward{
-		span_2d_extents{
-			.width = w_img,
-			.height = h_img
-		},
-		dft_direction::backward
-	};
-
-	plan_backward.execute(std::as_const(transformed_input).pixels().data(), noise.pixels().data());
+	dft_engine.transform(transformed_input.pixels(), noise.pixels(), dft_direction::backward).wait();
 
 	grayscale_image filtered_output{w_img, h_img};
 	auto sign_y = 1.0f;
@@ -464,4 +451,4 @@ void terraformer::rolling_hills_descriptor::bind(descriptor_editor_ref editor)
 
 terraformer::grayscale_image
 terraformer::rolling_hills_descriptor::generate_heightmap(heightmap_generator_context const& ctxt) const
-{ return generate(ctxt.domain_size, *this); }
+{ return generate(ctxt, *this); }

@@ -95,7 +95,10 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
-	grayscale_image generate(domain_size_descriptor dom_size, rolling_hills_descriptor const& params);
+	grayscale_image generate(
+		heightmap_generator_context const& ctxt,
+		rolling_hills_descriptor const& params
+	);
 }
 
 #endif

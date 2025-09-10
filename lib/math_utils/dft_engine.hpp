@@ -13,6 +13,7 @@
 #include <type_traits>
 #include <array>
 #include <variant>
+#include <cassert>
 
 namespace terraformer
 {
@@ -74,7 +75,7 @@ namespace terraformer
 		template<class TaskRunner>
 		static void enable_multithreading(TaskRunner& task_runner)
 		{
-			fftw_init_threads();
+			assert(fftw_init_threads() != 0);
 			fftw_plan_with_nthreads(static_cast<int>(task_runner.max_concurrency()));
 			fftw_threads_set_callback(
 				[](void *(*work)(char *), char *jobdata, size_t elsize, int njobs, void* task_runner) {
