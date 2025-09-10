@@ -106,7 +106,10 @@ void terraformer::heightmap_descriptor::bind(descriptor_editor_ref editor)
 	}
 }
 
-terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& descriptor)
+terraformer::grayscale_image terraformer::generate(
+	computation_context& comp_ctxt,
+	heightmap_descriptor const& descriptor
+)
 {
 	u8string_to_value_map<grayscale_image> inputs;
 	uint32_t output_width = 0;
@@ -115,7 +118,8 @@ terraformer::grayscale_image terraformer::generate(heightmap_descriptor const& d
 	{
 		auto img = item.second.generate_heightmap(
 			heightmap_generator_context{
-				.domain_size = descriptor.domain_size
+				.domain_size = descriptor.domain_size,
+				.comp_ctxt = comp_ctxt
 			}
 		);
 		output_height = std::max(img.height(), output_height);

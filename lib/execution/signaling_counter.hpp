@@ -29,6 +29,12 @@ namespace terraformer
 				{ m_cv.notify_one(); }
 			}
 
+			void reset(size_t new_value)
+			{
+				std::lock_guard lock{m_mutex};
+				m_value = new_value;
+			}
+
 		private:
 			size_t m_value;
 			mutable std::mutex m_mutex;

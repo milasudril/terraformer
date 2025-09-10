@@ -74,11 +74,11 @@ namespace terraformer
 		template<class TaskRunner>
 		static void enable_multithreading(TaskRunner& task_runner)
 		{
-			fftwf_init_threads();
+			fftw_init_threads();
 			fftw_plan_with_nthreads(static_cast<int>(task_runner.max_concurrency()));
 			fftw_threads_set_callback(
 				[](void *(*work)(char *), char *jobdata, size_t elsize, int njobs, void* task_runner) {
-					*m_status = signaling_counter{static_cast<size_t>(njobs)};
+					m_status->reset(static_cast<size_t>(njobs));
 					auto& obj = *static_cast<TaskRunner*>(task_runner);
 					for (int i = 0; i < njobs; ++i)
 					{

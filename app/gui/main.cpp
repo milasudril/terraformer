@@ -6,6 +6,7 @@
 #include "./heightmap.hpp"
 #include "./elevation_color_map.hpp"
 
+#include "lib/computation_engine/computation_context.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "ui/drawing_api/gl_surface_configuration.hpp"
 #include "ui/drawing_api/gl_resource_factory.hpp"
@@ -126,7 +127,15 @@ int main(int, char**)
 		}
 	);
 
-	auto output = generate(heightmap);
+	terraformer::computation_context comp_ctxt{
+		.workers = terraformer::thread_pool<terraformer::move_only_function<void()>>{
+			std::thread::hardware_concurrency()
+		},
+		.dft_engine = terraformer::dft_engine{}
+	};
+	terraformer::dft_engine::enable_multithreading(comp_ctxt.workers);
+
+	auto output = generate(comp_ctxt, heightmap);
 
 	terraformer::app::heightmap_view_descriptor heightmap_view_info{
 		.data = std::ref(output),
@@ -151,10 +160,10 @@ int main(int, char**)
 
 	terraformer::task_receiver<terraformer::move_only_function<void()>> task_receiver;
 
-	heightmap_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &heightmap, &heightmap_img = output](auto&&...){
+	heightmap_form.on_content_updated([&task_receiver, &heightmap_view, &gui_ctxt, &heightmap, &heightmap_img = output, &comp_ctxt](auto&&...){
 		task_receiver.replace_pending_task(
-			[heightmap, &heightmap_img, &heightmap_view, &gui_ctxt]() {
-				auto result = generate(heightmap);
+			[heightmap, &heightmap_img, &heightmap_view, &gui_ctxt, &comp_ctxt]() {
+				auto result = generate(comp_ctxt, heightmap);
 				gui_ctxt
 					.post_event([&heightmap_img, hm = result, &heightmap_view]() mutable {
 						heightmap_img = std::move(hm);

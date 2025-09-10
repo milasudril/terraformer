@@ -197,7 +197,7 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
-	grayscale_image generate(heightmap_descriptor const& descriptor);
+	grayscale_image generate(computation_context& comp_ctxt, heightmap_descriptor const& descriptor);
 }
 
 #endif
