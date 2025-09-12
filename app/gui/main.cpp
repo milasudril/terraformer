@@ -6,7 +6,7 @@
 #include "./heightmap.hpp"
 #include "./elevation_color_map.hpp"
 
-#include "lib/computation_engine/computation_context.hpp"
+#include "lib/math_utils/computation_context.hpp"
 #include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "ui/drawing_api/gl_surface_configuration.hpp"
 #include "ui/drawing_api/gl_resource_factory.hpp"

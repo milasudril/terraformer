@@ -1,7 +1,7 @@
 #ifndef TERRAFORMER_HEIGHTMAP_GENERATOR_CONTEXT_HPP
 #define TERRAFORMER_HEIGHTMAP_GENERATOR_CONTEXT_HPP
 
-#include "lib/computation_engine/computation_context.hpp"
+#include "lib/math_utils/computation_context.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 
 #include "lib/math_utils/dft_engine.hpp"

@@ -7,7 +7,8 @@
 
 terraformer::grayscale_image terraformer::apply(
 	butter_bp_2d_descriptor const& params,
-	span_2d<float const> input
+	span_2d<float const> input,
+	computation_context& comp_ctxt
 )
 {
 	auto const w = input.width();
@@ -31,15 +32,12 @@ terraformer::grayscale_image terraformer::apply(
 		}
 	}
 
-	dft_execution_plan plan_forward{
-		span_2d_extents{
-			.width = w,
-			.height = h
-		},
-		dft_direction::forward
-	};
 	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
-	plan_forward.execute(std::as_const(filter_input).pixels().data(), transformed_input.pixels().data());
+	comp_ctxt.dft_engine.transform(
+		std::as_const(filter_input).pixels(),
+		transformed_input.pixels(),
+		dft_direction::forward
+	).wait();
 
 	{
 		auto const f_x = params.f_x;
@@ -71,14 +69,11 @@ terraformer::grayscale_image terraformer::apply(
 		}
 	}
 
-	dft_execution_plan plan_backward{
-		span_2d_extents{
-			.width = w,
-			.height = h
-		},
+	comp_ctxt.dft_engine.transform(
+		std::as_const(transformed_input).pixels(),
+		filter_input.pixels(),
 		dft_direction::backward
-	};
-	plan_backward.execute(std::as_const(transformed_input).pixels().data(), filter_input.pixels().data());
+	).wait();
 
 	grayscale_image filtered_output{w, h};
 	{

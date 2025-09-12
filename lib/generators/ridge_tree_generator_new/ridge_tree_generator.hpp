@@ -219,7 +219,7 @@ namespace terraformer
 
 	float get_min_pixel_size(ridge_tree_descriptor const& params);
 
-	grayscale_image generate(domain_size_descriptor dom_size, ridge_tree_descriptor const& params);
+	grayscale_image generate(heightmap_generator_context const& ctxt, ridge_tree_descriptor const& params);
 }
 
 #endif

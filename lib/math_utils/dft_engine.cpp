@@ -1,7 +1,7 @@
 //@	{
 //@	"target":{"name":"./dft_engine.o", "type":"object"},
 //@	"dependencies":[
-//@			{"ref":"fftw3_threads", "origin":"system", "rel":"external"},
+//@			{"ref":"fftw3f_threads", "origin":"system", "rel":"external"},
 //@			{"ref":"fftw3f", "origin":"pkg-config"}
 //@		]
 //@	}
@@ -86,8 +86,6 @@ terraformer::dft_execution_plan_cache::get_plan(sizes buffer_size, dft_direction
 	m_transform_sizes[reject_index] = std::pair{buffer_size, dir};
 	return reject->plan;
 }
-
-thread_local terraformer::signaling_counter::semaphore* terraformer::dft_engine::m_status = nullptr;
 
 namespace
 {

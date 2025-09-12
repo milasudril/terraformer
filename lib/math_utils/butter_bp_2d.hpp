@@ -4,6 +4,8 @@
 #define TERRAFORMER_BUTTER_BP_2D_HPP
 
 #include "lib/pixel_store/image.hpp"
+#include "lib/math_utils/computation_context.hpp"
+
 namespace terraformer
 {
 	struct butter_bp_2d_descriptor
@@ -15,7 +17,11 @@ namespace terraformer
 		float y_direction;
 	};
 
-	grayscale_image apply(butter_bp_2d_descriptor const&, span_2d<float const> input);
+	grayscale_image apply(
+		butter_bp_2d_descriptor const&,
+		span_2d<float const> input,
+		computation_context& comp_ctxt
+	);
 }
 
 #endif

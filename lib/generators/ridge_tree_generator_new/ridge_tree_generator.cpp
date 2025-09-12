@@ -8,6 +8,7 @@
 #include "lib/common/span_2d.hpp"
 #include "lib/common/value_map.hpp"
 #include "lib/generators/domain/domain_size.hpp"
+#include "lib/generators/heightmap/heightmap_generator_context.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_curve.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree_branch.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree_branch_seed_sequence.hpp"
@@ -232,7 +233,7 @@ namespace
 	}
 
 	auto render_branches_at_current_level(
-		terraformer::domain_size_descriptor dom_size,
+		terraformer::heightmap_generator_context const& ctxt,
 		float min_pixel_size,
 		terraformer::ridge_tree_elevation_profile_descriptor const& elevation_profile,
 		terraformer::ridge_tree_trunk const* i,
@@ -241,6 +242,7 @@ namespace
 		terraformer::span_2d<float> output_image
 	)
 	{
+		auto const dom_size = ctxt.domain_size;
 		auto const level = i->level;
 		auto const pixel_size = std::min(min_pixel_size, get_min_pixel_size(elevation_profile));
 		auto const w_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
@@ -321,7 +323,8 @@ namespace
 					.hf_rolloff = elevation_profile.noise_hf_rolloff,
 					.y_direction = 0.0f
 				},
-				noise.pixels()
+				noise.pixels(),
+				ctxt.comp_ctxt
 			);
 
 			auto const minmax = std::minmax_element(
@@ -381,11 +384,12 @@ float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& 
 }
 
 terraformer::grayscale_image
-terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor const& params)
+terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridge_tree_descriptor const& params)
 {
 	auto const rng_seed = std::bit_cast<terraformer::rng_seed_type>(params.rng_seed);
 	terraformer::random_generator rng{rng_seed};
 
+	auto const dom_size = ctxt.domain_size;
 	auto const ridge_tree = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
 	if(ridge_tree.size().get() == 0)
 	{ return terraformer::grayscale_image{16, 16}; }
@@ -399,7 +403,7 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 	while(i != std::end(ridge_tree))
 	{
 		i = render_branches_at_current_level(
-			dom_size,
+			ctxt,
 			0.5f*get_min_pixel_size(params.horz_displacements[i->level]),
 			params.elevation_profile[i->level],
 			i,
@@ -423,7 +427,7 @@ terraformer::generate(domain_size_descriptor dom_size, ridge_tree_descriptor con
 
 terraformer::grayscale_image
 terraformer::ridge_tree_descriptor::generate_heightmap(heightmap_generator_context const& ctxt) const
-{ return generate(ctxt.domain_size, *this); }
+{ return generate(ctxt, *this); }
 
 void terraformer::ridge_tree_trunk_control_point_descriptor::bind(descriptor_editor_ref editor)
 {

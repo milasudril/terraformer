@@ -239,15 +239,12 @@ terraformer::generate(heightmap_generator_context const& ctxt, rolling_hills_des
 	auto noise = make_noise(w_img, h_img, std::bit_cast<rng_seed_type>(params.rng_seed));
 
 	basic_image<std::complex<float>> transformed_input{w_img, h_img};
-	puts("Computing dft of input");
 	dft_engine.transform(noise.pixels(), transformed_input.pixels(), dft_direction::forward).wait();
-	puts("Applying filter");
 	for(uint32_t y = 0; y != h_img; ++y)
 	{
 		for(uint32_t x = 0; x != w_img; ++x)
 		{ transformed_input(x, y) *= filter(x, y); }
 	}
-
 	dft_engine.transform(transformed_input.pixels(), noise.pixels(), dft_direction::backward).wait();
 
 	grayscale_image filtered_output{w_img, h_img};
