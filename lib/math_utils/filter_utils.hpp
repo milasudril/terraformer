@@ -13,15 +13,9 @@
 namespace terraformer
 {
 	void make_filter_input(
-		span_2d<std::complex<float>> output,
 		span_2d<float const> input,
-		uint32_t y_input_offset
-	);
-
-	[[nodiscard]] signaling_counter make_filter_input(
-		span_2d<std::complex<float>> output,
-		span_2d<float const> input,
-		thread_pool<move_only_function<void()>>& workers
+		uint32_t y_input_offset,
+		span_2d<std::complex<float>> output
 	);
 }
 

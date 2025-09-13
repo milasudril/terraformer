@@ -2,6 +2,8 @@
 #define TERRAFORMER_SPAN2D_HPP
 
 #include "./spaces.hpp"
+#include "./chunk_by_chunk_count_view.hpp"
+#include "lib/execution/signaling_counter.hpp"
 
 #include <functional>
 #include <cstdint>
@@ -11,6 +13,7 @@
 #include <limits>
 #include <algorithm>
 #include <ranges>
+#include <cassert>
 
 namespace terraformer
 {
@@ -280,6 +283,45 @@ namespace terraformer
 			{ ret.push_back(PointType{static_cast<float>(x), static_cast<float>(y), val}); }
 		});
 
+		return ret;
+	}
+
+	template<class InputType, class OutputType, class ThreadPool, class Callback, class ... Args>
+	[[nodiscard]] signaling_counter dispatch_jobs(
+		span_2d<InputType const> input,
+		span_2d<OutputType> output,
+		ThreadPool& workers,
+		Callback&& cb,
+		Args&&... args
+	)
+	{
+		auto const n_workers = workers.max_concurrency();
+		signaling_counter ret{n_workers};
+
+		assert(output.width() == input.width());
+		assert(output.height() == input.height());
+
+		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, input.height()}, n_workers})
+		{
+			workers.submit(
+				[
+					cb,
+					input,
+					input_y_offset = chunk.front(),
+					output = output.scanlines(
+						scanline_range{
+							.begin = chunk.front(),
+							.end = chunk.back() + 1
+						}
+					),
+					... args = args,
+					&counter = ret.get_state()
+				](){
+					cb(input, input_y_offset, output, args...);
+					counter.decrement();
+				}
+			);
+		}
 		return ret;
 	}
 }
