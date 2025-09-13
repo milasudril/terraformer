@@ -22,6 +22,7 @@ namespace
 	};
 
 	terraformer::dft_engine::thread_pool_type* workers;
+//	thread_local size_t inside_fftw_thread_callback = 0;
 }
 
 
@@ -113,23 +114,39 @@ void terraformer::dft_engine::enable_multithreading(thread_pool_type& workers)
 {
 	fftwf_init_threads();
 	fftwf_plan_with_nthreads(static_cast<int>(workers.max_concurrency()));
+#if 0
 	fftwf_threads_set_callback(
 		[](void *(*work)(char*), char* jobdata, size_t elsize, int njobs, void* workers) {
+			++inside_fftw_thread_callback;
 			signaling_counter counter{static_cast<size_t>(njobs)};
 			auto& obj = *static_cast<thread_pool_type*>(workers);
 			for (int i = 0; i < njobs; ++i)
 			{
-				obj.submit(
-					[work, jobdata, elsize, i, &counter = counter.get_state()]{
-						work(jobdata + elsize * i);
-						counter.decrement();
-					}
-				);
+				if(inside_fftw_thread_callback)
+				{
+					obj.submit_front(
+						[work, jobdata, elsize, i, &counter = counter.get_state()]{
+							work(jobdata + elsize * i);
+							counter.decrement();
+						}
+					);
+				}
+				else
+				{
+					obj.submit(
+						[work, jobdata, elsize, i, &counter = counter.get_state()]{
+							work(jobdata + elsize * i);
+							counter.decrement();
+						}
+					);
+				}
 			}
 			counter.wait();
+			--inside_fftw_thread_callback;
 		},
 		&workers
 	);
+#endif
 	::workers = &workers;
 }
 
