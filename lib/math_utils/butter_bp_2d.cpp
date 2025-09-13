@@ -17,9 +17,10 @@ terraformer::signaling_counter terraformer::apply(
 	auto const w = input.width();
 	auto const h = input.height();
 
-	auto filter_input = make_filter_input(input);
-
+	terraformer::basic_image<std::complex<float>> filter_input{w, h};
+	make_filter_input(filter_input, input, comp_ctxt.workers).wait();
 	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
+
 	comp_ctxt.dft_engine.transform(
 		std::as_const(filter_input).pixels(),
 		transformed_input.pixels(),

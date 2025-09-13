@@ -10,6 +10,7 @@
 #include <cmath>
 #include <limits>
 #include <algorithm>
+#include <ranges>
 
 namespace terraformer
 {
@@ -100,7 +101,6 @@ namespace terraformer
 				&(*this)(0, range.begin)
 			};
 		}
-
 
 	private:
 		IndexType m_width;
