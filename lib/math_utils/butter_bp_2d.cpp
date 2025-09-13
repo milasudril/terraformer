@@ -1,6 +1,7 @@
 //@	{"target":{"name":"./butter_bp_2d.o"}}
 
 #include "./butter_bp_2d.hpp"
+#include "./filter_utils.hpp"
 #include "./dft_engine.hpp"
 
 #include <cassert>
@@ -16,23 +17,7 @@ terraformer::signaling_counter terraformer::apply(
 	auto const w = input.width();
 	auto const h = input.height();
 
-	assert(w%2 == 0);
-	assert(h%2 == 0);
-
-	basic_image<std::complex<float>> filter_input{w, h};
-	{
-		auto sign_y = 1.0f;
-		for(uint32_t y = 0; y != h; ++y)
-		{
-			auto sign_x = 1.0f;
-			for(uint32_t x = 0; x != w; ++x)
-			{
-				filter_input(x, y) = input(x, y) * sign_y * sign_x;
-				sign_x *= -1.0f;
-			}
-			sign_y *= -1.0f;
-		}
-	}
+	auto filter_input = make_filter_input(input);
 
 	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
 	comp_ctxt.dft_engine.transform(
