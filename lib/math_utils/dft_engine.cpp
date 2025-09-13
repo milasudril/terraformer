@@ -7,6 +7,8 @@
 //@	}
 
 #include "./dft_engine.hpp"
+#include "lib/common/chunk_by_chunk_count_view.hpp"
+#include "lib/array_classes/span.hpp"
 
 #include <algorithm>
 
@@ -16,8 +18,12 @@ namespace
 	{
 		void operator()(fftwf_plan plan)
 		{ if(plan != nullptr) { fftwf_destroy_plan(plan); } }
+
 	};
+
+	terraformer::dft_engine::thread_pool_type* workers;
 }
+
 
 terraformer::dft_execution_plan::dft_execution_plan(size_t size, dft_direction dir)
 {
@@ -38,7 +44,14 @@ terraformer::dft_execution_plan::dft_execution_plan(span_2d_extents size, dft_di
 	auto const n = static_cast<size_t>(size.width)*static_cast<size_t>(size.height);
 	auto input_buff  = std::make_unique<std::complex<float>[]>(n);
 	auto output_buff = std::make_unique<std::complex<float>[]>(n);
-	std::fill_n(input_buff.get(), n, 0);
+	if(workers != nullptr)
+	{
+		auto const n_workers = workers->max_concurrency();
+		for(auto chunk:chunk_by_chunk_count_view{span{input_buff.get(), input_buff.get() + n}, n_workers})
+		{ workers->submit([chunk](){ std::ranges::fill(chunk, 0); }); }
+	}
+	else
+	{ std::fill_n(input_buff.get(), n, 0); }
 	auto input_buff_ptr  = reinterpret_cast<fftwf_complex*>(input_buff.get());
 	auto output_buff_ptr = reinterpret_cast<fftwf_complex*>(output_buff.get());
 	m_plan = std::unique_ptr<plan_type, plan_deleter>{
@@ -85,6 +98,30 @@ terraformer::dft_execution_plan_cache::get_plan(sizes buffer_size, dft_direction
 	++m_counter;
 	m_transform_sizes[reject_index] = std::pair{buffer_size, dir};
 	return reject->plan;
+}
+
+void terraformer::dft_engine::enable_multithreading(thread_pool_type& workers)
+{
+	fftwf_init_threads();
+	fftwf_plan_with_nthreads(static_cast<int>(workers.max_concurrency()));
+	fftwf_threads_set_callback(
+		[](void *(*work)(char*), char* jobdata, size_t elsize, int njobs, void* workers) {
+			signaling_counter counter{static_cast<size_t>(njobs)};
+			auto& obj = *static_cast<thread_pool_type*>(workers);
+			for (int i = 0; i < njobs; ++i)
+			{
+				obj.submit(
+					[work, jobdata, elsize, i, &counter = counter.get_state()]{
+						work(jobdata + elsize * i);
+						counter.decrement();
+					}
+				);
+			}
+			counter.wait();
+		},
+		&workers
+	);
+	::workers = &workers;
 }
 
 namespace

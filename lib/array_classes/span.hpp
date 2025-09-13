@@ -10,7 +10,7 @@ namespace terraformer
 	struct clamp_index{};
 
 	template<class T, class IndexType = array_index<std::remove_const_t<T>>, class SizeType = array_size<std::remove_const_t<T>>>
-	class span
+	class span: public std::ranges::view_base
 	{
 	public:
 		using index_type = IndexType;

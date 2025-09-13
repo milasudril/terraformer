@@ -6,6 +6,7 @@
 #include "lib/common/span_2d.hpp"
 #include "lib/execution/signaling_counter.hpp"
 #include "lib/execution/thread_pool.hpp"
+#include "lib/common/move_only_function.hpp"
 
 #include <fftw3.h>
 #include <complex>
@@ -73,29 +74,9 @@ namespace terraformer
 	class dft_engine
 	{
 	public:
-		template<class TaskRunner>
-		static void enable_multithreading(TaskRunner& task_runner)
-		{
-			fftwf_init_threads();
-			fftwf_plan_with_nthreads(static_cast<int>(task_runner.max_concurrency()));
-			fftwf_threads_set_callback(
-				[](void *(*work)(char*), char* jobdata, size_t elsize, int njobs, void* task_runner) {
-					signaling_counter counter{static_cast<size_t>(njobs)};
-					auto& obj = *static_cast<TaskRunner*>(task_runner);
-					for (int i = 0; i < njobs; ++i)
-					{
-						obj.submit(
-							[work, jobdata, elsize, i, &counter = counter.get_state()]{
-								work(jobdata + elsize * i);
-								counter.decrement();
-							}
-						);
-					}
-					counter.wait();
-				},
-				&task_runner
-			);
-		}
+		using thread_pool_type = thread_pool<move_only_function<void()>>;
+
+		static void enable_multithreading(thread_pool_type& task_runner);
 
 		[[nodiscard]] signaling_counter transform(
 			span_2d<std::complex<float> const> input_buffer,

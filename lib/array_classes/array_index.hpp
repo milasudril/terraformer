@@ -45,6 +45,18 @@ namespace terraformer
 			return *this;
 		}
 
+		constexpr array_size& operator/=(Rep other)
+		{
+			m_value /= other;
+			return *this;
+		}
+
+		constexpr array_size& operator%=(Rep other)
+		{
+			m_value %= other;
+			return *this;
+		}
+
 		template<class Other>
 		constexpr explicit operator array_size<Other, Rep>() const noexcept
 		{ return array_size<Other>{m_value}; }
@@ -77,6 +89,14 @@ namespace terraformer
 	template<class T, class Rep>
 	constexpr auto operator*(Rep c, array_size<T, Rep> a)
 	{ return a *= c; }
+
+	template<class T, class Rep>
+	constexpr auto operator/(array_size<T, Rep> a, Rep c)
+	{ return a /= c; }
+
+	template<class T, class Rep>
+	constexpr auto operator%(array_size<T, Rep> a, Rep c)
+	{ return a %= c; }
 
 	template<class T>
 	class index_range
