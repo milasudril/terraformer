@@ -5,12 +5,14 @@
 
 #include <cassert>
 
-terraformer::grayscale_image terraformer::apply(
+terraformer::signaling_counter terraformer::apply(
+	span_2d<float> filtered_output,
 	butter_bp_2d_descriptor const& params,
 	span_2d<float const> input,
 	computation_context& comp_ctxt
 )
 {
+	signaling_counter counter{0};
 	auto const w = input.width();
 	auto const h = input.height();
 
@@ -75,7 +77,6 @@ terraformer::grayscale_image terraformer::apply(
 		dft_direction::backward
 	).wait();
 
-	grayscale_image filtered_output{w, h};
 	{
 		auto sign_y = 1.0f;
 		for(uint32_t y = 0; y < h; ++y)
@@ -90,5 +91,5 @@ terraformer::grayscale_image terraformer::apply(
 		}
 	}
 
-	return filtered_output;
+	return counter;
 }
