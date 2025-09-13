@@ -47,8 +47,17 @@ terraformer::dft_execution_plan::dft_execution_plan(span_2d_extents size, dft_di
 	if(workers != nullptr)
 	{
 		auto const n_workers = workers->max_concurrency();
+		signaling_counter counter{n_workers};
 		for(auto chunk:chunk_by_chunk_count_view{span{input_buff.get(), input_buff.get() + n}, n_workers})
-		{ workers->submit([chunk](){ std::ranges::fill(chunk, 0); }); }
+		{
+			workers->submit(
+				[chunk, &state = counter.get_state()](){
+					std::ranges::fill(chunk, 0);
+					state.decrement();
+				}
+			);
+		}
+		counter.wait();
 	}
 	else
 	{ std::fill_n(input_buff.get(), n, 0); }
