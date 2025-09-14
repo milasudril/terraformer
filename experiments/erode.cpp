@@ -101,56 +101,23 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 }
 
 void accumulate(
+	terraformer::scanline_tranform_job const& jobinfo,
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
-	float factor,
-	float input_gain
+	float blend_factor
 )
 {
 	auto const width = output.width();
 	auto const height = output.height();
+	auto const input_y_offset = jobinfo.input_y_offset;
 	for(uint32_t y = 0; y != height; ++y)
 	{
 		for(uint32_t x = 0; x != width; ++x)
-		{ output(x, y) = (1.0f - factor)*output(x, y) + factor*input(x, y)*input_gain; }
+		{
+			output(x, y) = (1.0f - blend_factor)*output(x, y)
+				+ blend_factor*input(x, y + input_y_offset);
+		}
 	}
-}
-
-[[nodiscard]] terraformer::signaling_counter accumulate(
-	terraformer::span_2d<float> output,
-	terraformer::span_2d<float const> input,
-	float factor,
-	float input_gain,
-	thread_pool_type& workers
-)
-{
-	terraformer::signaling_counter counter{workers.max_concurrency()};
-	auto const height = output.height();
-	auto const n_workers = workers.max_concurrency();
-	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
-
-	for(size_t k = 0; k != workers.max_concurrency(); ++k)
-	{
-		terraformer::scanline_range range{
-			.begin = static_cast<uint32_t>(k*batch_size),
-			.end = static_cast<uint32_t>((k + 1)*batch_size)
-		};
-
-		workers.submit(
-			[
-				&counter = counter.get_state(),
-				factor,
-				input_gain,
-				scanlines_out = output.scanlines(range),
-				scanlines_in = input.scanlines(range)
-			](){
-				accumulate(scanlines_out, scanlines_in, factor, input_gain);
-				counter.decrement();
-			}
-		);
-	}
-
-	return counter;
 }
 
 struct linux_sched_params
@@ -198,14 +165,16 @@ int main(int argc, char** argv)
 	auto buffer_a = load(terraformer::empty<terraformer::grayscale_image>{}, argv[1]);
 	auto buffer_b = buffer_a;
 
-	auto input = buffer_a.pixels();
-	auto output = buffer_b.pixels();
-
 	auto white_noise_buffer = buffer_a;
-	auto filtered_noise_buffer = buffer_a;
+	auto filtered_noise_buffer_a = buffer_a;
+	auto filtered_noise_buffer_b = buffer_a;
 	auto accumulated_noise = buffer_a;
 	auto filter_mask = buffer_a;
 
+	auto input = buffer_a.pixels();
+	auto output = buffer_b.pixels();
+	auto noise_input = filtered_noise_buffer_a.pixels();
+	auto noise_output = filtered_noise_buffer_b.pixels();
 
 	pthread_attr_t attr{};
 	pthread_attr_init(&attr);
@@ -251,13 +220,13 @@ int main(int argc, char** argv)
 
 	terraformer::apply_filter(
 		white_noise_buffer.pixels(),
-		filtered_noise_buffer.pixels(),
+		noise_output,
 		comp_ctxt,
 		filter_mask.pixels()
 	).wait();
 
 	terraformer::generate(
-		filtered_noise_buffer.pixels(),
+		noise_output,
 		comp_ctxt.workers,
 		[](
 			auto const&,
@@ -267,13 +236,15 @@ int main(int argc, char** argv)
 			return terraformer::normalize(output, input_range);
 		},
 		terraformer::fold(
-			std::as_const(filtered_noise_buffer).pixels(),
+			noise_output,
 			comp_ctxt.workers,
 			[](auto const&, terraformer::span_2d<float const> output){
 				return minmax_value(output);
 			}
 		).get_result(fold_minmax_value)
 	).wait();
+
+	std::swap(noise_input, noise_output);
 
 	size_t k = 0;
 	while(true)
@@ -297,6 +268,7 @@ int main(int argc, char** argv)
 			).get_result(fold_minmax_value)
 		);
 
+
 		if(k == 1024)
 		{
 			pending_normalized_input.wait();
@@ -304,15 +276,17 @@ int main(int argc, char** argv)
 		}
 
 		pending_normalized_input.wait();
-		terraformer::transform(
+		auto next_result = terraformer::transform(
 			input,
 			output,
 			comp_ctxt.workers,
 			[]<class ... Args>(Args&&... args) {
 				erode(std::forward<Args>(args)...);
 			},
-			filtered_noise_buffer.pixels()
-		).wait();
+			noise_input
+		);
+
+//		make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs).wait();
 
 		std::swap(input, output);
 		++k;
