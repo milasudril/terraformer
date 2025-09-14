@@ -315,7 +315,7 @@ namespace terraformer
 
 	template<class InputType, class OutputType, class ThreadPool, class Callback, class ... Args>
 	[[nodiscard]] signaling_counter transform(
-		span_2d<InputType const> input,
+		span_2d<InputType> input,
 		span_2d<OutputType> output,
 		ThreadPool& workers,
 		Callback&& cb,

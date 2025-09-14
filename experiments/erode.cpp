@@ -17,22 +17,21 @@
 #include "lib/array_classes/single_array.hpp"
 
 #include <algorithm>
+#include <cstring>
 #include <random>
 #include <bit>
 
 using thread_pool_type = terraformer::thread_pool<terraformer::move_only_function<void()>>;
 
-[[nodiscard]] float erode(
-	terraformer::span_2d<float> output,
+void erode(
+	terraformer::scanline_tranform_job const& jobinfo,
 	terraformer::span_2d<float const> input,
-	terraformer::span_2d<float const> noise,
-	float maxval_in,
-	uint32_t input_y_offset = 0
+	terraformer::span_2d<float> output,
+	terraformer::span_2d<float const> noise
 )
 {
 	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
-	auto maxval = 0.0f;
-
+	auto const input_y_offset = jobinfo.input_y_offset;
 	for(int32_t y = 0; y != static_cast<int32_t>(output.height()); ++y)
 	{
 		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
@@ -61,54 +60,9 @@ using thread_pool_type = terraformer::thread_pool<terraformer::move_only_functio
 			auto const noise_val = noise(x ,y_in);
 			auto const minval = std::min(input_val, downhill_value);
 
-			auto const val = std::lerp(
-				input_val,
-				minval,
-				input_val*noise_val*noise_val/maxval_in
-			);
-			maxval = std::max(val, maxval);
-
-			output(x, y) = val;
+			output(x, y) = std::lerp(input_val, minval, input_val*noise_val);
 		}
 	}
-	return maxval;
-}
-
-[[nodiscard]] terraformer::batch_result<float> erode(
-	terraformer::span_2d<float> output,
-	terraformer::span_2d<float const> input,
-	terraformer::span_2d<float const> noise,
-	float maxval_in,
-	thread_pool_type& workers
-)
-{
-	terraformer::batch_result<float> retvals{workers.max_concurrency()};
-	auto const height = output.height();
-	auto const n_workers = workers.max_concurrency();
-	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
-	terraformer::single_array maxvals{terraformer::array_size<float>{n_workers}};
-
-	for(auto k : maxvals.element_indices())
-	{
-		terraformer::scanline_range range{
-			.begin = static_cast<uint32_t>(k.get()*batch_size),
-			.end = static_cast<uint32_t>((k + 1).get()*batch_size)
-		};
-
-		workers.submit(
-			[
-				&retvals = retvals.get_state(),
-				maxval_in,
-				scanlines_out = output.scanlines(range),
-				scanlines_in = input,
-				scanlines_noise = noise,
-				input_y_offset = range.begin
-			](){
-				retvals.save_partial_result(erode(scanlines_out, scanlines_in, scanlines_noise, maxval_in, input_y_offset));
-			}
-		);
-	}
-	return retvals;
 }
 
 void make_white_noise(terraformer::span_2d<float> output, terraformer::random_generator& rng)
@@ -244,8 +198,8 @@ int main(int argc, char** argv)
 	auto buffer_a = load(terraformer::empty<terraformer::grayscale_image>{}, argv[1]);
 	auto buffer_b = buffer_a;
 
-	//auto input = buffer_a.pixels();
-	//auto output = buffer_b.pixels();
+	auto input = buffer_a.pixels();
+	auto output = buffer_b.pixels();
 
 	auto white_noise_buffer = buffer_a;
 	auto filtered_noise_buffer = buffer_a;
@@ -292,7 +246,6 @@ int main(int argc, char** argv)
 
 	auto pending_noise = make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs);
 
-
 	pending_filter_mask.wait();
 	pending_noise.wait();
 
@@ -302,14 +255,6 @@ int main(int argc, char** argv)
 		comp_ctxt,
 		filter_mask.pixels()
 	).wait();
-
-	auto minmaxval_filter = terraformer::fold(
-		std::as_const(filtered_noise_buffer).pixels(),
-		comp_ctxt.workers,
-		[](auto const&, terraformer::span_2d<float const> output){
-			return minmax_value(output);
-		}
-	);
 
 	terraformer::generate(
 		filtered_noise_buffer.pixels(),
@@ -321,45 +266,58 @@ int main(int argc, char** argv)
 		){
 			return terraformer::normalize(output, input_range);
 		},
-		minmaxval_filter.get_result(fold_minmax_value)
+		terraformer::fold(
+			std::as_const(filtered_noise_buffer).pixels(),
+			comp_ctxt.workers,
+			[](auto const&, terraformer::span_2d<float const> output){
+				return minmax_value(output);
+			}
+		).get_result(fold_minmax_value)
 	).wait();
 
-	store(filtered_noise_buffer.pixels(), "/dev/shm/slask.exr");
-#if 0
-
-	for(size_t k = 0; k != 1024; ++k)
+	size_t k = 0;
+	while(true)
 	{
-		if(std::has_single_bit(k + 1))
-		{
-			std::filesystem::path filename{argv[2]};
-			filename /= std::to_string(k) + ".exr";
-			store(input, filename.c_str());
-		}
-
-		auto const maxval_erode = erode(output, input, accumulated_noise.pixels(), 3500.0f, workers);
-		make_white_noise(white_noise_buffer.pixels(), workers, rngs).wait();
-		maxval_filter = apply_lowpass_filter(filtered_noise_buffer.pixels(), white_noise_buffer.pixels(), workers);
-		auto noise_accumulate_sem = accumulate(
-			accumulated_noise.pixels(),
-			filtered_noise_buffer.pixels(),
-			0.25f,
-			1.0f/maxval_filter.get_result(max_value),
-			workers
+		auto pending_normalized_input = terraformer::generate(
+			input,
+			comp_ctxt.workers,
+			[](
+				auto const&,
+				terraformer::span_2d<float> output,
+				std::ranges::minmax_result<float> input_range
+			){
+				return terraformer::normalize(output, input_range);
+			},
+			terraformer::fold(
+				input,
+				comp_ctxt.workers,
+				[](auto const&, terraformer::span_2d<float const> output){
+					return minmax_value(output);
+				}
+			).get_result(fold_minmax_value)
 		);
-		auto output_amplify_sem = amplify(output, 3500.0f/maxval_erode.get_result(max_value), workers);
-		std::swap(output, input);
 
-		if(k %16 == 0)
+		if(k == 1024)
 		{
-			printf("\r");
-			auto count = static_cast<size_t>(64.0f*static_cast<float>(k)/65536.0f);
-			for(size_t k = 0; k != count; ++k)
-			{
-				printf("=");
-			}
+			pending_normalized_input.wait();
+			break;
 		}
+
+		pending_normalized_input.wait();
+		terraformer::transform(
+			input,
+			output,
+			comp_ctxt.workers,
+			[]<class ... Args>(Args&&... args) {
+				erode(std::forward<Args>(args)...);
+			},
+			filtered_noise_buffer.pixels()
+		).wait();
+
+		std::swap(input, output);
+		++k;
 	}
-	printf("\n");
-#endif
+
+	store(input, "/dev/shm/slask.exr");
 	return 0;
 }
