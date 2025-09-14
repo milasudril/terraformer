@@ -49,10 +49,10 @@ void terraformer::make_filter_mask(
 }
 
 terraformer::signaling_counter terraformer::apply(
-	span_2d<float> filtered_output,
-	butter_bp_2d_descriptor const& params,
 	span_2d<float const> input,
-	computation_context& comp_ctxt
+	span_2d<float> filtered_output,
+	computation_context& comp_ctxt,
+	butter_bp_2d_descriptor const& params
 )
 {
 	auto const w = input.width();

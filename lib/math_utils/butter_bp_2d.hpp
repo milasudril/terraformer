@@ -22,15 +22,15 @@ namespace terraformer
 	void make_filter_mask(
 		uint32_t input_height,
 		uint32_t input_y_offset,
-		terraformer::span_2d<float> output,
+		span_2d<float> output,
 		butter_bp_2d_descriptor const& params
 	);
 
 	signaling_counter apply(
-		span_2d<float> output,
-		butter_bp_2d_descriptor const&,
 		span_2d<float const> input,
-		computation_context& comp_ctxt
+		span_2d<float> filtered_output,
+		computation_context& comp_ctxt,
+		butter_bp_2d_descriptor const& params
 	);
 
 	inline grayscale_image apply(
@@ -42,7 +42,7 @@ namespace terraformer
 		auto const w = input.width();
 		auto const h = input.height();
 		grayscale_image filtered_output{w, h};
-		apply(filtered_output, filter, input, comp_ctxt).wait();
+		apply(input, filtered_output.pixels(), comp_ctxt, filter).wait();
 		return filtered_output;
 	}
 }
