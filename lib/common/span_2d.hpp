@@ -4,6 +4,7 @@
 #include "./spaces.hpp"
 #include "./chunk_by_chunk_count_view.hpp"
 #include "lib/execution/signaling_counter.hpp"
+#include "lib/execution/batch_result.hpp"
 
 #include <functional>
 #include <cstdint>
@@ -235,6 +236,26 @@ namespace terraformer
 		}
 	}
 
+	template<class T>
+	inline auto minmax_value(span_2d<T> img)
+	{
+		std::ranges::min_max_result<float> ret{
+			.min =  img(0, 0),
+			.max = img(0, 0)
+		};
+
+		for(uint32_t y = 0; y != img.height(); ++y)
+		{
+			for(uint32_t x = 0; x != img.width(); ++x)
+			{
+				auto const val = img(x, y);
+				ret.min = std::min(val, ret.min);
+				ret.max = std::max(val, ret.max);
+			}
+		}
+		return ret;
+	}
+
 	template<class Func>
 	auto generate_minmax(span_2d<float> out, Func&& f)
 	{
@@ -329,6 +350,7 @@ namespace terraformer
 	}
 
 	template<class OutputType, class ThreadPool, class Callback, class ... Args>
+	requires(!std::is_const_v<OutputType>)
 	[[nodiscard]] signaling_counter dispatch_jobs(
 		span_2d<OutputType> output,
 		ThreadPool& workers,
@@ -366,6 +388,50 @@ namespace terraformer
 		return ret;
 	}
 
+	template<class InputType, class ThreadPool, class Callback, class ... Args>
+	requires(std::is_const_v<InputType>)
+	[[nodiscard]] auto dispatch_jobs(
+		span_2d<InputType> output,
+		ThreadPool& workers,
+		Callback&& cb,
+		Args&&... args
+	)
+	{
+		auto const n_workers = workers.max_concurrency();
+
+		using callback_ret_type = decltype(
+			cb(size_t{}, uint32_t{}, uint32_t{}, output, args...)
+		);
+
+		batch_result<callback_ret_type> ret{n_workers};
+
+		size_t k = 0;
+		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, output.height()}, n_workers})
+		{
+			workers.submit(
+				[
+					cb,
+					k,
+					input_height = output.height(),
+					input_y_offset = chunk.front(),
+					output = output.scanlines(
+						scanline_range{
+							.begin = chunk.front(),
+							.end = chunk.back() + 1
+						}
+					),
+					... args = args,
+					&ret = ret.get_state()
+				](){
+					ret.save_partial_result(cb(k, input_height, input_y_offset, output, args...));
+				}
+			);
+			++k;
+		}
+		return ret;
+	}
+
+
 	template<class InputType, class OutputType>
 	void multiply_assign(
 		span_2d<InputType> input,
@@ -380,6 +446,42 @@ namespace terraformer
 		{
 			for(uint32_t x = 0; x != w; ++x)
 			{ output(x, y) *= input(x, y + y_input_offset); }
+		}
+	}
+
+	template<class T>
+	constexpr T min_normalized_value;
+
+	template<class T>
+	constexpr T max_normalized_value;
+
+	template<>
+	constexpr float min_normalized_value<float> = 0.0f;
+
+	template<>
+	constexpr float max_normalized_value<float> = 1.0f;
+
+
+	template<class InputType>
+	void normalize(
+		span_2d<InputType> input,
+		std::ranges::min_max_result<InputType> input_range,
+		std::ranges::min_max_result<InputType> output_range = std::ranges::min_max_result<InputType>{
+			.min = min_normalized_value<InputType>,
+			.max = max_normalized_value<InputType>
+		}
+	)
+	{
+		auto const w = input.width();
+		auto const h = input.height();
+
+		for(uint32_t y = 0; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{
+				auto const val = (input(x, y) - input_range.min)/(input_range.max - input_range.min);
+				input(x, y) = std::lerp(output_range.min, output_range.max, val);
+			}
 		}
 	}
 }

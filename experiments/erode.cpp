@@ -5,6 +5,9 @@
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
+#include "lib/math_utils/butter_lp_2d.hpp"
+#include "lib/math_utils/computation_context.hpp"
+#include "lib/math_utils/filter_utils.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/image_io.hpp"
 #include "lib/math_utils/interp.hpp"
@@ -174,102 +177,20 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 {
 	assert(workers.max_concurrency() == std::size(rngs).get());
 
-	terraformer::signaling_counter counter{workers.max_concurrency()};
-	auto const width = output.width();
-	auto const height = output.height();
-	auto const n_workers = workers.max_concurrency();
-	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
-
-	for(auto k : rngs.element_indices())
-	{
-		workers.submit(
-			[
-				&counter = counter.get_state(),
-				&rng = rngs[k],
-				width,
-				scanlines = output.scanlines(
-					terraformer::scanline_range{
-						.begin = static_cast<uint32_t>(k.get()*batch_size),
-						.end = static_cast<uint32_t>((k + 1).get()*batch_size)
-					}
-				)
-			](){
-				make_white_noise(scanlines, rng);
-				counter.decrement();
-			}
-		);
-	}
-
-	return counter;
-}
-
-[[nodiscard]] float apply_lowpass_filter(terraformer::span_2d<float> output, terraformer::span_2d<float const> input)
-{
-	constexpr auto kernel_width = 5;
-	constexpr auto kernel_height = 5;
-
-	std::array<std::array<float, kernel_width>, kernel_width> kernel{
-		std::array{0.0f, 1.0f, 1.0f, 1.0f, 0.0f},
-		std::array{1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-		std::array{1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-		std::array{1.0f, 1.0f, 1.0f, 1.0f, 1.0f},
-		std::array{0.0f, 1.0f, 1.0f, 1.0f, 0.0f}
-	};
-
-	auto maxval = 0.0f;
-	auto const width = output.width();
-	auto const height = output.height();
-
-	for(uint32_t y = 0; y != height; ++y)
-	{
-		for(uint32_t x = 0; x != width; ++x)
-		{
-			auto sum = 0.0f;
-			for(int k = 0; k != kernel_height; ++k)
-			{
-				for(int l = 0; l != kernel_width; ++l)
-				{
-					sum += input(
-						(x + width + l - kernel_width/2)%width,
-						(y + height + k - kernel_height/2)%height
-					)*kernel[k][l];
-				}
-			}
-
-			maxval = std::max(maxval, sum);
-			output(x, y) = sum;
-		}
-	}
-	return maxval;
-}
-
-[[nodiscard]]
-terraformer::batch_result<float> apply_lowpass_filter(terraformer::span_2d<float> output, terraformer::span_2d<float const> input, thread_pool_type& workers)
-{
-	terraformer::batch_result<float> results{workers.max_concurrency()};
-	auto const height = output.height();
-	auto const n_workers = workers.max_concurrency();
-	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
-	terraformer::single_array maxvals{terraformer::array_size<float>{n_workers}};
-
-	for(auto k : maxvals.element_indices())
-	{
-		terraformer::scanline_range range{
-			.begin = static_cast<uint32_t>(k.get()*batch_size),
-			.end = static_cast<uint32_t>((k + 1).get()*batch_size)
-		};
-
-		workers.submit(
-			[
-				&results = results.get_state(),
-				scanlines_out = output.scanlines(range),
-				scanlines_in = input.scanlines(range)
-			](){
-				results.save_partial_result(apply_lowpass_filter(scanlines_out, scanlines_in));
-			}
-		);
-	}
-	return results;
+	return terraformer::dispatch_jobs(
+		output,
+		workers,
+		[]<class ... Args>(
+			size_t worker_index,
+			uint32_t,
+			uint32_t,
+			terraformer::span_2d<float> output,
+			terraformer::span<terraformer::random_generator> rngs
+		){
+			make_white_noise(output, rngs[rngs.element_indices().front() + worker_index]);
+		},
+		rngs
+	);
 }
 
 void accumulate(
@@ -344,45 +265,122 @@ struct linux_sched_params
 	}
 };
 
-constexpr auto max_value = []<class T>(T&& range){
-	return *std::ranges::max_element(std::forward<T>(range));
+constexpr auto fold_minmax_value = [](auto const& range) {
+	return std::ranges::min_max_result{
+		.min = std::ranges::min_element(
+			range,
+			[](auto a, auto b){
+				return a.min < b.min;
+			}
+		)->min,
+		.max = std::ranges::max_element(
+			range,
+			[](auto a, auto b) {
+				return a.max < b.max;
+			}
+		)->max
+	};
 };
 
 int main(int argc, char** argv)
 {
 	if(argc < 3)
-	{
-		return -1;
-	}
+	{ return -1; }
 
 	terraformer::random_generator rng;
 	auto buffer_a = load(terraformer::empty<terraformer::grayscale_image>{}, argv[1]);
 	auto buffer_b = buffer_a;
 
-	auto input = buffer_a.pixels();
-	auto output = buffer_b.pixels();
+	//auto input = buffer_a.pixels();
+	//auto output = buffer_b.pixels();
 
 	auto white_noise_buffer = buffer_a;
 	auto filtered_noise_buffer = buffer_a;
 	auto accumulated_noise = buffer_a;
+	auto filter_mask = buffer_a;
+
 
 	pthread_attr_t attr{};
 	pthread_attr_init(&attr);
 	pthread_attr_setstacksize(&attr, 16384);
 
 	auto const n_threads = std::thread::hardware_concurrency();
-	thread_pool_type workers{n_threads};
-	workers.set_schedparams(linux_sched_params{
+
+	terraformer::computation_context comp_ctxt{
+		.workers = terraformer::thread_pool<terraformer::move_only_function<void()>>{
+			std::thread::hardware_concurrency()
+		},
+		.dft_engine = terraformer::dft_engine{}
+	};
+	terraformer::dft_engine::enable_multithreading(comp_ctxt.workers);
+
+	comp_ctxt.workers.set_schedparams(linux_sched_params{
 		.policy = SCHED_BATCH,
 		.priority = 0
 	});
 
+	auto pending_filter_mask = dispatch_jobs(
+		filter_mask.pixels(),
+		comp_ctxt.workers,
+		[]<class ... Args>(auto, Args&&... params){
+			make_filter_mask(std::forward<Args>(params)...);
+		},
+		terraformer::butter_lp_2d_descriptor{
+			.f_x = 49152.0f/8192.0f,
+			.f_y = 49152.0f/8192.0f,
+			.hf_rolloff = 2.0f,
+			.y_direction = 0.0f
+		}
+	);
 	terraformer::random_generator master_rng;
 	terraformer::single_array<terraformer::random_generator> rngs;
 	for(size_t k = 0; k != n_threads; ++k)
 	{ rngs.push_back(terraformer::random_generator{terraformer::generate_rng_seed(master_rng)}); }
 
-	make_white_noise(white_noise_buffer.pixels(), workers, rngs).wait();
+	auto pending_noise = make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs);
+
+
+	pending_filter_mask.wait();
+	pending_noise.wait();
+
+	terraformer::apply_filter(
+		white_noise_buffer.pixels(),
+		filtered_noise_buffer.pixels(),
+		comp_ctxt,
+		filter_mask.pixels()
+	).wait();
+
+	auto minmaxval_filter = terraformer::dispatch_jobs(
+		std::as_const(filtered_noise_buffer).pixels(),
+		comp_ctxt.workers,
+		[]<class ... Args>(
+			size_t,
+			uint32_t,
+			uint32_t,
+			terraformer::span_2d<float const> output
+		){
+			return minmax_value(output);
+		}
+	);
+
+	terraformer::dispatch_jobs(
+		filtered_noise_buffer.pixels(),
+		comp_ctxt.workers,
+		[]<class ... Args>(
+			size_t,
+			uint32_t,
+			uint32_t,
+			terraformer::span_2d<float> output,
+			std::ranges::minmax_result<float> input_range
+		){
+			return terraformer::normalize(output, input_range);
+		},
+		minmaxval_filter.get_result(fold_minmax_value)
+	).wait();
+
+	store(filtered_noise_buffer.pixels(), "/dev/shm/slask.exr");
+#if 0
+
 	auto maxval_filter = apply_lowpass_filter(accumulated_noise.pixels(), white_noise_buffer.pixels(), workers);
 	amplify(accumulated_noise.pixels(), 1.0f/maxval_filter.get_result(max_value), workers).wait();
 
@@ -419,6 +417,6 @@ int main(int argc, char** argv)
 		}
 	}
 	printf("\n");
-
+#endif
 	return 0;
 }
