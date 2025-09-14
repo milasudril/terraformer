@@ -357,9 +357,16 @@ namespace terraformer
 		return ret;
 	}
 
+	struct scanline_generate_job
+	{
+		size_t chunk_index;
+		uint32_t input_y_offset;
+		uint32_t total_height;
+	};
+
 	template<class OutputType, class ThreadPool, class Callback, class ... Args>
 	requires(!std::is_const_v<OutputType>)
-	[[nodiscard]] signaling_counter dispatch_jobs(
+	[[nodiscard]] signaling_counter generate(
 		span_2d<OutputType> output,
 		ThreadPool& workers,
 		Callback&& cb,
@@ -375,9 +382,12 @@ namespace terraformer
 			workers.submit(
 				[
 					cb,
+					jobinfo = scanline_generate_job{
+						.chunk_index = k,
+						.input_y_offset = chunk.front(),
+						.total_height = output.height()
+					},
 					k,
-					input_height = output.height(),
-					input_y_offset = chunk.front(),
 					output = output.scanlines(
 						scanline_range{
 							.begin = chunk.front(),
@@ -387,7 +397,7 @@ namespace terraformer
 					... args = args,
 					&counter = ret.get_state()
 				](){
-					cb(k, input_height, input_y_offset, output, args...);
+					cb(jobinfo, output, args...);
 					counter.decrement();
 				}
 			);

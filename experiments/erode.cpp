@@ -132,17 +132,15 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 {
 	assert(workers.max_concurrency() == std::size(rngs).get());
 
-	return terraformer::dispatch_jobs(
+	return terraformer::generate(
 		output,
 		workers,
 		[]<class ... Args>(
-			size_t worker_index,
-			uint32_t,
-			uint32_t,
+			terraformer::scanline_generate_job const& jobinfo,
 			terraformer::span_2d<float> output,
 			terraformer::span<terraformer::random_generator> rngs
 		){
-			make_white_noise(output, rngs[rngs.element_indices().front() + worker_index]);
+			make_white_noise(output, rngs[rngs.element_indices().front() + jobinfo.chunk_index]);
 		},
 		rngs
 	);
@@ -274,10 +272,10 @@ int main(int argc, char** argv)
 		.priority = 0
 	});
 
-	auto pending_filter_mask = dispatch_jobs(
+	auto pending_filter_mask = generate(
 		filter_mask.pixels(),
 		comp_ctxt.workers,
-		[]<class ... Args>(auto, Args&&... params){
+		[]<class ... Args>(Args&&... params){
 			make_filter_mask(std::forward<Args>(params)...);
 		},
 		terraformer::butter_lp_2d_descriptor{
@@ -318,13 +316,11 @@ int main(int argc, char** argv)
 		}
 	);
 
-	terraformer::dispatch_jobs(
+	terraformer::generate(
 		filtered_noise_buffer.pixels(),
 		comp_ctxt.workers,
-		[]<class ... Args>(
-			size_t,
-			uint32_t,
-			uint32_t,
+		[](
+			auto const&,
 			terraformer::span_2d<float> output,
 			std::ranges::minmax_result<float> input_range
 		){

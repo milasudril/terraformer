@@ -22,8 +22,7 @@ namespace terraformer
 	};
 
 	void make_filter_mask(
-		uint32_t input_height,
-		uint32_t input_y_offset,
+		scanline_generate_job const& jobinfo,
 		span_2d<float> output,
 		butter_bp_2d_descriptor const& params
 	);
@@ -39,10 +38,10 @@ namespace terraformer
 		auto const h = input.height();
 
 		terraformer::basic_image<float> filter_mask{w, h};
-		dispatch_jobs(
+		generate(
 			filter_mask.pixels(),
 			comp_ctxt.workers,
-			[]<class ... Args>(auto, Args&&... params){
+			[]<class ... Args>(Args&&... params){
 				make_filter_mask(std::forward<Args>(params)...);
 			},
 			params

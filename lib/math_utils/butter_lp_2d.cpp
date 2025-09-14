@@ -3,8 +3,7 @@
 #include "./butter_lp_2d.hpp"
 
 void terraformer::make_filter_mask(
-	uint32_t input_height,
-	uint32_t input_y_offset,
+	scanline_generate_job const& jobinfo,
 	span_2d<float> output,
 	butter_lp_2d_descriptor const& params
 )
@@ -15,7 +14,8 @@ void terraformer::make_filter_mask(
 	auto const f_x = params.f_x;
 	auto const f_y = params.f_y;
 	auto const w_float = static_cast<float>(w);
-	auto const h_float = static_cast<float>(input_height);
+	auto const h_float = static_cast<float>(jobinfo.total_height);
+	auto const input_y_offset = jobinfo.input_y_offset;
 	auto const x_0 = 0.5f*w_float;
 	auto const y_0 = 0.5f*h_float;
 	auto const cos_theta = std::cos(params.y_direction);
