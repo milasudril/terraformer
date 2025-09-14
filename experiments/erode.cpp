@@ -303,15 +303,10 @@ int main(int argc, char** argv)
 		filter_mask.pixels()
 	).wait();
 
-	auto minmaxval_filter = terraformer::dispatch_jobs(
+	auto minmaxval_filter = terraformer::fold(
 		std::as_const(filtered_noise_buffer).pixels(),
 		comp_ctxt.workers,
-		[](
-			size_t,
-			uint32_t,
-			uint32_t,
-			terraformer::span_2d<float const> output
-		){
+		[](auto const&, terraformer::span_2d<float const> output){
 			return minmax_value(output);
 		}
 	);

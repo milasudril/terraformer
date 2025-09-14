@@ -406,9 +406,15 @@ namespace terraformer
 		return ret;
 	}
 
+	struct scanline_fold_job
+	{
+		size_t chunk_index;
+		uint32_t input_y_offset;
+		uint32_t total_height;
+	};
+
 	template<class InputType, class ThreadPool, class Callback, class ... Args>
-	requires(std::is_const_v<InputType>)
-	[[nodiscard]] auto dispatch_jobs(
+	[[nodiscard]] auto fold(
 		span_2d<InputType> output,
 		ThreadPool& workers,
 		Callback&& cb,
@@ -417,9 +423,7 @@ namespace terraformer
 	{
 		auto const n_workers = workers.max_concurrency();
 
-		using callback_ret_type = decltype(
-			cb(size_t{}, uint32_t{}, uint32_t{}, output, args...)
-		);
+		using callback_ret_type = decltype(cb(scanline_fold_job{}, output, args...));
 
 		batch_result<callback_ret_type> ret{n_workers};
 
@@ -429,9 +433,11 @@ namespace terraformer
 			workers.submit(
 				[
 					cb,
-					k,
-					input_height = output.height(),
-					input_y_offset = chunk.front(),
+					jobinfo = scanline_fold_job{
+						.chunk_index = k,
+						.input_y_offset = chunk.front(),
+						.total_height = output.height()
+					},
 					output = output.scanlines(
 						scanline_range{
 							.begin = chunk.front(),
@@ -441,7 +447,7 @@ namespace terraformer
 					... args = args,
 					&ret = ret.get_state()
 				](){
-					ret.save_partial_result(cb(k, input_height, input_y_offset, output, args...));
+					ret.save_partial_result(cb(jobinfo, output, args...));
 				}
 			);
 			++k;
