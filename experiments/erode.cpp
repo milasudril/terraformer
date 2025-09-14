@@ -102,8 +102,8 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 
 void accumulate(
 	terraformer::scanline_tranform_job const& jobinfo,
-	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
+	terraformer::span_2d<float> output,
 	float blend_factor
 )
 {
@@ -114,8 +114,8 @@ void accumulate(
 	{
 		for(uint32_t x = 0; x != width; ++x)
 		{
-			output(x, y) = (1.0f - blend_factor)*output(x, y)
-				+ blend_factor*input(x, y + input_y_offset);
+			output(x, y) = blend_factor*output(x, y)
+				+ (1.0f - blend_factor)*input(x, y + input_y_offset);
 		}
 	}
 }
@@ -286,12 +286,69 @@ int main(int argc, char** argv)
 			noise_input
 		);
 
-//		make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs).wait();
+		make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs).wait();
+		terraformer::apply_filter(
+			white_noise_buffer.pixels(),
+			noise_output,
+			comp_ctxt,
+			filter_mask.pixels()
+		).wait();
 
+		terraformer::generate(
+			noise_output,
+			comp_ctxt.workers,
+			[](
+				auto const&,
+				terraformer::span_2d<float> output,
+				std::ranges::minmax_result<float> input_range
+			){
+				return terraformer::normalize(output, input_range);
+			},
+			terraformer::fold(
+				noise_output,
+				comp_ctxt.workers,
+				[](auto const&, terraformer::span_2d<float const> output){
+					return minmax_value(output);
+				}
+			).get_result(fold_minmax_value)
+		).wait();
+
+		terraformer::transform(
+			noise_input,
+			noise_output,
+			comp_ctxt.workers,
+			[]<class ...Args>(Args&&... args) {
+				accumulate(std::forward<Args>(args)...);
+			},
+			1.0f/16.0f
+		).wait();
+
+		terraformer::generate(
+			noise_output,
+			comp_ctxt.workers,
+			[](
+				auto const&,
+				terraformer::span_2d<float> output,
+				std::ranges::minmax_result<float> input_range
+			){
+				return terraformer::normalize(output, input_range);
+			},
+			terraformer::fold(
+				noise_output,
+				comp_ctxt.workers,
+				[](auto const&, terraformer::span_2d<float const> output){
+					return minmax_value(output);
+				}
+			).get_result(fold_minmax_value)
+		).wait();
+
+		next_result.wait();
+		std::swap(noise_input, noise_output);
 		std::swap(input, output);
 		++k;
 	}
 
 	store(input, "/dev/shm/slask.exr");
+	store(noise_input, "/dev/shm/noise_input.exr");
 	return 0;
 }
