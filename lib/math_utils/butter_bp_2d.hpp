@@ -39,7 +39,14 @@ namespace terraformer
 		auto const h = input.height();
 
 		terraformer::basic_image<float> filter_mask{w, h};
-		dispatch_jobs(filter_mask.pixels(), comp_ctxt.workers, make_filter_mask, params).wait();
+		dispatch_jobs(
+			filter_mask.pixels(),
+			comp_ctxt.workers,
+			[]<class ... Args>(Args&&... params){
+				make_filter_mask(std::forward<Args>(params)...);
+			},
+			params
+		).wait();
 
 		return apply_filter(
 			input, filtered_output, comp_ctxt, filter_mask.pixels()
