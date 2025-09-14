@@ -339,11 +339,13 @@ namespace terraformer
 		auto const n_workers = workers.max_concurrency();
 		signaling_counter ret{n_workers};
 
+		size_t k = 0;
 		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, output.height()}, n_workers})
 		{
 			workers.submit(
 				[
 					cb,
+					k,
 					input_height = output.height(),
 					input_y_offset = chunk.front(),
 					output = output.scanlines(
@@ -355,10 +357,11 @@ namespace terraformer
 					... args = args,
 					&counter = ret.get_state()
 				](){
-					cb(input_height, input_y_offset, output, args...);
+					cb(k, input_height, input_y_offset, output, args...);
 					counter.decrement();
 				}
 			);
+			++k;
 		}
 		return ret;
 	}

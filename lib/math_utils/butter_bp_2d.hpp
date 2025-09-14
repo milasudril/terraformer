@@ -42,7 +42,7 @@ namespace terraformer
 		dispatch_jobs(
 			filter_mask.pixels(),
 			comp_ctxt.workers,
-			[]<class ... Args>(Args&&... params){
+			[]<class ... Args>(auto, Args&&... params){
 				make_filter_mask(std::forward<Args>(params)...);
 			},
 			params
