@@ -3,10 +3,12 @@
 #ifndef TERRAFORMER_BUTTER_BP_2D_HPP
 #define TERRAFORMER_BUTTER_BP_2D_HPP
 
+#include "./computation_context.hpp"
+#include "./filter_utils.hpp"
+
 #include "lib/common/span_2d.hpp"
 #include "lib/execution/signaling_counter.hpp"
 #include "lib/pixel_store/image.hpp"
-#include "lib/math_utils/computation_context.hpp"
 
 namespace terraformer
 {
@@ -26,12 +28,23 @@ namespace terraformer
 		butter_bp_2d_descriptor const& params
 	);
 
-	signaling_counter apply(
+	inline signaling_counter apply(
 		span_2d<float const> input,
 		span_2d<float> filtered_output,
 		computation_context& comp_ctxt,
 		butter_bp_2d_descriptor const& params
-	);
+	)
+	{
+		auto const w = input.width();
+		auto const h = input.height();
+
+		terraformer::basic_image<float> filter_mask{w, h};
+		dispatch_jobs(filter_mask.pixels(), comp_ctxt.workers, make_filter_mask, params).wait();
+
+		return apply_filter(
+			input, filtered_output, comp_ctxt, filter_mask.pixels()
+		);
+	}
 
 	inline grayscale_image apply(
 		butter_bp_2d_descriptor const& filter,

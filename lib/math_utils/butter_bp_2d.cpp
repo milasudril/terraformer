@@ -1,12 +1,6 @@
 //@	{"target":{"name":"./butter_bp_2d.o"}}
 
 #include "./butter_bp_2d.hpp"
-#include "./filter_utils.hpp"
-#include "./dft_engine.hpp"
-#include "lib/common/span_2d.hpp"
-
-#include <cassert>
-
 
 void terraformer::make_filter_mask(
 	uint32_t input_height,
@@ -46,50 +40,4 @@ void terraformer::make_filter_mask(
 			output(x, y) = 2.0f*lpf*hpf;
 		}
 	}
-}
-
-terraformer::signaling_counter terraformer::apply(
-	span_2d<float const> input,
-	span_2d<float> filtered_output,
-	computation_context& comp_ctxt,
-	butter_bp_2d_descriptor const& params
-)
-{
-	auto const w = input.width();
-	auto const h = input.height();
-
-	terraformer::basic_image<float> filter_mask{w, h};
-	auto pending_mask = dispatch_jobs(filter_mask.pixels(), comp_ctxt.workers, make_filter_mask, params);
-
-	terraformer::basic_image<std::complex<float>> filter_input{w, h};
-	dispatch_jobs(input, filter_input.pixels(), comp_ctxt.workers, make_filter_input).wait();
-
-	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
-	auto pending_transform = comp_ctxt.dft_engine.transform(
-		std::as_const(filter_input).pixels(),
-		transformed_input.pixels(),
-		dft_direction::forward
-	);
-
-	pending_mask.wait();
-	pending_transform.wait();
-	dispatch_jobs(
-		std::as_const(filter_mask).pixels(),
-		transformed_input.pixels(),
-		comp_ctxt.workers,
-		multiply_assign<float const, std::complex<float>>
-	).wait();
-
-	comp_ctxt.dft_engine.transform(
-		std::as_const(transformed_input).pixels(),
-		filter_input.pixels(),
-		dft_direction::backward
-	).wait();
-
-	return dispatch_jobs(
-		std::as_const(filter_input).pixels(),
-		filtered_output,
-		comp_ctxt.workers,
-		make_filter_output
-	);
 }
