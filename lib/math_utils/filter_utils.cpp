@@ -63,7 +63,14 @@ terraformer::signaling_counter terraformer::apply_filter(
 	auto const h = input.height();
 
 	terraformer::basic_image<std::complex<float>> filter_input{w, h};
-	dispatch_jobs(input, filter_input.pixels(), comp_ctxt.workers, make_filter_input).wait();
+	dispatch_jobs(
+		input,
+		filter_input.pixels(),
+		comp_ctxt.workers,
+		[]<class ... Args>(auto, Args&&... args){
+			make_filter_input(std::forward<Args>(args)...);
+		}
+	).wait();
 
 	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
 	comp_ctxt.dft_engine.transform(
@@ -76,7 +83,9 @@ terraformer::signaling_counter terraformer::apply_filter(
 		filter_mask,
 		transformed_input.pixels(),
 		comp_ctxt.workers,
-		multiply_assign<float const, std::complex<float>>
+		[]<class ... Args>(auto, Args&&... args){
+			multiply_assign(std::forward<Args>(args)...);
+		}
 	).wait();
 
 	comp_ctxt.dft_engine.transform(
@@ -89,6 +98,8 @@ terraformer::signaling_counter terraformer::apply_filter(
 		std::as_const(filter_input).pixels(),
 		filtered_output,
 		comp_ctxt.workers,
-		make_filter_output
+		[]<class ... Args>(auto, Args&&... args){
+			make_filter_output(std::forward<Args>(args)...);
+		}
 	);
 }

@@ -301,11 +301,13 @@ namespace terraformer
 		assert(output.width() == input.width());
 		assert(output.height() == input.height());
 
+		size_t k = 0;
 		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, input.height()}, n_workers})
 		{
 			workers.submit(
 				[
 					cb,
+					k,
 					input,
 					input_y_offset = chunk.front(),
 					output = output.scanlines(
@@ -317,10 +319,11 @@ namespace terraformer
 					... args = args,
 					&counter = ret.get_state()
 				](){
-					cb(input, input_y_offset, output, args...);
+					cb(k, input, input_y_offset, output, args...);
 					counter.decrement();
 				}
 			);
+			++k;
 		}
 		return ret;
 	}
