@@ -308,7 +308,7 @@ int main(int argc, char** argv)
 	auto minmaxval_filter = terraformer::dispatch_jobs(
 		std::as_const(filtered_noise_buffer).pixels(),
 		comp_ctxt.workers,
-		[]<class ... Args>(
+		[](
 			size_t,
 			uint32_t,
 			uint32_t,

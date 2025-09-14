@@ -11,20 +11,21 @@
 #include <ranges>
 
 void terraformer::make_filter_input(
+	scanline_tranform_job const& jobinfo,
 	span_2d<float const> input,
-	uint32_t y_input_offset,
 	span_2d<std::complex<float>> output
 )
 {
 	auto const w = output.width();
 	auto const h = output.height();
-	auto sign_y = (y_input_offset%2 == 0)? 1.0f : -1.0f;
+	auto const input_y_offset = jobinfo.input_y_offset;
+	auto sign_y = (input_y_offset%2 == 0)? 1.0f : -1.0f;
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		auto sign_x = 1.0f;
 		for(uint32_t x = 0; x != w; ++x)
 		{
-			output(x, y) = input(x, y + y_input_offset) * sign_y * sign_x;
+			output(x, y) = input(x, y + input_y_offset) * sign_y * sign_x;
 			sign_x *= -1.0f;
 		}
 		sign_y *= -1.0f;
@@ -32,20 +33,21 @@ void terraformer::make_filter_input(
 }
 
 void terraformer::make_filter_output(
+	scanline_tranform_job const& jobinfo,
 	span_2d<std::complex<float> const> input,
-	uint32_t y_input_offset,
 	span_2d<float> output
 )
 {
 	auto const w = output.width();
 	auto const h = output.height();
-	auto sign_y = (y_input_offset%2 == 0)? 1.0f : -1.0f;
+	auto const input_y_offset = jobinfo.input_y_offset;
+	auto sign_y = (input_y_offset%2 == 0)? 1.0f : -1.0f;
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		auto sign_x = 1.0f;
 		for(uint32_t x = 0; x != w; ++x)
 		{
-			output(x, y) = input(x, y + y_input_offset).real() * sign_x * sign_y;
+			output(x, y) = input(x, y + input_y_offset).real() * sign_x * sign_y;
 			sign_x *= -1.0f;
 		}
 		sign_y *= -1.0f;
@@ -63,11 +65,11 @@ terraformer::signaling_counter terraformer::apply_filter(
 	auto const h = input.height();
 
 	terraformer::basic_image<std::complex<float>> filter_input{w, h};
-	dispatch_jobs(
+	transform(
 		input,
 		filter_input.pixels(),
 		comp_ctxt.workers,
-		[]<class ... Args>(auto, Args&&... args){
+		[]<class ... Args>(Args&&... args){
 			make_filter_input(std::forward<Args>(args)...);
 		}
 	).wait();
@@ -79,11 +81,11 @@ terraformer::signaling_counter terraformer::apply_filter(
 		dft_direction::forward
 	).wait();
 
-	dispatch_jobs(
+	transform(
 		filter_mask,
 		transformed_input.pixels(),
 		comp_ctxt.workers,
-		[]<class ... Args>(auto, Args&&... args){
+		[]<class ... Args>(Args&&... args){
 			multiply_assign(std::forward<Args>(args)...);
 		}
 	).wait();
@@ -94,11 +96,11 @@ terraformer::signaling_counter terraformer::apply_filter(
 		dft_direction::backward
 	).wait();
 
-	return dispatch_jobs(
+	return transform(
 		std::as_const(filter_input).pixels(),
 		filtered_output,
 		comp_ctxt.workers,
-		[]<class ... Args>(auto, Args&&... args){
+		[]<class ... Args>(Args&&... args){
 			make_filter_output(std::forward<Args>(args)...);
 		}
 	);

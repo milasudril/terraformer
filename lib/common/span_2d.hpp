@@ -307,8 +307,14 @@ namespace terraformer
 		return ret;
 	}
 
+	struct scanline_tranform_job
+	{
+		size_t chunk_index;
+		uint32_t input_y_offset;
+	};
+
 	template<class InputType, class OutputType, class ThreadPool, class Callback, class ... Args>
-	[[nodiscard]] signaling_counter dispatch_jobs(
+	[[nodiscard]] signaling_counter transform(
 		span_2d<InputType const> input,
 		span_2d<OutputType> output,
 		ThreadPool& workers,
@@ -328,9 +334,11 @@ namespace terraformer
 			workers.submit(
 				[
 					cb,
-					k,
 					input,
-					input_y_offset = chunk.front(),
+					jobinfo = scanline_tranform_job{
+						.chunk_index = k,
+						.input_y_offset = chunk.front()
+					},
 					output = output.scanlines(
 						scanline_range{
 							.begin = chunk.front(),
@@ -340,7 +348,7 @@ namespace terraformer
 					... args = args,
 					&counter = ret.get_state()
 				](){
-					cb(k, input, input_y_offset, output, args...);
+					cb(jobinfo, input, output, args...);
 					counter.decrement();
 				}
 			);
@@ -434,18 +442,19 @@ namespace terraformer
 
 	template<class InputType, class OutputType>
 	void multiply_assign(
+		scanline_tranform_job const& jobinfo,
 		span_2d<InputType> input,
-		uint32_t y_input_offset,
 		span_2d<OutputType> output
 	)
 	{
 		auto const w = output.width();
 		auto const h = output.height();
+		auto const input_y_offset = jobinfo.input_y_offset;
 
 		for(uint32_t y = 0; y != h; ++y)
 		{
 			for(uint32_t x = 0; x != w; ++x)
-			{ output(x, y) *= input(x, y + y_input_offset); }
+			{ output(x, y) *= input(x, y + input_y_offset); }
 		}
 	}
 
