@@ -359,6 +359,23 @@ namespace terraformer
 		}
 		return ret;
 	}
+
+	template<class InputType, class OutputType>
+	void multiply_assign(
+		span_2d<InputType> input,
+		uint32_t y_input_offset,
+		span_2d<OutputType> output
+	)
+	{
+		auto const w = output.width();
+		auto const h = output.height();
+
+		for(uint32_t y = 0; y != h; ++y)
+		{
+			for(uint32_t x = 0; x != w; ++x)
+			{ output(x, y) *= input(x, y + y_input_offset); }
+		}
+	}
 }
 
 template<class T>

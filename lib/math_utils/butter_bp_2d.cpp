@@ -59,29 +59,27 @@ terraformer::signaling_counter terraformer::apply(
 	auto const w = input.width();
 	auto const h = input.height();
 
-	terraformer::basic_image<std::complex<float>> filter_input{w, h};
 	terraformer::basic_image<float> filter_mask{w, h};
 	auto pending_mask = dispatch_jobs(filter_mask.pixels(), comp_ctxt.workers, make_filter_mask, params);
+
+	terraformer::basic_image<std::complex<float>> filter_input{w, h};
 	dispatch_jobs(input, filter_input.pixels(), comp_ctxt.workers, make_filter_input).wait();
 
-
 	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
-	comp_ctxt.dft_engine.transform(
+	auto pending_transform = comp_ctxt.dft_engine.transform(
 		std::as_const(filter_input).pixels(),
 		transformed_input.pixels(),
 		dft_direction::forward
-	).wait();
+	);
 
 	pending_mask.wait();
-	{
-		for(uint32_t y = 0; y != h; ++y)
-		{
-			for(uint32_t x = 0; x != w; ++x)
-			{
-				transformed_input(x, y) *= filter_mask(x, y);
-			}
-		}
-	}
+	pending_transform.wait();
+	dispatch_jobs(
+		std::as_const(filter_mask).pixels(),
+		transformed_input.pixels(),
+		comp_ctxt.workers,
+		multiply_assign<float const, std::complex<float>>
+	).wait();
 
 	comp_ctxt.dft_engine.transform(
 		std::as_const(transformed_input).pixels(),
