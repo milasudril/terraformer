@@ -17,14 +17,34 @@ void terraformer::make_filter_input(
 {
 	auto const w = output.width();
 	auto const h = output.height();
-
-	auto sign_y = (y_input_offset%2 == 0)? 1.0f : 0.0f;
+	auto sign_y = (y_input_offset%2 == 0)? 1.0f : -1.0f;
 	for(uint32_t y = 0; y != h; ++y)
 	{
 		auto sign_x = 1.0f;
 		for(uint32_t x = 0; x != w; ++x)
 		{
 			output(x, y) = input(x, y + y_input_offset) * sign_y * sign_x;
+			sign_x *= -1.0f;
+		}
+		sign_y *= -1.0f;
+	}
+}
+
+void terraformer::make_filter_output(
+	span_2d<std::complex<float> const> input,
+	uint32_t y_input_offset,
+	span_2d<float> output
+)
+{
+	auto const w = output.width();
+	auto const h = output.height();
+	auto sign_y = (y_input_offset%2 == 0)? 1.0f : -1.0f;
+	for(uint32_t y = 0; y != h; ++y)
+	{
+		auto sign_x = 1.0f;
+		for(uint32_t x = 0; x != w; ++x)
+		{
+			output(x, y) = input(x, y + y_input_offset).real() * sign_x * sign_y;
 			sign_x *= -1.0f;
 		}
 		sign_y *= -1.0f;

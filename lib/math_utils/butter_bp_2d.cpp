@@ -55,7 +55,6 @@ terraformer::signaling_counter terraformer::apply(
 	computation_context& comp_ctxt
 )
 {
-	signaling_counter counter{0};
 	auto const w = input.width();
 	auto const h = input.height();
 
@@ -87,19 +86,10 @@ terraformer::signaling_counter terraformer::apply(
 		dft_direction::backward
 	).wait();
 
-	{
-		auto sign_y = 1.0f;
-		for(uint32_t y = 0; y < h; ++y)
-		{
-			auto sign_x = 1.0f;
-			for(uint32_t x = 0; x < w; ++x)
-			{
-				filtered_output(x, y) = filter_input(x, y).real() * sign_x * sign_y;
-				sign_x *= -1.0f;
-			}
-			sign_y *= -1.0f;
-		}
-	}
-
-	return counter;
+	return dispatch_jobs(
+		std::as_const(filter_input).pixels(),
+		filtered_output,
+		comp_ctxt.workers,
+		make_filter_output
+	);
 }
