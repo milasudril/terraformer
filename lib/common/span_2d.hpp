@@ -324,6 +324,41 @@ namespace terraformer
 		}
 		return ret;
 	}
+
+	template<class OutputType, class ThreadPool, class Callback, class ... Args>
+	[[nodiscard]] signaling_counter dispatch_jobs(
+		span_2d<OutputType> output,
+		ThreadPool& workers,
+		Callback&& cb,
+		Args&&... args
+	)
+	{
+		auto const n_workers = workers.max_concurrency();
+		signaling_counter ret{n_workers};
+
+		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, output.height()}, n_workers})
+		{
+			workers.submit(
+				[
+					cb,
+					input_height = output.height(),
+					input_y_offset = chunk.front(),
+					output = output.scanlines(
+						scanline_range{
+							.begin = chunk.front(),
+							.end = chunk.back() + 1
+						}
+					),
+					... args = args,
+					&counter = ret.get_state()
+				](){
+					cb(input_height, input_y_offset, output, args...);
+					counter.decrement();
+				}
+			);
+		}
+		return ret;
+	}
 }
 
 template<class T>

@@ -19,6 +19,12 @@ namespace terraformer
 		float y_direction;
 	};
 
+	void make_filter_mask(
+		uint32_t input_height,
+		uint32_t input_y_offset,
+		terraformer::span_2d<float> output,
+		butter_bp_2d_descriptor const& params
+	);
 
 	signaling_counter apply(
 		span_2d<float> output,
