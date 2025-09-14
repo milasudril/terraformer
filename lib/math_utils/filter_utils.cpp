@@ -5,6 +5,7 @@
 #include "lib/common/utils.hpp"
 #include "lib/execution/signaling_counter.hpp"
 #include "lib/common/chunk_by_chunk_count_view.hpp"
+#include "lib/pixel_store/image.hpp"
 
 #include <cassert>
 #include <ranges>
@@ -49,4 +50,45 @@ void terraformer::make_filter_output(
 		}
 		sign_y *= -1.0f;
 	}
+}
+
+terraformer::signaling_counter terraformer::apply_filter(
+	span_2d<float const> input,
+	span_2d<float> filtered_output,
+	computation_context& comp_ctxt,
+	span_2d<float const> filter_mask
+)
+{
+	auto const w = input.width();
+	auto const h = input.height();
+
+	terraformer::basic_image<std::complex<float>> filter_input{w, h};
+	dispatch_jobs(input, filter_input.pixels(), comp_ctxt.workers, make_filter_input).wait();
+
+	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
+	comp_ctxt.dft_engine.transform(
+		std::as_const(filter_input).pixels(),
+		transformed_input.pixels(),
+		dft_direction::forward
+	).wait();
+
+	dispatch_jobs(
+		filter_mask,
+		transformed_input.pixels(),
+		comp_ctxt.workers,
+		multiply_assign<float const, std::complex<float>>
+	).wait();
+
+	comp_ctxt.dft_engine.transform(
+		std::as_const(transformed_input).pixels(),
+		filter_input.pixels(),
+		dft_direction::backward
+	).wait();
+
+	return dispatch_jobs(
+		std::as_const(filter_input).pixels(),
+		filtered_output,
+		comp_ctxt.workers,
+		make_filter_output
+	);
 }

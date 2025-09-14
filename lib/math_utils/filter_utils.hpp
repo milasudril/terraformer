@@ -4,10 +4,7 @@
 #define TERRAFORMER_FILTER_UTILS_HPP
 
 #include "lib/common/span_2d.hpp"
-#include "lib/common/move_only_function.hpp"
-#include "lib/execution/signaling_counter.hpp"
-#include "lib/execution/thread_pool.hpp"
-#include "lib/pixel_store/image.hpp"
+#include "lib/math_utils/computation_context.hpp"
 #include <complex>
 
 namespace terraformer
@@ -22,6 +19,13 @@ namespace terraformer
 		span_2d<std::complex<float> const> input,
 		uint32_t y_input_offset,
 		span_2d<float> output
+	);
+
+	signaling_counter apply_filter(
+		span_2d<float const> input,
+		span_2d<float> filtered_output,
+		computation_context& comp_ctxt,
+		span_2d<float const> filter_mask
 	);
 }
 
