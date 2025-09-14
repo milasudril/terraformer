@@ -22,51 +22,6 @@
 
 using thread_pool_type = terraformer::thread_pool<terraformer::move_only_function<void()>>;
 
-void amplify(terraformer::span_2d<float> input, float gain)
-{
-	auto const width = input.width();
-	auto const height = input.height();
-	for(uint32_t y = 0; y != height; ++y)
-	{
-		for(uint32_t x = 0; x != width; ++x)
-		{
-			input(x, y) *= gain;
-		}
-	}
-}
-
-[[nodiscard]] terraformer::signaling_counter amplify(
-	terraformer::span_2d<float> input,
-	float gain,
-	thread_pool_type& workers
-)
-{
-	terraformer::signaling_counter counter{workers.max_concurrency()};
-	auto const height = input.height();
-	auto const n_workers = workers.max_concurrency();
-	auto const batch_size = 1 + (height - 1)/static_cast<uint32_t>(n_workers);
-
-	for(size_t k = 0; k != workers.max_concurrency(); ++k)
-	{
-		workers.submit(
-			[
-				&counter = counter.get_state(),
-				gain,
-				scanlines = input.scanlines(
-					terraformer::scanline_range{
-						.begin = static_cast<uint32_t>(k*batch_size),
-						.end = static_cast<uint32_t>((k + 1)*batch_size)
-					}
-				)
-			](){
-				amplify(scanlines, gain);
-				counter.decrement();
-			}
-		);
-	}
-	return counter;
-}
-
 [[nodiscard]] float erode(
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
@@ -380,9 +335,6 @@ int main(int argc, char** argv)
 
 	store(filtered_noise_buffer.pixels(), "/dev/shm/slask.exr");
 #if 0
-
-	auto maxval_filter = apply_lowpass_filter(accumulated_noise.pixels(), white_noise_buffer.pixels(), workers);
-	amplify(accumulated_noise.pixels(), 1.0f/maxval_filter.get_result(max_value), workers).wait();
 
 	for(size_t k = 0; k != 1024; ++k)
 	{
