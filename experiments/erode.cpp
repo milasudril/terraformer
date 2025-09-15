@@ -48,17 +48,20 @@ void erode(
 			terraformer::location current_loc{static_cast<float>(x), static_cast<float>(y_in), 0.0f};
 
 			auto const input_val = input(x, y_in);
+			auto const noise_val = noise(x ,y_in);
 
 			auto const sample_from = current_loc - grad_z/grad_size;
-			auto const downhill_value = terraformer::interp(
-				input,
-				sample_from[0],
-				sample_from[1],
-				terraformer::clamp_at_boundary{}
+			auto const downhill_value = std::min(
+				terraformer::interp(
+					input,
+					sample_from[0],
+					sample_from[1],
+					terraformer::clamp_at_boundary{}
+				),
+				input_val
 			);
 
-			auto const noise_val = noise(x ,y_in);
-			auto const minval = std::min(input_val, downhill_value);
+			auto const minval = std::max(0.0f, input_val - 2.0f*(input_val - downhill_value));
 
 			output(x, y) = std::lerp(input_val, minval, input_val*noise_val);
 		}
@@ -202,8 +205,8 @@ int main(int argc, char** argv)
 			make_filter_mask(std::forward<Args>(params)...);
 		},
 		terraformer::butter_lp_2d_descriptor{
-			.f_x = 49152.0f/8192.0f,
-			.f_y = 49152.0f/8192.0f,
+			.f_x = 49152.0f/64.0f,
+			.f_y = 49152.0f/64.0f,
 			.hf_rolloff = 2.0f,
 			.y_direction = 0.0f
 		}
@@ -345,6 +348,8 @@ int main(int argc, char** argv)
 		next_result.wait();
 		std::swap(noise_input, noise_output);
 		std::swap(input, output);
+		printf("\r%zu   ", k);
+		fflush(stdout);
 		++k;
 	}
 
