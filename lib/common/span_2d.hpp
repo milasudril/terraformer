@@ -347,7 +347,7 @@ namespace terraformer
 					),
 					... args = args,
 					&counter = ret.get_state()
-				](){
+				]()  mutable {
 					cb(jobinfo, input, output, args...);
 					counter.decrement();
 				}
@@ -396,7 +396,7 @@ namespace terraformer
 					),
 					... args = args,
 					&counter = ret.get_state()
-				](){
+				]()  mutable  {
 					cb(jobinfo, output, args...);
 					counter.decrement();
 				}
@@ -446,7 +446,7 @@ namespace terraformer
 					),
 					... args = args,
 					&ret = ret.get_state()
-				](){
+				]() mutable {
 					ret.save_partial_result(cb(jobinfo, output, args...));
 				}
 			);

@@ -27,43 +27,23 @@ void erode(
 	terraformer::scanline_tranform_job const& jobinfo,
 	terraformer::span_2d<float const> input,
 	terraformer::span_2d<float> output,
-	terraformer::span_2d<float const> noise
+	terraformer::span_2d<float const> noise,
+	terraformer::span<terraformer::random_generator> rngs
 )
 {
-	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+//	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
 	auto const input_y_offset = jobinfo.input_y_offset;
+	std::uniform_real_distribution spawn{0.0f, 1.0f};
+	auto& rng = rngs[rngs.element_indices().front() + jobinfo.chunk_index];
 	for(int32_t y = 0; y != static_cast<int32_t>(output.height()); ++y)
 	{
 		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
 		{
-			auto const y_in = y + input_y_offset;
-			auto const ddx_input = input(x + 1, y_in, clamp_tag{}) - input(x - 1, y_in, clamp_tag{});
-			auto const ddy_input = input(x, y_in + 1, clamp_tag{}) - input(x, y_in - 1, clamp_tag{});
-			terraformer::displacement grad_z{ddx_input, ddy_input, 0.0f};
-			auto const grad_size = norm(grad_z);
-			if(grad_size  == 0.0f)
-			{ continue; }
-
-
-			terraformer::location current_loc{static_cast<float>(x), static_cast<float>(y_in), 0.0f};
-
-			auto const input_val = input(x, y_in);
-			auto const noise_val = noise(x ,y_in);
-
-			auto const sample_from = current_loc - grad_z/grad_size;
-			auto const downhill_value = std::min(
-				terraformer::interp(
-					input,
-					sample_from[0],
-					sample_from[1],
-					terraformer::clamp_at_boundary{}
-				),
-				input_val
-			);
-
-			auto const minval = std::max(0.0f, input_val - 2.0f*(input_val - downhill_value));
-
-			output(x, y) = std::lerp(input_val, minval, input_val*noise_val);
+			auto const noise_val = noise(x , y + input_y_offset)*input(x, y + input_y_offset)/3500.0f;
+			if(spawn(rng) < 2.0f*15.0f*noise_val/4096.0f)
+			{ output(x, y) = 1.0f; }
+			else
+			{ output(x, y) = 0.0f; }
 		}
 	}
 }
@@ -101,26 +81,6 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 		},
 		rngs
 	);
-}
-
-void accumulate(
-	terraformer::scanline_tranform_job const& jobinfo,
-	terraformer::span_2d<float const> input,
-	terraformer::span_2d<float> output,
-	float blend_factor
-)
-{
-	auto const width = output.width();
-	auto const height = output.height();
-	auto const input_y_offset = jobinfo.input_y_offset;
-	for(uint32_t y = 0; y != height; ++y)
-	{
-		for(uint32_t x = 0; x != width; ++x)
-		{
-			output(x, y) = blend_factor*output(x, y)
-				+ (1.0f - blend_factor)*input(x, y + input_y_offset);
-		}
-	}
 }
 
 struct linux_sched_params
@@ -205,8 +165,8 @@ int main(int argc, char** argv)
 			make_filter_mask(std::forward<Args>(params)...);
 		},
 		terraformer::butter_lp_2d_descriptor{
-			.f_x = 49152.0f/64.0f,
-			.f_y = 49152.0f/64.0f,
+			.f_x = 49152.0f/4096.0f,
+			.f_y = 49152.0f/4096.0f,
 			.hf_rolloff = 2.0f,
 			.y_direction = 0.0f
 		}
@@ -249,36 +209,8 @@ int main(int argc, char** argv)
 
 	std::swap(noise_input, noise_output);
 
-	size_t k = 0;
-	while(true)
+	for(size_t k = 0 ; k != 1; ++k)
 	{
-		auto pending_normalized_input = terraformer::generate(
-			input,
-			comp_ctxt.workers,
-			[](
-				auto const&,
-				terraformer::span_2d<float> output,
-				std::ranges::minmax_result<float> input_range
-			){
-				return terraformer::normalize(output, input_range);
-			},
-			terraformer::fold(
-				input,
-				comp_ctxt.workers,
-				[](auto const&, terraformer::span_2d<float const> output){
-					return minmax_value(output);
-				}
-			).get_result(fold_minmax_value)
-		);
-
-
-		if(k == 1024)
-		{
-			pending_normalized_input.wait();
-			break;
-		}
-
-		pending_normalized_input.wait();
 		auto next_result = terraformer::transform(
 			input,
 			output,
@@ -286,7 +218,8 @@ int main(int argc, char** argv)
 			[]<class ... Args>(Args&&... args) {
 				erode(std::forward<Args>(args)...);
 			},
-			noise_input
+			noise_input,
+			rngs
 		);
 
 		make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs).wait();
@@ -316,41 +249,11 @@ int main(int argc, char** argv)
 			).get_result(fold_minmax_value)
 		).wait();
 
-		terraformer::transform(
-			noise_input,
-			noise_output,
-			comp_ctxt.workers,
-			[]<class ...Args>(Args&&... args) {
-				accumulate(std::forward<Args>(args)...);
-			},
-			1.0f/16.0f
-		).wait();
-
-		terraformer::generate(
-			noise_output,
-			comp_ctxt.workers,
-			[](
-				auto const&,
-				terraformer::span_2d<float> output,
-				std::ranges::minmax_result<float> input_range
-			){
-				return terraformer::normalize(output, input_range);
-			},
-			terraformer::fold(
-				noise_output,
-				comp_ctxt.workers,
-				[](auto const&, terraformer::span_2d<float const> output){
-					return minmax_value(output);
-				}
-			).get_result(fold_minmax_value)
-		).wait();
-
 		next_result.wait();
 		std::swap(noise_input, noise_output);
 		std::swap(input, output);
 		printf("\r%zu   ", k);
 		fflush(stdout);
-		++k;
 	}
 
 	store(input, "/dev/shm/slask.exr");
