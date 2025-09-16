@@ -358,56 +358,6 @@ namespace terraformer
 		return ret;
 	}
 
-	struct scanline_fold_job
-	{
-		size_t chunk_index;
-		uint32_t input_y_offset;
-		uint32_t total_height;
-	};
-
-	template<class InputType, class ThreadPool, class Callback, class ... Args>
-	[[nodiscard]] auto fold(
-		span_2d<InputType> output,
-		ThreadPool& workers,
-		Callback&& cb,
-		Args&&... args
-	)
-	{
-		auto const n_workers = workers.max_concurrency();
-
-		using callback_ret_type = decltype(cb(scanline_fold_job{}, output, args...));
-
-		batch_result<callback_ret_type> ret{n_workers};
-
-		size_t k = 0;
-		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, output.height()}, n_workers})
-		{
-			workers.submit(
-				[
-					cb,
-					jobinfo = scanline_fold_job{
-						.chunk_index = k,
-						.input_y_offset = chunk.front(),
-						.total_height = output.height()
-					},
-					output = output.scanlines(
-						scanline_range{
-							.begin = chunk.front(),
-							.end = chunk.back() + 1
-						}
-					),
-					... args = args,
-					&ret = ret.get_state()
-				]() mutable {
-					ret.save_partial_result(cb(jobinfo, output, args...));
-				}
-			);
-			++k;
-		}
-		return ret;
-	}
-
-
 	template<class JobInfo, class OutputType, class InputType>
 	void multiply_assign(
 		JobInfo const& jobinfo,

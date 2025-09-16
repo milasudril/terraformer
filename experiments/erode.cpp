@@ -182,14 +182,14 @@ int main(int argc, char** argv)
 	pending_filter_mask.wait();
 	pending_noise.wait();
 
-	terraformer::apply_filter(
+	apply_filter(
 		white_noise_buffer.pixels(),
 		noise_output,
 		comp_ctxt,
 		filter_mask.pixels()
 	).wait();
 
-	terraformer::process_scanlines(
+	process_scanlines(
 		noise_output,
 		comp_ctxt.workers,
 		[](
@@ -199,7 +199,7 @@ int main(int argc, char** argv)
 		){
 			return terraformer::normalize(output, input_range);
 		},
-		terraformer::fold(
+		process_scanlines(
 			noise_output,
 			comp_ctxt.workers,
 			[](auto const&, terraformer::span_2d<float const> output){
@@ -241,7 +241,7 @@ int main(int argc, char** argv)
 			){
 				return terraformer::normalize(output, input_range);
 			},
-			terraformer::fold(
+			process_scanlines(
 				noise_output,
 				comp_ctxt.workers,
 				[](auto const&, terraformer::span_2d<float const> output){
