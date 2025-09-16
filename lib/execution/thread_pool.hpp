@@ -15,12 +15,15 @@ namespace terraformer
 	public:
 		explicit thread_pool(size_t num_workers):m_should_stop{false}
 		{
-			std::generate_n(std::back_inserter(m_workers), num_workers, [this](){
-				return std::thread{[this](){dispatch();}};
+			std::generate_n(std::back_inserter(m_workers), num_workers, [this, n = size_t{0}]() mutable{
+				return std::thread{[this, worker_index = n++](){dispatch(worker_index);}};
 			});
 		}
 
 		size_t max_concurrency() const { return std::size(m_workers); }
+
+		static size_t current_worker()
+		{ return m_current_worker; }
 
 		void submit(Task&& task)
 		{
@@ -56,8 +59,12 @@ namespace terraformer
 		blocking_queue<Task> m_tasks;
 		bool m_should_stop;
 
-		void dispatch()
+		static inline thread_local size_t m_current_worker = -1;
+
+		void dispatch(size_t worker_index)
 		{
+			m_current_worker = worker_index;
+
 			while(true)
 			{
 				bool should_stop{};
