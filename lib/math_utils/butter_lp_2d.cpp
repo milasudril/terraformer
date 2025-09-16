@@ -3,7 +3,7 @@
 #include "./butter_lp_2d.hpp"
 
 void terraformer::make_filter_mask(
-	scanline_generate_job const& jobinfo,
+	scanline_processing_job_info const& jobinfo,
 	span_2d<float> output,
 	butter_lp_2d_descriptor const& params
 )

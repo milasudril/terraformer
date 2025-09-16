@@ -358,55 +358,6 @@ namespace terraformer
 		return ret;
 	}
 
-	struct scanline_generate_job
-	{
-		size_t chunk_index;
-		uint32_t input_y_offset;
-		uint32_t total_height;
-	};
-
-	template<class OutputType, class ThreadPool, class Callback, class ... Args>
-	requires(!std::is_const_v<OutputType>)
-	[[nodiscard]] signaling_counter generate(
-		span_2d<OutputType> output,
-		ThreadPool& workers,
-		Callback&& cb,
-		Args&&... args
-	)
-	{
-		auto const n_workers = workers.max_concurrency();
-		signaling_counter ret{n_workers};
-
-		size_t k = 0;
-		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, output.height()}, n_workers})
-		{
-			workers.submit(
-				[
-					cb,
-					jobinfo = scanline_generate_job{
-						.chunk_index = k,
-						.input_y_offset = chunk.front(),
-						.total_height = output.height()
-					},
-					k,
-					output = output.scanlines(
-						scanline_range{
-							.begin = chunk.front(),
-							.end = chunk.back() + 1
-						}
-					),
-					... args = args,
-					&counter = ret.get_state()
-				]()  mutable  {
-					cb(jobinfo, output, args...);
-					counter.decrement();
-				}
-			);
-			++k;
-		}
-		return ret;
-	}
-
 	struct scanline_fold_job
 	{
 		size_t chunk_index;

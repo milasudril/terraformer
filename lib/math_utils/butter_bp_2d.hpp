@@ -22,7 +22,7 @@ namespace terraformer
 	};
 
 	void make_filter_mask(
-		scanline_generate_job const& jobinfo,
+		scanline_processing_job_info const& jobinfo,
 		span_2d<float> output,
 		butter_bp_2d_descriptor const& params
 	);
@@ -38,7 +38,7 @@ namespace terraformer
 		auto const h = input.height();
 
 		terraformer::basic_image<float> filter_mask{w, h};
-		generate(
+		process_scanlines(
 			filter_mask.pixels(),
 			comp_ctxt.workers,
 			[]<class ... Args>(Args&&... params){

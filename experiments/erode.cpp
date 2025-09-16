@@ -61,7 +61,7 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 	}
 }
 
-[[nodiscard]] terraformer::signaling_counter make_white_noise(
+[[nodiscard]] terraformer::batch_result<void> make_white_noise(
 	terraformer::span_2d<float> output,
 	thread_pool_type& workers,
 	terraformer::span<terraformer::random_generator> rngs
@@ -69,15 +69,16 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 {
 	assert(workers.max_concurrency() == std::size(rngs).get());
 
-	return terraformer::generate(
+	return process_scanlines(
 		output,
 		workers,
-		[]<class ... Args>(
-			terraformer::scanline_generate_job const& jobinfo,
+		[](
+			terraformer::scanline_processing_job_info const&,
 			terraformer::span_2d<float> output,
 			terraformer::span<terraformer::random_generator> rngs
 		){
-			make_white_noise(output, rngs[rngs.element_indices().front() + jobinfo.chunk_index]);
+			auto const index = rngs.element_indices().front() + thread_pool_type::current_worker();
+			make_white_noise(output, rngs[index]);
 		},
 		rngs
 	);
@@ -158,7 +159,7 @@ int main(int argc, char** argv)
 		.priority = 0
 	});
 
-	auto pending_filter_mask = generate(
+	auto pending_filter_mask = process_scanlines(
 		filter_mask.pixels(),
 		comp_ctxt.workers,
 		[]<class ... Args>(Args&&... params){
@@ -188,7 +189,7 @@ int main(int argc, char** argv)
 		filter_mask.pixels()
 	).wait();
 
-	terraformer::generate(
+	terraformer::process_scanlines(
 		noise_output,
 		comp_ctxt.workers,
 		[](
@@ -230,7 +231,7 @@ int main(int argc, char** argv)
 			filter_mask.pixels()
 		).wait();
 
-		terraformer::generate(
+		process_scanlines(
 			noise_output,
 			comp_ctxt.workers,
 			[](

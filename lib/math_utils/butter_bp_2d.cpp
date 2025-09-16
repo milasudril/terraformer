@@ -1,9 +1,10 @@
 //@	{"target":{"name":"./butter_bp_2d.o"}}
 
 #include "./butter_bp_2d.hpp"
+#include "lib/common/span_2d.hpp"
 
 void terraformer::make_filter_mask(
-	scanline_generate_job const& jobinfo,
+	terraformer::scanline_processing_job_info const& jobinfo,
 	terraformer::span_2d<float> output,
 	butter_bp_2d_descriptor const& params
 )
