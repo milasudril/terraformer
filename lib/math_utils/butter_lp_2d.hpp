@@ -26,7 +26,7 @@ namespace terraformer
 		butter_lp_2d_descriptor const& params
 	);
 
-	inline signaling_counter apply(
+	inline batch_result<void> apply(
 		span_2d<float const> input,
 		span_2d<float> filtered_output,
 		computation_context& comp_ctxt,

@@ -11,9 +11,9 @@
 #include <ranges>
 
 void terraformer::make_filter_input(
-	scanline_tranform_job const& jobinfo,
-	span_2d<float const> input,
-	span_2d<std::complex<float>> output
+	terraformer::scanline_processing_job_info const& jobinfo,
+	span_2d<std::complex<float>> output,
+	span_2d<float const> input
 )
 {
 	auto const w = output.width();
@@ -33,9 +33,9 @@ void terraformer::make_filter_input(
 }
 
 void terraformer::make_filter_output(
-	scanline_tranform_job const& jobinfo,
-	span_2d<std::complex<float> const> input,
-	span_2d<float> output
+	scanline_processing_job_info const& jobinfo,
+	span_2d<float> output,
+	span_2d<std::complex<float> const> input
 )
 {
 	auto const w = output.width();
@@ -54,7 +54,7 @@ void terraformer::make_filter_output(
 	}
 }
 
-terraformer::signaling_counter terraformer::apply_filter(
+terraformer::batch_result<void> terraformer::apply_filter(
 	span_2d<float const> input,
 	span_2d<float> filtered_output,
 	computation_context& comp_ctxt,
@@ -65,13 +65,13 @@ terraformer::signaling_counter terraformer::apply_filter(
 	auto const h = input.height();
 
 	terraformer::basic_image<std::complex<float>> filter_input{w, h};
-	transform(
-		input,
+	process_scanlines(
 		filter_input.pixels(),
 		comp_ctxt.workers,
 		[]<class ... Args>(Args&&... args){
 			make_filter_input(std::forward<Args>(args)...);
-		}
+		},
+		input
 	).wait();
 
 	terraformer::basic_image<std::complex<float>> transformed_input{w, h};
@@ -81,13 +81,13 @@ terraformer::signaling_counter terraformer::apply_filter(
 		dft_direction::forward
 	).wait();
 
-	transform(
-		filter_mask,
+	process_scanlines(
 		transformed_input.pixels(),
 		comp_ctxt.workers,
 		[]<class ... Args>(Args&&... args){
 			multiply_assign(std::forward<Args>(args)...);
-		}
+		},
+		filter_mask
 	).wait();
 
 	comp_ctxt.dft_engine.transform(
@@ -96,12 +96,12 @@ terraformer::signaling_counter terraformer::apply_filter(
 		dft_direction::backward
 	).wait();
 
-	return transform(
-		std::as_const(filter_input).pixels(),
+	return process_scanlines(
 		filtered_output,
 		comp_ctxt.workers,
 		[]<class ... Args>(Args&&... args){
 			make_filter_output(std::forward<Args>(args)...);
-		}
+		},
+		std::as_const(filter_input).pixels()
 	);
 }

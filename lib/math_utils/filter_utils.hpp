@@ -10,18 +10,18 @@
 namespace terraformer
 {
 	void make_filter_input(
-		scanline_tranform_job const& jobinfo,
-		span_2d<float const> input,
-		span_2d<std::complex<float>> output
+		scanline_processing_job_info const& jobinfo,
+		span_2d<std::complex<float>> output,
+		span_2d<float const> input
 	);
 
 	void make_filter_output(
-		scanline_tranform_job const& jobinfo,
-		span_2d<std::complex<float> const> input,
-		span_2d<float> output
+		scanline_processing_job_info const& jobinfo,
+		span_2d<float> output,
+		span_2d<std::complex<float> const> input
 	);
 
-	signaling_counter apply_filter(
+	batch_result<void> apply_filter(
 		span_2d<float const> input,
 		span_2d<float> filtered_output,
 		computation_context& comp_ctxt,

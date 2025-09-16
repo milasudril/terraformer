@@ -24,9 +24,9 @@
 using thread_pool_type = terraformer::thread_pool<terraformer::move_only_function<void()>>;
 
 void erode(
-	terraformer::scanline_tranform_job const& jobinfo,
-	terraformer::span_2d<float const> input,
+	terraformer::scanline_processing_job_info const& jobinfo,
 	terraformer::span_2d<float> output,
+	terraformer::span_2d<float const> input,
 	terraformer::span_2d<float const> noise,
 	terraformer::span<terraformer::random_generator> rngs
 )
@@ -34,7 +34,7 @@ void erode(
 //	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
 	auto const input_y_offset = jobinfo.input_y_offset;
 	std::uniform_real_distribution spawn{0.0f, 1.0f};
-	auto& rng = rngs[rngs.element_indices().front() + jobinfo.chunk_index];
+	auto& rng = rngs[rngs.element_indices().front() + thread_pool_type::current_worker()];
 	for(int32_t y = 0; y != static_cast<int32_t>(output.height()); ++y)
 	{
 		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
@@ -211,14 +211,14 @@ int main(int argc, char** argv)
 
 	for(size_t k = 0 ; k != 1; ++k)
 	{
-		auto next_result = terraformer::transform(
-			input,
+		auto next_result = process_scanlines(
 			output,
 			comp_ctxt.workers,
 			[]<class ... Args>(Args&&... args) {
 				erode(std::forward<Args>(args)...);
 			},
-			noise_input,
+			std::as_const(input),
+			std::as_const(noise_input),
 			rngs
 		);
 
@@ -257,6 +257,6 @@ int main(int argc, char** argv)
 	}
 
 	store(input, "/dev/shm/slask.exr");
-	store(noise_input, "/dev/shm/noise_input.exr");
+
 	return 0;
 }

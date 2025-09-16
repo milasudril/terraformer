@@ -346,62 +346,14 @@ namespace terraformer
 					&ret = ret.get_state()
 				]() mutable {
 					if constexpr (std::is_same_v<callback_ret_type, void>)
-					{ ret.mark_batch_as_completed(); }
+					{
+						cb(jobinfo, pixels, std::move(args)...);
+						ret.mark_batch_as_completed();
+					}
 					else
-					{ ret.save_partial_result(cb(jobinfo, pixels, args...)); }
+					{ ret.save_partial_result(cb(jobinfo, pixels, std::move(args)...)); }
 				}
 			);
-		}
-		return ret;
-	}
-
-
-	struct scanline_tranform_job
-	{
-		size_t chunk_index;
-		uint32_t input_y_offset;
-	};
-
-	template<class InputType, class OutputType, class ThreadPool, class Callback, class ... Args>
-	[[nodiscard]] signaling_counter transform(
-		span_2d<InputType> input,
-		span_2d<OutputType> output,
-		ThreadPool& workers,
-		Callback&& cb,
-		Args&&... args
-	)
-	{
-		auto const n_workers = workers.max_concurrency();
-		signaling_counter ret{n_workers};
-
-		assert(output.width() == input.width());
-		assert(output.height() == input.height());
-
-		size_t k = 0;
-		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, input.height()}, n_workers})
-		{
-			workers.submit(
-				[
-					cb,
-					input,
-					jobinfo = scanline_tranform_job{
-						.chunk_index = k,
-						.input_y_offset = chunk.front()
-					},
-					output = output.scanlines(
-						scanline_range{
-							.begin = chunk.front(),
-							.end = chunk.back() + 1
-						}
-					),
-					... args = args,
-					&counter = ret.get_state()
-				]()  mutable {
-					cb(jobinfo, input, output, args...);
-					counter.decrement();
-				}
-			);
-			++k;
 		}
 		return ret;
 	}
@@ -505,11 +457,11 @@ namespace terraformer
 	}
 
 
-	template<class InputType, class OutputType>
+	template<class JobInfo, class OutputType, class InputType>
 	void multiply_assign(
-		scanline_tranform_job const& jobinfo,
-		span_2d<InputType> input,
-		span_2d<OutputType> output
+		JobInfo const& jobinfo,
+		span_2d<OutputType> output,
+		span_2d<InputType> input
 	)
 	{
 		auto const w = output.width();
