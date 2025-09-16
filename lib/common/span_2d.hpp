@@ -307,6 +307,55 @@ namespace terraformer
 		return ret;
 	}
 
+	struct scanline_processing_job_info
+	{
+		uint32_t input_y_offset;
+		uint32_t total_height;
+	};
+
+	template<class Type, class ThreadPool, class Callback, class ... Args>
+	[[nodiscard]] auto process_scanlines(
+		span_2d<Type> pixels,
+		ThreadPool& workers,
+		Callback&& cb,
+		Args&&... args
+	)
+	{
+		auto const n_workers = workers.max_concurrency();
+
+		using callback_ret_type = decltype(cb(scanline_processing_job_info{}, pixels, args...));
+
+		batch_result<callback_ret_type> ret{n_workers};
+
+		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, pixels.height()}, n_workers})
+		{
+			workers.submit(
+				[
+					cb,
+					jobinfo = scanline_processing_job_info{
+						.input_y_offset = chunk.front(),
+						.total_height = pixels.height()
+					},
+					pixels = pixels.scanlines(
+						scanline_range{
+							.begin = chunk.front(),
+							.end = chunk.back() + 1
+						}
+					),
+					... args = args,
+					&ret = ret.get_state()
+				]() mutable {
+					if constexpr (std::is_same_v<callback_ret_type, void>)
+					{ ret.mark_batch_as_completed(); }
+					else
+					{ ret.save_partial_result(cb(jobinfo, pixels, args...)); }
+				}
+			);
+		}
+		return ret;
+	}
+
+
 	struct scanline_tranform_job
 	{
 		size_t chunk_index;

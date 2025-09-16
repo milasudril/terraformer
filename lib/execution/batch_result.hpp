@@ -17,15 +17,15 @@ namespace terraformer
 			m_num_tasks_to_complete{num_tasks_to_complete}
 		{}
 
-		template<class Fold>
-		[[nodiscard]] auto get_result(Fold&& fold) const
+		template<class FoldOperation>
+		[[nodiscard]] auto get_result(FoldOperation&& fold) const
 		{
 			std::unique_lock lock{m_mutex};
 			m_cv.wait(lock, [this](){
 				return m_num_tasks_to_complete == std::size(m_received_results);
 			});
 
-			return std::forward<Fold>(fold)(m_received_results);
+			return std::forward<FoldOperation>(fold)(m_received_results);
 		}
 
 		template<class... Args>
@@ -47,6 +47,34 @@ namespace terraformer
 		mutable std::condition_variable m_cv;
 	};
 
+	template<>
+	class batch_result_state<void>
+	{
+		public:
+		explicit batch_result_state(size_t num_tasks_to_complete):
+			m_num_tasks_to_complete{num_tasks_to_complete}
+		{}
+
+		void wait() const
+		{
+			std::unique_lock lock{m_mutex};
+			return m_cv.wait(lock, [this](){ return m_num_tasks_to_complete == 0; });
+		}
+
+		void mark_batch_as_completed()
+		{
+			std::lock_guard lock{m_mutex};
+			--m_num_tasks_to_complete;
+			if(m_num_tasks_to_complete == 0)
+			{ m_cv.notify_one(); }
+		}
+
+		private:
+			size_t m_num_tasks_to_complete;
+			mutable std::mutex m_mutex;
+			mutable std::condition_variable m_cv;
+	};
+
 	template<class ResultType>
 	class batch_result
 	{
@@ -55,9 +83,15 @@ namespace terraformer
 			m_state{std::make_unique<batch_result_state<ResultType>>(num_tasks_to_complete)}
 		{}
 
-		template<class Fold>
-		[[nodiscard]] auto get_result(Fold&& fold) const
-		{ return m_state->get_result(std::forward<Fold>(fold)); }
+		template<class FoldOperation>
+		requires(!std::is_same_v<ResultType, void>)
+		[[nodiscard]] auto get_result(FoldOperation&& fold) const
+		{ return m_state->get_result(std::forward<FoldOperation>(fold)); }
+
+		template<class T = void>
+		requires(std::is_same_v<ResultType, void>)
+		void wait() const
+		{ m_state->wait(); }
 
 		auto& get_state()
 		{ return *m_state; }
