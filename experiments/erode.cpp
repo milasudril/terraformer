@@ -15,6 +15,7 @@
 #include "lib/execution/signaling_counter.hpp"
 #include "lib/execution/batch_result.hpp"
 #include "lib/array_classes/single_array.hpp"
+#include "lib/generators/domain/domain_size.hpp"
 
 #include <algorithm>
 #include <cstring>
@@ -23,24 +24,39 @@
 
 using thread_pool_type = terraformer::thread_pool<terraformer::move_only_function<void()>>;
 
-void erode(
+struct stream_spawn_descriptor
+{
+	float stream_distance;
+};
+
+void generate_streams(
 	terraformer::scanline_processing_job_info const& jobinfo,
 	terraformer::span_2d<float> output,
-	terraformer::span_2d<float const> input,
+	terraformer::domain_size_descriptor dom_size,
+	stream_spawn_descriptor const& params,
+	terraformer::span_2d<float const> heightmap,
 	terraformer::span_2d<float const> noise,
 	terraformer::span<terraformer::random_generator> rngs
 )
 {
 //	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+	auto const w = output.width();
+	auto const h = output.height();
+	auto const total_height = heightmap.height();
 	auto const input_y_offset = jobinfo.input_y_offset;
+	auto const pixel_size = (dom_size.width*dom_size.height)/
+		(static_cast<float>(total_height)*static_cast<float>(w));
+	auto const stream_density = pixel_size/(params.stream_distance*params.stream_distance);
+
 	std::uniform_real_distribution spawn{0.0f, 1.0f};
 	auto& rng = rngs[rngs.element_indices().front() + thread_pool_type::current_worker()];
-	for(int32_t y = 0; y != static_cast<int32_t>(output.height()); ++y)
+
+	for(int32_t y = 0; y != static_cast<int32_t>(h); ++y)
 	{
-		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
+		for(int32_t x = 0; x != static_cast<int32_t>(w); ++x)
 		{
-			auto const noise_val = noise(x , y + input_y_offset)*input(x, y + input_y_offset)/3500.0f;
-			if(spawn(rng) < 2.0f*15.0f*noise_val/4096.0f)
+			auto const noise_val = noise(x , y + input_y_offset);
+			if(spawn(rng) < noise_val*stream_density)
 			{ output(x, y) = 1.0f; }
 			else
 			{ output(x, y) = 0.0f; }
@@ -216,7 +232,14 @@ int main(int argc, char** argv)
 			output,
 			comp_ctxt.workers,
 			[]<class ... Args>(Args&&... args) {
-				erode(std::forward<Args>(args)...);
+				generate_streams(std::forward<Args>(args)...);
+			},
+			terraformer::domain_size_descriptor{
+				.width = 49152.0f,
+				.height = 49152.0f
+			},
+			stream_spawn_descriptor{
+				.stream_distance = 512.0f
 			},
 			std::as_const(input),
 			std::as_const(noise_input),
