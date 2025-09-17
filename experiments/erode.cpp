@@ -39,13 +39,14 @@ void generate_streams(
 	terraformer::span<terraformer::random_generator> rngs
 )
 {
-//	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
 	auto const w = output.width();
 	auto const h = output.height();
 	auto const total_height = heightmap.height();
-	auto const input_y_offset = jobinfo.input_y_offset;
-	auto const pixel_size = (dom_size.width*dom_size.height)/
-		(static_cast<float>(total_height)*static_cast<float>(w));
+	auto const input_y_offset = static_cast<int32_t>(jobinfo.input_y_offset);
+	auto const dx = dom_size.width/static_cast<float>(w);
+	auto const dy = dom_size.height/static_cast<float>(total_height);
+	auto const pixel_size = dx*dy;
 	auto const stream_density = pixel_size/(params.stream_distance*params.stream_distance);
 
 	std::uniform_real_distribution spawn{0.0f, 1.0f};
@@ -55,8 +56,18 @@ void generate_streams(
 	{
 		for(int32_t x = 0; x != static_cast<int32_t>(w); ++x)
 		{
+			auto const dz_dx = (
+				  heightmap(x + 1, y + input_y_offset, clamp_tag{})
+				- heightmap(x - 1, y + input_y_offset, clamp_tag{})
+			)/(2.0f*dx);
+
+			auto const dz_dy = (
+				  heightmap(x, y + input_y_offset + 1, clamp_tag{})
+				- heightmap(x, y + input_y_offset - 1, clamp_tag{})
+			)/(2.0f*dy);
+
 			auto const noise_val = noise(x , y + input_y_offset);
-			if(spawn(rng) < noise_val*stream_density)
+			if(spawn(rng) < noise_val*stream_density && (dz_dx != 0 || dz_dy != 0.0f))
 			{ output(x, y) = 1.0f; }
 			else
 			{ output(x, y) = 0.0f; }
