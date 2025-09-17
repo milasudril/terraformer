@@ -29,8 +29,53 @@ struct stream_spawn_descriptor
 	float stream_distance;
 };
 
-void generate_streams(
+struct stream_point
+{
+	terraformer::location where;
+	terraformer::displacement gradient;
+};
+
+struct stream
+{
+	float total_flow;
+	terraformer::single_array<stream_point> points;
+};
+
+stream make_stream(terraformer::span_2d<float const> heightmap, stream_point start_at, float dx, float dy)
+{
+	stream ret;
+	ret.total_flow = 1.0f;
+	ret.points.push_back(start_at);
+	auto const max_length =
+		static_cast<size_t>(std::sqrt(static_cast<float>(heightmap.width())*static_cast<float>(heightmap.height())));
+
+	while(true)
+	{
+		auto const grad_norm = norm(start_at.gradient);
+		if(grad_norm < 1.0f/32768.0f || std::size(ret.points).get() == max_length)
+		{ return ret; }
+
+		start_at.where += 1.0f*terraformer::direction{start_at.gradient};
+
+		auto const x = start_at.where[0];
+		auto const y = start_at.where[1];
+		auto const dz_dx = (
+				interp(heightmap, x + 1.0f, y, terraformer::clamp_at_boundary{})
+			- interp(heightmap, x - 1.0f, y, terraformer::clamp_at_boundary{})
+		)/(2.0f*dx);
+		auto const dz_dy = (
+				interp(heightmap, x, y + 1.0f, terraformer::clamp_at_boundary{})
+			- interp(heightmap, x, y - 1.0f, terraformer::clamp_at_boundary{})
+		)/(2.0f*dy);
+		start_at.gradient = terraformer::displacement{dz_dx, dz_dy, 0.0f};
+
+		ret.points.push_back(start_at);
+	}
+}
+
+terraformer::single_array<stream> generate_streams(
 	terraformer::scanline_processing_job_info const& jobinfo,
+	// TODO: I am not going to write to output, but it must be here to partition the image
 	terraformer::span_2d<float> output,
 	terraformer::domain_size_descriptor dom_size,
 	stream_spawn_descriptor const& params,
@@ -50,6 +95,7 @@ void generate_streams(
 	auto const stream_density = pixel_size/(params.stream_distance*params.stream_distance);
 
 	std::uniform_real_distribution spawn{0.0f, 1.0f};
+	terraformer::single_array<stream> ret;
 	auto& rng = rngs[rngs.element_indices().front() + thread_pool_type::current_worker()];
 
 	for(int32_t y = 0; y != static_cast<int32_t>(h); ++y)
@@ -68,11 +114,27 @@ void generate_streams(
 
 			auto const noise_val = noise(x , y + input_y_offset);
 			if(spawn(rng) < noise_val*stream_density && (dz_dx != 0 || dz_dy != 0.0f))
-			{ output(x, y) = 1.0f; }
-			else
-			{ output(x, y) = 0.0f; }
+			{
+				ret.push_back(
+					make_stream(
+						heightmap,
+						stream_point{
+							.where = terraformer::location{
+								static_cast<float>(x),
+								static_cast<float>(y),
+								0.0f,
+							},
+							.gradient = terraformer::displacement{dz_dx, dz_dy, 0.0f}
+						},
+						dx,
+						dy
+					)
+				);
+			}
 		}
 	}
+
+	return ret;
 }
 
 void make_white_noise(terraformer::span_2d<float> output, terraformer::random_generator& rng)
@@ -239,11 +301,12 @@ int main(int argc, char** argv)
 
 	for(size_t k = 0 ; k != 1; ++k)
 	{
+		puts("Generating streams");
 		auto next_result = process_scanlines(
 			output,
 			comp_ctxt.workers,
 			[]<class ... Args>(Args&&... args) {
-				generate_streams(std::forward<Args>(args)...);
+				return generate_streams(std::forward<Args>(args)...);
 			},
 			terraformer::domain_size_descriptor{
 				.width = 49152.0f,
@@ -284,7 +347,19 @@ int main(int argc, char** argv)
 			).get_result(fold_minmax_value)
 		).wait();
 
-		next_result.wait();
+		puts("Folding result");
+		auto const res = next_result.get_result(
+			[](auto&& streams){
+				terraformer::single_array<stream> ret{};
+				for(auto& outer : streams)
+				{
+					for(auto& inner : outer)
+					{ ret.push_back(std::move(inner)); }
+				}
+				return ret;
+			}
+		);
+		printf("Number of streams: %zu\n", std::size(res).get());
 		std::swap(noise_input, noise_output);
 		std::swap(input, output);
 		printf("\r%zu   ", k);
