@@ -94,7 +94,6 @@ stream make_stream(terraformer::span_2d<float const> heightmap, stream_point sta
 
 terraformer::single_array<stream> generate_streams(
 	terraformer::scanline_processing_job_info const& jobinfo,
-	// TODO: I am not going to write to output, but it must be here to partition the image
 	terraformer::span_2d_extents extents,
 	terraformer::domain_size_descriptor dom_size,
 	stream_spawn_descriptor const& params,
@@ -140,7 +139,7 @@ terraformer::single_array<stream> generate_streams(
 						stream_point{
 							.where = terraformer::location{
 								static_cast<float>(x),
-								static_cast<float>(y),
+								static_cast<float>(y + input_y_offset),
 								0.0f,
 							},
 							.gradient = terraformer::displacement{dz_dx, dz_dy, 0.0f}
@@ -369,23 +368,12 @@ int main(int argc, char** argv)
 		).wait();
 #endif
 		puts("Folding result");
-		auto const res = next_result.get_result(
+		next_result.get_result(
 			[](auto&& streams){
-				terraformer::single_array<stream> ret{};
 				for(auto& item: std::ranges::join_view{streams})
-				{ ret.push_back(std::move(item)); }
-#if 0
-				for(auto& outer : streams)
-				{
-					for(auto& inner : outer)
-					{ ret.push_back(std::move(inner)); }
-				}
-#endif
-				return ret;
+				{ printf("%zu\n", std::size(item.points).get()); }
 			}
 		);
-
-		printf("Number of streams: %zu\n", std::size(res).get());
 		std::swap(noise_input, noise_output);
 		std::swap(input, output);
 		printf("\r%zu   ", k);
