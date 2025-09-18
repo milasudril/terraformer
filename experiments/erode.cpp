@@ -22,6 +22,7 @@
 #include <cstring>
 #include <random>
 #include <bit>
+#include <format>
 
 using thread_pool_type = terraformer::thread_pool<terraformer::move_only_function<void()>>;
 
@@ -368,12 +369,39 @@ int main(int argc, char** argv)
 		).wait();
 #endif
 		puts("Folding result");
-		next_result.get_result(
+		auto streams = next_result.get_result(
 			[](auto&& streams){
+				terraformer::single_array<stream> ret;
 				for(auto& item: std::ranges::join_view{streams})
-				{ printf("%zu\n", std::size(item.points).get()); }
+				{ ret.push_back(std::move(item)); }
+				return ret;
 			}
 		);
+
+		size_t l = 0;
+		for(auto item :
+			terraformer::chunk_by_chunk_count_view{
+				terraformer::span{std::begin(streams), std::end(streams)},
+				comp_ctxt.workers.max_concurrency()
+			}
+		)
+		{
+			{
+				terraformer::grayscale_image displacement_map{output.width(), output.height()};
+				for(auto const& stream : item)
+				{
+					for(auto loc : stream.points)
+					{
+						auto const x_int = static_cast<int32_t>(loc.where[0] + 0.5f);
+						auto const y_int = static_cast<int32_t>(loc.where[1] + 0.5f);
+						displacement_map(x_int, y_int) = 1.0f;
+					}
+				}
+
+				store(displacement_map.pixels(), std::format("/dev/shm/slask_{}.exr", l).c_str());
+			}
+			++l;
+		}
 		std::swap(noise_input, noise_output);
 		std::swap(input, output);
 		printf("\r%zu   ", k);
