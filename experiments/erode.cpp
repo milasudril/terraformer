@@ -95,7 +95,7 @@ stream make_stream(terraformer::span_2d<float const> heightmap, stream_point sta
 terraformer::single_array<stream> generate_streams(
 	terraformer::scanline_processing_job_info const& jobinfo,
 	// TODO: I am not going to write to output, but it must be here to partition the image
-	terraformer::span_2d<float> output,
+	terraformer::span_2d_extents extents,
 	terraformer::domain_size_descriptor dom_size,
 	stream_spawn_descriptor const& params,
 	terraformer::span_2d<float const> heightmap,
@@ -104,8 +104,8 @@ terraformer::single_array<stream> generate_streams(
 )
 {
 	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
-	auto const w = output.width();
-	auto const h = output.height();
+	auto const w = extents.width;
+	auto const h = extents.height;
 	auto const total_height = heightmap.height();
 	auto const input_y_offset = static_cast<int32_t>(jobinfo.input_y_offset);
 	auto const dx = dom_size.width/static_cast<float>(w);
@@ -324,7 +324,7 @@ int main(int argc, char** argv)
 	{
 		puts("Generating streams");
 		auto next_result = process_scanlines(
-			output,
+			output.extents(),
 			comp_ctxt.workers,
 			[]<class ... Args>(Args&&... args) {
 				return generate_streams(std::forward<Args>(args)...);
