@@ -33,7 +33,21 @@ namespace terraformer
 		constexpr bool operator!=(span_2d_extents const&) const = default;
 
 		struct clamp_tag{};
+
+		constexpr auto scanlines(scanline_range range) const
+		{
+			return span_2d_extents{
+				width,
+				std::min(range.end, height) - range.begin,
+			};
+		}
 	};
+
+	constexpr uint32_t width(span_2d_extents extents)
+	{ return extents.width; }
+
+	constexpr uint32_t height(span_2d_extents extents)
+	{ return extents.height; }
 
 	inline auto diagonal(span_2d_extents extents)
 	{
@@ -97,7 +111,7 @@ namespace terraformer
 			);
 		}
 
-		auto scanlines(scanline_range range) const
+		constexpr auto scanlines(scanline_range range) const
 		{
 			return span_2d{
 				m_width,
@@ -111,6 +125,14 @@ namespace terraformer
 		IndexType m_height;
 		T* __restrict__ m_ptr;
 	};
+
+	template<class T>
+	constexpr uint32_t width(span_2d<T> span)
+	{ return span.width(); }
+
+	template<class T>
+	constexpr uint32_t height(span_2d<T> span)
+	{ return span.height(); }
 
 	template<class T>
 	bool inside(span_2d<T const> span, float x, float y)
@@ -313,9 +335,9 @@ namespace terraformer
 		uint32_t total_height;
 	};
 
-	template<class Type, class ThreadPool, class Callback, class ... Args>
+	template<class Span2dExtents, class ThreadPool, class Callback, class ... Args>
 	[[nodiscard]] auto process_scanlines(
-		span_2d<Type> pixels,
+		Span2dExtents domain,
 		ThreadPool& workers,
 		Callback&& cb,
 		Args&&... args
@@ -323,20 +345,20 @@ namespace terraformer
 	{
 		auto const n_workers = workers.max_concurrency();
 
-		using callback_ret_type = decltype(cb(scanline_processing_job_info{}, pixels, args...));
+		using callback_ret_type = decltype(cb(scanline_processing_job_info{}, domain, args...));
 
 		batch_result<callback_ret_type> ret{n_workers};
 
-		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, pixels.height()}, n_workers})
+		for(auto chunk: chunk_by_chunk_count_view{std::ranges::iota_view{0u, height(domain)}, n_workers})
 		{
 			workers.submit(
 				[
 					cb,
 					jobinfo = scanline_processing_job_info{
 						.input_y_offset = chunk.front(),
-						.total_height = pixels.height()
+						.total_height = height(domain)
 					},
-					pixels = pixels.scanlines(
+					subdomain = domain.scanlines(
 						scanline_range{
 							.begin = chunk.front(),
 							.end = chunk.back() + 1
@@ -347,11 +369,11 @@ namespace terraformer
 				]() mutable {
 					if constexpr (std::is_same_v<callback_ret_type, void>)
 					{
-						cb(jobinfo, pixels, std::move(args)...);
+						cb(jobinfo, subdomain, std::move(args)...);
 						ret.mark_batch_as_completed();
 					}
 					else
-					{ ret.save_partial_result(cb(jobinfo, pixels, std::move(args)...)); }
+					{ ret.save_partial_result(cb(jobinfo, subdomain, std::move(args)...)); }
 				}
 			);
 		}
