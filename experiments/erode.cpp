@@ -4,6 +4,7 @@
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
+#include "lib/common/utils.hpp"
 #include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/math_utils/butter_lp_2d.hpp"
 #include "lib/math_utils/computation_context.hpp"
@@ -41,13 +42,31 @@ struct stream
 	terraformer::single_array<stream_point> points;
 };
 
+template<class Rng>
+struct counting_rng :public Rng
+{
+	using Rng::Rng;
+	counting_rng(counting_rng const&) = delete;
+	counting_rng(counting_rng&&) = default;
+
+	auto operator()()
+	{
+		++count;
+		return Rng::operator()();
+	}
+
+	size_t count{0};
+};
+
 stream make_stream(terraformer::span_2d<float const> heightmap, stream_point start_at, float dx, float dy)
 {
 	stream ret;
 	ret.total_flow = 1.0f;
 	ret.points.push_back(start_at);
 	auto const max_length =
-		static_cast<size_t>(std::sqrt(static_cast<float>(heightmap.width())*static_cast<float>(heightmap.height())));
+		static_cast<size_t>(
+			std::sqrt(static_cast<float>(heightmap.width())*static_cast<float>(heightmap.height()))
+		);
 
 	while(true)
 	{
@@ -55,7 +74,7 @@ stream make_stream(terraformer::span_2d<float const> heightmap, stream_point sta
 		if(grad_norm < 1.0f/32768.0f || std::size(ret.points).get() == max_length)
 		{ return ret; }
 
-		start_at.where += 1.0f*terraformer::direction{start_at.gradient};
+		start_at.where += -1.0f*terraformer::direction{start_at.gradient};
 
 		auto const x = start_at.where[0];
 		auto const y = start_at.where[1];
@@ -81,7 +100,7 @@ terraformer::single_array<stream> generate_streams(
 	stream_spawn_descriptor const& params,
 	terraformer::span_2d<float const> heightmap,
 	terraformer::span_2d<float const> noise,
-	terraformer::span<terraformer::random_generator> rngs
+	terraformer::span<counting_rng<terraformer::random_generator>> rngs
 )
 {
 	using clamp_tag = terraformer::span_2d_extents::clamp_tag;
@@ -113,7 +132,7 @@ terraformer::single_array<stream> generate_streams(
 			)/(2.0f*dy);
 
 			auto const noise_val = noise(x , y + input_y_offset);
-			if(spawn(rng) < noise_val*stream_density && (dz_dx != 0 || dz_dy != 0.0f))
+			if(spawn(rng) < noise_val*stream_density && (dz_dx != 0.0f || dz_dy != 0.0f))
 			{
 				ret.push_back(
 					make_stream(
@@ -137,7 +156,7 @@ terraformer::single_array<stream> generate_streams(
 	return ret;
 }
 
-void make_white_noise(terraformer::span_2d<float> output, terraformer::random_generator& rng)
+void make_white_noise(terraformer::span_2d<float> output, counting_rng<terraformer::random_generator>& rng)
 {
 	auto const width = output.width();
 	auto const height = output.height();
@@ -153,7 +172,7 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 [[nodiscard]] terraformer::batch_result<void> make_white_noise(
 	terraformer::span_2d<float> output,
 	thread_pool_type& workers,
-	terraformer::span<terraformer::random_generator> rngs
+	terraformer::span<counting_rng<terraformer::random_generator>> rngs
 )
 {
 	assert(workers.max_concurrency() == std::size(rngs).get());
@@ -164,7 +183,7 @@ void make_white_noise(terraformer::span_2d<float> output, terraformer::random_ge
 		[](
 			terraformer::scanline_processing_job_info const&,
 			terraformer::span_2d<float> output,
-			terraformer::span<terraformer::random_generator> rngs
+			terraformer::span<counting_rng<terraformer::random_generator>> rngs
 		){
 			auto const index = rngs.element_indices().front() + thread_pool_type::current_worker();
 			make_white_noise(output, rngs[index]);
@@ -237,7 +256,7 @@ int main(int argc, char** argv)
 
 	terraformer::computation_context comp_ctxt{
 		.workers = terraformer::thread_pool<terraformer::move_only_function<void()>>{
-			std::thread::hardware_concurrency()
+			n_threads
 		},
 		.dft_engine = terraformer::dft_engine{}
 	};
@@ -261,10 +280,12 @@ int main(int argc, char** argv)
 			.y_direction = 0.0f
 		}
 	);
-	terraformer::random_generator master_rng;
-	terraformer::single_array<terraformer::random_generator> rngs;
+	terraformer::random_generator master_rng{terraformer::rng_seed_type{}};
+	terraformer::single_array<counting_rng<terraformer::random_generator>> rngs;
 	for(size_t k = 0; k != n_threads; ++k)
-	{ rngs.push_back(terraformer::random_generator{terraformer::generate_rng_seed(master_rng)}); }
+	{
+		rngs.push_back(counting_rng<terraformer::random_generator>{terraformer::generate_rng_seed(master_rng)});
+	}
 
 	auto pending_noise = make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs);
 
@@ -317,9 +338,9 @@ int main(int argc, char** argv)
 			},
 			std::as_const(input),
 			std::as_const(noise_input),
-			rngs
+			terraformer::span{std::begin(rngs), std::end(rngs)}
 		);
-
+#if 0
 		make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs).wait();
 		terraformer::apply_filter(
 			white_noise_buffer.pixels(),
@@ -346,19 +367,24 @@ int main(int argc, char** argv)
 				}
 			).get_result(fold_minmax_value)
 		).wait();
-
+#endif
 		puts("Folding result");
 		auto const res = next_result.get_result(
 			[](auto&& streams){
 				terraformer::single_array<stream> ret{};
+				for(auto& item: std::ranges::join_view{streams})
+				{ ret.push_back(std::move(item)); }
+#if 0
 				for(auto& outer : streams)
 				{
 					for(auto& inner : outer)
 					{ ret.push_back(std::move(inner)); }
 				}
+#endif
 				return ret;
 			}
 		);
+
 		printf("Number of streams: %zu\n", std::size(res).get());
 		std::swap(noise_input, noise_output);
 		std::swap(input, output);

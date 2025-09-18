@@ -16,7 +16,9 @@ namespace terraformer
 		explicit thread_pool(size_t num_workers):m_should_stop{false}
 		{
 			std::generate_n(std::back_inserter(m_workers), num_workers, [this, n = size_t{0}]() mutable{
-				return std::thread{[this, worker_index = n++](){dispatch(worker_index);}};
+				auto worker_index = n;
+				++n;
+				return std::thread{[this, worker_index](){dispatch(worker_index);}};
 			});
 		}
 
