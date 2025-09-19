@@ -131,8 +131,30 @@ terraformer::single_array<stream> generate_streams(
 				- heightmap(x, y + input_y_offset - 1, clamp_tag{})
 			)/(2.0f*dy);
 
+
+			auto const d2z_dx2 = (
+				+ 1.0f*heightmap(x + 1, y + input_y_offset, clamp_tag{})
+				- 2.0f*heightmap(x + 0, y + input_y_offset, clamp_tag{})
+				+ 1.0f*heightmap(x - 1, y + input_y_offset, clamp_tag{})
+			)/(dx*dx);
+
+			auto const d2z_dy2 = (
+				+ 1.0f*heightmap(x, y + input_y_offset + 1, clamp_tag{})
+				- 2.0f*heightmap(x, y + input_y_offset, clamp_tag{})
+				+ 1.0f*heightmap(x, y + input_y_offset - 1, clamp_tag{})
+			)/(dy*dy);
+
+			auto const d2z_dxdy = (
+				+ heightmap(x + 1, y + input_y_offset + 1, clamp_tag{})
+				+ heightmap(x - 1, y + input_y_offset - 1, clamp_tag{})
+				- heightmap(x + 1, y + input_y_offset - 1, clamp_tag{})
+				- heightmap(x - 1, y + input_y_offset + 1, clamp_tag{})
+			)/(4.0f*dx*dy);
+
+			auto const hessdet = d2z_dx2*d2z_dy2 - d2z_dxdy*d2z_dxdy;
+
 			auto const noise_val = noise(x , y + input_y_offset);
-			if(spawn(rng) < noise_val*stream_density && (dz_dx != 0.0f || dz_dy != 0.0f))
+			if(spawn(rng) < noise_val*stream_density && (dz_dx != 0.0f || dz_dy != 0.0f) && hessdet > 0.0f)
 			{
 				ret.push_back(
 					make_stream(
