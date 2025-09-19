@@ -252,11 +252,11 @@ int main(int argc, char** argv)
 	pthread_attr_init(&attr);
 	pthread_attr_setstacksize(&attr, 16384);
 
-	auto const n_threads = std::thread::hardware_concurrency();
+	auto const n_workers = std::thread::hardware_concurrency();
 
 	terraformer::computation_context comp_ctxt{
 		.workers = terraformer::thread_pool<terraformer::move_only_function<void()>>{
-			n_threads
+			n_workers
 		},
 		.dft_engine = terraformer::dft_engine{}
 	};
@@ -282,7 +282,7 @@ int main(int argc, char** argv)
 	);
 	terraformer::random_generator master_rng{terraformer::rng_seed_type{}};
 	terraformer::single_array<counting_rng<terraformer::random_generator>> rngs;
-	for(size_t k = 0; k != n_threads; ++k)
+	for(size_t k = 0; k != n_workers; ++k)
 	{
 		rngs.push_back(counting_rng<terraformer::random_generator>{terraformer::generate_rng_seed(master_rng)});
 	}
@@ -378,30 +378,69 @@ int main(int argc, char** argv)
 			}
 		);
 
-		size_t l = 0;
-		for(auto item :
+		terraformer::batch_result<terraformer::grayscale_image> pending_displacement_maps{n_workers};
+		for(
+			auto item :
 			terraformer::chunk_by_chunk_count_view{
 				terraformer::span{std::begin(streams), std::end(streams)},
-				comp_ctxt.workers.max_concurrency()
+				n_workers
 			}
 		)
 		{
-			{
-				terraformer::grayscale_image displacement_map{output.width(), output.height()};
-				for(auto const& stream : item)
+			comp_ctxt.workers.submit(
+				[
+					&pending_displacement_maps = pending_displacement_maps.get_state(),
+					item,
+					w = output.width(),
+					h = output.height()
+				]()
 				{
-					for(auto loc : stream.points)
+					terraformer::grayscale_image displacement_map{w, h};
+					for(auto const& stream : item)
 					{
-						auto const x_int = static_cast<int32_t>(loc.where[0] + 0.5f);
-						auto const y_int = static_cast<int32_t>(loc.where[1] + 0.5f);
-						displacement_map(x_int, y_int) = 1.0f;
+						for(auto loc : stream.points)
+						{
+							auto const x_int = static_cast<int32_t>(loc.where[0] + 0.5f);
+							auto const y_int = static_cast<int32_t>(loc.where[1] + 0.5f);
+							displacement_map(x_int, y_int) = 1.0f;
+						}
 					}
+					pending_displacement_maps.save_partial_result(std::move(displacement_map));
+				}
+			);
+		}
+		auto displacement_map = pending_displacement_maps.get_result(
+			[w = output.width(), h = output.height(), &workers = comp_ctxt.workers](auto const& images){
+				terraformer::grayscale_image img{w, h};
+				for(auto const& item : images)
+				{
+					terraformer::process_scanlines(
+						img.pixels(),
+						workers,
+						[](
+							terraformer::scanline_processing_job_info const& jobinfo,
+							terraformer::span_2d<float> output,
+							terraformer::span_2d<float const> input
+						){
+							auto const w = output.width();
+							auto const h = output.height();
+							auto const input_y_offset = jobinfo.input_y_offset;
+							for(uint32_t y = 0; y != h; ++y)
+							{
+								for(uint32_t x = 0; x != w; ++x)
+								{ output(x, y) += input(x, y + input_y_offset); }
+							}
+						},
+						item.pixels()
+					).wait();
 				}
 
-				store(displacement_map.pixels(), std::format("/dev/shm/slask_{}.exr", l).c_str());
+				return img;
 			}
-			++l;
-		}
+		);
+
+		store(displacement_map.pixels(), "/dev/shm/streams.exr");
+
 		std::swap(noise_input, noise_output);
 		std::swap(input, output);
 		printf("\r%zu   ", k);
