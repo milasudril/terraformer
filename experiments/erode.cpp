@@ -420,17 +420,47 @@ int main(int argc, char** argv)
 					terraformer::grayscale_image displacement_map{w, h};
 					for(auto const& stream : item)
 					{
+						auto stream_velocity = 0.0f;
 						for(auto loc : stream.points)
 						{
-							auto const x_int = static_cast<int32_t>(loc.where[0] + 0.5f);
-							auto const y_int = static_cast<int32_t>(loc.where[1] + 0.5f);
-							displacement_map(x_int, y_int) = 1.0f;
+							auto const v = std::abs(stream_velocity);
+
+							if(v >= 1.0f/64) [[likely]]
+							{
+								auto const r = 1.0f/v;
+								auto const dz = v;
+
+								auto const loc_min = loc.where - terraformer::displacement{r, r, 0.0f};
+								auto const loc_max = loc.where + terraformer::displacement{r, r, 0.0f};
+								auto const x_min = static_cast<int32_t>(loc_min[0] - 0.5f);
+								auto const y_min = static_cast<int32_t>(loc_min[1] - 0.5f);
+								auto const x_max = static_cast<int32_t>(loc_max[0] + 0.5f);
+								auto const y_max = static_cast<int32_t>(loc_max[1] + 0.5f);
+								for(auto y = y_min; y != y_max; ++y)
+								{
+									for(auto x = x_min; x != x_max; ++x)
+									{
+										if(terraformer::inside(displacement_map.pixels(), x, y))
+										{
+											auto const dx = static_cast<float>(x) + 0.5f - loc.where[0];
+											auto const dy = static_cast<float>(y) + 0.5f - loc.where[1];
+											auto const rho = std::clamp(std::sqrt(dx*dx + dy*dy)/r, 0.0f, 1.0f);
+											displacement_map(x, y) = std::min(-dz*(1.0f - rho), displacement_map(x, y));
+										}
+									}
+								}
+							}
+
+							auto const grad = loc.gradient;
+							auto const grad_squared = inner_product(grad, grad);
+							stream_velocity = -(grad_squared/norm(grad + grad_squared*terraformer::displacement{0.0f, 0.0f, 1.0f}) + 0.25f*stream_velocity);
 						}
 					}
 					pending_displacement_maps.save_partial_result(std::move(displacement_map));
 				}
 			);
 		}
+
 		auto displacement_map = pending_displacement_maps.get_result(
 			[w = output.width(), h = output.height(), &workers = comp_ctxt.workers](auto const& images){
 				terraformer::grayscale_image img{w, h};

@@ -135,10 +135,17 @@ namespace terraformer
 	{ return span.height(); }
 
 	template<class T>
-	bool inside(span_2d<T const> span, float x, float y)
+	bool inside(span_2d<T> span, float x, float y)
 	{
 		return (x >= 0.0f && x < static_cast<float>(span.width()))
 			&& (y >= 0.0f && y < static_cast<float>(span.height()));
+	}
+
+	template<class T>
+	bool inside(span_2d<T> span, int32_t x, int32_t y)
+	{
+		return (x >= 0 && x < static_cast<int32_t>(span.width()))
+			&& (y >= 0 && y < static_cast<int32_t>(span.height()));
 	}
 
 	struct pixel_coordinates
