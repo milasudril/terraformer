@@ -390,7 +390,7 @@ int main(int argc, char** argv)
 			).get_result(fold_minmax_value)
 		).wait();
 #endif
-		puts("Folding result");
+		puts("Folding streams");
 		auto streams = next_result.get_result(
 			[](auto&& streams){
 				terraformer::single_array<stream> ret;
@@ -400,6 +400,7 @@ int main(int argc, char** argv)
 			}
 		);
 
+		puts("Creating displacement maps");
 		terraformer::batch_result<terraformer::grayscale_image> pending_displacement_maps{n_workers};
 		for(
 			auto item :
@@ -461,6 +462,7 @@ int main(int argc, char** argv)
 			);
 		}
 
+		puts("Folding displacement maps");
 		auto displacement_map = pending_displacement_maps.get_result(
 			[w = output.width(), h = output.height(), &workers = comp_ctxt.workers](auto const& images){
 				terraformer::grayscale_image img{w, h};
