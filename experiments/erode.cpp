@@ -493,6 +493,26 @@ int main(int argc, char** argv)
 			}
 		);
 
+		terraformer::process_scanlines(
+			output,
+			comp_ctxt.workers,
+			[](
+				terraformer::scanline_processing_job_info const& jobinfo,
+				terraformer::span_2d<float> output,
+				terraformer::span_2d<float const> displacement_map
+			){
+				auto const w = output.width();
+				auto const h = output.height();
+				auto const input_y_offset = jobinfo.input_y_offset;
+				for(uint32_t y = 0; y != h; ++y)
+				{
+					for(uint32_t x = 0; x != w; ++x)
+					{ output(x, y) = std::max(output(x, y) + displacement_map(x, y + input_y_offset), 0.0f); }
+				}
+			},
+			displacement_map.pixels()
+		).wait();
+
 		store(displacement_map.pixels(), "/dev/shm/streams.exr");
 
 		std::swap(noise_input, noise_output);
