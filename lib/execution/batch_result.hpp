@@ -18,14 +18,14 @@ namespace terraformer
 		{}
 
 		template<class FoldOperation>
-		[[nodiscard]] auto get_result(FoldOperation&& fold) const
+		[[nodiscard]] auto get_result(FoldOperation&& fold)
 		{
 			std::unique_lock lock{m_mutex};
 			m_cv.wait(lock, [this](){
 				return m_num_tasks_to_complete == std::size(m_received_results);
 			});
 
-			return std::forward<FoldOperation>(fold)(m_received_results);
+			return std::forward<FoldOperation>(fold)(std::move(m_received_results));
 		}
 
 		template<class... Args>

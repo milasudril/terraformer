@@ -174,7 +174,6 @@ terraformer::single_array<stream> generate_streams(
 			}
 		}
 	}
-
 	return ret;
 }
 
@@ -342,9 +341,10 @@ int main(int argc, char** argv)
 
 	std::swap(noise_input, noise_output);
 
-	for(size_t k = 0 ; k != 1; ++k)
+	for(size_t k = 0 ; k != 8192; ++k)
 	{
-		puts("Generating streams");
+		printf("k = %zu\n", k);
+//		puts("Generating streams");
 		auto next_result = process_scanlines(
 			output.extents(),
 			comp_ctxt.workers,
@@ -390,7 +390,7 @@ int main(int argc, char** argv)
 			).get_result(fold_minmax_value)
 		).wait();
 #endif
-		puts("Folding streams");
+//		puts("Folding streams");
 		auto streams = next_result.get_result(
 			[](auto&& streams){
 				terraformer::single_array<stream> ret;
@@ -400,7 +400,7 @@ int main(int argc, char** argv)
 			}
 		);
 
-		puts("Creating displacement maps");
+//		puts("Creating displacement maps");
 		terraformer::batch_result<terraformer::grayscale_image> pending_displacement_maps{n_workers};
 		for(
 			auto item :
@@ -462,7 +462,7 @@ int main(int argc, char** argv)
 			);
 		}
 
-		puts("Folding displacement maps");
+//		puts("Folding displacement maps");
 		auto displacement_map = pending_displacement_maps.get_result(
 			[w = output.width(), h = output.height(), &workers = comp_ctxt.workers](auto const& images){
 				terraformer::grayscale_image img{w, h};
@@ -507,18 +507,16 @@ int main(int argc, char** argv)
 				for(uint32_t y = 0; y != h; ++y)
 				{
 					for(uint32_t x = 0; x != w; ++x)
-					{ output(x, y) = std::max(output(x, y) + displacement_map(x, y + input_y_offset), 0.0f); }
+					{ output(x, y) = std::max(output(x, y) + 1.0f*displacement_map(x, y + input_y_offset), 0.0f); }
 				}
 			},
 			displacement_map.pixels()
 		).wait();
 
-		store(displacement_map.pixels(), "/dev/shm/streams.exr");
+	//	store(displacement_map.pixels(), "/dev/shm/streams.exr");
 
-		std::swap(noise_input, noise_output);
+	//	std::swap(noise_input, noise_output);
 		std::swap(input, output);
-		printf("\r%zu   ", k);
-		fflush(stdout);
 	}
 
 	store(input, "/dev/shm/slask.exr");
