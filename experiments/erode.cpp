@@ -131,7 +131,7 @@ terraformer::single_array<stream> generate_streams(
 				- heightmap(x, y + input_y_offset - 1, clamp_tag{})
 			)/(2.0f*dy);
 
-
+#if 0
 			auto const d2z_dx2 = (
 				+ 1.0f*heightmap(x + 1, y + input_y_offset, clamp_tag{})
 				- 2.0f*heightmap(x + 0, y + input_y_offset, clamp_tag{})
@@ -152,9 +152,9 @@ terraformer::single_array<stream> generate_streams(
 			)/(4.0f*dx*dy);
 
 			auto const hessdet = d2z_dx2*d2z_dy2 - d2z_dxdy*d2z_dxdy;
-
+#endif
 			auto const noise_val = noise(x , y + input_y_offset);
-			if(spawn(rng) < noise_val*stream_density && (dz_dx != 0.0f || dz_dy != 0.0f) && hessdet > 0.0f)
+			if(spawn(rng) < noise_val*stream_density && (dz_dx != 0.0f || dz_dy != 0.0f) /*&& hessdet > 0.0f*/)
 			{
 				ret.push_back(
 					make_stream(
@@ -341,7 +341,7 @@ int main(int argc, char** argv)
 
 	std::swap(noise_input, noise_output);
 
-	for(size_t k = 0 ; k != 8192; ++k)
+	for(size_t k = 0 ; k != 4096; ++k)
 	{
 		printf("k = %zu\n", k);
 //		puts("Generating streams");
@@ -356,13 +356,13 @@ int main(int argc, char** argv)
 				.height = 49152.0f
 			},
 			stream_spawn_descriptor{
-				.stream_distance = 512.0f
+				.stream_distance = 2048.0f
 			},
 			std::as_const(input),
 			std::as_const(noise_input),
 			terraformer::span{std::begin(rngs), std::end(rngs)}
 		);
-#if 0
+
 		make_white_noise(white_noise_buffer.pixels(), comp_ctxt.workers, rngs).wait();
 		terraformer::apply_filter(
 			white_noise_buffer.pixels(),
@@ -371,7 +371,7 @@ int main(int argc, char** argv)
 			filter_mask.pixels()
 		).wait();
 
-		process_scanlines(
+		auto pending_noise = process_scanlines(
 			noise_output,
 			comp_ctxt.workers,
 			[](
@@ -388,8 +388,8 @@ int main(int argc, char** argv)
 					return minmax_value(output);
 				}
 			).get_result(fold_minmax_value)
-		).wait();
-#endif
+		);
+
 //		puts("Folding streams");
 		auto streams = next_result.get_result(
 			[](auto&& streams){
@@ -421,15 +421,15 @@ int main(int argc, char** argv)
 					terraformer::grayscale_image displacement_map{w, h};
 					for(auto const& stream : item)
 					{
-						auto stream_velocity = 0.0f;
+					//	auto stream_velocity = 0.0f;
 						for(auto loc : stream.points)
 						{
-							auto const v = std::abs(stream_velocity);
+						//	auto const v = std::abs(stream_velocity);
 
-							if(v >= 1.0f/64) [[likely]]
+						//	if(v >= 1.0f/64) [[likely]]
 							{
-								auto const r = 1.0f/v;
-								auto const dz = v;
+								auto const r = 512.0f/16.0f;
+								auto const dz = 1.0f/16.0f;
 
 								auto const loc_min = loc.where - terraformer::displacement{r, r, 0.0f};
 								auto const loc_max = loc.where + terraformer::displacement{r, r, 0.0f};
@@ -452,9 +452,11 @@ int main(int argc, char** argv)
 								}
 							}
 
+							/*
 							auto const grad = loc.gradient;
 							auto const grad_squared = inner_product(grad, grad);
 							stream_velocity = -(grad_squared/norm(grad + grad_squared*terraformer::displacement{0.0f, 0.0f, 1.0f}) + 0.25f*stream_velocity);
+			*/
 						}
 					}
 					pending_displacement_maps.save_partial_result(std::move(displacement_map));
@@ -499,6 +501,54 @@ int main(int argc, char** argv)
 			[](
 				terraformer::scanline_processing_job_info const& jobinfo,
 				terraformer::span_2d<float> output,
+				terraformer::span_2d<float const> current_heightmap
+			){
+				auto const w = output.width();
+				auto const h = output.height();
+				auto const input_y_offset = jobinfo.input_y_offset;
+				using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+
+				for(uint32_t y = 0; y != h; ++y)
+				{
+					for(uint32_t x = 0; x != w; ++x)
+					{
+						auto const dx = 15.0f;
+						auto const dy = 15.0f;
+
+						auto const dz_dx = (
+								current_heightmap(x + 1, y + input_y_offset, clamp_tag{})
+							- current_heightmap(x - 1, y + input_y_offset, clamp_tag{})
+						)/(2.0f*dx);
+
+						auto const dz_dy = (
+								current_heightmap(x, y + input_y_offset + 1, clamp_tag{})
+							- current_heightmap(x, y + input_y_offset - 1, clamp_tag{})
+						)/(2.0f*dy);
+
+
+						auto const grad_norm = std::sqrt(dz_dx*dz_dx + dz_dy*dz_dy);
+						if(grad_norm >= 1.0f/std::sqrt(2.0f))
+						{
+							output(x, y) = 0.25f*(
+								current_heightmap(x + 1, y + input_y_offset, clamp_tag{})
+							+ current_heightmap(x - 1, y + input_y_offset, clamp_tag{})
+							+ current_heightmap(x, y + input_y_offset + 1, clamp_tag{})
+							+ current_heightmap(x, y + input_y_offset - 1, clamp_tag{})
+							);
+						}
+					}
+				}
+			},
+			input
+		).wait();
+
+		terraformer::process_scanlines(
+			output,
+			comp_ctxt.workers,
+			[](
+				terraformer::scanline_processing_job_info const& jobinfo,
+				terraformer::span_2d<float> output,
+				terraformer::span_2d<float const> current_heightmap,
 				terraformer::span_2d<float const> displacement_map
 			){
 				auto const w = output.width();
@@ -507,15 +557,16 @@ int main(int argc, char** argv)
 				for(uint32_t y = 0; y != h; ++y)
 				{
 					for(uint32_t x = 0; x != w; ++x)
-					{ output(x, y) = std::max(output(x, y) + 1.0f*displacement_map(x, y + input_y_offset), 0.0f); }
+					{ output(x, y) = std::max(current_heightmap(x, y + input_y_offset) + 1.0f*displacement_map(x, y + input_y_offset), 0.0f); }
 				}
 			},
+			input,
 			displacement_map.pixels()
 		).wait();
 
 	//	store(displacement_map.pixels(), "/dev/shm/streams.exr");
-
-	//	std::swap(noise_input, noise_output);
+		pending_noise.wait();
+		std::swap(noise_input, noise_output);
 		std::swap(input, output);
 	}
 
