@@ -24,11 +24,32 @@ namespace terraformer
 
 		explicit basic_image(span_2d_extents size):basic_image{size.width, size.height}{}
 
-		explicit basic_image(IndexType width, IndexType height):
+		explicit basic_image(IndexType width, IndexType height)
+		requires std::is_default_constructible_v<PixelType>:
 		  m_width{width}
 		, m_height{height}
 		, m_data{std::make_unique<PixelType[]>(static_cast<size_t>(width)*static_cast<size_t>(height))}
 		{}
+
+		explicit basic_image(IndexType width, IndexType height, PixelType initial_value)
+		requires (!std::is_default_constructible_v<PixelType>):
+		  m_width{width}
+		, m_height{height}
+		, m_data{
+			static_cast<PixelType*>(malloc(static_cast<size_t>(width)*static_cast<size_t>(height)*sizeof(PixelType)))
+		}
+		{
+			std::uninitialized_fill_n(
+				m_data.get(),
+				static_cast<size_t>(width)*static_cast<size_t>(height),
+				initial_value
+			);
+		}
+
+		~basic_image() requires std::is_default_constructible_v<PixelType> = default;
+
+		~basic_image() requires (!std::is_default_constructible_v<PixelType>)
+		{ std::destroy_n(m_data.get(), static_cast<size_t>(m_width)*static_cast<size_t>(m_height)); }
 
 		basic_image(basic_image const& src): basic_image{src.pixels()} {}
 
@@ -77,7 +98,20 @@ namespace terraformer
 	private:
 		IndexType m_width{0};
 		IndexType m_height{0};
-		std::unique_ptr<PixelType[]> m_data;
+
+		struct deleter
+		{
+			void operator()(PixelType* ptr)
+			{ free(ptr); }
+		};
+
+		using holder = std::conditional_t<
+			std::is_default_constructible_v<PixelType>,
+			std::unique_ptr<PixelType[]>,
+			std::unique_ptr<PixelType, deleter>
+		>;
+
+		holder m_data;
 
 		PixelType const* getAddress(IndexType x, IndexType y) const
 		{

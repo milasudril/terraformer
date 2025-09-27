@@ -283,10 +283,6 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	auto const normals = branch_points.get<1>();
 	auto const vertex_index = branch_points.get<2>();
 
-	fenv_t env;
-	feholdexcept(&env);
-	feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-
 	for(auto k : branch_points.element_indices())
 	{
 		auto const base_curve = generate_branch_base_curve(
@@ -350,8 +346,6 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			std::move(integrated_curve_length)
 		);
 	}
-
-	fesetenv(&env);
 
 	return gen_branches;
 }

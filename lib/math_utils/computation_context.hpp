@@ -9,6 +9,7 @@ namespace terraformer
 {
 	struct computation_context
 	{
+		// TODO: Would like to have the type of workers without including dft_engine
 		thread_pool<move_only_function<void()>> workers;
 		class dft_engine dft_engine;
 	};
