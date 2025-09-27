@@ -3,31 +3,26 @@
 #include "./ridge_tree.hpp"
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/curve_tools/length.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 
-terraformer::ridge_tree::ridge_tree(
-	ridge_tree_xy_description const& description,
+terraformer::ridge_tree_trunk terraformer::generate_trunk(
+	ridge_tree_trunk_curve_descriptor const& params,
+	ridge_tree_branch_displacement_description const& horz_displacement_profile,
 	random_generator& rng
 )
 {
-	auto& ret = m_value;
-	std::span branch_growth_params{description.branch_growth_params};
-	std::span displacement_profiles{description.displacement_profiles};
-
-	if(branch_growth_params.empty() || displacement_profiles.empty())
-	{ return; }
-
-	auto const trunk_e2e_distance = distance(description.trunk.begin.y, description.trunk.end.y);
-	auto const trunk_pixel_size = get_min_pixel_size(displacement_profiles[0]);
+	auto const trunk_e2e_distance = distance(params.begin.y, params.end.y);
+	auto const trunk_pixel_size = get_min_pixel_size(horz_displacement_profile);
 
 	auto const trunk_pixel_count = static_cast<size_t>(trunk_e2e_distance/trunk_pixel_size);
 
 	auto const trunk_offsets = generate(
-		displacement_profiles[0],
+		horz_displacement_profile,
 		rng,
 		array_size<float>{trunk_pixel_count},
 		trunk_pixel_size,
@@ -35,11 +30,10 @@ terraformer::ridge_tree::ridge_tree(
 	);
 
 	auto const trunk_base_curve = make_point_array
-		(description.trunk.begin, description.trunk.end, trunk_pixel_count);
-	{
+		(params.begin, params.end, trunk_pixel_count);
 		auto curve = displace_xy(
 			trunk_base_curve,
-			terraformer::displacement_profile{
+			displacement_profile{
 				.offsets = trunk_offsets,
 				.sample_period = trunk_pixel_size
 			}
@@ -55,17 +49,30 @@ terraformer::ridge_tree::ridge_tree(
 			std::move(integrated_curve_length)
 		);
 
-		ret.push_back(
-			ridge_tree_trunk{
-				.level = 0,
-				.branches = std::move(root),
-				.parent = ridge_tree_trunk::no_parent,
-				.parent_curve_index = array_index<displaced_curve>{0},
-				.side = ridge_tree_trunk::side::left,
-				.elevation_data = ridge_tree_branch_elevation_data{}
-			}
-		);
-	}
+	return ridge_tree_trunk{
+		.level = 0,
+		.branches = std::move(root),
+		.parent = ridge_tree_trunk::no_parent,
+		.parent_curve_index = array_index<displaced_curve>{0},
+		.side = ridge_tree_trunk::side::left,
+		.elevation_data = ridge_tree_branch_elevation_data{}
+	};
+}
+
+
+terraformer::ridge_tree::ridge_tree(
+	ridge_tree_xy_description const& description,
+	random_generator& rng
+)
+{
+	auto& ret = m_value;
+	std::span branch_growth_params{description.branch_growth_params};
+	std::span displacement_profiles{description.displacement_profiles};
+
+	if(branch_growth_params.empty() || displacement_profiles.empty())
+	{ return; }
+
+	ret.push_back(generate_trunk(description.trunk, displacement_profiles[0], rng));
 
 	// TODO: Can we use a range-based loop now?
 	auto current_trunk_index = ret.element_indices().front();

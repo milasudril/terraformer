@@ -22,6 +22,12 @@ namespace terraformer
 		cubic_spline_control_point<location, displacement> end;
 	};
 
+	ridge_tree_trunk generate_trunk(
+		ridge_tree_trunk_curve_descriptor const& params,
+		ridge_tree_branch_displacement_description const& horz_displacement_profile,
+		random_generator& rng
+	);
+
 	struct ridge_tree_xy_description
 	{
 		ridge_tree_trunk_curve_descriptor trunk;
