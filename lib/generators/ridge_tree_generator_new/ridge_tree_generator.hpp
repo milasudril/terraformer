@@ -131,6 +131,13 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
+	void fill_curve(
+		span_2d<float> pixels,
+		ridge_tree_trunk const& trunk,
+		ridge_tree_elevation_profile_descriptor const& elev_profile,
+		float pixel_size
+	);
+
 	inline constexpr float get_min_pixel_size(ridge_tree_elevation_profile_descriptor const& item)
 	{
 		return get_min_pixel_size(

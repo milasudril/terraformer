@@ -31,9 +31,9 @@
 #include <numbers>
 #include <random>
 
-#if 0
 namespace
 {
+#if 0
 	auto make_cubic_spline_control_point(
 		terraformer::domain_size_descriptor dom_size,
 		terraformer::ridge_tree_trunk_control_point_descriptor const& params
@@ -178,41 +178,46 @@ namespace
 			}
 		}
 	}
-
+#endif
 	template<class Shape>
 	void  max_circle(
 		terraformer::span_2d<float> output,
 		terraformer::location loc,
 		terraformer::direction tangent,
 		terraformer::direction normal,
-		float r, Shape&& shape
+		float r_0,
+		Shape&& shape,
+		float norm
 	)
 	{
 		auto const x_0 = loc[0];
 		auto const y_0 = loc[1];
 		auto const x_min = std::clamp(
-			static_cast<int32_t>(x_0 - r + 0.5f),
+			static_cast<int32_t>(x_0 - r_0 + 0.5f),
 			0,
 			static_cast<int32_t>(output.width())
 		);
 
 		auto const y_min = std::clamp(
-			static_cast<int32_t>(y_0 - r + 0.5f),
+			static_cast<int32_t>(y_0 - r_0 + 0.5f),
 			0,
 			static_cast<int32_t>(output.height())
 		);
 
 		auto const x_max = std::clamp(
-			static_cast<int32_t>(x_0 + r + 0.5f),
+			static_cast<int32_t>(x_0 + r_0 + 0.5f),
 			0,
 			static_cast<int32_t>(output.width())
 		);
 
 		auto const y_max = std::clamp(
-			static_cast<int32_t>(y_0 + r + 0.5f),
+			static_cast<int32_t>(y_0 + r_0 + 0.5f),
 			0,
 			static_cast<int32_t>(output.height())
 		);
+		printf("r_0 = %.8g\n", r_0);
+		printf("x range: %d %d\n", x_min, x_max);
+		printf("y range: %d %d\n", y_min, y_max);
 
 		for(int32_t y = y_min; y != y_max; ++y)
 		{
@@ -221,18 +226,22 @@ namespace
 				auto const v = (
 					  (terraformer::location{static_cast<float>(x), static_cast<float>(y), 0.0f} - loc)
 					+ terraformer::displacement{0.5f, 0.5f, 0.0f}
-					)/r;
+				)/r_0;
 
 				auto const xi = inner_product(v, tangent);
 				auto const eta = inner_product(v, normal);
+				auto const r = std::pow(
+					  std::pow(std::abs(xi), norm) + std::pow(std::abs(eta), norm),
+					1.0f/norm
+				);
 
-				auto const r = std::abs(xi) + std::abs(eta);
-				if( r <= 1.0f)
+				if( r <= r_0)
 				{ output(x, y) = std::max(output(x,y), shape(1.0f - r)); }
 			}
 		}
 	}
 
+#if 0
 	auto render_branches_at_current_level(
 		terraformer::heightmap_generator_context const& ctxt,
 		float min_pixel_size,
@@ -365,8 +374,8 @@ namespace
 		terraformer::add_resampled(std::as_const(tmp).pixels(), output_image, 1.0f);
 		return i;
 	}
-}
 #endif
+}
 
 float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
 {
@@ -385,6 +394,55 @@ float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& 
 	return get_min_pixel_size(*min_layout, *min_elevation_profile);
 }
 
+void terraformer::fill_curve(
+	span_2d<float> pixels,
+	ridge_tree_trunk const& trunk,
+	ridge_tree_elevation_profile_descriptor const& elevation_profile,
+	float pixel_size
+)
+{
+	auto const elems = trunk.branches.element_indices();
+	auto const attribs = trunk.branches.attributes();
+	auto const curves = attribs.get<0>();
+	auto const ridge_radius = elevation_profile.ridge_half_thickness/pixel_size;
+	printf("%.8g\n", ridge_radius);
+	auto const shape_exponent = elevation_profile.ridge_rolloff_exponent;
+	auto const ridge_elevation = elevation_profile.ridge_elevation;
+
+//	auto const curve_lengths = branches.get<3>();
+	for(auto k : elems)
+	{
+		auto const& curve = curves[k];
+		if(curve.points().empty())
+		{ continue; }
+
+		visit_pixels(curve.points(),
+			pixel_size,
+			[
+				pixels,
+				ridge_radius,
+				shape_exponent,
+				ridge_elevation
+			](terraformer::location loc, terraformer::direction tangent, terraformer::direction normal) {
+				max_circle(
+					pixels,
+					loc,
+					tangent,
+					normal,
+					ridge_radius,
+					[
+						shape_exponent,
+						ridge_elevation
+					](float r){
+						return ridge_elevation*std::pow(r, shape_exponent);
+					},
+					2.0f
+				);
+			}
+		);
+	}
+}
+
 terraformer::grayscale_image
 terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridge_tree_descriptor const& params)
 {
@@ -397,7 +455,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	auto const h_img = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*global_pixel_size) + 0.5f), 1u);
 	grayscale_image ret{w_img, h_img};
 
-	auto const trunk = generate_trunk(dom_size, params.trunk, params.horz_displacements[0], rng);
+	auto const trunk = generate_trunk(dom_size, params.trunk, params.horz_displacements.front(), rng);
+	fill_curve(ret, trunk, params.elevation_profile.front(), global_pixel_size);
 
 
 #if 0
