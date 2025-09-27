@@ -215,9 +215,6 @@ namespace
 			0,
 			static_cast<int32_t>(output.height())
 		);
-		printf("r_0 = %.8g\n", r_0);
-		printf("x range: %d %d\n", x_min, x_max);
-		printf("y range: %d %d\n", y_min, y_max);
 
 		for(int32_t y = y_min; y != y_max; ++y)
 		{
@@ -405,7 +402,6 @@ void terraformer::fill_curve(
 	auto const attribs = trunk.branches.attributes();
 	auto const curves = attribs.get<0>();
 	auto const ridge_radius = elevation_profile.ridge_half_thickness/pixel_size;
-	printf("%.8g\n", ridge_radius);
 	auto const shape_exponent = elevation_profile.ridge_rolloff_exponent;
 	auto const ridge_elevation = elevation_profile.ridge_elevation;
 
@@ -455,39 +451,92 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	auto const h_img = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*global_pixel_size) + 0.5f), 1u);
 	grayscale_image ret{w_img, h_img};
 
-	auto const trunk = generate_trunk(dom_size, params.trunk, params.horz_displacements.front(), rng);
-	fill_curve(ret, trunk, params.elevation_profile.front(), global_pixel_size);
+	single_array<ridge_tree_trunk> trunks;
+	trunks.push_back(generate_trunk(dom_size, params.trunk, params.horz_displacements.front(), rng));
+	fill_curve(ret, trunks.back(), params.elevation_profile.front(), global_pixel_size);
 
-
-#if 0
-	auto const ridge_tree = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
-	if(ridge_tree.size().get() == 0)
-	{ return terraformer::grayscale_image{16, 16}; }
-
-
-	auto i = std::begin(ridge_tree);
-	while(i != std::end(ridge_tree))
+	auto current_trunk_index = trunks.element_indices().front();
+	auto const& branch_growth_params = params.branch_growth_params;
+	auto const& displacement_profiles = params.horz_displacements;
+	while(true)
 	{
-		i = render_branches_at_current_level(
-			ctxt,
-			0.5f*get_min_pixel_size(params.horz_displacements[i->level]),
-			params.elevation_profile[i->level],
-			i,
-			std::end(ridge_tree),
-			rng,
-			ret.pixels()
-		);
-	}
+		if(current_trunk_index == std::size(trunks))
+		{ break; }
 
-	std::transform(
-		ret.pixels().data(),
-		ret.pixels().data() + w_img*h_img,
-		ret.pixels().data(),
-		[](auto val) {
-			return std::max(0.0f, val);
+		auto& current_trunk = trunks[current_trunk_index];
+		auto const next_level_index = current_trunk.level + 1;
+		if(next_level_index == std::size(branch_growth_params) + 1)
+		{
+			++current_trunk_index;
+			continue;
 		}
-	);
-#endif
+
+		auto const next_level_seeds = collect_ridge_tree_branch_seeds(
+			std::as_const(current_trunk.branches).get<0>()
+		);
+
+		auto k = next_level_seeds.element_indices().front();
+		for(auto& index_array : current_trunk.branches.get<2>())
+		{
+			index_array = collect_branch_indices(next_level_seeds[k]);
+			++k;
+		}
+
+		auto const& horz_displacement = displacement_profiles[next_level_index];
+		auto const& growth_params = branch_growth_params[next_level_index - 1];
+		auto const pixel_size = get_min_pixel_size(horz_displacement);
+		auto next_level = generate_branches(
+			next_level_seeds,
+			trunks,
+			pixel_size,
+			ridge_tree_branch_displacement_description{
+				.amplitude = horz_displacement.amplitude,
+				.wavelength = horz_displacement.wavelength,
+				.damping = horz_displacement.damping
+			},
+			rng,
+			ridge_tree_branch_growth_description{
+				.max_length = growth_params.e2e_distance,
+				.min_neighbour_distance = horz_displacement.amplitude
+			}
+		);
+
+		for(auto& stem: next_level)
+		{
+			if(!stem.left.empty())
+			{
+				trunks.push_back(
+					ridge_tree_trunk{
+						.level = next_level_index,
+						.branches = std::move(stem.left),
+						.parent = current_trunk_index,
+						.parent_curve_index = stem.parent_curve_index,
+						.side = ridge_tree_trunk::side::left,
+						.elevation_data = ridge_tree_branch_elevation_data{}
+					}
+				);
+
+				fill_curve(ret, trunks.back(), params.elevation_profile[next_level_index], global_pixel_size);
+			}
+
+			if(!stem.right.empty())
+			{
+				trunks.push_back(
+					ridge_tree_trunk{
+						.level = next_level_index,
+						.branches = std::move(stem.right),
+						.parent = current_trunk_index,
+						.parent_curve_index = stem.parent_curve_index,
+						.side = ridge_tree_trunk::side::right,
+						.elevation_data = ridge_tree_branch_elevation_data{}
+					}
+				);
+				fill_curve(ret, trunks.back(), params.elevation_profile[next_level_index], global_pixel_size);
+			}
+		}
+
+		++current_trunk_index;
+	}
 	return ret;
 }
 
