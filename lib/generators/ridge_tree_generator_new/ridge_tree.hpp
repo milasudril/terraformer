@@ -16,7 +16,7 @@
 
 namespace terraformer
 {
-	struct ridge_tree_trunk_description
+	struct ridge_tree_trunk_curve_descriptor
 	{
 		cubic_spline_control_point<location, displacement> begin;
 		cubic_spline_control_point<location, displacement> end;
@@ -24,7 +24,7 @@ namespace terraformer
 
 	struct ridge_tree_xy_description
 	{
-		ridge_tree_trunk_description trunk;
+		ridge_tree_trunk_curve_descriptor trunk;
 		std::vector<ridge_tree_branch_growth_description> branch_growth_params;
 		std::vector<ridge_tree_branch_displacement_description> displacement_profiles;;
 	};
@@ -34,6 +34,7 @@ namespace terraformer
 		ridge_tree_ridge_elevation_profile_description base_elevation;
 		ridge_tree_elevation_modulation_description modulation;
 	};
+
 
 	class ridge_tree
 	{

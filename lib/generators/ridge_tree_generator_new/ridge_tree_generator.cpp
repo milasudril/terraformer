@@ -48,13 +48,13 @@ namespace
 		};
 	}
 
-	terraformer::ridge_tree_trunk_description
+	terraformer::ridge_tree_trunk_curve_descriptor
 	make_ridge_tree_trunk_description(
 		terraformer::domain_size_descriptor dom_size,
 		terraformer::ridge_tree_trunk_descriptor const& params
 	)
 	{
-		return terraformer::ridge_tree_trunk_description{
+		return terraformer::ridge_tree_trunk_curve_descriptor{
 			.begin = make_cubic_spline_control_point(dom_size, params.begin),
 			.end = make_cubic_spline_control_point(dom_size, params.end)
 		};
