@@ -9,48 +9,6 @@
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 
-namespace
-{
-	std::vector<terraformer::location> make_point_array(
-		terraformer::cubic_spline_control_point<terraformer::location, terraformer::displacement> begin,
-		terraformer::cubic_spline_control_point<terraformer::location, terraformer::displacement> end,
-		size_t count
-	)
-	{
-		auto const p = make_polynomial(begin, end);
-		terraformer::multi_array<terraformer::location, float> points;
-		auto traveled_distance = 0.0f;
-		auto loc_prev = terraformer::location{} + p(0.0f);
-		points.push_back(loc_prev, traveled_distance);
-		auto const seg_count = static_cast<float>(count - 1);
-		for(size_t k = 1; k != count; ++k)
-		{
-			auto const t = static_cast<float>(k)/seg_count;
-			auto const loc =terraformer::location{} + p(t);
-			traveled_distance += distance(loc, loc_prev);
-			points.push_back(loc, traveled_distance);
-			loc_prev = loc;
-		}
-
-		std::vector<terraformer::location> ret(count);
-		auto const ds = traveled_distance/seg_count;
-		auto const attribs = points.attributes();
-		auto const x_vals = attribs.get<1>();
-		auto const y_vals = attribs.get<0>();
-
-		for(size_t k = 0; k != count; ++k)
-		{
-			auto const sample_at = ds*static_cast<float>(k);
-			ret[k] = terraformer::interp(
-				std::span{std::begin(x_vals), std::end(x_vals)},
-				std::span{std::begin(y_vals), std::end(y_vals)},
-				sample_at
-			);
-		}
-		return ret;
-	}
-}
-
 terraformer::ridge_tree::ridge_tree(
 	ridge_tree_xy_description const& description,
 	random_generator& rng

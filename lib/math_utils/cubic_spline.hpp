@@ -2,6 +2,10 @@
 #define TERRAFORMER_MATHUTILS_CUBIC_SPLINE_HPP
 
 #include "./polynomial.hpp"
+#include "./interp.hpp"
+
+#include "lib/array_classes/single_array.hpp"
+#include "lib/array_classes/multi_array.hpp"
 
 #include <algorithm>
 
@@ -50,6 +54,45 @@ namespace terraformer
 		x = std::clamp(x, -1.0f, 1.0f);
 		return (2.0f - x)*(x + 1.0f)*(x + 1.0f)/4.0f;
 	}
+
+	template<class Point, class Vector>
+	auto make_point_array(
+		cubic_spline_control_point<Point, Vector> begin,
+		cubic_spline_control_point<Point, Vector>  end,
+		size_t count
+	)
+	{
+		auto const p = make_polynomial(begin, end);
+		terraformer::multi_array<Point, float> points;
+		auto traveled_distance = 0.0f;
+		auto loc_prev = Point{} + p(0.0f);
+		points.push_back(loc_prev, traveled_distance);
+		auto const seg_count = static_cast<float>(count - 1);
+		for(size_t k = 1; k != count; ++k)
+		{
+			auto const t = static_cast<float>(k)/seg_count;
+			auto const loc = Point{} + p(t);
+			traveled_distance += distance(loc, loc_prev);
+			points.push_back(loc, traveled_distance);
+			loc_prev = loc;
+		}
+
+		auto const ds = traveled_distance/seg_count;
+		auto const attribs = points.attributes();
+		auto const t_vals = attribs.template get<1>();
+		auto const r_vals = attribs.template get<0>();
+		span const t_vals_span{std::begin(t_vals), std::end(t_vals)};
+		span const r_vals_span{std::begin(r_vals), std::end(r_vals)};
+
+		single_array ret{array_size<Point>{count}};
+		for(auto k : ret.element_indices())
+		{
+			auto const sample_at = ds*(static_cast<float>(k.get()) + 0.5f);
+			ret[k] = interp(t_vals_span, r_vals_span, sample_at);
+		}
+		return ret;
+	}
+
 }
 
 #endif

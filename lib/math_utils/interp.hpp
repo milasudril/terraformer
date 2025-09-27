@@ -114,17 +114,27 @@ namespace terraformer
 			}) - std::begin(x_vals)
 		);
 
-		auto const left = bsp(index - 1, static_cast<uint32_t>(std::size(x_vals)));
-		auto const right = bsp(index, static_cast<uint32_t>(std::size(x_vals)));
+		using array_type_x = std::remove_cvref_t<RangeX>;
+		using array_type_y = std::remove_cvref_t<RangeY>;
+
+		using index_type_x = typename select_index_type<array_type_x>::type;
+		using index_type_y = typename select_index_type<array_type_y>::type;
+
+		// HACK: Need a way to find the representation of std::size(lut)
+		using size_rep = size_t;
+
+		// HACK: Do not force conversion to uint32_t. bsp must accept any integral type
+		auto const left = bsp(index - 1, static_cast<uint32_t>(static_cast<size_rep>(std::size(x_vals))));
+		auto const right = bsp(index, static_cast<uint32_t>(static_cast<size_rep>((std::size(x_vals)))));
 
 		if(right == left)
-		{ return y_vals[left]; }
+		{ return y_vals[static_cast<index_type_y>(left)]; }
 
-		auto const dx = x_vals[right] - x_vals[left];
-		auto const dy = y_vals[right] - y_vals[left];
-		auto const t = (param - x_vals[left])/dx;
+		auto const dx = x_vals[static_cast<index_type_x>(right)] - x_vals[static_cast<index_type_x>(left)];
+		auto const dy = y_vals[static_cast<index_type_y>(right)] - y_vals[static_cast<index_type_y>(left)];
+		auto const t = (param - x_vals[static_cast<index_type_x>(left)])/dx;
 
-		return y_vals[left] + t*dy;
+		return y_vals[static_cast<index_type_y>(left)] + t*dy;
 	}
 
 	template<class ParamType, class OutputType>
