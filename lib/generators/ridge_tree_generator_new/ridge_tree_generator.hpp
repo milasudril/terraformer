@@ -69,6 +69,42 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
+	inline auto make_cubic_spline_control_point(
+		domain_size_descriptor dom_size,
+		ridge_tree_trunk_control_point_descriptor const& params
+	)
+	{
+		auto const theta = 2.0f*std::numbers::pi_v<float>*params.heading;
+		auto const r = displacement{params.x, params.y, 0.0f}
+			.apply(scaling{dom_size.width, dom_size.height, 1.0f});
+		auto const dom_norm = std::sqrt(dom_size.width*dom_size.height);
+		return cubic_spline_control_point<location, displacement>{
+			.y = location{} + r,
+			.ddx = dom_norm*params.speed*displacement{std::sin(theta), -std::cos(theta), 0.0f}
+		};
+	}
+
+	inline ridge_tree_trunk generate_trunk(
+		domain_size_descriptor dom_size,
+		ridge_tree_trunk_descriptor const& base_params,
+		ridge_tree_branch_horz_displacement_descriptor const& horz_displacement,
+		random_generator& rng
+	)
+	{
+		return generate_trunk(
+			ridge_tree_trunk_curve_descriptor{
+				.begin = make_cubic_spline_control_point(dom_size, base_params.begin),
+				.end = make_cubic_spline_control_point(dom_size, base_params.end)
+			},
+			ridge_tree_branch_displacement_description{
+				.amplitude = horz_displacement.amplitude,
+				.wavelength = horz_displacement.wavelength,
+				.damping = horz_displacement.damping
+			},
+			rng
+		);
+	}
+
 	inline constexpr float get_min_pixel_size(ridge_tree_branch_horz_displacement_descriptor const& item)
 	{
 		return get_min_pixel_size(

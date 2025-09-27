@@ -31,6 +31,7 @@
 #include <numbers>
 #include <random>
 
+#if 0
 namespace
 {
 	auto make_cubic_spline_control_point(
@@ -365,6 +366,7 @@ namespace
 		return i;
 	}
 }
+#endif
 
 float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
 {
@@ -390,14 +392,19 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	terraformer::random_generator rng{rng_seed};
 
 	auto const dom_size = ctxt.domain_size;
-	auto const ridge_tree = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
-	if(ridge_tree.size().get() == 0)
-	{ return terraformer::grayscale_image{16, 16}; }
-
 	auto const global_pixel_size = get_min_pixel_size(params);
 	auto const w_img = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*global_pixel_size) + 0.5f), 1u);
 	auto const h_img = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*global_pixel_size) + 0.5f), 1u);
 	grayscale_image ret{w_img, h_img};
+
+	auto const trunk = generate_trunk(dom_size, params.trunk, params.horz_displacements[0], rng);
+
+
+#if 0
+	auto const ridge_tree = generate(collect_ridge_tree_xy_params(dom_size, params), rng);
+	if(ridge_tree.size().get() == 0)
+	{ return terraformer::grayscale_image{16, 16}; }
+
 
 	auto i = std::begin(ridge_tree);
 	while(i != std::end(ridge_tree))
@@ -421,7 +428,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			return std::max(0.0f, val);
 		}
 	);
-
+#endif
 	return ret;
 }
 
