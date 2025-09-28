@@ -190,7 +190,7 @@ namespace terraformer
 	single_array<location> generate_branch_base_curve(
 		location loc,
 		direction start_dir,
-		span<ridge_tree_trunk const> trunks,
+		span_2d<float const> current_heightmap,
 		float pixel_size,
 		BranchStopCondition&& stop
 	)
@@ -200,16 +200,29 @@ namespace terraformer
 		{ return base_curve; }
 
 		base_curve.push_back(loc);
+		auto v = (loc - location{})/pixel_size;
 
 		base_curve.reserve(array_size<location>{128});
 
-		loc += pixel_size*start_dir;
+		v += 1.0f*start_dir;
 
-		while(!stop(loc))
+		while(!stop(location{} + v*pixel_size))
 		{
-			base_curve.push_back(loc);
-			auto const g = direction{compute_field(trunks, loc, pixel_size)};
-			loc -= pixel_size*g;
+			base_curve.push_back(location{} + v*pixel_size);
+
+			auto const dx =
+				   interp(current_heightmap, v[0] + 1.0f, v[1], clamp_at_boundary{})
+				 - interp(current_heightmap, v[0] - 1.0f, v[1], clamp_at_boundary{});
+			auto const dy =
+				   interp(current_heightmap, v[0], v[1] + 1.0f, clamp_at_boundary{})
+				 - interp(current_heightmap, v[0], v[1] - 1.0f, clamp_at_boundary{});
+			displacement const grad{dx, dy, 0.0f};
+
+			auto const grad_norm = norm(grad);
+			if(grad_norm <= 1.0f/1024.0f)
+			{ return base_curve; }
+
+			v -= grad/grad_norm;
 		}
 
 		return base_curve;
@@ -218,7 +231,7 @@ namespace terraformer
 	ridge_tree_branch_sequence
 	generate_branches(
 		ridge_tree_branch_seed_sequence const& branch_points,
-		span<ridge_tree_trunk const> trunks,
+		span_2d<float const> current_heightmap,
 		float pixel_size,
 		ridge_tree_branch_displacement_description const& curve_desc,
 		random_generator& rng,
@@ -247,7 +260,7 @@ namespace terraformer
 	single_array<ridge_tree_stem_collection>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
-		span<ridge_tree_trunk const> trunks,
+		span_2d<float const> current_heightmap,
 		float pixel_size,
 		ridge_tree_branch_displacement_description const &curve_desc,
 		random_generator& rng,

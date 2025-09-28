@@ -484,12 +484,12 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		auto const& horz_displacement = displacement_profiles[next_level_index];
 		auto const& growth_params = branch_growth_params[next_level_index - 1];
-		auto const pixel_size = get_min_pixel_size(horz_displacement);
+		//auto const pixel_size = get_min_pixel_size(horz_displacement);
 
 		auto next_level = generate_branches(
 			next_level_seeds,
-			trunks,
-			pixel_size,
+			ret.pixels(),
+			global_pixel_size,
 			ridge_tree_branch_displacement_description{
 				.amplitude = horz_displacement.amplitude,
 				.wavelength = horz_displacement.wavelength,

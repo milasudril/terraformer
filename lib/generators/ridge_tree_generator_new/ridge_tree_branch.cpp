@@ -272,7 +272,7 @@ terraformer::displacement terraformer::compute_field(
 
 terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	ridge_tree_branch_seed_sequence const& branch_points,
-	span<ridge_tree_trunk const> trunks,
+	span_2d<float const> current_heightmap,
 	float pixel_size,
 	ridge_tree_branch_displacement_description const& curve_desc,
 	random_generator& rng,
@@ -288,7 +288,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 		auto const base_curve = generate_branch_base_curve(
 			points[k],
 			normals[k],
-			trunks,
+			current_heightmap,
 			pixel_size,
 			[
 				d_max,
@@ -477,7 +477,7 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 terraformer::single_array<terraformer::ridge_tree_stem_collection>
 terraformer::generate_branches(
 	std::span<ridge_tree_branch_seed_sequence_pair const> parents,
-	span<ridge_tree_trunk const> trunks,
+	span_2d<float const> current_heightmap,
 	float pixel_size,
 	ridge_tree_branch_displacement_description const& curve_desc,
 	random_generator& rng,
@@ -492,7 +492,7 @@ terraformer::generate_branches(
 	ridge_tree_stem_collection current_stem_collection{array_index<displaced_curve>{0}};
 	current_stem_collection.left = generate_branches(
 		parents[0].left,
-		trunks,
+		current_heightmap,
 		pixel_size,
 		curve_desc,
 		rng,
@@ -505,7 +505,7 @@ terraformer::generate_branches(
 	{
 		current_stem_collection.right = generate_branches(
 			parents[k - 1].right,
-			trunks,
+			current_heightmap,
 			pixel_size,
 			curve_desc,
 			rng,
@@ -515,7 +515,7 @@ terraformer::generate_branches(
 
 		auto left_branches = generate_branches(
 			parents[k].left,
-			trunks,
+			current_heightmap,
 			pixel_size,
 			curve_desc,
 			rng,
@@ -531,7 +531,7 @@ terraformer::generate_branches(
 
 	current_stem_collection.right = generate_branches(
 		parents.back().right,
-		trunks,
+		current_heightmap,
 		pixel_size,
 		curve_desc,
 		rng,
