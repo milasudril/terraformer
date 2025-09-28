@@ -210,16 +210,19 @@ namespace terraformer
 		{
 			base_curve.push_back(location{} + v*pixel_size);
 
-			auto const dx =
+			auto const dx = 0.5f*(
 				   interp(current_heightmap, v[0] + 1.0f, v[1], clamp_at_boundary{})
-				 - interp(current_heightmap, v[0] - 1.0f, v[1], clamp_at_boundary{});
-			auto const dy =
+				 - interp(current_heightmap, v[0] - 1.0f, v[1], clamp_at_boundary{})
+			)/pixel_size;
+			auto const dy = 0.5f*(
 				   interp(current_heightmap, v[0], v[1] + 1.0f, clamp_at_boundary{})
-				 - interp(current_heightmap, v[0], v[1] - 1.0f, clamp_at_boundary{});
+				 - interp(current_heightmap, v[0], v[1] - 1.0f, clamp_at_boundary{})
+			)/pixel_size;
 			displacement const grad{dx, dy, 0.0f};
 
 			auto const grad_norm = norm(grad);
-			if(grad_norm <= 1.0f/1024.0f)
+
+			if(grad_norm <= 1.0f/16384.0f)
 			{ return base_curve; }
 
 			v -= grad/grad_norm;
