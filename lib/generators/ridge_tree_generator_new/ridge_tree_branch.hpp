@@ -203,12 +203,18 @@ namespace terraformer
 		auto v = (loc - location{})/pixel_size;
 
 		base_curve.reserve(array_size<location>{128});
-
-		v += 1.0f*start_dir;
+		auto step = 1.0f*start_dir;
+		v += 1.0f*step;
+		auto current_elevation = interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
 
 		while(!stop(location{} + v*pixel_size))
 		{
+			auto const next_elevation =  interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
+			if(next_elevation > current_elevation)
+			{ return base_curve; }
+
 			base_curve.push_back(location{} + v*pixel_size);
+			current_elevation = next_elevation;
 
 			auto const dx = 0.5f*(
 				   interp(current_heightmap, v[0] + 1.0f, v[1], clamp_at_boundary{})
@@ -222,10 +228,9 @@ namespace terraformer
 
 			auto const grad_norm = norm(grad);
 
-			if(grad_norm <= 1.0f/16384.0f)
-			{ return base_curve; }
+			step = grad_norm <= 1.0f/16384.0f? step : -grad/grad_norm;
 
-			v -= grad/grad_norm;
+			v += step;
 		}
 
 		return base_curve;
