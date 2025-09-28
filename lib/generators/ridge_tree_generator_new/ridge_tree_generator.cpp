@@ -537,7 +537,9 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
-				fill_curve(ret, trunks.back(), params.elevation_profile[next_level_index], global_pixel_size);
+				grayscale_image tmp{w_img, h_img};
+				fill_curve(tmp, trunks.back(), params.elevation_profile[next_level_index], global_pixel_size);
+				add_resampled(std::as_const(tmp).pixels(), ret.pixels(), 1.0f);
 			}
 
 			if(!stem.right.empty())
@@ -552,7 +554,10 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 						.elevation_data = ridge_tree_branch_elevation_data{}
 					}
 				);
+
+				grayscale_image tmp{w_img, h_img};
 				fill_curve(ret, trunks.back(), params.elevation_profile[next_level_index], global_pixel_size);
+				add_resampled(std::as_const(tmp).pixels(), ret.pixels(), 1.0f);
 			}
 		}
 
