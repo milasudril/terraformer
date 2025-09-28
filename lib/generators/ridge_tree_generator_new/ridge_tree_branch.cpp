@@ -302,15 +302,6 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 				if(new_distance > d_max)
 				{ return true; }
 
-				if(iter >= 2)
-				{
-					auto const v01 = direction{loc_prev - loc_prev_prev};
-					auto const v12 = direction{loc - loc_prev};
-					theta += std::acos(std::clamp(inner_product(v01, v12), -1.0f, 1.0f));
-					if(std::abs(theta) >= std::numbers::pi_v<float>/3.0f)
-					{ return true;}
-				}
-
 				d = new_distance;
 				loc_prev_prev = loc_prev;
 				loc_prev = loc;
