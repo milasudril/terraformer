@@ -16,7 +16,6 @@
 #include "lib/math_utils/butter_lp_2d.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/math_utils/interp.hpp"
-#include "lib/math_utils/normalized_image_gradient.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/value_maps/qurt_value_map.hpp"
 #include "lib/value_maps/log_value_map.hpp"
@@ -455,7 +454,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	single_array<ridge_tree_trunk> trunks;
 	trunks.push_back(generate_trunk(dom_size, params.trunk, params.horz_displacements.front(), rng));
 	fill_curve(ret, trunks.back(), params.elevation_profile.front(), global_pixel_size);
-	basic_image<direction> grad_field{w_img, h_img, direction{displacement{1.0f, 0.0f, 0.0f}}};
 
 	auto current_trunk_index = trunks.element_indices().front();
 	auto const& branch_growth_params = params.branch_growth_params;
@@ -473,12 +471,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			continue;
 		}
 
-		auto pending_gradient = compute_normalized_gradient(
-			grad_field.pixels(),
-			ctxt.comp_ctxt.get().workers,
-			ret
-		);
-
 		auto const next_level_seeds = collect_ridge_tree_branch_seeds(
 			std::as_const(current_trunk.branches).get<0>()
 		);
@@ -494,7 +486,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		auto const& growth_params = branch_growth_params[next_level_index - 1];
 		auto const pixel_size = get_min_pixel_size(horz_displacement);
 
-		pending_gradient.wait();
 		auto next_level = generate_branches(
 			next_level_seeds,
 			trunks,
