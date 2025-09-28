@@ -100,28 +100,38 @@ namespace
 	}
 
 	template<class Shape>
-	void  add_circle(terraformer::span_2d<float> output, float x_0, float y_0, float r, Shape&& shape)
+	void add_circle(
+		terraformer::span_2d<float> output,
+		terraformer::location loc,
+		terraformer::direction tangent,
+		terraformer::direction normal,
+		float r_0,
+		Shape&& shape,
+		float norm
+	)
 	{
+		auto const x_0 = loc[0];
+		auto const y_0 = loc[1];
 		auto const x_min = std::clamp(
-			static_cast<int32_t>(x_0 - r + 0.5f),
+			static_cast<int32_t>(x_0 - r_0 + 0.5f),
 			0,
 			static_cast<int32_t>(output.width())
 		);
 
 		auto const y_min = std::clamp(
-			static_cast<int32_t>(y_0 - r + 0.5f),
+			static_cast<int32_t>(y_0 - r_0 + 0.5f),
 			0,
 			static_cast<int32_t>(output.height())
 		);
 
 		auto const x_max = std::clamp(
-			static_cast<int32_t>(x_0 + r + 0.5f),
+			static_cast<int32_t>(x_0 + r_0 + 0.5f),
 			0,
 			static_cast<int32_t>(output.width())
 		);
 
 		auto const y_max = std::clamp(
-			static_cast<int32_t>(y_0 + r + 0.5f),
+			static_cast<int32_t>(y_0 + r_0 + 0.5f),
 			0,
 			static_cast<int32_t>(output.height())
 		);
@@ -130,11 +140,20 @@ namespace
 		{
 			for(int32_t x = x_min; x != x_max; ++x)
 			{
-				auto const x_float = (static_cast<float>(x) + 0.5f - x_0)/r;
-				auto const y_float = (static_cast<float>(y) + 0.5f - y_0)/r;
-				auto const r = std::sqrt(x_float*x_float + y_float*y_float);
-				if( r <= 1.0f)
-				{ output(x, y) += shape(1.0f - r); }
+				auto const v = (
+					  (terraformer::location{static_cast<float>(x), static_cast<float>(y), 0.0f} - loc)
+					+ terraformer::displacement{0.5f, 0.5f, 0.0f}
+				)/r_0;
+
+				auto const xi = inner_product(v, tangent);
+				auto const eta = inner_product(v, normal);
+				auto const r = std::pow(
+					  std::pow(std::abs(xi), norm) + std::pow(std::abs(eta), norm),
+					1.0f/norm
+				);
+
+				if( r <= r_0)
+				{ output(x, y) = output(x,y) + shape(1.0f - r); }
 			}
 		}
 	}
@@ -179,6 +198,7 @@ namespace
 		}
 	}
 #endif
+
 	template<class Shape>
 	void  max_circle(
 		terraformer::span_2d<float> output,
