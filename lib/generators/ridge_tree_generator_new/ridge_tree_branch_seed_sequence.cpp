@@ -73,7 +73,6 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		{ ret.right.push_back(loc_b, normal, *selected_branch_point); }
 	}
 
-#if 0
 	{
 		auto const theta_l = geosimd::rotation_angle{geosimd::turns{1.0f/6.0f}};
 		auto const theta_r = geosimd::rotation_angle{geosimd::turns{-1.0f/6.0f}};
@@ -87,7 +86,6 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		ret.left.push_back(points[indices.back()], v_left, indices.back());
 		ret.right.push_back(points[indices.back()], v_right, indices.back());
 	}
-#endif
 
 	// Reverse the order of branch points on the right hand side. This way, all branches will be
 	// located to the left of the trunk, which makes it easier to do collision detection in a
