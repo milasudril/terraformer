@@ -44,8 +44,8 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_plus_minus_plus)
 		)
 	);
 
-	EXPECT_EQ(std::size(res.left).get(), 3);
-	EXPECT_EQ(std::size(res.right).get(), 2);
+	EXPECT_EQ(std::size(res.left).get(), 2);
+	EXPECT_EQ(std::size(res.right).get(), 1);
 }
 
 TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_minus_plus_minus)
@@ -85,8 +85,8 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_minus_plus_minus)
 		)
 	);
 
-	EXPECT_EQ(std::size(res.left).get(), 2);
-	EXPECT_EQ(std::size(res.right).get(), 3);
+	EXPECT_EQ(std::size(res.left).get(), 1);
+	EXPECT_EQ(std::size(res.right).get(), 2);
 }
 
 TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_plus_minus_plus_minus)
@@ -125,19 +125,19 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_plus_minus_plus_minus)
 		)
 	);
 
-	EXPECT_EQ(std::size(res.left).get(), 3);
+	EXPECT_EQ(std::size(res.left).get(), 2);
 	EXPECT_LT(
 		distance(res.left.get<0>().front(), (terraformer::location{0.17f, -0.015f, 0.0f})),
 		0.05f
 	);
 	EXPECT_LT(res.left.get<1>().front()[1], 0.0f);
 
-	EXPECT_EQ(std::size(res.right).get(), 3);
+	EXPECT_EQ(std::size(res.right).get(), 2);
 	EXPECT_LT(
-		distance(res.right.get<0>()[res.right.element_indices().front() + 1], (terraformer::location{1.0f, 0.18f, 0.0f})),
+		distance(res.right.get<0>().front(), (terraformer::location{1.0f, 0.18f, 0.0f})),
 		0.05f
 	);
-	EXPECT_GT(res.right.get<1>()[res.right.element_indices().front() + 1][1], 0.0f);
+	EXPECT_GT(res.right.get<1>().front()[1], 0.0f);
 }
 
 #if 0
