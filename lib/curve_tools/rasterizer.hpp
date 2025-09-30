@@ -37,7 +37,7 @@ namespace terraformer
 		auto const dr = total_displacement/projected_distance;
 		auto const n = static_cast<size_t>(projected_distance);
 
-		for(size_t k = 0; k != n; ++k)
+		for(size_t k = 0; k != n + 1; ++k)
 		{ pixel_visitor(p1 + (static_cast<float>(k))*dr, tangent, normal); }
 	}
 

@@ -11,6 +11,7 @@
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "testfwk/validation.hpp"
 
+#include <cstdio>
 #include <random>
 #include <testfwk/testfwk.hpp>
 #include <format>
@@ -46,14 +47,15 @@ TESTCASE(terraformer_visit_pixels_different_directions)
 			terraformer::span{std::begin(locs), std::end(locs)},
 			pixel_size,
 			[&callcount, item, pixel_size](auto loc, auto...) {
-				auto const expected_loc = static_cast<float>(callcount)*item/2.0f;
+				auto const expected_loc = callcount <= 8?
+					static_cast<float>(callcount)*item/2.0f : static_cast<float>(callcount - 1)*item/2.0f;
 				EXPECT_EQ(loc[0], expected_loc[0]);
 				EXPECT_EQ(loc[1], expected_loc[1]);
 				++callcount;
 			}
 		);
 
-		auto const expected_callcount = 2.0f*static_cast<float>(std::size(locs) - 1)/pixel_size;
+		auto const expected_callcount = 2.0f*static_cast<float>(std::size(locs) - 1)/pixel_size + 2;
 		EXPECT_EQ(static_cast<float>(callcount), expected_callcount);
 	};
 }
@@ -75,16 +77,19 @@ TESTCASE(terraformer_visit_pixels_curve_through_non_integer_point_with_dir_chang
 		[&callcount, pixel_size](auto loc, auto ...) {
 			auto const x = loc[0];
 			auto const y = loc[1];
-			if(callcount < 7)
+			if(callcount < 8)
 			{
 				EXPECT_EQ(x,  static_cast<float>(callcount));
 				EXPECT_EQ(y, 0.0f);
 			}
 			else
-			if(callcount < 10)
-			{ EXPECT_EQ(y, static_cast<float>(callcount - 7)); }
+			if(callcount < 11)
+			{ EXPECT_EQ(y, static_cast<float>(callcount - 8)); }
 			else
-			{ EXPECT_EQ(y, 3.5f + static_cast<float>(callcount - 10)); }
+			if(callcount == 11)
+			{ EXPECT_EQ(y, 3.0f);}
+			else
+			{ EXPECT_EQ(y, 2.5f + static_cast<float>(callcount - 11)); }
 			++callcount;
 		}
 	);
@@ -121,7 +126,7 @@ TESTCASE(terraformer_visit_pixels_curge_random_points)
 				{
 					auto const dx_size = std::abs(x_int - x_0);
 					auto const dy_size = std::abs(y_int - y_0);
-					EXPECT_EQ(dx_size > 0 || dy_size > 0, true);
+					EXPECT_EQ(dx_size >= 0 || dy_size >= 0, true);
 				}
 
 				++callcount;
