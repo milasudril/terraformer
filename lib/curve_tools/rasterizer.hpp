@@ -24,6 +24,8 @@ namespace terraformer
 		PixelVisitor&& pixel_visitor
 	)
 	{
+		assert(pixel_size > 0.0f);
+
 		auto const p1 = location{} + (seg.p1 - location{})/pixel_size;
 		auto const p2 = location{} + (seg.p2 - location{})/pixel_size;
 		direction const tangent{p2 - p1};

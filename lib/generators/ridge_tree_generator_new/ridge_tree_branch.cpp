@@ -293,20 +293,15 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			[
 				d_max,
 				d = 0.0f,
-				loc_prev = points[k],
-				loc_prev_prev = points[k],
-				theta = 0.0f,
-				iter = size_t{0}
+				loc_prev = points[k]
 			](auto loc) mutable {
 				auto new_distance = d + distance(loc, loc_prev);
 				if(new_distance > d_max)
 				{ return true; }
 
 				d = new_distance;
-				loc_prev_prev = loc_prev;
 				loc_prev = loc;
 
-				++iter;
 				return false;
 			}
 		);

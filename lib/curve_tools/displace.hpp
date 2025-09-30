@@ -6,19 +6,13 @@
 #include "lib/common/spaces.hpp"
 #include "lib/array_classes/multi_array.hpp"
 #include "lib/curve_tools/length.hpp"
+#include "lib/math_utils/fp_props.hpp"
 
 #include <span>
 #include <bit>
 
 namespace terraformer
 {
-	constexpr bool isnan(float f)
-	{
-		auto x = std::bit_cast<uint32_t>(f);
-		auto pattern = 0x7fc0'0000u;
-		return (x&pattern) == pattern ;
-	}
-
 	inline direction curve_vertex_normal_from_curvature(
 		location a,
 		location b,

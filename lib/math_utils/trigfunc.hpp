@@ -5,6 +5,7 @@
 #include "lib/common/spaces.hpp"
 
 #include <numbers>
+#include <type_traits>
 
 namespace terraformer
 {
@@ -19,7 +20,7 @@ namespace terraformer
 	{
 		auto const factor = abs(scaling{std::cos(theta), std::sin(theta), 1.0f});
 		box /= factor;
-		return 0.5f*std::min(box[0], box[1]);;
+		return 0.5f*std::min(box[0], box[1]);
 	}
 
 	constexpr auto amplitude_to_wavelength(float amp, float slope)

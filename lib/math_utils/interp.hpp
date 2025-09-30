@@ -224,6 +224,9 @@ namespace terraformer
 		auto const output_width = output.width();
 		auto const output_height = output.height();
 
+		assert(output_width > 0);
+		assert(output_height > 0);
+
 		auto const sample_factor = box_size{input_width, input_height, 1.0f}
 			/box_size{static_cast<float>(output_width), static_cast<float>(output_height), 1.0f};
 

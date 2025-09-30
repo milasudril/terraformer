@@ -30,6 +30,7 @@
 #include <geosimd/unit_vector.hpp>
 #include <numbers>
 #include <random>
+#include <cfenv>
 
 namespace
 {
@@ -232,7 +233,7 @@ namespace
 					1.0f/norm
 				);
 
-				if( r <= r_0)
+				if( r <= 1.0f)
 				{ output(x, y) = std::max(output(x,y), shape(1.0f - r)); }
 			}
 		}
@@ -430,6 +431,8 @@ void terraformer::fill_curve(
 						shape_exponent,
 						ridge_elevation
 					](float r){
+						assert(r >= 0.0f);
+						assert(shape_exponent > 0.0f);
 						return ridge_elevation*std::pow(r, shape_exponent);
 					},
 					2.0f
@@ -486,6 +489,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		auto const& growth_params = branch_growth_params[next_level_index - 1];
 		//auto const pixel_size = get_min_pixel_size(horz_displacement);
 
+		feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret.pixels(),
@@ -502,6 +506,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			}
 		);
 
+		fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 		for(auto& stem: next_level)
 		{
 			if(!stem.left.empty())
@@ -543,6 +548,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		++current_trunk_index;
 	}
+
 	return ret;
 }
 

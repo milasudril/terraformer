@@ -15,6 +15,7 @@
 #include "lib/curve_tools/length.hpp"
 #include "lib/curve_tools/displace.hpp"
 #include "lib/curve_tools/distance.hpp"
+#include "lib/math_utils/fp_props.hpp"
 
 #include <random>
 
@@ -195,6 +196,7 @@ namespace terraformer
 		BranchStopCondition&& stop
 	)
 	{
+		assert(pixel_size > 0.0f);
 		single_array<location> base_curve;
 		if(stop(loc))
 		{ return base_curve; }
@@ -207,13 +209,22 @@ namespace terraformer
 		v += 1.0f*step;
 		auto current_elevation = interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
 
+		auto k = base_curve.element_indices().front();
 		while(!stop(location{} + v*pixel_size))
 		{
 			auto const next_elevation =  interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
-			if(next_elevation > current_elevation)
+			if(next_elevation > current_elevation || !inside(current_heightmap, v[0], v[1]))
 			{ return base_curve; }
 
-			base_curve.push_back(location{} + v*pixel_size);
+			auto const next_loc = location{} + v*pixel_size;
+
+			if(k > base_curve.element_indices().front() + 1)
+			{
+				if(distance(base_curve[k - 1], next_loc) <= 0.25f*pixel_size)
+				{ return base_curve; }
+			}
+
+			base_curve.push_back(next_loc);
 			current_elevation = next_elevation;
 
 			auto const dx = 0.5f*(
@@ -231,6 +242,7 @@ namespace terraformer
 			step = grad_norm <= 1.0f/16384.0f? step : -grad/grad_norm;
 
 			v += step;
+			++k;
 		}
 
 		return base_curve;
