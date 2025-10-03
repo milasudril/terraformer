@@ -13,14 +13,18 @@
 
 namespace terraformer
 {
-	inline direction curve_vertex_normal_from_curvature(
+	inline std::optional<direction> curve_vertex_normal_from_curvature(
 		location a,
 		location b,
 		location c)
 	{
 		auto const tangent = c - a;
 		auto const binormal = cross(tangent, b - a);
-		return direction{cross(binormal, tangent)};
+		auto const normal = cross(binormal, tangent);
+		auto const l = norm(normal);
+		if(l == 0.0f)
+		{ return std::nullopt; }
+		return direction{normal/l, direction::prenormalized_tag{}};
 	}
 
 	inline direction curve_vertex_normal_from_projection(

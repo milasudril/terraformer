@@ -24,7 +24,7 @@ TESTCASE(terraformer_curve_vertex_normal_from_curvature_to_circle_in_plane)
 		auto const n = terraformer::curve_vertex_normal_from_curvature(a, b, c);
 
 		auto const dir = b - terraformer::location{0.0f, 0.0f, 0.0f};
-		EXPECT_LT(norm(dir - n.get()), 1.0e-6f);
+		EXPECT_LT(norm(dir - n->get()), 1.0e-6f);
 	}
 }
 
@@ -54,7 +54,7 @@ TESTCASE(terraformer_curve_vertex_normal_from_curvature_to_circle_rotated_arroun
 		EXPECT_NE(b[2], 0.0f);
 
 		auto const dir = b - terraformer::location{0.0f, 0.0f, 0.0f};
-		EXPECT_LT(norm(dir - n.get()), 1.0e-6f);
+		EXPECT_LT(norm(dir - n->get()), 1.0e-6f);
 	}
 }
 
@@ -75,10 +75,10 @@ TESTCASE(terraformer_curve_vertex_normal_from_curvature)
 		auto const n = terraformer::curve_vertex_normal_from_curvature(a, b, c);
 
 		if(locs[k][1] > 0.0f)
-		{ EXPECT_GT(n[1], 0.0f); }
+		{ EXPECT_GT((*n)[1], 0.0f); }
 
 		if(locs[k][1] < 0.0f)
-		{ EXPECT_LT(n[1], 0.0f); }
+		{ EXPECT_LT((*n)[1], 0.0f); }
 	}
 }
 
