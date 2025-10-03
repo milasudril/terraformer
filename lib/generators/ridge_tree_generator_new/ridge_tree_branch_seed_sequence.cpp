@@ -42,10 +42,13 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 				auto const loc_b = points[*selected_branch_point];
 				auto const loc_c = points[*selected_branch_point + 1];
 				auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
-				if(side >= 0.0f)
-				{ ret.left.push_back(loc_b, normal, *selected_branch_point); }
-				else
-				{ ret.right.push_back(loc_b, normal, *selected_branch_point); }
+				if(normal.has_value())
+				{
+					if(side >= 0.0f)
+					{ ret.left.push_back(loc_b, *normal, *selected_branch_point); }
+					else
+					{ ret.right.push_back(loc_b, *normal, *selected_branch_point); }
+				}
 			}
 			max_offset = 0.0f;
 			++l;
@@ -67,10 +70,13 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		auto const loc_b = points[*selected_branch_point];
 		auto const loc_c = points[*selected_branch_point + 1];
 		auto const normal = curve_vertex_normal_from_curvature(loc_a, loc_b, loc_c);
-		if(side >= 0.0f)
-		{ ret.left.push_back(loc_b, normal, *selected_branch_point); }
-		else
-		{ ret.right.push_back(loc_b, normal, *selected_branch_point); }
+		if(normal.has_value())
+		{
+			if(side >= 0.0f)
+			{ ret.left.push_back(loc_b, *normal, *selected_branch_point); }
+			else
+			{ ret.right.push_back(loc_b, *normal, *selected_branch_point); }
+		}
 	}
 
 #if 0
