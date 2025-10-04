@@ -32,6 +32,40 @@
 #include <random>
 #include <cfenv>
 
+// FIXME:
+//
+// Horz displacement amplitude is wrong by a factor of 2
+
+// TODO:
+//
+// To add:
+//
+// * Control Roll-off exponent for ridge elevation
+// * Extra branches at the start of at least the root curve
+// * Avoid branch early. Looks strange, especially at the root curve
+// * Multi-threading where possible
+//
+// To verify:
+//
+// * Branch pruning
+//
+//
+// Experiments:
+//
+// Strategy 1:
+//
+// * Try to add noise before tracing children. Set the noise amplitude as a factor, with an
+//   amplitude of 0.25*input_elevation. Wave function with offset 1.
+//
+//
+// Strategy 2:
+//
+// // * Try to add extra elevation at vertices. Use at most 0.25*input_elevation. Actual value is
+//   randomized. Wave function with offset 1.
+// * Add noise with an amplitude of 0.125*input_elevation. Wave function with offset 1. If the added
+//   does not work together with tracer, apply it after the heightmap has been used to generate
+//   children.
+
 namespace
 {
 #if 0
@@ -437,9 +471,8 @@ void terraformer::fill_curve(
 			interp(pixels_in, start_loc[0], start_loc[1], clamp_at_boundary{}):
 			elevation_profile.ridge_elevation;
 		auto const ridge_radius = thickness_mod.rel_height?
-			1.25f*ridge_elevation/pixel_size:
+			2.0f*ridge_elevation/pixel_size:
 			elevation_profile.ridge_half_thickness/pixel_size;
-		printf("Ridge elevation = %.8g\n", ridge_elevation);
 
 		float curve_length = 0.0f;
 		visit_pixels(
@@ -614,6 +647,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 						.rel_height = true
 					}
 				);
+				// FIXME: Cannot touch ret yet, since that will be used for the right
 				pick_max(ret.pixels(), std::as_const(tmp).pixels());
 			}
 

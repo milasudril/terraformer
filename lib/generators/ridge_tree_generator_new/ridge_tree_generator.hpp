@@ -169,10 +169,10 @@ namespace terraformer
 		std::array<std::byte, 16> rng_seed{};
 		ridge_tree_trunk_descriptor trunk;
 
-		static constexpr size_t num_levels = 3;
+		static constexpr size_t num_levels = 2;
 		std::array<ridge_tree_branch_growth_descriptor, num_levels - 1> branch_growth_params{
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 12884.0f},
-			ridge_tree_branch_growth_descriptor{.e2e_distance = 3072.0f}
+		//	ridge_tree_branch_growth_descriptor{.e2e_distance = 3072.0f}
 		};
 
 		static constexpr auto trunk_slope = 1.25f;
@@ -211,12 +211,12 @@ namespace terraformer
 				.amplitude = default_branch_1_horz_amplitude,
 				.wavelength = default_branch_1_horz_wavelength,
 				.damping = {}
-			},
+			},/*
 			ridge_tree_branch_horz_displacement_descriptor{
 				.amplitude = default_branch_2_horz_amplitude,
 				.wavelength = default_branch_2_horz_wavelength,
 				.damping = {}
-			}
+			}*/
 		};
 
 		std::array<ridge_tree_elevation_profile_descriptor, num_levels> elevation_profile{
@@ -247,7 +247,7 @@ namespace terraformer
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_branch_1_noise_amplitude
-			},
+			},/*
 			ridge_tree_elevation_profile_descriptor{
 				.ridge_elevation = default_branch_2_ridge_elevation,
 				.ridge_half_thickness = default_branch_2_ridge_elevation*(
@@ -259,7 +259,7 @@ namespace terraformer
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_branch_2_noise_amplitude
-			}
+			}*/
 		};
 
 		bool operator==(ridge_tree_descriptor const&) const = default;
