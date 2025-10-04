@@ -206,7 +206,7 @@ namespace terraformer
 
 		base_curve.reserve(array_size<location>{128});
 		auto step = 1.0f*start_dir;
-		v += 1.0f*step;
+		v += 2.0f*step;
 		auto current_elevation = interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
 
 		auto k = base_curve.element_indices().front();
@@ -240,7 +240,6 @@ namespace terraformer
 			auto const grad_norm = norm(grad);
 
 			step = grad_norm <= 1.0f/16384.0f? step : -grad/grad_norm;
-
 			v += step;
 			++k;
 		}
