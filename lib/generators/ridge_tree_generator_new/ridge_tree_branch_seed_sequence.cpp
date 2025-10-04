@@ -80,15 +80,16 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 	}
 
 	{
-		auto const theta_l = geosimd::rotation_angle{geosimd::turns{1.0f/6.0f}};
-		auto const theta_r = geosimd::rotation_angle{geosimd::turns{-1.0f/6.0f}};
-		auto const last_tangent = points[indices.back()]  - points[indices.back() - 1];
+		auto const theta_l = geosimd::rotation_angle{geosimd::turns{1.0f/12.0f}};
+		auto const theta_r = geosimd::rotation_angle{geosimd::turns{-1.0f/12.0f}};
+		auto const last_tangent = points[indices.back()]  - points[indices.back() - 2];
 		direction const v_left{
 			last_tangent.apply(geosimd::rotation<geom_space>{theta_l, geosimd::dimension_tag<2>{}})
 		};
 		direction const v_right{
 			last_tangent.apply(geosimd::rotation<geom_space>{theta_r, geosimd::dimension_tag<2>{}})
 		};
+
 		ret.left.push_back(points[indices.back()], v_left, indices.back());
 		ret.right.push_back(points[indices.back()], v_right, indices.back());
 	}
