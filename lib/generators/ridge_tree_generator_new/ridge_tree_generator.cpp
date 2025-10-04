@@ -416,7 +416,8 @@ void terraformer::fill_curve(
 	span_2d<float> pixels,
 	ridge_tree_trunk const& trunk,
 	ridge_tree_elevation_profile_descriptor const& elevation_profile,
-	float pixel_size
+	float pixel_size,
+	ridge_tree_ridge_thickness_modulation const& thickness_mod
 )
 {
 	auto const elems = trunk.branches.element_indices();
@@ -426,30 +427,52 @@ void terraformer::fill_curve(
 	auto const shape_exponent = elevation_profile.ridge_rolloff_exponent;
 	auto const ridge_elevation = elevation_profile.ridge_elevation;
 
-//	auto const curve_lengths = branches.get<3>();
 	for(auto k : elems)
 	{
 		auto const& curve = curves[k];
 		if(curve.points().empty())
 		{ continue; }
 
-		visit_pixels(curve.points(),
+		float curve_length = 0.0f;
+		visit_pixels(
+			curve.points(),
+			pixel_size,
+			[
+				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
+				&curve_length
+			](location loc, auto&&...) mutable {
+				curve_length += distance(loc, loc_prev);
+				loc_prev = loc;
+			}
+		);
+
+		visit_pixels(
+			curve.points(),
 			pixel_size,
 			[
 				pixels,
 				ridge_radius,
 				shape_exponent,
-				ridge_elevation
-			](terraformer::location loc, terraformer::direction tangent, terraformer::direction normal) {
+				ridge_elevation,
+				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
+				integrated_length = 0.0f,
+				curve_length,
+				thickness_mod
+			](location loc, direction tangent, direction normal) mutable {
+				auto const curve_param = integrated_length/curve_length;
 				max_circle(
 					pixels,
 					loc,
 					tangent,
 					normal,
-					ridge_radius,
+					ridge_radius*std::lerp(thickness_mod.begin_val, thickness_mod.end_val, curve_param),
 					[
 						shape_exponent,
-						ridge_elevation
+						ridge_elevation = ridge_elevation*std::lerp(
+							thickness_mod.begin_val,
+							thickness_mod.end_val,
+							curve_param
+						)
 					](float r){
 						assert(r >= 0.0f);
 						assert(shape_exponent > 0.0f);
@@ -457,6 +480,9 @@ void terraformer::fill_curve(
 					},
 					2.0f
 				);
+
+				integrated_length += distance(loc, loc_prev);
+				loc_prev = loc;
 			}
 		);
 	}
@@ -476,7 +502,16 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 	single_array<ridge_tree_trunk> trunks;
 	trunks.push_back(generate_trunk(dom_size, params.trunk, params.horz_displacements.front(), rng));
-	fill_curve(ret, trunks.back(), params.elevation_profile.front(), global_pixel_size);
+	fill_curve(
+		ret,
+		trunks.back(),
+		params.elevation_profile.front(),
+		global_pixel_size,
+		ridge_tree_ridge_thickness_modulation{
+			.begin_val = 1.0f,
+			.end_val = 1.0f
+		}
+	);
 
 	auto current_trunk_index = trunks.element_indices().front();
 	auto const& branch_growth_params = params.branch_growth_params;
@@ -543,7 +578,16 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				);
 
 				grayscale_image tmp{w_img, h_img};
-				fill_curve(tmp, trunks.back(), params.elevation_profile[next_level_index], global_pixel_size);
+				fill_curve(
+					tmp,
+					trunks.back(),
+					params.elevation_profile[next_level_index],
+					global_pixel_size,
+					ridge_tree_ridge_thickness_modulation{
+						.begin_val = 1.0f,
+						.end_val = 0.0f
+					}
+				);
 				add_resampled(std::as_const(tmp).pixels(), ret.pixels(), 1.0f);
 			}
 
@@ -561,7 +605,16 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				);
 
 				grayscale_image tmp{w_img, h_img};
-				fill_curve(tmp, trunks.back(), params.elevation_profile[next_level_index], global_pixel_size);
+				fill_curve(
+					tmp,
+					trunks.back(),
+					params.elevation_profile[next_level_index],
+					global_pixel_size,
+					ridge_tree_ridge_thickness_modulation{
+						.begin_val = 1.0f,
+						.end_val = 0.0f
+					}
+				);
 				add_resampled(std::as_const(tmp).pixels(), ret.pixels(), 1.0f);
 			}
 		}
