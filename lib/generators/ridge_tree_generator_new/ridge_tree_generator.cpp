@@ -414,6 +414,7 @@ float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& 
 
 void terraformer::fill_curve(
 	span_2d<float> pixels,
+	span_2d<float const> pixels_in,
 	ridge_tree_trunk const& trunk,
 	ridge_tree_elevation_profile_descriptor const& elevation_profile,
 	float pixel_size,
@@ -423,15 +424,22 @@ void terraformer::fill_curve(
 	auto const elems = trunk.branches.element_indices();
 	auto const attribs = trunk.branches.attributes();
 	auto const curves = attribs.get<0>();
-	auto const ridge_radius = elevation_profile.ridge_half_thickness/pixel_size;
 	auto const shape_exponent = elevation_profile.ridge_rolloff_exponent;
-	auto const ridge_elevation = elevation_profile.ridge_elevation;
 
 	for(auto k : elems)
 	{
 		auto const& curve = curves[k];
 		if(curve.points().empty())
 		{ continue; }
+
+		auto const start_loc = (curve.points().front() - location{})/pixel_size;
+		auto const ridge_elevation = thickness_mod.rel_height?
+			interp(pixels_in, start_loc[0], start_loc[1], clamp_at_boundary{}):
+			elevation_profile.ridge_elevation;
+		auto const ridge_radius = thickness_mod.rel_height?
+			1.25f*ridge_elevation/pixel_size:
+			elevation_profile.ridge_half_thickness/pixel_size;
+		printf("Ridge elevation = %.8g\n", ridge_elevation);
 
 		float curve_length = 0.0f;
 		visit_pixels(
@@ -488,6 +496,20 @@ void terraformer::fill_curve(
 	}
 }
 
+namespace
+{
+	void pick_max(terraformer::span_2d<float> output, terraformer::span_2d<float const> input)
+	{
+		for(uint32_t y = 0; y != output.height(); ++y)
+		{
+			for(uint32_t x = 0; x != output.width(); ++x)
+			{
+				output(x, y) = std::max(output(x, y), input(x, y));
+			}
+		}
+	}
+}
+
 terraformer::grayscale_image
 terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridge_tree_descriptor const& params)
 {
@@ -504,12 +526,14 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	trunks.push_back(generate_trunk(dom_size, params.trunk, params.horz_displacements.front(), rng));
 	fill_curve(
 		ret,
+		span_2d<float const>{},
 		trunks.back(),
 		params.elevation_profile.front(),
 		global_pixel_size,
 		ridge_tree_ridge_thickness_modulation{
 			.begin_val = 1.0f,
-			.end_val = 1.0f
+			.end_val = 1.0f,
+			.rel_height = false
 		}
 	);
 
@@ -580,15 +604,17 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				grayscale_image tmp{w_img, h_img};
 				fill_curve(
 					tmp,
+					ret.pixels(),
 					trunks.back(),
 					params.elevation_profile[next_level_index],
 					global_pixel_size,
 					ridge_tree_ridge_thickness_modulation{
 						.begin_val = 1.0f,
-						.end_val = 0.0f
+						.end_val = 0.5f,
+						.rel_height = true
 					}
 				);
-				add_resampled(std::as_const(tmp).pixels(), ret.pixels(), 1.0f);
+				pick_max(ret.pixels(), std::as_const(tmp).pixels());
 			}
 
 			if(!stem.right.empty())
@@ -607,15 +633,17 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				grayscale_image tmp{w_img, h_img};
 				fill_curve(
 					tmp,
+					ret.pixels(),
 					trunks.back(),
 					params.elevation_profile[next_level_index],
 					global_pixel_size,
 					ridge_tree_ridge_thickness_modulation{
 						.begin_val = 1.0f,
-						.end_val = 0.0f
+						.end_val = 0.5f,
+						.rel_height = true
 					}
 				);
-				add_resampled(std::as_const(tmp).pixels(), ret.pixels(), 1.0f);
+				pick_max(ret.pixels(), std::as_const(tmp).pixels());
 			}
 		}
 

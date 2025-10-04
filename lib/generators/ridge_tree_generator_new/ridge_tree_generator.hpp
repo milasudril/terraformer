@@ -135,10 +135,12 @@ namespace terraformer
 	{
 		float begin_val;
 		float end_val;
+		bool rel_height;
 	};
 
 	void fill_curve(
 		span_2d<float> pixels,
+		span_2d<float const> pixels_in,
 		ridge_tree_trunk const& trunk,
 		ridge_tree_elevation_profile_descriptor const& elev_profile,
 		float pixel_size,
