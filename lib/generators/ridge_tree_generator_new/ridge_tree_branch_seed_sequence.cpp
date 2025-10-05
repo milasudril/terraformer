@@ -3,8 +3,11 @@
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
 #include "lib/common/spaces.hpp"
+#include "lib/common/value_map.hpp"
 #include "lib/curve_tools/displace.hpp"
 #include "lib/common/find_zeros.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
+#include "lib/value_maps/affine_value_map.hpp"
 #include <geosimd/abstract_spaces.hpp>
 #include <geosimd/angle.hpp>
 #include <numbers>
@@ -149,4 +152,29 @@ terraformer::collect_branch_indices(ridge_tree_branch_seed_sequence_pair const& 
 	std::ranges::copy(seq_pair.right.get<2>(), std::back_inserter(ret));
 	std::ranges::sort(ret);
 	return ret;
+}
+
+void terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor::bind(
+	descriptor_editor_ref& editor
+)
+{
+	editor.create_float_input(
+		u8"Branch count",
+		descriptor_editor_ref::assigner<float>{branch_count},
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_int_value_map{0, 4}},
+			.textbox_placeholder_string = u8"1",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
+	editor.create_float_input(
+		u8"Spread angle",
+		descriptor_editor_ref::assigner<float>{spread_angle},
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
 }

@@ -7,6 +7,7 @@
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/common/value_map.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include "lib/generators/domain/domain_size.hpp"
 #include "lib/generators/heightmap/heightmap_generator_context.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_curve.hpp"
@@ -789,6 +790,14 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 			.visual_angle_range = std::nullopt
 		}
 	);
+
+	auto eb_form = editor.create_form(
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Endpoint branches"
+		},
+		descriptor_editor_ref::form_descriptor{}
+	);
+	endpoint_branches.bind(eb_form);
 }
 
 void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_editor_ref editor)
@@ -899,7 +908,8 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 			descriptor_editor_ref::table_descriptor{
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
-					u8"E2E distance/m"
+					u8"E2E distance/m",
+					u8"Endpoint branches"
 				}
 			}
 		);

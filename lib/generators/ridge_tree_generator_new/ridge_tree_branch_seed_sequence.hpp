@@ -6,6 +6,7 @@
 #include "lib/curve_tools/displace.hpp"
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
 #include <geosimd/angle.hpp>
 
 namespace terraformer
@@ -25,6 +26,11 @@ namespace terraformer
 	{
 		size_t branch_count = 0;
 		geosimd::turn_angle spread_angle{geosimd::turns{0.5f}};
+
+		bool operator==(ridge_tree_brach_seed_sequence_boundary_point_descriptor const&) const = default;
+		bool operator!=(ridge_tree_brach_seed_sequence_boundary_point_descriptor const&) const = default;
+
+		void bind(descriptor_editor_ref& descriptor_editor);
 	};
 
 	struct ridge_tree_branch_seed_collection_descriptor
