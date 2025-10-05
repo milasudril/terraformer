@@ -605,6 +605,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		auto const& horz_displacement = displacement_profiles[next_level_index];
 		auto const& growth_params = branch_growth_params[next_level_index - 1];
+		auto const& elev_profile = params.elevation_profile[next_level_index];
 		//auto const pixel_size = get_min_pixel_size(horz_displacement);
 
 		feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
@@ -620,7 +621,9 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			rng,
 			ridge_tree_branch_growth_description{
 				.max_length = growth_params.e2e_distance,
-				.min_neighbour_distance = horz_displacement.amplitude
+				.min_neighbour_distance = 1.25f*(
+					horz_displacement.amplitude + 0.5f*elev_profile.ridge_half_thickness
+				)
 			}
 		);
 
