@@ -19,6 +19,26 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 
 	auto const points = displaced_points.get<0>();
 	auto const offsets = displaced_points.get<1>();
+	ridge_tree_branch_seed_sequence_pair ret;
+	auto const indices = displaced_points.element_indices();
+
+	{
+		auto const start_branches = params.start_branches;
+		auto const dtheta = start_branches.spread_angle/
+			static_cast<float>(start_branches.branch_count + 1);
+		auto const last_tangent = points.front() - points[indices.front() + 2];
+		geosimd::rotation_angle const ref_angle{};
+		auto const theta_0 = ref_angle + (dtheta - 0.5f*start_branches.spread_angle);
+		for(size_t k = 0; k != start_branches.branch_count; ++k)
+		{
+			auto const theta = theta_0 + static_cast<double>(k)*dtheta;
+			direction const v{last_tangent.apply(geosimd::rotation<geom_space>{theta, geosimd::dimension_tag<2>{}})};
+			if(theta - ref_angle > geosimd::turn_angle{geosimd::turns{0.5}})
+			{ ret.left.push_back(points[indices.front()], v, indices.front()); }
+			else
+			{ ret.right.push_back(points[indices.front()], v, indices.front()); }
+		}
+	}
 
 	auto const x_intercepts = terraformer::find_zeros(offsets, 1.0f/128.0f);
 	auto side = x_intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
@@ -29,10 +49,8 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		side = -side;
 	}
 
-	ridge_tree_branch_seed_sequence_pair ret;
 	float max_offset = 0.0f;
 	std::optional<displaced_curve::index_type> selected_branch_point;
-	auto const indices = displaced_points.element_indices();
 	for(auto k : index_range{indices.front() + 1, indices.back() - 1})
 	{
 		if(l != std::size(x_intercepts.zeros) && k == displaced_curve::index_type{x_intercepts.zeros[l]})
@@ -87,7 +105,7 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		auto const last_tangent = points[indices.back()]  - points[indices.back() - 2];
 		geosimd::rotation_angle const ref_angle{};
 		auto const theta_0 = ref_angle + (dtheta - 0.5f*end_brancehs.spread_angle);
-		for(size_t k = 0; k != params.end_brancehs.branch_count; ++k)
+		for(size_t k = 0; k != end_brancehs.branch_count; ++k)
 		{
 			auto const theta = theta_0 + static_cast<double>(k)*dtheta;
 			direction const v{last_tangent.apply(geosimd::rotation<geom_space>{theta, geosimd::dimension_tag<2>{}})};
