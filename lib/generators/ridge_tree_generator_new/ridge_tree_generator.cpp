@@ -32,10 +32,6 @@
 #include <random>
 #include <cfenv>
 
-// FIXME:
-//
-// Horz displacement amplitude is wrong by a factor of 2
-
 // TODO:
 //
 // To add:
