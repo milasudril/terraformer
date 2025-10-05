@@ -10,7 +10,8 @@
 #include <numbers>
 
 terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tree_branch_seeds(
-	displaced_curve const& displaced_points
+	displaced_curve const& displaced_points,
+	ridge_tree_branch_seed_collection_descriptor const& params
 )
 {
 	if(std::size(displaced_points).get() < 3)
@@ -80,18 +81,21 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 	}
 
 	{
-		auto const theta_l = geosimd::rotation_angle{geosimd::turns{1.0f/8.0f}};
-		auto const theta_r = geosimd::rotation_angle{geosimd::turns{-1.0f/8.0f}};
+		auto const end_brancehs = params.end_brancehs;
+		auto const dtheta = end_brancehs.spread_angle/
+			static_cast<float>(end_brancehs.branch_count + 1);
 		auto const last_tangent = points[indices.back()]  - points[indices.back() - 2];
-		direction const v_left{
-			last_tangent.apply(geosimd::rotation<geom_space>{theta_l, geosimd::dimension_tag<2>{}})
-		};
-		direction const v_right{
-			last_tangent.apply(geosimd::rotation<geom_space>{theta_r, geosimd::dimension_tag<2>{}})
-		};
-
-		ret.left.push_back(points[indices.back()], v_left, indices.back());
-		ret.right.push_back(points[indices.back()], v_right, indices.back());
+		geosimd::rotation_angle const ref_angle{};
+		auto const theta_0 = ref_angle + (dtheta - 0.5f*end_brancehs.spread_angle);
+		for(size_t k = 0; k != params.end_brancehs.branch_count; ++k)
+		{
+			auto const theta = theta_0 + static_cast<double>(k)*dtheta;
+			direction const v{last_tangent.apply(geosimd::rotation<geom_space>{theta, geosimd::dimension_tag<2>{}})};
+			if(theta - ref_angle > geosimd::turn_angle{geosimd::turns{0.5}})
+			{ ret.right.push_back(points[indices.back()], v, indices.back()); }
+			else
+			{ ret.left.push_back(points[indices.back()], v, indices.back()); }
+		}
 	}
 
 	// Reverse the order of branch points on the right hand side. This way, all branches will be
@@ -105,12 +109,15 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 }
 
 terraformer::single_array<terraformer::ridge_tree_branch_seed_sequence_pair>
-terraformer::collect_ridge_tree_branch_seeds(span<displaced_curve const> points)
+terraformer::collect_ridge_tree_branch_seeds(
+	span<displaced_curve const> points,
+	ridge_tree_branch_seed_collection_descriptor const& params
+)
 {
 	single_array<terraformer::ridge_tree_branch_seed_sequence_pair> ret;
 	ret.reserve(static_cast<decltype(ret)::size_type>(std::size(points)));
 	for(auto point : points)
-	{ ret.push_back(collect_ridge_tree_branch_seeds(point)); }
+	{ ret.push_back(collect_ridge_tree_branch_seeds(point, params)); }
 	return ret;
 }
 

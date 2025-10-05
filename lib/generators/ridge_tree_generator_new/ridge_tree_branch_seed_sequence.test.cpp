@@ -41,7 +41,14 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_plus_minus_plus)
 				.offsets = offsets,
 				.sample_period = 1.15f*dx
 			}
-		)
+		),
+		terraformer::ridge_tree_branch_seed_collection_descriptor{
+			.start_branches = terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor{},
+			.end_brancehs = terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor{
+				.branch_count = 2,
+				.spread_angle = geosimd::turns{0.5f}
+			}
+		}
 	);
 
 	EXPECT_EQ(std::size(res.left).get(), 3);
@@ -82,7 +89,14 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_minus_plus_minus)
 				.offsets = offsets,
 				.sample_period = 1.15f*dx
 			}
-		)
+		),
+		terraformer::ridge_tree_branch_seed_collection_descriptor{
+			.start_branches = terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor{},
+			.end_brancehs = terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor{
+				.branch_count = 2,
+				.spread_angle = geosimd::turns{0.5f}
+			}
+		}
 	);
 
 	EXPECT_EQ(std::size(res.left).get(), 2);
@@ -122,7 +136,14 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_pair_plus_minus_plus_minus)
 				.offsets = offsets,
 				.sample_period = 1.15f*dx
 			}
-		)
+		),
+		terraformer::ridge_tree_branch_seed_collection_descriptor{
+			.start_branches = terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor{},
+			.end_brancehs = terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor{
+				.branch_count = 2,
+				.spread_angle = geosimd::turns{0.5f}
+			}
+		}
 	);
 
 	EXPECT_EQ(std::size(res.left).get(), 3);

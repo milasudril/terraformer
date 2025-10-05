@@ -583,7 +583,14 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		}
 
 		auto const next_level_seeds = collect_ridge_tree_branch_seeds(
-			std::as_const(current_trunk.branches).get<0>()
+			std::as_const(current_trunk.branches).get<0>(),
+			terraformer::ridge_tree_branch_seed_collection_descriptor{
+				.start_branches = terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor{},
+				.end_brancehs = terraformer::ridge_tree_brach_seed_sequence_boundary_point_descriptor{
+					.branch_count = 2,
+					.spread_angle = geosimd::turns{0.5f}
+				}
+			}
 		);
 
 		auto k = next_level_seeds.element_indices().front();
