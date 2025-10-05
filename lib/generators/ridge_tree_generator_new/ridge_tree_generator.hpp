@@ -27,10 +27,11 @@ namespace terraformer
 
 		bool operator==(ridge_tree_trunk_control_point_descriptor const&) const = default;
 		bool operator!=(ridge_tree_trunk_control_point_descriptor const&) const = default;
+
 		void bind(descriptor_editor_ref editor);
 	};
 
-	struct ridge_tree_trunk_descriptor
+	struct ridge_tree_trunk_curve_descriptor
 	{
 		ridge_tree_trunk_control_point_descriptor begin{
 			.x = 0.125f,
@@ -46,10 +47,21 @@ namespace terraformer
 			.speed = 1.0f
 		};
 
+		bool operator==(ridge_tree_trunk_curve_descriptor const&) const = default;
+		bool operator!=(ridge_tree_trunk_curve_descriptor const&) const = default;
+
+		void bind(descriptor_editor_ref editor);
+	};
+
+	struct ridge_tree_trunk_descriptor
+	{
+		ridge_tree_trunk_curve_descriptor curve;
 		ridge_tree_brach_seed_sequence_boundary_point_descriptor start_point_branches;
 
 		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
 		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;
+
+		void bind(descriptor_editor_ref editor);
 	};
 
 	struct ridge_tree_branch_growth_descriptor
@@ -88,7 +100,7 @@ namespace terraformer
 
 	inline ridge_tree_trunk generate_trunk(
 		domain_size_descriptor dom_size,
-		ridge_tree_trunk_descriptor const& base_params,
+		ridge_tree_trunk_curve_descriptor const& base_params,
 		ridge_tree_branch_horz_displacement_descriptor const& horz_displacement,
 		random_generator& rng
 	)

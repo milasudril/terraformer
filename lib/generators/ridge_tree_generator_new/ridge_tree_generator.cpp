@@ -553,7 +553,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	grayscale_image ret{w_img, h_img};
 
 	single_array<ridge_tree_trunk> trunks;
-	trunks.push_back(generate_trunk(dom_size, params.trunk, params.horz_displacements.front(), rng));
+	trunks.push_back(generate_trunk(dom_size, params.trunk.curve, params.horz_displacements.front(), rng));
 	fill_curve(
 		ret,
 		span_2d<float const>{},
@@ -881,13 +881,13 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 
 		{
 			auto record = trunk_table.add_record(u8"Begin");
-			trunk.begin.bind(record);
+			trunk.curve.begin.bind(record);
 			record.append_pending_widgets();
 		}
 
 		{
 			auto record = trunk_table.add_record(u8"End");
-			trunk.end.bind(record);
+			trunk.curve.end.bind(record);
 			record.append_pending_widgets();
 		}
 	}
