@@ -239,8 +239,8 @@ namespace terraformer
 
 			auto const grad_norm = norm(grad);
 
-			step = grad_norm <= 1.0f/16384.0f? step : -grad/grad_norm;
-			v += step;
+			step = grad_norm <= 1.0f/64.0f? step : -grad/grad_norm;
+			v += 2.0f*step;
 			++k;
 		}
 
