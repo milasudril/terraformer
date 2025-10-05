@@ -16,14 +16,14 @@
 
 namespace terraformer
 {
-	struct ridge_tree_trunk_curve_descriptor
+	struct ridge_tree_trunk_curve
 	{
 		cubic_spline_control_point<location, displacement> begin;
 		cubic_spline_control_point<location, displacement> end;
 	};
 
 	ridge_tree_trunk generate_trunk(
-		ridge_tree_trunk_curve_descriptor const& params,
+		ridge_tree_trunk_curve const& params,
 		ridge_tree_branch_displacement_description const& horz_displacement_profile,
 		random_generator& rng
 	);

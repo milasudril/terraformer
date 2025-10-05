@@ -6,6 +6,7 @@
 #include "lib/common/spaces.hpp"
 #include "lib/generators/heightmap/heightmap_generator_context.hpp"
 #include "lib/generators/ridge_tree_generator_new/ridge_tree.hpp"
+#include "lib/generators/ridge_tree_generator_new/ridge_tree_branch_seed_sequence.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/math_utils/trigfunc.hpp"
 #include "lib/pixel_store/image.hpp"
@@ -44,6 +45,8 @@ namespace terraformer
 			.heading = 0.25f,
 			.speed = 1.0f
 		};
+
+		ridge_tree_brach_seed_sequence_boundary_point_descriptor start_point_branches;
 
 		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
 		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;
@@ -91,7 +94,7 @@ namespace terraformer
 	)
 	{
 		return generate_trunk(
-			ridge_tree_trunk_curve_descriptor{
+			ridge_tree_trunk_curve{
 				.begin = make_cubic_spline_control_point(dom_size, base_params.begin),
 				.end = make_cubic_spline_control_point(dom_size, base_params.end)
 			},
