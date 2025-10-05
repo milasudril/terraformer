@@ -52,11 +52,6 @@ namespace terraformer
 	struct ridge_tree_branch_growth_descriptor
 	{
 		float e2e_distance = 16384.0f;
-		ridge_tree_brach_seed_sequence_boundary_point_descriptor endpoint_branches{
-			.branch_count = 2,
-			.spread_angle = geosimd::turns{0.5f}
-		};
-
 		bool operator==(ridge_tree_branch_growth_descriptor const&) const = default;
 		bool operator!=(ridge_tree_branch_growth_descriptor const&) const = default;
 		void bind(descriptor_editor_ref editor);
@@ -174,6 +169,18 @@ namespace terraformer
 		ridge_tree_trunk_descriptor trunk;
 
 		static constexpr size_t num_levels = 3;
+
+		std::array<ridge_tree_brach_seed_sequence_boundary_point_descriptor, num_levels - 1> endpoint_branches{
+			ridge_tree_brach_seed_sequence_boundary_point_descriptor{
+				.branch_count = 2,
+				.spread_angle = geosimd::turns{0.5f}
+			},
+			ridge_tree_brach_seed_sequence_boundary_point_descriptor{
+				.branch_count = 2,
+				.spread_angle = geosimd::turns{0.5f}
+			}
+		};
+
 		std::array<ridge_tree_branch_growth_descriptor, num_levels - 1> branch_growth_params{
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 12884.0f},
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 3072.0f}

@@ -790,14 +790,6 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 			.visual_angle_range = std::nullopt
 		}
 	);
-
-	auto eb_form = editor.create_form(
-		descriptor_editor_ref::field_descriptor{
-			.label = u8"Endpoint branches"
-		},
-		descriptor_editor_ref::form_descriptor{}
-	);
-	endpoint_branches.bind(eb_form);
 }
 
 void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_editor_ref editor)
@@ -901,6 +893,32 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 	}
 
 	{
+		auto ep_branches_table = editor.create_table(
+			descriptor_editor_ref::field_descriptor{
+				.label = u8"Endpoint branches"
+			},
+			descriptor_editor_ref::table_descriptor{
+				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
+				.field_names{
+					u8"Branch count",
+					u8"Spread angle"
+				}
+			}
+		);
+
+		size_t k = 0;
+		for(auto& item : endpoint_branches)
+		{
+			auto record = ep_branches_table.add_record(
+				k == 0? u8"Trunk" : reinterpret_cast<char8_t const*>(std::to_string(k).c_str())
+			);
+			item.bind(record);
+			record.append_pending_widgets();
+			++k;
+		}
+	}
+
+	{
 		auto branch_growth_table = editor.create_table(
 			descriptor_editor_ref::field_descriptor{
 				.label = u8"Branch growth"
@@ -909,7 +927,6 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"E2E distance/m",
-					u8"Endpoint branches"
 				}
 			}
 		);
