@@ -60,7 +60,7 @@
 //
 // Strategy 2:
 //
-// // * Try to add extra elevation at vertices. Use at most 0.25*input_elevation. Actual value is
+// * Try to add extra elevation at vertices. Use at most 0.25*input_elevation. Actual value is
 //   randomized. Wave function with offset 1.
 // * Add noise with an amplitude of 0.125*input_elevation. Wave function with offset 1. If the added
 //   does not work together with tracer, apply it after the heightmap has been used to generate
