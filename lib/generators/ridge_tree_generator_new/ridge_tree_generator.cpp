@@ -621,6 +621,9 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 		for(auto& stem: next_level)
 		{
+			grayscale_image tmp_left{w_img, h_img};
+			grayscale_image tmp_right{w_img, h_img};
+
 			if(!stem.left.empty())
 			{
 				trunks.push_back(
@@ -634,9 +637,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
-				grayscale_image tmp{w_img, h_img};
 				fill_curve(
-					tmp,
+					tmp_left,
 					ret.pixels(),
 					trunks.back(),
 					params.elevation_profile[next_level_index],
@@ -647,8 +649,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 						.rel_height = true
 					}
 				);
-				// FIXME: Cannot touch ret yet, since that will be used for the right
-				pick_max(ret.pixels(), std::as_const(tmp).pixels());
 			}
 
 			if(!stem.right.empty())
@@ -664,9 +664,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
-				grayscale_image tmp{w_img, h_img};
 				fill_curve(
-					tmp,
+					tmp_right,
 					ret.pixels(),
 					trunks.back(),
 					params.elevation_profile[next_level_index],
@@ -677,8 +676,10 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 						.rel_height = true
 					}
 				);
-				pick_max(ret.pixels(), std::as_const(tmp).pixels());
 			}
+
+			pick_max(ret.pixels(), std::as_const(tmp_left).pixels());
+			pick_max(ret.pixels(), std::as_const(tmp_right).pixels());
 		}
 
 		++current_trunk_index;
