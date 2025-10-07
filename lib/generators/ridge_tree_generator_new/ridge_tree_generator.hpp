@@ -14,6 +14,7 @@
 #include "lib/common/bounded_value.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/generators/domain/domain_size.hpp"
+#include <geosimd/angle.hpp>
 #include <numbers>
 
 namespace terraformer
@@ -49,14 +50,15 @@ namespace terraformer
 
 		bool operator==(ridge_tree_trunk_curve_descriptor const&) const = default;
 		bool operator!=(ridge_tree_trunk_curve_descriptor const&) const = default;
-
-		void bind(descriptor_editor_ref editor);
 	};
 
 	struct ridge_tree_trunk_descriptor
 	{
 		ridge_tree_trunk_curve_descriptor curve;
-		ridge_tree_brach_seed_sequence_boundary_point_descriptor start_point_branches;
+		ridge_tree_brach_seed_sequence_boundary_point_descriptor starting_point_branches{
+			.branch_count = 2,
+			.spread_angle = geosimd::turn_angle{geosimd::turns{0.5f}}
+		};
 
 		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
 		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;

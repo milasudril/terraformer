@@ -746,6 +746,45 @@ void terraformer::ridge_tree_trunk_control_point_descriptor::bind(descriptor_edi
 	);
 }
 
+void terraformer::ridge_tree_trunk_descriptor::bind(descriptor_editor_ref editor)
+{
+	auto point_table = editor.create_table(
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Curve"
+		},
+		descriptor_editor_ref::table_descriptor{
+			.orientation = descriptor_editor_ref::widget_orientation::deduce,
+			.field_names{
+				u8"x",
+				u8"y",
+				u8"Heading",
+				u8"Speed",
+			}
+		}
+	);
+
+	{
+		auto record = point_table.add_record(u8"Begin");
+		curve.begin.bind(record);
+		record.append_pending_widgets();
+	}
+
+	{
+		auto record = point_table.add_record(u8"End");
+		curve.end.bind(record);
+		record.append_pending_widgets();
+	}
+
+	auto starting_point_branches_form = editor.create_form(
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Starting point branches"
+		},
+		descriptor_editor_ref::form_descriptor{
+		}
+	);
+	starting_point_branches.bind(starting_point_branches_form);
+}
+
 void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
@@ -863,34 +902,16 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_rng_seed_input(u8"Seed", rng_seed);
 
-	{
-		auto trunk_table = editor.create_table(
-			descriptor_editor_ref::field_descriptor{
-				.label = u8"Trunk"
-			},
-			descriptor_editor_ref::table_descriptor{
-				.orientation = descriptor_editor_ref::widget_orientation::vertical,
-				.field_names{
-					u8"x",
-					u8"y",
-					u8"Heading",
-					u8"Speed",
-				}
-			}
-		);
-
-		{
-			auto record = trunk_table.add_record(u8"Begin");
-			trunk.curve.begin.bind(record);
-			record.append_pending_widgets();
+	auto trunk_editor = editor.create_form(
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Trunk"
+		},
+		descriptor_editor_ref::form_descriptor{
+			.orientation = descriptor_editor_ref::widget_orientation::vertical
 		}
+	);
 
-		{
-			auto record = trunk_table.add_record(u8"End");
-			trunk.curve.end.bind(record);
-			record.append_pending_widgets();
-		}
-	}
+	trunk.bind(trunk_editor);
 
 	{
 		auto ep_branches_table = editor.create_table(
