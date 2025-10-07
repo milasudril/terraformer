@@ -38,7 +38,6 @@
 // To add:
 //
 // * Control Roll-off exponent for ridge elevation
-// * Extra branches at the start of at least the root curve
 // * Avoid branch early. Looks strange, especially at the root curve
 // * Multi-threading where possible
 //
@@ -593,10 +592,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 						.spread_angle = geosimd::turns{0.5f}
 					}
 				,
-				.end_brancehs = ridge_tree_brach_seed_sequence_boundary_point_descriptor{
-					.branch_count = 2,
-					.spread_angle = geosimd::turns{0.5f}
-				}
+				.end_brancehs = params.endpoint_branches[next_level_index - 1]
 			}
 		);
 
