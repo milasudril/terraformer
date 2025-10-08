@@ -557,7 +557,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		ret,
 		span_2d<float const>{},
 		trunks.back(),
-		params.elevation_profile.front(),
+		params.params.front(),
 		global_pixel_size,
 		ridge_tree_ridge_thickness_modulation{
 			.begin_val = 1.0f,
@@ -782,6 +782,16 @@ void terraformer::ridge_tree_trunk_descriptor::bind(descriptor_editor_ref editor
 		}
 	);
 	starting_point_branches.bind(starting_point_branches_form);
+
+	editor.create_float_input(
+		u8"Ridge elevation/m",
+		ridge_elevation,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8192.0f, 2.0f}},
+			.textbox_placeholder_string = u8"9999.9999",
+			.visual_angle_range = std::nullopt
+		}
+	);
 }
 
 void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descriptor_editor_ref editor)
