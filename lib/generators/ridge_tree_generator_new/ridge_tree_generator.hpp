@@ -59,7 +59,7 @@ namespace terraformer
 			.branch_count = 2,
 			.spread_angle = geosimd::turn_angle{geosimd::turns{0.5f}}
 		};
-		float ridge_elevation = 2048.0f;
+		float ridge_height = 2048.0f;
 
 		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
 		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;

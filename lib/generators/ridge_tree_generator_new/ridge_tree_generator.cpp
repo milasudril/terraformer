@@ -508,7 +508,7 @@ void terraformer::fill_curve(
 					std::lerp(
 						end_height,
 						begin_height,
-						1.0f - std::pow(curve_param, longitudal_rolloff_exponent)
+						std::pow(1.0f - curve_param, longitudal_rolloff_exponent)
 					);
 
 				max_circle(
@@ -619,6 +619,7 @@ void terraformer::fill_curve(
 
 namespace
 {
+#if 0
 	void pick_max(terraformer::span_2d<float> output, terraformer::span_2d<float const> input)
 	{
 		for(uint32_t y = 0; y != output.height(); ++y)
@@ -629,6 +630,7 @@ namespace
 			}
 		}
 	}
+#endif
 }
 
 terraformer::grayscale_image
@@ -645,19 +647,22 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 	single_array<ridge_tree_trunk> trunks;
 	trunks.push_back(generate_trunk(dom_size, params.trunk.curve, params.horz_displacements.front(), rng));
+
 	fill_curve(
 		ret,
 		span_2d<float const>{},
 		trunks.back(),
-		params.elevation_profile.front(),
-		global_pixel_size,
-		ridge_tree_ridge_thickness_modulation{
-			.begin_val = 1.0f,
-			.end_val = 1.0f,
-			.rel_height = false
-		}
+		ridge_tree_ridge_height_profile{
+			.begin_height = params.trunk.ridge_height,
+			.begin_height_is_relative = false,
+			.end_height  = 1.0f,
+			.relative_half_thickness = 1.25f,
+			.transverse_rolloff_exponent = 1.25f,
+			.longitudal_rolloff_exponent = 1.0f
+		},
+		global_pixel_size
 	);
-
+#if 0
 	auto current_trunk_index = trunks.element_indices().front();
 	auto const& branch_growth_params = params.branch_growth_params;
 	auto const& displacement_profiles = params.horz_displacements;
@@ -785,7 +790,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		++current_trunk_index;
 	}
-
+#endif
 	return ret;
 }
 
@@ -876,8 +881,8 @@ void terraformer::ridge_tree_trunk_descriptor::bind(descriptor_editor_ref editor
 	starting_point_branches.bind(starting_point_branches_form);
 
 	editor.create_float_input(
-		u8"Ridge elevation/m",
-		ridge_elevation,
+		u8"Ridge height/m",
+		ridge_height,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8192.0f, 2.0f}},
 			.textbox_placeholder_string = u8"9999.9999",
