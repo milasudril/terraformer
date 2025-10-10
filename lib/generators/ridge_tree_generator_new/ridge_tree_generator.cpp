@@ -442,6 +442,98 @@ float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& 
 	return get_min_pixel_size(*min_layout, *min_elevation_profile);
 }
 
+
+void terraformer::fill_curve(
+	span_2d<float> pixels,
+	span_2d<float const> pixels_in,
+	ridge_tree_trunk const& trunk,
+	ridge_tree_ridge_height_profile const& elev_profile,
+	float pixel_size
+)
+{
+	auto const elems = trunk.branches.element_indices();
+	auto const attribs = trunk.branches.attributes();
+	auto const curves = attribs.get<0>();
+	auto const transverse_rolloff_exponent = elev_profile.transverse_rolloff_exponent;
+	auto const longitudal_rolloff_exponent = elev_profile.longitudal_rolloff_exponent;
+	auto const begin_height_is_relative = elev_profile.begin_height_is_relative;
+	auto const begin_height_in = elev_profile.begin_height;
+	auto const end_height_in = elev_profile.end_height;
+	auto const ridge_radius = elev_profile.relative_half_thickness/pixel_size;
+
+	for(auto k : elems)
+	{
+		auto const& curve = curves[k];
+		if(curve.points().empty())
+		{ continue; }
+
+		auto const start_loc = (curve.points().front() - location{})/pixel_size;
+		auto const begin_height =
+			begin_height_in*(
+				begin_height_is_relative?
+					interp(pixels_in, start_loc[0], start_loc[1], clamp_at_boundary{}) :
+					1.0f
+			);
+		auto const end_height = end_height_in*begin_height;
+
+		float curve_length = 0.0f;
+		visit_pixels(
+			curve.points(),
+			pixel_size,
+			[
+				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
+				&curve_length
+			](location loc, auto&&...) mutable {
+				curve_length += distance(loc, loc_prev);
+				loc_prev = loc;
+			}
+		);
+
+		visit_pixels(
+			curve.points(),
+			pixel_size,
+			[
+				pixels,
+				ridge_radius,
+				transverse_rolloff_exponent,
+				longitudal_rolloff_exponent,
+				begin_height,
+				end_height,
+				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
+				integrated_length = 0.0f,
+				curve_length
+			](location loc, direction tangent, direction normal) mutable {
+				auto const curve_param = integrated_length/curve_length;
+				auto const current_height =
+					std::lerp(
+						end_height,
+						begin_height,
+						1.0f - std::pow(curve_param, longitudal_rolloff_exponent)
+					);
+
+				max_circle(
+					pixels,
+					loc,
+					tangent,
+					normal,
+					ridge_radius*current_height,
+					[
+						transverse_rolloff_exponent,
+						current_height
+					](float r){
+						return current_height*std::pow(r, transverse_rolloff_exponent);
+					},
+					2.0f
+				);
+
+				integrated_length += distance(loc, loc_prev);
+				loc_prev = loc;
+			}
+		);
+	}
+}
+
+
 void terraformer::fill_curve(
 	span_2d<float> pixels,
 	span_2d<float const> pixels_in,
@@ -557,7 +649,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		ret,
 		span_2d<float const>{},
 		trunks.back(),
-		params.params.front(),
+		params.elevation_profile.front(),
 		global_pixel_size,
 		ridge_tree_ridge_thickness_modulation{
 			.begin_val = 1.0f,

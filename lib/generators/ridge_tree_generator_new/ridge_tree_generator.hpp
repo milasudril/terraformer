@@ -155,6 +155,30 @@ namespace terraformer
 		bool rel_height;
 	};
 
+	struct ridge_tree_ridge_height_profile
+	{
+		float begin_height;
+		bool begin_height_is_relative;
+		float end_height;
+		float relative_half_thickness;
+		float transverse_rolloff_exponent;
+		float longitudal_rolloff_exponent;
+	} ;
+
+	void fill_curve(
+		span_2d<float> pixels,
+		span_2d<float const> pixels_in,
+		ridge_tree_trunk const& trunk,
+		ridge_tree_ridge_height_profile const& elev_profile,
+		float pixel_size
+	);
+
+	struct ridge_tree_elevation_modulation
+	{
+		float end_elevation;
+		float rolloff_exponent;
+	};
+
 	void fill_curve(
 		span_2d<float> pixels,
 		span_2d<float const> pixels_in,
