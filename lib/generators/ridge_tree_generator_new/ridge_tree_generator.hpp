@@ -138,7 +138,6 @@ namespace terraformer
 
 	struct ridge_tree_elevation_profile_descriptor
 	{
-		float ridge_elevation = 2048.0f;
 		float ridge_half_thickness = 2048.0f + 512.0f;
 		float ridge_rolloff_exponent = 1.0f;
 		float noise_wavelength = 1024.0f*2.0f*std::numbers::pi_v<float>;
@@ -182,20 +181,11 @@ namespace terraformer
 		float rolloff_exponent;
 	};
 
-	void fill_curve(
-		span_2d<float> pixels,
-		span_2d<float const> pixels_in,
-		ridge_tree_trunk const& trunk,
-		ridge_tree_elevation_profile_descriptor const& elev_profile,
-		float pixel_size,
-		ridge_tree_ridge_thickness_modulation const& thickness_mod
-	);
-
 	inline constexpr float get_min_pixel_size(ridge_tree_elevation_profile_descriptor const& item)
 	{
 		return get_min_pixel_size(
 			terraformer::wave_descriptor{
-				.amplitude = item.ridge_elevation,
+				.amplitude = 1024.0f,
 				.wavelength = item.noise_wavelength,
 				.hf_rolloff = item.noise_hf_rolloff
 			}
@@ -277,7 +267,6 @@ namespace terraformer
 
 		std::array<ridge_tree_elevation_profile_descriptor, num_levels> elevation_profile{
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_elevation = default_trunk_ridge_elevation,
 				.ridge_half_thickness = default_trunk_ridge_elevation*(
 					  default_trunk_ridge_rolloff_exponent
 					+ slope_from_amplitude_and_wavelength(default_trunk_noise_amplitude, default_trunk_noise_wavelength)
@@ -291,7 +280,6 @@ namespace terraformer
 				.noise_amplitude = default_trunk_noise_amplitude
 			},
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_elevation = default_branch_1_ridge_elevation,
 				.ridge_half_thickness = default_branch_1_ridge_elevation*(
 					  default_branch_1_ridge_rolloff_exponent
 					+ slope_from_amplitude_and_wavelength(default_branch_1_noise_amplitude, default_branch_1_noise_wavelength)
@@ -305,7 +293,6 @@ namespace terraformer
 				.noise_amplitude = default_branch_1_noise_amplitude
 			},
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_elevation = default_branch_2_ridge_elevation,
 				.ridge_half_thickness = default_branch_2_ridge_elevation*(
 					  default_branch_2_ridge_rolloff_exponent
 					+ slope_from_amplitude_and_wavelength(default_branch_2_noise_amplitude, default_branch_2_noise_wavelength)

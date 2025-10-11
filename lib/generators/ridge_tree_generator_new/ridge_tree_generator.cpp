@@ -533,90 +533,6 @@ void terraformer::fill_curve(
 	}
 }
 
-
-void terraformer::fill_curve(
-	span_2d<float> pixels,
-	span_2d<float const> pixels_in,
-	ridge_tree_trunk const& trunk,
-	ridge_tree_elevation_profile_descriptor const& elevation_profile,
-	float pixel_size,
-	ridge_tree_ridge_thickness_modulation const& thickness_mod
-)
-{
-	auto const elems = trunk.branches.element_indices();
-	auto const attribs = trunk.branches.attributes();
-	auto const curves = attribs.get<0>();
-	auto const shape_exponent = elevation_profile.ridge_rolloff_exponent;
-
-	for(auto k : elems)
-	{
-		auto const& curve = curves[k];
-		if(curve.points().empty())
-		{ continue; }
-
-		auto const start_loc = (curve.points().front() - location{})/pixel_size;
-		auto const ridge_elevation = thickness_mod.rel_height?
-			interp(pixels_in, start_loc[0], start_loc[1], clamp_at_boundary{}):
-			elevation_profile.ridge_elevation;
-		auto const ridge_radius = thickness_mod.rel_height?
-			2.0f*ridge_elevation/pixel_size:
-			elevation_profile.ridge_half_thickness/pixel_size;
-
-		float curve_length = 0.0f;
-		visit_pixels(
-			curve.points(),
-			pixel_size,
-			[
-				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
-				&curve_length
-			](location loc, auto&&...) mutable {
-				curve_length += distance(loc, loc_prev);
-				loc_prev = loc;
-			}
-		);
-
-		visit_pixels(
-			curve.points(),
-			pixel_size,
-			[
-				pixels,
-				ridge_radius,
-				shape_exponent,
-				ridge_elevation,
-				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
-				integrated_length = 0.0f,
-				curve_length,
-				thickness_mod
-			](location loc, direction tangent, direction normal) mutable {
-				auto const curve_param = integrated_length/curve_length;
-				max_circle(
-					pixels,
-					loc,
-					tangent,
-					normal,
-					ridge_radius*std::lerp(thickness_mod.begin_val, thickness_mod.end_val, curve_param),
-					[
-						shape_exponent,
-						ridge_elevation = ridge_elevation*std::lerp(
-							thickness_mod.begin_val,
-							thickness_mod.end_val,
-							curve_param
-						)
-					](float r){
-						assert(r >= 0.0f);
-						assert(shape_exponent > 0.0f);
-						return ridge_elevation*std::pow(r, shape_exponent);
-					},
-					2.0f
-				);
-
-				integrated_length += distance(loc, loc_prev);
-				loc_prev = loc;
-			}
-		);
-	}
-}
-
 namespace
 {
 #if 0
@@ -950,15 +866,6 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
-		u8"Ridge elevation/m",
-		ridge_elevation,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{1.0f, 8192.0f, 2.0f}},
-			.textbox_placeholder_string = u8"9999.9999",
-			.visual_angle_range = std::nullopt
-		}
-	);
-	editor.create_float_input(
 		u8"Ridge half-thickness/m",
 		ridge_half_thickness,
 		descriptor_editor_ref::knob_descriptor{
@@ -1114,7 +1021,6 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 			descriptor_editor_ref::table_descriptor{
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
-					u8"Ridge elevation/m",
 					u8"Ridge half-thickness/m",
 					u8"Ridge roll-off exponent",
 					u8"Noise wavelength/m",
