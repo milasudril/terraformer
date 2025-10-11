@@ -632,11 +632,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			rng,
 			ridge_tree_branch_growth_description{
 				.max_length = growth_params.e2e_distance,
-				.min_neighbour_distance = 1.25f*(
-					// FIXME: Need to add half-thickness here, but it depends on the distance along the
-					// curve
-					horz_displacement.amplitude
-				)
+				// FIXME: Need to add half-thickness here, but it depends on the distance along the
+				.min_neighbour_distance = 1024.0f
 			}
 		);
 
