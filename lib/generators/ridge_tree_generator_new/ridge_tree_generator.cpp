@@ -307,7 +307,7 @@ namespace
 		auto const h_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
 
 		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
-		auto const ridge_radius = height_profile.ridge_half_thickness/pixel_size;
+		auto const ridge_radius = height_profile.ridge_height_profile/pixel_size;
 		auto const shape_exponent = height_profile.ridge_rolloff_exponent;
 		printf("Rendering level %zu\n", level);
 		while(i != i_end)
@@ -572,8 +572,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			.begin_height = params.trunk.ridge_height,
 			.begin_height_is_relative = false,
 			.end_height  = 1.0f,
-			.relative_half_thickness = params.height_profile.front().ridge_half_thickness,
-			.transverse_rolloff_exponent = params.height_profile.front().ridge_rolloff_exponent,
+			.relative_half_thickness = params.height_profile.front().rel_half_thickness,
+			.transverse_rolloff_exponent = params.height_profile.front().rolloff_exponent,
 			.longitudinal_rolloff_exponent = 1.0f
 		},
 		global_pixel_size
@@ -635,7 +635,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			ridge_tree_branch_growth_description{
 				.max_length = growth_params.e2e_distance,
 				.min_neighbour_distance = 1.25f*(
-					horz_displacement.amplitude + 0.5f*elev_profile.ridge_half_thickness
+					horz_displacement.amplitude + 0.5f*elev_profile.ridge_height_profile
 				)
 			}
 		);
@@ -877,8 +877,8 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 void terraformer::ridge_tree_height_profile_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
-		u8"Ridge half-thickness",
-		ridge_half_thickness,
+		u8"Rel. half thickness",
+		rel_half_thickness,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
 			.textbox_placeholder_string = u8"0.123456789",
@@ -886,8 +886,8 @@ void terraformer::ridge_tree_height_profile_descriptor::bind(descriptor_editor_r
 		}
 	);
 	editor.create_float_input(
-		u8"Ridge roll-off exponent",
-		ridge_rolloff_exponent,
+		u8"Roll-off exponent",
+		rolloff_exponent,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
 			.textbox_placeholder_string = u8"0.123456789",
@@ -1028,12 +1028,12 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 	{
 		auto elev_profile_table = editor.create_table(
 			descriptor_editor_ref::field_descriptor{
-				.label = u8"Height profile"
+				.label = u8"Ridge height profile"
 			},
 			descriptor_editor_ref::table_descriptor{
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
-					u8"Ridge half-thickness",
+					u8"Rel. half thickness",
 					u8"Ridge roll-off exponent",
 					u8"Noise wavelength/m",
 					u8"Noise LF roll-off",

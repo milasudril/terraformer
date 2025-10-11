@@ -139,8 +139,8 @@ namespace terraformer
 
 	struct ridge_tree_height_profile_descriptor
 	{
-		float ridge_half_thickness = 2.0f;
-		float ridge_rolloff_exponent = 2.0f;
+		float rel_half_thickness = 2.0f;
+		float rolloff_exponent = 2.0f;
 		float noise_wavelength = 1024.0f*2.0f*std::numbers::pi_v<float>;
 		float noise_lf_rolloff = 2.0f;
 		float noise_hf_rolloff = 2.0f;
@@ -229,7 +229,7 @@ namespace terraformer
 			1.0f
 		);
 		static constexpr auto default_trunk_ridge_elevation = 2048.0f;
-		static constexpr auto default_trunk_ridge_rolloff_exponent = 1.25f;
+		static constexpr auto default_trunk_rolloff_exponent = 1.25f;
 		static constexpr auto default_trunk_noise_wavelength = default_trunk_horz_wavelength*std::numbers::phi_v<float>;
 		static constexpr auto default_trunk_noise_amplitude = 512.0f;
 
@@ -237,14 +237,14 @@ namespace terraformer
 		static constexpr auto default_branch_1_horz_wavelength = 3072.0f;
 		static constexpr auto default_branch_1_horz_amplitude = wavelength_to_amplitude(default_branch_1_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_1_ridge_elevation = 1024.0f;
-		static constexpr auto default_branch_1_ridge_rolloff_exponent = 1.25f;
+		static constexpr auto default_branch_1_rolloff_exponent = 1.25f;
 		static constexpr auto default_branch_1_noise_wavelength = default_branch_1_horz_wavelength*std::numbers::phi_v<float>;
 		static constexpr auto default_branch_1_noise_amplitude = 256.0f;
 
 		static constexpr auto default_branch_2_horz_wavelength = 600.0f;
 		static constexpr auto default_branch_2_horz_amplitude = wavelength_to_amplitude(default_branch_2_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_2_ridge_elevation = 512.0f;
-		static constexpr auto default_branch_2_ridge_rolloff_exponent = 1.25f;
+		static constexpr auto default_branch_2_rolloff_exponent = 1.25f;
 		static constexpr auto default_branch_2_noise_wavelength = default_branch_2_horz_wavelength*std::numbers::phi_v<float>;
 		static constexpr auto default_branch_2_noise_amplitude = 128.0f;
 
@@ -268,24 +268,24 @@ namespace terraformer
 
 		std::array<ridge_tree_height_profile_descriptor, num_levels> height_profile{
 			ridge_tree_height_profile_descriptor{
-				.ridge_half_thickness = 2.0f,
-				.ridge_rolloff_exponent = 2.0f,
+				.rel_half_thickness = 2.0f,
+				.rolloff_exponent = 2.0f,
 				.noise_wavelength = default_trunk_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_trunk_noise_amplitude
 			},
 			ridge_tree_height_profile_descriptor{
-				.ridge_half_thickness = 2.0f,
-				.ridge_rolloff_exponent = 2.0f,
+				.rel_half_thickness = 2.0f,
+				.rolloff_exponent = 2.0f,
 				.noise_wavelength = default_branch_1_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_branch_1_noise_amplitude
 			},
 			ridge_tree_height_profile_descriptor{
-				.ridge_half_thickness = 2.0f,
-				.ridge_rolloff_exponent = 2.0f,
+				.rel_half_thickness = 2.0f,
+				.rolloff_exponent = 2.0f,
 				.noise_wavelength = default_branch_2_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
