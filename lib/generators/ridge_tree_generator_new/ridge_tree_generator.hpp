@@ -139,8 +139,8 @@ namespace terraformer
 
 	struct ridge_tree_elevation_profile_descriptor
 	{
-		float ridge_half_thickness = 2048.0f + 512.0f;
-		float ridge_rolloff_exponent = 1.0f;
+		float ridge_half_thickness = 2.0f;
+		float ridge_rolloff_exponent = 2.0f;
 		float noise_wavelength = 1024.0f*2.0f*std::numbers::pi_v<float>;
 		float noise_lf_rolloff = 2.0f;
 		float noise_hf_rolloff = 2.0f;
@@ -268,37 +268,24 @@ namespace terraformer
 
 		std::array<ridge_tree_elevation_profile_descriptor, num_levels> elevation_profile{
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_half_thickness = default_trunk_ridge_elevation*(
-					  default_trunk_ridge_rolloff_exponent
-					+ slope_from_amplitude_and_wavelength(default_trunk_noise_amplitude, default_trunk_noise_wavelength)
-					+ default_branch_1_ridge_rolloff_exponent
-					+ slope_from_amplitude_and_wavelength(default_branch_1_noise_amplitude, default_branch_1_noise_wavelength)
-				)/trunk_slope,
-				.ridge_rolloff_exponent = default_trunk_ridge_rolloff_exponent,
+				.ridge_half_thickness = 2.0f,
+				.ridge_rolloff_exponent = 2.0f,
 				.noise_wavelength = default_trunk_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_trunk_noise_amplitude
 			},
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_half_thickness = default_branch_1_ridge_elevation*(
-					  default_branch_1_ridge_rolloff_exponent
-					+ slope_from_amplitude_and_wavelength(default_branch_1_noise_amplitude, default_branch_1_noise_wavelength)
-					+ default_branch_2_ridge_rolloff_exponent
-					+ slope_from_amplitude_and_wavelength(default_branch_2_noise_amplitude, default_branch_2_noise_wavelength)
-				)/branch_1_slope,
-				.ridge_rolloff_exponent = default_branch_1_ridge_rolloff_exponent,
+				.ridge_half_thickness = 2.0f,
+				.ridge_rolloff_exponent = 2.0f,
 				.noise_wavelength = default_branch_1_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_branch_1_noise_amplitude
 			},
 			ridge_tree_elevation_profile_descriptor{
-				.ridge_half_thickness = default_branch_2_ridge_elevation*(
-					  default_branch_2_ridge_rolloff_exponent
-					+ slope_from_amplitude_and_wavelength(default_branch_2_noise_amplitude, default_branch_2_noise_wavelength)
-				),
-				.ridge_rolloff_exponent = default_branch_2_ridge_rolloff_exponent,
+				.ridge_half_thickness = 2.0f,
+				.ridge_rolloff_exponent = 2.0f,
 				.noise_wavelength = default_branch_2_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,

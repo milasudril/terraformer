@@ -877,11 +877,11 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
-		u8"Ridge half-thickness/m",
+		u8"Ridge half-thickness",
 		ridge_half_thickness,
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{128.0f, 65536.0f, 2.0f}},
-			.textbox_placeholder_string = u8"9999.9999",
+			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
 			.visual_angle_range = std::nullopt
 		}
 	);
@@ -1033,7 +1033,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 			descriptor_editor_ref::table_descriptor{
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
-					u8"Ridge half-thickness/m",
+					u8"Ridge half-thickness",
 					u8"Ridge roll-off exponent",
 					u8"Noise wavelength/m",
 					u8"Noise LF roll-off",
