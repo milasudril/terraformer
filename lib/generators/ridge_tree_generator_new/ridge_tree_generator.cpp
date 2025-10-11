@@ -572,8 +572,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			.begin_height = params.trunk.ridge_height,
 			.begin_height_is_relative = false,
 			.end_height  = 1.0f,
-			.relative_half_thickness = 1.25f,
-			.transverse_rolloff_exponent = 1.25f,
+			.relative_half_thickness = params.elevation_profile.front().ridge_half_thickness,
+			.transverse_rolloff_exponent = params.elevation_profile.front().ridge_rolloff_exponent,
 			.longitudinal_rolloff_exponent = 1.0f
 		},
 		global_pixel_size
