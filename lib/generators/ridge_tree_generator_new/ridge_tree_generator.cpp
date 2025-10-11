@@ -455,7 +455,7 @@ void terraformer::fill_curve(
 	auto const attribs = trunk.branches.attributes();
 	auto const curves = attribs.get<0>();
 	auto const transverse_rolloff_exponent = elev_profile.transverse_rolloff_exponent;
-	auto const longitudal_rolloff_exponent = elev_profile.longitudal_rolloff_exponent;
+	auto const longitudinal_rolloff_exponent = elev_profile.longitudinal_rolloff_exponent;
 	auto const begin_height_is_relative = elev_profile.begin_height_is_relative;
 	auto const begin_height_in = elev_profile.begin_height;
 	auto const end_height_in = elev_profile.end_height;
@@ -496,7 +496,7 @@ void terraformer::fill_curve(
 				pixels,
 				ridge_radius,
 				transverse_rolloff_exponent,
-				longitudal_rolloff_exponent,
+				longitudinal_rolloff_exponent,
 				begin_height,
 				end_height,
 				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
@@ -508,7 +508,7 @@ void terraformer::fill_curve(
 					std::lerp(
 						end_height,
 						begin_height,
-						std::pow(1.0f - curve_param, longitudal_rolloff_exponent)
+						std::pow(1.0f - curve_param, longitudinal_rolloff_exponent)
 					);
 
 				max_circle(
@@ -574,7 +574,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			.end_height  = 1.0f,
 			.relative_half_thickness = 1.25f,
 			.transverse_rolloff_exponent = 1.25f,
-			.longitudal_rolloff_exponent = 1.0f
+			.longitudinal_rolloff_exponent = 1.0f
 		},
 		global_pixel_size
 	);
@@ -860,6 +860,17 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 			.textbox_placeholder_string = u8"0.123456789",
 			.visual_angle_range = std::nullopt
 		}
+
+	);
+
+	editor.create_float_input(
+		u8"Longit. roll-off exp.",
+		longitudinal_rolloff_exponent,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
 	);
 }
 
@@ -971,7 +982,8 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"E2E distance/m",
-					u8"Rel. end height"
+					u8"Rel. end height",
+					u8"Longit. roll-off exp."
 				}
 			}
 		);

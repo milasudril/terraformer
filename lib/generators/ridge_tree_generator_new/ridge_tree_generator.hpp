@@ -71,6 +71,7 @@ namespace terraformer
 	{
 		float e2e_distance = 16384.0f;
 		float end_height = 0.5f;
+		float longitudinal_rolloff_exponent = 2.0f;
 
 		bool operator==(ridge_tree_branch_growth_descriptor const&) const = default;
 		bool operator!=(ridge_tree_branch_growth_descriptor const&) const = default;
@@ -164,8 +165,8 @@ namespace terraformer
 		float end_height;
 		float relative_half_thickness;
 		float transverse_rolloff_exponent;
-		float longitudal_rolloff_exponent;
-	} ;
+		float longitudinal_rolloff_exponent;
+	};
 
 	void fill_curve(
 		span_2d<float> pixels,
