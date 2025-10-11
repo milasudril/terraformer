@@ -535,7 +535,6 @@ void terraformer::fill_curve(
 
 namespace
 {
-#if 0
 	void pick_max(terraformer::span_2d<float> output, terraformer::span_2d<float const> input)
 	{
 		for(uint32_t y = 0; y != output.height(); ++y)
@@ -546,7 +545,6 @@ namespace
 			}
 		}
 	}
-#endif
 }
 
 terraformer::grayscale_image
@@ -578,7 +576,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		},
 		global_pixel_size
 	);
-#if 0
+
 	auto current_trunk_index = trunks.element_indices().front();
 	auto const& branch_growth_params = params.branch_growth_params;
 	auto const& displacement_profiles = params.horz_displacements;
@@ -618,7 +616,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		auto const& horz_displacement = displacement_profiles[next_level_index];
 		auto const& growth_params = branch_growth_params[next_level_index - 1];
-		auto const& elev_profile = params.height_profile[next_level_index];
+		auto const& height_profile = params.height_profile[next_level_index];
 		//auto const pixel_size = get_min_pixel_size(horz_displacement);
 
 		feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
@@ -635,7 +633,9 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			ridge_tree_branch_growth_description{
 				.max_length = growth_params.e2e_distance,
 				.min_neighbour_distance = 1.25f*(
-					horz_displacement.amplitude + 0.5f*elev_profile.ridge_height_profile
+					// FIXME: Need to add half-thickness here, but it depends on the distance along the
+					// curve
+					horz_displacement.amplitude
 				)
 			}
 		);
@@ -663,13 +663,15 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					tmp_left,
 					ret.pixels(),
 					trunks.back(),
-					params.height_profile[next_level_index],
-					global_pixel_size,
-					ridge_tree_ridge_thickness_modulation{
-						.begin_val = 1.0f,
-						.end_val = 0.5f,
-						.rel_height = true
-					}
+					ridge_tree_ridge_height_profile{
+						.begin_height = 1.0f,
+						.begin_height_is_relative = true,
+						.end_height  = growth_params.end_height,
+						.relative_half_thickness = height_profile.rel_half_thickness,
+						.transverse_rolloff_exponent = height_profile.rolloff_exponent,
+						.longitudinal_rolloff_exponent = growth_params.longitudinal_rolloff_exponent
+					},
+					global_pixel_size
 				);
 			}
 
@@ -690,13 +692,15 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					tmp_right,
 					ret.pixels(),
 					trunks.back(),
-					params.height_profile[next_level_index],
-					global_pixel_size,
-					ridge_tree_ridge_thickness_modulation{
-						.begin_val = 1.0f,
-						.end_val = 0.5f,
-						.rel_height = true
-					}
+					ridge_tree_ridge_height_profile{
+						.begin_height = 1.0f,
+						.begin_height_is_relative = true,
+						.end_height  = growth_params.end_height,
+						.relative_half_thickness = height_profile.rel_half_thickness,
+						.transverse_rolloff_exponent = height_profile.rolloff_exponent,
+						.longitudinal_rolloff_exponent = growth_params.longitudinal_rolloff_exponent
+					},
+					global_pixel_size
 				);
 			}
 
@@ -706,7 +710,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		++current_trunk_index;
 	}
-#endif
 	return ret;
 }
 
@@ -1034,7 +1037,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"Rel. half thickness",
-					u8"Ridge roll-off exponent",
+					u8"Roll-off exponent",
 					u8"Noise wavelength/m",
 					u8"Noise LF roll-off",
 					u8"Noise HF roll-off",
