@@ -293,7 +293,7 @@ namespace
 	auto render_branches_at_current_level(
 		terraformer::heightmap_generator_context const& ctxt,
 		float min_pixel_size,
-		terraformer::ridge_tree_elevation_profile_descriptor const& elevation_profile,
+		terraformer::ridge_tree_height_profile_descriptor const& height_profile,
 		terraformer::ridge_tree_trunk const* i,
 		terraformer::ridge_tree_trunk const* i_end,
 		terraformer::random_generator& rng,
@@ -302,13 +302,13 @@ namespace
 	{
 		auto const dom_size = ctxt.domain_size;
 		auto const level = i->level;
-		auto const pixel_size = std::min(min_pixel_size, get_min_pixel_size(elevation_profile));
+		auto const pixel_size = std::min(min_pixel_size, get_min_pixel_size(height_profile));
 		auto const w_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.width/(2.0f*pixel_size) + 0.5f), 1u);
 		auto const h_img_ridge = 2u*std::max(static_cast<uint32_t>(dom_size.height/(2.0f*pixel_size) + 0.5f), 1u);
 
 		terraformer::grayscale_image ridge{w_img_ridge, h_img_ridge};
-		auto const ridge_radius = elevation_profile.ridge_half_thickness/pixel_size;
-		auto const shape_exponent = elevation_profile.ridge_rolloff_exponent;
+		auto const ridge_radius = height_profile.ridge_half_thickness/pixel_size;
+		auto const shape_exponent = height_profile.ridge_rolloff_exponent;
 		printf("Rendering level %zu\n", level);
 		while(i != i_end)
 		{
@@ -357,7 +357,7 @@ namespace
 					[
 						min = *minmax.first,
 						max = *minmax.second,
-						ridge_elevation = elevation_profile.ridge_elevation
+						ridge_elevation = height_profile.ridge_elevation
 					](auto val) {
 						return ridge_elevation * (val - min)/(max - min);
 					}
@@ -375,10 +375,10 @@ namespace
 
 			noise = terraformer::apply(
 				terraformer::butter_bp_2d_descriptor{
-					.f_x = 2.0f*dom_size.width/elevation_profile.noise_wavelength,
-					.f_y = 2.0f*dom_size.height/elevation_profile.noise_wavelength,
-					.lf_rolloff = elevation_profile.noise_lf_rolloff,
-					.hf_rolloff = elevation_profile.noise_hf_rolloff,
+					.f_x = 2.0f*dom_size.width/height_profile.noise_wavelength,
+					.f_y = 2.0f*dom_size.height/height_profile.noise_wavelength,
+					.lf_rolloff = height_profile.noise_lf_rolloff,
+					.hf_rolloff = height_profile.noise_hf_rolloff,
 					.y_direction = 0.0f
 				},
 				noise.pixels(),
@@ -399,7 +399,7 @@ namespace
 					[
 						min = *minmax.first,
 						max = *minmax.second,
-						noise_amplitude = elevation_profile.noise_amplitude
+						noise_amplitude = height_profile.noise_amplitude
 					](auto val) {
 						return 2.0f*noise_amplitude*((val - min)/(max - min) - 0.5f);
 					}
@@ -413,7 +413,7 @@ namespace
 			for(uint32_t x = 0; x != w_img_ridge; ++x)
 			{
 				tmp(x, y) = std::max(
-					ridge(x, y)*(1.0f + noise(x, y)/elevation_profile.ridge_elevation),
+					ridge(x, y)*(1.0f + noise(x, y)/height_profile.ridge_elevation),
 					0.0f
 				);
 			}
@@ -433,13 +433,13 @@ float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& 
 		{ return get_min_pixel_size(a) < get_min_pixel_size(b); }
 	);
 
-	auto const min_elevation_profile = std::ranges::min_element(
-		params.elevation_profile,
+	auto const min_height_profile = std::ranges::min_element(
+		params.height_profile,
 		[](auto const& a, auto const& b)
 		{ return get_min_pixel_size(a) < get_min_pixel_size(b); }
 	);
 
-	return get_min_pixel_size(*min_layout, *min_elevation_profile);
+	return get_min_pixel_size(*min_layout, *min_height_profile);
 }
 
 
@@ -572,8 +572,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			.begin_height = params.trunk.ridge_height,
 			.begin_height_is_relative = false,
 			.end_height  = 1.0f,
-			.relative_half_thickness = params.elevation_profile.front().ridge_half_thickness,
-			.transverse_rolloff_exponent = params.elevation_profile.front().ridge_rolloff_exponent,
+			.relative_half_thickness = params.height_profile.front().ridge_half_thickness,
+			.transverse_rolloff_exponent = params.height_profile.front().ridge_rolloff_exponent,
 			.longitudinal_rolloff_exponent = 1.0f
 		},
 		global_pixel_size
@@ -618,7 +618,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		auto const& horz_displacement = displacement_profiles[next_level_index];
 		auto const& growth_params = branch_growth_params[next_level_index - 1];
-		auto const& elev_profile = params.elevation_profile[next_level_index];
+		auto const& elev_profile = params.height_profile[next_level_index];
 		//auto const pixel_size = get_min_pixel_size(horz_displacement);
 
 		feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
@@ -663,7 +663,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					tmp_left,
 					ret.pixels(),
 					trunks.back(),
-					params.elevation_profile[next_level_index],
+					params.height_profile[next_level_index],
 					global_pixel_size,
 					ridge_tree_ridge_thickness_modulation{
 						.begin_val = 1.0f,
@@ -690,7 +690,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					tmp_right,
 					ret.pixels(),
 					trunks.back(),
-					params.elevation_profile[next_level_index],
+					params.height_profile[next_level_index],
 					global_pixel_size,
 					ridge_tree_ridge_thickness_modulation{
 						.begin_val = 1.0f,
@@ -874,7 +874,7 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 	);
 }
 
-void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_editor_ref editor)
+void terraformer::ridge_tree_height_profile_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
 		u8"Ridge half-thickness",
@@ -1028,7 +1028,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 	{
 		auto elev_profile_table = editor.create_table(
 			descriptor_editor_ref::field_descriptor{
-				.label = u8"Elevation profile"
+				.label = u8"Height profile"
 			},
 			descriptor_editor_ref::table_descriptor{
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
@@ -1043,7 +1043,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 			}
 		);
 		size_t k = 0;
-		for(auto& item : elevation_profile)
+		for(auto& item : height_profile)
 		{
 			auto record = elev_profile_table.add_record(
 				k == 0? u8"Trunk" : reinterpret_cast<char8_t const*>(std::to_string(k).c_str())
