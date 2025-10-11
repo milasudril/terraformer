@@ -935,6 +935,16 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 			.visual_angle_range = std::nullopt
 		}
 	);
+
+	editor.create_float_input(
+		u8"Rel. end height",
+		end_height,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
 }
 
 void terraformer::ridge_tree_elevation_profile_descriptor::bind(descriptor_editor_ref editor)
@@ -1054,6 +1064,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"E2E distance/m",
+					u8"Rel. end height"
 				}
 			}
 		);
@@ -1061,7 +1072,8 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 		size_t k = 0;
 		for(auto& item : branch_growth_params)
 		{
-			auto record = branch_growth_table.add_record(reinterpret_cast<char8_t const*>(std::to_string(k + 1).c_str()));
+			auto record = branch_growth_table
+				.add_record(reinterpret_cast<char8_t const*>(std::to_string(k + 1).c_str()));
 			item.bind(record);
 			record.append_pending_widgets();
 			++k;
