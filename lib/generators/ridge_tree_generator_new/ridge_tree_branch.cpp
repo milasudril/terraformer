@@ -337,15 +337,8 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	return gen_branches;
 }
 
-void terraformer::trim_at_intersect(
-	ridge_tree_branch_sequence::span_type const& a_seq,
-	ridge_tree_branch_sequence::span_type const& b_seq,
-	float min_distance
-)
+void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curve> b, float min_distance)
 {
-	auto const a = a_seq.get<0>();
-	auto const b = b_seq.get<0>();
-
 	auto const md2 = min_distance*min_distance;
 
 	auto const outer_count = std::size(a);
@@ -355,14 +348,14 @@ void terraformer::trim_at_intersect(
 	single_array<displaced_curve::index_type> a_trim(array_size<displaced_curve::index_type>{outer_count});
 	for(auto k : a_trim.element_indices())
 	{
-		decltype(a)::index_type const src_index{k.get()};
+		array_index<displaced_curve> const src_index{k.get()};
 		a_trim[k] = displaced_curve::index_type{std::size(a[src_index])};
 	}
 
 	single_array<displaced_curve::index_type> b_trim(array_size<displaced_curve::index_type>{inner_count});
 	for(auto l : b_trim.element_indices())
 	{
-		decltype(b)::index_type const src_index{l.get()};
+		array_index<displaced_curve> const src_index{l.get()};
 		b_trim[l] = displaced_curve::index_type{std::size(b[src_index])};
 	}
 
@@ -370,8 +363,8 @@ void terraformer::trim_at_intersect(
 	{
 		for(auto l : b_trim.element_indices())
 		{
-			decltype(a)::index_type const src_index_k{k.get()};
-			decltype(b)::index_type const src_index_l{l.get()};
+			array_index<displaced_curve> const src_index_k{k.get()};
+			array_index<displaced_curve> const src_index_l{l.get()};
 			auto const res = find_matching_pair(
 				a[src_index_k].get<0>(),
 				b[src_index_l].get<0>(),
@@ -398,8 +391,8 @@ void terraformer::trim_at_intersect(
 	{
 		for(auto l = a_trim.element_indices().front(); l != k; ++l)
 		{
-			decltype(a)::index_type const src_index_k{k.get()};
-			decltype(a)::index_type const src_index_l{l.get()};
+			array_index<displaced_curve> const src_index_k{k.get()};
+			array_index<displaced_curve> const src_index_l{l.get()};
 
 			auto const res = find_matching_pair(
 				a[src_index_k].get<0>(),
@@ -427,8 +420,8 @@ void terraformer::trim_at_intersect(
 	{
 		for(auto l = b_trim.element_indices().front(); l != k; ++l)
 		{
-			decltype(b)::index_type const src_index_k{k.get()};
-			decltype(b)::index_type const src_index_l{l.get()};
+			array_index<displaced_curve> const src_index_k{k.get()};
+			array_index<displaced_curve> const src_index_l{l.get()};
 
 			auto const res = find_matching_pair(
 				b[src_index_k].get<0>(),
@@ -454,7 +447,7 @@ void terraformer::trim_at_intersect(
 	for(auto k : a_trim.element_indices())
 	{
 		auto const index = a_trim[k];
-		decltype(a)::index_type const src_index_k{k.get()};
+		array_index<displaced_curve> const src_index_k{k.get()};
 		if(index != std::size(a[src_index_k]))
 		{ a[src_index_k].truncate_from(index); }
 	}
@@ -462,7 +455,7 @@ void terraformer::trim_at_intersect(
 	for(auto l : b_trim.element_indices())
 	{
 		auto const index = b_trim[l];
-		decltype(b)::index_type const src_index_l{l.get()};
+		array_index<displaced_curve> const src_index_l{l.get()};
 		if(index != std::size(b[src_index_l]))
 		{ b[src_index_l].truncate_from(index); }
 	}
@@ -492,8 +485,8 @@ terraformer::generate_branches(
 		rng,
 		growth_params.max_length
 	);
-	ridge_tree_branch_sequence::span_type dummy{};
-	trim_at_intersect(current_stem_collection.left.attributes(), dummy, growth_params.min_neighbour_distance);
+	span<displaced_curve> dummy{};
+	trim_at_intersect(current_stem_collection.left.get<0>(), dummy, growth_params.min_neighbour_distance);
 
 	for(size_t k = 1; k != std::size(parents); ++k)
 	{
@@ -516,7 +509,7 @@ terraformer::generate_branches(
 			growth_params.max_length
 		);
 
-		trim_at_intersect(current_stem_collection.right.attributes(), left_branches.attributes(), growth_params.min_neighbour_distance);
+		trim_at_intersect(current_stem_collection.right.get<0>(), left_branches.get<0>(), growth_params.min_neighbour_distance);
 		ret.push_back(std::move(current_stem_collection));
 
 		current_stem_collection = ridge_tree_stem_collection{array_index<displaced_curve>{k}};
@@ -531,7 +524,7 @@ terraformer::generate_branches(
 		rng,
 		growth_params.max_length
 	);
-	trim_at_intersect(current_stem_collection.right.attributes(), dummy, growth_params.min_neighbour_distance);
+	trim_at_intersect(current_stem_collection.right.get<0>(), dummy, growth_params.min_neighbour_distance);
 
 	ret.push_back(std::move(current_stem_collection));
 	return ret;

@@ -193,7 +193,6 @@ namespace terraformer
 		using index_type = array_index<multi_array_tag<T...>>;
 		using reference = tuple<T&...>;
 		using const_reference = tuple<T const&...>;
-		using span_type = multi_span<T...>;
 
 		template<size_t Index>
 		using attribute_type = std::tuple_element_t<Index, tuple<T...>>;
