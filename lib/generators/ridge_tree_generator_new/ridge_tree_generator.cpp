@@ -593,7 +593,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			continue;
 		}
 
-		auto const next_level_seeds = collect_ridge_tree_branch_seeds(
+		auto next_level_seeds = collect_ridge_tree_branch_seeds(
 			std::as_const(current_trunk.branches).get<0>(),
 				ridge_tree_branch_seed_collection_descriptor{
 				.start_branches = next_level_index == 1?
@@ -606,6 +606,25 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				.end_brancehs = params.endpoint_branches[next_level_index - 1]
 			}
 		);
+
+		for(auto& outer:next_level_seeds)
+		{
+			{
+				auto attribs = outer.left.attributes();
+				// TODO: Use ridge half-width and current amplitude to set collision margins
+				auto collision_margins = attribs.get<3>();
+				for(auto k : outer.left.element_indices())
+				{ collision_margins[k] = 1024.0f; }
+			}
+
+			{
+				auto attribs = outer.right.attributes();
+				// TODO: Use ridge half-width and current amplitude to set collision margins
+				auto collision_margins = attribs.get<3>();
+				for(auto k : outer.right.element_indices())
+				{ collision_margins[k] = 1024.0f; }
+			}
+		}
 
 		auto k = next_level_seeds.element_indices().front();
 		for(auto& index_array : current_trunk.branches.get<2>())

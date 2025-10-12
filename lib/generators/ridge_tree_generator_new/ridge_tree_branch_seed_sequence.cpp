@@ -37,9 +37,9 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 			auto const theta = theta_0 + static_cast<double>(k)*dtheta;
 			direction const v{last_tangent.apply(geosimd::rotation<geom_space>{theta, geosimd::dimension_tag<2>{}})};
 			if(theta - ref_angle > geosimd::turn_angle{geosimd::turns{0.5}})
-			{ ret.left.push_back(points[indices.front()], v, indices.front()); }
+			{ ret.left.push_back(points[indices.front()], v, indices.front(), 0.0f); }
 			else
-			{ ret.right.push_back(points[indices.front()], v, indices.front()); }
+			{ ret.right.push_back(points[indices.front()], v, indices.front(), 0.0f); }
 		}
 	}
 
@@ -67,9 +67,9 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 				if(normal.has_value())
 				{
 					if(side >= 0.0f)
-					{ ret.left.push_back(loc_b, *normal, *selected_branch_point); }
+					{ ret.left.push_back(loc_b, *normal, *selected_branch_point, 0.0f); }
 					else
-					{ ret.right.push_back(loc_b, *normal, *selected_branch_point); }
+					{ ret.right.push_back(loc_b, *normal, *selected_branch_point, 0.0f); }
 				}
 			}
 			max_offset = 0.0f;
@@ -95,9 +95,9 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		if(normal.has_value())
 		{
 			if(side >= 0.0f)
-			{ ret.left.push_back(loc_b, *normal, *selected_branch_point); }
+			{ ret.left.push_back(loc_b, *normal, *selected_branch_point, 0.0f); }
 			else
-			{ ret.right.push_back(loc_b, *normal, *selected_branch_point); }
+			{ ret.right.push_back(loc_b, *normal, *selected_branch_point, 0.0f); }
 		}
 	}
 
@@ -113,9 +113,9 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 			auto const theta = theta_0 + static_cast<double>(k)*dtheta;
 			direction const v{last_tangent.apply(geosimd::rotation<geom_space>{theta, geosimd::dimension_tag<2>{}})};
 			if(theta - ref_angle > geosimd::turn_angle{geosimd::turns{0.5}})
-			{ ret.right.push_back(points[indices.back()], v, indices.back()); }
+			{ ret.right.push_back(points[indices.back()], v, indices.back(), 0.0f); }
 			else
-			{ ret.left.push_back(points[indices.back()], v, indices.back()); }
+			{ ret.left.push_back(points[indices.back()], v, indices.back(), 0.0f); }
 		}
 	}
 
