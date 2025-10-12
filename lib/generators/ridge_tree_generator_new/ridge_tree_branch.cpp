@@ -329,7 +329,8 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			std::move(displaced_curve),
 			vertex_index[k],
 			single_array<displaced_curve::index_type>{},
-			std::move(integrated_curve_length)
+			std::move(integrated_curve_length),
+			0.0f
 		);
 	}
 

@@ -46,7 +46,8 @@ terraformer::ridge_tree_trunk terraformer::generate_trunk(
 			std::move(curve),
 			displaced_curve::index_type{},
 			single_array<displaced_curve::index_type>{},
-			std::move(integrated_curve_length)
+			std::move(integrated_curve_length),
+			0.0f
 		);
 
 	return ridge_tree_trunk{

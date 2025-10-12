@@ -84,13 +84,14 @@ namespace terraformer
 
 
 	struct ridge_tree_branch_sequence :
-		multi_array<displaced_curve, displaced_curve::index_type, single_array<displaced_curve::index_type>, single_array<float>>
+		multi_array<displaced_curve, displaced_curve::index_type, single_array<displaced_curve::index_type>, single_array<float>, float>
 	{
 		using multi_array<
 			displaced_curve,
 			displaced_curve::index_type,
 			single_array<displaced_curve::index_type>,
-			single_array<float>
+			single_array<float>,
+			float
 		>::multi_array;
 	};
 
