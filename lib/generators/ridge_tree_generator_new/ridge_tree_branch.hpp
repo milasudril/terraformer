@@ -257,7 +257,11 @@ namespace terraformer
 		float d_max,
 		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{});
 
-	void trim_at_intersect(span<displaced_curve> a, span<displaced_curve> b, float threshold);
+	void trim_at_intersect(
+		ridge_tree_branch_sequence::span_type const& a_seq,
+		ridge_tree_branch_sequence::span_type const& b_seq,
+		float threshold
+	);
 
 	struct ridge_tree_stem_collection
 	{
