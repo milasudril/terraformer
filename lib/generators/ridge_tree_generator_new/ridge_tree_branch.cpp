@@ -347,6 +347,9 @@ void terraformer::trim_at_intersect(
 	float min_distance
 )
 {
+	assert(std::size(a_params.collision_margins).get() == std::size(a_params.curves).get());
+	assert(std::size(b_params.collision_margins).get() == std::size(b_params.curves).get());
+
 	auto const a = a_params.curves;
 	auto const b = b_params.curves;
 	auto const md2 = min_distance*min_distance;
@@ -500,7 +503,7 @@ terraformer::generate_branches(
 	trim_at_intersect(
 		trim_params{
 			.curves = current_stem_collection.left.get<0>(),
-			.collision_margins = {}
+			.collision_margins = parents[0].left.get<3>()
 		},
 		dummy,
 		growth_params.min_neighbour_distance
@@ -530,11 +533,11 @@ terraformer::generate_branches(
 		trim_at_intersect(
 			trim_params{
 				.curves = current_stem_collection.right.get<0>(),
-				.collision_margins = {}
+				.collision_margins = parents[k - 1].right.get<3>()
 			},
 			trim_params{
 				.curves = left_branches.get<0>(),
-				.collision_margins = {}
+				.collision_margins = parents[k].left.get<3>()
 			},
 			growth_params.min_neighbour_distance
 		);
@@ -555,7 +558,7 @@ terraformer::generate_branches(
 	trim_at_intersect(
 		trim_params{
 			.curves = current_stem_collection.right.get<0>(),
-			.collision_margins = {}
+			.collision_margins = parents.back().right.get<3>()
 		},
 		dummy,
 		growth_params.min_neighbour_distance
