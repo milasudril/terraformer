@@ -343,8 +343,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 
 void terraformer::trim_at_intersect(
 	trim_params const& a_params,
-	trim_params const& b_params,
-	float min_distance
+	trim_params const& b_params
 )
 {
 	assert(std::size(a_params.collision_margins).get() == std::size(a_params.curves).get());
@@ -352,7 +351,8 @@ void terraformer::trim_at_intersect(
 
 	auto const a = a_params.curves;
 	auto const b = b_params.curves;
-	auto const md2 = min_distance*min_distance;
+	auto const a_margins = a_params.collision_margins;
+	auto const b_margins = b_params.collision_margins;
 
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
@@ -378,6 +378,9 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
+			auto const margin_a = a_margins[array_index<float>{k.get()}];
+			auto const margin_b = b_margins[array_index<float>{l.get()}];
+			auto const md2 = (margin_a + margin_b)*(margin_a + margin_b);
 			auto const res = find_matching_pair(
 				a[src_index_k].get<0>(),
 				b[src_index_l].get<0>(),
@@ -406,7 +409,9 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-
+			auto const margin_ak = a_margins[array_index<float>{k.get()}];
+			auto const margin_al= a_margins[array_index<float>{l.get()}];
+			auto const md2 = (margin_ak + margin_al)*(margin_ak + margin_al);
 			auto const res = find_matching_pair(
 				a[src_index_k].get<0>(),
 				a[src_index_l].get<0>(),
@@ -435,6 +440,9 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
+			auto const margin_bk = b_margins[array_index<float>{k.get()}];
+			auto const margin_bl= b_margins[array_index<float>{l.get()}];
+			auto const md2 = (margin_bk + margin_bl)*(margin_bk + margin_bl);
 
 			auto const res = find_matching_pair(
 				b[src_index_k].get<0>(),
@@ -505,8 +513,7 @@ terraformer::generate_branches(
 			.curves = current_stem_collection.left.get<0>(),
 			.collision_margins = parents[0].left.get<3>()
 		},
-		dummy,
-		growth_params.min_neighbour_distance
+		dummy
 	);
 
 	for(size_t k = 1; k != std::size(parents); ++k)
@@ -538,8 +545,7 @@ terraformer::generate_branches(
 			trim_params{
 				.curves = left_branches.get<0>(),
 				.collision_margins = parents[k].left.get<3>()
-			},
-			growth_params.min_neighbour_distance
+			}
 		);
 		ret.push_back(std::move(current_stem_collection));
 
@@ -560,8 +566,7 @@ terraformer::generate_branches(
 			.curves = current_stem_collection.right.get<0>(),
 			.collision_margins = parents.back().right.get<3>()
 		},
-		dummy,
-		growth_params.min_neighbour_distance
+		dummy
 	);
 
 	ret.push_back(std::move(current_stem_collection));

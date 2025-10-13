@@ -263,7 +263,7 @@ namespace terraformer
 		span<float const> collision_margins;
 	};
 
-	void trim_at_intersect(trim_params const& a_params, trim_params const& b_params, float min_distance);
+	void trim_at_intersect(trim_params const& a_params, trim_params const& b_params);
 
 	struct ridge_tree_stem_collection
 	{
@@ -279,7 +279,6 @@ namespace terraformer
 	struct ridge_tree_branch_growth_description
 	{
 		float max_length;
-		float min_neighbour_distance;
 	};
 
 	single_array<ridge_tree_stem_collection>
