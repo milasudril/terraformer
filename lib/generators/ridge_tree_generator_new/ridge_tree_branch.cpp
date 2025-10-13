@@ -308,7 +308,12 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 
 		if(std::size(base_curve).get() < 3)
 		{
-			fprintf(stderr, "Warning: Curve %zu is to short\n", k.get());
+			gen_branches.push_back(
+				displaced_curve{},
+				vertex_index[k],
+				single_array<displaced_curve::index_type>{},
+				single_array<float>{}
+			);
 			continue;
 		}
 
