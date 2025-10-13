@@ -336,8 +336,14 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	return gen_branches;
 }
 
-void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curve> b, float min_distance)
+void terraformer::trim_at_intersect(
+	trim_params const& a_params,
+	trim_params const& b_params,
+	float min_distance
+)
 {
+	auto const a = a_params.curves;
+	auto const b = b_params.curves;
 	auto const md2 = min_distance*min_distance;
 
 	auto const outer_count = std::size(a);
@@ -484,8 +490,16 @@ terraformer::generate_branches(
 		rng,
 		growth_params.max_length
 	);
-	span<displaced_curve> dummy{};
-	trim_at_intersect(current_stem_collection.left.get<0>(), dummy, growth_params.min_neighbour_distance);
+
+	trim_params dummy{};
+	trim_at_intersect(
+		trim_params{
+			.curves = current_stem_collection.left.get<0>(),
+			.collision_margins = {}
+		},
+		dummy,
+		growth_params.min_neighbour_distance
+	);
 
 	for(size_t k = 1; k != std::size(parents); ++k)
 	{
@@ -508,7 +522,17 @@ terraformer::generate_branches(
 			growth_params.max_length
 		);
 
-		trim_at_intersect(current_stem_collection.right.get<0>(), left_branches.get<0>(), growth_params.min_neighbour_distance);
+		trim_at_intersect(
+			trim_params{
+				.curves = current_stem_collection.right.get<0>(),
+				.collision_margins = {}
+			},
+			trim_params{
+				.curves = left_branches.get<0>(),
+				.collision_margins = {}
+			},
+			growth_params.min_neighbour_distance
+		);
 		ret.push_back(std::move(current_stem_collection));
 
 		current_stem_collection = ridge_tree_stem_collection{array_index<displaced_curve>{k}};
@@ -523,7 +547,14 @@ terraformer::generate_branches(
 		rng,
 		growth_params.max_length
 	);
-	trim_at_intersect(current_stem_collection.right.get<0>(), dummy, growth_params.min_neighbour_distance);
+	trim_at_intersect(
+		trim_params{
+			.curves = current_stem_collection.right.get<0>(),
+			.collision_margins = {}
+		},
+		dummy,
+		growth_params.min_neighbour_distance
+	);
 
 	ret.push_back(std::move(current_stem_collection));
 	return ret;

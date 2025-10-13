@@ -19,7 +19,7 @@ namespace terraformer
 
 		static constexpr index_type npos{static_cast<size_t>(-1)};
 
-		constexpr explicit span() = default;
+		constexpr span() = default;
 
 		constexpr explicit span(T* begin, T* end):m_begin{begin}, m_end{end}
 		{}
