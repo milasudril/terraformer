@@ -39,14 +39,11 @@ terraformer::ridge_tree_trunk terraformer::generate_trunk(
 			}
 		);
 
-		auto integrated_curve_length = curve_running_length_xy(std::as_const(curve).points());
-
 		ridge_tree_branch_sequence root;
 		root.push_back(
 			std::move(curve),
 			displaced_curve::index_type{},
-			single_array<displaced_curve::index_type>{},
-			std::move(integrated_curve_length)
+			single_array<displaced_curve::index_type>{}
 		);
 
 	return ridge_tree_trunk{

@@ -273,8 +273,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			gen_branches.push_back(
 				displaced_curve{},
 				vertex_index[k],
-				single_array<displaced_curve::index_type>{},
-				single_array<float>{}
+				single_array<displaced_curve::index_type>{}
 			);
 			continue;
 		}
@@ -290,13 +289,10 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			}
 		);
 
-		auto integrated_curve_length = curve_running_length_xy(std::as_const(displaced_curve).points());
-
 		gen_branches.push_back(
 			std::move(displaced_curve),
 			vertex_index[k],
-			single_array<displaced_curve::index_type>{},
-			std::move(integrated_curve_length)
+			single_array<displaced_curve::index_type>{}
 		);
 	}
 
