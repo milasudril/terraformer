@@ -613,7 +613,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			{
 				auto attribs = outer.left.attributes();
 				// TODO: Use ridge half-width and current amplitude to set collision margins
-				auto collision_margins = attribs.get<4>();
+				auto collision_margins = attribs.get<3>();
 				for(auto k : outer.left.element_indices())
 				{ collision_margins[k] = 1024.0f; }
 			}
@@ -621,7 +621,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			{
 				auto attribs = outer.right.attributes();
 				// TODO: Use ridge half-width and current amplitude to set collision margins
-				auto collision_margins = attribs.get<4>();
+				auto collision_margins = attribs.get<3>();
 				for(auto k : outer.right.element_indices())
 				{ collision_margins[k] = 1024.0f; }
 			}

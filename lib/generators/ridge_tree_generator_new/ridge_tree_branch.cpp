@@ -242,8 +242,8 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	ridge_tree_branch_sequence&& gen_branches)
 {
 	auto const points = branch_points.get<0>();
-	auto const normals = branch_points.get<2>();
-	auto const vertex_index = branch_points.get<3>();
+	auto const normals = branch_points.get<1>();
+	auto const vertex_index = branch_points.get<2>();
 
 	for(auto k : branch_points.element_indices())
 	{
@@ -473,7 +473,7 @@ terraformer::generate_branches(
 	trim_at_intersect(
 		trim_params{
 			.curves = current_stem_collection.left.get<0>(),
-			.collision_margins = parents[0].left.get<4>()
+			.collision_margins = parents[0].left.get<3>()
 		},
 		dummy
 	);
@@ -502,11 +502,11 @@ terraformer::generate_branches(
 		trim_at_intersect(
 			trim_params{
 				.curves = current_stem_collection.right.get<0>(),
-				.collision_margins = parents[k - 1].right.get<4>()
+				.collision_margins = parents[k - 1].right.get<3>()
 			},
 			trim_params{
 				.curves = left_branches.get<0>(),
-				.collision_margins = parents[k].left.get<4>()
+				.collision_margins = parents[k].left.get<3>()
 			}
 		);
 		ret.push_back(std::move(current_stem_collection));
@@ -526,7 +526,7 @@ terraformer::generate_branches(
 	trim_at_intersect(
 		trim_params{
 			.curves = current_stem_collection.right.get<0>(),
-			.collision_margins = parents.back().right.get<4>()
+			.collision_margins = parents.back().right.get<3>()
 		},
 		dummy
 	);

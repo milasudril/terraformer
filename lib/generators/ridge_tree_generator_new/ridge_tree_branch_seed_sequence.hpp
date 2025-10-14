@@ -11,9 +11,9 @@
 
 namespace terraformer
 {
-	struct ridge_tree_branch_seed_sequence : multi_array<location, float, direction, displaced_curve::index_type, float>
+	struct ridge_tree_branch_seed_sequence : multi_array<location, direction, displaced_curve::index_type, float>
 	{
-		using multi_array<location, float, direction, displaced_curve::index_type, float>::multi_array;
+		using multi_array<location, direction, displaced_curve::index_type, float>::multi_array;
 	};
 
 	struct ridge_tree_branch_seed_sequence_pair
