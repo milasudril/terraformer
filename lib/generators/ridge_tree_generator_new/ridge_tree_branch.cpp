@@ -268,7 +268,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			}
 		);
 
-		if(std::size(base_curve).get() < 3)
+		if(std::size(base_curve.locations).get() < 3)
 		{
 			gen_branches.push_back(
 				displaced_curve{},
@@ -278,11 +278,13 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			continue;
 		}
 
-		array_size<float> const base_curve_length{static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1};
+		array_size<float> const base_curve_length{
+			static_cast<size_t>(curve_length(base_curve.locations)/pixel_size) + 1
+		};
 		auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
 		auto displaced_curve = displace_xy(
-			base_curve,
+			base_curve.locations,
 			displacement_profile{
 				.offsets = offsets,
 				.sample_period = pixel_size,

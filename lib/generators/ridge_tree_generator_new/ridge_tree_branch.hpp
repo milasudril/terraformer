@@ -6,6 +6,7 @@
 #include "./ridge_curve.hpp"
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
+#include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/modules/dimensions.hpp"
 #include "lib/common/rng.hpp"
@@ -105,8 +106,15 @@ namespace terraformer
 		enum side side;
 	};
 
+	struct ridge_tree_branch_base_curve
+	{
+		single_array<location> locations;
+		float initial_height = 1.0f;
+	};
+
 	template<class BranchStopCondition>
-	single_array<location> generate_branch_base_curve(
+	ridge_tree_branch_base_curve
+	generate_branch_base_curve(
 		location loc,
 		direction start_dir,
 		span_2d<float const> current_heightmap,
@@ -115,19 +123,20 @@ namespace terraformer
 	)
 	{
 		assert(pixel_size > 0.0f);
-		single_array<location> base_curve;
+		ridge_tree_branch_base_curve base_curve{};
 		if(stop(loc))
 		{ return base_curve; }
 
-		base_curve.push_back(loc);
+		base_curve.locations.push_back(loc);
 		auto v = (loc - location{})/pixel_size;
+		base_curve.initial_height = interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
 
-		base_curve.reserve(array_size<location>{128});
+		base_curve.locations.reserve(array_size<location>{128});
 		auto step = 1.0f*start_dir;
 		v += 4.0f*step;
 		auto current_elevation = interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
 
-		auto k = base_curve.element_indices().front();
+		auto k = base_curve.locations.element_indices().front();
 		while(!stop(location{} + v*pixel_size))
 		{
 			auto const next_elevation =  interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
@@ -136,13 +145,13 @@ namespace terraformer
 
 			auto const next_loc = location{} + v*pixel_size;
 
-			if(k > base_curve.element_indices().front() + 1)
+			if(k > base_curve.locations.element_indices().front() + 1)
 			{
-				if(distance(base_curve[k - 1], next_loc) <= 0.25f*pixel_size)
+				if(distance(base_curve.locations[k - 1], next_loc) <= 0.25f*pixel_size)
 				{ return base_curve; }
 			}
 
-			base_curve.push_back(next_loc);
+			base_curve.locations.push_back(next_loc);
 			current_elevation = next_elevation;
 
 			auto const dx = 0.5f*(
@@ -173,7 +182,8 @@ namespace terraformer
 		ridge_tree_branch_displacement_description const& curve_desc,
 		random_generator& rng,
 		float d_max,
-		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{});
+		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{}
+	);
 
 	struct trim_params
 	{
