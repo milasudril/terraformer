@@ -146,10 +146,6 @@ namespace terraformer
 		ridge_tree_branch_elevation_data elevation_data;
 	};
 
-	displacement compute_field(span<displaced_curve const> branches, location r, float min_distance);
-
-	displacement compute_field(span<ridge_tree_trunk const> branches, location r, float min_distance);
-
 	inline auto closest_point_xy(ridge_tree_trunk const& trunk, location loc)
 	{	return closest_point_xy(trunk.branches, loc); }
 

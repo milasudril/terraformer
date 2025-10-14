@@ -232,44 +232,6 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	return ret;
 }
 
-terraformer::displacement terraformer::compute_field(span<displaced_curve const> branches, location r, float min_distance)
-{
-	displacement ret{};
-
-	for(auto& branch : branches)
-	{
-		auto const points = branch.get<0>();
-		ret += terraformer::fold_over_line_segments(
-			points,
-			[](auto seg, auto point, auto d02, auto... prev) {
-				auto const p = closest_point(seg, point);
-				auto const d2 = distance_squared(p, point);
-				direction const r{p - point};
-				auto const l = length(seg);
-				return (prev + ... + (l*r*(d2<d02? 1.0f : d02/d2)));
-			},
-			r,
-			min_distance*min_distance
-		);
-	}
-
-	return ret;
-}
-
-terraformer::displacement terraformer::compute_field(
-	span<ridge_tree_trunk const> branch_infos,
-	location r,
-	float min_distance
-)
-{
-	displacement ret{};
-
-	for(auto& branch_info : branch_infos)
-	{ ret += compute_field(branch_info.branches.get<0>(), r, min_distance); }
-
-	return ret;
-}
-
 terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	ridge_tree_branch_seed_sequence const& branch_points,
 	span_2d<float const> current_heightmap,
