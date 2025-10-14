@@ -93,44 +93,6 @@ namespace terraformer
 		>::multi_array;
 	};
 
-	struct ridge_tree_closest_point_curves_result
-	{
-		curve_distance_result result;
-		array_index<displaced_curve> curve{static_cast<size_t>(-1)};
-	};
-
-	inline auto closest_point_xy(span<displaced_curve const> curves, location loc)
-	{
-		if(curves.empty())
-		{
-			return ridge_tree_closest_point_curves_result{};
-		}
-
-		ridge_tree_closest_point_curves_result ret{
-			.result = curve_closest_point_xy(curves.front().points(), loc),
-			.curve = curves.element_indices().front()
-		};
-
-		for(auto k : curves.element_indices(1))
-		{
-			auto new_res = curve_closest_point_xy(curves[k].points(), loc);
-			if(new_res.distance < 0.0f)
-			{ continue; }
-
-			if(new_res.distance < ret.result.distance)
-			{
-				ret.result = new_res;
-				ret.curve = k;
-			}
-		}
-		return ret;
-	}
-
-	inline auto closest_point_xy(ridge_tree_branch_sequence const& seed_seq, location loc)
-	{	return closest_point_xy(seed_seq.get<0>(), loc); }
-
-	using ridge_tree_branch_elevation_data = single_array<polynomial<float, 3>>;
-
 	struct ridge_tree_trunk
 	{
 		static constexpr auto no_parent = array_index<ridge_tree_trunk>{static_cast<size_t>(-1)};
@@ -141,46 +103,7 @@ namespace terraformer
 		array_index<ridge_tree_trunk> parent;
 		array_index<displaced_curve> parent_curve_index;
 		enum side side;
-
-		ridge_tree_branch_elevation_data elevation_data;
 	};
-
-	inline auto closest_point_xy(ridge_tree_trunk const& trunk, location loc)
-	{	return closest_point_xy(trunk.branches, loc); }
-
-	struct ridge_tree_closest_point_result
-	{
-		ridge_tree_closest_point_curves_result distance_result;
-		array_index<ridge_tree_trunk> branch = ridge_tree_trunk::no_parent;
-	};
-
-	inline auto closest_point_xy(span<ridge_tree_trunk const> branches, location loc)
-	{
-		if(branches.empty())
-		{
-			return ridge_tree_closest_point_result{};
-		}
-
-		ridge_tree_closest_point_result ret{
-			.distance_result = closest_point_xy(branches.front(), loc),
-			.branch = branches.element_indices().front()
-		};
-
-		for(auto k : branches.element_indices(1))
-		{
-			auto const res = closest_point_xy(branches[k], loc);
-			if(res.result.distance < 0.0f)
-			{ continue; }
-
-			if(res.result.distance < ret.distance_result.result.distance)
-			{
-				ret.distance_result = res;
-				ret.branch = k;
-			}
-		}
-
-		return ret;
-	}
 
 	template<class BranchStopCondition>
 	single_array<location> generate_branch_base_curve(

@@ -51,7 +51,6 @@ terraformer::ridge_tree_trunk terraformer::generate_trunk(
 		.branches = std::move(root),
 		.parent = ridge_tree_trunk::no_parent,
 		.parent_curve_index = array_index<displaced_curve>{0},
-		.side = ridge_tree_trunk::side::left,
-		.elevation_data = ridge_tree_branch_elevation_data{}
+		.side = ridge_tree_trunk::side::left
 	};
 }

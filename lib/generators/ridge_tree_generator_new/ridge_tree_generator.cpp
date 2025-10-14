@@ -668,8 +668,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 						.branches = std::move(stem.left),
 						.parent = current_trunk_index,
 						.parent_curve_index = stem.parent_curve_index,
-						.side = ridge_tree_trunk::side::left,
-						.elevation_data = ridge_tree_branch_elevation_data{}
+						.side = ridge_tree_trunk::side::left
 					}
 				);
 
@@ -697,8 +696,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 						.branches = std::move(stem.right),
 						.parent = current_trunk_index,
 						.parent_curve_index = stem.parent_curve_index,
-						.side = ridge_tree_trunk::side::right,
-						.elevation_data = ridge_tree_branch_elevation_data{}
+						.side = ridge_tree_trunk::side::right
 					}
 				);
 
