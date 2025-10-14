@@ -627,7 +627,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		}
 
 		auto k = next_level_seeds.element_indices().front();
-		for(auto& index_array : current_trunk.branches.get<2>())
+		for(auto& index_array : current_trunk.branches.get<3>())
 		{
 			index_array = collect_branch_indices(next_level_seeds[k]);
 			++k;
