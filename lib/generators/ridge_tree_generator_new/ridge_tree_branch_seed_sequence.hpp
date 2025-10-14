@@ -40,13 +40,14 @@ namespace terraformer
 	};
 
 	ridge_tree_branch_seed_sequence_pair collect_ridge_tree_branch_seeds(
-		displaced_curve const& points,
+		displaced_curve const& curves,
 		ridge_tree_branch_seed_collection_descriptor const& params
 	);
 
 	single_array<ridge_tree_branch_seed_sequence_pair>
 	collect_ridge_tree_branch_seeds(
-		span<displaced_curve const> points,
+		span<displaced_curve const> curves,
+		span<float const> initial_heights,
 		ridge_tree_branch_seed_collection_descriptor const& params
 	);
 

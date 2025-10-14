@@ -595,6 +595,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		auto next_level_seeds = collect_ridge_tree_branch_seeds(
 			std::as_const(current_trunk.branches).get<0>(),
+			std::as_const(current_trunk.branches).get<1>(),
 				ridge_tree_branch_seed_collection_descriptor{
 				.start_branches = next_level_index == 1?
 					params.trunk.starting_point_branches:
