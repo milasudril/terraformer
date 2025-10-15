@@ -194,6 +194,7 @@ namespace terraformer
 
 	void trim_at_intersect(trim_params const& a_params, trim_params const& b_params);
 
+
 	struct ridge_tree_stem_collection
 	{
 		ridge_tree_stem_collection(array_index<displaced_curve> _parent_curve_index)
@@ -205,12 +206,17 @@ namespace terraformer
 		ridge_tree_branch_sequence right;
 	};
 
+	void trim_at_intersct(
+		span<ridge_tree_stem_collection> stem_collections,
+		std::span<ridge_tree_branch_seed_sequence_pair const> parents
+	);
+
 	struct ridge_tree_branch_growth_description
 	{
 		float max_length;
 	};
 
-	single_array<terraformer::ridge_tree_stem_collection>
+	single_array<ridge_tree_stem_collection>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
 		span_2d<float const> current_heightmap,

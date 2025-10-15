@@ -581,7 +581,7 @@ terraformer::generate_branches(
 			curve_desc,
 			rng,
 			growth_params.max_length
-		);;
+		);
 	}
 
 	current_stem_collection.right = generate_branches(
@@ -595,4 +595,55 @@ terraformer::generate_branches(
 
 	ret.push_back(std::move(current_stem_collection));
 	return ret;
+}
+
+void terraformer::trim_at_intersct(
+	span<terraformer::ridge_tree_stem_collection> stem_collections,
+	std::span<ridge_tree_branch_seed_sequence_pair const> parents
+)
+{
+	if(parents.empty() || stem_collections.empty())
+	{	return; }
+
+	assert(std::size(parents) == std::size(stem_collections).get());
+
+	auto current_stem_collection = &stem_collections.front();
+	auto left_stem_collection = &current_stem_collection->left;
+	ridge_tree_branch_sequence* right_stem_collection = nullptr;
+	trim_params dummy{};
+	trim_at_intersect(
+		trim_params{
+			.curves = left_stem_collection->get<0>(),
+			.collision_margins = parents[0].left.get<3>()
+		},
+		dummy
+	);
+
+	for(size_t k = 1; k != std::size(parents); ++k)
+	{
+		right_stem_collection = &current_stem_collection->right;
+		current_stem_collection = &stem_collections[stem_collections.element_indices().front() + k];
+		left_stem_collection = &current_stem_collection->left;
+
+		trim_at_intersect(
+			trim_params{
+				.curves = right_stem_collection->get<0>(),
+				.collision_margins = parents[k - 1].right.get<3>()
+			},
+			trim_params{
+				.curves = left_stem_collection->get<0>(),
+				.collision_margins = parents[k].left.get<3>()
+			}
+		);
+	}
+
+	right_stem_collection = &current_stem_collection->right;
+
+	trim_at_intersect(
+		trim_params{
+			.curves = right_stem_collection->get<0>(),
+			.collision_margins = parents.back().right.get<3>()
+		},
+		dummy
+	);
 }
