@@ -210,6 +210,16 @@ namespace terraformer
 		float max_length;
 	};
 
+	single_array<terraformer::ridge_tree_stem_collection>
+	generate_branches(
+		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
+		span_2d<float const> current_heightmap,
+		float pixel_size,
+		ridge_tree_branch_displacement_description const& curve_desc,
+		random_generator& rng,
+		ridge_tree_branch_growth_description growth_params
+	);
+
 	single_array<ridge_tree_stem_collection>
 	generate_and_prune_branches(
 		std::span<ridge_tree_branch_seed_sequence_pair const> parents,

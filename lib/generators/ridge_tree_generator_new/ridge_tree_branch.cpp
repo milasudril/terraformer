@@ -534,3 +534,65 @@ terraformer::generate_and_prune_branches(
 	ret.push_back(std::move(current_stem_collection));
 	return ret;
 }
+
+terraformer::single_array<terraformer::ridge_tree_stem_collection>
+terraformer::generate_branches(
+	std::span<ridge_tree_branch_seed_sequence_pair const> parents,
+	span_2d<float const> current_heightmap,
+	float pixel_size,
+	ridge_tree_branch_displacement_description const& curve_desc,
+	random_generator& rng,
+	ridge_tree_branch_growth_description growth_params
+)
+{
+	single_array<ridge_tree_stem_collection> ret;
+
+	if(parents.empty())
+	{	return ret; }
+
+	ridge_tree_stem_collection current_stem_collection{array_index<displaced_curve>{0}};
+	current_stem_collection.left = generate_branches(
+		parents[0].left,
+		current_heightmap,
+		pixel_size,
+		curve_desc,
+		rng,
+		growth_params.max_length
+	);
+
+	for(size_t k = 1; k != std::size(parents); ++k)
+	{
+		current_stem_collection.right = generate_branches(
+			parents[k - 1].right,
+			current_heightmap,
+			pixel_size,
+			curve_desc,
+			rng,
+			growth_params.max_length
+		);
+
+		ret.push_back(std::move(current_stem_collection));
+
+		current_stem_collection = ridge_tree_stem_collection{array_index<displaced_curve>{k}};
+		current_stem_collection.left = generate_branches(
+			parents[k].left,
+			current_heightmap,
+			pixel_size,
+			curve_desc,
+			rng,
+			growth_params.max_length
+		);;
+	}
+
+	current_stem_collection.right = generate_branches(
+		parents.back().right,
+		current_heightmap,
+		pixel_size,
+		curve_desc,
+		rng,
+		growth_params.max_length
+	);
+
+	ret.push_back(std::move(current_stem_collection));
+	return ret;
+}
