@@ -607,7 +607,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				.end_brancehs = params.endpoint_branches[next_level_index - 1]
 			}
 		);
-#if 0
+#if 1
 		for(auto& outer:next_level_seeds)
 		{
 			{
@@ -655,6 +655,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				.max_length = growth_params.e2e_distance
 			}
 		);
+
+		trim_at_intersct(next_level, next_level_seeds);
 
 		fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 		for(auto& stem: next_level)
