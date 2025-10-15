@@ -445,7 +445,7 @@ void terraformer::trim_at_intersect(
 }
 
 terraformer::single_array<terraformer::ridge_tree_stem_collection>
-terraformer::generate_branches(
+terraformer::generate_and_prune_branches(
 	std::span<ridge_tree_branch_seed_sequence_pair const> parents,
 	span_2d<float const> current_heightmap,
 	float pixel_size,

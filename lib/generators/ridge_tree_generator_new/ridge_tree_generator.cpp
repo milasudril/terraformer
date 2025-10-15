@@ -640,7 +640,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		//auto const pixel_size = get_min_pixel_size(horz_displacement);
 
 		feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
-		auto next_level = generate_branches(
+		auto next_level = generate_and_prune_branches(
 			next_level_seeds,
 			ret.pixels(),
 			global_pixel_size,

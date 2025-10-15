@@ -211,7 +211,7 @@ namespace terraformer
 	};
 
 	single_array<ridge_tree_stem_collection>
-	generate_branches(
+	generate_and_prune_branches(
 		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
 		span_2d<float const> current_heightmap,
 		float pixel_size,
