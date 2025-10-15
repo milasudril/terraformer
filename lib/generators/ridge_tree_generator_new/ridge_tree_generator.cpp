@@ -607,7 +607,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				.end_brancehs = params.endpoint_branches[next_level_index - 1]
 			}
 		);
-
+#if 0
 		for(auto& outer:next_level_seeds)
 		{
 			{
@@ -626,6 +626,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				{ collision_margins[k] = 1024.0f; }
 			}
 		}
+#endif
 
 		auto k = next_level_seeds.element_indices().front();
 		for(auto& index_array : current_trunk.branches.get<3>())
@@ -640,7 +641,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		//auto const pixel_size = get_min_pixel_size(horz_displacement);
 
 		feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
-		auto next_level = generate_and_prune_branches(
+		auto next_level = generate_branches(
 			next_level_seeds,
 			ret.pixels(),
 			global_pixel_size,
