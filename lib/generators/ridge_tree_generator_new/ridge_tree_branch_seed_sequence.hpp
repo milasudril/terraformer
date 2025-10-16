@@ -47,7 +47,6 @@ namespace terraformer
 	single_array<ridge_tree_branch_seed_sequence_pair>
 	collect_ridge_tree_branch_seeds(
 		span<displaced_curve const> curves,
-		span<float const> initial_heights,
 		ridge_tree_branch_seed_collection_descriptor const& params
 	);
 

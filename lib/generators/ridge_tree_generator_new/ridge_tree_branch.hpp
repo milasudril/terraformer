@@ -85,13 +85,14 @@ namespace terraformer
 
 
 	struct ridge_tree_branch_sequence :
-		multi_array<displaced_curve, float, displaced_curve::index_type, single_array<displaced_curve::index_type>>
+		multi_array<displaced_curve, float, displaced_curve::index_type, single_array<displaced_curve::index_type>, float>
 	{
 		using multi_array<
 			displaced_curve,
 			float,
 			displaced_curve::index_type,
-			single_array<displaced_curve::index_type>
+			single_array<displaced_curve::index_type>,
+			float
 		>::multi_array;
 	};
 
@@ -207,8 +208,7 @@ namespace terraformer
 	};
 
 	void trim_at_intersct(
-		span<ridge_tree_stem_collection> stem_collections,
-		std::span<ridge_tree_branch_seed_sequence_pair const> parents
+		span<ridge_tree_stem_collection> stem_collections
 	);
 
 	struct ridge_tree_branch_growth_description
@@ -222,16 +222,6 @@ namespace terraformer
 		span_2d<float const> current_heightmap,
 		float pixel_size,
 		ridge_tree_branch_displacement_description const& curve_desc,
-		random_generator& rng,
-		ridge_tree_branch_growth_description growth_params
-	);
-
-	single_array<ridge_tree_stem_collection>
-	generate_and_prune_branches(
-		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
-		span_2d<float const> current_heightmap,
-		float pixel_size,
-		ridge_tree_branch_displacement_description const &curve_desc,
 		random_generator& rng,
 		ridge_tree_branch_growth_description growth_params
 	);

@@ -132,7 +132,6 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 terraformer::single_array<terraformer::ridge_tree_branch_seed_sequence_pair>
 terraformer::collect_ridge_tree_branch_seeds(
 	span<displaced_curve const> curves,
-	span<float const>,
 	ridge_tree_branch_seed_collection_descriptor const& params
 )
 {
