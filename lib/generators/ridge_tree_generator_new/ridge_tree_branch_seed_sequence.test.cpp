@@ -199,9 +199,9 @@ TESTCASE(terraformer_ridge_tree_branch_seed_sequence_validate_branches_at_bounda
 	EXPECT_EQ(std::size(res.right).get(), 2);
 
 	for(auto v : res.left.get<1>())
-	{ EXPECT_GT(v[1], 0.0f); }
+	{ EXPECT_LT(v[1], 0.0f); }
 
 	for(auto v : res.right.get<1>())
-	{ EXPECT_LT(v[1], 0.0f); }
+	{ EXPECT_GT(v[1], 0.0f); }
 }
 
