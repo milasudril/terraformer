@@ -2,7 +2,9 @@
 
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/curve_tools/displace.hpp"
 #include "lib/curve_tools/length.hpp"
+#include "lib/curve_tools/line_segment.hpp"
 #include "lib/math_utils/first_order_hp_filter.hpp"
 #include "lib/math_utils/second_order_lp_filter.hpp"
 
@@ -305,6 +307,43 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	return gen_branches;
 }
 
+terraformer::displaced_curve::index_type
+terraformer::find_intersection(
+	displaced_curve const& first,
+	displaced_curve const& second,
+	float collision_margin,
+	bool debug
+)
+{
+	auto const index_first = first.element_indices();
+	auto const index_second = second.element_indices();
+	auto const end = std::min(index_first.bound(), index_second.bound());
+	if(end == index_first.front())
+	{ return terraformer::displaced_curve::npos; }
+
+	auto const first_curve = first.input_points();
+	auto const second_curve = second.input_points();
+
+	auto k = index_first.front();
+	auto d2 = distance_squared(first_curve[k], second_curve[k]);
+	auto const d2_min = collision_margin*collision_margin;
+	++k;
+	for(; k != end; ++k)
+	{
+		auto const new_d2 = distance_squared(first_curve[k], second_curve[k]);
+
+		if(debug)
+		{ printf("%.8g\n", std::sqrt(new_d2)); }
+
+		if(new_d2 < d2 && new_d2 < d2_min)
+		{ return k; }
+
+		d2 = new_d2;
+	}
+
+	return terraformer::displaced_curve::npos;
+}
+
 void terraformer::trim_at_intersect(
 	trim_params const& a_params,
 	trim_params const& b_params
@@ -320,6 +359,8 @@ void terraformer::trim_at_intersect(
 
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
+
+	printf("trim at intersect outer_count = %zu inner_count = %zu\n", outer_count.get(), inner_count.get());
 
 	// TODO: It would be nice to have different types for a_trim and b_trim
 	single_array<displaced_curve::index_type> a_trim(array_size<displaced_curve::index_type>{outer_count});
@@ -344,26 +385,16 @@ void terraformer::trim_at_intersect(
 			array_index<displaced_curve> const src_index_l{l.get()};
 			auto const margin_a = a_margins[array_index<float>{k.get()}];
 			auto const margin_b = b_margins[array_index<float>{l.get()}];
-			auto const md2 = (margin_a + margin_b)*(margin_a + margin_b);
-			auto const res = find_matching_pair(
-				a[src_index_k].get<0>(),
-				b[src_index_l].get<0>(),
-				[md2](auto const p1, auto const p2) {
-					auto const d2 = distance_squared(p1, p2);
-					if(d2 < md2)
-					{	return true; }
-					return false;
-				}
-			);
+			auto const cut_at = find_intersection(a[src_index_k], b[src_index_l], margin_a + margin_b, true);
+			if(cut_at == displaced_curve::npos)
+			{
+				printf("No intersection %.8g\n\n", margin_a + margin_b);
+				continue;
+			}
+			puts("");
 
-			a_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[src_index_k].get<0>()), res.first)),
-				a_trim[k]
-			);
-			b_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[src_index_l].get<0>()), res.second)),
-				b_trim[l]
-			);
+			a_trim[k] = std::min(cut_at, a_trim[k]);
+			b_trim[l] = std::min(cut_at, b_trim[l]);
 		}
 	}
 
@@ -375,26 +406,16 @@ void terraformer::trim_at_intersect(
 			array_index<displaced_curve> const src_index_l{l.get()};
 			auto const margin_ak = a_margins[array_index<float>{k.get()}];
 			auto const margin_al= a_margins[array_index<float>{l.get()}];
-			auto const md2 = (margin_ak + margin_al)*(margin_ak + margin_al);
-			auto const res = find_matching_pair(
-				a[src_index_k].get<0>(),
-				a[src_index_l].get<0>(),
-				[md2](auto const p1, auto const p2) {
-					if(distance_squared(p1, p2) < md2)
-					{ return true; }
-					return false;
-				}
+			auto const cut_at = find_intersection(
+				a[src_index_k],
+				a[src_index_l],
+				margin_ak + margin_al
 			);
+			if(cut_at == displaced_curve::npos)
+			{ continue; }
 
-			a_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[src_index_k].get<0>()), res.first)),
-				a_trim[k]
-			);
-
-			a_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[src_index_l].get<0>()), res.second)),
-				a_trim[l]
-			);
+			a_trim[k] = std::min(cut_at, a_trim[k]);
+			a_trim[l] = std::min(cut_at, a_trim[l]);
 		}
 	}
 
@@ -406,26 +427,17 @@ void terraformer::trim_at_intersect(
 			array_index<displaced_curve> const src_index_l{l.get()};
 			auto const margin_bk = b_margins[array_index<float>{k.get()}];
 			auto const margin_bl= b_margins[array_index<float>{l.get()}];
-			auto const md2 = (margin_bk + margin_bl)*(margin_bk + margin_bl);
-
-			auto const res = find_matching_pair(
-				b[src_index_k].get<0>(),
-				b[src_index_l].get<0>(),
-				[md2](auto const p1, auto const p2) {
-					if(distance_squared(p1, p2) < md2)
-					{ return true; }
-					return false;
-				}
+			auto const cut_at = find_intersection(
+				b[src_index_k],
+				b[src_index_l],
+				margin_bk + margin_bl
 			);
 
-			b_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[src_index_k].get<0>()), res.first)),
-				b_trim[k]
-			);
-			b_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[src_index_l].get<0>()), res.second)),
-				b_trim[l]
-			);
+			if(cut_at == displaced_curve::npos)
+			{ continue; }
+
+			b_trim[k] = std::min(cut_at, b_trim[k]);
+			b_trim[l] = std::min(cut_at, b_trim[l]);
 		}
 	}
 
@@ -526,7 +538,6 @@ void terraformer::trim_at_intersct(
 		},
 		dummy
 	);
-
 
 	for(auto k :stem_collections.element_indices(1))
 	{

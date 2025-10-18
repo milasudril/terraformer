@@ -187,6 +187,14 @@ namespace terraformer
 		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{}
 	);
 
+	terraformer::displaced_curve::index_type
+	find_intersection(
+		displaced_curve const& first,
+		displaced_curve const& second,
+		float collision_margin,
+		bool debug = false
+	);
+
 	struct trim_params
 	{
 		span<displaced_curve> curves;

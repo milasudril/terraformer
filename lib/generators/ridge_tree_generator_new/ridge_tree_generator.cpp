@@ -719,6 +719,9 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		}
 
 		++current_trunk_index;
+
+		// Debug
+		// break;
 	}
 	return ret;
 }
