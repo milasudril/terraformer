@@ -454,9 +454,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		auto const& horz_displacement = displacement_profiles[next_level_index];
 		auto const& growth_params = branch_growth_params[next_level_index - 1];
 		auto const& height_profile = params.height_profile[next_level_index];
-		//auto const pixel_size = get_min_pixel_size(horz_displacement);
 
-		feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
 		auto next_level = generate_branches(
 			next_level_seeds,
 			ret.pixels(),
@@ -481,7 +479,15 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		trim_at_intersct(next_level);
 
-		fedisableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW );
+		ridge_tree_ridge_height_profile const current_height_profile{
+			.begin_height = 1.0f,
+			.begin_height_is_relative = true,
+			.end_height  = growth_params.end_height,
+			.relative_half_thickness = height_profile.rel_half_thickness,
+			.transverse_rolloff_exponent = height_profile.rolloff_exponent,
+			.longitudinal_rolloff_exponent = growth_params.longitudinal_rolloff_exponent
+		};
+
 		for(auto& stem: next_level)
 		{
 			grayscale_image tmp_left{w_img, h_img};
@@ -499,20 +505,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
-				fill_curve(
-					tmp_left,
-					ret.pixels(),
-					trunks.back(),
-					ridge_tree_ridge_height_profile{
-						.begin_height = 1.0f,
-						.begin_height_is_relative = true,
-						.end_height  = growth_params.end_height,
-						.relative_half_thickness = height_profile.rel_half_thickness,
-						.transverse_rolloff_exponent = height_profile.rolloff_exponent,
-						.longitudinal_rolloff_exponent = growth_params.longitudinal_rolloff_exponent
-					},
-					global_pixel_size
-				);
+				fill_curve(tmp_left, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
 			}
 
 			if(!stem.right.empty())
@@ -527,20 +520,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
-				fill_curve(
-					tmp_right,
-					ret.pixels(),
-					trunks.back(),
-					ridge_tree_ridge_height_profile{
-						.begin_height = 1.0f,
-						.begin_height_is_relative = true,
-						.end_height  = growth_params.end_height,
-						.relative_half_thickness = height_profile.rel_half_thickness,
-						.transverse_rolloff_exponent = height_profile.rolloff_exponent,
-						.longitudinal_rolloff_exponent = growth_params.longitudinal_rolloff_exponent
-					},
-					global_pixel_size
-				);
+				fill_curve(tmp_right, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
 			}
 
 			pick_max(ret.pixels(), std::as_const(tmp_left).pixels());
