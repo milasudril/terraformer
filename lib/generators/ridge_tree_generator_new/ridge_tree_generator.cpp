@@ -21,10 +21,7 @@
 #include "lib/value_maps/qurt_value_map.hpp"
 #include "lib/value_maps/log_value_map.hpp"
 #include "lib/curve_tools/rasterizer.hpp"
-
-
 #include "lib/curve_tools/dump.hpp"
-#include "lib/common/cfile_owner.hpp"
 
 #include <algorithm>
 #include <cassert>
@@ -488,11 +485,9 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			.longitudinal_rolloff_exponent = growth_params.longitudinal_rolloff_exponent
 		};
 
+		grayscale_image tmp{w_img, h_img};
 		for(auto& stem: next_level)
 		{
-			grayscale_image tmp_left{w_img, h_img};
-			grayscale_image tmp_right{w_img, h_img};
-
 			if(!stem.left.empty())
 			{
 				trunks.push_back(
@@ -505,7 +500,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
-				fill_curve(tmp_left, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
+				fill_curve(tmp, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
 			}
 
 			if(!stem.right.empty())
@@ -520,13 +515,11 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
-				fill_curve(tmp_right, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
+				fill_curve(tmp, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
 			}
-
-			pick_max(ret.pixels(), std::as_const(tmp_left).pixels());
-			pick_max(ret.pixels(), std::as_const(tmp_right).pixels());
 		}
 
+		pick_max(ret.pixels(), std::as_const(tmp).pixels());
 		++current_trunk_index;
 	}
 	return ret;
