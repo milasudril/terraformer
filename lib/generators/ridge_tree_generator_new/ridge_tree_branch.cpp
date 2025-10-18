@@ -311,8 +311,7 @@ terraformer::displaced_curve::index_type
 terraformer::find_intersection(
 	displaced_curve const& first,
 	displaced_curve const& second,
-	float collision_margin,
-	bool debug
+	float collision_margin
 )
 {
 	auto const index_first = first.element_indices();
@@ -331,9 +330,6 @@ terraformer::find_intersection(
 	for(; k != end; ++k)
 	{
 		auto const new_d2 = distance_squared(first_curve[k], second_curve[k]);
-
-		if(debug)
-		{ printf("%.8g\n", std::sqrt(new_d2)); }
 
 		if(new_d2 < d2 && new_d2 < d2_min)
 		{ return k; }
@@ -360,8 +356,6 @@ void terraformer::trim_at_intersect(
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
 
-	printf("trim at intersect outer_count = %zu inner_count = %zu\n", outer_count.get(), inner_count.get());
-
 	// TODO: It would be nice to have different types for a_trim and b_trim
 	single_array<displaced_curve::index_type> a_trim(array_size<displaced_curve::index_type>{outer_count});
 	for(auto k : a_trim.element_indices())
@@ -385,13 +379,9 @@ void terraformer::trim_at_intersect(
 			array_index<displaced_curve> const src_index_l{l.get()};
 			auto const margin_a = a_margins[array_index<float>{k.get()}];
 			auto const margin_b = b_margins[array_index<float>{l.get()}];
-			auto const cut_at = find_intersection(a[src_index_k], b[src_index_l], margin_a + margin_b, true);
+			auto const cut_at = find_intersection(a[src_index_k], b[src_index_l], margin_a + margin_b);
 			if(cut_at == displaced_curve::npos)
-			{
-				printf("No intersection %.8g\n\n", margin_a + margin_b);
-				continue;
-			}
-			puts("");
+			{ continue; }
 
 			a_trim[k] = std::min(cut_at, a_trim[k]);
 			b_trim[l] = std::min(cut_at, b_trim[l]);

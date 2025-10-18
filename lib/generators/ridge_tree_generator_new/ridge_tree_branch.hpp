@@ -191,8 +191,7 @@ namespace terraformer
 	find_intersection(
 		displaced_curve const& first,
 		displaced_curve const& second,
-		float collision_margin,
-		bool debug = false
+		float collision_margin
 	);
 
 	struct trim_params
