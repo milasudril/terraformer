@@ -45,10 +45,10 @@ namespace terraformer
 		float sample_period;
 	};
 
-	class displaced_curve : public multi_array<location, float>
+	class displaced_curve : public multi_array<location, float, location>
 	{
 	public:
-		using multi_array<location, float>::multi_array;
+		using multi_array<location, float, location>::multi_array;
 
 		decltype(auto) scalar_displacements() const
 		{ return get<1>(); }
@@ -61,6 +61,12 @@ namespace terraformer
 
 		decltype(auto) points()
 		{ return get<0>(); }
+
+		decltype(auto) input_points() const
+		{ return get<2>(); }
+
+		decltype(auto) input_points()
+		{ return get<2>(); }
 	};
 
 	displaced_curve displace_xy(std::span<location const> c, displacement_profile dy);

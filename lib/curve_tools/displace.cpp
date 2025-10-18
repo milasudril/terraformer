@@ -14,6 +14,8 @@ terraformer::displaced_curve terraformer::displace_xy(std::span<location const> 
 	displaced_curve ret(displaced_curve::size_type{std::size(c)});
 	auto points = ret.get<0>();
 	auto offsets = ret.get<1>();
+	auto input_points = ret.get<2>();
+	std::copy(std::begin(c), std::end(c), std::begin(input_points));
 
 	{
 		auto const k = 1;
