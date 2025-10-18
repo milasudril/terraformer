@@ -37,14 +37,12 @@
 //
 // To add:
 //
-// * Control Roll-off exponent for ridge elevation
+// * Branch trimming within begin/endpoint branches. Currently there is no check because of left/right
+//   separation.
+//
 // * Avoid branch early. Looks strange, especially at the root curve
+//   * Can perhaps be solved by noise and diffusion
 // * Multi-threading where possible
-//
-// To verify:
-//
-// * Branch pruning
-//
 //
 // Experiments:
 //
