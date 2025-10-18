@@ -377,6 +377,18 @@ namespace
 			}
 		}
 	}
+
+	template<class T>
+	void set_collision_margins(T const& stem, float height_factor)
+	{
+		auto initial_heights = stem.template get<1>();
+		auto collision_margins = stem.template get<4>();
+		for(auto k : stem.element_indices())
+		{
+			auto const end_radius = height_factor*initial_heights[k];
+			collision_margins[k] = end_radius;
+		}
+	}
 }
 
 terraformer::grayscale_image
@@ -462,24 +474,9 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		for(auto& stems : next_level)
 		{
-			{
-				auto initial_heights = stems.left.get<1>();
-				auto collision_margins = stems.left.get<4>();
-				for(auto k : stems.left.element_indices())
-				{
-					auto const end_radius = growth_params.end_height*height_profile.rel_half_thickness*initial_heights[k];
-					collision_margins[k] = end_radius;
-				}
-			}
-			{
-				auto initial_heights = stems.right.get<1>();
-				auto collision_margins = stems.right.get<4>();
-				for(auto k : stems.right.element_indices())
-				{
-					auto const end_radius = growth_params.end_height*height_profile.rel_half_thickness*initial_heights[k];
-					collision_margins[k] = end_radius;
-				}
-			}
+			auto const height_factor = growth_params.end_height*height_profile.rel_half_thickness;
+			set_collision_margins(stems.left.attributes(), height_factor);
+			set_collision_margins(stems.right.attributes(), height_factor);
 		}
 
 		trim_at_intersct(next_level);
@@ -551,9 +548,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		}
 
 		++current_trunk_index;
-
-		// Debug
-		// break;
 	}
 	return ret;
 }
