@@ -231,7 +231,7 @@ namespace terraformer
 		static constexpr auto default_trunk_ridge_elevation = 2048.0f;
 		static constexpr auto default_trunk_rolloff_exponent = 1.25f;
 		static constexpr auto default_trunk_noise_wavelength = default_trunk_horz_wavelength*std::numbers::phi_v<float>;
-		static constexpr auto default_trunk_noise_amplitude = 512.0f;
+		static constexpr auto default_trunk_noise_amplitude = 256.0f;
 
 		static constexpr auto branch_1_slope = 1.25f;
 		static constexpr auto default_branch_1_horz_wavelength = 3072.0f;
