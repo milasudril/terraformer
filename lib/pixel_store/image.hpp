@@ -120,7 +120,7 @@ namespace terraformer
 		}
 	};
 
-	template<class T, class PixelType>
+	template<class PixelType, class T = std::remove_const_t<PixelType>>
 	auto create_with_same_size(span_2d<PixelType> span)
 	{	return basic_image<T>{span.width(), span.height()};	}
 

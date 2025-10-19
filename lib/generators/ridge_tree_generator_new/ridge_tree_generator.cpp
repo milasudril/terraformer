@@ -15,6 +15,7 @@
 #include "lib/generators/ridge_tree_generator_new/ridge_tree_branch_seed_sequence.hpp"
 #include "lib/math_utils/butter_bp_2d.hpp"
 #include "lib/math_utils/butter_lp_2d.hpp"
+#include "lib/math_utils/computation_context.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/pixel_store/image.hpp"
@@ -47,6 +48,8 @@
 //
 // * Try to add noise before tracing children. Set the noise amplitude as a factor, with an
 //   amplitude of 0.25*input_elevation. Wave function with offset 1.
+//   => Using noisy image to trace children does not work well. Use image without noise as input
+//      to tracer
 //
 //
 // Strategy 2:
@@ -369,9 +372,7 @@ namespace
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			for(uint32_t x = 0; x != output.width(); ++x)
-			{
-				output(x, y) = std::max(output(x, y), input(x, y));
-			}
+			{ output(x, y) = std::max(output(x, y), input(x, y)); }
 		}
 	}
 
@@ -384,6 +385,83 @@ namespace
 		{
 			auto const end_radius = height_factor*initial_heights[k];
 			collision_margins[k] = end_radius;
+		}
+	}
+
+	struct noise_params
+	{
+		float wavelength;
+		float lf_rolloff;
+		float hf_rolloff;
+	};
+
+	void make_filtered_noise(
+		terraformer::span_2d<float> output,
+		noise_params const& params,
+		terraformer::heightmap_generator_context const& ctxt,
+		terraformer::random_generator& rng
+	)
+	{
+		std::uniform_real_distribution noise_dist{0.0f, 1.0f};
+		for(uint32_t y = 0; y != output.height(); ++y)
+		{
+			for(uint32_t x = 0; x != output.width(); ++x)
+			{ output(x, y) = noise_dist(rng); }
+		}
+
+		auto const filtered_noise = terraformer::apply(
+			terraformer::butter_bp_2d_descriptor{
+				.f_x = 2.0f*ctxt.domain_size.width/params.wavelength,
+				.f_y = 2.0f*ctxt.domain_size.height/params.wavelength,
+				.lf_rolloff = params.lf_rolloff,
+				.hf_rolloff = params.hf_rolloff,
+				.y_direction = 0.0f
+			},
+			output,
+			ctxt.comp_ctxt
+		);
+
+		auto const minmax = std::ranges::minmax_element(filtered_noise.pixels());
+		auto const min = *minmax.min;
+		auto const max = *minmax.max;
+
+		if(min < max)
+		{
+			std::transform(
+				std::begin(filtered_noise.pixels()),
+				std::end(filtered_noise.pixels()),
+				std::begin(output),
+				[
+					min,
+					max
+				](auto val) {
+					return (val - min)/(max - min);
+				}
+			);
+		}
+	}
+
+	void modulate_with_noise(
+		terraformer::span_2d<float> image,
+		noise_params const& params,
+		float noise_amplitude,
+		terraformer::heightmap_generator_context const& ctxt,
+		terraformer::random_generator& rng
+	)
+	{
+		auto noise = create_with_same_size(image);
+		make_filtered_noise(noise.pixels(), params, ctxt, rng);
+		auto const maxval = *std::ranges::max_element(image);
+		for(uint32_t y = 0; y != image.height(); ++y)
+		{
+			for(uint32_t x = 0; x != image.width(); ++x)
+			{
+				auto const current_val = image(x, y);
+				auto const noise_factor = current_val/maxval;
+				auto const input_noise_val = noise(x, y);
+				auto const noise_val = 2.0f*noise_amplitude*input_noise_val;
+				image(x, y) = current_val + noise_val*noise_factor;
+			}
 		}
 	}
 }
@@ -403,6 +481,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	single_array<ridge_tree_trunk> trunks;
 	trunks.push_back(generate_trunk(dom_size, params.trunk.curve, params.horz_displacements.front(), rng));
 
+	auto const& trunk_height_profile = params.height_profile[0];
+	auto const trunk_ridge_height = params.trunk.ridge_height;
 	fill_curve(
 		ret,
 		span_2d<float const>{},
@@ -411,11 +491,24 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			.begin_height = params.trunk.ridge_height,
 			.begin_height_is_relative = false,
 			.end_height  = 1.0f,
-			.relative_half_thickness = params.height_profile.front().rel_half_thickness,
-			.transverse_rolloff_exponent = params.height_profile.front().rolloff_exponent,
+			.relative_half_thickness = trunk_height_profile.rel_half_thickness
+				*(trunk_height_profile.noise_amplitude + trunk_ridge_height)/trunk_ridge_height,
+			.transverse_rolloff_exponent = trunk_height_profile.rolloff_exponent,
 			.longitudinal_rolloff_exponent = 1.0f
 		},
 		global_pixel_size
+	);
+
+	modulate_with_noise(
+		ret,
+		noise_params{
+			.wavelength = trunk_height_profile.noise_wavelength,
+			.lf_rolloff = trunk_height_profile.noise_lf_rolloff,
+			.hf_rolloff = trunk_height_profile.noise_hf_rolloff
+		},
+		trunk_height_profile.noise_amplitude,
+		ctxt,
+		rng
 	);
 
 	auto current_trunk_index = trunks.element_indices().front();
