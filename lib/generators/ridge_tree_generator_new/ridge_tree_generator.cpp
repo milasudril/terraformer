@@ -499,6 +499,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		global_pixel_size
 	);
 
+	auto trace_input = ret;
 	modulate_with_noise(
 		ret,
 		noise_params{
@@ -547,7 +548,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		auto next_level = generate_branches(
 			next_level_seeds,
-			ret.pixels(),
+			trace_input.pixels(),
 			global_pixel_size,
 			ridge_tree_branch_displacement_description{
 				.amplitude = horz_displacement.amplitude,
@@ -611,7 +612,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				fill_curve(tmp, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
 			}
 		}
-
+		pick_max(trace_input.pixels(), std::as_const(tmp).pixels());
 		pick_max(ret.pixels(), std::as_const(tmp).pixels());
 		++current_trunk_index;
 	}
