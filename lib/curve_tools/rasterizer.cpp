@@ -4,6 +4,42 @@
 #include "lib/array_classes/span.hpp"
 
 #include <cassert>
+#include <unistd.h>
+
+terraformer::closest_point_info
+terraformer::find_closest_point(span<location const> curve, location loc)
+{
+	if(curve.empty())
+	{ return closest_point_info{}; }
+
+	auto p_0 = curve.front();
+	closest_point_info ret{
+		.curve_parameter = 0.0f,
+		.distance = distance(p_0, loc)
+	};
+
+	auto running_distance = 0.0f;
+
+	for(auto k : curve.element_indices(1))
+	{
+		auto const p = curve[k];
+		auto const curve_vector = p - p_0;
+		auto const p0_to_loc = loc - p_0;
+		direction const t{curve_vector};
+		auto const proj = inner_product(t, p0_to_loc);
+		auto const p_intersect = p_0 + proj*t;
+		auto const d_new = distance(p_intersect, loc);
+		if(d_new < ret.distance)
+		{
+			ret.curve_parameter = running_distance + proj;
+			ret.distance = d_new;
+		}
+		running_distance += distance(p, p_0);
+		p_0 = p;
+	}
+
+	return ret;
+}
 
 terraformer::thick_curve terraformer::make_thick_curve(
 	span<location const> curve,

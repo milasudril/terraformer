@@ -17,6 +17,14 @@
 
 namespace terraformer
 {
+	struct closest_point_info
+	{
+		float curve_parameter;
+		float distance;
+	};
+
+	closest_point_info find_closest_point(span<location const> curve, location loc);
+
 	template<class PixelVisitor>
 	void visit_pixels(
 		geosimd::line_segment<geom_space> seg,
