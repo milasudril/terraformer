@@ -23,7 +23,36 @@ namespace terraformer
 		float distance;
 	};
 
-	closest_point_info find_closest_point(span<location const> curve, location loc);
+	[[gnu::const]] closest_point_info find_closest_point(span<location const> curve, location loc);
+
+	template<class CurveShader>
+	void make_distance_field(
+		scanline_processing_job_info const& jobinfo,
+		span_2d<std::invoke_result_t<CurveShader, closest_point_info>> output,
+		span<location const> curve,
+		float pixel_size,
+		CurveShader&& shader
+	)
+	{
+		auto const y_offset = static_cast<float>(jobinfo.input_y_offset);
+		displacement const v{
+			0.5f,
+			y_offset + 0.5f,
+			0.0f
+		};
+
+		for(uint32_t y = 0; y != output.height(); ++y)
+		{
+			for(uint32_t x = 0; x != output.width(); ++x)
+			{
+				auto const loc =
+						location{}
+					+ pixel_size*(displacement{static_cast<float>(x), static_cast<float>(y), 0.0f} + v );
+
+				output(x, y) = shader(find_closest_point(curve, loc));
+			}
+		}
+	}
 
 	template<class PixelVisitor>
 	void visit_pixels(

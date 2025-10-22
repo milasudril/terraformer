@@ -5,6 +5,7 @@
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/span_2d.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/image_io.hpp"
 
@@ -311,12 +312,10 @@ TESTCASE(terraformer_make_thick_curve_in_the_middle_and_last)
 TESTCASE(terraformer_fill_curve_using_quads)
 {
 	terraformer::image output{512, 512};
-
 	std::array<terraformer::location, 48> locs{};
 	std::array<float, 48> thicknesses{};
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
-
 		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
 			/static_cast<float>(std::size(locs));
 		thicknesses[k] = (0.5f*std::sin(6.0f*theta) + 1.0f)/32.0f;
@@ -334,6 +333,45 @@ TESTCASE(terraformer_fill_curve_using_quads)
 		return terraformer::rgba_pixel{0.5f*(loc[0] + 1.0f), loc[1]/length, 0.0f, 1.0f};
 	});
 
-	store(output, std::format("{}/{}_fill_curve_using_quads.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str());
+	store(
+		output,
+		std::format("{}/{}_fill_curve_using_quads.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
+}
 
+
+TESTCASE(terraformer_make_distance_field)
+{
+	std::array<terraformer::location, 49> locs{};
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
+			/static_cast<float>(std::size(locs) - 1);
+		locs[k] = terraformer::location{0.5f, 0.5f, 0.0f}
+			+ 0.25f*terraformer::displacement{std::cos(theta), std::sin(theta), 0.0f};
+	}
+
+	auto const d_max = std::sqrt(2.0f)*0.5f;
+	auto const l_max = 0.5f*std::numbers::pi_v<float>;
+
+	terraformer::image output{512, 512};
+	make_distance_field(
+		terraformer::scanline_processing_job_info{
+			.input_y_offset = 0,
+			.total_height = output.height()
+		},
+		output.pixels(),
+		terraformer::span{std::begin(locs), std::end(locs)},
+		1.0f/512.0f,
+		[d_max, l_max](auto item) {
+			auto const d = item.distance/d_max;
+			auto const t = item.curve_parameter/l_max;
+			return terraformer::rgba_pixel{d, t, t, 1.0f};
+		}
+	);
+
+	store(
+		output,
+		std::format("{}/{}_make_distance_field.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
 }

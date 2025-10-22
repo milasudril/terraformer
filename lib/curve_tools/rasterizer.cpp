@@ -2,6 +2,7 @@
 
 #include "./rasterizer.hpp"
 #include "lib/array_classes/span.hpp"
+#include "lib/common/spaces.hpp"
 
 #include <cassert>
 #include <unistd.h>
@@ -24,9 +25,10 @@ terraformer::find_closest_point(span<location const> curve, location loc)
 	{
 		auto const p = curve[k];
 		auto const curve_vector = p - p_0;
+		auto const seg_length = norm(curve_vector);
 		auto const p0_to_loc = loc - p_0;
-		direction const t{curve_vector};
-		auto const proj = inner_product(t, p0_to_loc);
+		auto const t = curve_vector/seg_length;
+		auto const proj = std::clamp(inner_product(t, p0_to_loc), 0.0f, seg_length);
 		auto const p_intersect = p_0 + proj*t;
 		auto const d_new = distance(p_intersect, loc);
 		if(d_new < ret.distance)

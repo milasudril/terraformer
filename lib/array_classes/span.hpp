@@ -86,8 +86,8 @@ namespace terraformer
 		{ return *(m_end - 1); }
 
 	private:
-		T* m_begin = nullptr;
-		T* m_end = nullptr;
+		T* __restrict__ m_begin = nullptr;
+		T* __restrict__ m_end = nullptr;
 	};
 
 	enum class span_search_direction{backwards = -1, stay = 0, forwards = 1};
