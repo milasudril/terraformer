@@ -342,7 +342,7 @@ TESTCASE(terraformer_fill_curve_using_quads)
 
 TESTCASE(terraformer_make_distance_field)
 {
-	std::array<terraformer::location, 49> locs{};
+	std::array<terraformer::location, 13> locs{};
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
@@ -351,7 +351,6 @@ TESTCASE(terraformer_make_distance_field)
 			+ 0.25f*terraformer::displacement{std::cos(theta), std::sin(theta), 0.0f};
 	}
 
-	auto const d_max = std::sqrt(2.0f)*0.5f;
 	auto const l_max = 0.5f*std::numbers::pi_v<float>;
 
 	terraformer::image output{512, 512};
@@ -363,9 +362,10 @@ TESTCASE(terraformer_make_distance_field)
 		output.pixels(),
 		terraformer::span{std::begin(locs), std::end(locs)},
 		1.0f/512.0f,
-		[d_max, l_max](auto item) {
-			auto const d = item.distance/d_max;
+		[l_max](auto item) {
 			auto const t = item.curve_parameter/l_max;
+			auto const r = (1.0f/64.0f)*(1.0f + 0.0f*std::cos(6.0f*2.0f*std::numbers::pi_v<float>*t));
+			auto const d = std::max(1.0f - item.distance/r, 0.0f);
 			return terraformer::rgba_pixel{d, t, t, 1.0f};
 		}
 	);
