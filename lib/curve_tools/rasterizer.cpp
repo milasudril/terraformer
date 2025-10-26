@@ -4,11 +4,12 @@
 #include "lib/array_classes/span.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
+#include "lib/math_utils/polynomial.hpp"
 
 #include <cassert>
 
 terraformer::single_array<terraformer::polynomial<terraformer::displacement, 3>>
-terraformer::create_spline(span<location const> curve)
+terraformer::make_spline(span<location const> curve)
 {
 	if(std::size(curve).get() < 2)
 	{ return single_array<polynomial<displacement, 3>>{}; }
@@ -39,6 +40,89 @@ terraformer::create_spline(span<location const> curve)
 			.ddx = curve.back() - curve[indices.back() - 1]
 		}
 	);
+
+	return ret;
+}
+
+float terraformer::curve_length(
+	polynomial<displacement, 3> const& curve,
+	float t_start,
+	float t_end,
+	size_t seg_count
+)
+{
+	auto loc_start = location{} + curve(t_start);
+	auto const dt = (t_end - t_start)/static_cast<float>(seg_count);
+	auto ret = 0.0f;
+	for(size_t k = 1; k != seg_count + 1; ++k)
+	{
+		auto const t =  t_start + static_cast<float>(k)*dt;
+		auto const loc = location{} + curve(t);
+		ret += distance(loc, loc_start);
+		loc_start = loc;
+	};
+
+	return ret;
+}
+
+terraformer::closest_point_info
+terraformer::find_closest_point(polynomial<displacement, 3> const& curve, location loc)
+{
+	// Initial guess based on a straight line
+	auto const p = location{} + curve(1.0f);
+	auto const p_0 = location{} + curve(0.0f);
+	auto const curve_vector = p - p_0;
+	auto const seg_length = norm(curve_vector);
+	auto const p0_to_loc = loc - p_0;
+	auto const tangent_vector = curve_vector/seg_length;
+	auto const proj = inner_product(tangent_vector, p0_to_loc)/seg_length;
+
+	auto t = proj;
+	auto const point_to_curve = curve - polynomial{loc - location{}};
+	auto const distance_squared = multiply(
+		point_to_curve,
+		point_to_curve,
+		[](auto a, auto b) {
+			return inner_product(a, b);
+		}
+	);
+	auto const should_be_zero = distance_squared.derivative();
+	auto const should_be_zero_deriv = should_be_zero.derivative();
+	for(size_t k = 0; k != 16; ++k)
+	{ t = t - should_be_zero(t)/should_be_zero_deriv(t); }
+
+	auto const p_intersect = location{} + curve(std::clamp(t, 0.0f, 1.0f));
+	auto const d_new = distance(p_intersect, loc);
+
+	return closest_point_info{
+		.curve_parameter = t,
+		.distance = d_new
+	};
+}
+
+terraformer::closest_point_info
+terraformer::find_closest_point(span<polynomial<displacement, 3> const> curve, location loc)
+{
+	if(curve.empty())
+	{ return closest_point_info{}; }
+
+	static constexpr size_t curve_segs = 15;
+	auto ret = find_closest_point(curve.front(), loc);
+	ret.curve_parameter = curve_length(curve.front(), 0.0f, ret.curve_parameter, curve_segs);
+
+	auto running_distance = curve_length(curve.front(), 0.0f, 1.0f, curve_segs);
+	for(auto k : curve.element_indices(1))
+	{
+		auto const next = find_closest_point(curve[k], loc);
+		if(next.distance < ret.distance)
+		{
+			ret.curve_parameter = running_distance
+				+ curve_length(curve[k], 0.0f, next.curve_parameter, curve_segs);
+			ret.distance = next.distance;
+		}
+
+		running_distance += curve_length(curve[k], 0.0f, 1.0f, curve_segs);
+	}
 
 	return ret;
 }

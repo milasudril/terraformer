@@ -25,15 +25,20 @@ namespace terraformer
 		float distance;
 	};
 
-	constexpr inline float project_point_on_line_segment(line_segment seg, location loc)
-	{
-		auto const seg_length = distance(seg.to, seg.from);
-		auto const from_to_loc = seg.from - loc;
-		auto const tangent = (seg.to - seg.from)/seg_length;
-		return inner_product(tangent, from_to_loc)/seg_length;
-	}
+	single_array<polynomial<displacement, 3>> make_spline(span<location const> curve);
 
-	single_array<polynomial<displacement, 3>> create_spline(span<location const> curve);
+	[[gnu::const]] float curve_length(
+		polynomial<displacement, 3> const& curve,
+		float t_start,
+		float t_end,
+		size_t seg_count
+	);
+
+	[[gnu::const]] closest_point_info
+	find_closest_point(polynomial<displacement, 3> const& curve, location loc);
+
+	[[gnu::const]] closest_point_info
+	find_closest_point(span<polynomial<displacement, 3> const> curve, location loc);
 
 	[[gnu::const]] closest_point_info find_closest_point(span<location const> curve, location loc);
 
@@ -46,6 +51,8 @@ namespace terraformer
 		CurveShader&& shader
 	)
 	{
+		auto const spline = make_spline(curve);
+
 		auto const y_offset = static_cast<float>(jobinfo.input_y_offset);
 		displacement const v{
 			0.5f,
@@ -61,7 +68,7 @@ namespace terraformer
 						location{}
 					+ pixel_size*(displacement{static_cast<float>(x), static_cast<float>(y), 0.0f} + v );
 
-				output(x, y) = shader(find_closest_point(curve, loc));
+				output(x, y) = shader(find_closest_point(spline, loc));
 			}
 		}
 	}

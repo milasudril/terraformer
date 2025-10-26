@@ -364,9 +364,9 @@ TESTCASE(terraformer_make_distance_field)
 		1.0f/512.0f,
 		[l_max](auto item) {
 			auto const t = item.curve_parameter/l_max;
-			auto const r = (1.0f/64.0f)*(1.0f + 0.0f*std::cos(6.0f*2.0f*std::numbers::pi_v<float>*t));
+			auto const r = (1.0f/32.0f)*(1.0f + 0.5f*std::cos(6.0f*2.0f*std::numbers::pi_v<float>*(t + 1.0f/12.0f)));
 			auto const d = std::max(1.0f - item.distance/r, 0.0f);
-			return terraformer::rgba_pixel{d, t, t, 1.0f};
+			return terraformer::rgba_pixel{t, d, t, 1.0f};
 		}
 	);
 
