@@ -88,7 +88,7 @@ terraformer::find_closest_point(polynomial<displacement, 3> const& curve, locati
 	);
 	auto const should_be_zero = distance_squared.derivative();
 	auto const should_be_zero_deriv = should_be_zero.derivative();
-	for(size_t k = 0; k != 16; ++k)
+	for(size_t k = 0; k != 4; ++k)
 	{ t = t - should_be_zero(t)/should_be_zero_deriv(t); }
 
 	auto const p_intersect = location{} + curve(std::clamp(t, 0.0f, 1.0f));
@@ -106,7 +106,7 @@ terraformer::find_closest_point(span<polynomial<displacement, 3> const> curve, l
 	if(curve.empty())
 	{ return closest_point_info{}; }
 
-	static constexpr size_t curve_segs = 15;
+	static constexpr size_t curve_segs = 3;
 	auto ret = find_closest_point(curve.front(), loc);
 	ret.curve_parameter = curve_length(curve.front(), 0.0f, ret.curve_parameter, curve_segs);
 

@@ -155,6 +155,7 @@ TESTCASE(terraformer_make_distance_field)
 
 	auto const l_max = 0.5f*std::numbers::pi_v<float>;
 
+	auto const t_start = std::chrono::steady_clock::now();
 	terraformer::image output{512, 512};
 	make_distance_field(
 		terraformer::scanline_processing_job_info{
@@ -171,6 +172,9 @@ TESTCASE(terraformer_make_distance_field)
 			return terraformer::rgba_pixel{t, d, t, 1.0f};
 		}
 	);
+	auto const t_end = std::chrono::steady_clock::now();
+
+	printf("Duration = %.8g\n", std::chrono::duration<double>(t_end - t_start).count());
 
 	store(
 		output,
