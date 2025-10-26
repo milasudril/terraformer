@@ -3,9 +3,45 @@
 #include "./rasterizer.hpp"
 #include "lib/array_classes/span.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/math_utils/cubic_spline.hpp"
 
 #include <cassert>
-#include <unistd.h>
+
+terraformer::single_array<terraformer::polynomial<terraformer::displacement, 3>>
+terraformer::create_spline(span<location const> curve)
+{
+	if(std::size(curve).get() < 2)
+	{ return single_array<polynomial<displacement, 3>>{}; }
+
+	single_array ret{array_size<polynomial<displacement, 3>>{std::size(curve).get() - 1}};
+
+	auto const indices = curve.element_indices(1);
+	cubic_spline_control_point prev_control_point{
+		.y = curve.front(),
+		.ddx = curve[indices.front()] - curve.front()
+	};
+
+	for(auto k = indices.front(); k != indices.back(); ++k)
+	{
+		cubic_spline_control_point const control_point{
+			.y = curve[k],
+			.ddx = 0.5f*(curve[k + 1] - curve[k - 1])
+		};
+
+		ret[decltype(ret)::index_type{(k - 1).get()}] = make_polynomial(prev_control_point, control_point);
+		prev_control_point = control_point;
+	}
+
+	ret.back() = make_polynomial(
+		prev_control_point,
+		cubic_spline_control_point{
+			.y = curve.back(),
+			.ddx = curve.back() - curve[indices.back() - 1]
+		}
+	);
+
+	return ret;
+}
 
 terraformer::closest_point_info
 terraformer::find_closest_point(span<location const> curve, location loc)
