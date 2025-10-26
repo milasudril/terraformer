@@ -8,13 +8,13 @@
 
 #include <cassert>
 
-terraformer::single_array<terraformer::polynomial<terraformer::displacement, 3>>
+terraformer::single_array<terraformer::curve_part>
 terraformer::make_spline(span<location const> curve)
 {
 	if(std::size(curve).get() < 2)
-	{ return single_array<polynomial<displacement, 3>>{}; }
+	{ return single_array<curve_part>{}; }
 
-	single_array ret{array_size<polynomial<displacement, 3>>{std::size(curve).get() - 1}};
+	single_array ret{array_size<curve_part>{std::size(curve).get() - 1}};
 
 	auto const indices = curve.element_indices(1);
 	cubic_spline_control_point prev_control_point{
@@ -29,17 +29,27 @@ terraformer::make_spline(span<location const> curve)
 			.ddx = 0.5f*(curve[k + 1] - curve[k - 1])
 		};
 
-		ret[decltype(ret)::index_type{(k - 1).get()}] = make_polynomial(prev_control_point, control_point);
+		ret[decltype(ret)::index_type{(k - 1).get()}] = curve_part{
+			.p_0 = prev_control_point.y,
+			.p_1 = control_point.y,
+			.seg_length = distance(prev_control_point.y, control_point.y),
+			.interpolator = make_polynomial(prev_control_point, control_point)
+		};
 		prev_control_point = control_point;
 	}
 
-	ret.back() = make_polynomial(
-		prev_control_point,
-		cubic_spline_control_point{
-			.y = curve.back(),
-			.ddx = curve.back() - curve[indices.back() - 1]
-		}
-	);
+	ret.back() = curve_part{
+		.p_0 = prev_control_point.y,
+		.p_1 = curve.back(),
+		.seg_length = distance(prev_control_point.y, curve.back()),
+		.interpolator = make_polynomial(
+			prev_control_point,
+			cubic_spline_control_point{
+				.y = curve.back(),
+				.ddx = curve.back() - curve[indices.back() - 1]
+			}
+		)
+	};
 
 	return ret;
 }
@@ -66,19 +76,19 @@ float terraformer::curve_length(
 }
 
 terraformer::closest_point_info
-terraformer::find_closest_point(polynomial<displacement, 3> const& curve, location loc)
+terraformer::find_closest_point(terraformer::curve_part const& curve, location loc)
 {
 	// Initial guess based on a straight line
-	auto const p = location{} + curve(1.0f);
-	auto const p_0 = location{} + curve(0.0f);
+	auto const p = curve.p_0;
+	auto const p_0 = curve.p_1;
 	auto const curve_vector = p - p_0;
-	auto const seg_length = norm(curve_vector);
+	auto const seg_length = curve.seg_length;
 	auto const p0_to_loc = loc - p_0;
 	auto const tangent_vector = curve_vector/seg_length;
 	auto const proj = inner_product(tangent_vector, p0_to_loc)/seg_length;
 
 	auto t = proj;
-	auto const point_to_curve = curve - polynomial{loc - location{}};
+	auto const point_to_curve = curve.interpolator - polynomial{loc - location{}};
 	auto const distance_squared = multiply(
 		point_to_curve,
 		point_to_curve,
@@ -91,7 +101,7 @@ terraformer::find_closest_point(polynomial<displacement, 3> const& curve, locati
 	for(size_t k = 0; k != 4; ++k)
 	{ t = t - should_be_zero(t)/should_be_zero_deriv(t); }
 
-	auto const p_intersect = location{} + curve(std::clamp(t, 0.0f, 1.0f));
+	auto const p_intersect = location{} + curve.interpolator(std::clamp(t, 0.0f, 1.0f));
 	auto const d_new = distance(p_intersect, loc);
 
 	return closest_point_info{
@@ -101,27 +111,27 @@ terraformer::find_closest_point(polynomial<displacement, 3> const& curve, locati
 }
 
 terraformer::closest_point_info
-terraformer::find_closest_point(span<polynomial<displacement, 3> const> curve, location loc)
+terraformer::find_closest_point(span<curve_part const> curve, location loc)
 {
 	if(curve.empty())
 	{ return closest_point_info{}; }
 
 	static constexpr size_t curve_segs = 3;
 	auto ret = find_closest_point(curve.front(), loc);
-	ret.curve_parameter = curve_length(curve.front(), 0.0f, ret.curve_parameter, curve_segs);
+	ret.curve_parameter = curve_length(curve.front().interpolator, 0.0f, ret.curve_parameter, curve_segs);
 
-	auto running_distance = curve_length(curve.front(), 0.0f, 1.0f, curve_segs);
+	auto running_distance = curve_length(curve.front().interpolator, 0.0f, 1.0f, curve_segs);
 	for(auto k : curve.element_indices(1))
 	{
 		auto const next = find_closest_point(curve[k], loc);
 		if(next.distance < ret.distance)
 		{
 			ret.curve_parameter = running_distance
-				+ curve_length(curve[k], 0.0f, next.curve_parameter, curve_segs);
+				+ curve_length(curve[k].interpolator, 0.0f, next.curve_parameter, curve_segs);
 			ret.distance = next.distance;
 		}
 
-		running_distance += curve_length(curve[k], 0.0f, 1.0f, curve_segs);
+		running_distance += curve_length(curve[k].interpolator, 0.0f, 1.0f, curve_segs);
 	}
 
 	return ret;

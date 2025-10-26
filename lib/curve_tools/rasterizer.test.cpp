@@ -156,7 +156,7 @@ TESTCASE(terraformer_make_distance_field)
 	auto const l_max = 0.5f*std::numbers::pi_v<float>;
 
 	auto const t_start = std::chrono::steady_clock::now();
-	terraformer::image output{512, 512};
+	terraformer::image output{4096, 4096};
 	make_distance_field(
 		terraformer::scanline_processing_job_info{
 			.input_y_offset = 0,
@@ -164,7 +164,7 @@ TESTCASE(terraformer_make_distance_field)
 		},
 		output.pixels(),
 		terraformer::span{std::begin(locs), std::end(locs)},
-		1.0f/512.0f,
+		1.0f/4096.0f,
 		[l_max](auto item) {
 			auto const t = item.curve_parameter/l_max;
 			auto const r = (1.0f/32.0f)*(1.0f + 0.5f*std::cos(6.0f*2.0f*std::numbers::pi_v<float>*(t + 1.0f/12.0f)));

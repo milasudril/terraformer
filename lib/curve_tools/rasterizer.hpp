@@ -25,7 +25,15 @@ namespace terraformer
 		float distance;
 	};
 
-	single_array<polynomial<displacement, 3>> make_spline(span<location const> curve);
+	struct curve_part
+	{
+		location p_0;
+		location p_1;
+		float seg_length;
+		polynomial<displacement, 3> interpolator;
+	};
+
+	single_array<curve_part> make_spline(span<location const> curve);
 
 	[[gnu::const]] float curve_length(
 		polynomial<displacement, 3> const& curve,
@@ -35,10 +43,10 @@ namespace terraformer
 	);
 
 	[[gnu::const]] closest_point_info
-	find_closest_point(polynomial<displacement, 3> const& curve, location loc);
+	find_closest_point(curve_part const& curve, location loc);
 
 	[[gnu::const]] closest_point_info
-	find_closest_point(span<polynomial<displacement, 3> const> curve, location loc);
+	find_closest_point(span<curve_part const> curve, location loc);
 
 	[[gnu::const]] closest_point_info find_closest_point(span<location const> curve, location loc);
 
