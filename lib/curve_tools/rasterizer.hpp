@@ -3,14 +3,14 @@
 #ifndef TERRAFORMER_CURVE_RASTERIZER_HPP
 #define TERRAFORMER_CURVE_RASTERIZER_HPP
 
+#include "./line_segment.hpp"
+
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/array_classes/span.hpp"
 #include "lib/array_classes/multi_array.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/math_utils/quad_renderer.hpp"
-
-#include <geosimd/line.hpp>
 
 #include <optional>
 #include <cassert>
@@ -22,6 +22,14 @@ namespace terraformer
 		float curve_parameter;
 		float distance;
 	};
+
+	constexpr inline float project_point_on_line_segment(line_segment seg, location loc)
+	{
+		auto const seg_length = distance(seg.to, seg.from);
+		auto const from_to_loc = seg.from - loc;
+		auto const tangent = (seg.to - seg.from)/seg_length;
+		return inner_product(tangent, from_to_loc)/seg_length;
+	}
 
 	[[gnu::const]] closest_point_info find_closest_point(span<location const> curve, location loc);
 
