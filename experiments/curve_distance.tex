@@ -1,0 +1,33 @@
+\documentclass[a4paper, 11pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[intlimits]{amsmath}
+\usepackage{fixme}
+\usepackage{amssymb}
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+\newcommand{\grad}{\nabla}
+
+\title{Curve distance}
+\author{Torbjörn Rathsman}
+
+\begin{document}
+\maketitle
+\[
+ d^2(t, P) = |f(t) - P|^2
+\]
+
+\[
+\frac{\mathrm{d}}{\mathrm{d} t}\left(d^2(t, P_0)\right) =
+\frac{\mathrm{d}}{\mathrm{d} t}\left|P(t) - P_0\right|^2 =
+2\left(P - P_0\right)\cdot\dot{P}  = 0
+\]
+
+Let $P(t) = O + \vec{C}t + \vec{B}t^2 + \vec{A}t^3$. Then $\dot P (t) = \vec{C} + 2\vec{B}t + 3\vec{A}t^2$.
+
+\[
+ 2(O - P_0 + \vec{C}t + \vec{B}t^2 + \vec{A}t^3)\cdot(\vec{C} + 2\vec{B}t + 3\vec{A}t^2) = 0
+\]
+
+
+\end{document}
