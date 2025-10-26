@@ -83,8 +83,21 @@ namespace terraformer
 		polynomial<Value, std::max(Degree1, Degree2)> ret{};
 		for(size_t k = 0; k != std::size(ret.coefficients); ++k)
 		{
-			ret.coefficients[k] = (k < std::size(a.coefficients))? a.coefficients[k] : 0.0f;
-			ret.coefficients[k] += (k < std::size(b.coefficients))? b.coefficients[k] : 0.0f;
+			ret.coefficients[k] = (k < std::size(a.coefficients))? a.coefficients[k] : Value{};
+			ret.coefficients[k] += (k < std::size(b.coefficients))? b.coefficients[k] : Value{};
+ 		}
+
+		return ret;
+	}
+
+	template<class Value, size_t Degree1, size_t Degree2>
+	constexpr auto operator-(polynomial<Value, Degree1> const& a, polynomial<Value, Degree2> const& b)
+	{
+		polynomial<Value, std::max(Degree1, Degree2)> ret{};
+		for(size_t k = 0; k != std::size(ret.coefficients); ++k)
+		{
+			ret.coefficients[k] = (k < std::size(a.coefficients))? a.coefficients[k] : Value{};
+			ret.coefficients[k] -= (k < std::size(b.coefficients))? b.coefficients[k] : Value{};
  		}
 
 		return ret;
