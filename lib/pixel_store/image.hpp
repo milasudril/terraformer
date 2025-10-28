@@ -9,7 +9,7 @@
 
 #include <algorithm>
 #include <memory>
-#include <queue>
+#include <vector>
 
 namespace terraformer
 {
@@ -146,7 +146,11 @@ namespace terraformer
 		DomainMask&& is_inside_domain
 	)
 	{
-		std::queue<pixel_coordinates> to_visit;
+		std::vector<pixel_coordinates> to_visit;
+		to_visit.reserve(
+			 static_cast<size_t>(output.width())
+			*static_cast<size_t>(output.height())
+		);
 
 		auto visited = create_with_same_size<bool>(output);
 
@@ -154,14 +158,14 @@ namespace terraformer
 			auto const x = static_cast<uint32_t>(start_at.x);
 			auto const y = static_cast<uint32_t>(start_at.y);
 			if(inside(output, start_at.x, start_at.y) && is_inside_domain(x, y)) [[likely]]
-			{ to_visit.push(start_at); }
+			{ to_visit.push_back(start_at); }
 		}
 
 		while(!to_visit.empty())
 		{
-			auto item = to_visit.front();
+			auto item = to_visit.back();
 			{
-				to_visit.pop();
+				to_visit.pop_back();
 				auto const x = static_cast<uint32_t>(item.x);
 				auto const y = static_cast<uint32_t>(item.y);
 				output(x, y) = val_src(x, y);
@@ -170,20 +174,20 @@ namespace terraformer
 			// Search order optimized for scanlines
 			std::array const neighbours{
 				pixel_coordinates{
-					item.x + 1,
-					item.y
-				},
-				pixel_coordinates{
-					item.x - 1,
-					item.y
+					item.x,
+					item.y - 1
 				},
 				pixel_coordinates{
 					item.x,
 					item.y + 1
 				},
 				pixel_coordinates{
-					item.x,
-					item.y - 1
+					item.x - 1,
+					item.y
+				},
+				pixel_coordinates{
+					item.x + 1,
+					item.y
 				}
 			};
 
@@ -194,7 +198,7 @@ namespace terraformer
 				if(inside(output, neighbour.x, neighbour.y) && !visited(x, y) && is_inside_domain(x, y)) [[likely]]
 				{
 					visited(x, y) = true;
-					to_visit.push(neighbour);
+					to_visit.push_back(neighbour);
 				}
 			}
 		}
