@@ -9,6 +9,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <queue>
 
 namespace terraformer
 {
@@ -127,6 +128,71 @@ namespace terraformer
 	using image = basic_image<rgba_pixel>;
 
 	using grayscale_image = basic_image<float>;
+
+
+	template<class T, class ValueSource, class AtBoundary>
+	requires (
+		std::is_same_v<std::invoke_result_t<ValueSource, uint32_t, uint32_t>, T>
+		&& std::is_same_v<std::invoke_result_t<AtBoundary, uint32_t, uint32_t>, bool>
+	)
+	void floodfill(
+		span_2d<T> output,
+		pixel_coordinates start_at,
+		ValueSource&& val_src,
+		AtBoundary&& at_boundary
+	)
+	{
+		std::queue<pixel_coordinates> to_visit;
+
+		auto visited = create_with_same_size<bool>(output);
+
+		{
+			auto const x = static_cast<uint32_t>(start_at.x);
+			auto const y = static_cast<uint32_t>(start_at.y);
+			if(inside(output, start_at.x, start_at.y) && !at_boundary(x, y)) [[likely]]
+			{ to_visit.push(start_at); }
+		}
+
+		while(!to_visit.empty())
+		{
+			auto item = to_visit.front();
+			{
+				to_visit.pop();
+				auto const x = static_cast<uint32_t>(item.x);
+				auto const y = static_cast<uint32_t>(item.y);
+				output(x, y) = val_src(x, y);
+				visited(x, y) = true;
+			}
+
+			// Search order optimized for scanlines
+			std::array const neighbours{
+				pixel_coordinates{
+					item.x + 1,
+					item.y
+				},
+				pixel_coordinates{
+					item.x - 1,
+					item.y
+				},
+				pixel_coordinates{
+					item.x,
+					item.y + 1
+				},
+				pixel_coordinates{
+					item.x,
+					item.y - 1
+				}
+			};
+
+			for(auto neighbour: neighbours)
+			{
+				auto const x = static_cast<uint32_t>(item.x);
+				auto const y = static_cast<uint32_t>(item.y);
+				if(inside(output, item.x, item.y) && !visited(x, y) && !at_boundary(x, y)) [[likely]]
+				{ to_visit.push(neighbour); }
+			}
+		}
+	}
 }
 
 #endif

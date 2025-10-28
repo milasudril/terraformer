@@ -150,8 +150,8 @@ namespace terraformer
 
 	struct pixel_coordinates
 	{
-		uint32_t x;
-		uint32_t y;
+		int32_t x;
+		int32_t y;
 
 		bool operator==(pixel_coordinates const&) const = default;
 		bool operator!=(pixel_coordinates const&) const = default;
