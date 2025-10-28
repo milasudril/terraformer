@@ -121,9 +121,13 @@ namespace terraformer
 		}
 	};
 
-	template<class PixelType, class T = std::remove_const_t<PixelType>>
+	template<class T, class PixelType>
 	auto create_with_same_size(span_2d<PixelType> span)
 	{	return basic_image<T>{span.width(), span.height()};	}
+
+	template<class PixelType>
+	auto create_with_same_size(span_2d<PixelType> span)
+	{	return basic_image<PixelType>{span.width(), span.height()};	}
 
 	using image = basic_image<rgba_pixel>;
 
@@ -161,7 +165,6 @@ namespace terraformer
 				auto const x = static_cast<uint32_t>(item.x);
 				auto const y = static_cast<uint32_t>(item.y);
 				output(x, y) = val_src(x, y);
-				visited(x, y) = true;
 			}
 
 			// Search order optimized for scanlines
@@ -186,10 +189,13 @@ namespace terraformer
 
 			for(auto neighbour: neighbours)
 			{
-				auto const x = static_cast<uint32_t>(item.x);
-				auto const y = static_cast<uint32_t>(item.y);
-				if(inside(output, item.x, item.y) && !visited(x, y) && is_inside_domain(x, y)) [[likely]]
-				{ to_visit.push(neighbour); }
+				auto const x = static_cast<uint32_t>(neighbour.x);
+				auto const y = static_cast<uint32_t>(neighbour.y);
+				if(inside(output, neighbour.x, neighbour.y) && !visited(x, y) && is_inside_domain(x, y)) [[likely]]
+				{
+					visited(x, y) = true;
+					to_visit.push(neighbour);
+				}
 			}
 		}
 	}

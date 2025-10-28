@@ -1,10 +1,14 @@
 //@	{"target":{"name":"image.test"}}
 
 #include "./image.hpp"
+#include "./image_io.hpp"
 
+#include "lib/common/span_2d.hpp"
 #include "testfwk/testfwk.hpp"
 
-TESTCASE(CreateFromDataBlock)
+#include <format>
+
+TESTCASE(terraformer_image_create_from_data_block)
 {
 	terraformer::image img{3u, 2u};
 	EXPECT_EQ(img.width(), 3);
@@ -43,9 +47,40 @@ TESTCASE(CreateFromDataBlock)
 	EXPECT_EQ(img(2, 1).blue(), 0.0f);
 }
 
-TESTCASE(CreateEmpty)
+TESTCASE(terraformer_image_create_empty)
 {
 	terraformer::image img{3u, 2u};
 	EXPECT_EQ(img.width(), 3);
 	EXPECT_EQ(img.height(), 2);
+}
+
+TESTCASE(terraformer_image_floodfill)
+{
+	terraformer::grayscale_image output{256, 256};
+	floodfill(
+		output.pixels(),
+		terraformer::pixel_coordinates{
+			.x = 64,
+			.y = 128
+		},
+		[](auto...){
+			return 1.0f;
+		},
+		[](uint32_t x, uint32_t y) {
+			constexpr auto x_0 = 128.0f;
+			constexpr auto y_0 = 128.0f;
+
+			auto const x_float = static_cast<float>(x) - x_0;
+			auto const y_float = static_cast<float>(y) - y_0;
+
+			auto const r = std::sqrt(x_float*x_float + y_float*y_float);
+
+			return r >= 48.0f && r<= 96.0f;
+		}
+	);
+
+	store(
+		output,
+		std::format("{}/{}_floodfill_test.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
 }
