@@ -130,16 +130,16 @@ namespace terraformer
 	using grayscale_image = basic_image<float>;
 
 
-	template<class T, class ValueSource, class AtBoundary>
+	template<class T, class ValueSource, class DomainMask>
 	requires (
 		std::is_same_v<std::invoke_result_t<ValueSource, uint32_t, uint32_t>, T>
-		&& std::is_same_v<std::invoke_result_t<AtBoundary, uint32_t, uint32_t>, bool>
+		&& std::is_same_v<std::invoke_result_t<DomainMask, uint32_t, uint32_t>, bool>
 	)
 	void floodfill(
 		span_2d<T> output,
 		pixel_coordinates start_at,
 		ValueSource&& val_src,
-		AtBoundary&& at_boundary
+		DomainMask&& is_inside_domain
 	)
 	{
 		std::queue<pixel_coordinates> to_visit;
@@ -149,7 +149,7 @@ namespace terraformer
 		{
 			auto const x = static_cast<uint32_t>(start_at.x);
 			auto const y = static_cast<uint32_t>(start_at.y);
-			if(inside(output, start_at.x, start_at.y) && !at_boundary(x, y)) [[likely]]
+			if(inside(output, start_at.x, start_at.y) && is_inside_domain(x, y)) [[likely]]
 			{ to_visit.push(start_at); }
 		}
 
@@ -188,7 +188,7 @@ namespace terraformer
 			{
 				auto const x = static_cast<uint32_t>(item.x);
 				auto const y = static_cast<uint32_t>(item.y);
-				if(inside(output, item.x, item.y) && !visited(x, y) && !at_boundary(x, y)) [[likely]]
+				if(inside(output, item.x, item.y) && !visited(x, y) && is_inside_domain(x, y)) [[likely]]
 				{ to_visit.push(neighbour); }
 			}
 		}
