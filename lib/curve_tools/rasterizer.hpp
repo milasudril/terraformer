@@ -122,11 +122,41 @@ namespace terraformer
 		}
 	}
 
-	void make_curve_mask(
-		span_2d<float> output,
+	pixel_coordinates make_curve_mask(
+		span_2d<bool> output,
 		span<location const> curve,
 		float pixel_size,
 		float radius
 	);
+
+	template<class CurveShader>
+	void make_distance_field_2(
+		span_2d<std::invoke_result_t<CurveShader, closest_point_info>> output,
+		span<location const> curve,
+		float pixel_size,
+		float mask_radius,
+		CurveShader&& shader
+	)
+	{
+		auto curve_mask = create_with_same_size<bool>(output);
+		auto const seed_point = make_curve_mask(curve_mask.pixels(), curve, pixel_size, mask_radius);
+		printf("Starting at %d %d\n", seed_point.x, seed_point.y);
+		floodfill(
+			output,
+			seed_point,
+			[
+				pixel_size,
+				spline = make_spline(curve),
+				shader = std::forward<CurveShader>(shader)
+			](int32_t x, int32_t y){
+				displacement const v{0.5f, 0.5f, 0.0f};
+				auto const loc =
+					  location{}
+					+ pixel_size*(displacement{static_cast<float>(x), static_cast<float>(y), 0.0f} + v);
+				return shader(find_closest_point(spline, loc));
+			},
+			curve_mask.pixels()
+		);
+	}
 }
 #endif

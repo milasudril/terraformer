@@ -137,7 +137,7 @@ namespace terraformer
 	template<class T, class ValueSource, class DomainMask>
 	requires (
 		std::is_same_v<std::invoke_result_t<ValueSource, uint32_t, uint32_t>, T>
-		&& std::is_same_v<std::invoke_result_t<DomainMask, uint32_t, uint32_t>, bool>
+		&& std::is_same_v<std::remove_cvref_t<std::invoke_result_t<DomainMask, uint32_t, uint32_t>>, bool>
 	)
 	void floodfill(
 		span_2d<T> output,
