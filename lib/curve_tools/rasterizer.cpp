@@ -7,6 +7,7 @@
 #include "lib/math_utils/polynomial.hpp"
 
 #include <cassert>
+#include <geosimd/basic_vector.hpp>
 
 terraformer::single_array<terraformer::polynomial<terraformer::displacement, 3>>
 terraformer::make_spline(span<location const> curve)
@@ -161,4 +162,68 @@ terraformer::find_closest_point(span<location const> curve, location loc)
 	}
 
 	return ret;
+}
+
+namespace
+{
+	void draw_circle(terraformer::span_2d<float> output, terraformer::location loc, float r)
+	{
+		auto const x_0 = loc[0];
+		auto const y_0 = loc[1];
+		auto const x_min = std::clamp(
+			static_cast<int32_t>(x_0 - r + 0.5f),
+			0,
+			static_cast<int32_t>(output.width())
+		);
+
+		auto const y_min = std::clamp(
+			static_cast<int32_t>(y_0 - r + 0.5f),
+			0,
+			static_cast<int32_t>(output.height())
+		);
+
+		auto const x_max = std::clamp(
+			static_cast<int32_t>(x_0 + r + 0.5f),
+			0,
+			static_cast<int32_t>(output.width())
+		);
+
+		auto const y_max = std::clamp(
+			static_cast<int32_t>(y_0 + r + 0.5f),
+			0,
+			static_cast<int32_t>(output.height())
+		);
+
+		auto const r2 = r*r;
+
+		for(int32_t y = y_min; y != y_max; ++y)
+		{
+			for(int32_t x = x_min; x != x_max; ++x)
+			{
+				auto const v = (
+					  (terraformer::location{static_cast<float>(x), static_cast<float>(y), 0.0f} - loc)
+					+ terraformer::displacement{0.5f, 0.5f, 0.0f}
+				);
+
+				if(geosimd::norm_squared(v) <= r2)
+				{ output(x, y) = 1.0f; }
+			}
+		}
+	}
+}
+
+void terraformer::make_curve_mask(
+	span_2d<float> output,
+	span<location const> curve,
+	float pixel_size,
+	float radius
+)
+{
+	visit_pixels(
+		curve,
+		pixel_size,
+		[output, r = radius/pixel_size](location origin, auto...){
+			return draw_circle(output, origin, r);
+		}
+	);
 }

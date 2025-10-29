@@ -155,8 +155,8 @@ TESTCASE(terraformer_make_distance_field)
 
 	auto const l_max = 0.5f*std::numbers::pi_v<float>;
 
-	auto const t_start = std::chrono::steady_clock::now();
 	terraformer::image output{512, 512};
+	auto const t_start = std::chrono::steady_clock::now();
 	make_distance_field(
 		terraformer::scanline_processing_job_info{
 			.input_y_offset = 0,
@@ -179,5 +179,34 @@ TESTCASE(terraformer_make_distance_field)
 	store(
 		output,
 		std::format("{}/{}_make_distance_field.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
+}
+
+TESTCASE(terraformer_make_curve_mask)
+{
+	std::array<terraformer::location, 13> locs{};
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
+			/static_cast<float>(std::size(locs) - 1);
+		locs[k] = terraformer::location{0.5f, 0.5f, 0.0f}
+			+ 0.25f*terraformer::displacement{std::cos(theta), std::sin(theta), 0.0f};
+	}
+
+	terraformer::grayscale_image output{512, 512};
+	auto const t_start = std::chrono::steady_clock::now();
+	make_curve_mask(
+		output.pixels(),
+		terraformer::span{std::begin(locs), std::end(locs)},
+		1.0f/512.0f,
+		3.0f/64.0f
+	);
+	auto const t_end = std::chrono::steady_clock::now();
+
+	printf("Duration = %.8g\n", std::chrono::duration<double>(t_end - t_start).count());
+
+	store(
+		output,
+		std::format("{}/{}_curve_mask.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
 	);
 }

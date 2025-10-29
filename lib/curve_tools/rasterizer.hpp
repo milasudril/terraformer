@@ -121,5 +121,12 @@ namespace terraformer
 			prev = current;
 		}
 	}
+
+	void make_curve_mask(
+		span_2d<float> output,
+		span<location const> curve,
+		float pixel_size,
+		float radius
+	);
 }
 #endif
