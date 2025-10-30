@@ -144,7 +144,7 @@ TESTCASE(terraformer_visit_pixels_curge_random_points)
 
 TESTCASE(terraformer_make_distance_field)
 {
-	std::array<terraformer::location, 13> locs{};
+	std::array<terraformer::location, 145> locs{};
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
@@ -155,7 +155,7 @@ TESTCASE(terraformer_make_distance_field)
 
 	auto const l_max = 0.5f*std::numbers::pi_v<float>;
 
-	terraformer::image output{512, 512};
+	terraformer::image output{1024, 1024};
 	auto const t_start = std::chrono::steady_clock::now();
 	make_distance_field(
 		terraformer::scanline_processing_job_info{
@@ -164,7 +164,7 @@ TESTCASE(terraformer_make_distance_field)
 		},
 		output.pixels(),
 		terraformer::span{std::begin(locs), std::end(locs)},
-		1.0f/512.0f,
+		1.0f/1024.0f,
 		[l_max](auto item) {
 			auto const t = item.curve_parameter/l_max;
 			auto const r = (1.0f/32.0f)*(1.0f + 0.5f*std::cos(6.0f*2.0f*std::numbers::pi_v<float>*(t + 1.0f/12.0f)));
@@ -184,7 +184,7 @@ TESTCASE(terraformer_make_distance_field)
 
 TESTCASE(terraformer_make_curve_mask)
 {
-	std::array<terraformer::location, 13> locs{};
+	std::array<terraformer::location, 145> locs{};
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
@@ -193,12 +193,12 @@ TESTCASE(terraformer_make_curve_mask)
 			+ 0.25f*terraformer::displacement{std::cos(theta), std::sin(theta), 0.0f};
 	}
 
-	terraformer::basic_image<bool> output{512, 512};
+	terraformer::basic_image<bool> output{1024, 1024};
 	auto const t_start = std::chrono::steady_clock::now();
 	make_curve_mask(
 		output.pixels(),
 		terraformer::span{std::begin(locs), std::end(locs)},
-		1.0f/512.0f,
+		1.0f/1024.0f,
 		3.0f/64.0f
 	);
 	auto const t_end = std::chrono::steady_clock::now();
@@ -214,7 +214,7 @@ TESTCASE(terraformer_make_curve_mask)
 
 TESTCASE(terraformer_make_distance_field_2)
 {
-	std::array<terraformer::location, 13> locs{};
+	std::array<terraformer::location, 145> locs{};
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
 		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
@@ -225,12 +225,12 @@ TESTCASE(terraformer_make_distance_field_2)
 
 	auto const l_max = 0.5f*std::numbers::pi_v<float>;
 
-	terraformer::image output{512, 512};
+	terraformer::image output{1024, 1024};
 	auto const t_start = std::chrono::steady_clock::now();
 	make_distance_field_2(
 		output.pixels(),
 		terraformer::span{std::begin(locs), std::end(locs)},
-		1.0f/512.0f,
+		1.0f/1024.0f,
 		3.0f/64.0f,
 		[l_max](auto item) {
 			auto const t = item.curve_parameter/l_max;

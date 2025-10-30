@@ -139,24 +139,29 @@ namespace terraformer
 	)
 	{
 		auto curve_mask = create_with_same_size<bool>(output);
-		auto const seed_point = make_curve_mask(curve_mask.pixels(), curve, pixel_size, mask_radius);
-		printf("Starting at %d %d\n", seed_point.x, seed_point.y);
-		floodfill(
-			output,
-			seed_point,
-			[
-				pixel_size,
-				spline = make_spline(curve),
-				shader = std::forward<CurveShader>(shader)
-			](int32_t x, int32_t y){
-				displacement const v{0.5f, 0.5f, 0.0f};
-				auto const loc =
-					  location{}
-					+ pixel_size*(displacement{static_cast<float>(x), static_cast<float>(y), 0.0f} + v);
-				return shader(find_closest_point(spline, loc));
-			},
-			curve_mask.pixels()
-		);
+		std::ignore = make_curve_mask(curve_mask.pixels(), curve, pixel_size, mask_radius);
+		auto const spline = make_spline(curve);
+
+		displacement const v{
+			0.5f,
+			0.5f,
+			0.0f
+		};
+
+		for(uint32_t y = 0; y != output.height(); ++y)
+		{
+			for(uint32_t x = 0; x != output.width(); ++x)
+			{
+				if(curve_mask(x, y))
+				{
+					auto const loc =
+							location{}
+						+ pixel_size*(displacement{static_cast<float>(x), static_cast<float>(y), 0.0f} + v );
+
+					output(x, y) = shader(find_closest_point(spline, loc));
+				}
+			}
+		}
 	}
 }
 #endif
