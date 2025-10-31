@@ -13,14 +13,33 @@ namespace terraformer
 		template<class Param>
 		constexpr auto operator()(Param x) const
 		{
-			Value ret{};
-			Param param{1};
-			for(size_t k = 0; k != std::size(coefficients); ++k)
+			if constexpr(Degree == 4)
 			{
-				ret += coefficients[k]*param;
-				param *= x;
+				auto const x2 = x*x;
+				auto const x3 = x*x2;
+				auto const x4 = x2*x2;
+				return coefficients[0] + x*coefficients[1] + x2*coefficients[2] + x3*coefficients[3] + x4*coefficients[4];
 			}
-			return ret;
+			else
+			if constexpr(Degree == 5)
+			{
+				auto const x2 = x*x;
+				auto const x3 = x*x2;
+				auto const x4 = x2*x2;
+				auto const x5 = x2*x3;
+				return coefficients[0] + x*coefficients[1] + x2*coefficients[2] + x3*coefficients[3] + x4*coefficients[4] + x5*coefficients[5];
+			}
+			else
+			{
+				Value ret{};
+				Param param{1};
+				for(size_t k = 0; k != std::size(coefficients); ++k)
+				{
+					ret += coefficients[k]*param;
+					param *= x;
+				}
+				return ret;
+			}
 		}
 
 		static constexpr auto degree()
