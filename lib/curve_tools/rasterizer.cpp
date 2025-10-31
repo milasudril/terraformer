@@ -167,7 +167,7 @@ terraformer::find_closest_point(span<location const> curve, location loc)
 
 namespace
 {
-	terraformer::pixel_coordinates draw_circle(terraformer::span_2d<bool> output, terraformer::location loc, float r)
+	void draw_circle(terraformer::span_2d<bool> output, terraformer::location loc, float r)
 	{
 		auto const x_0 = loc[0];
 		auto const y_0 = loc[1];
@@ -196,7 +196,6 @@ namespace
 		);
 
 		auto const r2 = r*r;
-		terraformer::pixel_coordinates ret{};
 		for(int32_t y = y_min; y != y_max; ++y)
 		{
 			for(int32_t x = x_min; x != x_max; ++x)
@@ -207,31 +206,23 @@ namespace
 				);
 
 				if(geosimd::norm_squared(v) <= r2)
-				{
-					output(x, y) = true;
-					ret.x = static_cast<int32_t>(x);
-					ret.y = static_cast<int32_t>(y);
-				}
+				{ output(x, y) = true; }
 			}
 		}
-		return ret;
 	}
 }
 
-terraformer::pixel_coordinates terraformer::make_curve_mask(
+void terraformer::render_mask(
 	span_2d<bool> output,
 	span<location const> curve,
-	float pixel_size,
-	float radius
+	curve_render_mask_descriptor params
 )
 {
-	terraformer::pixel_coordinates ret{};
 	visit_pixels(
 		curve,
-		pixel_size,
-		[output, r = radius/pixel_size, &ret](location origin, auto...){
-			ret = draw_circle(output, origin, r);
+		params.pixel_size,
+		[output, r = params.radius/params.pixel_size](location origin, auto...){
+			draw_circle(output, origin, r);
 		}
 	);
-	return ret;
 }
