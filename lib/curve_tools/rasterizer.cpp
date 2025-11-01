@@ -10,6 +10,65 @@
 #include <cassert>
 #include <geosimd/basic_vector.hpp>
 
+
+float terraformer::curve_length(
+	polynomial<displacement, 3> const& curve,
+	float t_start,
+	float t_end,
+	size_t seg_count
+)
+{
+	auto loc_start = location{} + curve(t_start);
+	auto const dt = (t_end - t_start)/static_cast<float>(seg_count);
+	auto ret = 0.0f;
+	for(size_t k = 1; k != seg_count + 1; ++k)
+	{
+		auto const t =  t_start + static_cast<float>(k)*dt;
+		auto const loc = location{} + curve(t);
+		ret += distance(loc, loc_start);
+		loc_start = loc;
+	};
+
+	return ret;
+}
+
+terraformer::spline_with_length
+terraformer::make_spline_with_lengths(span<location const> curve)
+{
+	if(std::size(curve).get() < 2)
+	{ return spline_with_length{}; }
+
+	spline_with_length ret{};
+	auto const indices = curve.element_indices(1);
+	cubic_spline_control_point prev_control_point{
+		.y = curve.front(),
+		.ddx = curve[indices.front()] - curve.front()
+	};
+
+	for(auto k = indices.front(); k != indices.back(); ++k)
+	{
+		cubic_spline_control_point const control_point{
+			.y = curve[k],
+			.ddx = 0.5f*(curve[k + 1] - curve[k - 1])
+		};
+
+		auto const p = make_polynomial(prev_control_point, control_point);
+		ret.push_back(p, curve_length(p, 0.0f, 1.0f, 3));
+		prev_control_point = control_point;
+	}
+
+	auto const p = make_polynomial(
+		prev_control_point,
+		cubic_spline_control_point{
+			.y = curve.back(),
+			.ddx = curve.back() - curve[indices.back() - 1]
+		}
+	);
+	ret.push_back(p, curve_length(p, 0.0f, 1.0f, 3));
+
+	return ret;
+}
+
 terraformer::single_array<terraformer::polynomial<terraformer::displacement, 3>>
 terraformer::make_spline(span<location const> curve)
 {
@@ -42,27 +101,6 @@ terraformer::make_spline(span<location const> curve)
 			.ddx = curve.back() - curve[indices.back() - 1]
 		}
 	);
-
-	return ret;
-}
-
-float terraformer::curve_length(
-	polynomial<displacement, 3> const& curve,
-	float t_start,
-	float t_end,
-	size_t seg_count
-)
-{
-	auto loc_start = location{} + curve(t_start);
-	auto const dt = (t_end - t_start)/static_cast<float>(seg_count);
-	auto ret = 0.0f;
-	for(size_t k = 1; k != seg_count + 1; ++k)
-	{
-		auto const t =  t_start + static_cast<float>(k)*dt;
-		auto const loc = location{} + curve(t);
-		ret += distance(loc, loc_start);
-		loc_start = loc;
-	};
 
 	return ret;
 }
@@ -100,6 +138,36 @@ terraformer::find_closest_point(polynomial<displacement, 3> const& curve, locati
 		.curve_parameter = t,
 		.distance = d_new
 	};
+}
+
+terraformer::closest_point_info
+terraformer::find_closest_point(spline_with_length const& curve, location loc)
+{
+	if(curve.empty())
+	{ return closest_point_info{}; }
+
+	auto const polys = curve.polynomials();
+	auto const lengths = curve.curve_lengths();
+
+	static constexpr size_t curve_segs = 3;
+	auto ret = find_closest_point(polys.front(), loc);
+	ret.curve_parameter = curve_length(polys.front(), 0.0f, ret.curve_parameter, curve_segs);
+
+	auto running_distance = lengths.front();
+	for(auto k : curve.element_indices(1))
+	{
+		auto const next = find_closest_point(polys[k], loc);
+		if(next.distance < ret.distance)
+		{
+			ret.curve_parameter = running_distance
+				+ curve_length(polys[k], 0.0f, next.curve_parameter, curve_segs);
+			ret.distance = next.distance;
+		}
+
+		running_distance += lengths[k];
+	}
+
+	return ret;
 }
 
 terraformer::closest_point_info

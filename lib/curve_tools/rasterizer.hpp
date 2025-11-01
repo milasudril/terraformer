@@ -87,7 +87,14 @@ namespace terraformer
 		float distance;
 	};
 
-	single_array<polynomial<displacement, 3>> make_spline(span<location const> curve);
+	struct spline_with_length:public multi_array<polynomial<displacement, 3>, float>
+	{
+		auto curve_lengths() const
+		{ return get<1>(); }
+
+		auto polynomials() const
+		{ return get<0>(); }
+	};
 
 	[[gnu::const]] float curve_length(
 		polynomial<displacement, 3> const& curve,
@@ -95,6 +102,13 @@ namespace terraformer
 		float t_end,
 		size_t seg_count
 	);
+
+	spline_with_length make_spline_with_lengths(span<location const> curve);
+
+	single_array<polynomial<displacement, 3>> make_spline(span<location const> curve);
+
+	[[gnu::const]] closest_point_info
+	find_closest_point(spline_with_length const& curve, location loc);
 
 	[[gnu::const]] closest_point_info
 	find_closest_point(polynomial<displacement, 3> const& curve, location loc);
@@ -121,7 +135,7 @@ namespace terraformer
 	void render(
 		scanline_processing_job_info const& jobinfo,
 		span_2d<std::invoke_result_t<CurveShader, closest_point_info>> output,
-		span<polynomial<displacement, 3> const> curve,
+		spline_with_length const& curve,
 		curve_render_descriptor<CurveShader>&& params
 	)
 	{
@@ -157,7 +171,7 @@ namespace terraformer
 		curve_render_descriptor<CurveShader>&& params
 	)
 	{
-		auto const spline = make_spline(curve);
+		auto const spline = make_spline_with_lengths(curve);
 		render(
 			scanline_processing_job_info{
 				.input_y_offset = 0,
