@@ -147,25 +147,44 @@ terraformer::find_closest_point(spline_with_length const& curve, location loc)
 	auto const polys = curve.polynomials();
 	auto const lengths = curve.curve_lengths();
 
-	static constexpr size_t curve_segs = 3;
-	auto ret = find_closest_point(polys.front(), loc);
-	ret.curve_parameter = curve_length(polys.front(), 0.0f, ret.curve_parameter, curve_segs);
+	struct current_best_point
+	{
+		decltype(polys)::index_type point_index;
+		closest_point_info point_info;
+		float running_distance;
+	};
+
+	current_best_point best_point{
+		.point_index = curve.element_indices().front(),
+		.point_info = find_closest_point(polys.front(), loc),
+		.running_distance = 0.0f
+	};
 
 	auto running_distance = lengths.front();
 	for(auto k : curve.element_indices(1))
 	{
 		auto const next = find_closest_point(polys[k], loc);
-		if(next.distance < ret.distance)
+		if(next.distance < best_point.point_info.distance)
 		{
-			ret.curve_parameter = running_distance
-				+ curve_length(polys[k], 0.0f, next.curve_parameter, curve_segs);
-			ret.distance = next.distance;
+			best_point.point_index = k;
+			best_point.point_info = next;
+			best_point.running_distance = running_distance;
 		}
 
 		running_distance += lengths[k];
 	}
 
-	return ret;
+	static constexpr size_t curve_segs = 3;
+	return closest_point_info{
+		.curve_parameter = best_point.running_distance
+			+ curve_length(
+				polys[best_point.point_index],
+				0.0f,
+				best_point.point_info.curve_parameter,
+				curve_segs
+			),
+		.distance = best_point.point_info.distance,
+	};
 }
 
 terraformer::closest_point_info

@@ -96,7 +96,7 @@ namespace terraformer
 		{ return get<0>(); }
 	};
 
-	[[gnu::const]] float curve_length(
+	float curve_length(
 		polynomial<displacement, 3> const& curve,
 		float t_start,
 		float t_end,
