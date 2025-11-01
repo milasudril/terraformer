@@ -77,17 +77,24 @@ namespace terraformer
 	constexpr auto multiply(
 		polynomial<Value, Degree1> const& a,
 		polynomial<Value, Degree2> const& b,
-		CoeffMultFunction&& multiply = CoeffMultFunction{}
+		CoeffMultFunction&& multfun = CoeffMultFunction{}
 	)
 	{
 		polynomial<std::invoke_result_t<CoeffMultFunction, Value, Value>, Degree1 + Degree2> ret{};
 		for(size_t k = 0; k != std::size(a.coefficients); ++k)
 		{
 			for(size_t l = 0; l != std::size(b.coefficients); ++l)
-			{ ret.coefficients[k + l] += multiply(a.coefficients[k], b.coefficients[l]); }
+			{ ret.coefficients[k + l] += multfun(a.coefficients[k], b.coefficients[l]); }
 		}
 		return ret;
 	}
+
+	template<class Value, size_t Degree, class CoeffMultFunction = std::multiplies<>>
+	constexpr auto take_square_of(
+		polynomial<Value, Degree> const& input,
+		CoeffMultFunction&& multfun = CoeffMultFunction{}
+	)
+	{	return multiply(input, input, std::forward<CoeffMultFunction>(multfun)); }
 
 	template<class Value, size_t Degree1, size_t Degree2>
 	requires requires (Value const& x){

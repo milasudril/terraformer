@@ -118,10 +118,8 @@ terraformer::find_closest_point(polynomial<displacement, 3> const& curve, locati
 	auto const proj = inner_product(tangent_vector, p0_to_loc)/seg_length;
 
 	auto t = proj;
-	auto const point_to_curve = curve - polynomial{loc - location{}};
-	auto const distance_squared = multiply(
-		point_to_curve,
-		point_to_curve,
+	auto const distance_squared = take_square_of(
+		curve - polynomial{loc - location{}},
 		[](auto a, auto b) {
 			return inner_product(a, b);
 		}
