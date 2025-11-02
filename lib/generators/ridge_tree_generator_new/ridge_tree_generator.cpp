@@ -335,12 +335,12 @@ void terraformer::fill_curve(
 
 namespace
 {
-	void pick_max(terraformer::span_2d<float> output, terraformer::span_2d<float const> input)
+	void add(terraformer::span_2d<float> output, terraformer::span_2d<float const> input)
 	{
 		for(uint32_t y = 0; y != output.height(); ++y)
 		{
 			for(uint32_t x = 0; x != output.width(); ++x)
-			{ output(x, y) = std::max(output(x, y), input(x, y)); }
+			{ output(x, y) += input(x, y); }
 		}
 	}
 
@@ -576,8 +576,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 				fill_curve(tmp, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
 			}
 		}
-		pick_max(trace_input.pixels(), std::as_const(tmp).pixels());
-		pick_max(ret.pixels(), std::as_const(tmp).pixels());
+		add(trace_input.pixels(), std::as_const(tmp).pixels());
+		add(ret.pixels(), std::as_const(tmp).pixels());
 		++current_trunk_index;
 	}
 	return ret;
