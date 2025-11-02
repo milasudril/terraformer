@@ -1,6 +1,7 @@
 //@	{"target":{"name":"rasterizer.test"}}
 
 #include "./rasterizer.hpp"
+#include "./length.hpp"
 
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/rng.hpp"
@@ -251,5 +252,53 @@ TESTCASE(terraformer_make_distance_field_2)
 	store(
 		output,
 		std::format("{}/{}_make_distance_field_2.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
+}
+
+TESTCASE(terraformer_make_distance_field_wavy)
+{
+	std::array<terraformer::location, 512> locs{};
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+		auto const x = static_cast<float>(k)
+			/static_cast<float>(std::size(locs) - 1);
+		auto const y = 0.125f*(
+			      std::cos(2.0f*std::numbers::pi_v<float>*x)
+			+ 0.5f*std::sin(4.0f*std::numbers::pi_v<float>*x)
+			- 0.25f*std::cos(8.0f*std::numbers::pi_v<float>*x)
+			- 0.125f*std::sin(16.0f*std::numbers::pi_v<float>*x)
+			+ 0.0625f*std::cos(32.0f*std::numbers::pi_v<float>*x)
+			+ 0.03125f*std::sin(64.0f*std::numbers::pi_v<float>*x)
+			- 0.015625f*std::cos(128.0f*std::numbers::pi_v<float>*x)
+		);
+		locs[k] = terraformer::location{0.0f, 0.5f, 0.0f}
+			+ terraformer::displacement{x, y, 0.0f};
+	}
+
+	auto const l_max = curve_length(terraformer::span{std::cbegin(locs), std::cend(locs)});
+
+	terraformer::image output{1024, 1024};
+	auto const t_start = std::chrono::steady_clock::now();
+	render(
+		output.pixels(),
+		terraformer::span{std::begin(locs), std::end(locs)},
+		terraformer::curve_render_with_automask_descriptor{
+			.pixel_size = 1.0f/1024.0f,
+			.mask_radius = 1.0f/8,
+			.shader = [l_max](auto item) {
+				auto const t = item.curve_parameter/l_max;
+				auto const r = std::pow(std::clamp(1.0f - t, 0.0f, 1.0f), 1.0f)/8.0f;
+				auto const d = std::max(1.0f - item.distance/r, 0.0f);
+				return terraformer::rgba_pixel{t, d, t, 1.0f};
+			}
+		}
+	);
+	auto const t_end = std::chrono::steady_clock::now();
+
+	printf("Duration = %.8g\n", std::chrono::duration<double>(t_end - t_start).count());
+
+	store(
+		output,
+		std::format("{}/{}_make_distance_field_wavy.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
 	);
 }

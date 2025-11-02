@@ -9,6 +9,7 @@
 
 #include <cassert>
 #include <geosimd/basic_vector.hpp>
+#include <cstdio>
 
 
 float terraformer::curve_length(
@@ -137,6 +138,8 @@ namespace
 		if(t >= 1.0f)
 		{ return input_seg.to; }
 
+		fprintf(stderr, "Bad curve parameter t = %.8g\n", t);
+		fflush(stderr);
 		abort();
 	}
 }
@@ -149,6 +152,12 @@ terraformer::find_closest_point(polynomial<displacement, 3> const& curve, line_s
 	auto const p_0 = input_seg.from;
 	auto const curve_vector = p - p_0;
 	auto const seg_length = norm(curve_vector);
+	if(seg_length == 0.0f)
+	{
+		fprintf(stderr, "seg length is zero\n");
+		abort();
+
+	}
 	auto const p0_to_loc = loc - p_0;
 	auto const tangent_vector = curve_vector/seg_length;
 	auto const proj = inner_product(tangent_vector, p0_to_loc)/seg_length;
@@ -161,9 +170,28 @@ terraformer::find_closest_point(polynomial<displacement, 3> const& curve, line_s
 		}
 	);
 	auto const should_be_zero = distance_squared.derivative();
-	auto const should_be_zero_deriv = should_be_zero.derivative();
-	for(size_t k = 0; k != 4; ++k)
-	{ t = t - should_be_zero(t)/should_be_zero_deriv(t); }
+	auto num = should_be_zero(t);
+	if(num != 0.0f)
+	{
+		auto const should_be_zero_deriv = should_be_zero.derivative();
+		for(size_t k = 0; k != 4; ++k)
+		{
+			if(num == 0.0f)
+			{ break; }
+
+			auto const denom = should_be_zero_deriv(t);
+			if(denom == 0.0f)
+			{
+				t = num >= 0.0f? 1.0f : -1.0f;
+				break;
+			}
+			t = t - num/denom;
+			if(std::abs(t) >= 1.0e6f)
+			{ break; }
+
+			num = should_be_zero(t);
+		}
+	}
 
 	auto const p_intersect = eval_poly(t, curve, input_seg);
 	auto const d_new = distance(p_intersect, loc);
