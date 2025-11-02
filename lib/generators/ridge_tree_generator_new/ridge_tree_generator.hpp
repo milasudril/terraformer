@@ -160,12 +160,10 @@ namespace terraformer
 
 	struct ridge_tree_ridge_height_profile
 	{
-		float begin_height;
-		bool begin_height_is_relative;
-		float end_height;
+		float height;
+		bool height_is_relative;
 		float relative_half_thickness;
-		float transverse_rolloff_exponent;
-		float longitudinal_rolloff_exponent;
+		float rolloff_exponent;
 	};
 
 	void fill_curve(

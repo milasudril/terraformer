@@ -286,11 +286,9 @@ void terraformer::fill_curve(
 	auto const elems = trunk.branches.element_indices();
 	auto const attribs = trunk.branches.attributes();
 	auto const curves = attribs.get<0>();
-	auto const transverse_rolloff_exponent = elev_profile.transverse_rolloff_exponent;
-	auto const longitudinal_rolloff_exponent = elev_profile.longitudinal_rolloff_exponent;
-	auto const begin_height_is_relative = elev_profile.begin_height_is_relative;
-	auto const begin_height_in = elev_profile.begin_height;
-	auto const end_height_in = elev_profile.end_height;
+	auto const rolloff_exponent = elev_profile.rolloff_exponent;
+	auto const height_is_relative = elev_profile.height_is_relative;
+	auto const height_in = elev_profile.height;
 	auto const ridge_radius = elev_profile.relative_half_thickness/pixel_size;
 
 	for(auto k : elems)
@@ -300,26 +298,12 @@ void terraformer::fill_curve(
 		{ continue; }
 
 		auto const start_loc = (curve.points().front() - location{})/pixel_size;
-		auto const begin_height =
-			begin_height_in*(
-				begin_height_is_relative?
+		auto const height =
+			height_in*(
+				height_is_relative?
 					interp(pixels_in, start_loc[0], start_loc[1], clamp_at_boundary{}) :
 					1.0f
 			);
-		auto const end_height = end_height_in*begin_height;
-
-		float curve_length = 0.0f;
-		visit_pixels(
-			curve.points(),
-			pixel_size,
-			[
-				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
-				&curve_length
-			](location loc, auto&&...) mutable {
-				curve_length += distance(loc, loc_prev);
-				loc_prev = loc;
-			}
-		);
 
 		visit_pixels(
 			curve.points(),
@@ -327,39 +311,23 @@ void terraformer::fill_curve(
 			[
 				pixels,
 				ridge_radius,
-				transverse_rolloff_exponent,
-				longitudinal_rolloff_exponent,
-				begin_height,
-				end_height,
-				loc_prev = location{} + (curve.points().front() - location{})/pixel_size,
-				integrated_length = 0.0f,
-				curve_length
+				rolloff_exponent,
+				height
 			](location loc, direction tangent, direction normal) mutable {
-				auto const curve_param = integrated_length/curve_length;
-				auto const current_height =
-					std::lerp(
-						end_height,
-						begin_height,
-						std::pow(1.0f - curve_param, longitudinal_rolloff_exponent)
-					);
-
 				max_circle(
 					pixels,
 					loc,
 					tangent,
 					normal,
-					ridge_radius*current_height,
+					ridge_radius*height,
 					[
-						transverse_rolloff_exponent,
-						current_height
+						rolloff_exponent,
+						height
 					](float r){
-						return current_height*std::pow(r, transverse_rolloff_exponent);
+						return height*std::pow(r, rolloff_exponent);
 					},
 					2.0f
 				);
-
-				integrated_length += distance(loc, loc_prev);
-				loc_prev = loc;
 			}
 		);
 	}
@@ -488,13 +456,11 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		span_2d<float const>{},
 		trunks.back(),
 		ridge_tree_ridge_height_profile{
-			.begin_height = params.trunk.ridge_height,
-			.begin_height_is_relative = false,
-			.end_height  = 1.0f,
+			.height = params.trunk.ridge_height,
+			.height_is_relative = false,
 			.relative_half_thickness = trunk_height_profile.rel_half_thickness
 				*(trunk_height_profile.noise_amplitude + trunk_ridge_height)/trunk_ridge_height,
-			.transverse_rolloff_exponent = trunk_height_profile.rolloff_exponent,
-			.longitudinal_rolloff_exponent = 1.0f
+			.rolloff_exponent = trunk_height_profile.rolloff_exponent
 		},
 		global_pixel_size
 	);
@@ -571,12 +537,10 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		trim_at_intersct(next_level);
 
 		ridge_tree_ridge_height_profile const current_height_profile{
-			.begin_height = 1.0f,
-			.begin_height_is_relative = true,
-			.end_height  = growth_params.end_height,
+			.height = 0.5f,
+			.height_is_relative = true,
 			.relative_half_thickness = height_profile.rel_half_thickness,
-			.transverse_rolloff_exponent = height_profile.rolloff_exponent,
-			.longitudinal_rolloff_exponent = growth_params.longitudinal_rolloff_exponent
+			.rolloff_exponent = height_profile.rolloff_exponent,
 		};
 
 		grayscale_image tmp{w_img, h_img};
