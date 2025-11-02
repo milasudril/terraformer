@@ -53,7 +53,14 @@ terraformer::make_spline_with_lengths(span<location const> curve)
 		};
 
 		auto const p = make_polynomial(prev_control_point, control_point);
-		ret.push_back(p, curve_length(p, 0.0f, 1.0f, 3));
+		ret.push_back(
+			p,
+			line_segment{
+				.from = curve[k - 1],
+				.to = curve[k]
+			},
+			curve_length(p, 0.0f, 1.0f, 3)
+		);
 		prev_control_point = control_point;
 	}
 
@@ -64,7 +71,14 @@ terraformer::make_spline_with_lengths(span<location const> curve)
 			.ddx = curve.back() - curve[indices.back() - 1]
 		}
 	);
-	ret.push_back(p, curve_length(p, 0.0f, 1.0f, 3));
+	ret.push_back(
+		p,
+		line_segment{
+			.from = curve[indices.back() - 1],
+			.to = curve.back()
+		},
+		curve_length(p, 0.0f, 1.0f, 3)
+	);
 
 	return ret;
 }
@@ -105,12 +119,34 @@ terraformer::make_spline(span<location const> curve)
 	return ret;
 }
 
+namespace
+{
+	terraformer::location
+	eval_poly(
+		float t,
+		terraformer::polynomial<terraformer::displacement, 3> const& curve,
+		terraformer::line_segment input_seg
+	)
+	{
+		if(t > 0.0f && t < 1.0f) [[unlikely]]
+		{ return terraformer::location{} + curve(t); }
+
+		if(t <= 0.0f)
+		{ return input_seg.from; }
+
+		if(t >= 1.0f)
+		{ return input_seg.to; }
+
+		abort();
+	}
+}
+
 terraformer::closest_point_info
-terraformer::find_closest_point(polynomial<displacement, 3> const& curve, location loc)
+terraformer::find_closest_point(polynomial<displacement, 3> const& curve, line_segment input_seg, location loc)
 {
 	// Initial guess based on a straight line
-	auto const p = location{} + curve(1.0f);
-	auto const p_0 = location{} + curve(0.0f);
+	auto const p = input_seg.to;
+	auto const p_0 = input_seg.from;
 	auto const curve_vector = p - p_0;
 	auto const seg_length = norm(curve_vector);
 	auto const p0_to_loc = loc - p_0;
@@ -129,7 +165,7 @@ terraformer::find_closest_point(polynomial<displacement, 3> const& curve, locati
 	for(size_t k = 0; k != 4; ++k)
 	{ t = t - should_be_zero(t)/should_be_zero_deriv(t); }
 
-	auto const p_intersect = location{} + curve(std::clamp(t, 0.0f, 1.0f));
+	auto const p_intersect = eval_poly(t, curve, input_seg);
 	auto const d_new = distance(p_intersect, loc);
 
 	return closest_point_info{
@@ -146,6 +182,7 @@ terraformer::find_closest_point(spline_with_length const& curve, location loc)
 
 	auto const polys = curve.polynomials();
 	auto const lengths = curve.curve_lengths();
+	auto const segs = curve.line_segments();
 
 	struct current_best_point
 	{
@@ -156,14 +193,14 @@ terraformer::find_closest_point(spline_with_length const& curve, location loc)
 
 	current_best_point best_point{
 		.point_index = curve.element_indices().front(),
-		.point_info = find_closest_point(polys.front(), loc),
+		.point_info = find_closest_point(polys.front(), segs.front(), loc),
 		.running_distance = 0.0f
 	};
 
 	auto running_distance = lengths.front();
 	for(auto k : curve.element_indices(1))
 	{
-		auto const next = find_closest_point(polys[k], loc);
+		auto const next = find_closest_point(polys[k], segs[k], loc);
 		if(next.distance < best_point.point_info.distance)
 		{
 			best_point.point_index = k;
@@ -185,33 +222,6 @@ terraformer::find_closest_point(spline_with_length const& curve, location loc)
 			),
 		.distance = best_point.point_info.distance,
 	};
-}
-
-terraformer::closest_point_info
-terraformer::find_closest_point(span<polynomial<displacement, 3> const> curve, location loc)
-{
-	if(curve.empty())
-	{ return closest_point_info{}; }
-
-	static constexpr size_t curve_segs = 3;
-	auto ret = find_closest_point(curve.front(), loc);
-	ret.curve_parameter = curve_length(curve.front(), 0.0f, ret.curve_parameter, curve_segs);
-
-	auto running_distance = curve_length(curve.front(), 0.0f, 1.0f, curve_segs);
-	for(auto k : curve.element_indices(1))
-	{
-		auto const next = find_closest_point(curve[k], loc);
-		if(next.distance < ret.distance)
-		{
-			ret.curve_parameter = running_distance
-				+ curve_length(curve[k], 0.0f, next.curve_parameter, curve_segs);
-			ret.distance = next.distance;
-		}
-
-		running_distance += curve_length(curve[k], 0.0f, 1.0f, curve_segs);
-	}
-
-	return ret;
 }
 
 terraformer::closest_point_info

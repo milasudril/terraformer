@@ -87,13 +87,16 @@ namespace terraformer
 		float distance;
 	};
 
-	struct spline_with_length:public multi_array<polynomial<displacement, 3>, float>
+	struct spline_with_length:public multi_array<polynomial<displacement, 3>, line_segment, float>
 	{
-		auto curve_lengths() const
-		{ return get<1>(); }
-
 		auto polynomials() const
 		{ return get<0>(); }
+
+		auto line_segments() const
+		{ return get<1>(); }
+
+		auto curve_lengths() const
+		{ return get<2>(); }
 	};
 
 	float curve_length(
@@ -108,13 +111,10 @@ namespace terraformer
 	single_array<polynomial<displacement, 3>> make_spline(span<location const> curve);
 
 	closest_point_info
+	find_closest_point(polynomial<displacement, 3> const& curve, line_segment input_seg, location loc);
+
+	closest_point_info
 	find_closest_point(spline_with_length const& curve, location loc);
-
-	closest_point_info
-	find_closest_point(polynomial<displacement, 3> const& curve, location loc);
-
-	closest_point_info
-	find_closest_point(span<polynomial<displacement, 3> const> curve, location loc);
 
 	closest_point_info find_closest_point(span<location const> curve, location loc);
 
