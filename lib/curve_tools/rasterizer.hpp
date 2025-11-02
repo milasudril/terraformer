@@ -107,16 +107,16 @@ namespace terraformer
 
 	single_array<polynomial<displacement, 3>> make_spline(span<location const> curve);
 
-	[[gnu::const]] closest_point_info
+	closest_point_info
 	find_closest_point(spline_with_length const& curve, location loc);
 
-	[[gnu::const]] closest_point_info
+	closest_point_info
 	find_closest_point(polynomial<displacement, 3> const& curve, location loc);
 
-	[[gnu::const]] closest_point_info
+	closest_point_info
 	find_closest_point(span<polynomial<displacement, 3> const> curve, location loc);
 
-	[[gnu::const]] closest_point_info find_closest_point(span<location const> curve, location loc);
+	closest_point_info find_closest_point(span<location const> curve, location loc);
 
 	template<class T>
 	concept curve_shader = requires(T obj, closest_point_info point_info){
