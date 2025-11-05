@@ -21,19 +21,25 @@ float run_pass(
 		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
 		{
 			using clamp_tag = terraformer::span_2d_extents::clamp_tag;
-			auto const dx = 0.5f*(
-				  input(x + 1, y, clamp_tag{})
-				- input(x - 1, y, clamp_tag{})
-			)/pixel_size;
-			auto const dy = 0.5f*(
-				  input(x, y + 1, clamp_tag{})
-				- input(x, y - 1, clamp_tag{})
-			)/pixel_size;
+
+			std::array const neighbours{
+				input(x + 1, y, clamp_tag{}),
+				input(x, y + 1, clamp_tag{}),
+				input(x - 1, y, clamp_tag{}),
+				input(x, y - 1, clamp_tag{})
+			};
+
+			auto const heighest_neighbour = *std::ranges::max_element(neighbours);
+			auto const current_value = input(x, y);
+			auto const dz_max = heighest_neighbour - current_value;
+
+			auto const dx = 0.5f*(neighbours[0] - neighbours[2])/pixel_size;
+			auto const dy = 0.5f*(neighbours[1] - neighbours[3])/pixel_size;
 			terraformer::displacement const gradvec{dx, dy, 0.0f};
 			auto const grad_squared = norm_squared(gradvec);
 			max_grad_out = std::max(grad_squared, max_grad_out);
-
-			if(grad_squared > 1.0f)
+			auto const xi = 1.0f;
+			if(grad_squared > xi*xi || dz_max*pixel_size > xi)
 			{
 				auto const sample_from = terraformer::location{
 					static_cast<float>(x),
@@ -41,10 +47,13 @@ float run_pass(
 					0.0f
 				} + gradvec/std::sqrt(grad_squared);
 
-				auto const uphill_value = interp(input, sample_from[0], sample_from[1], terraformer::clamp_at_boundary{});
-				auto const current_value = input(x, y);
-				auto const required_value = (uphill_value - 1.0f*pixel_size)*(1.0f + 1.0f/1024.0f);
-				auto const error = required_value - current_value;
+				auto const uphill_value = std::max(
+					interp(input, sample_from[0], sample_from[1], terraformer::clamp_at_boundary{}),
+					heighest_neighbour
+				);
+
+				auto const required_value = (uphill_value - xi*pixel_size)*(1.0f + 1.0f/1024.0f);
+				auto const error = std::max(required_value - current_value, 0.0f);
 				auto const output_val = current_value + error/32.0f;
 				output(x, y) = output_val;
 			}
@@ -91,17 +100,22 @@ void grad_check(
 
 int main()
 {
+#if 0
+	terraformer::grayscale_image buffer_a{1024, 1024};
+	buffer_a(512, 512) = 1024.0f;
+#else
 	auto buffer_a = load(
 		terraformer::empty<terraformer::grayscale_image>{},
 		"experiments/rolling_hills.exr"
 	);
+#endif
 
 	auto buffer_b = terraformer::create_with_same_size(buffer_a.pixels());
 
 	auto pixels_a = buffer_a.pixels();
 	auto pixels_b = buffer_b.pixels();
 
-	for(size_t k = 0; k != 1024; ++k)
+	for(size_t k = 0; k != 8192; ++k)
 	{
 		auto ret = run_pass(pixels_b, pixels_a, 8.0f);
 		if(k % 128 == 0)
