@@ -59,6 +59,36 @@ float run_pass(
 	return max_grad_out;
 }
 
+void grad_check(
+	terraformer::span_2d<float> output,
+	terraformer::span_2d<float const> input,
+	float pixel_size
+)
+{
+	for(int32_t y = 0; y != static_cast<int32_t>(output.height()); ++y)
+	{
+		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
+		{
+			using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+			auto const dx = 0.5f*(
+				  input(x + 1, y, clamp_tag{})
+				- input(x - 1, y, clamp_tag{})
+			)/pixel_size;
+			auto const dy = 0.5f*(
+				  input(x, y + 1, clamp_tag{})
+				- input(x, y - 1, clamp_tag{})
+			)/pixel_size;
+			terraformer::displacement const gradvec{dx, dy, 0.0f};
+			auto const grad_squared = norm_squared(gradvec);
+
+			if(grad_squared > 1.0f)
+			{ output(x, y) = 1.0f; }
+			else
+			{ output(x, y) = 0.0f; }
+		}
+	}
+}
+
 int main()
 {
 	auto buffer_a = load(
@@ -71,11 +101,11 @@ int main()
 	auto pixels_a = buffer_a.pixels();
 	auto pixels_b = buffer_b.pixels();
 
-	for(size_t k = 0; k != 8192; ++k)
+	for(size_t k = 0; k != 1024; ++k)
 	{
-		auto ret = run_pass(pixels_b, pixels_a, 8);
+		auto ret = run_pass(pixels_b, pixels_a, 8.0f);
 		if(k % 128 == 0)
-		{ printf("%.8g\n", std::sqrt(ret)); }
+		{ printf("%zu %.8g\n", k, std::sqrt(ret)); }
 		if(ret <= 1.0f)
 		{ break; }
 
@@ -83,4 +113,7 @@ int main()
 	}
 
 	store(pixels_b, "/dev/shm/output.exr");
+
+	grad_check(pixels_a, pixels_b, 8.0f);
+	store(pixels_a, "/dev/shm/grad2.exr");
 }
