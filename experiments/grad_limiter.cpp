@@ -1,8 +1,13 @@
 //@	{"target":{"name":"grad_limiter.o"}}
 
+#include "lib/common/spaces.hpp"
+#include "lib/common/span_2d.hpp"
+#include "lib/math_utils/boundary_sampling_policies.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/image_io.hpp"
+#include "lib/math_utils/interp.hpp"
 #include <algorithm>
+#include <geosimd/basic_vector.hpp>
 
 float run_pass(
 	terraformer::span_2d<float> output,
@@ -11,38 +16,47 @@ float run_pass(
 )
 {
 	auto max_grad_out = 0.0f;
-	for(uint32_t y = 1; y != output.height() - 1; ++y)
+	for(int32_t y = 0; y != static_cast<int32_t>(output.height()); ++y)
 	{
-		for(uint32_t x = 1; x != output.width() - 1; ++x)
+		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
 		{
-			std::array const neighbours{
-				input(x + 1, y),
-				input(x - 1 ,y),
-				input(x, y + 1),
-				input(x, y - 1)
-			};
+			using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+			auto const dx = 0.5f*(
+				  input(x + 1, y, clamp_tag{})
+				- input(x - 1, y, clamp_tag{})
+			)/pixel_size;
+			auto const dy = 0.5f*(
+				  input(x, y + 1, clamp_tag{})
+				- input(x, y - 1, clamp_tag{})
+			)/pixel_size;
+			terraformer::displacement const gradvec{dx, dy, 0.0f};
+			auto const grad_squared = norm_squared(gradvec);
+			max_grad_out = std::max(grad_squared, max_grad_out);
 
-			auto const heighest_neigbour = *std::ranges::max_element(neighbours);
-			auto const dz = heighest_neigbour - input(x, y);
-			if(dz > pixel_size)
+			if(grad_squared > 1.0f)
 			{
-				auto const required_value = (heighest_neigbour - pixel_size)*(1.0f + 1.0f/1024.0f);
+				auto const sample_from = terraformer::location{
+					static_cast<float>(x),
+					static_cast<float>(y),
+					0.0f
+				} + gradvec/std::sqrt(grad_squared);
+
+				auto const uphill_value = interp(input, sample_from[0], sample_from[1], terraformer::clamp_at_boundary{});
 				auto const current_value = input(x, y);
+				auto const required_value = (uphill_value - 1.0f*pixel_size)*(1.0f + 1.0f/1024.0f);
 				auto const error = required_value - current_value;
 				auto const output_val = current_value + error/32.0f;
 				output(x, y) = output_val;
-				max_grad_out = std::max(std::abs(heighest_neigbour - output_val), max_grad_out);
 			}
 			else
 			{
 				auto const output_val = input(x, y);
-				max_grad_out = std::max(std::abs(heighest_neigbour - output_val), max_grad_out);
 				output(x, y) = output_val;
 			}
 		}
 	}
 
-	return max_grad_out/pixel_size;
+	return max_grad_out;
 }
 
 int main()
@@ -57,11 +71,11 @@ int main()
 	auto pixels_a = buffer_a.pixels();
 	auto pixels_b = buffer_b.pixels();
 
-	for(size_t k = 0; k != 16384; ++k)
+	for(size_t k = 0; k != 8192; ++k)
 	{
 		auto ret = run_pass(pixels_b, pixels_a, 8);
 		if(k % 128 == 0)
-		{ printf("%.8g\n", ret); }
+		{ printf("%.8g\n", std::sqrt(ret)); }
 		if(ret <= 1.0f)
 		{ break; }
 
