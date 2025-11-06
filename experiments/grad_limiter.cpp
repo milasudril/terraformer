@@ -39,7 +39,7 @@ float run_pass(
 			auto const grad_squared = norm_squared(gradvec);
 			max_grad_out = std::max(grad_squared, max_grad_out);
 			auto const xi = 1.0f;
-			if(grad_squared > xi*xi || dz_max*pixel_size > xi)
+			if(grad_squared > xi*xi || dz_max > xi*pixel_size)
 			{
 				auto const sample_from = terraformer::location{
 					static_cast<float>(x),
@@ -48,13 +48,13 @@ float run_pass(
 				} + gradvec/std::sqrt(grad_squared);
 
 				auto const uphill_value = std::max(
-					interp(input, sample_from[0], sample_from[1], terraformer::clamp_at_boundary{}),
-					heighest_neighbour
+					grad_squared >0.0f? interp(input, sample_from[0], sample_from[1], terraformer::clamp_at_boundary{}): 0.0f,
+					std::max(heighest_neighbour, current_value)
 				);
 
-				auto const required_value = (uphill_value - xi*pixel_size)*(1.0f + 1.0f/1024.0f);
+				auto const required_value = uphill_value - xi*pixel_size;
 				auto const error = std::max(required_value - current_value, 0.0f);
-				auto const output_val = current_value + error/32.0f;
+				auto const output_val = current_value + error/8.0f;
 				output(x, y) = output_val;
 			}
 			else
@@ -88,21 +88,16 @@ void grad_check(
 				- input(x, y - 1, clamp_tag{})
 			)/pixel_size;
 			terraformer::displacement const gradvec{dx, dy, 0.0f};
-			auto const grad_squared = norm_squared(gradvec);
-
-			if(grad_squared > 1.0f)
-			{ output(x, y) = 1.0f; }
-			else
-			{ output(x, y) = 0.0f; }
+			output(x, y) = std::sqrt(norm_squared(gradvec));
 		}
 	}
 }
 
 int main()
 {
-#if 0
-	terraformer::grayscale_image buffer_a{1024, 1024};
-	buffer_a(512, 512) = 1024.0f;
+#if 1
+	terraformer::grayscale_image buffer_a{2048, 2048};
+	buffer_a(1024, 1024) = 1024.0f;
 #else
 	auto buffer_a = load(
 		terraformer::empty<terraformer::grayscale_image>{},
@@ -117,7 +112,7 @@ int main()
 
 	for(size_t k = 0; k != 8192; ++k)
 	{
-		auto ret = run_pass(pixels_b, pixels_a, 8.0f);
+		auto ret = run_pass(pixels_b, pixels_a, 4.0f);
 		if(k % 128 == 0)
 		{ printf("%zu %.8g\n", k, std::sqrt(ret)); }
 		if(ret <= 1.0f)
@@ -127,7 +122,6 @@ int main()
 	}
 
 	store(pixels_b, "/dev/shm/output.exr");
-
-	grad_check(pixels_a, pixels_b, 8.0f);
-	store(pixels_a, "/dev/shm/grad2.exr");
+	grad_check(pixels_a, pixels_b, 4.0f);
+	store(pixels_a, "/dev/shm/grad.exr");
 }
