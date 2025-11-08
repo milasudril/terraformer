@@ -72,10 +72,10 @@ float run_pass(
 	return max_grad_out;
 }
 
-template<class PixelMask>
+template<class PixelBlendFactor>
 struct laplace_limiter_descriptor
 {
-	PixelMask mask;
+	PixelBlendFactor blend_factor;
 };
 
 template<class PixelMask>
@@ -89,18 +89,14 @@ void run_pass(
 	{
 		for(int32_t x = 0; x != static_cast<int32_t>(output.width()); ++x)
 		{
-			if(params.mask(static_cast<uint32_t>(x), static_cast<uint32_t>(y)))
-			{
-				using clamp_tag = terraformer::span_2d_extents::clamp_tag;
-				output(x, y) = 0.25f*(
-					 input(x + 1, y, clamp_tag{})
-					+input(x - 1, y, clamp_tag{})
-					+input(x, y + 1, clamp_tag{})
-					+input(x, y + 1, clamp_tag{})
-				);
-			}
-			else
-			{ output(x, y) = input(x, y); }
+			using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+			auto const filtered_val = 0.25f*(
+					input(x + 1, y, clamp_tag{})
+				+input(x - 1, y, clamp_tag{})
+				+input(x, y + 1, clamp_tag{})
+				+input(x, y - 1, clamp_tag{})
+			);
+			output(x, y) = std::lerp(input(x, y), filtered_val, params.blend_factor(x, y));
 		}
 	}
 }
@@ -181,43 +177,42 @@ terraformer::grayscale_image set_max_gradient_to(
 
 int main()
 {
-	auto after_grad_limiter = set_max_gradient_to(
-		load(
-			terraformer::empty<terraformer::grayscale_image>{},
-			"experiments/rolling_hills.exr"
-		),
+	auto const input = load(
+		terraformer::empty<terraformer::grayscale_image>{},
+		"experiments/rolling_hills.exr"
+	);
+
+	auto const after_grad_limiter = set_max_gradient_to(
+		input.pixels(),
 		gradient_limiter_descriptor{
-			.gradient_threshold = 0.5f,
+			.gradient_threshold = 1.0f,
 			.pixel_size = 8.0f
 		}
 	);
-
 	store(after_grad_limiter.pixels(), "/dev/shm/after_grad_limiter.exr");
-#if 0
-		auto buffer_b = terraformer::create_with_same_size(buffer_a.pixels());
-		auto pixels_a = buffer_a.pixels();
-		auto pixels_b = buffer_b.pixels();
 
+	auto buffer_out = terraformer::create_with_same_size<float>(after_grad_limiter.pixels());
+	auto buffer_in = after_grad_limiter;
+	for(size_t k = 0; k != 16384; ++k)
+	{
+		run_pass(buffer_out.pixels(), buffer_in.pixels(), laplace_limiter_descriptor{
+			[
+				pixels_in = input.pixels(),
+				pixels_out = buffer_in.pixels(),
+				pixel_size = 8.0f,
+				g_in_max_2 = 0.25f,
+				g_out_max_2 = 1.0f
+			](int32_t x, int32_t y){
+				using clamp_tag = terraformer::span_2d_extents::clamp_tag;
+				auto const ddx_in = 0.5f*(pixels_in(x - 1, y, clamp_tag{}) - pixels_in(x + 1, y, clamp_tag{}))/pixel_size;
+				auto const ddy_in = 0.5f*(pixels_in(x, y - 1, clamp_tag{}) - pixels_in(x, y + 1, clamp_tag{}))/pixel_size;
+				auto const ddx_out = 0.5f*(pixels_out(x - 1, y, clamp_tag{}) - pixels_out(x + 1, y, clamp_tag{}))/pixel_size;
+				auto const ddy_out = 0.5f*(pixels_out(x, y - 1, clamp_tag{}) - pixels_out(x, y + 1, clamp_tag{}))/pixel_size;
+				return ddx_out*ddx_out + ddy_out*ddy_out < g_out_max_2 ? std::clamp((ddx_in*ddx_in + ddy_in*ddy_in)/g_in_max_2, 0.0f, 1.0f) : 0.0f;
+			}
+		});
 
-
-		auto ret_prev = run_pass(pixels_b, pixels_a, grad_limiter);
-		std::swap(pixels_a, pixels_b);
-		while(true)
-		{
-			auto ret = run_pass(pixels_b, pixels_a, grad_limiter);
-			if(std::abs(ret - ret_prev) < 1.0e-4f)
-			{ break; }
-			ret_prev = ret;
-			std::swap(pixels_a, pixels_b);
-		}
-
-		store(pixels_b, "/dev/shm/output.exr");
-		grad_check(pixels_a, pixels_b, 8.0f);
-		store(pixels_a, "/dev/shm/grad.exr");
-
-		auto laplace_buff = terraformer::create_with_same_size(buffer_a.pixels());
-		laplace_check(laplace_buff.pixels(), pixels_b, 8.0f);
-		store(laplace_buff.pixels(), "/dev/shm/laplace.exr");
+		std::swap(buffer_out, buffer_in);
 	}
-#endif
+	store(buffer_out.pixels(), "/dev/shm/after_laplace_limiter.exr");
 }
