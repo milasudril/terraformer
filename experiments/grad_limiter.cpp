@@ -9,13 +9,20 @@
 #include <algorithm>
 #include <geosimd/basic_vector.hpp>
 
+struct gradient_limiter_descriptor
+{
+	float gradient_threshold;
+	float pixel_size;
+};
+
 float run_pass(
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
-	float pixel_size,
-	float max_gradient
+	gradient_limiter_descriptor params
 )
 {
+	auto const max_gradient = params.gradient_threshold;
+	auto const pixel_size = params.pixel_size;
 	auto max_grad_out = 0.0f;
 	for(int32_t y = 0; y != static_cast<int32_t>(output.height()); ++y)
 	{
@@ -105,13 +112,16 @@ int main()
 	auto pixels_a = buffer_a.pixels();
 	auto pixels_b = buffer_b.pixels();
 
-	auto const pixel_size = 8.0f;
-	auto const max_grad = 0.5f;
-	auto ret_prev = max_grad*max_grad;
+	gradient_limiter_descriptor const grad_limiter{
+		.gradient_threshold = 0.5f,
+		.pixel_size = 8.0f
+	};
 
+	auto ret_prev = run_pass(pixels_b, pixels_a, grad_limiter);
+	std::swap(pixels_a, pixels_b);
 	while(true)
 	{
-		auto ret = run_pass(pixels_b, pixels_a, pixel_size, max_grad);
+		auto ret = run_pass(pixels_b, pixels_a, grad_limiter);
 		if(std::abs(ret - ret_prev) < 1.0e-4f)
 		{ break; }
 		ret_prev = ret;
