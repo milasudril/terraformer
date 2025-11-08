@@ -12,7 +12,8 @@
 float run_pass(
 	terraformer::span_2d<float> output,
 	terraformer::span_2d<float const> input,
-	float pixel_size
+	float pixel_size,
+	float max_gradient
 )
 {
 	auto max_grad_out = 0.0f;
@@ -37,9 +38,8 @@ float run_pass(
 			terraformer::displacement const gradvec{ddx, ddy, 0.0f};
 			auto const grad_squared = norm_squared(gradvec);
 			max_grad_out = std::max(grad_squared, max_grad_out);
-			auto const xi = 1.0f;
 			auto get_uphill_value = [&](){
-				if(grad_squared > xi*xi)
+				if(grad_squared > max_gradient*max_gradient)
 				{
 					auto const sample_from = terraformer::location{
 						static_cast<float>(x),
@@ -49,13 +49,13 @@ float run_pass(
 					return interp(input, sample_from[0], sample_from[1], terraformer::clamp_at_boundary{});
 				}
 				else
-				if(dz_max > xi*pixel_size)
+				if(dz_max > max_gradient*pixel_size)
 				{ return heighest_neighbour; }
 				else
 				{ return input(x, y); }
 			};
 
-			auto const required_value = get_uphill_value() - xi*pixel_size;
+			auto const required_value = get_uphill_value() - max_gradient*pixel_size;
 			auto const error = std::min(current_value - required_value, 0.0f);
 			output(x, y) = current_value - error;
 		}
@@ -106,13 +106,13 @@ int main()
 	auto pixels_a = buffer_a.pixels();
 	auto pixels_b = buffer_b.pixels();
 
-	for(size_t k = 0; k != 256; ++k)
+	for(size_t k = 0; k != 1024; ++k)
 	{
-		auto ret = run_pass(pixels_b, pixels_a, 8.0f);
+		auto ret = run_pass(pixels_b, pixels_a, 8.0f, 0.5f);
 		//if(k % 128 == 0)
 		{ printf("%zu %.9g\n", k, std::sqrt(ret)); }
-		if(ret <= 1.0f)
-		{ break; }
+/*		if(ret <= 1.0f)
+		{ break; }*/
 
 		std::swap(pixels_a, pixels_b);
 	}
