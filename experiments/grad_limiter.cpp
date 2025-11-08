@@ -102,18 +102,19 @@ int main()
 #endif
 
 	auto buffer_b = terraformer::create_with_same_size(buffer_a.pixels());
-
 	auto pixels_a = buffer_a.pixels();
 	auto pixels_b = buffer_b.pixels();
 
-	for(size_t k = 0; k != 1024; ++k)
-	{
-		auto ret = run_pass(pixels_b, pixels_a, 8.0f, 0.5f);
-		//if(k % 128 == 0)
-		{ printf("%zu %.9g\n", k, std::sqrt(ret)); }
-/*		if(ret <= 1.0f)
-		{ break; }*/
+	auto const pixel_size = 8.0f;
+	auto const max_grad = 0.5f;
+	auto ret_prev = max_grad*max_grad;
 
+	while(true)
+	{
+		auto ret = run_pass(pixels_b, pixels_a, pixel_size, max_grad);
+		if(std::abs(ret - ret_prev) < 1.0e-4f)
+		{ break; }
+		ret_prev = ret;
 		std::swap(pixels_a, pixels_b);
 	}
 
