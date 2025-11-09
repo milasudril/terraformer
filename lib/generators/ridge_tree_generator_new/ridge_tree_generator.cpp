@@ -365,7 +365,7 @@ namespace
 		float lf_rolloff;
 		float hf_rolloff;
 	};
-#if 0
+
 	void make_filtered_noise(
 		terraformer::span_2d<float> output,
 		noise_params const& params,
@@ -435,7 +435,6 @@ namespace
 			}
 		}
 	}
-#endif
 }
 
 terraformer::grayscale_image
@@ -470,7 +469,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	);
 
 	auto trace_input = ret;
-#if 0
 	modulate_with_noise(
 		ret,
 		noise_params{
@@ -482,7 +480,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		ctxt,
 		rng
 	);
-#endif
 
 	auto current_trunk_index = trunks.element_indices().front();
 	auto const& branch_growth_params = params.branch_growth_params;
@@ -583,6 +580,18 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			}
 		}
 		add(trace_input.pixels(), std::as_const(tmp).pixels());
+		modulate_with_noise(
+			tmp,
+			noise_params{
+				.wavelength = height_profile.noise_wavelength,
+				.lf_rolloff = height_profile.noise_lf_rolloff,
+				.hf_rolloff = height_profile.noise_hf_rolloff
+			},
+			height_profile.noise_amplitude,
+			ctxt,
+			rng
+		);
+
 		add(ret.pixels(), std::as_const(tmp).pixels());
 		++current_trunk_index;
 	}
