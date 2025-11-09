@@ -39,26 +39,11 @@
 //   separation.
 //
 // * Avoid branch early. Looks strange, especially at the root curve
-//   * Can perhaps be solved by noise and diffusion
+//
+// * Perhaps add longitudinal modulation
+//
 // * Multi-threading where possible
 //
-// Experiments:
-//
-// Strategy 1:
-//
-// * Try to add noise before tracing children. Set the noise amplitude as a factor, with an
-//   amplitude of 0.25*input_elevation. Wave function with offset 1.
-//   => Using noisy image to trace children does not work well. Use image without noise as input
-//      to tracer
-//
-//
-// Strategy 2:
-//
-// * Try to add extra elevation at vertices. Use at most 0.25*input_elevation. Actual value is
-//   randomized. Wave function with offset 1.
-// * Add noise with an amplitude of 0.125*input_elevation. Wave function with offset 1. If the added
-//   does not work together with tracer, apply it after the heightmap has been used to generate
-//   children.
 
 namespace
 {
