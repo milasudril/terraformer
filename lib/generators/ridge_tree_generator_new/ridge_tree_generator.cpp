@@ -305,6 +305,9 @@ void terraformer::fill_curve(
 					1.0f
 			);
 
+		if(distance(curve.points().back(), curve.points().front()) <= ridge_radius*height)
+		{ continue; }
+
 		visit_pixels(
 			curve.points(),
 			pixel_size,
@@ -362,7 +365,7 @@ namespace
 		float lf_rolloff;
 		float hf_rolloff;
 	};
-
+#if 0
 	void make_filtered_noise(
 		terraformer::span_2d<float> output,
 		noise_params const& params,
@@ -432,6 +435,7 @@ namespace
 			}
 		}
 	}
+#endif
 }
 
 terraformer::grayscale_image
@@ -466,6 +470,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	);
 
 	auto trace_input = ret;
+#if 0
 	modulate_with_noise(
 		ret,
 		noise_params{
@@ -477,6 +482,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		ctxt,
 		rng
 	);
+#endif
 
 	auto current_trunk_index = trunks.element_indices().front();
 	auto const& branch_growth_params = params.branch_growth_params;
