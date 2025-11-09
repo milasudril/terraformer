@@ -535,7 +535,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		for(auto& stems : next_level)
 		{
-			auto const height_factor = growth_params.end_height*height_profile.rel_half_thickness;
+			auto const height_factor = growth_params.begin_height*height_profile.rel_half_thickness;
 			set_collision_margins(stems.left.attributes(), height_factor);
 			set_collision_margins(stems.right.attributes(), height_factor);
 		}
@@ -543,7 +543,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		trim_at_intersct(next_level);
 
 		ridge_tree_ridge_height_profile const current_height_profile{
-			.height = 0.5f,
+			.height = growth_params.begin_height,
 			.height_is_relative = true,
 			.relative_half_thickness = height_profile.rel_half_thickness,
 			.rolloff_exponent = height_profile.rolloff_exponent,
@@ -732,19 +732,8 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 	);
 
 	editor.create_float_input(
-		u8"Rel. end height",
-		end_height,
-		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
-			.textbox_placeholder_string = u8"0.123456789",
-			.visual_angle_range = std::nullopt
-		}
-
-	);
-
-	editor.create_float_input(
-		u8"Longit. roll-off exp.",
-		longitudinal_rolloff_exponent,
+		u8"Rel. height",
+		begin_height,
 		descriptor_editor_ref::knob_descriptor{
 			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
 			.textbox_placeholder_string = u8"0.123456789",
@@ -861,8 +850,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"E2E distance/m",
-					u8"Rel. end height",
-					u8"Longit. roll-off exp."
+					u8"Rel. height"
 				}
 			}
 		);

@@ -70,8 +70,7 @@ namespace terraformer
 	struct ridge_tree_branch_growth_descriptor
 	{
 		float e2e_distance = 16384.0f;
-		float end_height = 0.5f;
-		float longitudinal_rolloff_exponent = 2.0f;
+		float begin_height = 0.5f;
 
 		bool operator==(ridge_tree_branch_growth_descriptor const&) const = default;
 		bool operator!=(ridge_tree_branch_growth_descriptor const&) const = default;
