@@ -6,6 +6,7 @@
 #include "./ridge_curve.hpp"
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
+#include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/modules/dimensions.hpp"
 #include "lib/common/rng.hpp"
@@ -15,6 +16,7 @@
 #include "lib/curve_tools/length.hpp"
 #include "lib/curve_tools/displace.hpp"
 #include "lib/curve_tools/distance.hpp"
+#include "lib/math_utils/fp_props.hpp"
 
 #include <random>
 
@@ -83,53 +85,16 @@ namespace terraformer
 
 
 	struct ridge_tree_branch_sequence :
-		multi_array<displaced_curve, displaced_curve::index_type, single_array<displaced_curve::index_type>, single_array<float>>
+		multi_array<displaced_curve, float, displaced_curve::index_type, single_array<displaced_curve::index_type>, float>
 	{
 		using multi_array<
 			displaced_curve,
+			float,
 			displaced_curve::index_type,
 			single_array<displaced_curve::index_type>,
-			single_array<float>
+			float
 		>::multi_array;
 	};
-
-	struct ridge_tree_closest_point_curves_result
-	{
-		curve_distance_result result;
-		array_index<displaced_curve> curve{static_cast<size_t>(-1)};
-	};
-
-	inline auto closest_point_xy(span<displaced_curve const> curves, location loc)
-	{
-		if(curves.empty())
-		{
-			return ridge_tree_closest_point_curves_result{};
-		}
-
-		ridge_tree_closest_point_curves_result ret{
-			.result = curve_closest_point_xy(curves.front().points(), loc),
-			.curve = curves.element_indices().front()
-		};
-
-		for(auto k : curves.element_indices(1))
-		{
-			auto new_res = curve_closest_point_xy(curves[k].points(), loc);
-			if(new_res.distance < 0.0f)
-			{ continue; }
-
-			if(new_res.distance < ret.result.distance)
-			{
-				ret.result = new_res;
-				ret.curve = k;
-			}
-		}
-		return ret;
-	}
-
-	inline auto closest_point_xy(ridge_tree_branch_sequence const& seed_seq, location loc)
-	{	return closest_point_xy(seed_seq.get<0>(), loc); }
-
-	using ridge_tree_branch_elevation_data = single_array<polynomial<float, 3>>;
 
 	struct ridge_tree_trunk
 	{
@@ -141,75 +106,71 @@ namespace terraformer
 		array_index<ridge_tree_trunk> parent;
 		array_index<displaced_curve> parent_curve_index;
 		enum side side;
-
-		ridge_tree_branch_elevation_data elevation_data;
 	};
 
-	displacement compute_field(span<displaced_curve const> branches, location r, float min_distance);
-
-	displacement compute_field(span<ridge_tree_trunk const> branches, location r, float min_distance);
-
-	inline auto closest_point_xy(ridge_tree_trunk const& trunk, location loc)
-	{	return closest_point_xy(trunk.branches, loc); }
-
-	struct ridge_tree_closest_point_result
+	struct ridge_tree_branch_base_curve
 	{
-		ridge_tree_closest_point_curves_result distance_result;
-		array_index<ridge_tree_trunk> branch = ridge_tree_trunk::no_parent;
+		single_array<location> locations;
+		float initial_height = 1.0f;
 	};
-
-	inline auto closest_point_xy(span<ridge_tree_trunk const> branches, location loc)
-	{
-		if(branches.empty())
-		{
-			return ridge_tree_closest_point_result{};
-		}
-
-		ridge_tree_closest_point_result ret{
-			.distance_result = closest_point_xy(branches.front(), loc),
-			.branch = branches.element_indices().front()
-		};
-
-		for(auto k : branches.element_indices(1))
-		{
-			auto const res = closest_point_xy(branches[k], loc);
-			if(res.result.distance < 0.0f)
-			{ continue; }
-
-			if(res.result.distance < ret.distance_result.result.distance)
-			{
-				ret.distance_result = res;
-				ret.branch = k;
-			}
-		}
-
-		return ret;
-	}
 
 	template<class BranchStopCondition>
-	single_array<location> generate_branch_base_curve(
+	ridge_tree_branch_base_curve
+	generate_branch_base_curve(
 		location loc,
 		direction start_dir,
-		span<ridge_tree_trunk const> trunks,
+		span_2d<float const> current_heightmap,
 		float pixel_size,
 		BranchStopCondition&& stop
 	)
 	{
-		single_array<location> base_curve;
+		assert(pixel_size > 0.0f);
+		ridge_tree_branch_base_curve base_curve{};
 		if(stop(loc))
 		{ return base_curve; }
 
-		base_curve.push_back(loc);
+		base_curve.locations.push_back(loc);
+		auto v = (loc - location{})/pixel_size;
+		base_curve.initial_height = interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
 
-		base_curve.reserve(array_size<location>{128});
+		base_curve.locations.reserve(array_size<location>{128});
+		auto step = 1.0f*start_dir;
+		v += 4.0f*step;
+		auto current_elevation = interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
 
-		loc += pixel_size*start_dir;
-
-		while(!stop(loc))
+		auto k = base_curve.locations.element_indices().front();
+		while(!stop(location{} + v*pixel_size))
 		{
-			base_curve.push_back(loc);
-			auto const g = direction{compute_field(trunks, loc, pixel_size)};
-			loc -= pixel_size*g;
+			auto const next_elevation =  interp(current_heightmap, v[0], v[1], clamp_at_boundary{});
+			if(next_elevation > current_elevation || !inside(current_heightmap, v[0], v[1]))
+			{ return base_curve; }
+
+			auto const next_loc = location{} + v*pixel_size;
+
+			if(k > base_curve.locations.element_indices().front() + 1)
+			{
+				if(distance(base_curve.locations[k - 1], next_loc) <= 0.25f*pixel_size)
+				{ return base_curve; }
+			}
+
+			base_curve.locations.push_back(next_loc);
+			current_elevation = next_elevation;
+
+			auto const dx = 0.5f*(
+				   interp(current_heightmap, v[0] + 1.0f, v[1], clamp_at_boundary{})
+				 - interp(current_heightmap, v[0] - 1.0f, v[1], clamp_at_boundary{})
+			)/pixel_size;
+			auto const dy = 0.5f*(
+				   interp(current_heightmap, v[0], v[1] + 1.0f, clamp_at_boundary{})
+				 - interp(current_heightmap, v[0], v[1] - 1.0f, clamp_at_boundary{})
+			)/pixel_size;
+			displacement const grad{dx, dy, 0.0f};
+
+			auto const grad_norm = norm(grad);
+
+			step = grad_norm <= 1.0f/64.0f? step : -grad/grad_norm;
+			v += 2.0f*step;
+			++k;
 		}
 
 		return base_curve;
@@ -218,14 +179,29 @@ namespace terraformer
 	ridge_tree_branch_sequence
 	generate_branches(
 		ridge_tree_branch_seed_sequence const& branch_points,
-		span<ridge_tree_trunk const> trunks,
+		span_2d<float const> current_heightmap,
 		float pixel_size,
 		ridge_tree_branch_displacement_description const& curve_desc,
 		random_generator& rng,
 		float d_max,
-		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{});
+		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{}
+	);
 
-	void trim_at_intersect(span<displaced_curve> a, span<displaced_curve> b, float threshold);
+	terraformer::displaced_curve::index_type
+	find_intersection(
+		displaced_curve const& first,
+		displaced_curve const& second,
+		float collision_margin
+	);
+
+	struct trim_params
+	{
+		span<displaced_curve> curves;
+		span<float const> collision_margins;
+	};
+
+	void trim_at_intersect(trim_params const& a_params, trim_params const& b_params);
+
 
 	struct ridge_tree_stem_collection
 	{
@@ -238,18 +214,21 @@ namespace terraformer
 		ridge_tree_branch_sequence right;
 	};
 
+	void trim_at_intersct(
+		span<ridge_tree_stem_collection> stem_collections
+	);
+
 	struct ridge_tree_branch_growth_description
 	{
 		float max_length;
-		float min_neighbour_distance;
 	};
 
 	single_array<ridge_tree_stem_collection>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
-		span<ridge_tree_trunk const> trunks,
+		span_2d<float const> current_heightmap,
 		float pixel_size,
-		ridge_tree_branch_displacement_description const &curve_desc,
+		ridge_tree_branch_displacement_description const& curve_desc,
 		random_generator& rng,
 		ridge_tree_branch_growth_description growth_params
 	);

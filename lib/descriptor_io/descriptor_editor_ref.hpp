@@ -39,6 +39,30 @@ namespace terraformer
 		resource_reference<vtable> m_handle;
 	};
 
+	template<class Lhs>
+	struct assign_traits
+	{
+		template<class Rhs>
+		static void assign(Lhs& lhs, Rhs&& rhs)
+		{ lhs = static_cast<Lhs>(std::move(rhs)); }
+
+		template<class Rhs>
+		static auto convert_to(Lhs const& lhs)
+		{ return static_cast<Rhs>(lhs); }
+	};
+
+	template<>
+	struct assign_traits<geosimd::turn_angle>
+	{
+		static void assign(geosimd::turn_angle& lhs, float rhs)
+		{ lhs = geosimd::turn_angle{geosimd::turns{rhs}}; }
+
+		template<class Rhs>
+		requires(std::is_same_v<Rhs, float>)
+		static auto convert_to(geosimd::turn_angle const& lhs)
+		{ return static_cast<float>(to_turns(lhs).value); }
+	};
+
 	class descriptor_editor_ref
 	{
 	public:
@@ -91,10 +115,10 @@ namespace terraformer
 			explicit assigner(Lhs& lhs):
 				m_lhs{&lhs},
 				m_do_assign{[](void* lhs, Rhs&& rhs){
-					*static_cast<Lhs*>(lhs) = Lhs{std::move(rhs)};
+					assign_traits<Lhs>::assign(*static_cast<Lhs*>(lhs), std::move(rhs));
 				}},
 				m_get_value{[](void const* lhs) -> Rhs{
-					return static_cast<Rhs>(*static_cast<Lhs const*>(lhs));
+					return assign_traits<Lhs>::template convert_to<Rhs>(*static_cast<Lhs const*>(lhs));
 				}}
 			{}
 

@@ -2,6 +2,7 @@
 
 #include "./polynomial.hpp"
 
+#include "lib/common/spaces.hpp"
 #include <testfwk/testfwk.hpp>
 
 TESTCASE(terraformer_polynomial_degree_value_derivative)
@@ -71,4 +72,26 @@ TESTCASE(terraformer_polynomial_multiply)
 	EXPECT_EQ(p4.coefficients[1], 3.0f);
 	EXPECT_EQ(p4.coefficients[2], 3.0f);
 	EXPECT_EQ(p4.coefficients[3], 1.0f);
+}
+
+TESTCASE(terraformer_polynomial_multiply_vectors_coeffs)
+{
+	terraformer::polynomial const p1{
+		terraformer::displacement{1.0f, 2.0f, 3.0f},
+		terraformer::displacement{2.0f, 3.0f, 1.0f}
+	};
+
+	terraformer::polynomial const p2{
+		terraformer::displacement{1.0f, 2.0f, 3.0f},
+		terraformer::displacement{2.0f, 3.0f, 1.0f}
+	};
+
+	auto const p3 = multiply(p1, p2, [](auto a, auto b){
+		return inner_product(a, b);
+	});
+
+	EXPECT_EQ(p3.degree(), 2);
+	EXPECT_EQ(p3.coefficients[0], 14.0f);
+	EXPECT_EQ(p3.coefficients[1], 22.0f);
+	EXPECT_EQ(p3.coefficients[2], 14.0f);
 }

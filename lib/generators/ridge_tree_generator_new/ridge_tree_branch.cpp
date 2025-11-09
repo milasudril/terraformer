@@ -2,7 +2,9 @@
 
 #include "./ridge_tree_branch.hpp"
 
+#include "lib/curve_tools/displace.hpp"
 #include "lib/curve_tools/length.hpp"
+#include "lib/curve_tools/line_segment.hpp"
 #include "lib/math_utils/first_order_hp_filter.hpp"
 #include "lib/math_utils/second_order_lp_filter.hpp"
 
@@ -232,47 +234,9 @@ terraformer::single_array<float> terraformer::generate_elevation_profile(
 	return ret;
 }
 
-terraformer::displacement terraformer::compute_field(span<displaced_curve const> branches, location r, float min_distance)
-{
-	displacement ret{};
-
-	for(auto& branch : branches)
-	{
-		auto const points = branch.get<0>();
-		ret += terraformer::fold_over_line_segments(
-			points,
-			[](auto seg, auto point, auto d02, auto... prev) {
-				auto const p = closest_point(seg, point);
-				auto const d2 = distance_squared(p, point);
-				direction const r{p - point};
-				auto const l = length(seg);
-				return (prev + ... + (l*r*(d2<d02? 1.0f : d02/d2)));
-			},
-			r,
-			min_distance*min_distance
-		);
-	}
-
-	return ret;
-}
-
-terraformer::displacement terraformer::compute_field(
-	span<ridge_tree_trunk const> branch_infos,
-	location r,
-	float min_distance
-)
-{
-	displacement ret{};
-
-	for(auto& branch_info : branch_infos)
-	{ ret += compute_field(branch_info.branches.get<0>(), r, min_distance); }
-
-	return ret;
-}
-
 terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	ridge_tree_branch_seed_sequence const& branch_points,
-	span<ridge_tree_trunk const> trunks,
+	span_2d<float const> current_heightmap,
 	float pixel_size,
 	ridge_tree_branch_displacement_description const& curve_desc,
 	random_generator& rng,
@@ -283,82 +247,111 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	auto const normals = branch_points.get<1>();
 	auto const vertex_index = branch_points.get<2>();
 
-	fenv_t env;
-	feholdexcept(&env);
-	feenableexcept(FE_DIVBYZERO | FE_INVALID | FE_OVERFLOW);
-
 	for(auto k : branch_points.element_indices())
 	{
 		auto const base_curve = generate_branch_base_curve(
 			points[k],
 			normals[k],
-			trunks,
+			current_heightmap,
 			pixel_size,
 			[
 				d_max,
 				d = 0.0f,
-				loc_prev = points[k],
-				loc_prev_prev = points[k],
-				theta = 0.0f,
-				iter = size_t{0}
+				loc_prev = points[k]
 			](auto loc) mutable {
 				auto new_distance = d + distance(loc, loc_prev);
 				if(new_distance > d_max)
 				{ return true; }
 
-				if(iter >= 2)
-				{
-					auto const v01 = direction{loc_prev - loc_prev_prev};
-					auto const v12 = direction{loc - loc_prev};
-					theta += std::acos(std::clamp(inner_product(v01, v12), -1.0f, 1.0f));
-					if(std::abs(theta) >= std::numbers::pi_v<float>/3.0f)
-					{ return true;}
-				}
-
 				d = new_distance;
-				loc_prev_prev = loc_prev;
 				loc_prev = loc;
 
-				++iter;
 				return false;
 			}
 		);
 
-		if(std::size(base_curve).get() < 3)
+		if(std::size(base_curve.locations).get() < 3)
 		{
-			fprintf(stderr, "Warning: Curve %zu is to short\n", k.get());
+			gen_branches.push_back(
+				displaced_curve{},
+				1.0f,
+				vertex_index[k],
+				single_array<displaced_curve::index_type>{},
+				0.0f
+			);
 			continue;
 		}
 
-		array_size<float> const base_curve_length{static_cast<size_t>(curve_length(base_curve)/pixel_size) + 1};
+		array_size<float> const base_curve_length{
+			static_cast<size_t>(curve_length(base_curve.locations)/pixel_size) + 1
+		};
 		auto const offsets = generate(curve_desc, rng, base_curve_length, pixel_size);
 
 		auto displaced_curve = displace_xy(
-			base_curve,
+			base_curve.locations,
 			displacement_profile{
 				.offsets = offsets,
 				.sample_period = pixel_size,
 			}
 		);
 
-		auto integrated_curve_length = curve_running_length_xy(std::as_const(displaced_curve).points());
-
 		gen_branches.push_back(
 			std::move(displaced_curve),
+			base_curve.initial_height,
 			vertex_index[k],
 			single_array<displaced_curve::index_type>{},
-			std::move(integrated_curve_length)
+			0.0f
 		);
 	}
-
-	fesetenv(&env);
 
 	return gen_branches;
 }
 
-void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curve> b, float min_distance)
+terraformer::displaced_curve::index_type
+terraformer::find_intersection(
+	displaced_curve const& first,
+	displaced_curve const& second,
+	float collision_margin
+)
 {
-	auto const md2 = min_distance*min_distance;
+	auto const index_first = first.element_indices();
+	auto const index_second = second.element_indices();
+	auto const end = std::min(index_first.bound(), index_second.bound());
+	if(end == index_first.front())
+	{ return terraformer::displaced_curve::npos; }
+
+	auto const first_curve = first.input_points();
+	auto const second_curve = second.input_points();
+
+	auto k = index_first.front();
+	auto d2 = distance_squared(first_curve[k], second_curve[k]);
+	auto const d2_min = collision_margin*collision_margin;
+	++k;
+	for(; k != end; ++k)
+	{
+		auto const new_d2 = distance_squared(first_curve[k], second_curve[k]);
+
+		if(new_d2 < d2 && new_d2 < d2_min)
+		{ return k; }
+
+		d2 = new_d2;
+	}
+
+	return terraformer::displaced_curve::npos;
+}
+
+void terraformer::trim_at_intersect(
+	trim_params const& a_params,
+	trim_params const& b_params
+)
+{
+	assert(std::size(a_params.collision_margins).get() == std::size(a_params.curves).get());
+	assert(std::size(b_params.collision_margins).get() == std::size(b_params.curves).get());
+
+	auto const a = a_params.curves;
+	auto const b = b_params.curves;
+	auto const a_margins = a_params.collision_margins;
+	auto const b_margins = b_params.collision_margins;
 
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
@@ -384,25 +377,14 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-			auto const res = find_matching_pair(
-				a[src_index_k].get<0>(),
-				b[src_index_l].get<0>(),
-				[md2](auto const p1, auto const p2) {
-					auto const d2 = distance_squared(p1, p2);
-					if(d2 < md2)
-					{	return true; }
-					return false;
-				}
-			);
+			auto const margin_a = a_margins[array_index<float>{k.get()}];
+			auto const margin_b = b_margins[array_index<float>{l.get()}];
+			auto const cut_at = find_intersection(a[src_index_k], b[src_index_l], margin_a + margin_b);
+			if(cut_at == displaced_curve::npos)
+			{ continue; }
 
-			a_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[src_index_k].get<0>()), res.first)),
-				a_trim[k]
-			);
-			b_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[src_index_l].get<0>()), res.second)),
-				b_trim[l]
-			);
+			a_trim[k] = std::min(cut_at, a_trim[k]);
+			b_trim[l] = std::min(cut_at, b_trim[l]);
 		}
 	}
 
@@ -412,26 +394,18 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-
-			auto const res = find_matching_pair(
-				a[src_index_k].get<0>(),
-				a[src_index_l].get<0>(),
-				[md2](auto const p1, auto const p2) {
-					if(distance_squared(p1, p2) < md2)
-					{ return true; }
-					return false;
-				}
+			auto const margin_ak = a_margins[array_index<float>{k.get()}];
+			auto const margin_al= a_margins[array_index<float>{l.get()}];
+			auto const cut_at = find_intersection(
+				a[src_index_k],
+				a[src_index_l],
+				margin_ak + margin_al
 			);
+			if(cut_at == displaced_curve::npos)
+			{ continue; }
 
-			a_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[src_index_k].get<0>()), res.first)),
-				a_trim[k]
-			);
-
-			a_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(a[src_index_l].get<0>()), res.second)),
-				a_trim[l]
-			);
+			a_trim[k] = std::min(cut_at, a_trim[k]);
+			a_trim[l] = std::min(cut_at, a_trim[l]);
 		}
 	}
 
@@ -441,25 +415,19 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-
-			auto const res = find_matching_pair(
-				b[src_index_k].get<0>(),
-				b[src_index_l].get<0>(),
-				[md2](auto const p1, auto const p2) {
-					if(distance_squared(p1, p2) < md2)
-					{ return true; }
-					return false;
-				}
+			auto const margin_bk = b_margins[array_index<float>{k.get()}];
+			auto const margin_bl= b_margins[array_index<float>{l.get()}];
+			auto const cut_at = find_intersection(
+				b[src_index_k],
+				b[src_index_l],
+				margin_bk + margin_bl
 			);
 
-			b_trim[k] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[src_index_k].get<0>()), res.first)),
-				b_trim[k]
-			);
-			b_trim[l] = std::min(
-				static_cast<displaced_curve::index_type>(as_index(std::begin(b[src_index_l].get<0>()), res.second)),
-				b_trim[l]
-			);
+			if(cut_at == displaced_curve::npos)
+			{ continue; }
+
+			b_trim[k] = std::min(cut_at, b_trim[k]);
+			b_trim[l] = std::min(cut_at, b_trim[l]);
 		}
 	}
 
@@ -483,7 +451,7 @@ void terraformer::trim_at_intersect(span<displaced_curve> a, span<displaced_curv
 terraformer::single_array<terraformer::ridge_tree_stem_collection>
 terraformer::generate_branches(
 	std::span<ridge_tree_branch_seed_sequence_pair const> parents,
-	span<ridge_tree_trunk const> trunks,
+	span_2d<float const> current_heightmap,
 	float pixel_size,
 	ridge_tree_branch_displacement_description const& curve_desc,
 	random_generator& rng,
@@ -498,53 +466,94 @@ terraformer::generate_branches(
 	ridge_tree_stem_collection current_stem_collection{array_index<displaced_curve>{0}};
 	current_stem_collection.left = generate_branches(
 		parents[0].left,
-		trunks,
+		current_heightmap,
 		pixel_size,
 		curve_desc,
 		rng,
 		growth_params.max_length
 	);
-	span<displaced_curve> dummy{};
-	trim_at_intersect(current_stem_collection.left.get<0>(), dummy, growth_params.min_neighbour_distance);
 
 	for(size_t k = 1; k != std::size(parents); ++k)
 	{
 		current_stem_collection.right = generate_branches(
 			parents[k - 1].right,
-			trunks,
+			current_heightmap,
 			pixel_size,
 			curve_desc,
 			rng,
 			growth_params.max_length
 		);
 
-
-		auto left_branches = generate_branches(
-			parents[k].left,
-			trunks,
-			pixel_size,
-			curve_desc,
-			rng,
-			growth_params.max_length
-		);
-
-		trim_at_intersect(current_stem_collection.right.get<0>(), left_branches.get<0>(), growth_params.min_neighbour_distance);
 		ret.push_back(std::move(current_stem_collection));
 
 		current_stem_collection = ridge_tree_stem_collection{array_index<displaced_curve>{k}};
-		current_stem_collection.left = std::move(left_branches);
+		current_stem_collection.left = generate_branches(
+			parents[k].left,
+			current_heightmap,
+			pixel_size,
+			curve_desc,
+			rng,
+			growth_params.max_length
+		);
 	}
 
 	current_stem_collection.right = generate_branches(
 		parents.back().right,
-		trunks,
+		current_heightmap,
 		pixel_size,
 		curve_desc,
 		rng,
 		growth_params.max_length
 	);
-	trim_at_intersect(current_stem_collection.right.get<0>(), dummy, growth_params.min_neighbour_distance);
 
 	ret.push_back(std::move(current_stem_collection));
 	return ret;
+}
+
+void terraformer::trim_at_intersct(
+	span<terraformer::ridge_tree_stem_collection> stem_collections
+)
+{
+	if(stem_collections.empty())
+	{	return; };
+
+	auto current_stem_collection = &stem_collections.front();
+	auto left_stem_collection = &current_stem_collection->left;
+	ridge_tree_branch_sequence* right_stem_collection = nullptr;
+	trim_params dummy{};
+	trim_at_intersect(
+		trim_params{
+			.curves = left_stem_collection->get<0>(),
+			.collision_margins = left_stem_collection->get<4>()
+		},
+		dummy
+	);
+
+	for(auto k :stem_collections.element_indices(1))
+	{
+		right_stem_collection = &current_stem_collection->right;
+		current_stem_collection = &stem_collections[k];
+		left_stem_collection = &current_stem_collection->left;
+
+		trim_at_intersect(
+			trim_params{
+				.curves = right_stem_collection->get<0>(),
+				.collision_margins = right_stem_collection->get<4>()
+			},
+			trim_params{
+				.curves = left_stem_collection->get<0>(),
+				.collision_margins = left_stem_collection->get<4>()
+			}
+		);
+	}
+
+	right_stem_collection = &current_stem_collection->right;
+
+	trim_at_intersect(
+		trim_params{
+			.curves = right_stem_collection->get<0>(),
+			.collision_margins = right_stem_collection->get<4>()
+		},
+		dummy
+	);
 }

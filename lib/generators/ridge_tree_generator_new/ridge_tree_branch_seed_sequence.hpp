@@ -6,14 +6,15 @@
 #include "lib/curve_tools/displace.hpp"
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/descriptor_io/descriptor_editor_ref.hpp"
+#include <geosimd/angle.hpp>
 
 namespace terraformer
 {
-	struct ridge_tree_branch_seed_sequence : multi_array<location, direction, displaced_curve::index_type>
+	struct ridge_tree_branch_seed_sequence : multi_array<location, direction, displaced_curve::index_type, float>
 	{
-		using multi_array<location, direction, displaced_curve::index_type>::multi_array;
+		using multi_array<location, direction, displaced_curve::index_type, float>::multi_array;
 	};
-
 
 	struct ridge_tree_branch_seed_sequence_pair
 	{
@@ -21,12 +22,33 @@ namespace terraformer
 		ridge_tree_branch_seed_sequence right;
 	};
 
+	struct ridge_tree_brach_seed_sequence_boundary_point_descriptor
+	{
+		size_t branch_count = 0;
+		geosimd::turn_angle spread_angle{geosimd::turns{0.5f}};
+
+		bool operator==(ridge_tree_brach_seed_sequence_boundary_point_descriptor const&) const = default;
+		bool operator!=(ridge_tree_brach_seed_sequence_boundary_point_descriptor const&) const = default;
+
+		void bind(descriptor_editor_ref& descriptor_editor);
+	};
+
+	struct ridge_tree_branch_seed_collection_descriptor
+	{
+		ridge_tree_brach_seed_sequence_boundary_point_descriptor start_branches;
+		ridge_tree_brach_seed_sequence_boundary_point_descriptor end_brancehs;
+	};
+
 	ridge_tree_branch_seed_sequence_pair collect_ridge_tree_branch_seeds(
-		displaced_curve const& points
+		displaced_curve const& curves,
+		ridge_tree_branch_seed_collection_descriptor const& params
 	);
 
 	single_array<ridge_tree_branch_seed_sequence_pair>
-	collect_ridge_tree_branch_seeds(span<displaced_curve const> points);
+	collect_ridge_tree_branch_seeds(
+		span<displaced_curve const> curves,
+		ridge_tree_branch_seed_collection_descriptor const& params
+	);
 
 	single_array<displaced_curve::index_type> collect_branch_indices(ridge_tree_branch_seed_sequence_pair const& seq_pair);
 };

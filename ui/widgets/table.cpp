@@ -7,7 +7,18 @@ void terraformer::ui::widgets::table::record::append_pending_widgets()
 {
 	auto const& field_names =  m_parent.get().field_names();
 	if(std::size(m_widgets) != std::size(field_names).get())
-	{ throw std::runtime_error{"Table is missing fields"}; }
+	{
+		for(auto& item:m_parent.get().field_names())
+		{ printf("%s\n", reinterpret_cast<char const*>(item.value().data())); }
+		printf("-------");
+		for(auto& item:m_widgets)
+		{
+			printf("%s\n", reinterpret_cast<char const*>(item.first.data()));
+		}
+
+		throw std::runtime_error{"Table is missing fields"};
+
+	}
 
 	m_parent.get().append(std::ref(m_id_label), main::widget_geometry{});
 	for(auto& item :field_names)
@@ -24,14 +35,14 @@ void terraformer::ui::widgets::table::record::append_pending_widgets()
 		auto const ptr = ref.get_pointer();
 		auto const vt = ref.get_vtable();
 		vt.append_to(ptr, m_parent);
-		
+
 		auto const attribs = m_parent.get().get_attributes();
 		auto const last = attribs.element_indices().back();
 		if(i->second.expand_layout_cell)
 		{
 			puts("Cell should be expanded");
-			m_parent.get().layout.set_cell_size(last.get(), layouts::table::cell_size::expand{}); 
-			
+			m_parent.get().layout.set_cell_size(last.get(), layouts::table::cell_size::expand{});
+
 		}
 		if(i->second.maximize_widget)
 		{ puts("Widget should be maximized"); }

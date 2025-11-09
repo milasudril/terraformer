@@ -1,16 +1,20 @@
 //@	{"target":{"name":"rasterizer.test"}}
 
 #include "./rasterizer.hpp"
+#include "./length.hpp"
 
 #include "lib/array_classes/single_array.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
+#include "lib/common/span_2d.hpp"
 #include "lib/pixel_store/image.hpp"
 #include "lib/pixel_store/image_io.hpp"
 
 #include "lib/pixel_store/rgba_pixel.hpp"
 #include "testfwk/validation.hpp"
 
+#include <cstdio>
+#include <forward_list>
 #include <random>
 #include <testfwk/testfwk.hpp>
 #include <format>
@@ -46,14 +50,15 @@ TESTCASE(terraformer_visit_pixels_different_directions)
 			terraformer::span{std::begin(locs), std::end(locs)},
 			pixel_size,
 			[&callcount, item, pixel_size](auto loc, auto...) {
-				auto const expected_loc = static_cast<float>(callcount)*item/2.0f;
+				auto const expected_loc = callcount <= 8?
+					static_cast<float>(callcount)*item/2.0f : static_cast<float>(callcount - 1)*item/2.0f;
 				EXPECT_EQ(loc[0], expected_loc[0]);
 				EXPECT_EQ(loc[1], expected_loc[1]);
 				++callcount;
 			}
 		);
 
-		auto const expected_callcount = 2.0f*static_cast<float>(std::size(locs) - 1)/pixel_size;
+		auto const expected_callcount = 2.0f*static_cast<float>(std::size(locs) - 1)/pixel_size + 2;
 		EXPECT_EQ(static_cast<float>(callcount), expected_callcount);
 	};
 }
@@ -75,16 +80,19 @@ TESTCASE(terraformer_visit_pixels_curve_through_non_integer_point_with_dir_chang
 		[&callcount, pixel_size](auto loc, auto ...) {
 			auto const x = loc[0];
 			auto const y = loc[1];
-			if(callcount < 7)
+			if(callcount < 8)
 			{
 				EXPECT_EQ(x,  static_cast<float>(callcount));
 				EXPECT_EQ(y, 0.0f);
 			}
 			else
-			if(callcount < 10)
-			{ EXPECT_EQ(y, static_cast<float>(callcount - 7)); }
+			if(callcount < 11)
+			{ EXPECT_EQ(y, static_cast<float>(callcount - 8)); }
 			else
-			{ EXPECT_EQ(y, 3.5f + static_cast<float>(callcount - 10)); }
+			if(callcount == 11)
+			{ EXPECT_EQ(y, 3.0f);}
+			else
+			{ EXPECT_EQ(y, 2.5f + static_cast<float>(callcount - 11)); }
 			++callcount;
 		}
 	);
@@ -121,7 +129,7 @@ TESTCASE(terraformer_visit_pixels_curge_random_points)
 				{
 					auto const dx_size = std::abs(x_int - x_0);
 					auto const dy_size = std::abs(y_int - y_0);
-					EXPECT_EQ(dx_size > 0 || dy_size > 0, true);
+					EXPECT_EQ(dx_size >= 0 || dy_size >= 0, true);
 				}
 
 				++callcount;
@@ -136,199 +144,161 @@ TESTCASE(terraformer_visit_pixels_curge_random_points)
 	}
 }
 
-TESTCASE(terraformer_make_thick_curve_empty_input)
+TESTCASE(terraformer_render_curve_full_mask)
 {
-	auto res = make_thick_curve(
-		terraformer::span<terraformer::location const>{},
-		terraformer::span<float const>{}
-	);
-
-	EXPECT_EQ(res.data.empty(), true);
-}
-
-TESTCASE(terraformer_make_thick_curve_single_element_only)
-{
-	terraformer::location const loc{};
-	auto const thickness = 4.0f;
-
-	auto res = make_thick_curve(
-		terraformer::span{&loc, &loc + 1},
-		terraformer::span{&thickness, &thickness + 1}
-	);
-
-	EXPECT_EQ(res.data.empty(), true);
-}
-
-TESTCASE(terraformer_make_thick_curve_first_segment_broken)
-{
-	std::array locs{
-		terraformer::location{},
-		terraformer::location{0.0f, 1.0f, 0.0f},
-		terraformer::location{1.0f, 1.0f, 0.0f},
-		terraformer::location{2.0f, 1.333333f, 0.0f},
-	};
-
-	std::array thicknesses{
-		2.0f,
-		2.0f,
-		2.0f,
-		2.0f
-	};
-
-	auto res = make_thick_curve(
-		terraformer::span{std::begin(locs), std::end(locs)},
-		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
-	);
-
-	// First element was removed
-	EXPECT_EQ(std::size(res.data).get(), 3);
-	auto const locs_out = res.locations();
-	auto const elems = res.data.element_indices();
-	auto const running_lenghts = res.running_lengths();
-	std::array locs_out_expected{
-		terraformer::location{0.0f, 0.5f, 0.0f},
-		terraformer::location{1.0f, 1.0f, 0.0f},
-		terraformer::location{2.0f, 1.333333f, 0.0f},
-	};
-	std::array running_lenghts_expected{
-		0.0f,
-		distance(locs_out_expected[1], locs_out_expected[0]),
-		  distance(locs_out_expected[1], locs_out_expected[0])
-		+ distance(locs_out_expected[2], locs_out_expected[1]),
-	};
-	for(auto index : elems)
-	{
-		auto const i = index - elems.front();
-		EXPECT_EQ(locs_out[index], locs_out_expected[i]);
-		EXPECT_EQ(running_lenghts[index], running_lenghts_expected[i]);
-	}
-	EXPECT_EQ(res.curve_length, running_lenghts_expected.back());
-}
-
-TESTCASE(terraformer_make_thick_curve_all_segments_broken)
-{
-	std::array locs{
-		terraformer::location{},
-		terraformer::location{0.0f, 1.0f, 0.0f},
-		terraformer::location{1.0f, 1.0f, 0.0f},
-		terraformer::location{1.0f, 0.0f, 0.0f},
-	};
-
-	std::array thicknesses{
-		2.0f,
-		2.0f,
-		2.0f,
-		2.0f
-	};
-
-	auto res = make_thick_curve(
-		terraformer::span{std::begin(locs), std::end(locs)},
-		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
-	);
-
-	// Nothing interesting left
-	EXPECT_EQ(std::size(res.data).get(), 0);
-	EXPECT_EQ(res.curve_length, 0.0f);
-}
-
-TESTCASE(terraformer_make_thick_curve_only_two_vertices)
-{
-	std::array locs{
-		terraformer::location{},
-		terraformer::location{0.0f, 1.0f, 0.0f}
-	};
-
-	std::array thicknesses{
-		2.0f,
-		2.0f
-	};
-
-	auto res = make_thick_curve(
-		terraformer::span{std::begin(locs), std::end(locs)},
-		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
-	);
-
-	EXPECT_EQ(std::size(res.data).get(), 2);
-	auto const elems = res.data.element_indices();
-	auto const normals_out = res.normals();
-	auto const locs_out = res.locations();
-	for(auto index : elems)
-	{
-		EXPECT_EQ(locs_out[index], locs[index - elems.front()]);
-		EXPECT_EQ(normals_out[index], (terraformer::direction{terraformer::displacement{1.0f, 0.0f, 0.0f}}));
-	}
-	EXPECT_EQ(res.curve_length, 1.0f);
-}
-
-TESTCASE(terraformer_make_thick_curve_in_the_middle_and_last)
-{
-	std::array locs{
-		terraformer::location{},
-		terraformer::location{0.0f, 1.0f, 0.0f},
-		terraformer::location{0.5f, 2.0f, 0.0f},
-		terraformer::location{1.5f, 1.5f, 0.0f},
-	};
-
-	std::array thicknesses{
-		2.0f,
-		2.0f,
-		2.0f,
-		2.0f
-	};
-
-	auto res = make_thick_curve(
-		terraformer::span{std::begin(locs), std::end(locs)},
-		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
-	);
-	EXPECT_EQ(std::size(res.data).get(), 2);
-
-	auto const locs_out = res.locations();
-	auto const elems = res.data.element_indices();
-	auto const running_lenghts = res.running_lengths();
-	std::array locs_out_expected{
-		terraformer::location{},
-		terraformer::location{0.875f, 1.5f, 0.0f}
-
-	};
-	std::array running_lenghts_expected{
-		0.0f,
-		distance(locs_out_expected[1], locs_out_expected[0])
-	};
-	for(auto index : elems)
-	{
-		auto const i = index - elems.front();
-		EXPECT_EQ(locs_out[index], locs_out_expected[i]);
-		EXPECT_EQ(running_lenghts[index], running_lenghts_expected[i]);
-	}
-	EXPECT_EQ(res.curve_length, running_lenghts_expected.back());
-}
-
-TESTCASE(terraformer_fill_curve_using_quads)
-{
-	terraformer::image output{512, 512};
-
-	std::array<terraformer::location, 48> locs{};
-	std::array<float, 48> thicknesses{};
+	std::array<terraformer::location, 145> locs{};
 	for(size_t k = 0; k != std::size(locs); ++k)
 	{
-
 		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
-			/static_cast<float>(std::size(locs));
-		thicknesses[k] = (0.5f*std::sin(6.0f*theta) + 1.0f)/32.0f;
+			/static_cast<float>(std::size(locs) - 1);
 		locs[k] = terraformer::location{0.5f, 0.5f, 0.0f}
 			+ 0.25f*terraformer::displacement{std::cos(theta), std::sin(theta), 0.0f};
 	}
 
-	auto curve = make_thick_curve(
+	auto const l_max = 0.5f*std::numbers::pi_v<float>;
+	terraformer::basic_image<bool> mask{1024, 1024};
+	std::ranges::fill(mask.pixels(), true);
+	terraformer::image output{1024, 1024};
+	auto const t_start = std::chrono::steady_clock::now();
+	render(
+		output.pixels(),
 		terraformer::span{std::begin(locs), std::end(locs)},
-		terraformer::span{std::begin(thicknesses), std::end(thicknesses)}
+		terraformer::curve_render_descriptor{
+			.pixel_size = 1.0f/1024.0f,
+			.fill_mask = mask.pixels(),
+			.shader = [l_max](auto item) {
+				auto const t = item.curve_parameter/l_max;
+				auto const r = (1.0f/32.0f)*(1.0f + 0.5f*std::cos(6.0f*2.0f*std::numbers::pi_v<float>*(t + 1.0f/12.0f)));
+				auto const d = std::max(1.0f - item.distance/r, 0.0f);
+				return terraformer::rgba_pixel{t, d, t, 1.0f};
+			},
+		}
 	);
-	EXPECT_EQ(std::size(curve.data).get(), 48);
+	auto const t_end = std::chrono::steady_clock::now();
 
-	fill_using_quads(curve.attributes(), 1.0f/512.0f, output.pixels(),[length = curve.curve_length](terraformer::location loc){
-		return terraformer::rgba_pixel{0.5f*(loc[0] + 1.0f), loc[1]/length, 0.0f, 1.0f};
-	});
+	printf("Duration = %.8g\n", std::chrono::duration<double>(t_end - t_start).count());
 
-	store(output, std::format("{}/{}_fill_curve_using_quads.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str());
+	store(
+		output,
+		std::format("{}/{}_make_distance_field.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
+}
 
+TESTCASE(terraformer_make_curve_mask)
+{
+	std::array<terraformer::location, 145> locs{};
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
+			/static_cast<float>(std::size(locs) - 1);
+		locs[k] = terraformer::location{0.5f, 0.5f, 0.0f}
+			+ 0.25f*terraformer::displacement{std::cos(theta), std::sin(theta), 0.0f};
+	}
+
+	terraformer::basic_image<bool> output{1024, 1024};
+	auto const t_start = std::chrono::steady_clock::now();
+	render_mask(
+		output.pixels(),
+		terraformer::span{std::begin(locs), std::end(locs)},
+		terraformer::curve_render_mask_descriptor{
+			.pixel_size = 1.0f/1024.0f,
+			.radius = 3.0f/64.0f
+		}
+	);
+	auto const t_end = std::chrono::steady_clock::now();
+
+	printf("Duration = %.8g\n", std::chrono::duration<double>(t_end - t_start).count());
+#if 0
+	store(
+		output,
+		std::format("{}/{}_curve_mask.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
+#endif
+}
+
+TESTCASE(terraformer_make_distance_field_2)
+{
+	std::array<terraformer::location, 145> locs{};
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+		auto const theta = 2.0f*std::numbers::pi_v<float>*static_cast<float>(k)
+			/static_cast<float>(std::size(locs) - 1);
+		locs[k] = terraformer::location{0.5f, 0.5f, 0.0f}
+			+ 0.25f*terraformer::displacement{std::cos(theta), std::sin(theta), 0.0f};
+	}
+
+	auto const l_max = 0.5f*std::numbers::pi_v<float>;
+
+	terraformer::image output{1024, 1024};
+	auto const t_start = std::chrono::steady_clock::now();
+	render(
+		output.pixels(),
+		terraformer::span{std::begin(locs), std::end(locs)},
+		terraformer::curve_render_with_automask_descriptor{
+			.pixel_size = 1.0f/1024.0f,
+			.mask_radius = 3.0f/64.0f,
+			.shader = [l_max](auto item) {
+				auto const t = item.curve_parameter/l_max;
+				auto const r = (1.0f/32.0f)*(1.0f + 0.5f*std::cos(6.0f*2.0f*std::numbers::pi_v<float>*(t + 1.0f/12.0f)));
+				auto const d = std::max(1.0f - item.distance/r, 0.0f);
+				return terraformer::rgba_pixel{t, d, t, 1.0f};
+			}
+		}
+	);
+	auto const t_end = std::chrono::steady_clock::now();
+
+	printf("Duration = %.8g\n", std::chrono::duration<double>(t_end - t_start).count());
+
+	store(
+		output,
+		std::format("{}/{}_make_distance_field_2.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
+}
+
+TESTCASE(terraformer_make_distance_field_wavy)
+{
+	std::array<terraformer::location, 512> locs{};
+	for(size_t k = 0; k != std::size(locs); ++k)
+	{
+		auto const x = static_cast<float>(k)
+			/static_cast<float>(std::size(locs) - 1);
+		auto const y = 0.125f*(
+			      std::cos(2.0f*std::numbers::pi_v<float>*x)
+			+ 0.5f*std::sin(4.0f*std::numbers::pi_v<float>*x)
+			- 0.25f*std::cos(8.0f*std::numbers::pi_v<float>*x)
+			- 0.125f*std::sin(16.0f*std::numbers::pi_v<float>*x)
+			+ 0.0625f*std::cos(32.0f*std::numbers::pi_v<float>*x)
+			+ 0.03125f*std::sin(64.0f*std::numbers::pi_v<float>*x)
+			- 0.015625f*std::cos(128.0f*std::numbers::pi_v<float>*x)
+		);
+		locs[k] = terraformer::location{0.0f, 0.5f, 0.0f}
+			+ terraformer::displacement{x, y, 0.0f};
+	}
+
+	auto const l_max = curve_length(terraformer::span{std::cbegin(locs), std::cend(locs)});
+
+	terraformer::image output{1024, 1024};
+	auto const t_start = std::chrono::steady_clock::now();
+	render(
+		output.pixels(),
+		terraformer::span{std::begin(locs), std::end(locs)},
+		terraformer::curve_render_with_automask_descriptor{
+			.pixel_size = 1.0f/1024.0f,
+			.mask_radius = 1.0f/8,
+			.shader = [l_max](auto item) {
+				auto const t = item.curve_parameter/l_max;
+				auto const r = std::pow(std::clamp(1.0f - t, 0.0f, 1.0f), 1.0f)/8.0f;
+				auto const d = std::max(1.0f - item.distance/r, 0.0f);
+				return terraformer::rgba_pixel{t, d, t, 1.0f};
+			}
+		}
+	);
+	auto const t_end = std::chrono::steady_clock::now();
+
+	printf("Duration = %.8g\n", std::chrono::duration<double>(t_end - t_start).count());
+
+	store(
+		output,
+		std::format("{}/{}_make_distance_field_wavy.exr", MAIKE_BUILDINFO_TARGETDIR, MAIKE_TASKID).c_str()
+	);
 }

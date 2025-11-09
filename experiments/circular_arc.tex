@@ -1,0 +1,88 @@
+\documentclass[a4paper, 11pt]{scrartcl}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[intlimits]{amsmath}
+\usepackage{fixme}
+\usepackage{amssymb}
+\renewcommand{\vec}[1]{\boldsymbol{#1}}
+\newcommand{\grad}{\nabla}
+
+\title{Circular arc}
+\author{Torbjörn Rathsman}
+
+\begin{document}
+\maketitle
+
+A point $P$, at the angle $\theta$, on a circular arc with radius $r$ located at $O$ can be found by the the equation
+\[
+P(\theta) = O + r\left(\cos(\theta) \vec{\hat{x}} +  \sin(\theta) \vec{\hat{y}}\right)
+\]
+
+\section{The angle}
+Assume that the tangent vectors $\vec{\hat{t}}_0$ and $\vec{\hat{t}}_0$ at the points $P_0$ and $P_1$ corresponding to some unknown angles $\theta_0$ and $\theta_1$ respectively are known. That is
+
+\[
+\vec{\hat{t}}_0 = -\sin(\theta_0) \vec{\hat{x}} + \cos(\theta_0) \vec{\hat{y}}
+\]
+and
+\[
+\vec{\hat{t}}_1 = -\sin(\theta_1) \vec{\hat{x}} + \cos(\theta_1) \vec{\hat{y}}
+\]
+
+Notice that
+\[
+\begin{bmatrix}
+0 & 1\\
+-1 & 0
+\end{bmatrix}
+\begin{bmatrix}
+-\sin(\theta)\\
+ \cos(\theta)
+\end{bmatrix}
+=
+\begin{bmatrix}
+\cos(\theta)\\
+ \sin(\theta)
+\end{bmatrix}
+\]
+Therefore, $\cos(\theta)$ and $\sin(\theta)$ can be found by multiplying a tangent vector by the matrix
+\[
+R = \begin{bmatrix}
+0 & 1\\
+-1 & 0
+\end{bmatrix}
+\]
+
+\section{The origin and radius}
+Given $P_0$ and $P_1$, $O$ and $r$ should be determined. The system of equations that needs to be solved is
+\[
+\left\{
+ \begin{aligned}
+ P_0 &= O + r\left(\cos(\theta_0) \vec{\hat{x}} +  \sin(\theta_0) \vec{\hat{y}}\right) \\
+ P_1 &= O + r\left(\cos(\theta_1) \vec{\hat{x}} +  \sin(\theta_1) \vec{\hat{y}}\right) \\
+ \end{aligned}
+ \right.
+\]
+
+First, solve for $r$. By subtracting the equations
+\[
+ \overrightarrow{P_0P_1} = P_1 - P_0 = r\left(\left(\cos(\theta_1) - \cos(\theta_0)\right)\vec{\hat{x}}
+ + \left(\sin(\theta_1) - \sin(\theta_0)\right)\vec{\hat{y}} \right)
+\]
+Here, $r$ can be found from either the $x$ equation or $y$ equation. For best precision, the component which gives the largest denominator should be uses.
+
+When $r$ is known, $O$ can be found by substitution. That is
+\[
+\left\{
+\begin{aligned}
+ O_x &= x_0 - r\cos(\theta_0) = x_1 - r\cos(\theta_1)\\
+ O_y &= y_0 - r\sin(\theta_0) = y_1 - r\sin(\theta_1)
+\end{aligned}
+\right.
+\]
+If $x_0 - r\cos(\theta_0) \neq x_1 - r\cos(\theta_1)$ or $y_0 - r\sin(\theta_0) \neq y_1 - r\sin(\theta_1)$, this is not a circle.
+
+
+
+\end{document}

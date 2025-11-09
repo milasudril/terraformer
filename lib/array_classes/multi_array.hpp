@@ -196,6 +196,7 @@ namespace terraformer
 
 		template<size_t Index>
 		using attribute_type = std::tuple_element_t<Index, tuple<T...>>;
+		static constexpr index_type npos = index_type{static_cast<size_t>(-1)};
 
 		multi_array() noexcept = default;
 
