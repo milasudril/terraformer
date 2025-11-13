@@ -1,6 +1,6 @@
-//@	{"target": {"name":"./ridge_tree.o"}}
+//@	{"target": {"name":"./ridge_tree_trunk_curve.o"}}
 
-#include "./ridge_tree.hpp"
+#include "./ridge_tree_trunk_curve.hpp"
 #include "./ridge_tree_branch.hpp"
 
 #include "lib/common/rng.hpp"
@@ -9,6 +9,7 @@
 #include "lib/curve_tools/length.hpp"
 #include "lib/math_utils/interp.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
+#include "lib/curve_tools/displace.hpp"
 
 terraformer::ridge_tree_trunk terraformer::generate_trunk(
 	ridge_tree_trunk_curve const& params,
@@ -16,7 +17,8 @@ terraformer::ridge_tree_trunk terraformer::generate_trunk(
 	random_generator& rng
 )
 {
-	auto const trunk_e2e_distance = distance(params.begin.y, params.end.y);
+	auto const p = make_polynomial(params.begin, params.end);
+	auto const trunk_e2e_distance = curve_length(p, 0.0f, 1.0f, 1024.0f);
 	auto const trunk_pixel_size = get_min_pixel_size(horz_displacement_profile);
 
 	auto const trunk_pixel_count = static_cast<size_t>(trunk_e2e_distance/trunk_pixel_size);
@@ -29,24 +31,24 @@ terraformer::ridge_tree_trunk terraformer::generate_trunk(
 		1024.0f
 	);
 
-	auto const trunk_base_curve = make_point_array
-		(params.begin, params.end, trunk_pixel_count);
-		auto curve = displace_xy(
-			trunk_base_curve,
-			displacement_profile{
-				.offsets = trunk_offsets,
-				.sample_period = trunk_pixel_size
-			}
-		);
+	auto const trunk_base_curve = make_point_array<location>(p, trunk_pixel_count);
 
-		ridge_tree_branch_sequence root;
-		root.push_back(
-			std::move(curve),
-			1.0f,
-			displaced_curve::index_type{},
-			single_array<displaced_curve::index_type>{},
-			0.0f
-		);
+	auto curve = displace_xy(
+		trunk_base_curve,
+		displacement_profile{
+			.offsets = trunk_offsets,
+			.sample_period = trunk_pixel_size
+		}
+	);
+
+	ridge_tree_branch_sequence root;
+	root.push_back(
+		std::move(curve),
+		1.0f,
+		displaced_curve::index_type{},
+		single_array<displaced_curve::index_type>{},
+		0.0f
+	);
 
 	return ridge_tree_trunk{
 		.level = 0,

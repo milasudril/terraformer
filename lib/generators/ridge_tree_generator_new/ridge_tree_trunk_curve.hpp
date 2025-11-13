@@ -1,18 +1,15 @@
-//@	{"dependencies_extra":[{"ref":"./ridge_tree.o", "rel":"implementation"}]}
+//@	{"dependencies_extra":[{"ref":"./ridge_tree_trunk_curve.o", "rel":"implementation"}]}
 
-#ifndef TERRAFORMER_RIDGE_TREE_HPP
-#define TERRAFORMER_RIDGE_TREE_HPP
+#ifndef TERRAFORMER_RIDGE_TREE_TRUNK_CURVE_HPP
+#define TERRAFORMER_RIDGE_TREE_TRUNK_CURVE_HPP
 
 #include "./ridge_curve.hpp"
 #include "./ridge_tree_branch.hpp"
 
 #include "lib/array_classes/single_array.hpp"
-#include "lib/curve_tools/displace.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/span_2d.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
-
-#include <vector>
 
 namespace terraformer
 {

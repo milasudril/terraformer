@@ -1,7 +1,7 @@
 //@	{"target": {"name": "./ridge_tree_generator.o"}}
 
 #include "./ridge_tree_generator.hpp"
-#include "./ridge_tree.hpp"
+#include "./ridge_tree_trunk_curve.hpp"
 
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"

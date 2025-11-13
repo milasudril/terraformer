@@ -3,10 +3,11 @@
 #ifndef TERRAFORMER_RIDGE_TREE_GENERATOR_HPP
 #define TERRAFORMER_RIDGE_TREE_GENERATOR_HPP
 
+#include "./ridge_tree_branch_seed_sequence.hpp"
+#include "./ridge_tree_trunk_curve.hpp"
+
 #include "lib/common/spaces.hpp"
 #include "lib/generators/heightmap/heightmap_generator_context.hpp"
-#include "lib/generators/ridge_tree_generator_new/ridge_tree.hpp"
-#include "lib/generators/ridge_tree_generator_new/ridge_tree_branch_seed_sequence.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
 #include "lib/math_utils/trigfunc.hpp"
 #include "lib/pixel_store/image.hpp"
@@ -14,6 +15,7 @@
 #include "lib/common/bounded_value.hpp"
 #include "lib/common/utils.hpp"
 #include "lib/generators/domain/domain_size.hpp"
+
 #include <geosimd/angle.hpp>
 #include <numbers>
 
