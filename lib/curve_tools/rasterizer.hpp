@@ -99,13 +99,6 @@ namespace terraformer
 		{ return get<2>(); }
 	};
 
-	float curve_length(
-		polynomial<displacement, 3> const& curve,
-		float t_start,
-		float t_end,
-		size_t seg_count
-	);
-
 	spline_with_length make_spline_with_lengths(span<location const> curve);
 
 	single_array<polynomial<displacement, 3>> make_spline(span<location const> curve);

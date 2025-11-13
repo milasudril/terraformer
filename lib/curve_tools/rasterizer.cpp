@@ -11,28 +11,6 @@
 #include <geosimd/basic_vector.hpp>
 #include <cstdio>
 
-
-float terraformer::curve_length(
-	polynomial<displacement, 3> const& curve,
-	float t_start,
-	float t_end,
-	size_t seg_count
-)
-{
-	auto loc_start = location{} + curve(t_start);
-	auto const dt = (t_end - t_start)/static_cast<float>(seg_count);
-	auto ret = 0.0f;
-	for(size_t k = 1; k != seg_count + 1; ++k)
-	{
-		auto const t =  t_start + static_cast<float>(k)*dt;
-		auto const loc = location{} + curve(t);
-		ret += distance(loc, loc_start);
-		loc_start = loc;
-	};
-
-	return ret;
-}
-
 terraformer::spline_with_length
 terraformer::make_spline_with_lengths(span<location const> curve)
 {

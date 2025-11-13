@@ -1,6 +1,9 @@
 #ifndef TERRAFORMER_POLYNOMIAL_HPP
 #define TERRAFORMER_POLYNOMIAL_HPP
 
+#include "lib/array_classes/multi_array.hpp"
+#include "lib/array_classes/single_array.hpp"
+
 #include <array>
 #include <cstddef>
 #include <functional>
@@ -126,6 +129,61 @@ namespace terraformer
 			ret.coefficients[k] -= (k < std::size(b.coefficients))? b.coefficients[k] : Value{};
  		}
 
+		return ret;
+	}
+
+	template<class Vector, size_t Degree>
+	constexpr auto curve_length(
+		polynomial<Vector, Degree> const& curve,
+		float t_start,
+		float t_end,
+		size_t seg_count
+	)
+	{
+		auto v_0 = curve(t_start);
+		auto const dt = (t_end - t_start)/static_cast<float>(seg_count);
+		decltype(norm(v_0)) ret{};
+		for(size_t k = 1; k != seg_count + 1; ++k)
+		{
+			auto const t =  t_start + static_cast<float>(k)*dt;
+			auto const v = curve(t);
+			ret += norm(v - v_0);
+			v_0 = v;
+		};
+
+		return ret;
+	}
+
+	template<class Point, class Vector, size_t Degree>
+	auto make_point_array(polynomial<Vector, Degree> const& p, size_t count)
+	{
+		terraformer::multi_array<Point, float> points;
+		auto traveled_distance = 0.0f;
+		auto loc_prev = Point{} + p(0.0f);
+		points.push_back(loc_prev, traveled_distance);
+		auto const seg_count = static_cast<float>(count - 1);
+		for(size_t k = 1; k != count; ++k)
+		{
+			auto const t = static_cast<float>(k)/seg_count;
+			auto const loc = Point{} + p(t);
+			traveled_distance += distance(loc, loc_prev);
+			points.push_back(loc, traveled_distance);
+			loc_prev = loc;
+		}
+
+		auto const ds = traveled_distance/seg_count;
+		auto const attribs = points.attributes();
+		auto const t_vals = attribs.template get<1>();
+		auto const r_vals = attribs.template get<0>();
+		span const t_vals_span{std::begin(t_vals), std::end(t_vals)};
+		span const r_vals_span{std::begin(r_vals), std::end(r_vals)};
+
+		single_array ret{array_size<Point>{count}};
+		for(auto k : ret.element_indices())
+		{
+			auto const sample_at = ds*(static_cast<float>(k.get()) + 0.5f);
+			ret[k] = interp(t_vals_span, r_vals_span, sample_at);
+		}
 		return ret;
 	}
 }
