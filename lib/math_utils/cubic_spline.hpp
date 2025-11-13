@@ -55,14 +55,9 @@ namespace terraformer
 		return (2.0f - x)*(x + 1.0f)*(x + 1.0f)/4.0f;
 	}
 
-	template<class Point, class Vector>
-	auto make_point_array(
-		cubic_spline_control_point<Point, Vector> begin,
-		cubic_spline_control_point<Point, Vector>  end,
-		size_t count
-	)
+	template<class Point, class Vector, size_t Degree>
+	auto make_point_array(polynomial<Vector, Degree> const& p, size_t count)
 	{
-		auto const p = make_polynomial(begin, end);
 		terraformer::multi_array<Point, float> points;
 		auto traveled_distance = 0.0f;
 		auto loc_prev = Point{} + p(0.0f);
@@ -93,6 +88,14 @@ namespace terraformer
 		return ret;
 	}
 
+
+	template<class Point, class Vector>
+	auto make_point_array(
+		cubic_spline_control_point<Point, Vector> begin,
+		cubic_spline_control_point<Point, Vector>  end,
+		size_t count
+	)
+	{ return make_point_array<Point>(make_polynomial(begin, end), count); }
 }
 
 #endif
