@@ -370,7 +370,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			ridge_tree_branch_displacement_description{
 				.amplitude = horz_displacement.amplitude,
 				.wavelength = horz_displacement.wavelength,
-				.damping = horz_displacement.damping
+				.damping = horz_displacement.damping,
+				.attack_length = displacement_profiles[next_level_index - 1].wavelength
 			},
 			rng,
 			ridge_tree_branch_growth_description{

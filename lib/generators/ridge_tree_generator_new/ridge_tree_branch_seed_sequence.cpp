@@ -43,7 +43,7 @@ terraformer::ridge_tree_branch_seed_sequence_pair terraformer::collect_ridge_tre
 		}
 	}
 
-	auto const x_intercepts = terraformer::find_zeros(offsets, 1.0f/128.0f);
+	auto const x_intercepts = terraformer::find_zeros(offsets, 1.0f/8.0f);
 	auto side = x_intercepts.first_value >= 0.0f ? 1.0f : -1.0f;
 	size_t l = 0;
 	if(l != std::size(x_intercepts.zeros) && x_intercepts.zeros[l] == 0)

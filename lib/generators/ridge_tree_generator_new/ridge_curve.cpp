@@ -60,8 +60,8 @@ terraformer::single_array<float> terraformer::generate(
 		--warmup_count;
 	}
 
-	auto envelope = [wavelength = src.attack_length.value_or(src.wavelength)](float x){
-		auto const t = x/(wavelength);
+	auto envelope = [attack_length = src.attack_length.value_or(src.wavelength)](float x){
+		auto const t = x/(attack_length);
 		return t < 1.0f ?
 			interp(
 				cubic_spline_control_point{
