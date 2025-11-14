@@ -15,7 +15,8 @@ terraformer::single_array<float> terraformer::generate(
 	random_generator& rng,
 	array_size<float> seg_count,
 	float dx,
-	float warmup_periods)
+	float warmup_periods
+)
 {
 	single_array<float> ret;
 	ret.resize(seg_count);
@@ -59,7 +60,7 @@ terraformer::single_array<float> terraformer::generate(
 		--warmup_count;
 	}
 
-	auto envelope = [wavelength = src.wavelength](float x){
+	auto envelope = [wavelength = src.attack_length.value_or(src.wavelength)](float x){
 		auto const t = x/(wavelength);
 		return t < 1.0f ?
 			interp(

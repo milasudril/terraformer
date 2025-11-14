@@ -17,6 +17,7 @@ namespace terraformer
 		float amplitude;
 		float wavelength;
 		float damping;
+		std::optional<float> attack_length = std::nullopt;
 	};
 
 	inline constexpr float get_min_pixel_size(ridge_tree_branch_displacement_description const& item)

@@ -33,8 +33,6 @@
 
 // TODO:
 //
-// * Check displacement amplitude becomes zero for an arc.
-//
 // * Branch trimming within begin/endpoint branches. Currently there is no check because of left/right
 //   separation.
 //
