@@ -402,3 +402,12 @@ TESTCASE(terraformer_scientific_to_natural_correct_input)
 		EXPECT_EQ(res5, "-0.0325645");
 	}
 }
+
+TESTCASE(terraformer_make_unique_handle)
+{
+	auto x = std::make_unique<int>(124);
+	auto ptr = x.get();
+	auto handle = terraformer::make_unique_handle(std::move(x));
+	EXPECT_EQ(handle.get(), ptr);
+	EXPECT_EQ(x.get(), nullptr);
+}

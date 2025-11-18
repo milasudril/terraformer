@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <functional>
 #include <string_view>
+#include <memory>
 
 namespace terraformer
 {
@@ -260,6 +261,21 @@ namespace terraformer
 		auto const wavelength = wave.wavelength;
 		auto const hf_rolloff = wave.hf_rolloff;
 		return wavelength*std::pow(amplitude/a_0, -1.0f/hf_rolloff)/2.0f;
+	}
+
+	using unique_handle = std::unique_ptr<void const, void(*)(void const*)>;
+
+	template<class T, class Deleter>
+	requires(std::is_empty_v<Deleter>)
+	unique_handle make_unique_handle(std::unique_ptr<T, Deleter> ptr)
+	{
+		return unique_handle{
+			ptr.release(),
+			[](void const* obj) {
+				using element_type = typename std::unique_ptr<T, Deleter>::element_type;
+				Deleter{}(static_cast<element_type*>(const_cast<void*>(obj)));
+			}
+		};
 	}
 }
 
