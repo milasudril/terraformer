@@ -54,7 +54,7 @@ void terraformer::make_filter_output(
 	}
 }
 
-terraformer::batch_result<void> terraformer::apply_filter(
+terraformer::filter_2d_job terraformer::apply_filter(
 	span_2d<float const> input,
 	span_2d<float> filtered_output,
 	computation_context& comp_ctxt,
@@ -96,12 +96,16 @@ terraformer::batch_result<void> terraformer::apply_filter(
 		dft_direction::backward
 	).wait();
 
-	return process_scanlines(
-		filtered_output,
-		comp_ctxt.workers,
-		[]<class ... Args>(Args&&... args){
-			make_filter_output(std::forward<Args>(args)...);
-		},
-		std::as_const(filter_input).pixels()
-	);
+	auto fip = std::as_const(filter_input).pixels();
+	return filter_2d_job{
+		process_scanlines(
+			filtered_output,
+			comp_ctxt.workers,
+			[]<class ... Args>(Args&&... args){
+				make_filter_output(std::forward<Args>(args)...);
+			},
+			fip
+		),
+		filter_input.take_buffer()
+	};
 }

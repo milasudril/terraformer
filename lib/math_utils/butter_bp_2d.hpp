@@ -27,7 +27,7 @@ namespace terraformer
 		butter_bp_2d_descriptor const& params
 	);
 
-	inline batch_result<void> apply(
+	inline auto apply(
 		span_2d<float const> input,
 		span_2d<float> filtered_output,
 		computation_context& comp_ctxt,

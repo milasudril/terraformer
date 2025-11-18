@@ -96,6 +96,8 @@ namespace terraformer
 
 		bool has_pixels() const { return m_data != nullptr; }
 
+		auto take_buffer() { return make_unique_handle(std::move(m_data)); }
+
 	private:
 		IndexType m_width{0};
 		IndexType m_height{0};
