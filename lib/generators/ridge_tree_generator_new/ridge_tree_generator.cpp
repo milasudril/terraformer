@@ -36,8 +36,6 @@
 // * Branch trimming within begin/endpoint branches. Currently there is no check because of left/right
 //   separation.
 //
-// * Avoid branch early. Looks strange, especially at the root curve
-//
 // * Perhaps add longitudinal modulation
 //
 // * Multi-threading where possible
