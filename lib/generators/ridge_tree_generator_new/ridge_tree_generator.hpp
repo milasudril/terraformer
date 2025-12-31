@@ -210,15 +210,19 @@ namespace terraformer
 				.branch_count = 2,
 				.spread_angle = geosimd::turns{0.5f}
 			},
+#if 1
 			ridge_tree_brach_seed_sequence_boundary_point_descriptor{
 				.branch_count = 2,
 				.spread_angle = geosimd::turns{0.5f}
 			}
+#endif
 		};
 
 		std::array<ridge_tree_branch_growth_descriptor, num_levels - 1> branch_growth_params{
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 12884.0f},
+#if 1
 			ridge_tree_branch_growth_descriptor{.e2e_distance = 3072.0f}
+#endif
 		};
 
 		static constexpr auto default_trunk_horz_wavelength = 3.0f*2.0f*(1024.0f + 256.0f);
@@ -251,11 +255,13 @@ namespace terraformer
 				.wavelength = default_branch_1_horz_wavelength,
 				.damping = {}
 			},
+#if 1
 			ridge_tree_branch_horz_displacement_descriptor{
 				.amplitude = default_branch_2_horz_amplitude,
 				.wavelength = default_branch_2_horz_wavelength,
 				.damping = {}
 			}
+#endif
 		};
 
 		std::array<ridge_tree_height_profile_descriptor, num_levels> height_profile{
@@ -275,6 +281,7 @@ namespace terraformer
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_branch_1_noise_amplitude
 			},
+#if 1
 			ridge_tree_height_profile_descriptor{
 				.rel_half_thickness = 2.0f,
 				.rolloff_exponent = 2.0f,
@@ -283,6 +290,7 @@ namespace terraformer
 				.noise_hf_rolloff = 2.0f,
 				.noise_amplitude = default_branch_2_noise_amplitude
 			}
+#endif
 		};
 
 		bool operator==(ridge_tree_descriptor const&) const = default;

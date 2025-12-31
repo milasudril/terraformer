@@ -219,6 +219,9 @@ namespace terraformer
 	{
 		return t.template get<get_index_from_type<T, Args...>()>();
 	}
+
+	template<class T, class U = T>
+	using pair = std::pair<T, U>;
 }
 
 namespace std

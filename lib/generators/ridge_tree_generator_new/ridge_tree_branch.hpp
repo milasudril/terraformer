@@ -187,10 +187,21 @@ namespace terraformer
 		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{}
 	);
 
-	terraformer::displaced_curve::index_type
+	pair<displaced_curve::index_type>
+	find_intersection(pair<std::reference_wrapper<displaced_curve>> curves);
+
+	struct closest_points_result
+	{
+		pair<displaced_curve::index_type> indices;
+		float distance;
+	};
+
+	closest_points_result
+	closest_points(pair<std::reference_wrapper<displaced_curve>> curves);
+
+	pair<displaced_curve::index_type>
 	find_intersection(
-		displaced_curve const& first,
-		displaced_curve const& second,
+		pair<std::reference_wrapper<displaced_curve>> curves,
 		float collision_margin
 	);
 
