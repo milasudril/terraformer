@@ -147,7 +147,7 @@ namespace
 		assert(w >= 1);
 
 		terraformer::image ret{w, h};
-		auto const slice_count = 8.0f*params.rot_scale;
+		auto const slice_count = 16.0f*params.rot_scale;
 		auto const dy = static_cast<float>(input.height())/slice_count;
 
 		xsection_point_output_params const output_params{
