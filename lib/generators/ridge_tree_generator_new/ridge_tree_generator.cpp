@@ -36,6 +36,12 @@
 // * Branch trimming within begin/endpoint branches. Currently there is no check because of left/right
 //   separation.
 //
+// * Begin/endpoint spread angle should be noisy
+//
+// * Branch length should use correlated noise
+//
+// * Add directionality to branch length
+//
 // * Perhaps add longitudinal modulation
 //
 // * Multi-threading where possible
