@@ -267,7 +267,7 @@ namespace terraformer
 		std::array<ridge_tree_height_profile_descriptor, num_levels> height_profile{
 			ridge_tree_height_profile_descriptor{
 				.rel_half_thickness = 2.0f,
-				.rolloff_exponent = 2.0f,
+				.rolloff_exponent = 1.5f,
 				.noise_wavelength = default_trunk_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
@@ -275,7 +275,7 @@ namespace terraformer
 			},
 			ridge_tree_height_profile_descriptor{
 				.rel_half_thickness = 2.0f,
-				.rolloff_exponent = 2.0f,
+				.rolloff_exponent = 1.5f,
 				.noise_wavelength = default_branch_1_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
@@ -284,7 +284,7 @@ namespace terraformer
 #if 1
 			ridge_tree_height_profile_descriptor{
 				.rel_half_thickness = 2.0f,
-				.rolloff_exponent = 2.0f,
+				.rolloff_exponent = 1.5f,
 				.noise_wavelength = default_branch_2_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
