@@ -648,9 +648,9 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 
 	editor.create_float_input(
 		u8"Rel. height",
-		begin_height,
+		descriptor_editor_ref::assigner<float>{length_variability},
 		descriptor_editor_ref::knob_descriptor{
-			.value_map = type_erased_value_map{value_maps::log_value_map{0.25f, 4.0f, 2.0f}},
+			.value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}},
 			.textbox_placeholder_string = u8"0.123456789",
 			.visual_angle_range = std::nullopt
 		}
