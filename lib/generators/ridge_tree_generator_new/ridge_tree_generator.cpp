@@ -401,13 +401,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		trim_at_intersct(next_level);
 
-		ridge_tree_ridge_height_profile const current_height_profile{
-			.height = growth_params.begin_height,
-			.height_is_relative = true,
-			.relative_half_thickness = height_profile.rel_half_thickness,
-			.rolloff_exponent = height_profile.rolloff_exponent,
-		};
-
+		std::uniform_real_distribution heightmod{-1.0f, std::nextafter(1.0f, 2.0f)};
 		grayscale_image tmp{w_img, h_img};
 		for(auto& stem: next_level)
 		{
@@ -423,6 +417,12 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
+				ridge_tree_ridge_height_profile const current_height_profile{
+					.height = growth_params.begin_height*(1.0f + growth_params.begin_height_variability*heightmod(rng)),
+					.height_is_relative = true,
+					.relative_half_thickness = height_profile.rel_half_thickness,
+					.rolloff_exponent = height_profile.rolloff_exponent,
+				};
 				fill_curve(tmp, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
 			}
 
@@ -438,6 +438,12 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
+				ridge_tree_ridge_height_profile const current_height_profile{
+					.height = growth_params.begin_height*(1.0f + growth_params.begin_height_variability*heightmod(rng)),
+					.height_is_relative = true,
+					.relative_half_thickness = height_profile.rel_half_thickness,
+					.rolloff_exponent = height_profile.rolloff_exponent,
+				};
 				fill_curve(tmp, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size);
 			}
 		}
@@ -655,6 +661,16 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 			.visual_angle_range = std::nullopt
 		}
 	);
+
+		editor.create_float_input(
+		u8"Height variability",
+		descriptor_editor_ref::assigner<float>{begin_height_variability},
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
 }
 
 void terraformer::ridge_tree_height_profile_descriptor::bind(descriptor_editor_ref editor)
@@ -767,7 +783,8 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 					u8"E2E distance/m",
 					u8"Length variability",
 					u8"Length anisotropy",
-					u8"Rel. height"
+					u8"Rel. height",
+					u8"Height variability"
 				}
 			}
 		);
