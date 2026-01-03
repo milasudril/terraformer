@@ -156,7 +156,9 @@ namespace terraformer
 	struct ridge_tree_height_profile_descriptor
 	{
 		float rel_half_thickness = 2.0f;
-		float rolloff_exponent = 2.0f;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rel_half_thickness_variability;
+		float rolloff_exponent = 1.5f;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;;
 		float noise_wavelength = 1024.0f*2.0f*std::numbers::pi_v<float>;
 		float noise_lf_rolloff = 2.0f;
 		float noise_hf_rolloff = 2.0f;
@@ -177,17 +179,21 @@ namespace terraformer
 	struct ridge_tree_ridge_height_profile
 	{
 		float height;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f> height_variability;
 		bool height_is_relative;
 		float relative_half_thickness;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rel_half_thickness_variability;;
 		float rolloff_exponent;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;;
 	};
 
-	void fill_curve(
+	void fill_curves(
 		span_2d<float> pixels,
 		span_2d<float const> pixels_in,
 		ridge_tree_trunk const& trunk,
 		ridge_tree_ridge_height_profile const& elev_profile,
-		float pixel_size
+		float pixel_size,
+		random_generator& rng
 	);
 
 	struct ridge_tree_elevation_modulation
@@ -199,7 +205,7 @@ namespace terraformer
 	inline constexpr float get_min_pixel_size(ridge_tree_height_profile_descriptor const& item)
 	{
 		return get_min_pixel_size(
-			terraformer::wave_descriptor{
+			wave_descriptor{
 				.amplitude = 1024.0f,
 				.wavelength = item.noise_wavelength,
 				.hf_rolloff = item.noise_hf_rolloff
@@ -294,7 +300,9 @@ namespace terraformer
 		std::array<ridge_tree_height_profile_descriptor, num_levels> height_profile{
 			ridge_tree_height_profile_descriptor{
 				.rel_half_thickness = 2.0f,
+				.rel_half_thickness_variability = {},
 				.rolloff_exponent = 1.5f,
+				.rolloff_exponent_variability = {},
 				.noise_wavelength = default_trunk_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
@@ -302,7 +310,9 @@ namespace terraformer
 			},
 			ridge_tree_height_profile_descriptor{
 				.rel_half_thickness = 2.0f,
+				.rel_half_thickness_variability = {},
 				.rolloff_exponent = 1.5f,
+				.rolloff_exponent_variability = {},
 				.noise_wavelength = default_branch_1_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
@@ -311,7 +321,9 @@ namespace terraformer
 #if 1
 			ridge_tree_height_profile_descriptor{
 				.rel_half_thickness = 2.0f,
+				.rel_half_thickness_variability = {},
 				.rolloff_exponent = 1.5f,
+				.rolloff_exponent_variability = {},
 				.noise_wavelength = default_branch_2_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
 				.noise_hf_rolloff = 2.0f,
