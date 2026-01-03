@@ -39,8 +39,6 @@
 //
 // * Begin/endpoint spread angle should be noisy
 //
-// * Branch length should use correlated noise
-//
 // * Perhaps add longitudinal modulation
 //
 // * Multi-threading where possible
@@ -387,6 +385,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					direction::prenormalized_tag{}
 				},
 				.anistropy_amount = growth_params.length_anisotropy.amount,
+				.length_variability = growth_params.length_variability,
 				.max_length = growth_params.e2e_distance
 			}
 		);
@@ -626,6 +625,16 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 		}
 	);
 
+	editor.create_float_input(
+		u8"Length variability",
+		descriptor_editor_ref::assigner<float>{length_variability},
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
+
 	auto length_anisotropy_form = editor.create_form(
 		descriptor_editor_ref::field_descriptor{
 			.label = u8"Length anisotropy"
@@ -754,6 +763,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"E2E distance/m",
+					u8"Length variability",
 					u8"Length anisotropy",
 					u8"Rel. height"
 				}

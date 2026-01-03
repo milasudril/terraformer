@@ -250,6 +250,8 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	auto const points = branch_points.get<0>();
 	auto const normals = branch_points.get<1>();
 	auto const vertex_index = branch_points.get<2>();
+	float length_var{growth_params.length_variability};
+	std::uniform_real_distribution branch_length_noise{-length_var, std::nextafter(length_var, 2.0f*length_var)};
 
 	for(auto k : branch_points.element_indices())
 	{
@@ -261,7 +263,9 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			pixel_size,
 			[
 				d_max = growth_params.max_length*(
-					1.0f + growth_params.anistropy_amount*inner_product(normal, growth_params.anistropy_direction)
+					  1.0f
+					+ 0.5f*growth_params.anistropy_amount*inner_product(normal, growth_params.anistropy_direction)
+					+ 0.5f*branch_length_noise(rng)
 				),
 				d = 0.0f,
 				loc_prev = points[k]
