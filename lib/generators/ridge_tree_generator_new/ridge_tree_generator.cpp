@@ -269,9 +269,11 @@ namespace
 		terraformer::random_generator& rng
 	)
 	{
+		auto const maxval = *std::ranges::max_element(image);
+		if(maxval == 0.0f)
+		{ return; }
 		auto noise = create_with_same_size(image);
 		make_filtered_noise(noise.pixels(), params, ctxt, rng);
-		auto const maxval = *std::ranges::max_element(image);
 		for(uint32_t y = 0; y != image.height(); ++y)
 		{
 			for(uint32_t x = 0; x != image.width(); ++x)
