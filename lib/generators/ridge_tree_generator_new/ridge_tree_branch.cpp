@@ -244,7 +244,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 	float pixel_size,
 	ridge_tree_branch_displacement_description const& curve_desc,
 	random_generator& rng,
-	float d_max,
+	ridge_tree_branch_growth_description const& growth_params,
 	ridge_tree_branch_sequence&& gen_branches)
 {
 	auto const points = branch_points.get<0>();
@@ -253,13 +253,16 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 
 	for(auto k : branch_points.element_indices())
 	{
+		auto const normal = normals[k];
 		auto const base_curve = generate_branch_base_curve(
 			points[k],
-			normals[k],
+			normal,
 			current_heightmap,
 			pixel_size,
 			[
-				d_max,
+				d_max = growth_params.max_length*(
+					1.0f + growth_params.anistropy_amount*inner_product(normal, growth_params.anistropy_direction)
+				),
 				d = 0.0f,
 				loc_prev = points[k]
 			](auto loc) mutable {
@@ -536,7 +539,7 @@ terraformer::generate_branches(
 	float pixel_size,
 	ridge_tree_branch_displacement_description const& curve_desc,
 	random_generator& rng,
-	ridge_tree_branch_growth_description growth_params
+	ridge_tree_branch_growth_description const& growth_params
 )
 {
 	single_array<ridge_tree_stem_collection> ret;
@@ -551,7 +554,7 @@ terraformer::generate_branches(
 		pixel_size,
 		curve_desc,
 		rng,
-		growth_params.max_length
+		growth_params
 	);
 
 	for(size_t k = 1; k != std::size(parents); ++k)
@@ -562,7 +565,7 @@ terraformer::generate_branches(
 			pixel_size,
 			curve_desc,
 			rng,
-			growth_params.max_length
+			growth_params
 		);
 
 		ret.push_back(std::move(current_stem_collection));
@@ -574,7 +577,7 @@ terraformer::generate_branches(
 			pixel_size,
 			curve_desc,
 			rng,
-			growth_params.max_length
+			growth_params
 		);
 	}
 
@@ -584,7 +587,7 @@ terraformer::generate_branches(
 		pixel_size,
 		curve_desc,
 		rng,
-		growth_params.max_length
+		growth_params
 	);
 
 	ret.push_back(std::move(current_stem_collection));

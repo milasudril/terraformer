@@ -3,6 +3,7 @@
 #include "./ridge_tree_generator.hpp"
 #include "./ridge_tree_trunk_curve.hpp"
 
+#include "lib/common/interval.hpp"
 #include "lib/common/rng.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/common/span_2d.hpp"
@@ -39,8 +40,6 @@
 // * Begin/endpoint spread angle should be noisy
 //
 // * Branch length should use correlated noise
-//
-// * Add directionality to branch length
 //
 // * Perhaps add longitudinal modulation
 //
@@ -366,7 +365,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		auto const& horz_displacement = displacement_profiles[next_level_index];
 		auto const& growth_params = branch_growth_params[next_level_index - 1];
 		auto const& height_profile = params.height_profile[next_level_index];
-
+		auto const anistropy_direction = 2.0f*std::numbers::pi_v<float>*growth_params.length_anisotropy.direction;
 		auto next_level = generate_branches(
 			next_level_seeds,
 			trace_input.pixels(),
@@ -379,6 +378,15 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			},
 			rng,
 			ridge_tree_branch_growth_description{
+				.anistropy_direction = direction{
+					displacement{
+						std::sin(anistropy_direction),
+						-std::cos(anistropy_direction),
+						0.0f
+					},
+					direction::prenormalized_tag{}
+				},
+				.anistropy_amount = growth_params.length_anisotropy.amount,
 				.max_length = growth_params.e2e_distance
 			}
 		);
@@ -581,6 +589,31 @@ void terraformer::ridge_tree_branch_horz_displacement_descriptor::bind(descripto
 	);
 }
 
+void terraformer::ridge_tree_branch_length_anisotropy_descriptor::bind(descriptor_editor_ref editor)
+{
+	editor.create_float_input(
+		u8"Direction",
+		direction,
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{-0.5f, 0.5f}},
+			.textbox_placeholder_string = u8"-0.123456789",
+			.visual_angle_range = closed_closed_interval<geosimd::turn_angle>{
+				geosimd::turns{0.0},
+				geosimd::turns{1.0}
+			}
+		}
+	);
+	editor.create_float_input(
+		u8"Amount",
+		descriptor_editor_ref::assigner<float>{amount},
+		descriptor_editor_ref::knob_descriptor{
+			.value_map = type_erased_value_map{value_maps::affine_value_map{0.0f, 1.0f}},
+			.textbox_placeholder_string = u8"0.123456789",
+			.visual_angle_range = std::nullopt
+		}
+	);
+}
+
 void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_ref editor)
 {
 	editor.create_float_input(
@@ -592,6 +625,15 @@ void terraformer::ridge_tree_branch_growth_descriptor::bind(descriptor_editor_re
 			.visual_angle_range = std::nullopt
 		}
 	);
+
+	auto length_anisotropy_form = editor.create_form(
+		descriptor_editor_ref::field_descriptor{
+			.label = u8"Length anisotropy"
+		},
+		descriptor_editor_ref::form_descriptor{
+		}
+	);
+	length_anisotropy.bind(length_anisotropy_form);
 
 	editor.create_float_input(
 		u8"Rel. height",
@@ -712,6 +754,7 @@ void terraformer::ridge_tree_descriptor::bind(descriptor_editor_ref editor)
 				.orientation = descriptor_editor_ref::widget_orientation::horizontal,
 				.field_names{
 					u8"E2E distance/m",
+					u8"Length anisotropy",
 					u8"Rel. height"
 				}
 			}

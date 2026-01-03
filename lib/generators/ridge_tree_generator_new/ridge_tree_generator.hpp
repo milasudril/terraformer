@@ -6,6 +6,7 @@
 #include "./ridge_tree_branch_seed_sequence.hpp"
 #include "./ridge_tree_trunk_curve.hpp"
 
+#include "lib/common/interval.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/generators/heightmap/heightmap_generator_context.hpp"
 #include "lib/math_utils/cubic_spline.hpp"
@@ -69,10 +70,22 @@ namespace terraformer
 		void bind(descriptor_editor_ref editor);
 	};
 
+	struct ridge_tree_branch_length_anisotropy_descriptor
+	{
+		float direction = 0.5f;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f> amount;
+
+		bool operator==(ridge_tree_branch_length_anisotropy_descriptor const&) const = default;
+		bool operator!=(ridge_tree_branch_length_anisotropy_descriptor const&) const = default;
+
+		void bind(descriptor_editor_ref editor);
+	};
+
 	struct ridge_tree_branch_growth_descriptor
 	{
 		float e2e_distance = 16384.0f;
 		float begin_height = 0.5f;
+		ridge_tree_branch_length_anisotropy_descriptor length_anisotropy;
 
 		bool operator==(ridge_tree_branch_growth_descriptor const&) const = default;
 		bool operator!=(ridge_tree_branch_growth_descriptor const&) const = default;
@@ -219,9 +232,15 @@ namespace terraformer
 		};
 
 		std::array<ridge_tree_branch_growth_descriptor, num_levels - 1> branch_growth_params{
-			ridge_tree_branch_growth_descriptor{.e2e_distance = 12884.0f},
+			ridge_tree_branch_growth_descriptor{
+				.e2e_distance = 12884.0f,
+				.length_anisotropy = ridge_tree_branch_length_anisotropy_descriptor{}
+			},
 #if 1
-			ridge_tree_branch_growth_descriptor{.e2e_distance = 3072.0f}
+			ridge_tree_branch_growth_descriptor{
+				.e2e_distance = 3072.0f,
+				.length_anisotropy = ridge_tree_branch_length_anisotropy_descriptor{}
+			}
 #endif
 		};
 

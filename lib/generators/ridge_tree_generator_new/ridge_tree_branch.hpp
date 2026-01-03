@@ -7,6 +7,7 @@
 #include "./ridge_tree_branch_seed_sequence.hpp"
 
 #include "lib/array_classes/single_array.hpp"
+#include "lib/common/bounded_value.hpp"
 #include "lib/common/spaces.hpp"
 #include "lib/modules/dimensions.hpp"
 #include "lib/common/rng.hpp"
@@ -176,6 +177,13 @@ namespace terraformer
 		return base_curve;
 	}
 
+	struct ridge_tree_branch_growth_description
+	{
+		direction anistropy_direction;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f> anistropy_amount;
+		float max_length;
+	};
+
 	ridge_tree_branch_sequence
 	generate_branches(
 		ridge_tree_branch_seed_sequence const& branch_points,
@@ -183,7 +191,7 @@ namespace terraformer
 		float pixel_size,
 		ridge_tree_branch_displacement_description const& curve_desc,
 		random_generator& rng,
-		float d_max,
+		ridge_tree_branch_growth_description const& growth_params,
 		ridge_tree_branch_sequence&& gen_branches = ridge_tree_branch_sequence{}
 	);
 
@@ -229,11 +237,6 @@ namespace terraformer
 		span<ridge_tree_stem_collection> stem_collections
 	);
 
-	struct ridge_tree_branch_growth_description
-	{
-		float max_length;
-	};
-
 	single_array<ridge_tree_stem_collection>
 	generate_branches(
 		std::span<ridge_tree_branch_seed_sequence_pair const> parents,
@@ -241,7 +244,7 @@ namespace terraformer
 		float pixel_size,
 		ridge_tree_branch_displacement_description const& curve_desc,
 		random_generator& rng,
-		ridge_tree_branch_growth_description growth_params
+		ridge_tree_branch_growth_description const& growth_params
 	);
 }
 
