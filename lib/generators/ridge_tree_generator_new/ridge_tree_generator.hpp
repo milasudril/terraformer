@@ -62,7 +62,7 @@ namespace terraformer
 			.branch_count = 2,
 			.spread_angle = geosimd::turn_angle{geosimd::turns{0.5f}}
 		};
-		float ridge_height = 2048.0f;
+		float ridge_height = 1536.0f;
 
 		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
 		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;
@@ -157,7 +157,7 @@ namespace terraformer
 	{
 		float rel_half_thickness = 2.0f;
 		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rel_half_thickness_variability;
-		float rolloff_exponent = 1.5f;
+		float rolloff_exponent = 1.25f;
 		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;;
 		float noise_wavelength = 1024.0f*2.0f*std::numbers::pi_v<float>;
 		float noise_lf_rolloff = 2.0f;
@@ -182,9 +182,9 @@ namespace terraformer
 		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f> height_variability;
 		bool height_is_relative;
 		float relative_half_thickness;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rel_half_thickness_variability;;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rel_half_thickness_variability;
 		float rolloff_exponent;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;
 	};
 
 	void fill_curves(
@@ -264,18 +264,18 @@ namespace terraformer
 			1.0f
 		);
 		static constexpr auto default_trunk_ridge_elevation = 2048.0f;
-		static constexpr auto default_trunk_noise_wavelength = default_trunk_horz_wavelength/std::numbers::phi_v<float>;
-		static constexpr auto default_trunk_noise_amplitude = 171.0f;
+		static constexpr auto default_trunk_noise_wavelength = 12884.0f;
+		static constexpr auto default_trunk_noise_amplitude = 299.0f;
 
 		static constexpr auto default_branch_1_horz_wavelength = 3072.0f;
 		static constexpr auto default_branch_1_horz_amplitude = wavelength_to_amplitude(default_branch_1_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_1_noise_wavelength = 0.5f*default_trunk_noise_wavelength;
-		static constexpr auto default_branch_1_noise_amplitude = 85.0f;
+		static constexpr auto default_branch_1_noise_amplitude = 0.5f*default_trunk_noise_amplitude;
 
 		static constexpr auto default_branch_2_horz_wavelength = 600.0f;
 		static constexpr auto default_branch_2_horz_amplitude = wavelength_to_amplitude(default_branch_2_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_2_noise_wavelength = 0.5f*default_branch_1_noise_wavelength;
-		static constexpr auto default_branch_2_noise_amplitude = 43.0f;
+		static constexpr auto default_branch_2_noise_amplitude = 0.5f*default_branch_1_noise_amplitude;
 
 		std::array<ridge_tree_branch_horz_displacement_descriptor, num_levels> horz_displacements{
 			ridge_tree_branch_horz_displacement_descriptor{
