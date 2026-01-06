@@ -194,8 +194,8 @@ namespace terraformer
 	struct ridge_tree_branch_growth_description
 	{
 		direction anistropy_direction;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f> anistropy_amount;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f> length_variability;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f> anistropy_amount;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f> length_variability;
 		float max_length;
 	};
 

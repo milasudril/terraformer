@@ -73,7 +73,7 @@ namespace terraformer
 	struct ridge_tree_branch_length_anisotropy_descriptor
 	{
 		float direction = 0.5f;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f> amount;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f> amount;
 
 		bool operator==(ridge_tree_branch_length_anisotropy_descriptor const&) const = default;
 		bool operator!=(ridge_tree_branch_length_anisotropy_descriptor const&) const = default;
@@ -84,7 +84,7 @@ namespace terraformer
 	struct ridge_tree_branch_growth_descriptor
 	{
 		float e2e_distance = 16384.0f;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f> length_variability;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f> length_variability;
 		ridge_tree_branch_length_anisotropy_descriptor length_anisotropy;
 		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.5f> begin_height;
 		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f> begin_height_variability;
@@ -248,7 +248,7 @@ namespace terraformer
 			},
 #if 1
 			ridge_tree_branch_growth_descriptor{
-				.e2e_distance = 3072.0f,
+				.e2e_distance = 3221.0f,
 				.length_variability = {},
 				.length_anisotropy = ridge_tree_branch_length_anisotropy_descriptor{},
 				.begin_height = {},

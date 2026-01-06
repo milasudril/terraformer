@@ -363,6 +363,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	auto current_trunk_index = trunks.element_indices().front();
 	auto const& branch_growth_params = params.branch_growth_params;
 	auto const& displacement_profiles = params.horz_displacements;
+	printf("Enter loop\n");
 	while(true)
 	{
 		if(current_trunk_index == std::size(trunks))
