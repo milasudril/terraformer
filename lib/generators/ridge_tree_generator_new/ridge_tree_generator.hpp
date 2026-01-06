@@ -158,7 +158,7 @@ namespace terraformer
 		float rel_half_thickness = 2.0f;
 		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rel_half_thickness_variability;
 		float rolloff_exponent = 1.25f;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;
 		float noise_wavelength = 1024.0f*2.0f*std::numbers::pi_v<float>;
 		float noise_lf_rolloff = 2.0f;
 		float noise_hf_rolloff = 2.0f;
@@ -178,11 +178,6 @@ namespace terraformer
 
 	struct ridge_tree_ridge_height_profile
 	{
-		float height;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f> height_variability;
-		bool height_is_relative;
-		float relative_half_thickness;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rel_half_thickness_variability;
 		float rolloff_exponent;
 		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;
 	};

@@ -334,12 +334,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		ret,
 		trunks.back(),
 		ridge_tree_ridge_height_profile{
-			.height = params.trunk.ridge_height,
-			.height_variability = bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.25f>{0.0f},
-			.height_is_relative = false,
-			.relative_half_thickness = trunk_height_profile.rel_half_thickness
-				*(trunk_height_profile.noise_amplitude + trunk_ridge_height)/trunk_ridge_height,
-			.rel_half_thickness_variability = trunk_height_profile.rel_half_thickness_variability,
 			.rolloff_exponent = trunk_height_profile.rolloff_exponent,
 			.rolloff_exponent_variability = trunk_height_profile.rolloff_exponent_variability
 		},
@@ -443,11 +437,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		trim_at_intersct(next_level);
 
 		ridge_tree_ridge_height_profile const current_height_profile{
-			.height = growth_params.begin_height,
-			.height_variability = growth_params.begin_height_variability,
-			.height_is_relative = true,
-			.relative_half_thickness = height_profile.rel_half_thickness,
-			.rel_half_thickness_variability = height_profile.rel_half_thickness_variability,
 			.rolloff_exponent = height_profile.rolloff_exponent,
 			.rolloff_exponent_variability = height_profile.rolloff_exponent_variability
 		};
