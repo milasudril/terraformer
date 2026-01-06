@@ -287,7 +287,8 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 				1.0f,
 				vertex_index[k],
 				single_array<displaced_curve::index_type>{},
-				curve_radius{}
+				curve_radius{},
+				ridge_height{}
 			);
 			continue;
 		}
@@ -310,7 +311,8 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			base_curve.initial_height,
 			vertex_index[k],
 			single_array<displaced_curve::index_type>{},
-			curve_radius{}
+			curve_radius{},
+			ridge_height{}
 		);
 	}
 

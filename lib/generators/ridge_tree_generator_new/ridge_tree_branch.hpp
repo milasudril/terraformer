@@ -93,15 +93,21 @@ namespace terraformer
 		return curve_radius{.value = a.value + b.value};
 	}
 
+	struct ridge_height
+	{
+		float value;
+	};
+
 	struct ridge_tree_branch_sequence :
-		multi_array<displaced_curve, float, displaced_curve::index_type, single_array<displaced_curve::index_type>, curve_radius>
+		multi_array<displaced_curve, float, displaced_curve::index_type, single_array<displaced_curve::index_type>, curve_radius, ridge_height>
 	{
 		using multi_array<
 			displaced_curve,
 			float,
 			displaced_curve::index_type,
 			single_array<displaced_curve::index_type>,
-			curve_radius
+			curve_radius,
+			ridge_height
 		>::multi_array;
 	};
 

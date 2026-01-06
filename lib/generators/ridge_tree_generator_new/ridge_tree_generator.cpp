@@ -214,6 +214,25 @@ namespace
 		}
 	}
 
+#if 0
+	template<class T>
+	void set_ridge_params(T const& stem, terraformer::ridge_height nominal_ridge_height, float nominal_radius)
+	{
+		auto initial_heights = stem.template get<1>();
+		auto curve_radii = stem.template get<4>();
+		auto ridge_heights = stem.template get<5>();
+		for(auto k : stem.element_indices())
+		{
+			auto const ridge_height = nominal_ridge_height;
+			ridge_heights[k] = ridge_height;
+			auto const end_radius = height_factor*initial_heights[k];
+			curve_radii[k] = terraformer::curve_radius{
+				.value = end_radius
+			};
+		}
+	}
+#endif
+
 	struct noise_params
 	{
 		float wavelength;
@@ -308,9 +327,15 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 	single_array<ridge_tree_trunk> trunks;
 	trunks.push_back(generate_trunk(dom_size, params.trunk.curve, params.horz_displacements.front(), rng));
-
 	auto const& trunk_height_profile = params.height_profile[0];
 	auto const trunk_ridge_height = params.trunk.ridge_height;
+	set_curve_radii(
+		trunks.back().branches.attributes(),
+		trunk_height_profile.rel_half_thickness*(
+			trunk_height_profile.noise_amplitude + trunk_ridge_height
+		)/trunk_ridge_height
+	);
+
 	std::uniform_real_distribution heightmod{-1.0f, std::nextafter(1.0f, 2.0f)};
 
 	fill_curves(
