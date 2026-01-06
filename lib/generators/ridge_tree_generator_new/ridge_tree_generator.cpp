@@ -37,6 +37,8 @@
 // * Branch trimming within begin/endpoint branches. Currently there is no check because of left/right
 //   separation.
 //
+// * Last pixel of branches should be filled using max-norm (Or 1-norm in case of endpoint branches)
+//
 // * Perhaps add longitudinal modulation
 //
 // * Multi-threading where possible
@@ -206,7 +208,9 @@ namespace
 		for(auto k : stem.element_indices())
 		{
 			auto const end_radius = height_factor*initial_heights[k];
-			collision_margins[k] = end_radius;
+			collision_margins[k] = terraformer::collision_margin{
+				.value = end_radius
+			};
 		}
 	}
 
@@ -403,6 +407,12 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		for(auto& stems : next_level)
 		{
 			// TODO: This loop must save actual half thickness values
+			// Compute height from growth_params.begin_height and growth_params.begin_height_variability
+			// Compute half_thickness from
+			//   height,
+			//   height_profile.rel_half_thickness
+			//   height_profile.rel_half_thickness_variability
+			//
 			auto const height_factor = growth_params.begin_height*height_profile.rel_half_thickness;
 			set_collision_margins(stems.left.attributes(), height_factor);
 			set_collision_margins(stems.right.attributes(), height_factor);

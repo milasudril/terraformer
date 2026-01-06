@@ -83,17 +83,25 @@ namespace terraformer
 		random_generator& rng
 	);
 
+	struct collision_margin
+	{
+		float value;
+	};
 
+	inline constexpr collision_margin operator+(collision_margin a, collision_margin b)
+	{
+		return collision_margin{.value = a.value + b.value};
+	}
 
 	struct ridge_tree_branch_sequence :
-		multi_array<displaced_curve, float, displaced_curve::index_type, single_array<displaced_curve::index_type>, float>
+		multi_array<displaced_curve, float, displaced_curve::index_type, single_array<displaced_curve::index_type>, collision_margin>
 	{
 		using multi_array<
 			displaced_curve,
 			float,
 			displaced_curve::index_type,
 			single_array<displaced_curve::index_type>,
-			float
+			collision_margin
 		>::multi_array;
 	};
 
@@ -211,13 +219,13 @@ namespace terraformer
 	pair<displaced_curve::index_type>
 	find_intersection(
 		pair<std::reference_wrapper<displaced_curve>> curves,
-		float collision_margin
+		collision_margin margin
 	);
 
 	struct trim_params
 	{
 		span<displaced_curve> curves;
-		span<float const> collision_margins;
+		span<collision_margin const> collision_margins;
 	};
 
 	void trim_at_intersect(trim_params const& a_params, trim_params const& b_params);

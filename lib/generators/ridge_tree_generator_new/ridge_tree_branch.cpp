@@ -287,7 +287,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 				1.0f,
 				vertex_index[k],
 				single_array<displaced_curve::index_type>{},
-				0.0f
+				collision_margin{}
 			);
 			continue;
 		}
@@ -310,7 +310,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			base_curve.initial_height,
 			vertex_index[k],
 			single_array<displaced_curve::index_type>{},
-			0.0f
+			collision_margin{}
 		);
 	}
 
@@ -389,14 +389,14 @@ terraformer::closest_points(pair<std::reference_wrapper<displaced_curve>> curves
 terraformer::pair<terraformer::displaced_curve::index_type>
 terraformer::find_intersection(
 	pair<std::reference_wrapper<displaced_curve>> curves,
-	float collision_margin
+	collision_margin margin
 )
 {
 	auto intersection = find_intersection(curves);
 	if(intersection.first == displaced_curve::npos || intersection.second == displaced_curve::npos)
 	{
 		auto const cpr = closest_points(curves);
-		if(cpr.indices == intersection || cpr.distance > collision_margin)
+		if(cpr.indices == intersection || cpr.distance > margin.value)
 		{ return intersection; }
 		intersection = cpr.indices;
 	}
@@ -410,7 +410,7 @@ terraformer::find_intersection(
 
 	auto const first_curve = curves.first.get().points();
 	auto const second_curve = curves.second.get().points();
-	auto const margin_squared = collision_margin*collision_margin;
+	auto const margin_squared = margin.value*margin.value;
 	auto const step_count = std::min(intersection.first, intersection.second);
 	for(size_t offset = 0; offset != step_count.get(); ++offset)
 	{
@@ -463,8 +463,8 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-			auto const margin_a = a_margins[array_index<float>{k.get()}];
-			auto const margin_b = b_margins[array_index<float>{l.get()}];
+			auto const margin_a = a_margins[array_index<collision_margin>{k.get()}];
+			auto const margin_b = b_margins[array_index<collision_margin>{l.get()}];
 			auto const cut_at = find_intersection(
 				pair{std::ref(a[src_index_k]), std::ref(b[src_index_l])},
 				margin_a + margin_b
@@ -483,8 +483,8 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-			auto const margin_ak = a_margins[array_index<float>{k.get()}];
-			auto const margin_al= a_margins[array_index<float>{l.get()}];
+			auto const margin_ak = a_margins[array_index<collision_margin>{k.get()}];
+			auto const margin_al= a_margins[array_index<collision_margin>{l.get()}];
 			auto const cut_at = find_intersection(
 				pair{std::ref(a[src_index_k]), std::ref(a[src_index_l])},
 				margin_ak + margin_al
@@ -503,8 +503,8 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-			auto const margin_bk = b_margins[array_index<float>{k.get()}];
-			auto const margin_bl= b_margins[array_index<float>{l.get()}];
+			auto const margin_bk = b_margins[array_index<collision_margin>{k.get()}];
+			auto const margin_bl= b_margins[array_index<collision_margin>{l.get()}];
 			auto const cut_at = find_intersection(
 				pair{std::ref(b[src_index_k]), std::ref(b[src_index_l])},
 				margin_bk + margin_bl
