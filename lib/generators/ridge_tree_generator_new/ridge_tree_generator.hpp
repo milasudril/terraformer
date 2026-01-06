@@ -189,7 +189,6 @@ namespace terraformer
 
 	void fill_curves(
 		span_2d<float> pixels,
-		span_2d<float const> pixels_in,
 		ridge_tree_trunk const& trunk,
 		ridge_tree_ridge_height_profile const& elev_profile,
 		float pixel_size,

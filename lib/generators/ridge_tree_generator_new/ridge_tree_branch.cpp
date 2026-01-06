@@ -433,13 +433,13 @@ void terraformer::trim_at_intersect(
 	trim_params const& b_params
 )
 {
-	assert(std::size(a_params.curve_radiuss).get() == std::size(a_params.curves).get());
-	assert(std::size(b_params.curve_radiuss).get() == std::size(b_params.curves).get());
+	assert(std::size(a_params.curve_radii).get() == std::size(a_params.curves).get());
+	assert(std::size(b_params.curve_radii).get() == std::size(b_params.curves).get());
 
 	auto const a = a_params.curves;
 	auto const b = b_params.curves;
-	auto const a_margins = a_params.curve_radiuss;
-	auto const b_margins = b_params.curve_radiuss;
+	auto const a_margins = a_params.curve_radii;
+	auto const b_margins = b_params.curve_radii;
 
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
@@ -613,7 +613,7 @@ void terraformer::trim_at_intersct(
 	trim_at_intersect(
 		trim_params{
 			.curves = left_stem_collection->get<0>(),
-			.curve_radiuss = left_stem_collection->get<4>()
+			.curve_radii = left_stem_collection->get<4>()
 		},
 		dummy
 	);
@@ -627,11 +627,11 @@ void terraformer::trim_at_intersct(
 		trim_at_intersect(
 			trim_params{
 				.curves = right_stem_collection->get<0>(),
-				.curve_radiuss = right_stem_collection->get<4>()
+				.curve_radii = right_stem_collection->get<4>()
 			},
 			trim_params{
 				.curves = left_stem_collection->get<0>(),
-				.curve_radiuss = left_stem_collection->get<4>()
+				.curve_radii = left_stem_collection->get<4>()
 			}
 		);
 	}
@@ -641,7 +641,7 @@ void terraformer::trim_at_intersct(
 	trim_at_intersect(
 		trim_params{
 			.curves = right_stem_collection->get<0>(),
-			.curve_radiuss = right_stem_collection->get<4>()
+			.curve_radii = right_stem_collection->get<4>()
 		},
 		dummy
 	);

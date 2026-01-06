@@ -126,7 +126,6 @@ float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& 
 
 void terraformer::fill_curves(
 	span_2d<float> pixels,
-	span_2d<float const> pixels_in,
 	ridge_tree_trunk const& trunk,
 	ridge_tree_ridge_height_profile const& elev_profile,
 	float pixel_size,
@@ -136,10 +135,9 @@ void terraformer::fill_curves(
 	auto const elems = trunk.branches.element_indices();
 	auto const attribs = trunk.branches.attributes();
 	auto const curves = attribs.get<0>();
+	auto const radii = attribs.get<4>();
+	auto const heights = attribs.get<5>();
 	auto const rolloff_exponent = elev_profile.rolloff_exponent;
-	auto const height_is_relative = elev_profile.height_is_relative;
-	auto const height_in = elev_profile.height;
-	auto const ridge_radius = elev_profile.relative_half_thickness/pixel_size;
 	std::uniform_real_distribution value_noise_gen{-1.0f, std::nextafter(1.0f, 2.0f)};
 	for(auto k : elems)
 	{
@@ -147,15 +145,9 @@ void terraformer::fill_curves(
 		if(curve.points().empty())
 		{ continue; }
 
-		auto const start_loc = (curve.points().front() - location{})/pixel_size;
-		auto const height =
-			height_in*(
-				height_is_relative?
-					interp(pixels_in, start_loc[0], start_loc[1], clamp_at_boundary{}) :
-					1.0f
-			)*(1.0f + elev_profile.height_variability*value_noise_gen(rng));
-
-		if(distance(curve.points().back(), curve.points().front()) <= ridge_radius*height)
+		auto const height = heights[k].value;
+		auto const ridge_radius = radii[k].value/pixel_size;
+		if(distance(curve.points().back(), curve.points().front()) <= ridge_radius)
 		{ continue; }
 
 		visit_pixels(
@@ -163,9 +155,7 @@ void terraformer::fill_curves(
 			pixel_size,
 			[
 				pixels,
-				ridge_radius = ridge_radius*(
-					1.0f + elev_profile.rel_half_thickness_variability*value_noise_gen(rng)
-				),
+				ridge_radius,
 				rolloff_exponent = rolloff_exponent
 					*std::exp2(elev_profile.rolloff_exponent_variability*value_noise_gen(rng)),
 				height
@@ -175,7 +165,7 @@ void terraformer::fill_curves(
 					loc,
 					tangent,
 					normal,
-					ridge_radius*height,
+					ridge_radius,
 					[
 						rolloff_exponent,
 						height
@@ -200,38 +190,38 @@ namespace
 		}
 	}
 
-	template<class T>
-	void set_curve_radii(T const& stem, float height_factor)
-	{
-		auto initial_heights = stem.template get<1>();
-		auto curve_radiuss = stem.template get<4>();
-		for(auto k : stem.element_indices())
-		{
-			auto const end_radius = height_factor*initial_heights[k];
-			curve_radiuss[k] = terraformer::curve_radius{
-				.value = end_radius
-			};
-		}
-	}
-
-#if 0
-	template<class T>
-	void set_ridge_params(T const& stem, terraformer::ridge_height nominal_ridge_height, float nominal_radius)
+	template<class T, class Rng>
+	void set_ridge_params(
+		T const& stem,
+		float nominal_ridge_radius,
+		float nominal_ridge_height,
+		float ridge_radius_variability,
+		float ridge_height_variability,
+		Rng& rng
+	)
 	{
 		auto initial_heights = stem.template get<1>();
 		auto curve_radii = stem.template get<4>();
 		auto ridge_heights = stem.template get<5>();
+		std::uniform_real_distribution noise_dist{-1.0f, std::nextafter(1.0f, 2.0f)};
 		for(auto k : stem.element_indices())
 		{
-			auto const ridge_height = nominal_ridge_height;
-			ridge_heights[k] = ridge_height;
-			auto const end_radius = height_factor*initial_heights[k];
+			auto const parent_ridge_height = initial_heights[k];
+			auto const ridge_height = nominal_ridge_height*(
+				1.0f + ridge_height_variability*noise_dist(rng)
+			)*parent_ridge_height;
+			auto const ridge_radius = nominal_ridge_radius*(
+				1.0f + ridge_radius_variability*noise_dist(rng)
+			)*ridge_height;
+
 			curve_radii[k] = terraformer::curve_radius{
-				.value = end_radius
+				.value = ridge_radius
+			};
+			ridge_heights[k] = terraformer::ridge_height{
+				.value = ridge_height
 			};
 		}
 	}
-#endif
 
 	struct noise_params
 	{
@@ -329,18 +319,19 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	trunks.push_back(generate_trunk(dom_size, params.trunk.curve, params.horz_displacements.front(), rng));
 	auto const& trunk_height_profile = params.height_profile[0];
 	auto const trunk_ridge_height = params.trunk.ridge_height;
-	set_curve_radii(
+	set_ridge_params(
 		trunks.back().branches.attributes(),
-		trunk_height_profile.rel_half_thickness*(
-			trunk_height_profile.noise_amplitude + trunk_ridge_height
-		)/trunk_ridge_height
+		trunk_height_profile.rel_half_thickness,
+		trunk_ridge_height,
+		trunk_height_profile.rel_half_thickness_variability,
+		0.0f,
+		rng
 	);
 
 	std::uniform_real_distribution heightmod{-1.0f, std::nextafter(1.0f, 2.0f)};
 
 	fill_curves(
 		ret,
-		span_2d<float const>{},
 		trunks.back(),
 		ridge_tree_ridge_height_profile{
 			.height = params.trunk.ridge_height,
@@ -431,16 +422,22 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 
 		for(auto& stems : next_level)
 		{
-			// TODO: This loop must save actual half thickness values
-			// Compute height from growth_params.begin_height and growth_params.begin_height_variability
-			// Compute half_thickness from
-			//   height,
-			//   height_profile.rel_half_thickness
-			//   height_profile.rel_half_thickness_variability
-			//
-			auto const height_factor = growth_params.begin_height*height_profile.rel_half_thickness;
-			set_curve_radii(stems.left.attributes(), height_factor);
-			set_curve_radii(stems.right.attributes(), height_factor);
+			set_ridge_params(
+				stems.left.attributes(),
+				height_profile.rel_half_thickness,
+				growth_params.begin_height,
+				height_profile.rel_half_thickness_variability,
+				growth_params.begin_height_variability,
+				rng
+			);
+			set_ridge_params(
+				stems.right.attributes(),
+				height_profile.rel_half_thickness,
+				growth_params.begin_height,
+				height_profile.rel_half_thickness_variability,
+				growth_params.begin_height_variability,
+				rng
+			);
 		}
 
 		trim_at_intersct(next_level);
@@ -469,7 +466,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 					}
 				);
 
-				fill_curves(tmp, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size, rng);
+				fill_curves(tmp, trunks.back(), current_height_profile, global_pixel_size, rng);
 			}
 
 			if(!stem.right.empty())
@@ -483,7 +480,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 						.side = ridge_tree_trunk::side::right
 					}
 				);
-				fill_curves(tmp, ret.pixels(), trunks.back(), current_height_profile, global_pixel_size, rng);
+				fill_curves(tmp, trunks.back(), current_height_profile, global_pixel_size, rng);
 			}
 		}
 		add(trace_input.pixels(), std::as_const(tmp).pixels());

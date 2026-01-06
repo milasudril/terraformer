@@ -231,7 +231,7 @@ namespace terraformer
 	struct trim_params
 	{
 		span<displaced_curve> curves;
-		span<curve_radius const> curve_radiuss;
+		span<curve_radius const> curve_radii;
 	};
 
 	void trim_at_intersect(trim_params const& a_params, trim_params const& b_params);
