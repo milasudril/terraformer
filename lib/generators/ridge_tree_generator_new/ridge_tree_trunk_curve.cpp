@@ -47,7 +47,7 @@ terraformer::ridge_tree_trunk terraformer::generate_trunk(
 		1.0f,
 		displaced_curve::index_type{},
 		single_array<displaced_curve::index_type>{},
-		collision_margin{}
+		curve_radius{}
 	);
 
 	return ridge_tree_trunk{

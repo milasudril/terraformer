@@ -287,7 +287,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 				1.0f,
 				vertex_index[k],
 				single_array<displaced_curve::index_type>{},
-				collision_margin{}
+				curve_radius{}
 			);
 			continue;
 		}
@@ -310,7 +310,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 			base_curve.initial_height,
 			vertex_index[k],
 			single_array<displaced_curve::index_type>{},
-			collision_margin{}
+			curve_radius{}
 		);
 	}
 
@@ -389,7 +389,7 @@ terraformer::closest_points(pair<std::reference_wrapper<displaced_curve>> curves
 terraformer::pair<terraformer::displaced_curve::index_type>
 terraformer::find_intersection(
 	pair<std::reference_wrapper<displaced_curve>> curves,
-	collision_margin margin
+	curve_radius margin
 )
 {
 	auto intersection = find_intersection(curves);
@@ -431,13 +431,13 @@ void terraformer::trim_at_intersect(
 	trim_params const& b_params
 )
 {
-	assert(std::size(a_params.collision_margins).get() == std::size(a_params.curves).get());
-	assert(std::size(b_params.collision_margins).get() == std::size(b_params.curves).get());
+	assert(std::size(a_params.curve_radiuss).get() == std::size(a_params.curves).get());
+	assert(std::size(b_params.curve_radiuss).get() == std::size(b_params.curves).get());
 
 	auto const a = a_params.curves;
 	auto const b = b_params.curves;
-	auto const a_margins = a_params.collision_margins;
-	auto const b_margins = b_params.collision_margins;
+	auto const a_margins = a_params.curve_radiuss;
+	auto const b_margins = b_params.curve_radiuss;
 
 	auto const outer_count = std::size(a);
 	auto const inner_count = std::size(b);
@@ -463,8 +463,8 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-			auto const margin_a = a_margins[array_index<collision_margin>{k.get()}];
-			auto const margin_b = b_margins[array_index<collision_margin>{l.get()}];
+			auto const margin_a = a_margins[array_index<curve_radius>{k.get()}];
+			auto const margin_b = b_margins[array_index<curve_radius>{l.get()}];
 			auto const cut_at = find_intersection(
 				pair{std::ref(a[src_index_k]), std::ref(b[src_index_l])},
 				margin_a + margin_b
@@ -483,8 +483,8 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-			auto const margin_ak = a_margins[array_index<collision_margin>{k.get()}];
-			auto const margin_al= a_margins[array_index<collision_margin>{l.get()}];
+			auto const margin_ak = a_margins[array_index<curve_radius>{k.get()}];
+			auto const margin_al= a_margins[array_index<curve_radius>{l.get()}];
 			auto const cut_at = find_intersection(
 				pair{std::ref(a[src_index_k]), std::ref(a[src_index_l])},
 				margin_ak + margin_al
@@ -503,8 +503,8 @@ void terraformer::trim_at_intersect(
 		{
 			array_index<displaced_curve> const src_index_k{k.get()};
 			array_index<displaced_curve> const src_index_l{l.get()};
-			auto const margin_bk = b_margins[array_index<collision_margin>{k.get()}];
-			auto const margin_bl= b_margins[array_index<collision_margin>{l.get()}];
+			auto const margin_bk = b_margins[array_index<curve_radius>{k.get()}];
+			auto const margin_bl= b_margins[array_index<curve_radius>{l.get()}];
 			auto const cut_at = find_intersection(
 				pair{std::ref(b[src_index_k]), std::ref(b[src_index_l])},
 				margin_bk + margin_bl
@@ -611,7 +611,7 @@ void terraformer::trim_at_intersct(
 	trim_at_intersect(
 		trim_params{
 			.curves = left_stem_collection->get<0>(),
-			.collision_margins = left_stem_collection->get<4>()
+			.curve_radiuss = left_stem_collection->get<4>()
 		},
 		dummy
 	);
@@ -625,11 +625,11 @@ void terraformer::trim_at_intersct(
 		trim_at_intersect(
 			trim_params{
 				.curves = right_stem_collection->get<0>(),
-				.collision_margins = right_stem_collection->get<4>()
+				.curve_radiuss = right_stem_collection->get<4>()
 			},
 			trim_params{
 				.curves = left_stem_collection->get<0>(),
-				.collision_margins = left_stem_collection->get<4>()
+				.curve_radiuss = left_stem_collection->get<4>()
 			}
 		);
 	}
@@ -639,7 +639,7 @@ void terraformer::trim_at_intersct(
 	trim_at_intersect(
 		trim_params{
 			.curves = right_stem_collection->get<0>(),
-			.collision_margins = right_stem_collection->get<4>()
+			.curve_radiuss = right_stem_collection->get<4>()
 		},
 		dummy
 	);

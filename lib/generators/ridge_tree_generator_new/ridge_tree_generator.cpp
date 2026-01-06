@@ -201,14 +201,14 @@ namespace
 	}
 
 	template<class T>
-	void set_collision_margins(T const& stem, float height_factor)
+	void set_curve_radii(T const& stem, float height_factor)
 	{
 		auto initial_heights = stem.template get<1>();
-		auto collision_margins = stem.template get<4>();
+		auto curve_radiuss = stem.template get<4>();
 		for(auto k : stem.element_indices())
 		{
 			auto const end_radius = height_factor*initial_heights[k];
-			collision_margins[k] = terraformer::collision_margin{
+			curve_radiuss[k] = terraformer::curve_radius{
 				.value = end_radius
 			};
 		}
@@ -414,8 +414,8 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			//   height_profile.rel_half_thickness_variability
 			//
 			auto const height_factor = growth_params.begin_height*height_profile.rel_half_thickness;
-			set_collision_margins(stems.left.attributes(), height_factor);
-			set_collision_margins(stems.right.attributes(), height_factor);
+			set_curve_radii(stems.left.attributes(), height_factor);
+			set_curve_radii(stems.right.attributes(), height_factor);
 		}
 
 		trim_at_intersct(next_level);
