@@ -223,7 +223,7 @@ namespace terraformer
 		std::array<ridge_tree_brach_seed_sequence_boundary_point_descriptor, num_levels - 1> endpoint_branches{
 			ridge_tree_brach_seed_sequence_boundary_point_descriptor{
 				.branch_count = 2,
-				.spread_angle = geosimd::turns{0.5f}
+				.spread_angle = geosimd::turns{2.0f/3.0f}
 			},
 #if 1
 			ridge_tree_brach_seed_sequence_boundary_point_descriptor{

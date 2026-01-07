@@ -34,6 +34,8 @@
 
 // TODO:
 //
+// * Branch trimming against uncles. "Left" children against k - 1. "Right" children against k + 1.
+//
 // * Branch trimming within begin/endpoint branches. Currently there is no check because of left/right
 //   separation.
 //
