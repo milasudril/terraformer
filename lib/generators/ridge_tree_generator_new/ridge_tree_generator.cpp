@@ -37,8 +37,6 @@
 // * Branch trimming within begin/endpoint branches. Currently there is no check because of left/right
 //   separation.
 //
-// * Last pixel of branches should be filled using max-norm (Or 1-norm in case of endpoint branches)
-//
 // * Perhaps add longitudinal modulation
 //
 // * Multi-threading where possible
