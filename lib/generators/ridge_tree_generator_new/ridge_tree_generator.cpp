@@ -34,8 +34,6 @@
 
 // TODO:
 //
-// * Branch trimming against uncles. "Left" children against k - 1. "Right" children against k + 1.
-//
 // * Branch trimming within begin/endpoint branches. Currently there is no check because of left/right
 //   separation.
 //
@@ -104,6 +102,12 @@ namespace
 			}
 		}
 	}
+#if 0
+	float smoothramp(float t)
+	{
+		return (1.0f - 0.5f*t)*(t*t*t);
+	}
+#endif
 }
 
 float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
@@ -434,7 +438,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			);
 		}
 
-		trim_at_intersct(next_level);
+		trim_at_intersct(next_level, std::as_const(current_trunk).branches.attributes());
 
 		ridge_tree_ridge_height_profile const current_height_profile{
 			.rolloff_exponent = height_profile.rolloff_exponent,

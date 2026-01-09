@@ -316,6 +316,8 @@ namespace terraformer
 			return span<sel_attribute_type, index_type, size_type>{ptr, ptr + m_size.get()};
 		}
 
+		using attributes_type = multi_span<T...>;
+
 		auto attributes() noexcept
 		{
 			return multi_span<T...>{
@@ -328,6 +330,8 @@ namespace terraformer
 				m_size
 			};
 		}
+
+		using const_attributes_type = multi_span<T const...>;
 
 		auto attributes() const noexcept
 		{

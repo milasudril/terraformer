@@ -211,7 +211,7 @@ namespace terraformer
 	);
 
 	pair<displaced_curve::index_type>
-	find_intersection(pair<std::reference_wrapper<displaced_curve>> curves);
+	find_intersection(pair<std::reference_wrapper<displaced_curve const>> curves);
 
 	struct closest_points_result
 	{
@@ -220,11 +220,11 @@ namespace terraformer
 	};
 
 	closest_points_result
-	closest_points(pair<std::reference_wrapper<displaced_curve>> curves);
+	closest_points(pair<std::reference_wrapper<displaced_curve const>> curves);
 
 	pair<displaced_curve::index_type>
 	find_intersection(
-		pair<std::reference_wrapper<displaced_curve>> curves,
+		pair<std::reference_wrapper<displaced_curve const>> curves,
 		curve_radius margin
 	);
 
@@ -236,6 +236,14 @@ namespace terraformer
 
 	void trim_at_intersect(trim_params const& a_params, trim_params const& b_params);
 
+	struct trim_against
+	{
+		std::reference_wrapper<displaced_curve const> curve;
+		struct curve_radius curve_radius;
+	};
+
+	void trim_at_intersect(trim_params const& a_params, trim_against const& trim_against);
+
 
 	struct ridge_tree_stem_collection
 	{
@@ -243,13 +251,15 @@ namespace terraformer
 			:parent_curve_index{_parent_curve_index}
 		{}
 
+		// Check: array_index from ridge_tree_branch_sequence?
 		array_index<displaced_curve> parent_curve_index;
 		ridge_tree_branch_sequence left;
 		ridge_tree_branch_sequence right;
 	};
 
 	void trim_at_intersct(
-		span<ridge_tree_stem_collection> stem_collections
+		span<ridge_tree_stem_collection> stem_collections,
+		ridge_tree_branch_sequence::const_attributes_type
 	);
 
 	single_array<ridge_tree_stem_collection>

@@ -320,7 +320,7 @@ terraformer::ridge_tree_branch_sequence terraformer::generate_branches(
 }
 
 terraformer::pair<terraformer::displaced_curve::index_type>
-terraformer::find_intersection(pair<std::reference_wrapper<displaced_curve>> curves)
+terraformer::find_intersection(pair<std::reference_wrapper<displaced_curve const>> curves)
 {
 	auto const first_curve = curves.first.get().points();
 	auto const second_curve = curves.second.get().points();
@@ -360,7 +360,7 @@ terraformer::find_intersection(pair<std::reference_wrapper<displaced_curve>> cur
 }
 
 terraformer::closest_points_result
-terraformer::closest_points(pair<std::reference_wrapper<displaced_curve>> curves)
+terraformer::closest_points(pair<std::reference_wrapper<displaced_curve const>> curves)
 {
 	// TODO: Consider spatial hashing
 	auto const first_curve = curves.first.get().points();
@@ -390,7 +390,7 @@ terraformer::closest_points(pair<std::reference_wrapper<displaced_curve>> curves
 
 terraformer::pair<terraformer::displaced_curve::index_type>
 terraformer::find_intersection(
-	pair<std::reference_wrapper<displaced_curve>> curves,
+	pair<std::reference_wrapper<displaced_curve const>> curves,
 	curve_radius margin
 )
 {
@@ -599,8 +599,28 @@ terraformer::generate_branches(
 	return ret;
 }
 
+void terraformer::trim_at_intersect(trim_params const& params, trim_against const& trim_against)
+{
+	assert(std::size(params.curve_radii).get() == std::size(params.curves).get());
+	auto const curves = params.curves;
+	auto const radii = params.curve_radii;
+
+	for(auto k : params.curves.element_indices())
+	{
+		auto cut_at = find_intersection(
+			pair{std::ref(curves[k]), std::ref(trim_against.curve)},
+			radii[array_index<curve_radius>{k.get()}] + trim_against.curve_radius
+		);
+		if(cut_at.first == displaced_curve::npos)
+		{ continue; }
+
+		params.curves[k].truncate_from(cut_at.first);
+	}
+}
+
 void terraformer::trim_at_intersct(
-	span<terraformer::ridge_tree_stem_collection> stem_collections
+	span<terraformer::ridge_tree_stem_collection> stem_collections,
+	ridge_tree_branch_sequence::const_attributes_type parents
 )
 {
 	if(stem_collections.empty())
@@ -618,11 +638,45 @@ void terraformer::trim_at_intersct(
 		dummy
 	);
 
+	auto const parent_curves = parents.get<0>();
+	auto const parent_radii = parents.get<4>();
+
 	for(auto k :stem_collections.element_indices(1))
 	{
 		right_stem_collection = &current_stem_collection->right;
+		{
+			ridge_tree_branch_sequence::index_type const parent_curve_index{
+				current_stem_collection->parent_curve_index.get()
+			};
+			trim_at_intersect(
+				trim_params{
+					.curves = right_stem_collection->get<0>(),
+					.curve_radii = right_stem_collection->get<4>()
+				},
+				trim_against{
+					.curve = std::ref(parent_curves[parent_curve_index + 1]),
+					.curve_radius = parent_radii[parent_curve_index + 1]
+				}
+			);
+		}
+
 		current_stem_collection = &stem_collections[k];
 		left_stem_collection = &current_stem_collection->left;
+		{
+			ridge_tree_branch_sequence::index_type const parent_curve_index{
+				current_stem_collection->parent_curve_index.get()
+			};
+			trim_at_intersect(
+				trim_params{
+					.curves = left_stem_collection->get<0>(),
+					.curve_radii = left_stem_collection->get<4>()
+				},
+				trim_against{
+					.curve = std::ref(parent_curves[parent_curve_index - 1]),
+					.curve_radius = parent_radii[parent_curve_index - 1]
+				}
+			);
+		}
 
 		trim_at_intersect(
 			trim_params{
