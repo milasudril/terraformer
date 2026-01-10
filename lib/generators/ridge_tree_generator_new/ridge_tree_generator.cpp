@@ -102,12 +102,11 @@ namespace
 			}
 		}
 	}
-#if 0
+
 	float smoothramp(float t)
 	{
-		return (1.0f - 0.5f*t)*(t*t*t);
+		return 2.0f*(1.0f - 0.5f*t)*(t*t*t);
 	}
-#endif
 }
 
 float terraformer::get_min_pixel_size(terraformer::ridge_tree_descriptor const& params)
@@ -150,7 +149,7 @@ void terraformer::fill_curves(
 		{ continue; }
 
 		auto const height = heights[k].value;
-		auto const ridge_radius = radii[k].value/pixel_size;
+		auto const ridge_radius = 2.0f*radii[k].value/(1.5f*pixel_size);
 		if(distance(curve.points().back(), curve.points().front()) <= ridge_radius)
 		{ continue; }
 
@@ -174,7 +173,7 @@ void terraformer::fill_curves(
 						rolloff_exponent,
 						height
 					](float r){
-						return height*std::pow(r, rolloff_exponent);
+						return height*std::pow(smoothramp(r), rolloff_exponent);
 					},
 					2.0f
 				);
@@ -325,7 +324,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 	auto const trunk_ridge_height = params.trunk.ridge_height;
 	set_ridge_params(
 		trunks.back().branches.attributes(),
-		trunk_height_profile.rel_half_thickness,
+		1.5f*trunk_height_profile.rel_half_thickness,
 		trunk_ridge_height,
 		trunk_height_profile.rel_half_thickness_variability,
 		0.0f,
@@ -420,7 +419,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		{
 			set_ridge_params(
 				stems.left.attributes(),
-				height_profile.rel_half_thickness,
+				1.5f*height_profile.rel_half_thickness,
 				growth_params.begin_height,
 				height_profile.rel_half_thickness_variability,
 				growth_params.begin_height_variability,
@@ -428,7 +427,7 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 			);
 			set_ridge_params(
 				stems.right.attributes(),
-				height_profile.rel_half_thickness,
+				1.5f*height_profile.rel_half_thickness,
 				growth_params.begin_height,
 				height_profile.rel_half_thickness_variability,
 				growth_params.begin_height_variability,

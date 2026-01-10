@@ -62,7 +62,9 @@ namespace terraformer
 			.branch_count = 2,
 			.spread_angle = geosimd::turn_angle{geosimd::turns{0.5f}}
 		};
-		float ridge_height = 1536.0f;
+		static constexpr auto default_ridge_base_height = 1536.0f;
+
+		float ridge_height = default_ridge_base_height;
 
 		bool operator==(ridge_tree_trunk_descriptor const&) const = default;
 		bool operator!=(ridge_tree_trunk_descriptor const&) const = default;
@@ -153,10 +155,13 @@ namespace terraformer
 		);
 	}
 
+	static constexpr auto default_rel_half_thickness_variability = 0.125f;
+
 	struct ridge_tree_height_profile_descriptor
 	{
 		float rel_half_thickness = 2.0f;
-		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rel_half_thickness_variability;
+		bounded_value<closed_closed_interval{0.0f, 1.0f}, default_rel_half_thickness_variability>
+			rel_half_thickness_variability;
 		float rolloff_exponent = 1.25f;
 		bounded_value<closed_closed_interval{0.0f, 1.0f}, 0.125f> rolloff_exponent_variability;
 		float noise_wavelength = 1024.0f*2.0f*std::numbers::pi_v<float>;
@@ -228,7 +233,7 @@ namespace terraformer
 #if 1
 			ridge_tree_brach_seed_sequence_boundary_point_descriptor{
 				.branch_count = 2,
-				.spread_angle = geosimd::turns{0.5f}
+				.spread_angle = geosimd::turns{2.0f/3.0f}
 			}
 #endif
 		};
@@ -252,21 +257,21 @@ namespace terraformer
 #endif
 		};
 
-		static constexpr auto default_trunk_horz_wavelength = 3.0f*2.0f*(1024.0f + 256.0f);
+		static constexpr auto default_trunk_noise_amplitude = 299.0f;
+		static constexpr auto default_rel_half_thickness = 2.0f;
+		static constexpr auto default_trunk_horz_wavelength = 8192.0f;
 		static constexpr auto default_trunk_horz_amplitude = wavelength_to_amplitude(
 			default_trunk_horz_wavelength,
 			1.0f
 		);
-		static constexpr auto default_trunk_ridge_elevation = 2048.0f;
 		static constexpr auto default_trunk_noise_wavelength = 12884.0f;
-		static constexpr auto default_trunk_noise_amplitude = 299.0f;
 
-		static constexpr auto default_branch_1_horz_wavelength = 3072.0f;
+		static constexpr auto default_branch_1_horz_wavelength = 3221.0f;
 		static constexpr auto default_branch_1_horz_amplitude = wavelength_to_amplitude(default_branch_1_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_1_noise_wavelength = 0.5f*default_trunk_noise_wavelength;
 		static constexpr auto default_branch_1_noise_amplitude = 0.5f*default_trunk_noise_amplitude;
 
-		static constexpr auto default_branch_2_horz_wavelength = 600.0f;
+		static constexpr auto default_branch_2_horz_wavelength = 1024.0f;
 		static constexpr auto default_branch_2_horz_amplitude = wavelength_to_amplitude(default_branch_2_horz_wavelength, 1.0f);
 		static constexpr auto default_branch_2_noise_wavelength = 0.5f*default_branch_1_noise_wavelength;
 		static constexpr auto default_branch_2_noise_amplitude = 0.5f*default_branch_1_noise_amplitude;
@@ -293,9 +298,9 @@ namespace terraformer
 
 		std::array<ridge_tree_height_profile_descriptor, num_levels> height_profile{
 			ridge_tree_height_profile_descriptor{
-				.rel_half_thickness = 2.0f,
+				.rel_half_thickness = 2.0f*default_rel_half_thickness,
 				.rel_half_thickness_variability = {},
-				.rolloff_exponent = 1.5f,
+				.rolloff_exponent = 2.0f,
 				.rolloff_exponent_variability = {},
 				.noise_wavelength = default_trunk_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
@@ -303,9 +308,9 @@ namespace terraformer
 				.noise_amplitude = default_trunk_noise_amplitude
 			},
 			ridge_tree_height_profile_descriptor{
-				.rel_half_thickness = 2.0f,
+				.rel_half_thickness = default_rel_half_thickness,
 				.rel_half_thickness_variability = {},
-				.rolloff_exponent = 1.5f,
+				.rolloff_exponent = 1.0f,
 				.rolloff_exponent_variability = {},
 				.noise_wavelength = default_branch_1_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
@@ -314,9 +319,9 @@ namespace terraformer
 			},
 #if 1
 			ridge_tree_height_profile_descriptor{
-				.rel_half_thickness = 2.0f,
+				.rel_half_thickness = 0.5f*default_rel_half_thickness,
 				.rel_half_thickness_variability = {},
-				.rolloff_exponent = 1.5f,
+				.rolloff_exponent = 1.0f,
 				.rolloff_exponent_variability = {},
 				.noise_wavelength = default_branch_2_noise_wavelength,
 				.noise_lf_rolloff = 1.0f,
