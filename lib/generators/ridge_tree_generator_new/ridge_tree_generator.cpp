@@ -332,8 +332,6 @@ terraformer::generate(terraformer::heightmap_generator_context const& ctxt, ridg
 		rng
 	);
 
-	std::uniform_real_distribution heightmod{-1.0f, std::nextafter(1.0f, 2.0f)};
-
 	fill_curves(
 		ret,
 		trunks.back(),
